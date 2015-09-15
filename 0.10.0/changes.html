@@ -1,0 +1,987 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.10.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="index.html">
+            <img src="_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="index.html">Home</a> ·
+<a class="navbar" href="quickstart.html">Quickstart</a> ·
+<a class="navbar" href="documentation.html">Documentation</a> ·
+<a class="navbar" href="about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Changes in Nipype</a><ul>
+<li><a class="reference internal" href="#release-0-10-0-october-10-2014">Release 0.10.0 (October 10, 2014)</a></li>
+<li><a class="reference internal" href="#release-0-9-2-january-31-2014">Release 0.9.2 (January 31, 2014)</a></li>
+<li><a class="reference internal" href="#release-0-9-1-december-25-2013">Release 0.9.1 (December 25, 2013)</a></li>
+<li><a class="reference internal" href="#release-0-9-0-december-20-2013">Release 0.9.0 (December 20, 2013)</a></li>
+<li><a class="reference internal" href="#release-0-8-0-may-8-2013">Release 0.8.0 (May 8, 2013)</a></li>
+<li><a class="reference internal" href="#release-0-7-0-dec-18-2012">Release 0.7.0 (Dec 18, 2012)</a></li>
+<li><a class="reference internal" href="#release-0-6-0-jun-30-2012">Release 0.6.0 (Jun 30, 2012)</a></li>
+<li><a class="reference internal" href="#release-0-5-3-mar-23-2012">Release 0.5.3 (Mar 23, 2012)</a></li>
+<li><a class="reference internal" href="#release-0-5-2-mar-14-2012">Release 0.5.2 (Mar 14, 2012)</a></li>
+<li><a class="reference internal" href="#release-0-5-mar-10-2012">Release 0.5 (Mar 10, 2012)</a></li>
+<li><a class="reference internal" href="#release-0-4-1-jun-16-2011">Release 0.4.1 (Jun 16, 2011)</a></li>
+<li><a class="reference internal" href="#release-0-4-jun-11-2011">Release 0.4 (Jun 11, 2011)</a></li>
+<li><a class="reference internal" href="#release-0-3-4-jan-12-2011">Release 0.3.4 (Jan 12, 2011)</a></li>
+<li><a class="reference internal" href="#release-0-3-3-sep-16-2010">Release 0.3.3 (Sep 16, 2010)</a></li>
+<li><a class="reference internal" href="#release-0-3-2-aug-03-2010">Release 0.3.2 (Aug 03, 2010)</a></li>
+<li><a class="reference internal" href="#release-0-3-1-jul-29-2010">Release 0.3.1 (Jul 29, 2010)</a></li>
+<li><a class="reference internal" href="#release-0-3-jul-27-2010">Release 0.3 (Jul 27, 2010)</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="changes-in-nipype">
+<span id="changes"></span><h1>Changes in Nipype<a class="headerlink" href="#changes-in-nipype" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="release-0-10-0-october-10-2014">
+<h2>Release 0.10.0 (October 10, 2014)<a class="headerlink" href="#release-0-10-0-october-10-2014" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><dl class="first docutils">
+<dt>ENH: New miscelaneous interfaces: SplitROIs (mapper), MergeROIs (reducer)</dt>
+<dd><p class="first last">to enable parallel processing of very large images.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Updated FSL interfaces: BEDPOSTX and XFibres, former interfaces are still</dt>
+<dd><p class="first last">available with the version suffix: BEDPOSTX4 and XFibres4. Added gpu
+versions of BEDPOSTX: BEDPOSTXGPU, BEDPOSTX5GPU, and BEDPOSTX4GPU</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: Added experimental support for MIPAV algorithms thorugh JIST plugins</p>
+</li>
+<li><p class="first">ENH: New dipy interfaces: Denoise, Resample</p>
+</li>
+<li><p class="first">ENH: New Freesurfer interfaces: Tkregister2 (for conversion of fsl style matrices to freesurfer format), MRIPretess</p>
+</li>
+<li><p class="first">ENH: New FSL interfaces: WarpPoints, WarpPointsToStd, EpiReg, ProbTrackX2, WarpUtils, ConvertWarp</p>
+</li>
+<li><p class="first">ENH: New miscelaneous interfaces: AddCSVRow, NormalizeProbabilityMapSet, AddNoise</p>
+</li>
+<li><p class="first">ENH: New AFNI interfaces:  Eval, Means, SVMTest, SVMTrain</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: FUGUE interface has been refactored to use the name_template system, 3 examples</dt>
+<dd><p class="first last">added to doctests, some bugs solved.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>API: Interfaces to external packages are no longer available in the top-level</dt>
+<dd><p class="first last"><code class="docutils literal"><span class="pre">nipype</span></code> namespace, and must be imported directly (e.g.
+<code class="docutils literal"><span class="pre">from</span> <span class="pre">nipype.interfaces</span> <span class="pre">import</span> <span class="pre">fsl</span></code>).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Support for elastix via a set of new interfaces: Registration, ApplyWarp,</dt>
+<dd><p class="first last">AnalyzeWarp, PointsWarp, and EditTransform</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: New ANTs interface: ApplyTransformsToPoints, LaplacianThickness</p>
+</li>
+<li><p class="first">ENH: New Diffusion Toolkit interface: TrackMerge</p>
+</li>
+<li><p class="first">ENH: New MRtrix interface: FilterTracks</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: New metrics group in algorithms. Now Distance, Overlap, and FuzzyOverlap</dt>
+<dd><p class="first last">are found in nipype.algorithms.metrics instead of misc. Overlap interface
+extended to allow files containing multiple ROIs and volume physical units.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: New interface in algorithms.metrics: ErrorMap (a voxel-wise diff map).</p>
+</li>
+<li><p class="first">ENH: New FreeSurfer workflow: create_skullstripped_recon_flow()</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Deep revision of workflows for correction of dMRI artifacts. New dmri_preprocessing</dt>
+<dd><p class="first last">example.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: New data grabbing interface that works over SSH connections, SSHDataGrabber</p>
+</li>
+<li><p class="first">ENH: New color mode for write_graph</p>
+</li>
+<li><p class="first">ENH: You can now force MapNodes to be run serially</p>
+</li>
+<li><p class="first">ENH: Added ANTS based openfmri workflow</p>
+</li>
+<li><p class="first">ENH: MapNode now supports flattening of nested lists</p>
+</li>
+<li><p class="first">ENH: Support for headless mode using Xvfb</p>
+</li>
+<li><p class="first">ENH: nipype_display_crash has a debugging mode</p>
+</li>
+<li><p class="first">FIX: MRTrix tracking algorithms were ignoring mask parameters.</p>
+</li>
+<li><p class="first">FIX: FNIRT registration pathway and associated OpenFMRI example script</p>
+</li>
+<li><p class="first">FIX: spm12b compatibility for Model estimate</p>
+</li>
+<li><p class="first">FIX: Batch scheduler controls the number of maximum jobs properly</p>
+</li>
+<li><p class="first">FIX: Update for FSL 5.0.7 which deprecated Contrast Manager</p>
+</li>
+</ul>
+</div>
+<div class="section" id="release-0-9-2-january-31-2014">
+<h2>Release 0.9.2 (January 31, 2014)<a class="headerlink" href="#release-0-9-2-january-31-2014" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>FIX: DataFinder was broken due to a typo</li>
+<li>FIX: Order of DataFinder outputs was not guaranteed, it&#8217;s human sorted now</li>
+<li>ENH: New interfaces: Vnifti2Image, VtoMat</li>
+</ul>
+</div>
+<div class="section" id="release-0-9-1-december-25-2013">
+<h2>Release 0.9.1 (December 25, 2013)<a class="headerlink" href="#release-0-9-1-december-25-2013" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>FIX: installation issues</li>
+</ul>
+</div>
+<div class="section" id="release-0-9-0-december-20-2013">
+<h2>Release 0.9.0 (December 20, 2013)<a class="headerlink" href="#release-0-9-0-december-20-2013" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">ENH: SelectFiles: a streamlined version of DataGrabber</p>
+</li>
+<li><p class="first">ENH: new tools for defining workflows: JoinNode, synchronize and itersource</p>
+</li>
+<li><p class="first">ENH: W3C PROV support with optional RDF export built into Nipype</p>
+</li>
+<li><p class="first">ENH: Added support for Simple Linux Utility Resource Management (SLURM)</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: AFNI interfaces refactor, prefix, suffix are replaced by</dt>
+<dd><p class="first last">&#8220;flexible_%s_templates&#8221;</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: New SPM interfaces:</dt>
+<dd><ul class="first last simple">
+<li>spm.ResliceToReference,</li>
+<li>spm.DicomImport</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: New AFNI interfaces:</dt>
+<dd><ul class="first last simple">
+<li>afni.AFNItoNIFTI</li>
+<li>afni.TCorr1D</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Several new interfaces related to Camino were added:</dt>
+<dd><ul class="first simple">
+<li>camino.SFPICOCalibData</li>
+<li>camino.Conmat</li>
+<li>camino.QBallMX</li>
+<li>camino.LinRecon</li>
+<li>camino.SFPeaks</li>
+</ul>
+<p class="last">One outdated interface no longer part of Camino was removed:
+- camino.Conmap</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Three new mrtrix interfaces were added:</dt>
+<dd><ul class="first last simple">
+<li>mrtrix.GenerateDirections</li>
+<li>mrtrix.FindShPeaks</li>
+<li>mrtrix.Directions2Amplitude</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: New FSL interfaces:</dt>
+<dd><ul class="first last simple">
+<li>fsl.PrepareFieldmap</li>
+<li>fsl.TOPUP</li>
+<li>fsl.ApplyTOPUP</li>
+<li>fsl.Eddy</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: New misc interfaces:</dt>
+<dd><ul class="first last simple">
+<li>FuzzyOverlap,</li>
+<li>P2PDistance</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: New workflows: nipype.workflows.dmri.fsl.epi.[fieldmap_correction&amp;topup_correction]</p>
+</li>
+<li><p class="first">ENH: Added simplified outputname generation for command line interfaces.</p>
+</li>
+<li><p class="first">ENH: Allow ants use a single mask image</p>
+</li>
+<li><p class="first">ENH: Create configuration option for parameterizing directories with hashes</p>
+</li>
+<li><p class="first">ENH: arrange nodes by topological sort with disconnected subgraphs</p>
+</li>
+<li><p class="first">ENH: uses the nidm iri namespace for uuids</p>
+</li>
+<li><p class="first">ENH: remove old reporting webpage</p>
+</li>
+<li><p class="first">ENH: Added support for Vagrant</p>
+</li>
+<li><p class="first">API: &#8216;name&#8217; is now a positional argument for Workflow, Node, and MapNode constructors</p>
+</li>
+<li><p class="first">API: SPM now defaults to SPM8 or SPM12b job format</p>
+</li>
+<li><p class="first">API: DataGrabber and SelectFiles use human (or natural) sort now</p>
+</li>
+<li><dl class="first docutils">
+<dt>FIX: Several fixes related to Camino interfaces:</dt>
+<dd><ul class="first last simple">
+<li>ProcStreamlines would ignore many arguments silently (target, waypoint, exclusion ROIS, etc.)</li>
+<li>DTLUTGen would silently round the &#8220;step&#8221;, &#8220;snr&#8221; and &#8220;trace&#8221; parameters to integers</li>
+<li>PicoPDFs would not accept more than one lookup table</li>
+<li>PicoPDFs default pdf did not correspond to Camino default</li>
+<li>Track input model names were outdated (and would generate an error)</li>
+<li>Track numpds parameter could not be set for deterministic tractography</li>
+<li>FA created output files with erroneous extension</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">FIX: Deals properly with 3d files in SPM Realign</p>
+</li>
+<li><p class="first">FIX: SPM with MCR fixed</p>
+</li>
+<li><p class="first">FIX: Cleaned up input and output spec metadata</p>
+</li>
+<li><p class="first">FIX: example openfmri script now makes the contrast spec a hashed input</p>
+</li>
+<li><p class="first">FIX: FILMGLS compatibility with FSL 5.0.5</p>
+</li>
+<li><p class="first">FIX: Freesurfer recon-all resume now avoids setting inputs</p>
+</li>
+<li><p class="first">FIX: File removal from node respects file associations img/hdr/mat, BRIK/HEAD</p>
+</li>
+</ul>
+</div>
+<div class="section" id="release-0-8-0-may-8-2013">
+<h2>Release 0.8.0 (May 8, 2013)<a class="headerlink" href="#release-0-8-0-may-8-2013" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><dl class="first docutils">
+<dt>ENH: New interfaces: nipy.Trim, fsl.GLM, fsl.SigLoss, spm.VBMSegment, fsl.InvWarp,</dt>
+<dd><p class="first last">dipy.TensorMode</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: Allow control over terminal output for commandline interfaces</p>
+</li>
+<li><p class="first">ENH: Added preliminary support for generating Python code from Workflows.</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: New workflows for dMRI and fMRI pre-processing: added motion artifact correction</dt>
+<dd><p class="first last">with rotation of the B-matrix, and susceptibility correction for EPI imaging using
+fieldmaps. Updated eddy_correct pipeline to support both dMRI and fMRI, and new parameters.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: Minor improvements to FSL&#8217;s FUGUE and FLIRT interfaces</p>
+</li>
+<li><p class="first">ENH: Added optional dilation of parcels in cmtk.Parcellate</p>
+</li>
+<li><p class="first">ENH: Interpolation mode added to afni.Resample</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Function interface can accept a list of strings containing import statements</dt>
+<dd><p class="first last">that allow external functions to run without their imports defined in the
+function body</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: Allow node configurations to override master configuration</p>
+</li>
+<li><p class="first">FIX: SpecifyModel works with 3D files correctly now.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="release-0-7-0-dec-18-2012">
+<h2>Release 0.7.0 (Dec 18, 2012)<a class="headerlink" href="#release-0-7-0-dec-18-2012" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">ENH: Add basic support for LSF plugin.</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: New interfaces: ICC, Meshfix, ants.Register, C3dAffineTool, ants.JacobianDeterminant,</dt>
+<dd><p class="first last">afni.AutoTcorrelate, DcmStack</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: New workflows: ants template building (both using &#8216;ANTS&#8217; and the new &#8216;antsRegistration&#8217;)</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: New examples: how to use ANTS template building workflows (smri_ants_build_tmeplate),</dt>
+<dd><p class="first last">how to set SGE specific options (smri_ants_build_template_new)</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: added no_flatten option to Merge</p>
+</li>
+<li><p class="first">ENH: added versioning option and checking to traits</p>
+</li>
+<li><p class="first">ENH: added deprecation metadata to traits</p>
+</li>
+<li><p class="first">ENH: Slicer interfaces were updated to version 4.1</p>
+</li>
+</ul>
+</div>
+<div class="section" id="release-0-6-0-jun-30-2012">
+<h2>Release 0.6.0 (Jun 30, 2012)<a class="headerlink" href="#release-0-6-0-jun-30-2012" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">API: display variable no longer encoded as inputs in commandline interfaces</p>
+</li>
+<li><p class="first">ENH: input hash not modified when environment DISPLAY is changed</p>
+</li>
+<li><p class="first">ENH: support for 3d files for TSNR calculation</p>
+</li>
+<li><p class="first">ENH: Preliminary support for graph submission with SGE, PBS and Soma Workflow</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: New interfaces: MySQLSink, nipy.Similarity, WatershedBEM, MRIsSmooth,</dt>
+<dd><p class="first last">NetworkBasedStatistic, Atropos, N4BiasFieldCorrection, ApplyTransforms,
+fs.MakeAverageSubject, epidewarp.fsl, WarpTimeSeriesImageMultiTransform,
+AVScale, mri_ms_LDA</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: simple interfaces for spm</p>
+</li>
+<li><p class="first">FIX: CompCor component calculation was erroneous</p>
+</li>
+<li><p class="first">FIX: filename generation for AFNI and PRELUDE</p>
+</li>
+<li><p class="first">FIX: improved slicer module autogeneration</p>
+</li>
+<li><p class="first">FIX: added missing options for BBRegsiter</p>
+</li>
+<li><p class="first">FIX: functionality of remove_unnecessary_ouputs cleaned up</p>
+</li>
+<li><p class="first">FIX: local hash check works with appropriate inputs</p>
+</li>
+<li><p class="first">FIX: Captures all stdout from commandline programs</p>
+</li>
+<li><p class="first">FIX: Afni outputs should inherit from TraitedSpec</p>
+</li>
+</ul>
+</div>
+<div class="section" id="release-0-5-3-mar-23-2012">
+<h2>Release 0.5.3 (Mar 23, 2012)<a class="headerlink" href="#release-0-5-3-mar-23-2012" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>FIX: SPM model generation when output units is in scans</li>
+</ul>
+</div>
+<div class="section" id="release-0-5-2-mar-14-2012">
+<h2>Release 0.5.2 (Mar 14, 2012)<a class="headerlink" href="#release-0-5-2-mar-14-2012" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>API: Node now allows specifying node level configuration for SGE/PBS clusters</li>
+<li>API: Logging to file is disabled by default</li>
+<li>API: New location of log file -&gt; .nipype/nipype.cfg</li>
+<li>ENH: Changing logging options via config works for distributed processing</li>
+<li>FIX: Unittests on debian (logging and ipython)</li>
+</ul>
+</div>
+<div class="section" id="release-0-5-mar-10-2012">
+<h2>Release 0.5 (Mar 10, 2012)<a class="headerlink" href="#release-0-5-mar-10-2012" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">API: FSL defaults to Nifti when OUTPUTTYPE environment variable not found</p>
+</li>
+<li><p class="first">API: By default inputs are removed from Node working directory</p>
+</li>
+<li><p class="first">API: InterfaceResult class is now versioned and stores class type not instance</p>
+</li>
+<li><p class="first">API: Added FIRST interface</p>
+</li>
+<li><dl class="first docutils">
+<dt>API: Added max_jobs paramter to plugin_args. limits the number of jobs</dt>
+<dd><p class="first last">executing at any given point in time</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">API: crashdump_dir is now a config execution option</p>
+</li>
+<li><dl class="first docutils">
+<dt>API: new config execution options for controlling hash checking, execution and</dt>
+<dd><p class="first last">logging behavior when running in distributed mode.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">API: Node/MapNode has new attribute that allows it to run on master thread.</p>
+</li>
+<li><p class="first">API: IPython plugin now invokes IPython 0.11 or greater</p>
+</li>
+<li><p class="first">API: Canned workflows are now all under a different package structure</p>
+</li>
+<li><p class="first">API: SpecifyModel event_info renamed to event_files</p>
+</li>
+<li><dl class="first docutils">
+<dt>API: DataGrabber is always being rerun (unless overwrite is set to False on</dt>
+<dd><p class="first last">Node level)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>API: &#8220;stop_on_first_rerun&#8221; does not stop for DataGrabber (unless overwrite is</dt>
+<dd><p class="first last">set to True on Node level)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>API: Output prefix can be set for spm nodes (SliceTiming, Realign, Coregister,</dt>
+<dd><p class="first last">Normalize, Smooth)</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: Added fsl resting state workflow based on behzadi 2007 CompCorr method.</p>
+</li>
+<li><p class="first">ENH: TSNR node produces mean and std-dev maps; allows polynomial detrending</p>
+</li>
+<li><p class="first">ENH: IdentityNodes are removed prior to execution</p>
+</li>
+<li><p class="first">ENH: Added Michael Notter&#8217;s beginner&#8217;s guide</p>
+</li>
+<li><p class="first">ENH: Added engine support for status callback functions</p>
+</li>
+<li><p class="first">ENH: SPM create warped node</p>
+</li>
+<li><p class="first">ENH: All underlying interfaces (including python ones) are now optional</p>
+</li>
+<li><p class="first">ENH: Added imperative programming option with Nodes and caching</p>
+</li>
+<li><p class="first">ENH: Added debug mode to configuration</p>
+</li>
+<li><p class="first">ENH: Results can be stored and loaded without traits exceptions</p>
+</li>
+<li><p class="first">ENH: Added concurrent log handler for distributed writing to log file</p>
+</li>
+<li><p class="first">ENH: Reporting can be turned off using config</p>
+</li>
+<li><p class="first">ENH: Added stats files to FreeSurferOutput</p>
+</li>
+<li><p class="first">ENH: Support for Condor through qsub emulation</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: IdentityNode with iterable expansion takes place after remaining Identity</dt>
+<dd><p class="first last">Node removal</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: Crashfile display script added</p>
+</li>
+<li><p class="first">ENH: Added FmriRealign4d node wrapped from nipy</p>
+</li>
+<li><p class="first">ENH: Added TBSS workflows and examples</p>
+</li>
+<li><p class="first">ENH: Support for openfmri data processing</p>
+</li>
+<li><p class="first">ENH: Package version check</p>
+</li>
+<li><p class="first">FIX: Fixed spm preproc workflow to cater to multiple functional runs</p>
+</li>
+<li><p class="first">FIX: Workflow outputs displays nodes with empty outputs</p>
+</li>
+<li><p class="first">FIX: SUSAN workflow works without usans</p>
+</li>
+<li><p class="first">FIX: SGE fixed for reading custom templates</p>
+</li>
+<li><p class="first">FIX: warping in SPM realign, Dartel and interpolation parameters</p>
+</li>
+<li><p class="first">FIX: Fixed voxel size parameter in freesurfer mri_convert</p>
+</li>
+<li><p class="first">FIX: 4D images in spm coregister</p>
+</li>
+<li><p class="first">FIX: Works around matlab tty bug</p>
+</li>
+<li><p class="first">FIX: Overwriting connection raises exception</p>
+</li>
+<li><dl class="first docutils">
+<dt>FIX: Outputs are loaded from results and not stored in memory for during</dt>
+<dd><p class="first last">distributed operation</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">FIX: SPM threshold uses SPM.mat name and improved error detection</p>
+</li>
+<li><p class="first">FIX: Removing directory contents works even when a node has no outputs</p>
+</li>
+<li><p class="first">FIX: DARTEL workflows will run only when SPM 8 is available</p>
+</li>
+<li><p class="first">FIX: SPM Normalize estimate field fixed</p>
+</li>
+<li><p class="first">FIX: hashmethod argument now used for calculating hash of old file</p>
+</li>
+<li><p class="first">FIX: Modelgen now allows FSL style event files</p>
+</li>
+</ul>
+</div>
+<div class="section" id="release-0-4-1-jun-16-2011">
+<h2>Release 0.4.1 (Jun 16, 2011)<a class="headerlink" href="#release-0-4-1-jun-16-2011" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Minor bugfixes</li>
+</ul>
+</div>
+<div class="section" id="release-0-4-jun-11-2011">
+<h2>Release 0.4 (Jun 11, 2011)<a class="headerlink" href="#release-0-4-jun-11-2011" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><dl class="first docutils">
+<dt>API: Timestamp hashing does not use ctime anymore. Please update your hashes by</dt>
+<dd><p class="first last">running workflows with updatehash=True option
+NOTE: THIS IS THE DEFAULT CONFIG NOW, so unless you updatehash, workflows will
+rerun</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>API: Workflow run function no longer supports (inseries, createdirsonly).</dt>
+<dd><p class="first last">Functions used in connect string must be pickleable</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">API: SPM EstimateContrast: ignore_derivs replaced by use_derivs</p>
+</li>
+<li><p class="first">API: All interfaces: added new config option ignore_exception</p>
+</li>
+<li><dl class="first docutils">
+<dt>API: SpecifModel no longer supports (concatenate_runs, output_specs). high_pass_filter</dt>
+<dd><p class="first last">cutoff is mandatory (even if its set to np.inf). Additional interfaces
+SpecifySPMModel and SpecifySparseModel support other types of data.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">API: fsl.DTIFit input &#8220;save&#8221; is now called &#8220;save_tensor&#8221;</p>
+</li>
+<li><dl class="first docutils">
+<dt>API: All inputs of IdentityInterfaces are mandatory by default. You can turn</dt>
+<dd><p class="first last">this off by specifying mandatory_inputs=False to the constructor.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">API: fsl FILMGLS input &#8220;autocorr_estimate&#8221; is now called &#8220;autocorr_estimate_only&#8221;</p>
+</li>
+<li><dl class="first docutils">
+<dt>API: fsl ContrastMgr now requires access to specific files (no longer accepts</dt>
+<dd><p class="first last">the result directory)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>API: freesurfer.GLMFit input &#8220;surf&#8221; is now a boolean with three corresponding</dt>
+<dd><p class="first last">inputs &#8211; subject_id, hemi, and surf_geo</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: All commandline interfaces display stdout and stderr</p>
+</li>
+<li><p class="first">ENH: All interfaces raise exceptions on error with an option to suppress</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Supports a plugin interface for execution (current support for multiprocessing,</dt>
+<dd><p class="first last">IPython, SGE, PBS)</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: MapNode runs in parallel under IPython, SGE, MultiProc, PBS</p>
+</li>
+<li><p class="first">ENH: Optionally allows keeping only required outputs</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: New interface: utility.Rename to change the name of files, optionally</dt>
+<dd><p class="first last">using python string-formatting with inputs or regular expressions matching</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: New interface: freesurfer.ApplyMask (mri_mask)</p>
+</li>
+<li><p class="first">ENH: New FSL interface &#8211; SwapDimensions (fslswapdim)</p>
+</li>
+<li><p class="first">ENH: Sparse models allow regressor scaling and temporal derivatives</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Added support for the component parts of FSL&#8217;s TBSS workflow (TBSSSkeleton</dt>
+<dd><p class="first last">and DistanceMap)</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: dcm2nii interface exposes bvals, bvecs, reoriented and cropped images</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Added several higher-level interfaces to the fslmaths command:</dt>
+<dd><ul class="first last simple">
+<li>ChangeDataType, Threshold, MeanImage, IsotropicSmooth, ApplyMask, TemporalFilter
+DilateImage, ErodeImage, SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: added support for networx 1.4 and improved iterable expansion</p>
+</li>
+<li><p class="first">ENH: Replaced BEDPOSTX and EddyCurrent with nipype pipelines</p>
+</li>
+<li><p class="first">ENH: Ability to create a hierarchical dot file</p>
+</li>
+<li><p class="first">ENH: Improved debugging information for rerunning nodes</p>
+</li>
+<li><p class="first">ENH: Added &#8216;stop_on_first_rerun&#8217; option</p>
+</li>
+<li><p class="first">ENH: Added support for Camino</p>
+</li>
+<li><p class="first">ENH: Added support for Camino2Trackvis</p>
+</li>
+<li><p class="first">ENH: Added support for Connectome Viewer</p>
+</li>
+<li><p class="first">BF: dcm2nii interface handles gzipped files correctly</p>
+</li>
+<li><p class="first">BF: FNIRT generates proper outputs</p>
+</li>
+<li><p class="first">BF: fsl.DTIFit now properly collects tensor volume</p>
+</li>
+<li><p class="first">BF: updatehash now removes old result hash file</p>
+</li>
+</ul>
+</div>
+<div class="section" id="release-0-3-4-jan-12-2011">
+<h2>Release 0.3.4 (Jan 12, 2011)<a class="headerlink" href="#release-0-3-4-jan-12-2011" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">API: hash values for float use a string conversion up to the 10th decimal place.</p>
+</li>
+<li><p class="first">API: Iterables in output path will always be generated as _var1_val1_var2_val2 pairs</p>
+</li>
+<li><p class="first">ENH: Added support to nipy: GLM fit, contrast estimation and calculating mask from EPI</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Added support for manipulating surface files in Freesurfer:</dt>
+<dd><ul class="first last simple">
+<li>projecting volume images onto the surface</li>
+<li>smoothing along the surface</li>
+<li>transforming a surface image from one subject to another</li>
+<li>using tksurfer to save pictures of the surface</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: Added support for flash processing using FreeSurfer</p>
+</li>
+<li><p class="first">ENH: Added support for flirt matrix in BBRegister</p>
+</li>
+<li><p class="first">ENH: Added support for FSL convert_xfm</p>
+</li>
+<li><p class="first">ENH: hashes can be updated again without rerunning all nodes.</p>
+</li>
+<li><p class="first">ENH: Added multiple regression design for FSL</p>
+</li>
+<li><p class="first">ENH: Added SPM based Analyze to Nifti converter</p>
+</li>
+<li><p class="first">ENH: Added increased support for PyXNAT</p>
+</li>
+<li><p class="first">ENH: Added support for MCR-based binary version of SPM</p>
+</li>
+<li><p class="first">ENH: Added SPM node for calculating various threshold statistics</p>
+</li>
+<li><p class="first">ENH: Added distance and dissimilarity measurements</p>
+</li>
+<li><p class="first">BF: Diffusion toolkit gets installed</p>
+</li>
+<li><dl class="first docutils">
+<dt>BF: Changed FNIRT interface to accept flexible lists (rather than 4-tuples)</dt>
+<dd><p class="first last">on all options specific to different subsampling levels</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="release-0-3-3-sep-16-2010">
+<h2>Release 0.3.3 (Sep 16, 2010)<a class="headerlink" href="#release-0-3-3-sep-16-2010" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>API: subject_id in ModelSpec is now deprecated</li>
+<li>API: spm.Threshold
+- does not need mask, beta, RPV anymore
+- takes only one image (stat_image - mind the name change)
+- works with SPM2 SPM.mat
+- returns additional map - pre topological FDR</li>
+<li>ENH: Added support for Diffusion toolkit</li>
+<li>ENH: Added support for FSL slicer and overlay</li>
+<li>ENH: Added support for dcm2nii</li>
+<li>BF: DataSink properly handles lists of lists now</li>
+<li>BF: DataGrabber has option for raising Exception on getting empty lists</li>
+<li>BF: Traits logic for &#8216;requires&#8217; metadata</li>
+<li>BF: allows workflows to be relocatable</li>
+<li>BF: nested workflows with connections don&#8217;t raise connection not found error</li>
+<li>BF: multiple workflows with identical nodenames and iterables do not create nestsed workflows</li>
+</ul>
+</div>
+<div class="section" id="release-0-3-2-aug-03-2010">
+<h2>Release 0.3.2 (Aug 03, 2010)<a class="headerlink" href="#release-0-3-2-aug-03-2010" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="enhancements">
+<h3>Enhancements<a class="headerlink" href="#enhancements" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li>all outputs from nodes are now pickled as part of workflow processing</li>
+<li>added git developer docs</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="bugs-fixed">
+<h3>Bugs fixed<a class="headerlink" href="#bugs-fixed" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>FreeSurfer<ul>
+<li>Fixed bugs in SegStats doctest</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="release-0-3-1-jul-29-2010">
+<h2>Release 0.3.1 (Jul 29, 2010)<a class="headerlink" href="#release-0-3-1-jul-29-2010" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>Bugs fixed<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>FreeSurfer<ul>
+<li>Fixed bugs in glmfit and concatenate</li>
+<li>Added group t-test to freesurfer tutorial</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="release-0-3-jul-27-2010">
+<h2>Release 0.3 (Jul 27, 2010)<a class="headerlink" href="#release-0-3-jul-27-2010" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="incompatible-changes">
+<h3>Incompatible changes<a class="headerlink" href="#incompatible-changes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Complete redesign of the Interface class - heavy use of Traits.</li>
+<li>Changes in the engine API - added Workflow and MapNode. Compulsory name argument.</li>
+</ul>
+</div>
+<div class="section" id="features-added">
+<h3>Features added<a class="headerlink" href="#features-added" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>General:<ul>
+<li>Type checking of inputs and outputs using Traits from <a class="reference external" href="http://code.enthought.com/projects/tool-suite.php">ETS</a>.</li>
+<li>Support for nested workflows.</li>
+<li>Preliminary Slicer and AFNI support.</li>
+<li>New flexible DataGrabber node.</li>
+<li>AtlasPick and Threshold nodes.</li>
+<li>Preliminary support for XNAT.</li>
+<li>Doubled number of the tutorials.</li>
+</ul>
+</li>
+<li>FSL:<ul>
+<li>Added DTI processing nodes (note that TBSS nodes are still experimental).</li>
+<li>Recreated FEAT workflow.</li>
+</ul>
+</li>
+<li>SPM:<ul>
+<li>Added New Segment and many other nodes.</li>
+<li>Redesigned second level analysis.</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

@@ -1,0 +1,745 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../index.html">
+            <img src="../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../index.html">Home</a> ·
+<a class="navbar" href="../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../documentation.html">Documentation</a> ·
+<a class="navbar" href="../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Interface Specifications</a><ul>
+<li><a class="reference internal" href="#before-you-start">Before you start</a></li>
+<li><a class="reference internal" href="#overview">Overview</a><ul>
+<li><a class="reference internal" href="#traits-version">Traits version</a></li>
+<li><a class="reference internal" href="#more-documentation">More documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#nipype-interface-specifications">Nipype Interface Specifications</a><ul>
+<li><a class="reference internal" href="#inputspec-class-hierarchy">InputSpec class hierarchy</a></li>
+<li><a class="reference internal" href="#output-specs">Output Specs</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#traited-attributes">Traited Attributes</a><ul>
+<li><a class="reference internal" href="#common">Common</a></li>
+<li><a class="reference internal" href="#commandline">CommandLine</a></li>
+<li><a class="reference internal" href="#spm">SPM</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#defining-an-interface-class">Defining an interface class</a><ul>
+<li><a class="reference internal" href="#id1">Common</a></li>
+<li><a class="reference internal" href="#id2">CommandLine</a></li>
+<li><a class="reference internal" href="#id3">SPM</a></li>
+<li><a class="reference internal" href="#matlab">Matlab</a></li>
+<li><a class="reference internal" href="#python">Python</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#undefined-inputs">Undefined inputs</a></li>
+<li><a class="reference internal" href="#example-of-inputs">Example of inputs</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interface-specifications">
+<span id="interface-specs"></span><h1>Interface Specifications<a class="headerlink" href="#interface-specifications" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="before-you-start">
+<h2>Before you start<a class="headerlink" href="#before-you-start" title="Permalink to this headline">¶</a></h2>
+<p>Nipype is a young project maintained by an enthusiastic group of developers.
+Even though the documentation might be sparse or cryptic at times we strongly
+encourage you to contact us on the official nipype developers mailing list in
+case of any troubles: <a class="reference external" href="mailto:nipy-devel&#37;&#52;&#48;neuroimaging&#46;scipy&#46;org">nipy-devel<span>&#64;</span>neuroimaging<span>&#46;</span>scipy<span>&#46;</span>org</a> (we are sharing a
+mailing list with the nipy community therefore please add <code class="docutils literal"><span class="pre">[nipype]</span></code> to the
+messsage title).</p>
+</div>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>We&#8217;re using the <a class="reference external" href="http://code.enthought.com/projects/traits/">Enthought Traits</a> package for all of our
+inputs and outputs.  Traits allows us to validate user inputs and
+provides a mechanism to handle all the <em>special cases</em> in a simple and
+concise way though metadata.  With the metadata, each input/output can
+have an optional set of metadata attributes (described in more detail
+below).  The machinery for handling the metadata is located in the
+base classes, so all subclasses use the same code to handle these
+cases.  This is in contrast to our previous code where every class
+defined it&#8217;s own _parse_inputs, run and aggregate_outputs methods to
+handle these cases.  Which of course leads to a dozen different ways
+to solve the same problem.</p>
+<p>Traits is a big package with a lot to learn in order to take full
+advantage of.  But don&#8217;t be intimidated!  To write a Nipype Trait
+Specification, you only need to learn a few of the basics of Traits.
+Here are a few starting points in the documentation:</p>
+<ul class="simple">
+<li>What are Traits?  The <a class="reference external" href="http://code.enthought.com/projects/traits/docs/html/traits_user_manual/intro.html">Introduction in the User Manual</a>
+gives a brief description of the functionality traits provides.</li>
+<li>Traits and metadata.  The <a class="reference external" href="http://code.enthought.com/projects/traits/docs/html/traits_user_manual/defining.html">second section of the User Manual</a>
+gives more details on traits and how to use them.  Plus there a
+section describing metadata, including the metadata all traits have.</li>
+<li>If your interested in more of a <em>big picture</em> overview, <a class="reference external" href="http://code.enthought.com/projects/traits/docs/html/tutorials/traits_ui_scientific_app.html">Gael wrote
+a good tutorial</a>
+that shows how to write a scientific application using traits for
+the benefit of the generated UI components.  (For now, Nipype is not
+taking advantage of the generated UI feature of traits.)</li>
+</ul>
+<div class="section" id="traits-version">
+<h3>Traits version<a class="headerlink" href="#traits-version" title="Permalink to this headline">¶</a></h3>
+<p>We&#8217;re using Traits version 3.x which can be install as part of <a class="reference external" href="http://enthought.com/products/epd.php">EPD</a> or from <a class="reference external" href="http://pypi.python.org/pypi/Traits/3.3.0">pypi</a></p>
+</div>
+<div class="section" id="more-documentation">
+<h3>More documentation<a class="headerlink" href="#more-documentation" title="Permalink to this headline">¶</a></h3>
+<p>Not everything is documented in the User Manual, in those cases the
+<a class="reference external" href="https://mail.enthought.com/mailman/listinfo/enthought-dev">enthought-dev mailing list</a> or the
+<a class="reference external" href="http://code.enthought.com/projects/files/ETS32_API/enthought.traits.html">API docs</a>
+is your next place to look.</p>
+</div>
+</div>
+<div class="section" id="nipype-interface-specifications">
+<h2>Nipype Interface Specifications<a class="headerlink" href="#nipype-interface-specifications" title="Permalink to this headline">¶</a></h2>
+<p>Each interface class defines two specifications: 1) an InputSpec and
+2) an OutputSpec.  Each of these are prefixed with the class name of
+the interfaces.  For example, Bet has these specs:</p>
+<blockquote>
+<div><ul class="simple">
+<li>BETInputSpec</li>
+<li>BETOutputSpec</li>
+</ul>
+</div></blockquote>
+<p>Each of these Specs are classes, derived from a base TraitedSpec class
+(more on these below).  The InputSpec consists of attributes which
+correspond to different parameters for the tool they wrap/interface.
+In the case of a command-line tool like Bet, the InputSpec attributes
+correspond to the different command-line parameters that can be passed
+to Bet.  If you are familiar with the Nipype 0.2 code-base, these
+attributes are the same as the keys in the opt_map dictionaries.  When
+an interfaces class is instantiated, the InputSpec is bound to the
+<code class="docutils literal"><span class="pre">inputs</span></code> attribute of that object.  Below is an example of how the
+<code class="docutils literal"><span class="pre">inputs</span></code> appear to a user for Bet:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bet</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">bet</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+<span class="go">&lt;class &#39;nipype.interfaces.fsl.preprocess.BETInputSpec&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bet</span><span class="o">.</span><span class="n">inputs</span><span class="o">.&lt;</span><span class="n">TAB</span><span class="o">&gt;</span>
+<span class="go">bet.inputs.__class__           bet.inputs.center</span>
+<span class="go">bet.inputs.__delattr__         bet.inputs.environ</span>
+<span class="go">bet.inputs.__doc__             bet.inputs.frac</span>
+<span class="go">bet.inputs.__getattribute__    bet.inputs.functional</span>
+<span class="go">bet.inputs.__hash__            bet.inputs.hashval</span>
+<span class="go">bet.inputs.__init__            bet.inputs.infile</span>
+<span class="go">bet.inputs.__new__             bet.inputs.items</span>
+<span class="go">bet.inputs.__reduce__          bet.inputs.mask</span>
+<span class="go">bet.inputs.__reduce_ex__       bet.inputs.mesh</span>
+<span class="go">bet.inputs.__repr__            bet.inputs.nooutput</span>
+<span class="go">bet.inputs.__setattr__         bet.inputs.outfile</span>
+<span class="go">bet.inputs.__str__             bet.inputs.outline</span>
+<span class="go">bet.inputs._generate_handlers  bet.inputs.outputtype</span>
+<span class="go">bet.inputs._get_hashval        bet.inputs.radius</span>
+<span class="go">bet.inputs._hash_infile        bet.inputs.reduce_bias</span>
+<span class="go">bet.inputs._xor_inputs         bet.inputs.skull</span>
+<span class="go">bet.inputs._xor_warn           bet.inputs.threshold</span>
+<span class="go">bet.inputs.args                bet.inputs.vertical_gradient</span>
+</pre></div>
+</div>
+<p>Each Spec inherits from a parent Spec.  The parent Specs provide
+attribute(s) that are common to all child classes.  For example, FSL
+InputSpecs inherit from interfaces.fsl.base.FSLTraitedSpec.
+FSLTraitedSpec defines an <code class="docutils literal"><span class="pre">outputtype</span></code> attribute, which stores the
+file type (NIFTI, NIFTI_PAIR, etc...) for all generated output files.</p>
+<div class="section" id="inputspec-class-hierarchy">
+<h3>InputSpec class hierarchy<a class="headerlink" href="#inputspec-class-hierarchy" title="Permalink to this headline">¶</a></h3>
+<p>Below is the current class hierarchy for InputSpec classes (from
+base class down to subclasses).:</p>
+<blockquote>
+<div><p><code class="docutils literal"><span class="pre">TraitedSpec</span></code>: Nipype&#8217;s primary base class for all Specs.
+Provides initialization, some nipype-specific methods and any trait
+handlers we define. Inherits from traits.HasTraits.</p>
+<blockquote>
+<div><p><code class="docutils literal"><span class="pre">BaseInterfaceInputSpec</span></code>: Defines inputs common to all
+Interfaces (<code class="docutils literal"><span class="pre">ignore_exception</span></code>). If in doubt inherit from this.</p>
+<blockquote>
+<div><p><code class="docutils literal"><span class="pre">CommandLineInputSpec</span></code>: Defines inputs common to all
+command-line classes (<code class="docutils literal"><span class="pre">args</span></code> and <code class="docutils literal"><span class="pre">environ</span></code>)</p>
+<blockquote>
+<div><p><code class="docutils literal"><span class="pre">FSLTraitedSpec</span></code>: Defines inputs common to all FSL classes
+(<code class="docutils literal"><span class="pre">outputtype</span></code>)</p>
+<p><code class="docutils literal"><span class="pre">SPMCommandInputSpec</span></code>: Defines inputs common to all SPM classes (<code class="docutils literal"><span class="pre">matlab_cmd</span></code>, <code class="docutils literal"><span class="pre">path</span></code>, and <code class="docutils literal"><span class="pre">mfile</span></code>)</p>
+<p><code class="docutils literal"><span class="pre">FSTraitedSpec</span></code>: Defines inputs common to all FreeSurfer classes
+(<code class="docutils literal"><span class="pre">sbjects_dir</span></code>)</p>
+<p><code class="docutils literal"><span class="pre">MatlabInputSpec</span></code>: Defines inputs common to all Matlab classes (<code class="docutils literal"><span class="pre">script</span></code>, <code class="docutils literal"><span class="pre">nodesktop</span></code>, <code class="docutils literal"><span class="pre">nosplash</span></code>, <code class="docutils literal"><span class="pre">logfile</span></code>, <code class="docutils literal"><span class="pre">single_comp_thread</span></code>, <code class="docutils literal"><span class="pre">mfile</span></code>, <code class="docutils literal"><span class="pre">script_file</span></code>, and <code class="docutils literal"><span class="pre">paths</span></code>)</p>
+<p><code class="docutils literal"><span class="pre">SlicerCommandLineInputSpec</span></code>: Defines inputs common to all Slicer classes (<code class="docutils literal"><span class="pre">module</span></code>)</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p>Most developers will only need to code at the the interface-level (i.e. implementing custom class inheriting from one of the above classes).</p>
+</div>
+<div class="section" id="output-specs">
+<h3>Output Specs<a class="headerlink" href="#output-specs" title="Permalink to this headline">¶</a></h3>
+<p>The OutputSpec defines the outputs that are generated, or possibly
+generated depending on inputs, by the tool.  OutputSpecs inherit from
+<code class="docutils literal"><span class="pre">interfaces.base.TraitedSpec</span></code> directly.</p>
+</div>
+</div>
+<div class="section" id="traited-attributes">
+<h2>Traited Attributes<a class="headerlink" href="#traited-attributes" title="Permalink to this headline">¶</a></h2>
+<p>Each specification attribute is an instance of a Trait class.  These
+classes encapsulate many standard Python types like Float and Int, but
+with additional behavior like type checking.  (<em>See the documentation
+on traits for more information on these trait types.</em>) To handle
+unique behaviors of our attributes we us traits metadata.  These are
+keyword arguments supplied in the initialization of the attributes.
+The base classes <code class="docutils literal"><span class="pre">BaseInterface</span></code> and <code class="docutils literal"><span class="pre">CommandLine</span></code>
+(defined in <code class="docutils literal"><span class="pre">nipype.interfaces.base</span></code>) check for the existence/or
+value of these metadata and handle the inputs/outputs accordingly.
+For example, all mandatory parameters will have the <code class="docutils literal"><span class="pre">mandatory</span> <span class="pre">=</span>
+<span class="pre">True</span></code> metadata:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">BetInputSpec</span><span class="p">(</span><span class="n">FSLTraitedSpec</span><span class="p">):</span>
+  <span class="n">infile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">desc</span> <span class="o">=</span> <span class="s">&#39;input file to skull strip&#39;</span><span class="p">,</span>
+                <span class="n">argstr</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="common">
+<h3>Common<a class="headerlink" href="#common" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">exists</span></code></dt>
+<dd><p class="first">For files, use <code class="docutils literal"><span class="pre">nipype.interfaces.base.File</span></code> as the trait type.  If
+the file must exist for the tool to execute, specify <code class="docutils literal"><span class="pre">exists</span> <span class="pre">=</span> <span class="pre">True</span></code>
+in the initialization of File (as shown in BetInputSpec above). This
+will trigger the underlying traits code to confirm the file assigned
+to that <em>input</em> actually exists.  If it does not exist, the user will
+be presented with an error message:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">bet</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">infile</span> <span class="o">=</span> <span class="s">&#39;does_not_exist.nii&#39;</span>
+<span class="go">------------------------------------------------------------</span>
+<span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;&lt;ipython console&gt;&quot;</span>, line <span class="m">1</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;/Users/cburns/local/lib/python2.5/site-packages/nipype/interfaces/base.py&quot;</span>, line <span class="m">76</span>, in <span class="n">validate</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="p">)</span>
+  File <span class="nb">&quot;/Users/cburns/local/lib/python2.5/site-packages/enthought/traits/trait_handlers.py&quot;</span>, line <span class="m">175</span>, in <span class="n">error</span>
+    <span class="n">value</span> <span class="p">)</span>
+<span class="gr">TraitError</span>: <span class="n">The &#39;infile&#39; trait of a BetInputSpec instance must be a file</span>
+<span class="go">name, but a value of &#39;does_not_exist.nii&#39; &lt;type &#39;str&#39;&gt; was specified.</span>
+</pre></div>
+</div>
+</dd>
+<dt><code class="docutils literal"><span class="pre">hash_files</span></code></dt>
+<dd>To be used with inputs that are defining output filenames. When this flag
+is set to false any Nipype will not try to hash any files described by this
+input. This is useful to avoid rerunning when the specified output file
+already exists and has changed.</dd>
+<dt><code class="docutils literal"><span class="pre">desc</span></code></dt>
+<dd><p class="first">All trait objects have a set of default metadata attributes.  <code class="docutils literal"><span class="pre">desc</span></code>
+is one of those and is used as a simple, one-line docstring.  The
+<code class="docutils literal"><span class="pre">desc</span></code> is printed when users use the <code class="docutils literal"><span class="pre">help()</span></code> methods.</p>
+<dl class="last docutils">
+<dt><strong>Required:</strong> This metadata is required by all nipype interface</dt>
+<dd>classes.</dd>
+</dl>
+</dd>
+<dt><code class="docutils literal"><span class="pre">usedefault</span></code></dt>
+<dd><p class="first">Set this metadata to True when the <em>default value</em> for the trait type
+of this attribute is an acceptable value.  All trait objects have a
+default value, <code class="docutils literal"><span class="pre">traits.Int</span></code> has a default of <code class="docutils literal"><span class="pre">0</span></code>, <code class="docutils literal"><span class="pre">traits.Float</span></code>
+has a default of <code class="docutils literal"><span class="pre">0.0</span></code>, etc...  You can also define a default value
+when you define the class.  For example, in the code below all objects
+of <code class="docutils literal"><span class="pre">Foo</span></code> will have a default value of 12 for <code class="docutils literal"><span class="pre">x</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">enthought.traits.api</span> <span class="kn">as</span> <span class="nn">traits</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">HasTraits</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">x</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">y</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">x</span>
+<span class="go">12</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">foo</span><span class="o">.</span><span class="n">y</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+<p>Nipype only passes <code class="docutils literal"><span class="pre">inputs</span></code> on to the underlying package if they
+have been defined (more on this later).  So if you specify
+<code class="docutils literal"><span class="pre">usedefault</span> <span class="pre">=</span> <span class="pre">True</span></code>, you are telling the parser to pass the default
+value on to the underlying package.  Let&#8217;s look at the InputSpec for
+SPM Realign:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">RealignInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">jobtype</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s">&#39;estwrite&#39;</span><span class="p">,</span> <span class="s">&#39;estimate&#39;</span><span class="p">,</span> <span class="s">&#39;write&#39;</span><span class="p">,</span>
+                          <span class="n">desc</span><span class="o">=</span><span class="s">&#39;one of: estimate, write, estwrite&#39;</span><span class="p">,</span>
+                          <span class="n">usedefault</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here we&#8217;ve defined <code class="docutils literal"><span class="pre">jobtype</span></code> to be an enumerated trait type,
+<code class="docutils literal"><span class="pre">Enum</span></code>, which can be set to one of the following: <code class="docutils literal"><span class="pre">estwrite</span></code>,
+<code class="docutils literal"><span class="pre">estimate</span></code>, or <code class="docutils literal"><span class="pre">write</span></code>.  In a container, the default is always the
+first element.  So in this case, the default will be <code class="docutils literal"><span class="pre">estwrite</span></code>:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">spm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rlgn</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">Realign</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rlgn</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">infile</span>
+<span class="go">&lt;undefined&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rlgn</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">jobtype</span>
+<span class="go">&#39;estwrite&#39;</span>
+</pre></div>
+</div>
+</dd>
+<dt><code class="docutils literal"><span class="pre">xor</span></code> and <code class="docutils literal"><span class="pre">requires</span></code></dt>
+<dd>Both of these accept a list of trait names. The <code class="docutils literal"><span class="pre">xor</span></code> metadata reflects
+mutually exclusive traits, while the requires metadata reflects traits
+that have to be set together. When a xor-ed trait is set, all other
+traits belonging to the list are set to Undefined. The function
+check_mandatory_inputs ensures that all requirements (both mandatory and
+via the requires metadata are satisfied). These are also reflected in
+the help function.</dd>
+<dt><code class="docutils literal"><span class="pre">copyfile</span></code></dt>
+<dd>This is metadata for a File or Directory trait that is relevant only in
+the context of wrapping an interface in a <cite>Node</cite> and <cite>MapNode</cite>. <cite>copyfile</cite>
+can be set to either <cite>True</cite> or <cite>False</cite>. <cite>False</cite> indicates that contents
+should be symlinked, while <cite>True</cite> indicates that the contents should be
+copied over.</dd>
+<dt><code class="docutils literal"><span class="pre">min_ver</span></code> and <code class="docutils literal"><span class="pre">max_ver</span></code></dt>
+<dd><p class="first">These metadata determine if a particular trait will be available when a
+given version of the underlying interface runs. Note that this check is
+performed at runtime.:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">RealignInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">jobtype</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s">&#39;estwrite&#39;</span><span class="p">,</span> <span class="s">&#39;estimate&#39;</span><span class="p">,</span> <span class="s">&#39;write&#39;</span><span class="p">,</span> <span class="n">min_ver</span><span class="o">=</span><span class="s">&#39;5&#39;</span><span class="p">,</span>
+                          <span class="n">usedefault</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt><code class="docutils literal"><span class="pre">deprecated</span></code> and <code class="docutils literal"><span class="pre">new_name</span></code></dt>
+<dd><p class="first">This is metadata for removing or renaming an input field from a spec.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">RealignInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">jobtype</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s">&#39;estwrite&#39;</span><span class="p">,</span> <span class="s">&#39;estimate&#39;</span><span class="p">,</span> <span class="s">&#39;write&#39;</span><span class="p">,</span>
+                          <span class="n">deprecated</span><span class="o">=</span><span class="s">&#39;0.8&#39;</span><span class="p">,</span>
+                          <span class="n">desc</span><span class="o">=</span><span class="s">&#39;one of: estimate, write, estwrite&#39;</span><span class="p">,</span>
+                          <span class="n">usedefault</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In the above example this means that the <cite>jobtype</cite> input is deprecated and
+will be removed in version 0.8. Deprecation should be set to two versions
+from current release. Raises <cite>TraitError</cite> after package version crosses the
+deprecation version.</p>
+<p>For inputs that are being renamed, one can specify the new name of the
+field.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">RealignInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
+    <span class="n">jobtype</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s">&#39;estwrite&#39;</span><span class="p">,</span> <span class="s">&#39;estimate&#39;</span><span class="p">,</span> <span class="s">&#39;write&#39;</span><span class="p">,</span>
+                          <span class="n">deprecated</span><span class="o">=</span><span class="s">&#39;0.8&#39;</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span><span class="s">&#39;job_type&#39;</span><span class="p">,</span>
+                          <span class="n">desc</span><span class="o">=</span><span class="s">&#39;one of: estimate, write, estwrite&#39;</span><span class="p">,</span>
+                          <span class="n">usedefault</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">job_type</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s">&#39;estwrite&#39;</span><span class="p">,</span> <span class="s">&#39;estimate&#39;</span><span class="p">,</span> <span class="s">&#39;write&#39;</span><span class="p">,</span>
+                          <span class="n">desc</span><span class="o">=</span><span class="s">&#39;one of: estimate, write, estwrite&#39;</span><span class="p">,</span>
+                          <span class="n">usedefault</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="last">In the above example, the <cite>jobtype</cite> field is being renamed to <cite>job_type</cite>.
+When <cite>new_name</cite> is provided it must exist as a trait, otherwise an exception
+will be raised.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The version information for <cite>min_ver</cite>, <cite>max_ver</cite> and <cite>deprecated</cite> has to be
+provided as a string. For example, <cite>min_ver=&#8216;0.1&#8217;</cite>.</p>
+</div>
+</div>
+<div class="section" id="commandline">
+<h3>CommandLine<a class="headerlink" href="#commandline" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">argstr</span></code></dt>
+<dd><p class="first">The metadata keyword for specifying the format strings
+for the parameters. This was the <em>value</em> string in the opt_map
+dictionaries of Nipype 0.2 code.  If we look at the
+<code class="docutils literal"><span class="pre">FlirtInputSpec</span></code>, the <code class="docutils literal"><span class="pre">argstr</span></code> for the reference file corresponds
+to the argument string I would need to provide with the command-line
+version of <code class="docutils literal"><span class="pre">flirt</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FlirtInputSpec</span><span class="p">(</span><span class="n">FSLTraitedSpec</span><span class="p">):</span>
+    <span class="n">reference</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">argstr</span> <span class="o">=</span> <span class="s">&#39;-ref </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">mandatory</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+                     <span class="n">position</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">desc</span> <span class="o">=</span> <span class="s">&#39;reference file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="last"><strong>Required:</strong> This metadata is required by all command-line interface classes.</p>
+</dd>
+<dt><code class="docutils literal"><span class="pre">position</span></code></dt>
+<dd>This metadata is used to specify the position of arguments.  Both
+positive and negative values are accepted.  <code class="docutils literal"><span class="pre">position</span> <span class="pre">=</span> <span class="pre">0</span></code> will
+position this argument as the first parameter after the command
+name. <code class="docutils literal"><span class="pre">position</span> <span class="pre">=</span> <span class="pre">-1</span></code> will position this argument as the last
+parameter, after all other parameters.</dd>
+<dt><code class="docutils literal"><span class="pre">genfile</span></code></dt>
+<dd>If True, the <code class="docutils literal"><span class="pre">genfile</span></code> metadata specifies that a filename should be
+generated for this parameter <em>if-and-only-if</em> the user did not provide
+one.  The nipype convention is to automatically generate output
+filenames when not specified by the user both as a convenience for the
+user and so the pipeline can easily gather the outputs. Requires
+<code class="docutils literal"><span class="pre">_gen_filename()</span></code> method to be implemented. This way should be used if the
+desired file name is dependent on some runtime variables (such as file name
+of one of the inputs, or current working directory). In case when it should
+be fixed it&#8217;s recommended to just use <code class="docutils literal"><span class="pre">usedefault</span></code>.</dd>
+<dt><code class="docutils literal"><span class="pre">sep</span></code></dt>
+<dd>For List traits the string with witch elements of the list will be joined.</dd>
+<dt><code class="docutils literal"><span class="pre">name_source</span></code></dt>
+<dd>Indicates the list of input fields from which the value of the current File
+output variable will be drawn. This input field must be the name of a File.</dd>
+<dt><code class="docutils literal"><span class="pre">name_template</span></code></dt>
+<dd>By default a <code class="docutils literal"><span class="pre">%s_generated</span></code> template is used to create the output
+filename. This metadata keyword allows overriding the generated name.</dd>
+<dt><code class="docutils literal"><span class="pre">keep_extension</span></code></dt>
+<dd>Use this and set it <code class="docutils literal"><span class="pre">True</span></code> if you want the extension from the input to be
+kept.</dd>
+</dl>
+</div>
+<div class="section" id="spm">
+<h3>SPM<a class="headerlink" href="#spm" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">field</span></code></dt>
+<dd><p class="first">name of the structure refered by the SPM job manager</p>
+<dl class="last docutils">
+<dt><strong>Required:</strong> This metadata is required by all SPM-mediated</dt>
+<dd>interface classes.</dd>
+</dl>
+</dd>
+</dl>
+</div>
+</div>
+<div class="section" id="defining-an-interface-class">
+<h2>Defining an interface class<a class="headerlink" href="#defining-an-interface-class" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>Common<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>When you define an interface class, you will define these attributes
+and methods:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">input_spec</span></code>: the InputSpec</li>
+<li><code class="docutils literal"><span class="pre">output_spec</span></code>: the OutputSpec</li>
+<li><code class="docutils literal"><span class="pre">_list_outputs()</span></code>: Returns a dictionary containing names of generated files that are expected after package completes execution.  This is used by <code class="docutils literal"><span class="pre">BaseInterface.aggregate_outputs</span></code> to gather all output files for the pipeline.</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h3>CommandLine<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>For command-line interfaces:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">_cmd</span></code>: the command-line command</li>
+</ul>
+<p>If you used genfile:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">_gen_filename(name)</span></code>:  Generate filename, used for filenames that nipype generates as a convenience for users.  This is for parameters that are required by the wrapped package, but we&#8217;re generating from some other parameter. For example, <code class="docutils literal"><span class="pre">BET.inputs.outfile</span></code> is required by BET but we can generate the name from <code class="docutils literal"><span class="pre">BET.inputs.infile</span></code>.  Override this method in subclass to handle.</li>
+</ul>
+<p>And optionally:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">_format_arg(name,</span> <span class="pre">spec,</span> <span class="pre">value)</span></code>: For extra formatting of the input values before passing them to generic <code class="docutils literal"><span class="pre">_parse_inputs()</span></code> method.</li>
+</ul>
+<p>For example this is the class definition for Flirt, minus the docstring:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FLIRTInputSpec</span><span class="p">(</span><span class="n">FSLCommandInputSpec</span><span class="p">):</span>
+    <span class="n">in_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">argstr</span><span class="o">=</span><span class="s">&#39;-in </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                   <span class="n">position</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s">&#39;input file&#39;</span><span class="p">)</span>
+    <span class="n">reference</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">argstr</span><span class="o">=</span><span class="s">&#39;-ref </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                     <span class="n">position</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s">&#39;reference file&#39;</span><span class="p">)</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">argstr</span><span class="o">=</span><span class="s">&#39;-out </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s">&#39;registered output file&#39;</span><span class="p">,</span>
+                    <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span> <span class="n">name_template</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">_flirt&#39;</span><span class="p">,</span>
+                    <span class="n">position</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">hash_files</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">out_matrix_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">argstr</span><span class="o">=</span><span class="s">&#39;-omat </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span>
+                           <span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span> <span class="n">keep_extension</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                           <span class="n">name_template</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">_flirt.mat&#39;</span><span class="p">,</span>
+                           <span class="n">desc</span><span class="o">=</span><span class="s">&#39;output affine matrix in 4x4 asciii format&#39;</span><span class="p">,</span>
+                           <span class="n">position</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">hash_files</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">out_log</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">name_source</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span> <span class="n">keep_extension</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                   <span class="n">requires</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;save_log&#39;</span><span class="p">],</span>
+                   <span class="n">name_template</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">_flirt.log&#39;</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s">&#39;output log&#39;</span><span class="p">)</span>
+    <span class="o">...</span>
+
+<span class="k">class</span> <span class="nc">FLIRTOutputSpec</span><span class="p">(</span><span class="n">TraitedSpec</span><span class="p">):</span>
+    <span class="n">out_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                    <span class="n">desc</span><span class="o">=</span><span class="s">&#39;path/name of registered file (if generated)&#39;</span><span class="p">)</span>
+    <span class="n">out_matrix_file</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                           <span class="n">desc</span><span class="o">=</span><span class="s">&#39;path/name of calculated affine transform &#39;</span>
+                           <span class="s">&#39;(if generated)&#39;</span><span class="p">)</span>
+    <span class="n">out_log</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="s">&#39;path/name of output log (if generated)&#39;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Flirt</span><span class="p">(</span><span class="n">FSLCommand</span><span class="p">):</span>
+    <span class="n">_cmd</span> <span class="o">=</span> <span class="s">&#39;flirt&#39;</span>
+    <span class="n">input_spec</span> <span class="o">=</span> <span class="n">FlirtInputSpec</span>
+    <span class="n">output_spec</span> <span class="o">=</span> <span class="n">FlirtOutputSpec</span>
+</pre></div>
+</div>
+<p>There are two possible output files <code class="docutils literal"><span class="pre">outfile</span></code> and <code class="docutils literal"><span class="pre">outmatrix</span></code>,
+both of which can be generated if not specified by the user.</p>
+<p>Also notice the use of <code class="docutils literal"><span class="pre">self._gen_fname()</span></code> - a FSLCommand helper method for generating filenames (with extensions conforming with FSLOUTPUTTYPE).</p>
+<p>See also <a class="reference internal" href="cmd_interface_devel.html"><em>How to wrap a command line tool</em></a>.</p>
+</div>
+<div class="section" id="id3">
+<h3>SPM<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>For SPM-mediated interfaces:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">_jobtype</span></code> and <code class="docutils literal"><span class="pre">_jobname</span></code>: special names used used by the SPM job manager. You can find them by saving your batch job as an .m file and looking up the code.</li>
+</ul>
+<p>And optionally:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">_format_arg(name,</span> <span class="pre">spec,</span> <span class="pre">value)</span></code>: For extra formatting of the input values before passing them to generic <code class="docutils literal"><span class="pre">_parse_inputs()</span></code> method.</li>
+</ul>
+</div>
+<div class="section" id="matlab">
+<h3>Matlab<a class="headerlink" href="#matlab" title="Permalink to this headline">¶</a></h3>
+<p>See <a class="reference internal" href="matlab_interface_devel.html"><em>How to wrap a MATLAB script</em></a>.</p>
+</div>
+<div class="section" id="python">
+<h3>Python<a class="headerlink" href="#python" title="Permalink to this headline">¶</a></h3>
+<p>See <a class="reference internal" href="python_interface_devel.html"><em>How to wrap a Python script</em></a>.</p>
+</div>
+</div>
+<div class="section" id="undefined-inputs">
+<h2>Undefined inputs<a class="headerlink" href="#undefined-inputs" title="Permalink to this headline">¶</a></h2>
+<p>All the inputs and outputs that were not explicitly set (And do not have a usedefault flag - see above) will have Undefined value. To check if something is defined you have to explicitly call <code class="docutils literal"><span class="pre">isdefiend</span></code> function (comparing to None will not work).</p>
+</div>
+<div class="section" id="example-of-inputs">
+<h2>Example of inputs<a class="headerlink" href="#example-of-inputs" title="Permalink to this headline">¶</a></h2>
+<p>Below we have an example of using Bet.  We can see from the help which
+inputs are mandatory and which are optional, along with the one-line
+description provided by the <code class="docutils literal"><span class="pre">desc</span></code> metadata:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="o">.</span><span class="n">help</span><span class="p">()</span>
+<span class="go">Inputs</span>
+<span class="go">------</span>
+
+<span class="go">Mandatory:</span>
+<span class="go"> infile: input file to skull strip</span>
+
+<span class="go">Optional:</span>
+<span class="go"> args: Additional parameters to the command</span>
+<span class="go"> center: center of gravity in voxels</span>
+<span class="go"> environ: Environment variables (default={})</span>
+<span class="go"> frac: fractional intensity threshold</span>
+<span class="go"> functional: apply to 4D fMRI data</span>
+<span class="go"> mask: create binary mask image</span>
+<span class="go"> mesh: generate a vtk mesh brain surface</span>
+<span class="go"> nooutput: Don&#39;t generate segmented output</span>
+<span class="go"> outfile: name of output skull stripped image</span>
+<span class="go"> outline: create surface outline image</span>
+<span class="go"> outputtype: None</span>
+<span class="go"> radius: head radius</span>
+<span class="go"> reduce_bias: bias field and neck cleanup</span>
+<span class="go"> skull: create skull image</span>
+<span class="go"> threshold: apply thresholding to segmented brain image and mask</span>
+<span class="go"> vertical_gradient: vertical gradient in fractional intensity threshold (-1, 1)</span>
+
+<span class="go">Outputs</span>
+<span class="go">-------</span>
+<span class="go">maskfile: path/name of binary brain mask (if generated)</span>
+<span class="go">meshfile: path/name of vtk mesh file (if generated)</span>
+<span class="go">outfile: path/name of skullstripped file</span>
+<span class="go">outlinefile: path/name of outline file (if generated)</span>
+</pre></div>
+</div>
+<p>Here we create a bet object and specify the required input. We then
+check our inputs to see which are defined and which are not:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">bet</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">(</span><span class="n">infile</span> <span class="o">=</span> <span class="s">&#39;f3.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bet</span><span class="o">.</span><span class="n">inputs</span>
+<span class="go">args = &lt;undefined&gt;</span>
+<span class="go">center = &lt;undefined&gt;</span>
+<span class="go">environ = {&#39;FSLOUTPUTTYPE&#39;: &#39;NIFTI_GZ&#39;}</span>
+<span class="go">frac = &lt;undefined&gt;</span>
+<span class="go">functional = &lt;undefined&gt;</span>
+<span class="go">infile = f3.nii</span>
+<span class="go">mask = &lt;undefined&gt;</span>
+<span class="go">mesh = &lt;undefined&gt;</span>
+<span class="go">nooutput = &lt;undefined&gt;</span>
+<span class="go">outfile = &lt;undefined&gt;</span>
+<span class="go">outline = &lt;undefined&gt;</span>
+<span class="go">outputtype = NIFTI_GZ</span>
+<span class="go">radius = &lt;undefined&gt;</span>
+<span class="go">reduce_bias = &lt;undefined&gt;</span>
+<span class="go">skull = &lt;undefined&gt;</span>
+<span class="go">threshold = &lt;undefined&gt;</span>
+<span class="go">vertical_gradient = &lt;undefined&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bet</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;bet f3.nii /Users/cburns/data/nipype/s1/f3_brain.nii.gz&#39;</span>
+</pre></div>
+</div>
+<p>We also checked the command-line that will be generated when we run
+the command and can see the generated output filename
+<code class="docutils literal"><span class="pre">f3_brain.nii.gz</span></code>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,17 +114,17 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">workflows.fmri.fsl.estimate</a><ul>
-<li><a class="reference internal" href="#create-fixed-effects-flow"><tt class="docutils literal"><span class="pre">create_fixed_effects_flow()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-fixed-effects-flow"><code class="docutils literal"><span class="pre">create_fixed_effects_flow()</span></code></a><ul>
 <li><a class="reference internal" href="#example">Example</a></li>
 <li><a class="reference internal" href="#graph">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-modelfit-workflow"><tt class="docutils literal"><span class="pre">create_modelfit_workflow()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-modelfit-workflow"><code class="docutils literal"><span class="pre">create_modelfit_workflow()</span></code></a><ul>
 <li><a class="reference internal" href="#id1">Example</a></li>
 <li><a class="reference internal" href="#id2">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-overlay-workflow"><tt class="docutils literal"><span class="pre">create_overlay_workflow()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-overlay-workflow"><code class="docutils literal"><span class="pre">create_overlay_workflow()</span></code></a><ul>
 <li><a class="reference internal" href="#id3">Graph</a></li>
 </ul>
 </li>
@@ -150,7 +150,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -162,7 +162,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -185,9 +185,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -197,13 +197,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-nipype.workflows.fmri.fsl.estimate">
 <span id="workflows-fmri-fsl-estimate"></span><h1>workflows.fmri.fsl.estimate<a class="headerlink" href="#module-nipype.workflows.fmri.fsl.estimate" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="create-fixed-effects-flow">
-<span id="nipype-workflows-fmri-fsl-estimate-create-fixed-effects-flow"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_fixed_effects_flow()</span></tt><a class="headerlink" href="#create-fixed-effects-flow" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/estimate.py#L180">Link to code</a></p>
+<span id="nipype-workflows-fmri-fsl-estimate-create-fixed-effects-flow"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_fixed_effects_flow()</span></code><a class="headerlink" href="#create-fixed-effects-flow" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/fmri/fsl/estimate.py#L180">Link to code</a></p>
 <p>Create a fixed-effects workflow</p>
 <p>This workflow is used to combine registered copes and varcopes across runs
 for an individual subject</p>
@@ -236,11 +236,9 @@ outputspec.tstats : t statistics of contrasts
 <div class="section" id="graph">
 <h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-ae6eb583003cd1cc5007c4bb6df65db2b4d1d0e8.png" alt="digraph fixedfx{
+<img src="../../_images/graphviz-1549af832aaebab54a1d7b7df6453fed52c99d9f.png" alt="digraph fixedfx{
 
   label=&quot;fixedfx&quot;;
-
-  fixedfx_l2model[label=&quot;l2model (fsl)&quot;];
 
   fixedfx_inputspec[label=&quot;inputspec (utility)&quot;];
 
@@ -250,21 +248,17 @@ outputspec.tstats : t statistics of contrasts
 
   fixedfx_varcopemerge[label=&quot;varcopemerge (fsl)&quot;];
 
+  fixedfx_l2model[label=&quot;l2model (fsl)&quot;];
+
   fixedfx_flameo[label=&quot;flameo (fsl)&quot;];
 
   fixedfx_outputspec[label=&quot;outputspec (utility)&quot;];
 
-  fixedfx_l2model -&gt; fixedfx_flameo;
-
-  fixedfx_l2model -&gt; fixedfx_flameo;
-
-  fixedfx_l2model -&gt; fixedfx_flameo;
-
-  fixedfx_inputspec -&gt; fixedfx_varcopemerge;
+  fixedfx_inputspec -&gt; fixedfx_gendofvolume;
 
   fixedfx_inputspec -&gt; fixedfx_copemerge;
 
-  fixedfx_inputspec -&gt; fixedfx_gendofvolume;
+  fixedfx_inputspec -&gt; fixedfx_varcopemerge;
 
   fixedfx_copemerge -&gt; fixedfx_flameo;
 
@@ -273,6 +267,12 @@ outputspec.tstats : t statistics of contrasts
   fixedfx_gendofvolume -&gt; fixedfx_flameo;
 
   fixedfx_varcopemerge -&gt; fixedfx_flameo;
+
+  fixedfx_l2model -&gt; fixedfx_flameo;
+
+  fixedfx_l2model -&gt; fixedfx_flameo;
+
+  fixedfx_l2model -&gt; fixedfx_flameo;
 
   fixedfx_flameo -&gt; fixedfx_outputspec;
 
@@ -289,8 +289,8 @@ outputspec.tstats : t statistics of contrasts
 </div>
 </div>
 <div class="section" id="create-modelfit-workflow">
-<span id="nipype-workflows-fmri-fsl-estimate-create-modelfit-workflow"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_modelfit_workflow()</span></tt><a class="headerlink" href="#create-modelfit-workflow" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/estimate.py#L10">Link to code</a></p>
+<span id="nipype-workflows-fmri-fsl-estimate-create-modelfit-workflow"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_modelfit_workflow()</span></code><a class="headerlink" href="#create-modelfit-workflow" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/fmri/fsl/estimate.py#L10">Link to code</a></p>
 <p>Create an FSL individual modelfitting workflow</p>
 <div class="section" id="id1">
 <h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
@@ -325,7 +325,7 @@ inputspec.bases
 <div class="section" id="id2">
 <h3>Graph<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-b20a6f55dcb061f28aac6fe4781a5457c386aecb.png" alt="digraph modelfit{
+<img src="../../_images/graphviz-a9f90ebc68f14874541531b5df998ad9419c1241.png" alt="digraph modelfit{
 
   label=&quot;modelfit&quot;;
 
@@ -367,17 +367,17 @@ inputspec.bases
 
   modelfit_modelgen -&gt; modelfit_modelestimate;
 
+  modelfit_modelestimate -&gt; modelfit_outputspec;
+
+  modelfit_modelestimate -&gt; modelfit_outputspec;
+
+  modelfit_modelestimate -&gt; modelfit_outputspec;
+
+  modelfit_modelestimate -&gt; modelfit_outputspec;
+
   modelfit_modelestimate -&gt; modelfit_merge_contrasts;
 
   modelfit_modelestimate -&gt; modelfit_merge_contrasts;
-
-  modelfit_modelestimate -&gt; modelfit_outputspec;
-
-  modelfit_modelestimate -&gt; modelfit_outputspec;
-
-  modelfit_modelestimate -&gt; modelfit_outputspec;
-
-  modelfit_modelestimate -&gt; modelfit_outputspec;
 
   modelfit_merge_contrasts -&gt; modelfit_ztop;
 
@@ -390,8 +390,8 @@ inputspec.bases
 </div>
 </div>
 <div class="section" id="create-overlay-workflow">
-<span id="nipype-workflows-fmri-fsl-estimate-create-overlay-workflow"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_overlay_workflow()</span></tt><a class="headerlink" href="#create-overlay-workflow" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/fmri/fsl/estimate.py#L160">Link to code</a></p>
+<span id="nipype-workflows-fmri-fsl-estimate-create-overlay-workflow"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_overlay_workflow()</span></code><a class="headerlink" href="#create-overlay-workflow" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/fmri/fsl/estimate.py#L160">Link to code</a></p>
 <p>Setup overlay workflow</p>
 <div class="section" id="id3">
 <h3>Graph<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
@@ -419,9 +419,9 @@ inputspec.bases
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

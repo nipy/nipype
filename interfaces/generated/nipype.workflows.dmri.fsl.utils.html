@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,41 +114,41 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">workflows.dmri.fsl.utils</a><ul>
-<li><a class="reference internal" href="#apply-all-corrections"><tt class="docutils literal"><span class="pre">apply_all_corrections()</span></tt></a><ul>
+<li><a class="reference internal" href="#apply-all-corrections"><code class="docutils literal"><span class="pre">apply_all_corrections()</span></code></a><ul>
 <li><a class="reference internal" href="#graph">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#cleanup-edge-pipeline"><tt class="docutils literal"><span class="pre">cleanup_edge_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#cleanup-edge-pipeline"><code class="docutils literal"><span class="pre">cleanup_edge_pipeline()</span></code></a><ul>
 <li><a class="reference internal" href="#id1">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#dwi-flirt"><tt class="docutils literal"><span class="pre">dwi_flirt()</span></tt></a><ul>
+<li><a class="reference internal" href="#dwi-flirt"><code class="docutils literal"><span class="pre">dwi_flirt()</span></code></a><ul>
 <li><a class="reference internal" href="#id2">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#vsm2warp"><tt class="docutils literal"><span class="pre">vsm2warp()</span></tt></a><ul>
+<li><a class="reference internal" href="#vsm2warp"><code class="docutils literal"><span class="pre">vsm2warp()</span></code></a><ul>
 <li><a class="reference internal" href="#id3">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#add-empty-vol"><tt class="docutils literal"><span class="pre">add_empty_vol()</span></tt></a></li>
-<li><a class="reference internal" href="#b0-average"><tt class="docutils literal"><span class="pre">b0_average()</span></tt></a></li>
-<li><a class="reference internal" href="#b0-indices"><tt class="docutils literal"><span class="pre">b0_indices()</span></tt></a></li>
-<li><a class="reference internal" href="#compute-readout"><tt class="docutils literal"><span class="pre">compute_readout()</span></tt></a></li>
-<li><a class="reference internal" href="#copy-hdr"><tt class="docutils literal"><span class="pre">copy_hdr()</span></tt></a></li>
-<li><a class="reference internal" href="#demean-image"><tt class="docutils literal"><span class="pre">demean_image()</span></tt></a></li>
-<li><a class="reference internal" href="#eddy-rotate-bvecs"><tt class="docutils literal"><span class="pre">eddy_rotate_bvecs()</span></tt></a></li>
-<li><a class="reference internal" href="#enhance"><tt class="docutils literal"><span class="pre">enhance()</span></tt></a></li>
-<li><a class="reference internal" href="#extract-bval"><tt class="docutils literal"><span class="pre">extract_bval()</span></tt></a></li>
-<li><a class="reference internal" href="#hmc-split"><tt class="docutils literal"><span class="pre">hmc_split()</span></tt></a></li>
-<li><a class="reference internal" href="#insert-mat"><tt class="docutils literal"><span class="pre">insert_mat()</span></tt></a></li>
-<li><a class="reference internal" href="#rads2radsec"><tt class="docutils literal"><span class="pre">rads2radsec()</span></tt></a></li>
-<li><a class="reference internal" href="#recompose-dwi"><tt class="docutils literal"><span class="pre">recompose_dwi()</span></tt></a></li>
-<li><a class="reference internal" href="#recompose-xfm"><tt class="docutils literal"><span class="pre">recompose_xfm()</span></tt></a></li>
-<li><a class="reference internal" href="#remove-comp"><tt class="docutils literal"><span class="pre">remove_comp()</span></tt></a></li>
-<li><a class="reference internal" href="#reorient-bvecs"><tt class="docutils literal"><span class="pre">reorient_bvecs()</span></tt></a></li>
-<li><a class="reference internal" href="#rotate-bvecs"><tt class="docutils literal"><span class="pre">rotate_bvecs()</span></tt></a></li>
-<li><a class="reference internal" href="#siemens2rads"><tt class="docutils literal"><span class="pre">siemens2rads()</span></tt></a></li>
-<li><a class="reference internal" href="#time-avg"><tt class="docutils literal"><span class="pre">time_avg()</span></tt></a></li>
+<li><a class="reference internal" href="#add-empty-vol"><code class="docutils literal"><span class="pre">add_empty_vol()</span></code></a></li>
+<li><a class="reference internal" href="#b0-average"><code class="docutils literal"><span class="pre">b0_average()</span></code></a></li>
+<li><a class="reference internal" href="#b0-indices"><code class="docutils literal"><span class="pre">b0_indices()</span></code></a></li>
+<li><a class="reference internal" href="#compute-readout"><code class="docutils literal"><span class="pre">compute_readout()</span></code></a></li>
+<li><a class="reference internal" href="#copy-hdr"><code class="docutils literal"><span class="pre">copy_hdr()</span></code></a></li>
+<li><a class="reference internal" href="#demean-image"><code class="docutils literal"><span class="pre">demean_image()</span></code></a></li>
+<li><a class="reference internal" href="#eddy-rotate-bvecs"><code class="docutils literal"><span class="pre">eddy_rotate_bvecs()</span></code></a></li>
+<li><a class="reference internal" href="#enhance"><code class="docutils literal"><span class="pre">enhance()</span></code></a></li>
+<li><a class="reference internal" href="#extract-bval"><code class="docutils literal"><span class="pre">extract_bval()</span></code></a></li>
+<li><a class="reference internal" href="#hmc-split"><code class="docutils literal"><span class="pre">hmc_split()</span></code></a></li>
+<li><a class="reference internal" href="#insert-mat"><code class="docutils literal"><span class="pre">insert_mat()</span></code></a></li>
+<li><a class="reference internal" href="#rads2radsec"><code class="docutils literal"><span class="pre">rads2radsec()</span></code></a></li>
+<li><a class="reference internal" href="#recompose-dwi"><code class="docutils literal"><span class="pre">recompose_dwi()</span></code></a></li>
+<li><a class="reference internal" href="#recompose-xfm"><code class="docutils literal"><span class="pre">recompose_xfm()</span></code></a></li>
+<li><a class="reference internal" href="#remove-comp"><code class="docutils literal"><span class="pre">remove_comp()</span></code></a></li>
+<li><a class="reference internal" href="#reorient-bvecs"><code class="docutils literal"><span class="pre">reorient_bvecs()</span></code></a></li>
+<li><a class="reference internal" href="#rotate-bvecs"><code class="docutils literal"><span class="pre">rotate_bvecs()</span></code></a></li>
+<li><a class="reference internal" href="#siemens2rads"><code class="docutils literal"><span class="pre">siemens2rads()</span></code></a></li>
+<li><a class="reference internal" href="#time-avg"><code class="docutils literal"><span class="pre">time_avg()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -171,7 +171,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -183,7 +183,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -206,9 +206,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -218,13 +218,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-nipype.workflows.dmri.fsl.utils">
 <span id="workflows-dmri-fsl-utils"></span><h1>workflows.dmri.fsl.utils<a class="headerlink" href="#module-nipype.workflows.dmri.fsl.utils" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="apply-all-corrections">
-<span id="nipype-workflows-dmri-fsl-utils-apply-all-corrections"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">apply_all_corrections()</span></tt><a class="headerlink" href="#apply-all-corrections" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L136">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-apply-all-corrections"></span><h2><code class="xref py py-func docutils literal"><span class="pre">apply_all_corrections()</span></code><a class="headerlink" href="#apply-all-corrections" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L136">Link to code</a></p>
 <p>Combines two lists of linear transforms with the deformation field
 map obtained typically after the SDC process.
 Additionally, computes the corresponding bspline coefficients and
@@ -232,23 +232,23 @@ the map of determinants of the jacobian.</p>
 <div class="section" id="graph">
 <h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-b84699d5e361cf740a4a0450a400c011680ce679.png" alt="digraph UnwarpArtifacts{
+<img src="../../_images/graphviz-690175e3113c63034325a859fdd3b6eabff18880.png" alt="digraph UnwarpArtifacts{
 
   label=&quot;UnwarpArtifacts&quot;;
 
   UnwarpArtifacts_inputnode[label=&quot;inputnode (utility)&quot;];
 
-  UnwarpArtifacts_ConvertWarp[label=&quot;ConvertWarp (fsl)&quot;];
-
   UnwarpArtifacts_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
 
   UnwarpArtifacts_Reference[label=&quot;Reference (utility)&quot;];
 
-  UnwarpArtifacts_UnwarpDWIs[label=&quot;UnwarpDWIs (fsl)&quot;];
+  UnwarpArtifacts_ConvertWarp[label=&quot;ConvertWarp (fsl)&quot;];
 
   UnwarpArtifacts_CoeffComp[label=&quot;CoeffComp (fsl)&quot;];
 
   UnwarpArtifacts_JacobianComp[label=&quot;JacobianComp (fsl)&quot;];
+
+  UnwarpArtifacts_UnwarpDWIs[label=&quot;UnwarpDWIs (fsl)&quot;];
 
   UnwarpArtifacts_ModulateDWIs[label=&quot;ModulateDWIs (fsl)&quot;];
 
@@ -268,23 +268,21 @@ the map of determinants of the jacobian.</p>
 
   UnwarpArtifacts_inputnode -&gt; UnwarpArtifacts_SplitDWIs;
 
-  UnwarpArtifacts_ConvertWarp -&gt; UnwarpArtifacts_UnwarpDWIs;
-
-  UnwarpArtifacts_ConvertWarp -&gt; UnwarpArtifacts_outputnode;
-
-  UnwarpArtifacts_ConvertWarp -&gt; UnwarpArtifacts_CoeffComp;
-
   UnwarpArtifacts_SplitDWIs -&gt; UnwarpArtifacts_Reference;
 
   UnwarpArtifacts_SplitDWIs -&gt; UnwarpArtifacts_UnwarpDWIs;
 
-  UnwarpArtifacts_Reference -&gt; UnwarpArtifacts_JacobianComp;
+  UnwarpArtifacts_Reference -&gt; UnwarpArtifacts_CoeffComp;
 
   UnwarpArtifacts_Reference -&gt; UnwarpArtifacts_UnwarpDWIs;
 
-  UnwarpArtifacts_Reference -&gt; UnwarpArtifacts_CoeffComp;
+  UnwarpArtifacts_Reference -&gt; UnwarpArtifacts_JacobianComp;
 
-  UnwarpArtifacts_UnwarpDWIs -&gt; UnwarpArtifacts_ModulateDWIs;
+  UnwarpArtifacts_ConvertWarp -&gt; UnwarpArtifacts_CoeffComp;
+
+  UnwarpArtifacts_ConvertWarp -&gt; UnwarpArtifacts_UnwarpDWIs;
+
+  UnwarpArtifacts_ConvertWarp -&gt; UnwarpArtifacts_outputnode;
 
   UnwarpArtifacts_CoeffComp -&gt; UnwarpArtifacts_JacobianComp;
 
@@ -293,6 +291,8 @@ the map of determinants of the jacobian.</p>
   UnwarpArtifacts_JacobianComp -&gt; UnwarpArtifacts_ModulateDWIs;
 
   UnwarpArtifacts_JacobianComp -&gt; UnwarpArtifacts_outputnode;
+
+  UnwarpArtifacts_UnwarpDWIs -&gt; UnwarpArtifacts_ModulateDWIs;
 
   UnwarpArtifacts_ModulateDWIs -&gt; UnwarpArtifacts_RemoveNegative;
 
@@ -305,22 +305,22 @@ the map of determinants of the jacobian.</p>
 </div>
 </div>
 <div class="section" id="cleanup-edge-pipeline">
-<span id="nipype-workflows-dmri-fsl-utils-cleanup-edge-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">cleanup_edge_pipeline()</span></tt><a class="headerlink" href="#cleanup-edge-pipeline" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L11">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-cleanup-edge-pipeline"></span><h2><code class="xref py py-func docutils literal"><span class="pre">cleanup_edge_pipeline()</span></code><a class="headerlink" href="#cleanup-edge-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L11">Link to code</a></p>
 <p>Perform some de-spiking filtering to clean up the edge of the fieldmap
 (copied from fsl_prepare_fieldmap)</p>
 <div class="section" id="id1">
 <h3>Graph<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-fd68c69e93ab5214ca8d2bcc32a52e654f573d16.png" alt="digraph Cleanup{
+<img src="../../_images/graphviz-010f3770151539a453b2bc1379bba5df535752b4.png" alt="digraph Cleanup{
 
   label=&quot;Cleanup&quot;;
 
   Cleanup_inputnode[label=&quot;inputnode (utility)&quot;];
 
-  Cleanup_Despike[label=&quot;Despike (fsl)&quot;];
-
   Cleanup_MskErode[label=&quot;MskErode (fsl)&quot;];
+
+  Cleanup_Despike[label=&quot;Despike (fsl)&quot;];
 
   Cleanup_NewMask[label=&quot;NewMask (fsl)&quot;];
 
@@ -332,6 +332,8 @@ the map of determinants of the jacobian.</p>
 
   Cleanup_outputnode[label=&quot;outputnode (utility)&quot;];
 
+  Cleanup_inputnode -&gt; Cleanup_NewMask;
+
   Cleanup_inputnode -&gt; Cleanup_Despike;
 
   Cleanup_inputnode -&gt; Cleanup_Despike;
@@ -340,13 +342,11 @@ the map of determinants of the jacobian.</p>
 
   Cleanup_inputnode -&gt; Cleanup_MskErode;
 
-  Cleanup_inputnode -&gt; Cleanup_NewMask;
-
-  Cleanup_Despike -&gt; Cleanup_ApplyMask;
-
   Cleanup_MskErode -&gt; Cleanup_NewMask;
 
   Cleanup_MskErode -&gt; Cleanup_Merge;
+
+  Cleanup_Despike -&gt; Cleanup_ApplyMask;
 
   Cleanup_NewMask -&gt; Cleanup_ApplyMask;
 
@@ -361,29 +361,29 @@ the map of determinants of the jacobian.</p>
 </div>
 </div>
 <div class="section" id="dwi-flirt">
-<span id="nipype-workflows-dmri-fsl-utils-dwi-flirt"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">dwi_flirt()</span></tt><a class="headerlink" href="#dwi-flirt" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L79">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-dwi-flirt"></span><h2><code class="xref py py-func docutils literal"><span class="pre">dwi_flirt()</span></code><a class="headerlink" href="#dwi-flirt" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L79">Link to code</a></p>
 <p>Generates a workflow for linear registration of dwi volumes</p>
 <div class="section" id="id2">
 <h3>Graph<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-ee3295bf5b540643d8b777bc7b961a5bd7ef1f79.png" alt="digraph DWICoregistration{
+<img src="../../_images/graphviz-0d931e8169e11d33949271a82f856630a7b86e70.png" alt="digraph DWICoregistration{
 
   label=&quot;DWICoregistration&quot;;
 
   DWICoregistration_inputnode[label=&quot;inputnode (utility)&quot;];
 
-  DWICoregistration_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
+  DWICoregistration_Bias[label=&quot;Bias (ants)&quot;];
 
   DWICoregistration_InitXforms[label=&quot;InitXforms (utility)&quot;];
 
-  DWICoregistration_Bias[label=&quot;Bias (ants)&quot;];
+  DWICoregistration_B0Equalize[label=&quot;B0Equalize (utility)&quot;];
 
   DWICoregistration_MskDilate[label=&quot;MskDilate (fsl)&quot;];
 
-  DWICoregistration_DWEqualize[label=&quot;DWEqualize (utility)&quot;];
+  DWICoregistration_SplitDWIs[label=&quot;SplitDWIs (fsl)&quot;];
 
-  DWICoregistration_B0Equalize[label=&quot;B0Equalize (utility)&quot;];
+  DWICoregistration_DWEqualize[label=&quot;DWEqualize (utility)&quot;];
 
   DWICoregistration_CoRegistration[label=&quot;CoRegistration (fsl)&quot;];
 
@@ -395,33 +395,33 @@ the map of determinants of the jacobian.</p>
 
   DWICoregistration_inputnode -&gt; DWICoregistration_SplitDWIs;
 
-  DWICoregistration_inputnode -&gt; DWICoregistration_InitXforms;
-
-  DWICoregistration_inputnode -&gt; DWICoregistration_InitXforms;
-
   DWICoregistration_inputnode -&gt; DWICoregistration_Bias;
 
   DWICoregistration_inputnode -&gt; DWICoregistration_Bias;
 
   DWICoregistration_inputnode -&gt; DWICoregistration_MskDilate;
 
+  DWICoregistration_inputnode -&gt; DWICoregistration_InitXforms;
+
+  DWICoregistration_inputnode -&gt; DWICoregistration_InitXforms;
+
   DWICoregistration_inputnode -&gt; DWICoregistration_B0Equalize;
-
-  DWICoregistration_SplitDWIs -&gt; DWICoregistration_DWEqualize;
-
-  DWICoregistration_InitXforms -&gt; DWICoregistration_CoRegistration;
 
   DWICoregistration_Bias -&gt; DWICoregistration_B0Equalize;
 
-  DWICoregistration_MskDilate -&gt; DWICoregistration_CoRegistration;
+  DWICoregistration_InitXforms -&gt; DWICoregistration_CoRegistration;
 
-  DWICoregistration_MskDilate -&gt; DWICoregistration_CoRegistration;
+  DWICoregistration_B0Equalize -&gt; DWICoregistration_CoRegistration;
 
   DWICoregistration_MskDilate -&gt; DWICoregistration_DWEqualize;
 
-  DWICoregistration_DWEqualize -&gt; DWICoregistration_CoRegistration;
+  DWICoregistration_MskDilate -&gt; DWICoregistration_CoRegistration;
 
-  DWICoregistration_B0Equalize -&gt; DWICoregistration_CoRegistration;
+  DWICoregistration_MskDilate -&gt; DWICoregistration_CoRegistration;
+
+  DWICoregistration_SplitDWIs -&gt; DWICoregistration_DWEqualize;
+
+  DWICoregistration_DWEqualize -&gt; DWICoregistration_CoRegistration;
 
   DWICoregistration_CoRegistration -&gt; DWICoregistration_RemoveNegative;
 
@@ -436,13 +436,13 @@ the map of determinants of the jacobian.</p>
 </div>
 </div>
 <div class="section" id="vsm2warp">
-<span id="nipype-workflows-dmri-fsl-utils-vsm2warp"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">vsm2warp()</span></tt><a class="headerlink" href="#vsm2warp" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L50">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-vsm2warp"></span><h2><code class="xref py py-func docutils literal"><span class="pre">vsm2warp()</span></code><a class="headerlink" href="#vsm2warp" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L50">Link to code</a></p>
 <p>Converts a voxel shift map (vsm) to a displacements field (warp).</p>
 <div class="section" id="id3">
 <h3>Graph<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-d12860869a96e47a8d540f2c9e92a6eac7b5a979.png" alt="digraph Shiftmap2Warping{
+<img src="../../_images/graphviz-bc72e0950e069d9bdc172820d094164d68745b5e.png" alt="digraph Shiftmap2Warping{
 
   label=&quot;Shiftmap2Warping&quot;;
 
@@ -456,15 +456,15 @@ the map of determinants of the jacobian.</p>
 
   Shiftmap2Warping_outputnode[label=&quot;outputnode (utility)&quot;];
 
-  Shiftmap2Warping_inputnode -&gt; Shiftmap2Warping_vsm2dfm;
-
-  Shiftmap2Warping_inputnode -&gt; Shiftmap2Warping_vsm2dfm;
-
-  Shiftmap2Warping_inputnode -&gt; Shiftmap2Warping_Fix_hdr;
-
-  Shiftmap2Warping_inputnode -&gt; Shiftmap2Warping_Fix_hdr;
-
   Shiftmap2Warping_inputnode -&gt; Shiftmap2Warping_ScaleField;
+
+  Shiftmap2Warping_inputnode -&gt; Shiftmap2Warping_Fix_hdr;
+
+  Shiftmap2Warping_inputnode -&gt; Shiftmap2Warping_Fix_hdr;
+
+  Shiftmap2Warping_inputnode -&gt; Shiftmap2Warping_vsm2dfm;
+
+  Shiftmap2Warping_inputnode -&gt; Shiftmap2Warping_vsm2dfm;
 
   Shiftmap2Warping_Fix_hdr -&gt; Shiftmap2Warping_ScaleField;
 
@@ -477,13 +477,13 @@ the map of determinants of the jacobian.</p>
 </div>
 </div>
 <div class="section" id="add-empty-vol">
-<span id="nipype-workflows-dmri-fsl-utils-add-empty-vol"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">add_empty_vol()</span></tt><a class="headerlink" href="#add-empty-vol" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L664">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-add-empty-vol"></span><h2><code class="xref py py-func docutils literal"><span class="pre">add_empty_vol()</span></code><a class="headerlink" href="#add-empty-vol" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L664">Link to code</a></p>
 <p>Adds an empty vol to the phase difference image</p>
 </div>
 <div class="section" id="b0-average">
-<span id="nipype-workflows-dmri-fsl-utils-b0-average"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">b0_average()</span></tt><a class="headerlink" href="#b0-average" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L429">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-b0-average"></span><h2><code class="xref py py-func docutils literal"><span class="pre">b0_average()</span></code><a class="headerlink" href="#b0-average" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L429">Link to code</a></p>
 <p>A function that averages the <em>b0</em> volumes from a DWI dataset.
 As current dMRI data are being acquired with all b-values &gt; 0.0,
 the <em>lowb</em> volumes are selected by specifying the parameter max_b.</p>
@@ -494,84 +494,84 @@ be corrected).</p>
 </div>
 </div>
 <div class="section" id="b0-indices">
-<span id="nipype-workflows-dmri-fsl-utils-b0-indices"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">b0_indices()</span></tt><a class="headerlink" href="#b0-indices" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L420">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-b0-indices"></span><h2><code class="xref py py-func docutils literal"><span class="pre">b0_indices()</span></code><a class="headerlink" href="#b0-indices" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L420">Link to code</a></p>
 <p>Extract the indices of slices in a b-values file with a low b value</p>
 </div>
 <div class="section" id="compute-readout">
-<span id="nipype-workflows-dmri-fsl-utils-compute-readout"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">compute_readout()</span></tt><a class="headerlink" href="#compute-readout" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L551">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-compute-readout"></span><h2><code class="xref py py-func docutils literal"><span class="pre">compute_readout()</span></code><a class="headerlink" href="#compute-readout" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L551">Link to code</a></p>
 <p>Computes readout time from epi params (see <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/EDDY/Faq#How_do_I_know_what_to_put_into_my_--acqp_file.3F">eddy documentation</a>).</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last"><tt class="docutils literal"><span class="pre">params['echospacing']</span></tt> should be in <em>sec</em> units.</p>
+<p class="last"><code class="docutils literal"><span class="pre">params['echospacing']</span></code> should be in <em>sec</em> units.</p>
 </div>
 </div>
 <div class="section" id="copy-hdr">
-<span id="nipype-workflows-dmri-fsl-utils-copy-hdr"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">copy_hdr()</span></tt><a class="headerlink" href="#copy-hdr" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L715">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-copy-hdr"></span><h2><code class="xref py py-func docutils literal"><span class="pre">copy_hdr()</span></code><a class="headerlink" href="#copy-hdr" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L715">Link to code</a></p>
 </div>
 <div class="section" id="demean-image">
-<span id="nipype-workflows-dmri-fsl-utils-demean-image"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">demean_image()</span></tt><a class="headerlink" href="#demean-image" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L633">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-demean-image"></span><h2><code class="xref py py-func docutils literal"><span class="pre">demean_image()</span></code><a class="headerlink" href="#demean-image" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L633">Link to code</a></p>
 <p>Demean image data inside mask</p>
 </div>
 <div class="section" id="eddy-rotate-bvecs">
-<span id="nipype-workflows-dmri-fsl-utils-eddy-rotate-bvecs"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">eddy_rotate_bvecs()</span></tt><a class="headerlink" href="#eddy-rotate-bvecs" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L501">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-eddy-rotate-bvecs"></span><h2><code class="xref py py-func docutils literal"><span class="pre">eddy_rotate_bvecs()</span></code><a class="headerlink" href="#eddy-rotate-bvecs" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L501">Link to code</a></p>
 <p>Rotates the input bvec file accordingly with a list of parameters sourced
-from <tt class="docutils literal"><span class="pre">eddy</span></tt>, as explained <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/EDDY/Faq#Will_eddy_rotate_my_bevcs_for_me.3F">here</a>.</p>
+from <code class="docutils literal"><span class="pre">eddy</span></code>, as explained <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/EDDY/Faq#Will_eddy_rotate_my_bevcs_for_me.3F">here</a>.</p>
 </div>
 <div class="section" id="enhance">
-<span id="nipype-workflows-dmri-fsl-utils-enhance"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">enhance()</span></tt><a class="headerlink" href="#enhance" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L737">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-enhance"></span><h2><code class="xref py py-func docutils literal"><span class="pre">enhance()</span></code><a class="headerlink" href="#enhance" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L737">Link to code</a></p>
 </div>
 <div class="section" id="extract-bval">
-<span id="nipype-workflows-dmri-fsl-utils-extract-bval"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">extract_bval()</span></tt><a class="headerlink" href="#extract-bval" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L197">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-extract-bval"></span><h2><code class="xref py py-func docutils literal"><span class="pre">extract_bval()</span></code><a class="headerlink" href="#extract-bval" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L197">Link to code</a></p>
 <p>Writes an image containing only the volumes with b-value specified at
 input</p>
 </div>
 <div class="section" id="hmc-split">
-<span id="nipype-workflows-dmri-fsl-utils-hmc-split"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">hmc_split()</span></tt><a class="headerlink" href="#hmc-split" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L232">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-hmc-split"></span><h2><code class="xref py py-func docutils literal"><span class="pre">hmc_split()</span></code><a class="headerlink" href="#hmc-split" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L232">Link to code</a></p>
 <p>Selects the reference and moving volumes from a dwi dataset
 for the purpose of HMC.</p>
 </div>
 <div class="section" id="insert-mat">
-<span id="nipype-workflows-dmri-fsl-utils-insert-mat"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">insert_mat()</span></tt><a class="headerlink" href="#insert-mat" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L316">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-insert-mat"></span><h2><code class="xref py py-func docutils literal"><span class="pre">insert_mat()</span></code><a class="headerlink" href="#insert-mat" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L316">Link to code</a></p>
 </div>
 <div class="section" id="rads2radsec">
-<span id="nipype-workflows-dmri-fsl-utils-rads2radsec"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">rads2radsec()</span></tt><a class="headerlink" href="#rads2radsec" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L611">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-rads2radsec"></span><h2><code class="xref py py-func docutils literal"><span class="pre">rads2radsec()</span></code><a class="headerlink" href="#rads2radsec" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L611">Link to code</a></p>
 <p>Converts input phase difference map to rads</p>
 </div>
 <div class="section" id="recompose-dwi">
-<span id="nipype-workflows-dmri-fsl-utils-recompose-dwi"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">recompose_dwi()</span></tt><a class="headerlink" href="#recompose-dwi" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L326">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-recompose-dwi"></span><h2><code class="xref py py-func docutils literal"><span class="pre">recompose_dwi()</span></code><a class="headerlink" href="#recompose-dwi" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L326">Link to code</a></p>
 <p>Recompose back the dMRI data accordingly the b-values table after EC
 correction</p>
 </div>
 <div class="section" id="recompose-xfm">
-<span id="nipype-workflows-dmri-fsl-utils-recompose-xfm"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">recompose_xfm()</span></tt><a class="headerlink" href="#recompose-xfm" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L359">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-recompose-xfm"></span><h2><code class="xref py py-func docutils literal"><span class="pre">recompose_xfm()</span></code><a class="headerlink" href="#recompose-xfm" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L359">Link to code</a></p>
 <p>Insert identity transformation matrices in b0 volumes to build up a list</p>
 </div>
 <div class="section" id="remove-comp">
-<span id="nipype-workflows-dmri-fsl-utils-remove-comp"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">remove_comp()</span></tt><a class="headerlink" href="#remove-comp" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L278">Link to code</a></p>
-<p>Removes the volume <tt class="docutils literal"><span class="pre">volid</span></tt> from the 4D nifti file</p>
+<span id="nipype-workflows-dmri-fsl-utils-remove-comp"></span><h2><code class="xref py py-func docutils literal"><span class="pre">remove_comp()</span></code><a class="headerlink" href="#remove-comp" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L278">Link to code</a></p>
+<p>Removes the volume <code class="docutils literal"><span class="pre">volid</span></code> from the 4D nifti file</p>
 </div>
 <div class="section" id="reorient-bvecs">
-<span id="nipype-workflows-dmri-fsl-utils-reorient-bvecs"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">reorient_bvecs()</span></tt><a class="headerlink" href="#reorient-bvecs" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L686">Link to code</a></p>
-<p>Checks reorientations of <tt class="docutils literal"><span class="pre">in_dwi</span></tt> w.r.t. <tt class="docutils literal"><span class="pre">old_dwi</span></tt> and
+<span id="nipype-workflows-dmri-fsl-utils-reorient-bvecs"></span><h2><code class="xref py py-func docutils literal"><span class="pre">reorient_bvecs()</span></code><a class="headerlink" href="#reorient-bvecs" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L686">Link to code</a></p>
+<p>Checks reorientations of <code class="docutils literal"><span class="pre">in_dwi</span></code> w.r.t. <code class="docutils literal"><span class="pre">old_dwi</span></code> and
 reorients the in_bvec table accordingly.</p>
 </div>
 <div class="section" id="rotate-bvecs">
-<span id="nipype-workflows-dmri-fsl-utils-rotate-bvecs"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">rotate_bvecs()</span></tt><a class="headerlink" href="#rotate-bvecs" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L464">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-rotate-bvecs"></span><h2><code class="xref py py-func docutils literal"><span class="pre">rotate_bvecs()</span></code><a class="headerlink" href="#rotate-bvecs" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L464">Link to code</a></p>
 <p>Rotates the input bvec file accordingly with a list of matrices.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -582,13 +582,13 @@ the target position of <span class="math">\vec{r}</span>.</p>
 </div>
 </div>
 <div class="section" id="siemens2rads">
-<span id="nipype-workflows-dmri-fsl-utils-siemens2rads"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">siemens2rads()</span></tt><a class="headerlink" href="#siemens2rads" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L575">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-siemens2rads"></span><h2><code class="xref py py-func docutils literal"><span class="pre">siemens2rads()</span></code><a class="headerlink" href="#siemens2rads" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L575">Link to code</a></p>
 <p>Converts input phase difference map to rads</p>
 </div>
 <div class="section" id="time-avg">
-<span id="nipype-workflows-dmri-fsl-utils-time-avg"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">time_avg()</span></tt><a class="headerlink" href="#time-avg" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/utils.py#L384">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-utils-time-avg"></span><h2><code class="xref py py-func docutils literal"><span class="pre">time_avg()</span></code><a class="headerlink" href="#time-avg" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/utils.py#L384">Link to code</a></p>
 <p>Average the input time-series, selecting the indices given in index</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
@@ -605,9 +605,9 @@ head motion artifacts).</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

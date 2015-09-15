@@ -1,0 +1,531 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+interfaces.camino.odf
+=====================
+
+
+.. _nipype.interfaces.camino.odf.LinRecon:
+
+
+.. index:: LinRecon
+
+LinRecon
+--------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/camino/odf.py#L111>`__
+
+Wraps command **linrecon**
+
+Runs a linear transformation in each voxel.
+
+Reads  a  linear  transformation from the matrix file assuming the
+imaging scheme specified in the scheme file. Performs the linear
+transformation on the data in every voxel and outputs the result to
+the standard output. The ouput in every voxel is actually:
+    [exit code, ln(S(0)), p1, ..., pR]
+where p1, ..., pR are the parameters of the reconstruction.
+Possible exit codes are:
+   0. No problems.
+   6. Bad data replaced by substitution of zero.
+The matrix must be R by N+M where N+M is the number of measurements
+and R is the number of parameters of the reconstruction. The matrix
+file contains binary double-precision floats. The matrix elements
+are stored row by row.
+
+Example
+~~~~~~~~~
+First run QBallMX and create a linear transform matrix using
+Spherical Harmonics (sh).
+
+>>> import nipype.interfaces.camino as cam
+>>> qballmx = cam.QBallMX()
+>>> qballmx.inputs.scheme_file = 'A.scheme'
+>>> qballmx.inputs.basistype = 'sh'
+>>> qballmx.inputs.order = 4
+>>> qballmx.run()            # doctest: +SKIP
+
+Then run it over each voxel using LinRecon
+
+>>> qballcoeffs = cam.LinRecon()
+>>> qballcoeffs.inputs.in_file = 'SubjectA.Bfloat'
+>>> qballcoeffs.inputs.scheme_file = 'A.scheme'
+>>> qballcoeffs.inputs.qball_mat = 'A_qmat.Bdouble'
+>>> qballcoeffs.inputs.normalize = True
+>>> qballcoeffs.run()         # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                voxel-order data filename
+                flag: %s, position: 1
+        qball_mat: (an existing file name)
+                Linear transformation matrix.
+                flag: %s, position: 3
+        scheme_file: (an existing file name)
+                Specifies the scheme file for the diffusion MRI data
+                flag: %s, position: 2
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        bgmask: (an existing file name)
+                background mask
+                flag: -bgmask %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        log: (a boolean)
+                Transform the log measurements rather than the measurements
+                themselves
+                flag: -log
+        normalize: (a boolean)
+                Normalize the measurements and discard the zero measurements before
+                the linear transform.
+                flag: -normalize
+        out_file: (a file name)
+                flag: > %s, position: -1
+
+Outputs::
+
+        recon_data: (an existing file name)
+                Transformed data
+
+.. _nipype.interfaces.camino.odf.MESD:
+
+
+.. index:: MESD
+
+MESD
+----
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/camino/odf.py#L194>`__
+
+Wraps command **mesd**
+
+MESD is a general program for maximum entropy spherical deconvolution.
+It also runs PASMRI, which is a special case of spherical deconvolution.
+The input data must be in voxel order.
+
+The format of the output in each voxel is:
+{ exitcode, ln(A^star(0)), lambda_0, lambda_1, ..., lambda_N }
+
+The  exitcode  contains  the  results of three tests. The first test thresholds
+the maximum relative error between the numerical integrals computed at con-
+vergence and those computed using a larger test point set; if the error is
+greater than a threshold the exitcode is increased from zero to one as a
+warning; if it is greater than a larger threshold the exitcode is increased to
+two to suggest failure. The  second  test  thresholds  the predicted  error in
+numerical integrals computed using the test point set; if the predicted error
+is greater than a threshold the exitcode is increased by 10. The third test
+thresholds the RMS error between the measurements and their predictions from
+the fitted deconvolution; if the errors are greater than a threshold, the exit
+code is increased by 100. An exitcode of 112 means that all three tests were
+failed and the result is likely to be unreliable.  If all is well the exitcode
+is zero. Results are often still reliable even if one or two of the tests are
+failed.
+
+Other possible exitcodes are:
+ 5   - The optimization failed to converge
+-1   - Background
+-100 - Something wrong in the MRI data, e.g. negative or zero measurements,
+       so that the optimization could not run.
+
+The  standard  MESD  implementation  is computationally demanding, particularly
+as the number of measurements increases (computation is approximately O(N^2),
+where N is the number of measurements). There are two ways to obtain significant
+computational speed-up:
+
+i) Turn off error checks and use a small point set for computing numerical
+integrals in the algorithm by adding the flag -fastmesd. Sakaie CDMRI 2008
+shows that using the smallest point set  (-basepointset  0)  with  no
+error  checks  usually  has only a minor effect on the output of the algorithm,
+but provides a major reduction in computation time. You can increase the point
+set size using -basepointset with an argument higher than 0, which may produce
+better results in some voxels, but will increase computation time, which
+approximately doubles every time the point set index increases by 1.
+
+ii) Reduce the complexity of the maximum entropy encoding using -mepointset <X>.
+By default <X> = N, the number of measurements, and is the number of parameters
+in the max.  ent. representation of the  output  function, ie  the  number of
+lambda parameters, as described in Jansons and Alexander Inverse Problems 2003.
+However, we can represent the function using less components and <X> here
+specifies the number of lambda parameters. To obtain speed-up, set <X>
+< N; complexity become O(<X>^2) rather than O(N^2). Note that <X> must be chosen
+so that the camino/PointSets directory contains a point set  with  that  number
+of  elements.  When  -mepointset decreases, the  numerical  integration checks
+make less and less of a difference and smaller point sets for numerical
+integration (see -basepointset) become adequate. So when <X> is low -fastmesd is
+worth using to get even more speed-up.
+
+The choice of <X> is a parameter of the technique. Too low and you lose angular
+resoloution; too high and you see no computational benefit and may even suffer
+from overfitting. Empirically, we  have  found  that  <X>=16 often  gives  good
+results and good speed up, but it is worth trying a few values a comparing
+performance. The reduced encoding is described in the following ISMRM abstract:
+Sweet and Alexander "Reduced Encoding Persistent Angular Structure" 572 ISMRM 2010.
+
+Example
+~~~~~~~~~
+Run MESD on every voxel of the data file SubjectA.Bfloat using the PASMRI kernel.
+
+>>> import nipype.interfaces.camino as cam
+>>> mesd = cam.MESD()
+>>> mesd.inputs.in_file = 'SubjectA.Bfloat'
+>>> mesd.inputs.scheme_file = 'A.scheme'
+>>> mesd.inputs.inverter = 'PAS'
+>>> mesd.inputs.inverter_param = 1.4
+>>> mesd.run()            # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                voxel-order data filename
+                flag: -inputfile %s, position: 1
+        inverter: ('SPIKE' or 'PAS')
+                The inversion index specifies the type of inversion to perform on
+                the data.The currently available choices are:Inverter name |
+                Inverter parameters---------------|------------------SPIKE | bd
+                (b-value x diffusivity along the fibre.)PAS | r
+                flag: -filter %s, position: 2
+        inverter_param: (a float)
+                Parameter associated with the inverter. Cf. inverter description
+                formore information.
+                flag: %f, position: 3
+        scheme_file: (an existing file name)
+                Specifies the scheme file for the diffusion MRI data
+                flag: -schemefile %s
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        bgmask: (an existing file name)
+                background mask
+                flag: -bgmask %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        fastmesd: (a boolean)
+                Turns off numerical integration checks and fixes the integration
+                point set size at that ofthe index specified by -basepointset..
+                flag: -fastmesd
+                requires: mepointset
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        inputdatatype: ('float' or 'char' or 'short' or 'int' or 'long' or
+                 'double')
+                Specifies the data type of the input file: "char", "short", "int",
+                "long","float" or "double". The input file must have BIG-ENDIAN
+                ordering.By default, the input type is "float".
+                flag: -inputdatatype %s
+        mepointset: (an integer (int or long))
+                Use a set of directions other than those in the scheme file for the
+                deconvolution kernel.The number refers to the number of directions
+                on the unit sphere. For example, "-mepointset 54" uses the
+                directions in "camino/PointSets/Elec054.txt".
+                flag: -mepointset %d
+        out_file: (a file name)
+                flag: > %s, position: -1
+
+Outputs::
+
+        mesd_data: (an existing file name)
+                MESD data
+
+.. _nipype.interfaces.camino.odf.QBallMX:
+
+
+.. index:: QBallMX
+
+QBallMX
+-------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/camino/odf.py#L39>`__
+
+Wraps command **qballmx**
+
+Generates a reconstruction matrix for Q-Ball. Used in LinRecon with
+the same scheme file to reconstruct data.
+
+Example 1
+~~~~~~~~~
+To create  a linear transform matrix using Spherical Harmonics (sh).
+
+>>> import nipype.interfaces.camino as cam
+>>> qballmx = cam.QBallMX()
+>>> qballmx.inputs.scheme_file = 'A.scheme'
+>>> qballmx.inputs.basistype = 'sh'
+>>> qballmx.inputs.order = 6
+>>> qballmx.run()            # doctest: +SKIP
+
+Example 2
+~~~~~~~~~
+To create  a linear transform matrix using Radial Basis Functions
+(rbf). This command uses the default setting of rbf sigma = 0.2618
+(15 degrees), data smoothing sigma = 0.1309 (7.5 degrees), rbf
+pointset 246
+
+>>> import nipype.interfaces.camino as cam
+>>> qballmx = cam.QBallMX()
+>>> qballmx.inputs.scheme_file = 'A.scheme'
+>>> qballmx.run()              # doctest: +SKIP
+
+The linear transform matrix from any of these two examples can then
+be run over each voxel using LinRecon
+
+>>> qballcoeffs = cam.LinRecon()
+>>> qballcoeffs.inputs.in_file = 'SubjectA.Bfloat'
+>>> qballcoeffs.inputs.scheme_file = 'A.scheme'
+>>> qballcoeffs.inputs.qball_mat = 'A_qmat.Bdouble'
+>>> qballcoeffs.inputs.normalize = True
+>>> qballcoeffs.inputs.bgmask = 'brain_mask.nii'
+>>> qballcoeffs.run()             # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        scheme_file: (an existing file name)
+                Specifies the scheme file for the diffusion MRI data
+                flag: -schemefile %s
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        basistype: ('rbf' or 'sh', nipype default value: rbf)
+                Basis function type. "rbf" to use radial basis functions "sh" to use
+                spherical harmonics
+                flag: -basistype %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        order: (an integer (int or long))
+                Specific to sh. Maximum order of the spherical harmonic series.
+                Default is 4.
+                flag: -order %d
+        out_file: (a file name)
+                flag: > %s, position: -1
+        rbfpointset: (an integer (int or long))
+                Specific to rbf. Sets the number of radial basis functions to use.
+                The value specified must be present in the Pointsets directory. The
+                default value is 246.
+                flag: -rbfpointset %d
+        rbfsigma: (a float)
+                Specific to rbf. Sets the width of the interpolating basis
+                functions. The default value is 0.2618 (15 degrees).
+                flag: -rbfsigma %f
+        smoothingsigma: (a float)
+                Specific to rbf. Sets the width of the smoothing basis functions.
+                The default value is 0.1309 (7.5 degrees).
+                flag: -smoothingsigma %f
+
+Outputs::
+
+        qmat: (an existing file name)
+                Q-Ball reconstruction matrix
+
+.. _nipype.interfaces.camino.odf.SFPeaks:
+
+
+.. index:: SFPeaks
+
+SFPeaks
+-------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/camino/odf.py#L336>`__
+
+Wraps command **sfpeaks**
+
+Finds the peaks of spherical functions.
+
+This utility reads coefficients of the spherical functions and
+outputs a list of peak directions of the function. It computes the
+value of the function at each of a set of sample points. Then it
+finds local maxima by finding all points at which the function is
+larger than for any other point within a fixed search radius (the
+default  is 0.4). The utility then uses Powell's algorithm to
+optimize the position of each local maximum. Finally the utility
+removes duplicates and tiny peaks with function value smaller than
+some threshold, which is the mean of the function plus some number
+of standard deviations. By default the program checks for con-
+sistency with a second set of starting points, but skips the
+optimization step. To speed up execution, you can turn off the con-
+sistency check by setting the noconsistencycheck flag to True.
+
+By  default, the utility constructs a set of sample points by
+randomly rotating a unit icosahedron repeatedly (the default is 1000
+times, which produces a set of 6000 points) and concatenating the
+lists of vertices. The 'pointset = <index>' attribute can tell the
+utility to use an evenly distributed set of points (index 0 gives
+1082 points, 1 gives 1922, 2 gives 4322, 3 gives 8672, 4 gives 15872,
+5 gives 32762, 6 gives 72032), which is quicker, because you can get
+away with fewer points. We estimate that you can use a factor of 2.5
+less evenly distributed points than randomly distributed points and
+still expect similar performance levels.
+
+The output for each voxel is:
+- exitcode (inherited from the input data).
+- ln(A(0))
+- number of peaks found.
+- flag for consistency with a repeated run (number of directions is
+  the same and the directions are the same to within a threshold.)
+- mean(f).
+- std(f).
+- direction 1 (x, y, z, f, H00, H01, H10, H11).
+- direction 2 (x, y, z, f, H00, H01, H10, H11).
+- direction 3 (x, y, z, f, H00, H01, H10, H11).
+
+H is the Hessian of f at the peak. It is the matrix:
+[d^2f/ds^2 d^2f/dsdt]
+[d^2f/dtds d^2f/dt^2]
+= [H00 H01]
+  [H10 H11]
+where s and t are orthogonal coordinates local to the peak.
+
+By default the maximum number of peak directions output in each
+voxel is three. If less than three directions are found, zeros are
+output for later directions. The peaks are ordered by the value of
+the function at the peak. If more than the maximum number of
+directions are found only the strongest ones are output. The maximum
+number can be changed setting the 'numpds' attribute.
+
+The utility can read various kinds of spherical function, but must
+be told what kind of function is input using the 'inputmodel'
+attribute. The description of the 'inputmodel' attribute lists
+additional information required by SFPeaks for each input model.
+
+
+Example
+~~~~~~~~~
+First run QBallMX and create a linear transform matrix using
+Spherical Harmonics (sh).
+
+>>> import nipype.interfaces.camino as cam
+>>> sf_peaks = cam.SFPeaks()
+>>> sf_peaks.inputs.in_file = 'A_recon_params.Bdouble'
+>>> sf_peaks.inputs.inputmodel = 'sh'
+>>> sf_peaks.inputs.order = 4
+>>> sf_peaks.inputs.density = 100
+>>> sf_peaks.inputs.searchradius = 1.0
+>>> sf_peaks.run()          # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                Voxel-order data of spherical functions
+                flag: -inputfile %s
+        inputmodel: ('sh' or 'maxent' or 'rbf')
+                Type of functions input via in_file. Currently supported options
+                are: sh - Spherical harmonic series. Specify the maximum order of
+                the SH series with the "order" attribute if different from the
+                default of 4. maxent - Maximum entropy representations output by
+                MESD. The reconstruction directions input to MESD must be specified.
+                By default this is the same set of gradient directions (excluding
+                zero gradients) in the scheme file, so specify the "schemefile"
+                attribute unless the "mepointset" attribute was set in MESD. rbf -
+                Sums of radial basis functions. Specify the pointset with the
+                attribute "rbfpointset" if different from the default. See QBallMX.
+                flag: -inputmodel %s
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        density: (an integer (int or long))
+                The number of randomly rotated icosahedra to use in constructing the
+                set of points for random sampling in the peak finding algorithm.
+                Default is 1000, which works well for very spiky maxent functions.
+                For other types of function, it is reasonable to set the density
+                much lower and increase the search radius slightly, which speeds up
+                the computation.
+                flag: -density %d
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        mepointset: (an integer (int or long))
+                Use a set of directions other than those in the scheme file for the
+                deconvolution kernel. The number refers to the number of directions
+                on the unit sphere. For example, "mepointset = 54" uses the
+                directions in "camino/PointSets/Elec054.txt" Use this option only if
+                you told MESD to use a custom set of directions with the same
+                option. Otherwise, specify the scheme file with the "schemefile"
+                attribute.
+                flag: -mepointset %d
+        noconsistencycheck: (a boolean)
+                Turns off the consistency check. The output shows all consistencies
+                as true.
+                flag: -noconsistencycheck
+        numpds: (an integer (int or long))
+                The largest number of peak directions to output in each voxel.
+                flag: -numpds %d
+        order: (an integer (int or long))
+                Specific to sh. Maximum order of the spherical harmonic series.
+                flag: -order %d
+        out_file: (a file name)
+                flag: > %s, position: -1
+        pdthresh: (a float)
+                Base threshold on the actual peak direction strength divided by the
+                mean of the function. The default is 1.0 (the peak must be equal or
+                greater than the mean).
+                flag: -pdthresh %f
+        pointset: (an integer (int or long))
+                To sample using an evenly distributed set of points instead. The
+                integer can be 0, 1, ..., 7. Index 0 gives 1082 points, 1 gives
+                1922, 2 gives 3002, 3 gives 4322, 4 gives 5882, 5 gives 8672, 6
+                gives 12002, 7 gives 15872.
+                flag: -pointset %d
+        rbfpointset: (an integer (int or long))
+                Specific to rbf. Sets the number of radial basis functions to use.
+                The value specified must be present in the Pointsets directory. The
+                default value is 246.
+                flag: -rbfpointset %d
+        scheme_file: (an existing file name)
+                Specific to maxent. Specifies the scheme file.
+                flag: %s
+        searchradius: (a float)
+                The search radius in the peak finding algorithm. The default is 0.4
+                (cf. "density")
+                flag: -searchradius %f
+        stdsfrommean: (a float)
+                This is the number of standard deviations of the function to be
+                added to the "pdthresh" attribute in the peak directions pruning.
+                flag: -stdsfrommean %f
+
+Outputs::
+
+        peaks: (an existing file name)
+                Peaks of the spherical functions.

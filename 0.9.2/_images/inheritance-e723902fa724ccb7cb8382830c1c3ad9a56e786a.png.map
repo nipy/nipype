@@ -1,0 +1,7 @@
+<map id="inheritancefc668476a8" name="inheritancefc668476a8">
+<area shape="poly" id="node1" href="#nipype.pipeline.engine.JoinNode" title="Wraps interface objects that join inputs into a list." alt="" coords="571,35,567,26,556,17,540,10,519,6,496,5,473,6,452,10,435,17,425,26,421,35,425,44,435,53,452,60,473,64,496,65,519,64,540,60,556,53,567,44"/>
+<area shape="poly" id="node2" href="#nipype.pipeline.engine.Node" title="Wraps interface objects for use in pipeline" alt="" coords="365,76,362,66,353,58,340,51,324,47,306,45,287,47,271,51,258,58,250,66,247,76,250,85,258,94,271,100,287,105,306,106,324,105,340,100,353,94,362,85"/>
+<area shape="poly" id="node3" href="#nipype.pipeline.engine.MapNode" title="Wraps interface objects that need to be iterated on a list of inputs." alt="" coords="571,116,568,107,557,98,540,92,519,87,496,86,472,87,451,92,434,98,424,107,420,116,424,126,434,134,451,141,472,145,496,147,519,145,540,141,557,134,568,126"/>
+<area shape="poly" id="node4" href="#nipype.pipeline.engine.WorkflowBase" title="Defines common attributes and functions for workflows and nodes." alt="" coords="191,116,187,107,173,98,153,92,127,87,98,86,69,87,43,92,22,98,9,107,5,116,9,126,22,134,43,141,69,145,98,147,127,145,153,141,173,134,187,126"/>
+<area shape="poly" id="node5" href="#nipype.pipeline.engine.Workflow" title="Controls the setup and execution of a pipeline of processes." alt="" coords="379,157,376,147,365,139,349,132,328,128,306,126,283,128,262,132,246,139,236,147,232,157,236,166,246,175,262,182,283,186,306,187,328,186,349,182,365,175,376,166"/>
+</map>

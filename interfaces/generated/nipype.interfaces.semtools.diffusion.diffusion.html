@@ -1,0 +1,720 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.11.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.semtools.diffusion.diffusion</a><ul>
+<li><a class="reference internal" href="#dwiconvert">DWIConvert</a></li>
+<li><a class="reference internal" href="#dtiaverage">dtiaverage</a></li>
+<li><a class="reference internal" href="#dtiestim">dtiestim</a></li>
+<li><a class="reference internal" href="#dtiprocess">dtiprocess</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-semtools-diffusion-diffusion">
+<h1>interfaces.semtools.diffusion.diffusion<a class="headerlink" href="#interfaces-semtools-diffusion-diffusion" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-semtools-diffusion-diffusion-dwiconvert"></span><div class="section" id="dwiconvert">
+<span id="index-0"></span><h2>DWIConvert<a class="headerlink" href="#dwiconvert" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/diffusion/diffusion.py#L254">Link to code</a></p>
+<p>Wraps command ** DWIConvert **</p>
+<p>title: DWIConverter</p>
+<p>category: Diffusion.Diffusion Data Conversion</p>
+<p>description: Converts diffusion weighted MR images in dicom series into Nrrd format for analysis in Slicer. This program has been tested on only a limited subset of DTI dicom formats available from Siemens, GE, and Phillips scanners. Work in progress to support dicom multi-frame data. The program parses dicom header to extract necessary information about measurement frame, diffusion weighting directions, b-values, etc, and write out a nrrd image. For non-diffusion weighted dicom images, it loads in an entire dicom series and writes out a single dicom volume in a .nhdr/.raw pair.</p>
+<p>version: Version 1.0</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DWIConverter">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DWIConverter</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Vince Magnotta (UIowa), Hans Johnson (UIowa), Joy Matsui (UIowa), Kent Williams (UIowa), Mark Scully (Uiowa), Xiaodong Tao (GE)</p>
+<p>acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.  Additional support for DTI data produced on Philips scanners was contributed by Vincent Magnotta and Hans Johnson at the University of Iowa.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+conversionMode: (&#39;DicomToNrrd&#39; or &#39;DicomToFSL&#39; or &#39;NrrdToFSL&#39; or
+         &#39;FSLToNrrd&#39;)
+        Determine which conversion to perform. DicomToNrrd (default):
+        Convert DICOM series to NRRD DicomToFSL: Convert DICOM series to
+        NIfTI File + gradient/bvalue text files NrrdToFSL: Convert DWI NRRD
+        file to NIfTI File + gradient/bvalue text files FSLToNrrd: Convert
+        NIfTI File + gradient/bvalue text files to NRRD file.
+        flag: --conversionMode %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fMRI: (a boolean)
+        Output a NRRD file, but without gradients
+        flag: --fMRI
+fslNIFTIFile: (an existing file name)
+        4D NIfTI file containing gradient volumes
+        flag: --fslNIFTIFile %s
+gradientVectorFile: (a boolean or a file name)
+        Text file giving gradient vectors
+        flag: --gradientVectorFile %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputBValues: (an existing file name)
+        The B Values are stored in FSL .bval text file format
+        flag: --inputBValues %s
+inputBVectors: (an existing file name)
+        The Gradient Vectors are stored in FSL .bvec text file format
+        flag: --inputBVectors %s
+inputDicomDirectory: (an existing directory name)
+        Directory holding Dicom series
+        flag: --inputDicomDirectory %s
+inputVolume: (an existing file name)
+        Input DWI volume -- not used for DicomToNrrd mode.
+        flag: --inputVolume %s
+outputBValues: (a boolean or a file name)
+        The B Values are stored in FSL .bval text file format (defaults to
+        &lt;outputVolume&gt;.bval)
+        flag: --outputBValues %s
+outputBVectors: (a boolean or a file name)
+        The Gradient Vectors are stored in FSL .bvec text file format
+        (defaults to &lt;outputVolume&gt;.bvec)
+        flag: --outputBVectors %s
+outputDirectory: (a boolean or a directory name)
+        Directory holding the output NRRD file
+        flag: --outputDirectory %s
+outputVolume: (a boolean or a file name)
+        Output filename (.nhdr or .nrrd)
+        flag: --outputVolume %s
+smallGradientThreshold: (a float)
+        If a gradient magnitude is greater than 0 and less than
+        smallGradientThreshold, then DWIConvert will display an error
+        message and quit, unless the useBMatrixGradientDirections option is
+        set.
+        flag: --smallGradientThreshold %f
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+useBMatrixGradientDirections: (a boolean)
+        Fill the nhdr header with the gradient directions and bvalues
+        computed out of the BMatrix. Only changes behavior for Siemens data.
+        In some cases the standard public gradients are not properly
+        computed. The gradients can emperically computed from the private
+        BMatrix fields. In some cases the private BMatrix is consistent with
+        the public grandients, but not in all cases, when it exists BMatrix
+        is usually most robust.
+        flag: --useBMatrixGradientDirections
+useIdentityMeaseurementFrame: (a boolean)
+        Adjust all the gradients so that the measurement frame is an
+        identity matrix.
+        flag: --useIdentityMeaseurementFrame
+writeProtocolGradientsFile: (a boolean)
+        Write the protocol gradients to a file suffixed by &#39;.txt&#39; as they
+        were specified in the procol by multiplying each diffusion gradient
+        direction by the measurement frame. This file is for debugging
+        purposes only, the format is not fixed, and will likely change as
+        debugging of new dicom formats is necessary.
+        flag: --writeProtocolGradientsFile
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>gradientVectorFile: (an existing file name)
+        Text file giving gradient vectors
+outputBValues: (an existing file name)
+        The B Values are stored in FSL .bval text file format (defaults to
+        &lt;outputVolume&gt;.bval)
+outputBVectors: (an existing file name)
+        The Gradient Vectors are stored in FSL .bvec text file format
+        (defaults to &lt;outputVolume&gt;.bvec)
+outputDirectory: (an existing directory name)
+        Directory holding the output NRRD file
+outputVolume: (an existing file name)
+        Output filename (.nhdr or .nrrd)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-diffusion-diffusion-dtiaverage"></span></div>
+<div class="section" id="dtiaverage">
+<span id="index-1"></span><h2>dtiaverage<a class="headerlink" href="#dtiaverage" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/diffusion/diffusion.py#L20">Link to code</a></p>
+<p>Wraps command ** dtiaverage **</p>
+<p>title: DTIAverage (DTIProcess)</p>
+<p>category: Diffusion.Diffusion Tensor Images.CommandLineOnly</p>
+<dl class="docutils">
+<dt>description: dtiaverage is a program that allows to compute the average of an arbitrary number of tensor fields (listed after the &#8211;inputs option) This program is used in our pipeline as the last step of the atlas building processing. When all the tensor fields have been deformed in the same space, to create the average tensor field (&#8211;tensor_output) we use dtiaverage.</dt>
+<dd>Several average method can be used (specified by the &#8211;method option): euclidian, log-euclidian and pga. The default being euclidian.</dd>
+</dl>
+<p>version: 1.0.0</p>
+<p>documentation-url: <a class="reference external" href="http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess">http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess</a></p>
+<dl class="docutils">
+<dt>license: Copyright (c)  Casey Goodlett. All rights reserved.</dt>
+<dd>See <a class="reference external" href="http://www.ia.unc.edu/dev/Copyright.htm">http://www.ia.unc.edu/dev/Copyright.htm</a> for details.
+This software is distributed WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.  See the above copyright notices for more information.</dd>
+</dl>
+<p>contributor: Casey Goodlett</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+DTI_double: (a boolean)
+        Tensor components are saved as doubles (cannot be visualized in
+        Slicer)
+        flag: --DTI_double
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputs: (a list of items which are an existing file name)
+        List of all the tensor fields to be averaged
+        flag: --inputs %s...
+tensor_output: (a boolean or a file name)
+        Averaged tensor volume
+        flag: --tensor_output %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+verbose: (a boolean)
+        produce verbose output
+        flag: --verbose
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>tensor_output: (an existing file name)
+        Averaged tensor volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-diffusion-diffusion-dtiestim"></span></div>
+<div class="section" id="dtiestim">
+<span id="index-2"></span><h2>dtiestim<a class="headerlink" href="#dtiestim" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/diffusion/diffusion.py#L81">Link to code</a></p>
+<p>Wraps command ** dtiestim **</p>
+<p>title: DTIEstim (DTIProcess)</p>
+<p>category: Diffusion.Diffusion Weighted Images</p>
+<p>description: dtiestim is a tool that takes in a set of DWIs (with &#8211;dwi_image option) in nrrd format and estimates a tensor field out of it. The output tensor file name is specified with the &#8211;tensor_output option
+There are several methods to estimate the tensors which you can specify with the option &#8211;method lls|wls|nls|ml . Here is a short description of the different methods:</p>
+<dl class="docutils">
+<dt>lls</dt>
+<dd>Linear least squares. Standard estimation technique that recovers the tensor parameters by multiplying the log of the normalized signal intensities by the pseudo-inverse of the gradient matrix. Default option.</dd>
+<dt>wls</dt>
+<dd>Weighted least squares. This method is similar to the linear least squares method except that the gradient matrix is weighted by the original lls estimate. (See Salvador, R., Pena, A., Menon, D. K., Carpenter, T. A., Pickard, J. D., and Bullmore, E. T. Formal characterization and extension of the linearized diffusion tensor model. Human Brain Mapping 24, 2 (Feb. 2005), 144-155. for more information on this method). This method is recommended for most applications. The weight for each iteration can be specified with the &#8211;weight_iterations.  It is not currently the default due to occasional matrix singularities.</dd>
+<dt>nls</dt>
+<dd>Non-linear least squares. This method does not take the log of the signal and requires an optimization based on levenberg-marquadt to optimize the parameters of the signal. The lls estimate is used as an initialization. For this method the step size can be specified with the &#8211;step option.</dd>
+<dt>ml</dt>
+<dd>Maximum likelihood estimation. This method is experimental and is not currently recommended. For this ml method the sigma can be specified with the option &#8211;sigma and the step size can be specified with the &#8211;step option.</dd>
+</dl>
+<p>You can set a threshold (&#8211;threshold) to have the tensor estimated to only a subset of voxels. All the baseline voxel value higher than the threshold define the voxels where the tensors are computed. If not specified the threshold is calculated using an OTSU threshold on the baseline image.The masked generated by the -t option or by the otsu value can be saved with the &#8211;B0_mask_output option.</p>
+<p>dtiestim also can extract a few scalar images out of the DWI set of images:</p>
+<blockquote>
+<div><ul class="simple">
+<li>the average baseline image (&#8211;B0) which is the average of all the B0s.</li>
+<li>the IDWI (&#8211;idwi)which is the geometric mean of the diffusion images.</li>
+</ul>
+</div></blockquote>
+<p>You can also load a mask if you want to compute the tensors only where the voxels are non-zero (&#8211;brain_mask) or a negative mask and the tensors will be estimated where the negative mask has zero values (&#8211;bad_region_mask)</p>
+<p>version: 1.2.0</p>
+<p>documentation-url: <a class="reference external" href="http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess">http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess</a></p>
+<dl class="docutils">
+<dt>license: Copyright (c)  Casey Goodlett. All rights reserved.</dt>
+<dd><dl class="first last docutils">
+<dt>See <a class="reference external" href="http://www.ia.unc.edu/dev/Copyright.htm">http://www.ia.unc.edu/dev/Copyright.htm</a> for details.</dt>
+<dd>This software is distributed WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.  See the above copyright notices for more information.</dd>
+</dl>
+</dd>
+</dl>
+<p>contributor: Casey Goodlett, Francois Budin</p>
+<p>acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); (1=University of Iowa Department of Psychiatry, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering) provided conversions to make DTIProcess compatible with Slicer execution, and simplified the stand-alone build requirements by removing the dependancies on boost and a fortran compiler.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+B0: (a boolean or a file name)
+        Baseline image, average of all baseline images
+        flag: --B0 %s
+B0_mask_output: (a boolean or a file name)
+        B0 mask used for the estimation. B0 thresholded either with the -t
+        option value or the automatic OTSU value
+        flag: --B0_mask_output %s
+DTI_double: (a boolean)
+        Tensor components are saved as doubles (cannot be visualized in
+        Slicer)
+        flag: --DTI_double
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bad_region_mask: (an existing file name)
+        Bad region mask. Image where for every voxel &gt; 0 the tensors are not
+        estimated
+        flag: --bad_region_mask %s
+brain_mask: (an existing file name)
+        Brain mask. Image where for every voxel == 0 the tensors are not
+        estimated. Be aware that in addition a threshold based masking will
+        be performed by default. If such an additional threshold masking is
+        NOT desired, then use option -t 0.
+        flag: --brain_mask %s
+correction: (&#39;none&#39; or &#39;zero&#39; or &#39;abs&#39; or &#39;nearest&#39;)
+        Correct the tensors if computed tensor is not semi-definite positive
+        flag: --correction %s
+defaultTensor: (a list of items which are a float)
+        Default tensor used if estimated tensor is below a given threshold
+        flag: --defaultTensor %s
+dwi_image: (an existing file name)
+        DWI image volume (required)
+        flag: --dwi_image %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+idwi: (a boolean or a file name)
+        idwi output image. Image with isotropic diffusion-weighted
+        information = geometric mean of diffusion images
+        flag: --idwi %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+method: (&#39;lls&#39; or &#39;wls&#39; or &#39;nls&#39; or &#39;ml&#39;)
+        Esitmation method (lls:linear least squares, wls:weighted least
+        squares, nls:non-linear least squares, ml:maximum likelihood)
+        flag: --method %s
+shiftNeg: (a boolean)
+        Shift eigenvalues so all are positive (accounts for bad tensors
+        related to noise or acquisition error). This is the same option as
+        the one available in DWIToDTIEstimation in Slicer (but instead of
+        just adding the minimum eigenvalue to all the eigenvalues if it is
+        smaller than 0, we use a coefficient to have stictly positive
+        eigenvalues
+        flag: --shiftNeg
+shiftNegCoeff: (a float)
+        Shift eigenvalues so all are positive (accounts for bad tensors
+        related to noise or acquisition error). Instead of just adding the
+        minimum eigenvalue to all the eigenvalues if it is smaller than 0,
+        we use a coefficient to have stictly positive eigenvalues.
+        Coefficient must be between 1.0 and 1.001 (included).
+        flag: --shiftNegCoeff %f
+sigma: (a float)
+        flag: --sigma %f
+step: (a float)
+        Gradient descent step size (for nls and ml methods)
+        flag: --step %f
+tensor_output: (a boolean or a file name)
+        Tensor OutputImage
+        flag: --tensor_output %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+threshold: (an integer (int or long))
+        Baseline threshold for estimation. If not specified calculated using
+        an OTSU threshold on the baseline image.
+        flag: --threshold %d
+verbose: (a boolean)
+        produce verbose output
+        flag: --verbose
+weight_iterations: (an integer (int or long))
+        Number of iterations to recaluate weightings from tensor estimate
+        flag: --weight_iterations %d
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>B0: (an existing file name)
+        Baseline image, average of all baseline images
+B0_mask_output: (an existing file name)
+        B0 mask used for the estimation. B0 thresholded either with the -t
+        option value or the automatic OTSU value
+idwi: (an existing file name)
+        idwi output image. Image with isotropic diffusion-weighted
+        information = geometric mean of diffusion images
+tensor_output: (an existing file name)
+        Tensor OutputImage
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-diffusion-diffusion-dtiprocess"></span></div>
+<div class="section" id="dtiprocess">
+<span id="index-3"></span><h2>dtiprocess<a class="headerlink" href="#dtiprocess" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/diffusion/diffusion.py#L182">Link to code</a></p>
+<p>Wraps command ** dtiprocess **</p>
+<p>title: DTIProcess (DTIProcess)</p>
+<p>category: Diffusion.Diffusion Tensor Images</p>
+<p>description: dtiprocess is a tool that handles tensor fields. It takes as an input a tensor field in nrrd format.
+It can generate diffusion scalar properties out of the tensor field such as : FA (&#8211;fa_output), Gradient FA image (&#8211;fa_gradient_output), color FA (&#8211;color_fa_output), MD (&#8211;md_output), Frobenius norm (&#8211;frobenius_norm_output), lbd1, lbd2, lbd3 (&#8211;lambda{1,2,3}_output), binary map of voxel where if any of the eigenvalue is negative, the voxel is set to 1 (&#8211;negative_eigenvector_output)</p>
+<p>It also creates 4D images out of the tensor field such as: Highest eigenvector map (highest eigenvector at each voxel) (&#8211;principal_eigenvector_output)</p>
+<p>Masking capabilities: For any of the processing done with dtiprocess, it&#8217;s possible to apply it on a masked region of the tensor field. You need to use the &#8211;mask option for any of the option to be applied on that tensor field sub-region only. If you want to save the masked tensor field use the option &#8211;outmask and specify the new masked tensor field file name.
+dtiprocess also allows a range of transformations on the tensor fields. The transformed tensor field file name is specified with the option &#8211;deformation_output. There are 3 resampling interpolation methods specified with the tag &#8211;interpolation followed by the type to use (nearestneighbor, linear, cubic) Then you have several transformations possible to apply:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Affine transformations using as an input</li>
+<li>itk affine transformation file (based on the itkAffineTransform class)</li>
+<li>Affine transformations using rview (details and download at <a class="reference external" href="http://www.doc.ic.ac.uk/~dr/software/">http://www.doc.ic.ac.uk/~dr/software/</a>). There are 2 versions of rview both creating transformation files called dof files. The old version of rview outputs text files containing the transformation parameters. It can be read in with the &#8211;dof_file option. The new version outputs binary dof files. These dof files can be transformed into human readable file with the dof2mat tool which is part of the rview package. So you need to save the output of dof2mat into a text file which can then be used with the &#8211; newdof_file option. Usage example: dof2mat mynewdoffile.dof &gt;&gt; mynewdoffile.txt       dtiprocess &#8211;dti_image mytensorfield.nhdr &#8211;newdof_file mynewdoffile.txt &#8211;rot_output myaffinetensorfield.nhdr</li>
+</ul>
+</div></blockquote>
+<p>Non linear transformations as an input: The default transformation file type is d-field (displacement field) in nrrd format. The option to use is &#8211;forward with the name of the file. If the transformation file is a h-field you have to add the option &#8211;hField.</p>
+<p>version: 1.0.1</p>
+<p>documentation-url: <a class="reference external" href="http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess">http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/DTIProcess</a></p>
+<dl class="docutils">
+<dt>license: Copyright (c)  Casey Goodlett. All rights reserved.</dt>
+<dd><dl class="first last docutils">
+<dt>See <a class="reference external" href="http://www.ia.unc.edu/dev/Copyright.htm">http://www.ia.unc.edu/dev/Copyright.htm</a> for details.</dt>
+<dd>This software is distributed WITHOUT ANY WARRANTY; without even
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+PURPOSE.  See the above copyright notices for more information.</dd>
+</dl>
+</dd>
+</dl>
+<p>contributor: Casey Goodlett</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+DTI_double: (a boolean)
+        Tensor components are saved as doubles (cannot be visualized in
+        Slicer)
+        flag: --DTI_double
+RD_output: (a boolean or a file name)
+        RD (Radial Diffusivity 1/2*(lambda2+lambda3)) output
+        flag: --RD_output %s
+affineitk_file: (an existing file name)
+        Transformation file for affine transformation. ITK format.
+        flag: --affineitk_file %s
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+color_fa_output: (a boolean or a file name)
+        Color Fractional Anisotropy output file
+        flag: --color_fa_output %s
+correction: (&#39;none&#39; or &#39;zero&#39; or &#39;abs&#39; or &#39;nearest&#39;)
+        Correct the tensors if computed tensor is not semi-definite positive
+        flag: --correction %s
+deformation_output: (a boolean or a file name)
+        Warped tensor field based on a deformation field. This option
+        requires the --forward,-F transformation to be specified.
+        flag: --deformation_output %s
+dof_file: (an existing file name)
+        Transformation file for affine transformation. This can be ITK
+        format (or the outdated RView).
+        flag: --dof_file %s
+dti_image: (an existing file name)
+        DTI tensor volume
+        flag: --dti_image %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fa_gradient_output: (a boolean or a file name)
+        Fractional Anisotropy Gradient output file
+        flag: --fa_gradient_output %s
+fa_gradmag_output: (a boolean or a file name)
+        Fractional Anisotropy Gradient Magnitude output file
+        flag: --fa_gradmag_output %s
+fa_output: (a boolean or a file name)
+        Fractional Anisotropy output file
+        flag: --fa_output %s
+forward: (an existing file name)
+        Forward transformation. Assumed to be a deformation field in world
+        coordinates, unless the --h-field option is specified.
+        flag: --forward %s
+frobenius_norm_output: (a boolean or a file name)
+        Frobenius Norm Output
+        flag: --frobenius_norm_output %s
+hField: (a boolean)
+        forward and inverse transformations are h-fields instead of
+        displacement fields
+        flag: --hField
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+interpolation: (&#39;nearestneighbor&#39; or &#39;linear&#39; or &#39;cubic&#39;)
+        Interpolation type (nearestneighbor, linear, cubic)
+        flag: --interpolation %s
+lambda1_output: (a boolean or a file name)
+        Axial Diffusivity - Lambda 1 (largest eigenvalue) output
+        flag: --lambda1_output %s
+lambda2_output: (a boolean or a file name)
+        Lambda 2 (middle eigenvalue) output
+        flag: --lambda2_output %s
+lambda3_output: (a boolean or a file name)
+        Lambda 3 (smallest eigenvalue) output
+        flag: --lambda3_output %s
+mask: (an existing file name)
+        Mask tensors. Specify --outmask if you want to save the masked
+        tensor field, otherwise the mask is applied just for the current
+        processing
+        flag: --mask %s
+md_output: (a boolean or a file name)
+        Mean Diffusivity output file
+        flag: --md_output %s
+negative_eigenvector_output: (a boolean or a file name)
+        Negative Eigenvectors Output: create a binary image where if any of
+        the eigen value is below zero, the voxel is set to 1, otherwise 0.
+        flag: --negative_eigenvector_output %s
+newdof_file: (an existing file name)
+        Transformation file for affine transformation. RView NEW format.
+        (txt file output of dof2mat)
+        flag: --newdof_file %s
+outmask: (a boolean or a file name)
+        Name of the masked tensor field.
+        flag: --outmask %s
+principal_eigenvector_output: (a boolean or a file name)
+        Principal Eigenvectors Output
+        flag: --principal_eigenvector_output %s
+reorientation: (&#39;fs&#39; or &#39;ppd&#39;)
+        Reorientation type (fs, ppd)
+        flag: --reorientation %s
+rot_output: (a boolean or a file name)
+        Rotated tensor output file. Must also specify the dof file.
+        flag: --rot_output %s
+scalar_float: (a boolean)
+        Write scalar [FA,MD] as unscaled float (with their actual values,
+        otherwise scaled by 10 000). Also causes FA to be unscaled [0..1].
+        flag: --scalar_float
+sigma: (a float)
+        Scale of gradients
+        flag: --sigma %f
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+verbose: (a boolean)
+        produce verbose output
+        flag: --verbose
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>RD_output: (an existing file name)
+        RD (Radial Diffusivity 1/2*(lambda2+lambda3)) output
+color_fa_output: (an existing file name)
+        Color Fractional Anisotropy output file
+deformation_output: (an existing file name)
+        Warped tensor field based on a deformation field. This option
+        requires the --forward,-F transformation to be specified.
+fa_gradient_output: (an existing file name)
+        Fractional Anisotropy Gradient output file
+fa_gradmag_output: (an existing file name)
+        Fractional Anisotropy Gradient Magnitude output file
+fa_output: (an existing file name)
+        Fractional Anisotropy output file
+frobenius_norm_output: (an existing file name)
+        Frobenius Norm Output
+lambda1_output: (an existing file name)
+        Axial Diffusivity - Lambda 1 (largest eigenvalue) output
+lambda2_output: (an existing file name)
+        Lambda 2 (middle eigenvalue) output
+lambda3_output: (an existing file name)
+        Lambda 3 (smallest eigenvalue) output
+md_output: (an existing file name)
+        Mean Diffusivity output file
+negative_eigenvector_output: (an existing file name)
+        Negative Eigenvectors Output: create a binary image where if any of
+        the eigen value is below zero, the voxel is set to 1, otherwise 0.
+outmask: (an existing file name)
+        Name of the masked tensor field.
+principal_eigenvector_output: (an existing file name)
+        Principal Eigenvectors Output
+rot_output: (an existing file name)
+        Rotated tensor output file. Must also specify the dof file.
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

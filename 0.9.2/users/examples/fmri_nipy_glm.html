@@ -1,0 +1,450 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">fMRI: NiPy GLM, SPM</a><ul>
+<li><a class="reference internal" href="#preliminaries">Preliminaries</a></li>
+<li><a class="reference internal" href="#preprocessing-pipeline-nodes">Preprocessing pipeline nodes</a></li>
+<li><a class="reference internal" href="#set-up-analysis-components">Set up analysis components</a></li>
+<li><a class="reference internal" href="#setup-the-pipeline">Setup the pipeline</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="fmri-nipy-glm-spm">
+<span id="example-fmri-nipy-glm"></span><h1>fMRI: NiPy GLM, SPM<a class="headerlink" href="#fmri-nipy-glm-spm" title="Permalink to this headline">¶</a></h1>
+<p>The fmri_nipy_glm.py integrates several interfaces to perform a first level
+analysis on a two-subject data set. It is very similar to the spm_tutorial with
+the difference of using nipy for fitting GLM model and estimating contrasts.
+The tutorial can
+be found in the examples folder. Run the tutorial from inside the
+nipype tutorial directory:</p>
+<blockquote>
+<div>python fmri_nipy_glm.py</div></blockquote>
+<dl class="docutils">
+<dt>::</dt>
+<dd>from nipype.interfaces.nipy.model import FitGLM, EstimateContrast
+from nipype.interfaces.nipy.preprocess import ComputeMask</dd>
+</dl>
+<p>Import necessary modules from nipype.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">as</span> <span class="nn">nio</span>           <span class="c"># Data i/o</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>          <span class="c"># spm</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.matlab</span> <span class="kn">as</span> <span class="nn">mlab</span>      <span class="c"># how to run matlab</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.utility</span> <span class="kn">as</span> <span class="nn">util</span>     <span class="c"># utility</span>
+<span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="kn">as</span> <span class="nn">pe</span>          <span class="c"># pypeline engine</span>
+<span class="kn">import</span> <span class="nn">nipype.algorithms.rapidart</span> <span class="kn">as</span> <span class="nn">ra</span>      <span class="c"># artifact detection</span>
+<span class="kn">import</span> <span class="nn">nipype.algorithms.modelgen</span> <span class="kn">as</span> <span class="nn">model</span>   <span class="c"># model specification</span>
+<span class="kn">import</span> <span class="nn">os</span>                                    <span class="c"># system functions</span>
+</pre></div>
+</div>
+<div class="section" id="preliminaries">
+<h2>Preliminaries<a class="headerlink" href="#preliminaries" title="Permalink to this headline">¶</a></h2>
+<p>Set any package specific configuration. The output file format
+for FSL routines is being set to uncompressed NIFTI and a specific
+version of matlab is being used. The uncompressed format is required
+because SPM does not handle compressed NIFTI.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Set the way matlab should be called</span>
+<span class="n">mlab</span><span class="o">.</span><span class="n">MatlabCommand</span><span class="o">.</span><span class="n">set_default_matlab_cmd</span><span class="p">(</span><span class="s">&quot;matlab -nodesktop -nosplash&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The nipype tutorial contains data for two subjects.  Subject data
+is in two subdirectories, <code class="docutils literal"><span class="pre">s1</span></code> and <code class="docutils literal"><span class="pre">s2</span></code>.  Each subject directory
+contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
+one anatomical volume named struct.nii.</p>
+<p>Below we set some variables to inform the <code class="docutils literal"><span class="pre">datasource</span></code> about the
+layout of our data.  We specify the location of the data, the subject
+sub-directories and a dictionary that maps each run to a mnemonic (or
+field) for the run type (<code class="docutils literal"><span class="pre">struct</span></code> or <code class="docutils literal"><span class="pre">func</span></code>).  These fields become
+the output fields of the <code class="docutils literal"><span class="pre">datasource</span></code> node in the pipeline.</p>
+<p>In the example below, run &#8216;f3&#8217; is of type &#8216;func&#8217; and gets mapped to a
+nifti filename through a template &#8216;%s.nii&#8217;. So &#8216;f3&#8217; would become
+&#8216;f3.nii&#8217;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Specify the location of the data.</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;data&#39;</span><span class="p">)</span>
+<span class="c"># Specify the subject directories</span>
+<span class="n">subject_list</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;s1&#39;</span><span class="p">]</span>
+<span class="c"># Map field names to individual subject runs.</span>
+<span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;f3&#39;</span><span class="p">,</span><span class="s">&#39;f5&#39;</span><span class="p">,</span><span class="s">&#39;f7&#39;</span><span class="p">,</span><span class="s">&#39;f10&#39;</span><span class="p">]]],</span>
+            <span class="n">struct</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;struct&#39;</span><span class="p">]])</span>
+
+<span class="n">infosource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">]),</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s">&quot;infosource&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here we set up iteration over all the subjects. The following line
+is a particular example of the flexibility of the system.  The
+<code class="docutils literal"><span class="pre">datasource</span></code> attribute <code class="docutils literal"><span class="pre">iterables</span></code> tells the pipeline engine that
+it should repeat the analysis on each of the items in the
+<code class="docutils literal"><span class="pre">subject_list</span></code>. In the current example, the entire first level
+preprocessing and estimation will be repeated for each subject
+contained in subject_list.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">infosource</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subject_list</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="preprocessing-pipeline-nodes">
+<h2>Preprocessing pipeline nodes<a class="headerlink" href="#preprocessing-pipeline-nodes" title="Permalink to this headline">¶</a></h2>
+<p>Now we create a <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.DataSource</span></code> object and
+fill in the information from above about the layout of our data.  The
+<code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.NodeWrapper</span></code> module wraps the interface object
+and provides additional housekeeping and pipeline specific
+functionality.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">datasource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">],</span>
+                                               <span class="n">outfields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;func&#39;</span><span class="p">,</span> <span class="s">&#39;struct&#39;</span><span class="p">]),</span>
+                     <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;datasource&#39;</span><span class="p">)</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">data_dir</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">.nii&#39;</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span> <span class="o">=</span> <span class="n">info</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Realign</span></code> for motion correction
+and register all images to the mean image.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">realign</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Realign</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;realign&quot;</span><span class="p">)</span>
+<span class="n">realign</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">register_to_mean</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="n">compute_mask</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">ComputeMask</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;compute_mask&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.algorithms.rapidart</span></code> to determine which of the
+images in the functional series are outliers based on deviations in
+intensity or movement.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">art</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">ra</span><span class="o">.</span><span class="n">ArtifactDetect</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;art&quot;</span><span class="p">)</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_differences</span>      <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_norm</span>             <span class="o">=</span> <span class="bp">True</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">norm_threshold</span>       <span class="o">=</span> <span class="mi">1</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">zintensity_threshold</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_type</span>            <span class="o">=</span> <span class="s">&#39;file&#39;</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">parameter_source</span>     <span class="o">=</span> <span class="s">&#39;SPM&#39;</span>
+</pre></div>
+</div>
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Coregister</span></code> to perform a rigid
+body registration of the functional data to the structural data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">coregister</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Coregister</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;coregister&quot;</span><span class="p">)</span>
+<span class="n">coregister</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">jobtype</span> <span class="o">=</span> <span class="s">&#39;estimate&#39;</span>
+</pre></div>
+</div>
+<p>Smooth the functional data using
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Smooth</span></code>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">smooth</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Smooth</span><span class="p">(),</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;smooth&quot;</span><span class="p">)</span>
+<span class="n">smooth</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mi">4</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-up-analysis-components">
+<h2>Set up analysis components<a class="headerlink" href="#set-up-analysis-components" title="Permalink to this headline">¶</a></h2>
+<p>Here we create a function that returns subject-specific information
+about the experimental paradigm. This is used by the
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.SpecifyModel</span></code> to create the information
+necessary to generate an SPM design matrix. In this tutorial, the same
+paradigm was used for every participant.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">subjectinfo</span><span class="p">(</span><span class="n">subject_id</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="n">Bunch</span>
+    <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+    <span class="k">print</span> <span class="s">&quot;Subject ID: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span><span class="o">%</span><span class="nb">str</span><span class="p">(</span><span class="n">subject_id</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Task-Odd&#39;</span><span class="p">,</span><span class="s">&#39;Task-Even&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">onsets</span> <span class="o">=</span> <span class="p">[</span><span class="nb">range</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">240</span><span class="p">,</span><span class="mi">60</span><span class="p">),</span><span class="nb">range</span><span class="p">(</span><span class="mi">45</span><span class="p">,</span><span class="mi">240</span><span class="p">,</span><span class="mi">60</span><span class="p">)]</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">r</span><span class="p">,</span>
+                      <span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
+                            <span class="n">onsets</span><span class="o">=</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">onsets</span><span class="p">),</span>
+                            <span class="n">durations</span><span class="o">=</span><span class="p">[[</span><span class="mi">15</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">names</span><span class="p">],</span>
+                            <span class="n">amplitudes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">tmod</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">pmod</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">regressor_names</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">regressors</span><span class="o">=</span><span class="bp">None</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">output</span>
+</pre></div>
+</div>
+<p>Setup the contrast structure that needs to be evaluated. This is a
+list of lists. The inner list specifies the contrasts and has the
+following format - [Name,Stat,[list of condition names],[weights on
+those conditions]. The condition names must match the <cite>names</cite> listed
+in the <cite>subjectinfo</cite> function described above.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cont1</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Task&gt;Baseline&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Task-Odd&#39;</span><span class="p">,</span><span class="s">&#39;Task-Even&#39;</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">])</span>
+<span class="n">cont2</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Task-Odd&gt;Task-Even&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Task-Odd&#39;</span><span class="p">,</span><span class="s">&#39;Task-Even&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">contrasts</span> <span class="o">=</span> <span class="p">[</span><span class="n">cont1</span><span class="p">,</span><span class="n">cont2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Generate design information using
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.SpecifyModel</span></code>. nipy accepts only design specified
+in seconds so &#8220;output_units&#8221; has always have to be set to &#8220;secs&#8221;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">modelspec</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">SpecifySPMModel</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span> <span class="s">&quot;modelspec&quot;</span><span class="p">)</span>
+<span class="n">modelspec</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">concatenate_runs</span>        <span class="o">=</span> <span class="bp">True</span>
+<span class="n">modelspec</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_units</span>             <span class="o">=</span> <span class="s">&#39;secs&#39;</span>
+<span class="n">modelspec</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_units</span>            <span class="o">=</span> <span class="s">&#39;secs&#39;</span>
+<span class="n">modelspec</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">time_repetition</span>         <span class="o">=</span> <span class="mf">3.</span>
+<span class="n">modelspec</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">high_pass_filter_cutoff</span> <span class="o">=</span> <span class="mi">120</span>
+</pre></div>
+</div>
+<p>Fit the GLM model using nipy and ordinary least square method</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">model_estimate</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">FitGLM</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;model_estimate&quot;</span><span class="p">)</span>
+<span class="n">model_estimate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">TR</span> <span class="o">=</span> <span class="mf">3.</span>
+<span class="n">model_estimate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="s">&quot;spherical&quot;</span>
+<span class="n">model_estimate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="s">&quot;ols&quot;</span>
+</pre></div>
+</div>
+<p>Estimate the contrasts. The format of the contrasts definition is the same as
+for FSL and SPM</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">contrast_estimate</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">EstimateContrast</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;contrast_estimate&quot;</span><span class="p">)</span>
+<span class="n">cont1</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Task&gt;Baseline&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Task-Odd&#39;</span><span class="p">,</span><span class="s">&#39;Task-Even&#39;</span><span class="p">],[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">])</span>
+<span class="n">cont2</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Task-Odd&gt;Task-Even&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Task-Odd&#39;</span><span class="p">,</span><span class="s">&#39;Task-Even&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">contrast_estimate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">contrasts</span> <span class="o">=</span> <span class="p">[</span><span class="n">cont1</span><span class="p">,</span><span class="n">cont2</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setup-the-pipeline">
+<h2>Setup the pipeline<a class="headerlink" href="#setup-the-pipeline" title="Permalink to this headline">¶</a></h2>
+<p>The nodes created above do not describe the flow of data. They merely
+describe the parameters used for each function. In this section we
+setup the connections between the nodes such that appropriate outputs
+from nodes are piped into appropriate inputs of other nodes.</p>
+<p>Use the <code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Pipeline</span></code> to create a
+graph-based execution pipeline for first level analysis. The config
+options tells the pipeline engine to use <cite>workdir</cite> as the disk
+location to use when running the processes and keeping their
+outputs. The <cite>use_parameterized_dirs</cite> tells the engine to create
+sub-directories under <cite>workdir</cite> corresponding to the iterables in the
+pipeline. Thus for this pipeline there will be subject specific
+sub-directories.</p>
+<p>The <code class="docutils literal"><span class="pre">nipype.pipeline.engine.Pipeline.connect</span></code> function creates the
+links between the processes, i.e., how data should flow in and out of
+the processing nodes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l1pipeline</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;level1&quot;</span><span class="p">)</span>
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;nipy_tutorial/workingdir&#39;</span><span class="p">)</span>
+
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">infosource</span><span class="p">,</span> <span class="n">datasource</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">datasource</span><span class="p">,</span><span class="n">realign</span><span class="p">,[(</span><span class="s">&#39;func&#39;</span><span class="p">,</span><span class="s">&#39;in_files&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="n">compute_mask</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;mean_image&#39;</span><span class="p">,</span><span class="s">&#39;mean_volume&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="n">coregister</span><span class="p">,[(</span><span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="s">&#39;source&#39;</span><span class="p">),</span>
+                                        <span class="p">(</span><span class="s">&#39;realigned_files&#39;</span><span class="p">,</span><span class="s">&#39;apply_to_files&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">datasource</span><span class="p">,</span> <span class="n">coregister</span><span class="p">,[(</span><span class="s">&#39;struct&#39;</span><span class="p">,</span> <span class="s">&#39;target&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">coregister</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;coregistered_files&#39;</span><span class="p">,</span> <span class="s">&#39;in_files&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="n">modelspec</span><span class="p">,[(</span><span class="s">&#39;realignment_parameters&#39;</span><span class="p">,</span><span class="s">&#39;realignment_parameters&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">smooth</span><span class="p">,</span> <span class="n">modelspec</span><span class="p">,[(</span><span class="s">&#39;smoothed_files&#39;</span><span class="p">,</span><span class="s">&#39;functional_runs&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="n">art</span><span class="p">,[(</span><span class="s">&#39;realignment_parameters&#39;</span><span class="p">,</span><span class="s">&#39;realignment_parameters&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">coregister</span><span class="p">,</span> <span class="n">art</span><span class="p">,[(</span><span class="s">&#39;coregistered_files&#39;</span><span class="p">,</span><span class="s">&#39;realigned_files&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">compute_mask</span><span class="p">,</span><span class="n">art</span><span class="p">,[(</span><span class="s">&#39;brain_mask&#39;</span><span class="p">,</span><span class="s">&#39;mask_file&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="n">modelspec</span><span class="p">,[(</span><span class="s">&#39;outlier_files&#39;</span><span class="p">,</span><span class="s">&#39;outlier_files&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="n">modelspec</span><span class="p">,</span> <span class="p">[((</span><span class="s">&quot;subject_id&quot;</span><span class="p">,</span> <span class="n">subjectinfo</span><span class="p">),</span> <span class="s">&quot;subject_info&quot;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">modelspec</span><span class="p">,</span> <span class="n">model_estimate</span><span class="p">,[(</span><span class="s">&#39;session_info&#39;</span><span class="p">,</span><span class="s">&#39;session_info&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">compute_mask</span><span class="p">,</span> <span class="n">model_estimate</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;brain_mask&#39;</span><span class="p">,</span><span class="s">&#39;mask&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">model_estimate</span><span class="p">,</span> <span class="n">contrast_estimate</span><span class="p">,</span> <span class="p">[(</span><span class="s">&quot;beta&quot;</span><span class="p">,</span><span class="s">&quot;beta&quot;</span><span class="p">),</span>
+                                                        <span class="p">(</span><span class="s">&quot;nvbeta&quot;</span><span class="p">,</span><span class="s">&quot;nvbeta&quot;</span><span class="p">),</span>
+                                                        <span class="p">(</span><span class="s">&quot;s2&quot;</span><span class="p">,</span><span class="s">&quot;s2&quot;</span><span class="p">),</span>
+                                                        <span class="p">(</span><span class="s">&quot;dof&quot;</span><span class="p">,</span> <span class="s">&quot;dof&quot;</span><span class="p">),</span>
+                                                        <span class="p">(</span><span class="s">&quot;axis&quot;</span><span class="p">,</span> <span class="s">&quot;axis&quot;</span><span class="p">),</span>
+                                                        <span class="p">(</span><span class="s">&quot;constants&quot;</span><span class="p">,</span> <span class="s">&quot;constants&quot;</span><span class="p">),</span>
+                                                        <span class="p">(</span><span class="s">&quot;reg_names&quot;</span><span class="p">,</span> <span class="s">&quot;reg_names&quot;</span><span class="p">)])</span>
+                  <span class="p">])</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">l1pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition-example-source-code admonition">
+<p class="first admonition-title">Example source code</p>
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/fmri_nipy_glm.py"><code class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></code></a>.
+This same script is also included in the Nipype source distribution under the
+<code class="file docutils literal"><span class="pre">examples</span></code> directory.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

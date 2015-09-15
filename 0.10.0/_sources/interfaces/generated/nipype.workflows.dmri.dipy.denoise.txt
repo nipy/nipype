@@ -1,0 +1,85 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+workflows.dmri.dipy.denoise
+===========================
+
+
+.. module:: nipype.workflows.dmri.dipy.denoise
+
+
+.. _nipype.workflows.dmri.dipy.denoise.nlmeans_pipeline:
+
+:func:`nlmeans_pipeline`
+------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/workflows/dmri/dipy/denoise.py#L11>`__
+
+
+
+Workflow that performs nlmeans denoising
+
+Example
+~~~~~~~
+
+>>> from nipype.workflows.dmri.dipy.denoise import nlmeans_pipeline
+>>> denoise = nlmeans_pipeline()
+>>> denoise.inputs.inputnode.in_file = 'diffusion.nii'
+>>> denoise.inputs.inputnode.in_mask = 'mask.nii'
+>>> denoise.run() # doctest: +SKIP
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph Denoise{
+
+	  label="Denoise";
+
+	  Denoise_inputnode[label="inputnode (utility)"];
+
+	  Denoise_NoiseMsk[label="NoiseMsk (utility)"];
+
+	  Denoise_NLMeans[label="NLMeans (dipy)"];
+
+	  Denoise_outputnode[label="outputnode (utility)"];
+
+	  Denoise_inputnode -> Denoise_NoiseMsk;
+
+	  Denoise_inputnode -> Denoise_NoiseMsk;
+
+	  Denoise_inputnode -> Denoise_NLMeans;
+
+	  Denoise_inputnode -> Denoise_NLMeans;
+
+	  Denoise_NoiseMsk -> Denoise_NLMeans;
+
+	  Denoise_NLMeans -> Denoise_outputnode;
+
+	}
+
+
+.. _nipype.workflows.dmri.dipy.denoise.bg_mask:
+
+:func:`bg_mask`
+---------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/workflows/dmri/dipy/denoise.py#L92>`__
+
+
+
+Rough mask of background from brain masks
+
+
+.. _nipype.workflows.dmri.dipy.denoise.csf_mask:
+
+:func:`csf_mask`
+----------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/workflows/dmri/dipy/denoise.py#L49>`__
+
+
+
+Artesanal mask of csf in T2w-like images
+

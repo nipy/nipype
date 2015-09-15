@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,28 +114,28 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">workflows.dmri.connectivity.group_connectivity</a><ul>
-<li><a class="reference internal" href="#concatcsv"><tt class="docutils literal"><span class="pre">concatcsv()</span></tt></a></li>
-<li><a class="reference internal" href="#create-average-networks-by-group-workflow"><tt class="docutils literal"><span class="pre">create_average_networks_by_group_workflow()</span></tt></a><ul>
+<li><a class="reference internal" href="#concatcsv"><code class="docutils literal"><span class="pre">concatcsv()</span></code></a></li>
+<li><a class="reference internal" href="#create-average-networks-by-group-workflow"><code class="docutils literal"><span class="pre">create_average_networks_by_group_workflow()</span></code></a><ul>
 <li><a class="reference internal" href="#example">Example</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-merge-group-network-results-workflow"><tt class="docutils literal"><span class="pre">create_merge_group_network_results_workflow()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-merge-group-network-results-workflow"><code class="docutils literal"><span class="pre">create_merge_group_network_results_workflow()</span></code></a><ul>
 <li><a class="reference internal" href="#id1">Example</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-merge-group-networks-workflow"><tt class="docutils literal"><span class="pre">create_merge_group_networks_workflow()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-merge-group-networks-workflow"><code class="docutils literal"><span class="pre">create_merge_group_networks_workflow()</span></code></a><ul>
 <li><a class="reference internal" href="#id2">Example</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-merge-network-results-by-group-workflow"><tt class="docutils literal"><span class="pre">create_merge_network_results_by_group_workflow()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-merge-network-results-by-group-workflow"><code class="docutils literal"><span class="pre">create_merge_network_results_by_group_workflow()</span></code></a><ul>
 <li><a class="reference internal" href="#id3">Example</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-merge-networks-by-group-workflow"><tt class="docutils literal"><span class="pre">create_merge_networks_by_group_workflow()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-merge-networks-by-group-workflow"><code class="docutils literal"><span class="pre">create_merge_networks_by_group_workflow()</span></code></a><ul>
 <li><a class="reference internal" href="#id4">Example</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#pullnodeids"><tt class="docutils literal"><span class="pre">pullnodeIDs()</span></tt></a></li>
+<li><a class="reference internal" href="#pullnodeids"><code class="docutils literal"><span class="pre">pullnodeIDs()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -158,7 +158,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -170,7 +170,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -193,9 +193,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -205,20 +205,20 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-nipype.workflows.dmri.connectivity.group_connectivity">
 <span id="workflows-dmri-connectivity-group-connectivity"></span><h1>workflows.dmri.connectivity.group_connectivity<a class="headerlink" href="#module-nipype.workflows.dmri.connectivity.group_connectivity" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="concatcsv">
-<span id="nipype-workflows-dmri-connectivity-group-connectivity-concatcsv"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">concatcsv()</span></tt><a class="headerlink" href="#concatcsv" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/connectivity/group_connectivity.py#L47">Link to code</a></p>
+<span id="nipype-workflows-dmri-connectivity-group-connectivity-concatcsv"></span><h2><code class="xref py py-func docutils literal"><span class="pre">concatcsv()</span></code><a class="headerlink" href="#concatcsv" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/connectivity/group_connectivity.py#L47">Link to code</a></p>
 <p>This function will contatenate two &#8220;comma-separated value&#8221;
 text files, but remove the first row (usually column headers) from
 all but the first file.</p>
 </div>
 <div class="section" id="create-average-networks-by-group-workflow">
-<span id="nipype-workflows-dmri-connectivity-group-connectivity-create-average-networks-by-group-workflow"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_average_networks_by_group_workflow()</span></tt><a class="headerlink" href="#create-average-networks-by-group-workflow" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/connectivity/group_connectivity.py#L429">Link to code</a></p>
+<span id="nipype-workflows-dmri-connectivity-group-connectivity-create-average-networks-by-group-workflow"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_average_networks_by_group_workflow()</span></code><a class="headerlink" href="#create-average-networks-by-group-workflow" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/connectivity/group_connectivity.py#L429">Link to code</a></p>
 <p>Creates a fourth-level pipeline to average the networks for two groups and merge them into a single
 CFF file. This pipeline will also output the average networks in .gexf format, for visualization in other
 graph viewers, such as Gephi.</p>
@@ -247,8 +247,8 @@ title: String to use as a title for the output merged CFF file (default &#39;gro
 </div>
 </div>
 <div class="section" id="create-merge-group-network-results-workflow">
-<span id="nipype-workflows-dmri-connectivity-group-connectivity-create-merge-group-network-results-workflow"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_merge_group_network_results_workflow()</span></tt><a class="headerlink" href="#create-merge-group-network-results-workflow" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/connectivity/group_connectivity.py#L349">Link to code</a></p>
+<span id="nipype-workflows-dmri-connectivity-group-connectivity-create-merge-group-network-results-workflow"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_merge_group_network_results_workflow()</span></code><a class="headerlink" href="#create-merge-group-network-results-workflow" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/connectivity/group_connectivity.py#L349">Link to code</a></p>
 <p>Creates a third-level pipeline to merge the Connectome File Format (CFF) outputs from each group
 and combines them into a single CFF file for each group. This version of the third-level pipeline also
 concatenates the comma-separated value files for the NetworkX metrics and the connectivity matrices
@@ -278,8 +278,8 @@ title: String to use as a title for the output merged CFF file (default &#39;gro
 </div>
 </div>
 <div class="section" id="create-merge-group-networks-workflow">
-<span id="nipype-workflows-dmri-connectivity-group-connectivity-create-merge-group-networks-workflow"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_merge_group_networks_workflow()</span></tt><a class="headerlink" href="#create-merge-group-networks-workflow" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/connectivity/group_connectivity.py#L289">Link to code</a></p>
+<span id="nipype-workflows-dmri-connectivity-group-connectivity-create-merge-group-networks-workflow"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_merge_group_networks_workflow()</span></code><a class="headerlink" href="#create-merge-group-networks-workflow" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/connectivity/group_connectivity.py#L289">Link to code</a></p>
 <p>Creates a third-level pipeline to merge the Connectome File Format (CFF) outputs from each group
 and combines them into a single CFF file for each group.</p>
 <div class="section" id="id2">
@@ -307,8 +307,8 @@ title: String to use as a title for the output merged CFF file (default &#39;gro
 </div>
 </div>
 <div class="section" id="create-merge-network-results-by-group-workflow">
-<span id="nipype-workflows-dmri-connectivity-group-connectivity-create-merge-network-results-by-group-workflow"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_merge_network_results_by_group_workflow()</span></tt><a class="headerlink" href="#create-merge-network-results-by-group-workflow" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/connectivity/group_connectivity.py#L144">Link to code</a></p>
+<span id="nipype-workflows-dmri-connectivity-group-connectivity-create-merge-network-results-by-group-workflow"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_merge_network_results_by_group_workflow()</span></code><a class="headerlink" href="#create-merge-network-results-by-group-workflow" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/connectivity/group_connectivity.py#L144">Link to code</a></p>
 <p>Creates a second-level pipeline to merge the Connectome File Format (CFF) outputs from the group-level
 MRtrix structural connectivity processing pipeline into a single CFF file for each group.</p>
 <div class="section" id="id3">
@@ -337,8 +337,8 @@ output_dir: Path for the output files
 </div>
 </div>
 <div class="section" id="create-merge-networks-by-group-workflow">
-<span id="nipype-workflows-dmri-connectivity-group-connectivity-create-merge-networks-by-group-workflow"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_merge_networks_by_group_workflow()</span></tt><a class="headerlink" href="#create-merge-networks-by-group-workflow" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/connectivity/group_connectivity.py#L73">Link to code</a></p>
+<span id="nipype-workflows-dmri-connectivity-group-connectivity-create-merge-networks-by-group-workflow"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_merge_networks_by_group_workflow()</span></code><a class="headerlink" href="#create-merge-networks-by-group-workflow" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/connectivity/group_connectivity.py#L73">Link to code</a></p>
 <p>Creates a second-level pipeline to merge the Connectome File Format (CFF) outputs from the group-level
 MRtrix structural connectivity processing pipeline into a single CFF file for each group.</p>
 <div class="section" id="id4">
@@ -367,8 +367,8 @@ output_dir: Path for the output files
 </div>
 </div>
 <div class="section" id="pullnodeids">
-<span id="nipype-workflows-dmri-connectivity-group-connectivity-pullnodeids"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">pullnodeIDs()</span></tt><a class="headerlink" href="#pullnodeids" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/connectivity/group_connectivity.py#L19">Link to code</a></p>
+<span id="nipype-workflows-dmri-connectivity-group-connectivity-pullnodeids"></span><h2><code class="xref py py-func docutils literal"><span class="pre">pullnodeIDs()</span></code><a class="headerlink" href="#pullnodeids" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/connectivity/group_connectivity.py#L19">Link to code</a></p>
 <p>This function will return the values contained, for each node in
 a network, given an input key. By default it will return the node names</p>
 </div>
@@ -381,9 +381,9 @@ a network, given an input key. By default it will return the node names</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

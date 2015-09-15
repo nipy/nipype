@@ -1,0 +1,486 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+workflows.dmri.fsl.dti
+======================
+
+
+.. module:: nipype.workflows.dmri.fsl.dti
+
+
+.. _nipype.workflows.dmri.fsl.dti.bedpostx_parallel:
+
+:func:`bedpostx_parallel`
+-------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/workflows/dmri/fsl/dti.py#L127>`__
+
+
+
+Does the same as :func:`.create_bedpostx_pipeline` by splitting
+the input dMRI in small ROIs that are better suited for parallel
+processing).
+
+Example
+~~~~~~~
+
+>>> from nipype.workflows.dmri.fsl.dti import bedpostx_parallel
+>>> params = dict(n_fibres = 2, fudge = 1, burn_in = 1000,
+...               n_jumps = 1250, sample_every = 25)
+>>> bpwf = bedpostx_parallel('nipype_bedpostx_parallel', params)
+>>> bpwf.inputs.inputnode.dwi = 'diffusion.nii'
+>>> bpwf.inputs.inputnode.mask = 'mask.nii'
+>>> bpwf.inputs.inputnode.bvecs = 'bvecs'
+>>> bpwf.inputs.inputnode.bvals = 'bvals'
+>>> bpwf.run(plugin='CondorDAGMan') # doctest: +SKIP
+
+Inputs::
+
+    inputnode.dwi
+    inputnode.mask
+    inputnode.bvecs
+    inputnode.bvals
+
+Outputs::
+
+    outputnode wraps all XFibres outputs
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph bedpostx_parallel{
+
+	  label="bedpostx_parallel";
+
+	  bedpostx_parallel_inputnode[label="inputnode (utility)"];
+
+	  bedpostx_parallel_slice_dwi[label="slice_dwi (misc)"];
+
+	  bedpostx_parallel_xfibres[label="xfibres (fsl)"];
+
+	  bedpostx_parallel_Merge_dyads[label="Merge_dyads (misc)"];
+
+	  bedpostx_parallel_Merge_mean_fsamples[label="Merge_mean_fsamples (misc)"];
+
+	  bedpostx_parallel_Make_dyads[label="Make_dyads (fsl)"];
+
+	  bedpostx_parallel_outputnode[label="outputnode (utility)"];
+
+	  bedpostx_parallel_inputnode -> bedpostx_parallel_Merge_dyads;
+
+	  bedpostx_parallel_inputnode -> bedpostx_parallel_slice_dwi;
+
+	  bedpostx_parallel_inputnode -> bedpostx_parallel_slice_dwi;
+
+	  bedpostx_parallel_inputnode -> bedpostx_parallel_xfibres;
+
+	  bedpostx_parallel_inputnode -> bedpostx_parallel_xfibres;
+
+	  bedpostx_parallel_inputnode -> bedpostx_parallel_Make_dyads;
+
+	  bedpostx_parallel_inputnode -> bedpostx_parallel_Merge_mean_fsamples;
+
+	  bedpostx_parallel_slice_dwi -> bedpostx_parallel_xfibres;
+
+	  bedpostx_parallel_slice_dwi -> bedpostx_parallel_xfibres;
+
+	  bedpostx_parallel_slice_dwi -> bedpostx_parallel_Merge_dyads;
+
+	  bedpostx_parallel_slice_dwi -> bedpostx_parallel_Merge_mean_fsamples;
+
+	  bedpostx_parallel_xfibres -> bedpostx_parallel_Merge_dyads;
+
+	  bedpostx_parallel_xfibres -> bedpostx_parallel_Merge_mean_fsamples;
+
+	  bedpostx_parallel_Merge_dyads -> bedpostx_parallel_outputnode;
+
+	  subgraph cluster_bedpostx_parallel_fsamples {
+
+	      label="fsamples";
+
+	    bedpostx_parallel_fsamples_inputnode[label="inputnode (utility)"];
+
+	    bedpostx_parallel_fsamples_Merge[label="Merge (misc)"];
+
+	    bedpostx_parallel_fsamples_Mean[label="Mean (fsl)"];
+
+	    bedpostx_parallel_fsamples_outputnode[label="outputnode (utility)"];
+
+	    bedpostx_parallel_fsamples_inputnode -> bedpostx_parallel_fsamples_Merge;
+
+	    bedpostx_parallel_fsamples_inputnode -> bedpostx_parallel_fsamples_Merge;
+
+	    bedpostx_parallel_fsamples_inputnode -> bedpostx_parallel_fsamples_Merge;
+
+	    bedpostx_parallel_fsamples_Merge -> bedpostx_parallel_fsamples_Mean;
+
+	    bedpostx_parallel_fsamples_Merge -> bedpostx_parallel_fsamples_outputnode;
+
+	    bedpostx_parallel_fsamples_Mean -> bedpostx_parallel_fsamples_outputnode;
+
+	  }
+
+	  subgraph cluster_bedpostx_parallel_phsamples {
+
+	      label="phsamples";
+
+	    bedpostx_parallel_phsamples_inputnode[label="inputnode (utility)"];
+
+	    bedpostx_parallel_phsamples_Merge[label="Merge (misc)"];
+
+	    bedpostx_parallel_phsamples_Mean[label="Mean (fsl)"];
+
+	    bedpostx_parallel_phsamples_outputnode[label="outputnode (utility)"];
+
+	    bedpostx_parallel_phsamples_inputnode -> bedpostx_parallel_phsamples_Merge;
+
+	    bedpostx_parallel_phsamples_inputnode -> bedpostx_parallel_phsamples_Merge;
+
+	    bedpostx_parallel_phsamples_inputnode -> bedpostx_parallel_phsamples_Merge;
+
+	    bedpostx_parallel_phsamples_Merge -> bedpostx_parallel_phsamples_Mean;
+
+	    bedpostx_parallel_phsamples_Merge -> bedpostx_parallel_phsamples_outputnode;
+
+	    bedpostx_parallel_phsamples_Mean -> bedpostx_parallel_phsamples_outputnode;
+
+	  }
+
+	  subgraph cluster_bedpostx_parallel_thsamples {
+
+	      label="thsamples";
+
+	    bedpostx_parallel_thsamples_inputnode[label="inputnode (utility)"];
+
+	    bedpostx_parallel_thsamples_Merge[label="Merge (misc)"];
+
+	    bedpostx_parallel_thsamples_Mean[label="Mean (fsl)"];
+
+	    bedpostx_parallel_thsamples_outputnode[label="outputnode (utility)"];
+
+	    bedpostx_parallel_thsamples_inputnode -> bedpostx_parallel_thsamples_Merge;
+
+	    bedpostx_parallel_thsamples_inputnode -> bedpostx_parallel_thsamples_Merge;
+
+	    bedpostx_parallel_thsamples_inputnode -> bedpostx_parallel_thsamples_Merge;
+
+	    bedpostx_parallel_thsamples_Merge -> bedpostx_parallel_thsamples_Mean;
+
+	    bedpostx_parallel_thsamples_Merge -> bedpostx_parallel_thsamples_outputnode;
+
+	    bedpostx_parallel_thsamples_Mean -> bedpostx_parallel_thsamples_outputnode;
+
+	  }
+
+	  bedpostx_parallel_Merge_mean_fsamples -> bedpostx_parallel_outputnode;
+
+	  bedpostx_parallel_Make_dyads -> bedpostx_parallel_outputnode;
+
+	  bedpostx_parallel_inputnode -> bedpostx_parallel_fsamples_inputnode;
+
+	  bedpostx_parallel_inputnode -> bedpostx_parallel_phsamples_inputnode;
+
+	  bedpostx_parallel_inputnode -> bedpostx_parallel_thsamples_inputnode;
+
+	  bedpostx_parallel_fsamples_outputnode -> bedpostx_parallel_outputnode;
+
+	  bedpostx_parallel_fsamples_outputnode -> bedpostx_parallel_outputnode;
+
+	  bedpostx_parallel_phsamples_outputnode -> bedpostx_parallel_outputnode;
+
+	  bedpostx_parallel_phsamples_outputnode -> bedpostx_parallel_outputnode;
+
+	  bedpostx_parallel_phsamples_outputnode -> bedpostx_parallel_Make_dyads;
+
+	  bedpostx_parallel_slice_dwi -> bedpostx_parallel_fsamples_inputnode;
+
+	  bedpostx_parallel_slice_dwi -> bedpostx_parallel_phsamples_inputnode;
+
+	  bedpostx_parallel_slice_dwi -> bedpostx_parallel_thsamples_inputnode;
+
+	  bedpostx_parallel_xfibres -> bedpostx_parallel_fsamples_inputnode;
+
+	  bedpostx_parallel_xfibres -> bedpostx_parallel_phsamples_inputnode;
+
+	  bedpostx_parallel_xfibres -> bedpostx_parallel_thsamples_inputnode;
+
+	  bedpostx_parallel_thsamples_outputnode -> bedpostx_parallel_outputnode;
+
+	  bedpostx_parallel_thsamples_outputnode -> bedpostx_parallel_outputnode;
+
+	  bedpostx_parallel_thsamples_outputnode -> bedpostx_parallel_Make_dyads;
+
+	}
+
+
+.. _nipype.workflows.dmri.fsl.dti.create_bedpostx_pipeline:
+
+:func:`create_bedpostx_pipeline`
+--------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/workflows/dmri/fsl/dti.py#L19>`__
+
+
+
+Creates a pipeline that does the same as bedpostx script from FSL -
+calculates diffusion model parameters (distributions not MLE) voxelwise for
+the whole volume (by splitting it slicewise).
+
+Example
+~~~~~~~
+
+>>> from nipype.workflows.dmri.fsl.dti import create_bedpostx_pipeline
+>>> params = dict(n_fibres = 2, fudge = 1, burn_in = 1000,
+...               n_jumps = 1250, sample_every = 25)
+>>> bpwf = create_bedpostx_pipeline('nipype_bedpostx', params)
+>>> bpwf.inputs.inputnode.dwi = 'diffusion.nii'
+>>> bpwf.inputs.inputnode.mask = 'mask.nii'
+>>> bpwf.inputs.inputnode.bvecs = 'bvecs'
+>>> bpwf.inputs.inputnode.bvals = 'bvals'
+>>> bpwf.run() # doctest: +SKIP
+
+Inputs::
+
+    inputnode.dwi
+    inputnode.mask
+    inputnode.bvecs
+    inputnode.bvals
+
+Outputs::
+
+    outputnode wraps all XFibres outputs
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph bedpostx{
+
+	  label="bedpostx";
+
+	  bedpostx_inputnode[label="inputnode (utility)"];
+
+	  bedpostx_slice_dwi[label="slice_dwi (fsl)"];
+
+	  bedpostx_slice_msk[label="slice_msk (fsl)"];
+
+	  bedpostx_mask_dwi[label="mask_dwi (fsl)"];
+
+	  bedpostx_xfibres[label="xfibres (fsl)"];
+
+	  bedpostx_make_dyads[label="make_dyads (fsl)"];
+
+	  bedpostx_outputnode[label="outputnode (utility)"];
+
+	  bedpostx_inputnode -> bedpostx_slice_dwi;
+
+	  bedpostx_inputnode -> bedpostx_xfibres;
+
+	  bedpostx_inputnode -> bedpostx_xfibres;
+
+	  bedpostx_inputnode -> bedpostx_make_dyads;
+
+	  bedpostx_inputnode -> bedpostx_slice_msk;
+
+	  bedpostx_slice_dwi -> bedpostx_xfibres;
+
+	  bedpostx_slice_dwi -> bedpostx_mask_dwi;
+
+	  bedpostx_slice_msk -> bedpostx_mask_dwi;
+
+	  bedpostx_mask_dwi -> bedpostx_xfibres;
+
+	  subgraph cluster_bedpostx_fsamples {
+
+	      label="fsamples";
+
+	    bedpostx_fsamples_inputnode[label="inputnode (utility)"];
+
+	    bedpostx_fsamples_Merge[label="Merge (fsl)"];
+
+	    bedpostx_fsamples_Mean[label="Mean (fsl)"];
+
+	    bedpostx_fsamples_outputnode[label="outputnode (utility)"];
+
+	    bedpostx_fsamples_inputnode -> bedpostx_fsamples_Merge;
+
+	    bedpostx_fsamples_Merge -> bedpostx_fsamples_outputnode;
+
+	    bedpostx_fsamples_Merge -> bedpostx_fsamples_Mean;
+
+	    bedpostx_fsamples_Mean -> bedpostx_fsamples_outputnode;
+
+	  }
+
+	  subgraph cluster_bedpostx_thsamples {
+
+	      label="thsamples";
+
+	    bedpostx_thsamples_inputnode[label="inputnode (utility)"];
+
+	    bedpostx_thsamples_Merge[label="Merge (fsl)"];
+
+	    bedpostx_thsamples_Mean[label="Mean (fsl)"];
+
+	    bedpostx_thsamples_outputnode[label="outputnode (utility)"];
+
+	    bedpostx_thsamples_inputnode -> bedpostx_thsamples_Merge;
+
+	    bedpostx_thsamples_Merge -> bedpostx_thsamples_Mean;
+
+	    bedpostx_thsamples_Merge -> bedpostx_thsamples_outputnode;
+
+	    bedpostx_thsamples_Mean -> bedpostx_thsamples_outputnode;
+
+	  }
+
+	  subgraph cluster_bedpostx_phsamples {
+
+	      label="phsamples";
+
+	    bedpostx_phsamples_inputnode[label="inputnode (utility)"];
+
+	    bedpostx_phsamples_Merge[label="Merge (fsl)"];
+
+	    bedpostx_phsamples_Mean[label="Mean (fsl)"];
+
+	    bedpostx_phsamples_outputnode[label="outputnode (utility)"];
+
+	    bedpostx_phsamples_inputnode -> bedpostx_phsamples_Merge;
+
+	    bedpostx_phsamples_Merge -> bedpostx_phsamples_outputnode;
+
+	    bedpostx_phsamples_Merge -> bedpostx_phsamples_Mean;
+
+	    bedpostx_phsamples_Mean -> bedpostx_phsamples_outputnode;
+
+	  }
+
+	  bedpostx_make_dyads -> bedpostx_outputnode;
+
+	  bedpostx_make_dyads -> bedpostx_outputnode;
+
+	  bedpostx_fsamples_outputnode -> bedpostx_outputnode;
+
+	  bedpostx_fsamples_outputnode -> bedpostx_outputnode;
+
+	  bedpostx_xfibres -> bedpostx_fsamples_inputnode;
+
+	  bedpostx_xfibres -> bedpostx_thsamples_inputnode;
+
+	  bedpostx_xfibres -> bedpostx_phsamples_inputnode;
+
+	  bedpostx_thsamples_outputnode -> bedpostx_make_dyads;
+
+	  bedpostx_thsamples_outputnode -> bedpostx_outputnode;
+
+	  bedpostx_thsamples_outputnode -> bedpostx_outputnode;
+
+	  bedpostx_phsamples_outputnode -> bedpostx_make_dyads;
+
+	  bedpostx_phsamples_outputnode -> bedpostx_outputnode;
+
+	  bedpostx_phsamples_outputnode -> bedpostx_outputnode;
+
+	}
+
+
+.. _nipype.workflows.dmri.fsl.dti.merge_and_mean:
+
+:func:`merge_and_mean`
+----------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/workflows/dmri/fsl/dti.py#L107>`__
+
+
+
+
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph mm{
+
+	  label="mm";
+
+	  mm_inputnode[label="inputnode (utility)"];
+
+	  mm_Merge[label="Merge (fsl)"];
+
+	  mm_Mean[label="Mean (fsl)"];
+
+	  mm_outputnode[label="outputnode (utility)"];
+
+	  mm_inputnode -> mm_Merge;
+
+	  mm_Merge -> mm_Mean;
+
+	  mm_Merge -> mm_outputnode;
+
+	  mm_Mean -> mm_outputnode;
+
+	}
+
+
+.. _nipype.workflows.dmri.fsl.dti.merge_and_mean_parallel:
+
+:func:`merge_and_mean_parallel`
+-------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/workflows/dmri/fsl/dti.py#L233>`__
+
+
+
+
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph mm{
+
+	  label="mm";
+
+	  mm_inputnode[label="inputnode (utility)"];
+
+	  mm_Merge[label="Merge (misc)"];
+
+	  mm_Mean[label="Mean (fsl)"];
+
+	  mm_outputnode[label="outputnode (utility)"];
+
+	  mm_inputnode -> mm_Merge;
+
+	  mm_inputnode -> mm_Merge;
+
+	  mm_inputnode -> mm_Merge;
+
+	  mm_Merge -> mm_Mean;
+
+	  mm_Merge -> mm_outputnode;
+
+	  mm_Mean -> mm_outputnode;
+
+	}
+
+
+.. _nipype.workflows.dmri.fsl.dti.transpose:
+
+:func:`transpose`
+-----------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/workflows/dmri/fsl/dti.py#L13>`__
+
+
+
+
+

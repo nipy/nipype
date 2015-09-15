@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -184,7 +184,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -196,7 +196,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -219,9 +219,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -231,13 +231,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-fsl-preprocess">
 <h1>interfaces.fsl.preprocess<a class="headerlink" href="#interfaces-fsl-preprocess" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-fsl-preprocess-applywarp"></span><div class="section" id="applywarp">
 <span id="index-0"></span><h2>ApplyWarp<a class="headerlink" href="#applywarp" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/preprocess.py#L983">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/preprocess.py#L984">Link to code</a></p>
 <p>Wraps command <strong>applywarp</strong></p>
 <p>Use FSL&#8217;s applywarp to apply the results of a FNIRT registration</p>
 <div class="section" id="examples">
@@ -303,7 +303,7 @@ relwarp: (a boolean)
         treat warp field as relative: x&#39; = x + w(x)
         flag: --rel, position: -1
         mutually_exclusive: abswarp
-superlevel: (&#39;a&#39; or an integer)
+superlevel: (&#39;a&#39; or an integer (int or long))
         level of intermediary supersampling, a for &#39;automatic&#39; or integer
         level. Default = 2
         flag: --superlevel=%s
@@ -325,7 +325,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="applyxfm">
 <span id="index-1"></span><h2>ApplyXfm<a class="headerlink" href="#applyxfm" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/preprocess.py#L570">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/preprocess.py#L571">Link to code</a></p>
 <p>Wraps command <strong>flirt</strong></p>
 <p>Currently just a light wrapper around FLIRT,
 with no modifications</p>
@@ -376,10 +376,10 @@ bbrtype: (&#39;signed&#39; or &#39;global_abs&#39; or &#39;local_abs&#39;)
 bgvalue: (a float)
         use specified background value for points outside FOV
         flag: -setbackground %f
-bins: (an integer)
+bins: (an integer (int or long))
         number of histogram bins
         flag: -bins %d
-coarse_search: (an integer)
+coarse_search: (an integer (int or long))
         coarse search delta angle
         flag: -coarsesearch %d
 cost: (&#39;mutualinfo&#39; or &#39;corratio&#39; or &#39;normcorr&#39; or &#39;normmi&#39; or
@@ -396,7 +396,7 @@ datatype: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;float&#39;
 display_init: (a boolean)
         display initial matrix
         flag: -displayinit
-dof: (an integer)
+dof: (an integer (int or long))
         number of transform degrees of freedom
         flag: -dof %d
 echospacing: (a float)
@@ -413,7 +413,7 @@ fieldmap: (a file name)
 fieldmapmask: (a file name)
         mask for fieldmap image
         flag: -fieldmapmask %s
-fine_search: (an integer)
+fine_search: (an integer (int or long))
         fine search delta angle
         flag: -finesearch %d
 force_scaling: (a boolean)
@@ -458,10 +458,10 @@ out_matrix_file: (a file name)
 output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
          &#39;NIFTI&#39;)
         FSL output type
-padding_size: (an integer)
+padding_size: (an integer (int or long))
         for applyxfm: interpolates outside image by size
         flag: -paddingsize %d
-pedir: (an integer)
+pedir: (an integer (int or long))
         phase encode direction of EPI - 1/2/3=x/y/z &amp; -1/-2/-3=-x/-y/-z
         flag: -pedir %d
 ref_weight: (an existing file name)
@@ -475,16 +475,19 @@ save_log: (a boolean)
 schedule: (an existing file name)
         replaces default schedule
         flag: -schedule %s
-searchr_x: (a list of from 2 to 2 items which are an integer)
+searchr_x: (a list of from 2 to 2 items which are an integer (int or
+         long))
         search angles along x-axis, in degrees
         flag: -searchrx %s
-searchr_y: (a list of from 2 to 2 items which are an integer)
+searchr_y: (a list of from 2 to 2 items which are an integer (int or
+         long))
         search angles along y-axis, in degrees
         flag: -searchry %s
-searchr_z: (a list of from 2 to 2 items which are an integer)
+searchr_z: (a list of from 2 to 2 items which are an integer (int or
+         long))
         search angles along z-axis, in degrees
         flag: -searchrz %s
-sinc_width: (an integer)
+sinc_width: (an integer (int or long))
         full-width in voxels
         flag: -sincwidth %d
 sinc_window: (&#39;rectangular&#39; or &#39;hanning&#39; or &#39;blackman&#39;)
@@ -497,7 +500,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 uses_qform: (a boolean)
         initialize using sform or qform
         flag: -usesqform
-verbose: (an integer)
+verbose: (an integer (int or long))
         verbose mode, 0 is least
         flag: -verbose %d
 wm_seg: (a file name)
@@ -524,7 +527,7 @@ out_matrix_file: (an existing file name)
 </div>
 <div class="section" id="bet">
 <span id="index-2"></span><h2>BET<a class="headerlink" href="#bet" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/preprocess.py#L117">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/preprocess.py#L118">Link to code</a></p>
 <p>Wraps command <strong>bet</strong></p>
 <p>Use FSL BET command for skull stripping.</p>
 <p>For complete details, see the <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/bet2/index.html">BET Documentation.</a></p>
@@ -548,7 +551,8 @@ in_file: (an existing file name)
 args: (a string)
         Additional parameters to the command
         flag: %s
-center: (a list of at most 3 items which are an integer)
+center: (a list of at most 3 items which are an integer (int or
+         long))
         center of gravity in voxels
         flag: -c %s
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -590,7 +594,7 @@ padding: (a boolean)
         flag: -Z
         mutually_exclusive: functional, reduce_bias, robust, padding,
          remove_eyes, surfaces, t2_guided
-radius: (an integer)
+radius: (an integer (int or long))
         head radius
         flag: -r %d
 reduce_bias: (a boolean)
@@ -664,7 +668,7 @@ skull_mask_file: (a file name)
 </div>
 <div class="section" id="fast">
 <span id="index-3"></span><h2>FAST<a class="headerlink" href="#fast" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/preprocess.py#L290">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/preprocess.py#L291">Link to code</a></p>
 <p>Wraps command <strong>fast</strong></p>
 <p>Use FSL FAST for segmenting and bias correction.</p>
 <p>For complete details, see the <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/fast4/index.html">FAST Documentation.</a></p>
@@ -674,7 +678,7 @@ skull_mask_file: (a file name)
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">example_data</span>
 </pre></div>
 </div>
-<p>Assign options through the <tt class="docutils literal"><span class="pre">inputs</span></tt> attribute:</p>
+<p>Assign options through the <code class="docutils literal"><span class="pre">inputs</span></code> attribute:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fastr</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FAST</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fastr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="n">example_data</span><span class="p">(</span><span class="s">&#39;structural.nii&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">fastr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
@@ -789,7 +793,7 @@ tissue_class_map: (an existing file name)
 </div>
 <div class="section" id="first">
 <span id="index-4"></span><h2>FIRST<a class="headerlink" href="#first" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/preprocess.py#L1542">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/preprocess.py#L1529">Link to code</a></p>
 <p>Wraps command <strong>run_first_all</strong></p>
 <p>Use FSL&#8217;s run_first_all command to segment subcortical volumes</p>
 <p><a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/first/index.html">http://www.fmrib.ox.ac.uk/fsl/first/index.html</a></p>
@@ -835,15 +839,15 @@ list_of_specific_structures: (a list of at least 1 items which are a
         R_Accu, L_Amyg, R_AmygL_Caud, R_Caud, L_Pall, R_PallL_Puta, R_Puta,
         L_Thal, R_Thal, BrStem
         flag: -s %s, position: 5
-method: (&#39;auto&#39; or &#39;fast&#39; or &#39;none&#39;)
+method: (&#39;auto&#39; or &#39;fast&#39; or &#39;none&#39;, nipype default value: auto)
         Method must be one of auto, fast, none, or it can be entered using
         the &#39;method_as_numerical_threshold&#39; input
-        flag: -m, position: 4
+        flag: -m %s, position: 4
         mutually_exclusive: method_as_numerical_threshold
 method_as_numerical_threshold: (a float)
         Specify a numerical threshold value or use the &#39;method&#39; input to
         choose auto, fast, or none
-        flag: -m, position: 4
+        flag: -m %.4f, position: 4
 no_cleanup: (a boolean)
         Input structural image is already brain-extracted
         flag: -d, position: 3
@@ -875,7 +879,7 @@ vtk_surfaces: (a list of items which are an existing file name)
 </div>
 <div class="section" id="flirt">
 <span id="index-5"></span><h2>FLIRT<a class="headerlink" href="#flirt" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/preprocess.py#L521">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/preprocess.py#L522">Link to code</a></p>
 <p>Wraps command <strong>flirt</strong></p>
 <p>Use FSL FLIRT for coregistration.</p>
 <p>For complete details, see the <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/flirt/index.html">FLIRT Documentation.</a></p>
@@ -929,10 +933,10 @@ bbrtype: (&#39;signed&#39; or &#39;global_abs&#39; or &#39;local_abs&#39;)
 bgvalue: (a float)
         use specified background value for points outside FOV
         flag: -setbackground %f
-bins: (an integer)
+bins: (an integer (int or long))
         number of histogram bins
         flag: -bins %d
-coarse_search: (an integer)
+coarse_search: (an integer (int or long))
         coarse search delta angle
         flag: -coarsesearch %d
 cost: (&#39;mutualinfo&#39; or &#39;corratio&#39; or &#39;normcorr&#39; or &#39;normmi&#39; or
@@ -949,7 +953,7 @@ datatype: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;float&#39;
 display_init: (a boolean)
         display initial matrix
         flag: -displayinit
-dof: (an integer)
+dof: (an integer (int or long))
         number of transform degrees of freedom
         flag: -dof %d
 echospacing: (a float)
@@ -966,7 +970,7 @@ fieldmap: (a file name)
 fieldmapmask: (a file name)
         mask for fieldmap image
         flag: -fieldmapmask %s
-fine_search: (an integer)
+fine_search: (an integer (int or long))
         fine search delta angle
         flag: -finesearch %d
 force_scaling: (a boolean)
@@ -1011,10 +1015,10 @@ out_matrix_file: (a file name)
 output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
          &#39;NIFTI&#39;)
         FSL output type
-padding_size: (an integer)
+padding_size: (an integer (int or long))
         for applyxfm: interpolates outside image by size
         flag: -paddingsize %d
-pedir: (an integer)
+pedir: (an integer (int or long))
         phase encode direction of EPI - 1/2/3=x/y/z &amp; -1/-2/-3=-x/-y/-z
         flag: -pedir %d
 ref_weight: (an existing file name)
@@ -1028,16 +1032,19 @@ save_log: (a boolean)
 schedule: (an existing file name)
         replaces default schedule
         flag: -schedule %s
-searchr_x: (a list of from 2 to 2 items which are an integer)
+searchr_x: (a list of from 2 to 2 items which are an integer (int or
+         long))
         search angles along x-axis, in degrees
         flag: -searchrx %s
-searchr_y: (a list of from 2 to 2 items which are an integer)
+searchr_y: (a list of from 2 to 2 items which are an integer (int or
+         long))
         search angles along y-axis, in degrees
         flag: -searchry %s
-searchr_z: (a list of from 2 to 2 items which are an integer)
+searchr_z: (a list of from 2 to 2 items which are an integer (int or
+         long))
         search angles along z-axis, in degrees
         flag: -searchrz %s
-sinc_width: (an integer)
+sinc_width: (an integer (int or long))
         full-width in voxels
         flag: -sincwidth %d
 sinc_window: (&#39;rectangular&#39; or &#39;hanning&#39; or &#39;blackman&#39;)
@@ -1050,7 +1057,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 uses_qform: (a boolean)
         initialize using sform or qform
         flag: -usesqform
-verbose: (an integer)
+verbose: (an integer (int or long))
         verbose mode, 0 is least
         flag: -verbose %d
 wm_seg: (a file name)
@@ -1077,7 +1084,7 @@ out_matrix_file: (an existing file name)
 </div>
 <div class="section" id="fnirt">
 <span id="index-6"></span><h2>FNIRT<a class="headerlink" href="#fnirt" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/preprocess.py#L851">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/preprocess.py#L852">Link to code</a></p>
 <p>Wraps command <strong>fnirt</strong></p>
 <p>Use FSL FNIRT for non-linear registration.</p>
 <div class="section" id="id6">
@@ -1137,8 +1144,8 @@ args: (a string)
 bias_regularization_lambda: (a float)
         Weight of regularisation for bias-field, default 10000
         flag: --biaslambda=%f
-biasfield_resolution: (a tuple of the form: (an integer, an integer,
-         an integer))
+biasfield_resolution: (a tuple of the form: (an integer (int or
+         long), an integer (int or long), an integer (int or long)))
         Resolution (in mm) of bias-field modelling local intensities,
         default 50, 50, 50
         flag: --biasres=%d,%d,%d
@@ -1165,7 +1172,7 @@ hessian_precision: (&#39;double&#39; or &#39;float&#39;)
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-in_fwhm: (a list of items which are an integer)
+in_fwhm: (a list of items which are an integer (int or long))
         FWHM (in mm) of gaussian smoothing kernel for input volume, default
         [6, 4, 2, 2]
         flag: --infwhm=%s
@@ -1184,7 +1191,7 @@ intensity_mapping_model: (&#39;none&#39; or &#39;global_linear&#39; or
          &#39;local_non_linear&#39;)
         Model for intensity-mapping
         flag: --intmod=%s
-intensity_mapping_order: (an integer)
+intensity_mapping_order: (an integer (int or long))
         Order of poynomial for mapping intensities, default 5
         flag: --intorder=%d
 inwarp_file: (an existing file name)
@@ -1200,7 +1207,7 @@ jacobian_range: (a tuple of the form: (a float, a float))
 log_file: (a file name)
         Name of log-file
         flag: --logout=%s
-max_nonlin_iter: (a list of items which are an integer)
+max_nonlin_iter: (a list of items which are an integer (int or long))
         Max # of non-linear iterations list, default [5, 5, 5, 5]
         flag: --miter=%s
 modulatedref_file: (a boolean or a file name)
@@ -1214,7 +1221,7 @@ out_intensitymap_file: (a boolean or a file name)
 output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
          &#39;NIFTI&#39;)
         FSL output type
-ref_fwhm: (a list of items which are an integer)
+ref_fwhm: (a list of items which are an integer (int or long))
         FWHM (in mm) of gaussian smoothing kernel for ref volume, default
         [4, 2, 0, 0]
         flag: --reffwhm=%s
@@ -1253,18 +1260,19 @@ skip_refmask: (a boolean)
         Skip specified refmask if set, default false
         flag: --applyrefmask=0
         mutually_exclusive: apply_refmask
-spline_order: (an integer)
+spline_order: (an integer (int or long))
         Order of spline, 2-&gt;Qadratic spline, 3-&gt;Cubic spline. Default=3
         flag: --splineorder=%d
-subsampling_scheme: (a list of items which are an integer)
+subsampling_scheme: (a list of items which are an integer (int or
+         long))
         sub-sampling scheme, list, default [4, 2, 1, 1]
         flag: --subsamp=%s
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-warp_resolution: (a tuple of the form: (an integer, an integer, an
-         integer))
+warp_resolution: (a tuple of the form: (an integer (int or long), an
+         integer (int or long), an integer (int or long)))
         (approximate) resolution (in mm) of warp basis in x-, y- and
         z-direction, default 10, 10, 10
         flag: --warpres=%d,%d,%d
@@ -1294,7 +1302,7 @@ warped_file: (an existing file name)
 </div>
 <div class="section" id="fugue">
 <span id="index-7"></span><h2>FUGUE<a class="headerlink" href="#fugue" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/preprocess.py#L1242">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/preprocess.py#L1243">Link to code</a></p>
 <p>Wraps command <strong>fugue</strong></p>
 <p><a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE">FUGUE</a> is, most generally, a set of tools for
 EPI distortion correction.</p>
@@ -1318,10 +1326,10 @@ EPI distortion correction.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">unwarp_direction</span> <span class="o">=</span> <span class="s">&#39;y&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&quot;NIFTI_GZ&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
 </pre></div>
 </div>
-<p>&#8216;fugue &#8211;in=epi.nii &#8211;mask=epi_mask.nii &#8211;loadshift=vsm.nii &#8211;unwarpdir=y &#8211;unwarp=epi_unwarped.nii.gz&#8217;
-&gt;&gt;&gt; fugue.run() #doctest: +SKIP</p>
 <p>Warping an input image (shift map is known)</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl.preprocess</span> <span class="kn">import</span> <span class="n">FUGUE</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span> <span class="o">=</span> <span class="n">FUGUE</span><span class="p">()</span>
@@ -1332,10 +1340,10 @@ EPI distortion correction.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">unwarp_direction</span> <span class="o">=</span> <span class="s">&#39;y&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&quot;NIFTI_GZ&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --warp=epi_warped.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
 </pre></div>
 </div>
-<p>&#8216;fugue &#8211;in=epi.nii &#8211;mask=epi_mask.nii &#8211;loadshift=vsm.nii &#8211;unwarpdir=y &#8211;warp=epi_warped.nii.gz&#8217;
-&gt;&gt;&gt; fugue.run() #doctest: +SKIP</p>
 <p>Computing the vsm (unwrapped phase map is known)</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl.preprocess</span> <span class="kn">import</span> <span class="n">FUGUE</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span> <span class="o">=</span> <span class="n">FUGUE</span><span class="p">()</span>
@@ -1346,10 +1354,10 @@ EPI distortion correction.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">save_shift</span> <span class="o">=</span> <span class="bp">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&quot;NIFTI_GZ&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;fugue --dwelltoasym=0.9390243902 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
 </pre></div>
 </div>
-<p>&#8216;fugue &#8211;dwelltoasym=0.9390243902 &#8211;mask=epi_mask.nii &#8211;phasemap=epi_phasediff.nii &#8211;saveshift=epi_phasediff_vsm.nii.gz &#8211;unwarpdir=y&#8217;
-&gt;&gt;&gt; fugue.run() #doctest: +SKIP</p>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
 
@@ -1385,7 +1393,7 @@ fmap_out_file: (a file name)
         flag: --savefmap=%s
 forward_warping: (a boolean, nipype default value: False)
         apply forward warping instead of unwarping
-fourier_order: (an integer)
+fourier_order: (an integer (int or long))
         apply Fourier (sinusoidal) fitting of order N
         flag: --fourier=%d
 icorr: (a boolean)
@@ -1429,7 +1437,7 @@ phase_conjugate: (a boolean)
 phasemap_in_file: (an existing file name)
         filename for input phase image
         flag: --phasemap=%s
-poly_order: (an integer)
+poly_order: (an integer (int or long))
         apply polynomial fitting of order N
         flag: --poly=%d
 save_fmap: (a boolean)
@@ -1492,7 +1500,7 @@ warped_file: (a file name)
 </div>
 <div class="section" id="mcflirt">
 <span id="index-8"></span><h2>MCFLIRT<a class="headerlink" href="#mcflirt" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/preprocess.py#L647">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/preprocess.py#L648">Link to code</a></p>
 <p>Wraps command <strong>mcflirt</strong></p>
 <p>Use FSL MCFLIRT to do within-modality motion correction.</p>
 <p>For complete details, see the <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/mcflirt/index.html">MCFLIRT Documentation.</a></p>
@@ -1514,14 +1522,14 @@ in_file: (an existing file name)
 args: (a string)
         Additional parameters to the command
         flag: %s
-bins: (an integer)
+bins: (an integer (int or long))
         number of histogram bins
         flag: -bins %d
 cost: (&#39;mutualinfo&#39; or &#39;woods&#39; or &#39;corratio&#39; or &#39;normcorr&#39; or
          &#39;normmi&#39; or &#39;leastsquares&#39;)
         cost function to optimize
         flag: -cost %s
-dof: (an integer)
+dof: (an integer (int or long))
         degrees of freedom for the transformation
         flag: -dof %d
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -1549,10 +1557,10 @@ output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#
 ref_file: (an existing file name)
         target image for motion correction
         flag: -reffile %s
-ref_vol: (an integer)
+ref_vol: (an integer (int or long))
         volume to align frames to
         flag: -refvol %d
-rotation: (an integer)
+rotation: (an integer (int or long))
         scaling factor for rotation tolerances
         flag: -rotation %d
 save_mats: (a boolean)
@@ -1570,7 +1578,7 @@ scaling: (a float)
 smooth: (a float)
         smoothing factor for the cost function
         flag: -smooth %.2f
-stages: (an integer)
+stages: (an integer (int or long))
         stages (if 4, perform final search with sinc interpolation
         flag: -stages %d
 stats_imgs: (a boolean)
@@ -1609,7 +1617,7 @@ variance_img: (an existing file name)
 </div>
 <div class="section" id="prelude">
 <span id="index-9"></span><h2>PRELUDE<a class="headerlink" href="#prelude" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/preprocess.py#L1461">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/preprocess.py#L1442">Link to code</a></p>
 <p>Wraps command <strong>prelude</strong></p>
 <p>Use FSL prelude to do phase unwrapping</p>
 <div class="section" id="id10">
@@ -1634,7 +1642,7 @@ phase_file: (an existing file name)
 args: (a string)
         Additional parameters to the command
         flag: %s
-end: (an integer)
+end: (an integer (int or long))
         final image number to process (default Inf)
         flag: --end=%d
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -1653,7 +1661,7 @@ labelprocess2d: (a boolean)
 mask_file: (an existing file name)
         filename of mask input volume
         flag: --mask=%s
-num_partitions: (an integer)
+num_partitions: (an integer (int or long))
         number of phase partitions to use
         flag: --numphasesplit=%d
 output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
@@ -1676,7 +1684,7 @@ removeramps: (a boolean)
 savemask_file: (a file name)
         saving the mask volume
         flag: --savemask=%s
-start: (an integer)
+start: (an integer (int or long))
         first image number to process (default 0)
         flag: --start=%d
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -1700,7 +1708,7 @@ unwrapped_phase_file: (a file name)
 </div>
 <div class="section" id="susan">
 <span id="index-10"></span><h2>SUSAN<a class="headerlink" href="#susan" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/preprocess.py#L1114">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/preprocess.py#L1115">Link to code</a></p>
 <p>Wraps command <strong>susan</strong></p>
 <p>use FSL SUSAN to perform smoothing</p>
 <div class="section" id="id11">
@@ -1773,7 +1781,7 @@ use_median: (1 or 0, nipype default value: 1)
 </div>
 <div class="section" id="slicetimer">
 <span id="index-11"></span><h2>SliceTimer<a class="headerlink" href="#slicetimer" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/preprocess.py#L1050">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/preprocess.py#L1051">Link to code</a></p>
 <p>Wraps command <strong>slicetimer</strong></p>
 <p>use FSL slicetimer to perform slice timing correction.</p>
 <div class="section" id="id12">
@@ -1854,9 +1862,9 @@ time_repetition: (a float)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

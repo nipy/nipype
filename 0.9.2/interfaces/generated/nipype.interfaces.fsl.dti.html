@@ -1,0 +1,1071 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.fsl.dti</a><ul>
+<li><a class="reference internal" href="#bedpostx">BEDPOSTX</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dtifit">DTIFit</a><ul>
+<li><a class="reference internal" href="#id1">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#distancemap">DistanceMap</a><ul>
+<li><a class="reference internal" href="#id2">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#findthebiggest">FindTheBiggest</a><ul>
+<li><a class="reference internal" href="#id3">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#makedyadicvectors">MakeDyadicVectors</a></li>
+<li><a class="reference internal" href="#probtrackx">ProbTrackX</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#projthresh">ProjThresh</a><ul>
+<li><a class="reference internal" href="#id4">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tractskeleton">TractSkeleton</a><ul>
+<li><a class="reference internal" href="#id5">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vecreg">VecReg</a><ul>
+<li><a class="reference internal" href="#id6">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#xfibres">XFibres</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-fsl-dti">
+<h1>interfaces.fsl.dti<a class="headerlink" href="#interfaces-fsl-dti" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-fsl-dti-bedpostx"></span><div class="section" id="bedpostx">
+<span id="index-0"></span><h2>BEDPOSTX<a class="headerlink" href="#bedpostx" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/dti.py#L147">Link to code</a></p>
+<p>Wraps command <strong>bedpostx</strong></p>
+<p>Deprecated! Please use create_bedpostx_pipeline instead</p>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bedp</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">BEDPOSTX</span><span class="p">(</span><span class="n">bpx_directory</span><span class="o">=</span><span class="s">&#39;subjdir&#39;</span><span class="p">,</span> <span class="n">bvecs</span><span class="o">=</span><span class="s">&#39;bvecs&#39;</span><span class="p">,</span> <span class="n">bvals</span><span class="o">=</span><span class="s">&#39;bvals&#39;</span><span class="p">,</span> <span class="n">dwi</span><span class="o">=</span><span class="s">&#39;diffusion.nii&#39;</span><span class="p">,</span>     <span class="n">mask</span><span class="o">=</span><span class="s">&#39;mask.nii&#39;</span><span class="p">,</span> <span class="n">fibres</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">bedp</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;bedpostx subjdir -n 1&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+bvals: (an existing file name)
+        b values file
+bvecs: (an existing file name)
+        b vectors file
+dwi: (an existing file name)
+        diffusion weighted image data file
+mask: (an existing file name)
+        bet binary mask file
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+bpx_directory: (a directory name, nipype default value: bedpostx)
+        the name for this subjects bedpostx folder
+burn_period: (an integer (int or long))
+        burnin period
+bvals: (an existing file name)
+        b values file
+bvecs: (an existing file name)
+        b vectors file
+dwi: (an existing file name)
+        diffusion weighted image data file
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fibres: (an integer (int or long))
+        number of fibres per voxel
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+jumps: (an integer (int or long))
+        number of jumps
+mask: (an existing file name)
+        bet binary mask file
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+sampling: (an integer (int or long))
+        sample every
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+weight: (a float)
+        ARD weight, more weight means less secondary fibres per voxel
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>bpx_out_directory: (an existing directory name)
+        path/name of directory with all bedpostx output files for this
+        subject
+dyads: (a list of items which are an existing file name)
+        a list of path/name of mean of PDD distribution in vector form
+mean_fsamples: (a list of items which are an existing file name)
+        a list of path/name of 3D volume with mean of distribution on f
+        anisotropy
+mean_phsamples: (a list of items which are an existing file name)
+        a list of path/name of 3D volume with mean of distribution on phi
+mean_thsamples: (a list of items which are an existing file name)
+        a list of path/name of 3D volume with mean of distribution on theta
+merged_fsamples: (a list of items which are an existing file name)
+        a list of path/name of 4D volume with samples from the distribution
+        on anisotropic volume fraction
+merged_phsamples: (a list of items which are an existing file name)
+        a list of path/name of file with samples from the distribution on
+        phi
+merged_thsamples: (a list of items which are an existing file name)
+        a list of path/name of 4D volume with samples from the distribution
+        on theta
+xfms_directory: (an existing directory name)
+        path/name of directory with the tranformation matrices
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-dti-dtifit"></span></div>
+</div>
+<div class="section" id="dtifit">
+<span id="index-1"></span><h2>DTIFit<a class="headerlink" href="#dtifit" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/dti.py#L70">Link to code</a></p>
+<p>Wraps command <strong>dtifit</strong></p>
+<p>Use FSL  dtifit command for fitting a diffusion tensor model at each
+voxel</p>
+<div class="section" id="id1">
+<h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dti</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">DTIFit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dti</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dwi</span> <span class="o">=</span> <span class="s">&#39;diffusion.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dti</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bvecs</span> <span class="o">=</span> <span class="s">&#39;bvecs&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dti</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bvals</span> <span class="o">=</span> <span class="s">&#39;bvals&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dti</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_name</span> <span class="o">=</span> <span class="s">&#39;TP&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dti</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dti</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;dtifit -k diffusion.nii -o TP -m mask.nii -r bvecs -b bvals&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+bvals: (an existing file name)
+        b values file
+bvecs: (an existing file name)
+        b vectors file
+dwi: (an existing file name)
+        diffusion weighted image data file
+mask: (an existing file name)
+        bet binary mask file
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+base_name: (a string, nipype default value: dtifit_)
+        base_name that all output files will start with
+bvals: (an existing file name)
+        b values file
+bvecs: (an existing file name)
+        b vectors file
+cni: (an existing file name)
+        input counfound regressors
+dwi: (an existing file name)
+        diffusion weighted image data file
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+little_bit: (a boolean)
+        only process small area of brain
+mask: (an existing file name)
+        bet binary mask file
+max_x: (an integer (int or long))
+        max x
+max_y: (an integer (int or long))
+        max y
+max_z: (an integer (int or long))
+        max z
+min_x: (an integer (int or long))
+        min x
+min_y: (an integer (int or long))
+        min y
+min_z: (an integer (int or long))
+        min z
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+save_tensor: (a boolean)
+        save the elements of the tensor
+sse: (a boolean)
+        output sum of squared errors
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>FA: (an existing file name)
+        path/name of file with the fractional anisotropy
+L1: (an existing file name)
+        path/name of file with the 1st eigenvalue
+L2: (an existing file name)
+        path/name of file with the 2nd eigenvalue
+L3: (an existing file name)
+        path/name of file with the 3rd eigenvalue
+MD: (an existing file name)
+        path/name of file with the mean diffusivity
+MO: (an existing file name)
+        path/name of file with the mode of anisotropy
+S0: (an existing file name)
+        path/name of file with the raw T2 signal with no diffusion weighting
+V1: (an existing file name)
+        path/name of file with the 1st eigenvector
+V2: (an existing file name)
+        path/name of file with the 2nd eigenvector
+V3: (an existing file name)
+        path/name of file with the 3rd eigenvector
+tensor: (an existing file name)
+        path/name of file with the 4D tensor volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-dti-distancemap"></span></div>
+</div>
+<div class="section" id="distancemap">
+<span id="index-2"></span><h2>DistanceMap<a class="headerlink" href="#distancemap" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/dti.py#L727">Link to code</a></p>
+<p>Wraps command <strong>distancemap</strong></p>
+<p>Use FSL&#8217;s distancemap to generate a map of the distance to the nearest nonzero voxel.</p>
+<div class="section" id="id2">
+<h3>Example<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mapper</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">DistanceMap</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mapper</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&quot;skeleton_mask.nii.gz&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mapper</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to calculate distance values for
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+distance_map: (a file name)
+        distance map to write
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        image to calculate distance values for
+invert_input: (a boolean)
+        invert input image
+local_max_file: (a boolean or a file name)
+        write an image of the local maxima
+mask_file: (an existing file name)
+        binary mask to contrain calculations
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>distance_map: (an existing file name)
+        value is distance to nearest nonzero voxels
+local_max_file: (a file name)
+        image of local maxima
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-dti-findthebiggest"></span></div>
+</div>
+<div class="section" id="findthebiggest">
+<span id="index-3"></span><h2>FindTheBiggest<a class="headerlink" href="#findthebiggest" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/dti.py#L571">Link to code</a></p>
+<p>Wraps command <strong>find_the_biggest</strong></p>
+<p>Use FSL find_the_biggest for performing hard segmentation on
+the outputs of connectivity-based thresholding in probtrack.
+For complete details, see the <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_biggest.html">FDT
+Documentation.</a></p>
+<div class="section" id="id3">
+<h3>Example<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ldir</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;seeds_to_M1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;seeds_to_M2.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fBig</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FindTheBiggest</span><span class="p">(</span><span class="n">in_files</span><span class="o">=</span><span class="n">ldir</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="s">&#39;biggestSegmentation&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fBig</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;find_the_biggest seeds_to_M1.nii seeds_to_M2.nii biggestSegmentation&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (a list of items which are an existing file name)
+        a list of input volumes or a singleMatrixFile
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_files: (a list of items which are an existing file name)
+        a list of input volumes or a singleMatrixFile
+out_file: (a file name)
+        file with the resulting segmentation
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file indexed in order of input files
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-dti-makedyadicvectors"></span></div>
+</div>
+<div class="section" id="makedyadicvectors">
+<span id="index-4"></span><h2>MakeDyadicVectors<a class="headerlink" href="#makedyadicvectors" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/dti.py#L875">Link to code</a></p>
+<p>Wraps command <strong>make_dyadic_vectors</strong></p>
+<p>Create vector volume representing mean principal diffusion direction
+and its uncertainty (dispersion)</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+phi_vol: (an existing file name)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+theta_vol: (an existing file name)
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask: (an existing file name)
+output: (a file name, nipype default value: dyads)
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+perc: (a float)
+        the {perc}% angle of the output cone of uncertainty (output will be
+        in degrees)
+phi_vol: (an existing file name)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+theta_vol: (an existing file name)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>dispersion: (an existing file name)
+dyads: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-dti-probtrackx"></span></div>
+<div class="section" id="probtrackx">
+<span id="index-5"></span><h2>ProbTrackX<a class="headerlink" href="#probtrackx" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/dti.py#L324">Link to code</a></p>
+<p>Wraps command <strong>probtrackx</strong></p>
+<p>Use FSL  probtrackx for tractography on bedpostx results</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pbx</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">ProbTrackX</span><span class="p">(</span><span class="n">samples_base_name</span><span class="o">=</span><span class="s">&#39;merged&#39;</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="s">&#39;mask.nii&#39;</span><span class="p">,</span>     <span class="n">seed</span><span class="o">=</span><span class="s">&#39;MASK_average_thal_right.nii&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;seedmask&#39;</span><span class="p">,</span>     <span class="n">xfm</span><span class="o">=</span><span class="s">&#39;trans.mat&#39;</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">n_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">force_dir</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">opd</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">os2t</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>     <span class="n">target_masks</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;targets_MASK1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;targets_MASK2.nii&#39;</span><span class="p">],</span>     <span class="n">thsamples</span><span class="o">=</span><span class="s">&#39;merged_thsamples.nii&#39;</span><span class="p">,</span> <span class="n">fsamples</span><span class="o">=</span><span class="s">&#39;merged_fsamples.nii&#39;</span><span class="p">,</span> <span class="n">phsamples</span><span class="o">=</span><span class="s">&#39;merged_phsamples.nii&#39;</span><span class="p">,</span>     <span class="n">out_dir</span><span class="o">=</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pbx</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;probtrackx --forcedir -m mask.nii --mode=seedmask --nsamples=3 --nsteps=10 --opd --os2t --dir=. --samples=merged --seed=MASK_average_thal_right.nii --targetmasks=targets.txt --xfm=trans.mat&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+fsamples: (an existing file name)
+mask: (an existing file name)
+        bet binary mask file in diffusion space
+phsamples: (an existing file name)
+seed: (an existing file name or a list of items which are an existing
+         file name or a list of items which are a list of from 3 to 3 items
+         which are an integer (int or long))
+        seed volume(s), or voxel(s)or freesurfer label file
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+thsamples: (an existing file name)
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+avoid_mp: (an existing file name)
+        reject pathways passing through locations given by this mask
+c_thresh: (a float)
+        curvature threshold - default=0.2
+correct_path_distribution: (a boolean)
+        correct path distribution for the length of the pathways
+dist_thresh: (a float)
+        discards samples shorter than this threshold (in mm - default=0)
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fibst: (an integer (int or long))
+        force a starting fibre for tracking - default=1, i.e. first fibre
+        orientation. Only works if randfib==0
+force_dir: (a boolean, nipype default value: True)
+        use the actual directory name given - i.e. do not add + to make a
+        new directory
+fsamples: (an existing file name)
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inv_xfm: (a file name)
+        transformation matrix taking DTI space to seed space (compulsory
+        when using a warp_field for seeds_to_dti)
+loop_check: (a boolean)
+        perform loop_checks on paths - slower, but allows lower curvature
+        threshold
+mask: (an existing file name)
+        bet binary mask file in diffusion space
+mask2: (an existing file name)
+        second bet binary mask (in diffusion space) in twomask_symm mode
+mesh: (an existing file name)
+        Freesurfer-type surface descriptor (in ascii format)
+mod_euler: (a boolean)
+        use modified euler streamlining
+mode: (&#39;simple&#39; or &#39;two_mask_symm&#39; or &#39;seedmask&#39;)
+        options: simple (single seed voxel), seedmask (mask of seed voxels),
+        twomask_symm (two bet binary masks)
+n_samples: (an integer (int or long), nipype default value: 5000)
+        number of samples - default=5000
+n_steps: (an integer (int or long))
+        number of steps per sample - default=2000
+network: (a boolean)
+        activate network mode - only keep paths going through at least one
+        seed mask (required if multiple seed masks)
+opd: (a boolean, nipype default value: True)
+        outputs path distributions
+os2t: (a boolean)
+        Outputs seeds to targets
+out_dir: (an existing directory name)
+        directory to put the final volumes in
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+phsamples: (an existing file name)
+rand_fib: (0 or 1 or 2 or 3)
+        options: 0 - default, 1 - to randomly sample initial fibres (with f
+        &gt; fibthresh), 2 - to sample in proportion fibres (with f&gt;fibthresh)
+        to f, 3 - to sample ALL populations at random (even if f&lt;fibthresh)
+random_seed: (a boolean)
+        random seed
+s2tastext: (a boolean)
+        output seed-to-target counts as a text file (useful when seeding
+        from a mesh)
+sample_random_points: (a boolean)
+        sample random points within seed voxels
+samples_base_name: (a string, nipype default value: merged)
+        the rootname/base_name for samples files
+seed: (an existing file name or a list of items which are an existing
+         file name or a list of items which are a list of from 3 to 3 items
+         which are an integer (int or long))
+        seed volume(s), or voxel(s)or freesurfer label file
+seed_ref: (an existing file name)
+        reference vol to define seed space in simple mode - diffusion space
+        assumed if absent
+step_length: (a float)
+        step_length in mm - default=0.5
+stop_mask: (an existing file name)
+        stop tracking at locations given by this mask file
+target_masks: (a file name)
+        list of target masks - required for seeds_to_targets classification
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+thsamples: (an existing file name)
+use_anisotropy: (a boolean)
+        use anisotropy to constrain tracking
+verbose: (0 or 1 or 2)
+        Verbose level, [0-2].Level 2 is required to output particle files.
+waypoints: (an existing file name)
+        waypoint mask or ascii list of waypoint masks - only keep paths
+        going through ALL the masks
+xfm: (an existing file name)
+        transformation matrix taking seed space to DTI space (either FLIRT
+        matrix or FNIRT warp_field) - default is identity
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>fdt_paths: (an existing file name)
+        path/name of a 3D image file containing the output connectivity
+        distribution to the seed mask
+log: (an existing file name)
+        path/name of a text record of the command that was run
+particle_files: (a list of items which are an existing file name)
+        Files describing all of the tract samples. Generated only if verbose
+        is set to 2
+targets: (a list of items which are an existing file name)
+        a list with all generated seeds_to_target files
+way_total: (an existing file name)
+        path/name of a text file containing a single number corresponding to
+        the total number of generated tracts that have not been rejected by
+        inclusion/exclusion mask criteria
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-dti-projthresh"></span></div>
+</div>
+<div class="section" id="projthresh">
+<span id="index-6"></span><h2>ProjThresh<a class="headerlink" href="#projthresh" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/dti.py#L528">Link to code</a></p>
+<p>Wraps command <strong>proj_thresh</strong></p>
+<p>Use FSL proj_thresh for thresholding some outputs of probtrack
+For complete details, see the FDT Documentation
+&lt;<a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_thresh.html">http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_thresh.html</a>&gt;</p>
+<div class="section" id="id4">
+<h3>Example<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ldir</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;seeds_to_M1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;seeds_to_M2.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pThresh</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">ProjThresh</span><span class="p">(</span><span class="n">in_files</span><span class="o">=</span><span class="n">ldir</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pThresh</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;proj_thresh seeds_to_M1.nii seeds_to_M2.nii 3&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (a list of items which are an existing file name)
+        a list of input volumes
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+threshold: (an integer (int or long))
+        threshold indicating minimum number of seed voxels entering this
+        mask region
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_files: (a list of items which are an existing file name)
+        a list of input volumes
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+threshold: (an integer (int or long))
+        threshold indicating minimum number of seed voxels entering this
+        mask region
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_files: (a list of items which are an existing file name)
+        path/name of output volume after thresholding
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-dti-tractskeleton"></span></div>
+</div>
+<div class="section" id="tractskeleton">
+<span id="index-7"></span><h2>TractSkeleton<a class="headerlink" href="#tractskeleton" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/dti.py#L639">Link to code</a></p>
+<p>Wraps command <strong>tbss_skeleton</strong></p>
+<p>Use FSL&#8217;s tbss_skeleton to skeletonise an FA image or project arbitrary values onto a skeleton.</p>
+<p>There are two ways to use this interface.  To create a skeleton from an FA image, just
+supply the <code class="docutils literal"><span class="pre">in_file</span></code> and set <code class="docutils literal"><span class="pre">skeleton_file</span></code> to True (or specify a skeleton filename.
+To project values onto a skeleton, you must set <code class="docutils literal"><span class="pre">project_data</span></code> to True, and then also
+supply values for <code class="docutils literal"><span class="pre">threshold</span></code>, <code class="docutils literal"><span class="pre">distance_map</span></code>, and <code class="docutils literal"><span class="pre">data_file</span></code>. The <code class="docutils literal"><span class="pre">search_mask_file</span></code>
+and <code class="docutils literal"><span class="pre">use_cingulum_mask</span></code> inputs are also used in data projection, but <code class="docutils literal"><span class="pre">use_cingulum_mask</span></code>
+is set to True by default.  This mask controls where the projection algorithm searches
+within a circular space around a tract, rather than in a single perpindicular direction.</p>
+<div class="section" id="id5">
+<h3>Example<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">skeletor</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">TractSkeleton</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">skeletor</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&quot;all_FA.nii.gz&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">skeletor</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">skeleton_file</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">skeletor</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input image (typcially mean FA volume)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+alt_data_file: (an existing file name)
+        4D non-FA data to project onto skeleton
+alt_skeleton: (an existing file name)
+        alternate skeleton to use
+args: (a string)
+        Additional parameters to the command
+data_file: (an existing file name)
+        4D data to project onto skeleton (usually FA)
+distance_map: (an existing file name)
+        distance map image
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input image (typcially mean FA volume)
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+project_data: (a boolean)
+        project data onto skeleton
+        requires: threshold, distance_map, data_file
+projected_data: (a file name)
+        input data projected onto skeleton
+search_mask_file: (an existing file name)
+        mask in which to use alternate search rule
+        mutually_exclusive: use_cingulum_mask
+skeleton_file: (a boolean or a file name)
+        write out skeleton image
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+threshold: (a float)
+        skeleton threshold value
+use_cingulum_mask: (a boolean, nipype default value: True)
+        perform alternate search using built-in cingulum mask
+        mutually_exclusive: search_mask_file
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>projected_data: (a file name)
+        input data projected onto skeleton
+skeleton_file: (a file name)
+        tract skeleton image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-dti-vecreg"></span></div>
+</div>
+<div class="section" id="vecreg">
+<span id="index-8"></span><h2>VecReg<a class="headerlink" href="#vecreg" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/dti.py#L469">Link to code</a></p>
+<p>Wraps command <strong>vecreg</strong></p>
+<p>Use FSL vecreg for registering vector data
+For complete details, see the FDT Documentation
+&lt;<a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_vecreg.html">http://www.fmrib.ox.ac.uk/fsl/fdt/fdt_vecreg.html</a>&gt;</p>
+<div class="section" id="id6">
+<h3>Example<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vreg</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">VecReg</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s">&#39;diffusion.nii&#39;</span><span class="p">,</span>                  <span class="n">affine_mat</span><span class="o">=</span><span class="s">&#39;trans.mat&#39;</span><span class="p">,</span>                  <span class="n">ref_vol</span><span class="o">=</span><span class="s">&#39;mni.nii&#39;</span><span class="p">,</span>                  <span class="n">out_file</span><span class="o">=</span><span class="s">&#39;diffusion_vreg.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vreg</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;vecreg -t trans.mat -i diffusion.nii -o diffusion_vreg.nii -r mni.nii&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        filename for input vector or tensor field
+ref_vol: (an existing file name)
+        filename for reference (target) volume
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+affine_mat: (an existing file name)
+        filename for affine transformation matrix
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        filename for input vector or tensor field
+interpolation: (&#39;nearestneighbour&#39; or &#39;trilinear&#39; or &#39;sinc&#39; or
+         &#39;spline&#39;)
+        interpolation method : nearestneighbour, trilinear (default), sinc
+        or spline
+mask: (an existing file name)
+        brain mask in input space
+out_file: (a file name)
+        filename for output registered vector or tensor field
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+ref_mask: (an existing file name)
+        brain mask in output space (useful for speed up of nonlinear reg)
+ref_vol: (an existing file name)
+        filename for reference (target) volume
+rotation_mat: (an existing file name)
+        filename for secondary affine matrixif set, this will be used for
+        the rotation of the vector/tensor field
+rotation_warp: (an existing file name)
+        filename for secondary warp fieldif set, this will be used for the
+        rotation of the vector/tensor field
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+warp_field: (an existing file name)
+        filename for 4D warp field for nonlinear registration
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        path/name of filename for the registered vector or tensor field
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-dti-xfibres"></span></div>
+</div>
+<div class="section" id="xfibres">
+<span id="index-9"></span><h2>XFibres<a class="headerlink" href="#xfibres" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/dti.py#L825">Link to code</a></p>
+<p>Wraps command <strong>xfibres</strong></p>
+<p>Perform model parameters estimation for local (voxelwise) diffusion parameters</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+bvals: (an existing file name)
+bvecs: (an existing file name)
+dwi: (an existing file name)
+mask: (an existing file name)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+all_ard: (a boolean)
+        Turn ARD on on all fibres
+        mutually_exclusive: no_ard, all_ard
+args: (a string)
+        Additional parameters to the command
+burn_in: (an integer &gt;= 0)
+        Total num of jumps at start of MCMC to be discarded
+burn_in_no_ard: (an integer &gt;= 0)
+        num of burnin jumps before the ard is imposed
+bvals: (an existing file name)
+bvecs: (an existing file name)
+dwi: (an existing file name)
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+force_dir: (a boolean, nipype default value: True)
+        use the actual directory name given - i.e. do not add + to make a
+        new directory
+fudge: (an integer (int or long))
+        ARD fudge factor
+gradnonlin: (an existing file name)
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+logdir: (a directory name, nipype default value: logdir)
+mask: (an existing file name)
+model: (an integer (int or long))
+        Which model to use. 1=mono-exponential (default and required for
+        single shell). 2=continous exponential (for multi-shell experiments)
+n_fibres: (an integer &gt;= 1)
+        Maximum nukmber of fibres to fit in each voxel
+n_jumps: (an integer &gt;= 1)
+        Num of jumps to be made by MCMC
+no_ard: (a boolean)
+        Turn ARD off on all fibres
+        mutually_exclusive: no_ard, all_ard
+no_spat: (a boolean)
+        Initialise with tensor, not spatially
+        mutually_exclusive: no_spat, non_linear
+non_linear: (a boolean)
+        Initialise with nonlinear fitting
+        mutually_exclusive: no_spat, non_linear
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+sample_every: (an integer &gt;= 0)
+        Num of jumps for each sample (MCMC)
+seed: (an integer (int or long))
+        seed for pseudo random number generator
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+update_proposal_every: (an integer &gt;= 1)
+        Num of jumps for each update to the proposal density std (MCMC)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>dyads: (an existing file name)
+        Mean of PDD distribution in vector form.
+fsamples: (an existing file name)
+        Samples from the distribution on anisotropic volume fraction
+mean_S0samples: (an existing file name)
+        Samples from S0 distribution
+mean_dsamples: (an existing file name)
+        Mean of distribution on diffusivity d
+mean_fsamples: (an existing file name)
+        Mean of distribution on f anisotropy
+phsamples: (an existing file name)
+        Samples from the distribution on phi
+thsamples: (an existing file name)
+        Samples from the distribution on theta
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

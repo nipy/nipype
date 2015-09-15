@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,7 +114,7 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">workflows.dmri.mrtrix.connectivity_mapping</a><ul>
-<li><a class="reference internal" href="#create-connectivity-pipeline"><tt class="docutils literal"><span class="pre">create_connectivity_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-connectivity-pipeline"><code class="docutils literal"><span class="pre">create_connectivity_pipeline()</span></code></a><ul>
 <li><a class="reference internal" href="#example">Example</a></li>
 <li><a class="reference internal" href="#graph">Graph</a></li>
 </ul>
@@ -141,7 +141,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -153,7 +153,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -176,9 +176,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -188,15 +188,15 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-nipype.workflows.dmri.mrtrix.connectivity_mapping">
 <span id="workflows-dmri-mrtrix-connectivity-mapping"></span><h1>workflows.dmri.mrtrix.connectivity_mapping<a class="headerlink" href="#module-nipype.workflows.dmri.mrtrix.connectivity_mapping" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="create-connectivity-pipeline">
-<span id="nipype-workflows-dmri-mrtrix-connectivity-mapping-create-connectivity-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_connectivity_pipeline()</span></tt><a class="headerlink" href="#create-connectivity-pipeline" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/mrtrix/connectivity_mapping.py#L18">Link to code</a></p>
+<span id="nipype-workflows-dmri-mrtrix-connectivity-mapping-create-connectivity-pipeline"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_connectivity_pipeline()</span></code><a class="headerlink" href="#create-connectivity-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/mrtrix/connectivity_mapping.py#L18">Link to code</a></p>
 <p>Creates a pipeline that does the same connectivity processing as in the
-<a class="reference internal" href="../../users/examples/dmri_connectivity_advanced.html#example-dmri-connectivity-advanced"><em>dMRI: Connectivity - MRtrix, CMTK, FreeSurfer</em></a> example script. Given a subject id (and completed Freesurfer reconstruction)
+<a class="reference internal" href="../../users/examples/dmri_connectivity_advanced.html#example-dmri-connectivity-advanced"><span>dMRI: Connectivity - MRtrix, CMTK, FreeSurfer</span></a> example script. Given a subject id (and completed Freesurfer reconstruction)
 diffusion-weighted image, b-values, and b-vectors, the workflow will return the subject&#8217;s connectome
 as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="reference external" href="http://www.cmtk.org">http://www.cmtk.org</a>).</p>
 <div class="section" id="example">
@@ -243,7 +243,7 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 <div class="section" id="graph">
 <h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-8186dea6147ab3b07122a09590cfbf5a29322dd6.png" alt="digraph connectivity{
+<img src="../../_images/graphviz-f1ee467ff9812d3a7c31cea6a13b78268e56187f.png" alt="digraph connectivity{
 
   label=&quot;connectivity&quot;;
 
@@ -251,67 +251,25 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
   connectivity_outputnode[label=&quot;outputnode (utility)&quot;];
 
-  subgraph cluster_mapping_networkx {
+  subgraph cluster_mapping_cmats_to_csv {
 
-      label=&quot;networkx&quot;;
+      label=&quot;cmats_to_csv&quot;;
 
-    connectivity_networkx_inputnode[label=&quot;inputnode (utility)&quot;];
+    connectivity_cmats_to_csv_inputnode[label=&quot;inputnode (utility)&quot;];
 
-    connectivity_networkx_NetworkXMetrics[label=&quot;NetworkXMetrics (cmtk)&quot;];
+    connectivity_cmats_to_csv_Matlab2CSV[label=&quot;Matlab2CSV (misc)&quot;];
 
-    connectivity_networkx_Matlab2CSV_global[label=&quot;Matlab2CSV_global (misc)&quot;];
+    connectivity_cmats_to_csv_MergeCSVFiles[label=&quot;MergeCSVFiles (misc)&quot;];
 
-    connectivity_networkx_MergeCSVFiles_global[label=&quot;MergeCSVFiles_global (misc)&quot;];
+    connectivity_cmats_to_csv_outputnode[label=&quot;outputnode (utility)&quot;];
 
-    connectivity_networkx_Matlab2CSV_node[label=&quot;Matlab2CSV_node (misc)&quot;];
+    connectivity_cmats_to_csv_inputnode -&gt; connectivity_cmats_to_csv_Matlab2CSV;
 
-    connectivity_networkx_mergeNetworks[label=&quot;mergeNetworks (utility)&quot;];
+    connectivity_cmats_to_csv_inputnode -&gt; connectivity_cmats_to_csv_MergeCSVFiles;
 
-    connectivity_networkx_MergeCSVFiles_node[label=&quot;MergeCSVFiles_node (misc)&quot;];
+    connectivity_cmats_to_csv_Matlab2CSV -&gt; connectivity_cmats_to_csv_MergeCSVFiles;
 
-    connectivity_networkx_mergeCSVs[label=&quot;mergeCSVs (utility)&quot;];
-
-    connectivity_networkx_outputnode[label=&quot;outputnode (utility)&quot;];
-
-    connectivity_networkx_inputnode -&gt; connectivity_networkx_MergeCSVFiles_node;
-
-    connectivity_networkx_inputnode -&gt; connectivity_networkx_MergeCSVFiles_node;
-
-    connectivity_networkx_inputnode -&gt; connectivity_networkx_MergeCSVFiles_node;
-
-    connectivity_networkx_inputnode -&gt; connectivity_networkx_mergeNetworks;
-
-    connectivity_networkx_inputnode -&gt; connectivity_networkx_NetworkXMetrics;
-
-    connectivity_networkx_inputnode -&gt; connectivity_networkx_MergeCSVFiles_global;
-
-    connectivity_networkx_inputnode -&gt; connectivity_networkx_MergeCSVFiles_global;
-
-    connectivity_networkx_NetworkXMetrics -&gt; connectivity_networkx_Matlab2CSV_global;
-
-    connectivity_networkx_NetworkXMetrics -&gt; connectivity_networkx_outputnode;
-
-    connectivity_networkx_NetworkXMetrics -&gt; connectivity_networkx_Matlab2CSV_node;
-
-    connectivity_networkx_NetworkXMetrics -&gt; connectivity_networkx_mergeNetworks;
-
-    connectivity_networkx_Matlab2CSV_global -&gt; connectivity_networkx_MergeCSVFiles_global;
-
-    connectivity_networkx_Matlab2CSV_global -&gt; connectivity_networkx_MergeCSVFiles_global;
-
-    connectivity_networkx_MergeCSVFiles_global -&gt; connectivity_networkx_outputnode;
-
-    connectivity_networkx_MergeCSVFiles_global -&gt; connectivity_networkx_mergeCSVs;
-
-    connectivity_networkx_Matlab2CSV_node -&gt; connectivity_networkx_MergeCSVFiles_node;
-
-    connectivity_networkx_mergeNetworks -&gt; connectivity_networkx_outputnode;
-
-    connectivity_networkx_MergeCSVFiles_node -&gt; connectivity_networkx_outputnode;
-
-    connectivity_networkx_MergeCSVFiles_node -&gt; connectivity_networkx_mergeCSVs;
-
-    connectivity_networkx_mergeCSVs -&gt; connectivity_networkx_outputnode;
+    connectivity_cmats_to_csv_MergeCSVFiles -&gt; connectivity_cmats_to_csv_outputnode;
 
   }
 
@@ -321,49 +279,65 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_inputnode_within[label=&quot;inputnode_within (utility)&quot;];
 
-    connectivity_mapping_fssource[label=&quot;fssource (io)&quot;];
-
     connectivity_mapping_fssourceRH[label=&quot;fssourceRH (io)&quot;];
-
-    connectivity_mapping_mris_convertRHinflated[label=&quot;mris_convertRHinflated (freesurfer)&quot;];
-
-    connectivity_mapping_mri_convert_Brain[label=&quot;mri_convert_Brain (freesurfer)&quot;];
-
-    connectivity_mapping_mris_convertRHsphere[label=&quot;mris_convertRHsphere (freesurfer)&quot;];
-
-    connectivity_mapping_coregister[label=&quot;coregister (fsl)&quot;];
-
-    connectivity_mapping_bet_b0[label=&quot;bet_b0 (fsl)&quot;];
 
     connectivity_mapping_mris_convertRH[label=&quot;mris_convertRH (freesurfer)&quot;];
 
-    connectivity_mapping_fsl2mrtrix[label=&quot;fsl2mrtrix (mrtrix)&quot;];
+    connectivity_mapping_mris_convertRHsphere[label=&quot;mris_convertRHsphere (freesurfer)&quot;];
 
-    connectivity_mapping_gen_WM_mask[label=&quot;gen_WM_mask (mrtrix)&quot;];
-
-    connectivity_mapping_dwi2tensor[label=&quot;dwi2tensor (mrtrix)&quot;];
-
-    connectivity_mapping_tensor2adc[label=&quot;tensor2adc (mrtrix)&quot;];
-
-    connectivity_mapping_MRconvert[label=&quot;MRconvert (mrtrix)&quot;];
-
-    connectivity_mapping_threshold_b0[label=&quot;threshold_b0 (mrtrix)&quot;];
-
-    connectivity_mapping_mris_convertRHlabels[label=&quot;mris_convertRHlabels (freesurfer)&quot;];
-
-    connectivity_mapping_threshold_wmmask[label=&quot;threshold_wmmask (mrtrix)&quot;];
+    connectivity_mapping_mris_convertRHwhite[label=&quot;mris_convertRHwhite (freesurfer)&quot;];
 
     connectivity_mapping_Parcellate[label=&quot;Parcellate (cmtk)&quot;];
 
     connectivity_mapping_mri_convert_ROI_scale500[label=&quot;mri_convert_ROI_scale500 (freesurfer)&quot;];
 
-    connectivity_mapping_NiftiVolumes[label=&quot;NiftiVolumes (utility)&quot;];
+    connectivity_mapping_fssource[label=&quot;fssource (io)&quot;];
+
+    connectivity_mapping_mri_convert_Brain[label=&quot;mri_convert_Brain (freesurfer)&quot;];
+
+    connectivity_mapping_fssourceLH[label=&quot;fssourceLH (io)&quot;];
+
+    connectivity_mapping_mris_convertLHsphere[label=&quot;mris_convertLHsphere (freesurfer)&quot;];
+
+    connectivity_mapping_mris_convertLHlabels[label=&quot;mris_convertLHlabels (freesurfer)&quot;];
+
+    connectivity_mapping_mris_convertLH[label=&quot;mris_convertLH (freesurfer)&quot;];
+
+    connectivity_mapping_mris_convertRHlabels[label=&quot;mris_convertRHlabels (freesurfer)&quot;];
+
+    connectivity_mapping_GiftiLabels[label=&quot;GiftiLabels (utility)&quot;];
+
+    connectivity_mapping_mris_convertLHwhite[label=&quot;mris_convertLHwhite (freesurfer)&quot;];
+
+    connectivity_mapping_mris_convertLHinflated[label=&quot;mris_convertLHinflated (freesurfer)&quot;];
+
+    connectivity_mapping_MRconvert[label=&quot;MRconvert (mrtrix)&quot;];
+
+    connectivity_mapping_threshold_b0[label=&quot;threshold_b0 (mrtrix)&quot;];
 
     connectivity_mapping_median3d[label=&quot;median3d (mrtrix)&quot;];
 
     connectivity_mapping_erode_mask_firstpass[label=&quot;erode_mask_firstpass (mrtrix)&quot;];
 
     connectivity_mapping_erode_mask_secondpass[label=&quot;erode_mask_secondpass (mrtrix)&quot;];
+
+    connectivity_mapping_NiftiVolumes[label=&quot;NiftiVolumes (utility)&quot;];
+
+    connectivity_mapping_coregister[label=&quot;coregister (fsl)&quot;];
+
+    connectivity_mapping_bet_b0[label=&quot;bet_b0 (fsl)&quot;];
+
+    connectivity_mapping_mris_convertRHinflated[label=&quot;mris_convertRHinflated (freesurfer)&quot;];
+
+    connectivity_mapping_GiftiSurfaces[label=&quot;GiftiSurfaces (utility)&quot;];
+
+    connectivity_mapping_fsl2mrtrix[label=&quot;fsl2mrtrix (mrtrix)&quot;];
+
+    connectivity_mapping_gen_WM_mask[label=&quot;gen_WM_mask (mrtrix)&quot;];
+
+    connectivity_mapping_threshold_wmmask[label=&quot;threshold_wmmask (mrtrix)&quot;];
+
+    connectivity_mapping_dwi2tensor[label=&quot;dwi2tensor (mrtrix)&quot;];
 
     connectivity_mapping_tensor2fa[label=&quot;tensor2fa (mrtrix)&quot;];
 
@@ -373,6 +347,12 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_threshold_FA[label=&quot;threshold_FA (mrtrix)&quot;];
 
+    connectivity_mapping_MRconvert_fa[label=&quot;MRconvert_fa (mrtrix)&quot;];
+
+    connectivity_mapping_tensor2vector[label=&quot;tensor2vector (mrtrix)&quot;];
+
+    connectivity_mapping_tensor2adc[label=&quot;tensor2adc (mrtrix)&quot;];
+
     connectivity_mapping_estimateresponse[label=&quot;estimateresponse (mrtrix)&quot;];
 
     connectivity_mapping_csdeconv[label=&quot;csdeconv (mrtrix)&quot;];
@@ -381,79 +361,55 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_tracks2prob[label=&quot;tracks2prob (mrtrix)&quot;];
 
-    connectivity_mapping_MRconvert_fa[label=&quot;MRconvert_fa (mrtrix)&quot;];
-
     connectivity_mapping_MRconvert_tracks2prob[label=&quot;MRconvert_tracks2prob (mrtrix)&quot;];
 
     connectivity_mapping_tck2trk[label=&quot;tck2trk (mrtrix)&quot;];
 
-    connectivity_mapping_CreateMatrix[label=&quot;CreateMatrix (cmtk)&quot;];
+    connectivity_mapping_trk2tdi[label=&quot;trk2tdi (dipy)&quot;];
 
-    connectivity_mapping_FiberDataArrays[label=&quot;FiberDataArrays (utility)&quot;];
+    connectivity_mapping_CreateMatrix[label=&quot;CreateMatrix (cmtk)&quot;];
 
     connectivity_mapping_nfibs_to_csv[label=&quot;nfibs_to_csv (misc)&quot;];
 
     connectivity_mapping_merge_nfib_csvs[label=&quot;merge_nfib_csvs (misc)&quot;];
 
-    connectivity_mapping_trk2tdi[label=&quot;trk2tdi (dipy)&quot;];
-
-    connectivity_mapping_fssourceLH[label=&quot;fssourceLH (io)&quot;];
-
-    connectivity_mapping_mris_convertLHlabels[label=&quot;mris_convertLHlabels (freesurfer)&quot;];
-
-    connectivity_mapping_GiftiLabels[label=&quot;GiftiLabels (utility)&quot;];
-
-    connectivity_mapping_mris_convertLH[label=&quot;mris_convertLH (freesurfer)&quot;];
-
-    connectivity_mapping_mris_convertLHinflated[label=&quot;mris_convertLHinflated (freesurfer)&quot;];
-
-    connectivity_mapping_mris_convertLHsphere[label=&quot;mris_convertLHsphere (freesurfer)&quot;];
-
-    connectivity_mapping_mris_convertLHwhite[label=&quot;mris_convertLHwhite (freesurfer)&quot;];
-
-    connectivity_mapping_tensor2vector[label=&quot;tensor2vector (mrtrix)&quot;];
-
-    connectivity_mapping_mris_convertRHwhite[label=&quot;mris_convertRHwhite (freesurfer)&quot;];
-
-    connectivity_mapping_GiftiSurfaces[label=&quot;GiftiSurfaces (utility)&quot;];
+    connectivity_mapping_FiberDataArrays[label=&quot;FiberDataArrays (utility)&quot;];
 
     connectivity_mapping_CFFConverter[label=&quot;CFFConverter (cmtk)&quot;];
 
     connectivity_mapping_NxStatsCFFConverter[label=&quot;NxStatsCFFConverter (cmtk)&quot;];
 
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceRH;
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fsl2mrtrix;
 
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceRH;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_CreateMatrix;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_CreateMatrix;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_CreateMatrix;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_CFFConverter;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceLH;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceLH;
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fsl2mrtrix;
 
     connectivity_mapping_inputnode_within -&gt; connectivity_mapping_merge_nfib_csvs;
 
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssource;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssource;
-
     connectivity_mapping_inputnode_within -&gt; connectivity_mapping_NxStatsCFFConverter;
 
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fsl2mrtrix;
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceLH;
 
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fsl2mrtrix;
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceLH;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceRH;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceRH;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_CFFConverter;
 
     connectivity_mapping_inputnode_within -&gt; connectivity_mapping_Parcellate;
 
     connectivity_mapping_inputnode_within -&gt; connectivity_mapping_Parcellate;
 
-    connectivity_mapping_fssource -&gt; connectivity_mapping_mri_convert_Brain;
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssource;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssource;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_CreateMatrix;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_CreateMatrix;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_CreateMatrix;
 
     connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRH;
 
@@ -467,7 +423,19 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRHinflated;
 
-    connectivity_mapping_mris_convertRHinflated -&gt; connectivity_mapping_GiftiSurfaces;
+    connectivity_mapping_mris_convertRH -&gt; connectivity_mapping_GiftiSurfaces;
+
+    connectivity_mapping_mris_convertRHsphere -&gt; connectivity_mapping_GiftiSurfaces;
+
+    connectivity_mapping_mris_convertRHwhite -&gt; connectivity_mapping_GiftiSurfaces;
+
+    connectivity_mapping_Parcellate -&gt; connectivity_mapping_mri_convert_ROI_scale500;
+
+    connectivity_mapping_Parcellate -&gt; connectivity_mapping_CreateMatrix;
+
+    connectivity_mapping_Parcellate -&gt; connectivity_mapping_NiftiVolumes;
+
+    connectivity_mapping_fssource -&gt; connectivity_mapping_mri_convert_Brain;
 
     connectivity_mapping_mri_convert_Brain -&gt; connectivity_mapping_NiftiVolumes;
 
@@ -475,7 +443,33 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_mri_convert_Brain -&gt; connectivity_mapping_tck2trk;
 
-    connectivity_mapping_mris_convertRHsphere -&gt; connectivity_mapping_GiftiSurfaces;
+    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHsphere;
+
+    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHlabels;
+
+    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHlabels;
+
+    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHinflated;
+
+    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLH;
+
+    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHwhite;
+
+    connectivity_mapping_mris_convertLHsphere -&gt; connectivity_mapping_GiftiSurfaces;
+
+    connectivity_mapping_mris_convertLHlabels -&gt; connectivity_mapping_GiftiLabels;
+
+    connectivity_mapping_mris_convertLH -&gt; connectivity_mapping_GiftiSurfaces;
+
+    connectivity_mapping_mris_convertRHlabels -&gt; connectivity_mapping_GiftiLabels;
+
+    connectivity_mapping_GiftiLabels -&gt; connectivity_mapping_CFFConverter;
+
+    connectivity_mapping_GiftiLabels -&gt; connectivity_mapping_NxStatsCFFConverter;
+
+    connectivity_mapping_mris_convertLHwhite -&gt; connectivity_mapping_GiftiSurfaces;
+
+    connectivity_mapping_mris_convertLHinflated -&gt; connectivity_mapping_GiftiSurfaces;
 
     subgraph cluster_connectivity_mapping_eddycorrect {
 
@@ -509,17 +503,35 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     }
 
+    connectivity_mapping_MRconvert -&gt; connectivity_mapping_threshold_b0;
+
+    connectivity_mapping_threshold_b0 -&gt; connectivity_mapping_median3d;
+
+    connectivity_mapping_median3d -&gt; connectivity_mapping_erode_mask_firstpass;
+
+    connectivity_mapping_erode_mask_firstpass -&gt; connectivity_mapping_erode_mask_secondpass;
+
+    connectivity_mapping_erode_mask_secondpass -&gt; connectivity_mapping_MRmultiply_merge;
+
+    connectivity_mapping_NiftiVolumes -&gt; connectivity_mapping_CFFConverter;
+
+    connectivity_mapping_NiftiVolumes -&gt; connectivity_mapping_NxStatsCFFConverter;
+
     connectivity_mapping_coregister -&gt; connectivity_mapping_tck2trk;
 
     connectivity_mapping_bet_b0 -&gt; connectivity_mapping_gen_WM_mask;
 
-    connectivity_mapping_mris_convertRH -&gt; connectivity_mapping_GiftiSurfaces;
+    connectivity_mapping_mris_convertRHinflated -&gt; connectivity_mapping_GiftiSurfaces;
+
+    connectivity_mapping_GiftiSurfaces -&gt; connectivity_mapping_CFFConverter;
+
+    connectivity_mapping_GiftiSurfaces -&gt; connectivity_mapping_NxStatsCFFConverter;
 
     connectivity_mapping_fsl2mrtrix -&gt; connectivity_mapping_gen_WM_mask;
 
-    connectivity_mapping_fsl2mrtrix -&gt; connectivity_mapping_csdeconv;
-
     connectivity_mapping_fsl2mrtrix -&gt; connectivity_mapping_dwi2tensor;
+
+    connectivity_mapping_fsl2mrtrix -&gt; connectivity_mapping_csdeconv;
 
     connectivity_mapping_fsl2mrtrix -&gt; connectivity_mapping_estimateresponse;
 
@@ -527,35 +539,13 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_gen_WM_mask -&gt; connectivity_mapping_csdeconv;
 
-    connectivity_mapping_dwi2tensor -&gt; connectivity_mapping_tensor2vector;
+    connectivity_mapping_threshold_wmmask -&gt; connectivity_mapping_probCSDstreamtrack;
 
     connectivity_mapping_dwi2tensor -&gt; connectivity_mapping_tensor2fa;
 
+    connectivity_mapping_dwi2tensor -&gt; connectivity_mapping_tensor2vector;
+
     connectivity_mapping_dwi2tensor -&gt; connectivity_mapping_tensor2adc;
-
-    connectivity_mapping_MRconvert -&gt; connectivity_mapping_threshold_b0;
-
-    connectivity_mapping_threshold_b0 -&gt; connectivity_mapping_median3d;
-
-    connectivity_mapping_mris_convertRHlabels -&gt; connectivity_mapping_GiftiLabels;
-
-    connectivity_mapping_threshold_wmmask -&gt; connectivity_mapping_probCSDstreamtrack;
-
-    connectivity_mapping_Parcellate -&gt; connectivity_mapping_mri_convert_ROI_scale500;
-
-    connectivity_mapping_Parcellate -&gt; connectivity_mapping_NiftiVolumes;
-
-    connectivity_mapping_Parcellate -&gt; connectivity_mapping_CreateMatrix;
-
-    connectivity_mapping_NiftiVolumes -&gt; connectivity_mapping_NxStatsCFFConverter;
-
-    connectivity_mapping_NiftiVolumes -&gt; connectivity_mapping_CFFConverter;
-
-    connectivity_mapping_median3d -&gt; connectivity_mapping_erode_mask_firstpass;
-
-    connectivity_mapping_erode_mask_firstpass -&gt; connectivity_mapping_erode_mask_secondpass;
-
-    connectivity_mapping_erode_mask_secondpass -&gt; connectivity_mapping_MRmultiply_merge;
 
     connectivity_mapping_tensor2fa -&gt; connectivity_mapping_MRmultiply_merge;
 
@@ -577,23 +567,23 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_tracks2prob -&gt; connectivity_mapping_MRconvert_tracks2prob;
 
-    connectivity_mapping_tck2trk -&gt; connectivity_mapping_CreateMatrix;
-
     connectivity_mapping_tck2trk -&gt; connectivity_mapping_trk2tdi;
 
-    connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_FiberDataArrays;
+    connectivity_mapping_tck2trk -&gt; connectivity_mapping_CreateMatrix;
 
-    connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_FiberDataArrays;
+    connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_CFFConverter;
 
-    connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_FiberDataArrays;
-
-    connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_FiberDataArrays;
+    connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_CFFConverter;
 
     connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_nfibs_to_csv;
 
-    connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_CFFConverter;
+    connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_FiberDataArrays;
 
-    connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_CFFConverter;
+    connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_FiberDataArrays;
+
+    connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_FiberDataArrays;
+
+    connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_FiberDataArrays;
 
     subgraph cluster_connectivity_mapping_cmats_to_csv {
 
@@ -617,11 +607,11 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     }
 
-    connectivity_mapping_FiberDataArrays -&gt; connectivity_mapping_NxStatsCFFConverter;
+    connectivity_mapping_nfibs_to_csv -&gt; connectivity_mapping_merge_nfib_csvs;
 
     connectivity_mapping_FiberDataArrays -&gt; connectivity_mapping_CFFConverter;
 
-    connectivity_mapping_nfibs_to_csv -&gt; connectivity_mapping_merge_nfib_csvs;
+    connectivity_mapping_FiberDataArrays -&gt; connectivity_mapping_NxStatsCFFConverter;
 
     subgraph cluster_connectivity_mapping_networkx {
 
@@ -633,11 +623,11 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
         connectivity_mapping_networkx_Matlab2CSV_global[label=&quot;Matlab2CSV_global (misc)&quot;];
 
-        connectivity_mapping_networkx_MergeCSVFiles_global[label=&quot;MergeCSVFiles_global (misc)&quot;];
-
         connectivity_mapping_networkx_Matlab2CSV_node[label=&quot;Matlab2CSV_node (misc)&quot;];
 
         connectivity_mapping_networkx_mergeNetworks[label=&quot;mergeNetworks (utility)&quot;];
+
+        connectivity_mapping_networkx_MergeCSVFiles_global[label=&quot;MergeCSVFiles_global (misc)&quot;];
 
         connectivity_mapping_networkx_MergeCSVFiles_node[label=&quot;MergeCSVFiles_node (misc)&quot;];
 
@@ -645,25 +635,25 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
         connectivity_mapping_networkx_outputnode[label=&quot;outputnode (utility)&quot;];
 
-        connectivity_mapping_networkx_inputnode -&gt; connectivity_mapping_networkx_MergeCSVFiles_node;
-
-        connectivity_mapping_networkx_inputnode -&gt; connectivity_mapping_networkx_MergeCSVFiles_node;
-
-        connectivity_mapping_networkx_inputnode -&gt; connectivity_mapping_networkx_MergeCSVFiles_node;
-
         connectivity_mapping_networkx_inputnode -&gt; connectivity_mapping_networkx_mergeNetworks;
+
+        connectivity_mapping_networkx_inputnode -&gt; connectivity_mapping_networkx_MergeCSVFiles_global;
+
+        connectivity_mapping_networkx_inputnode -&gt; connectivity_mapping_networkx_MergeCSVFiles_global;
 
         connectivity_mapping_networkx_inputnode -&gt; connectivity_mapping_networkx_NetworkXMetrics;
 
-        connectivity_mapping_networkx_inputnode -&gt; connectivity_mapping_networkx_MergeCSVFiles_global;
+        connectivity_mapping_networkx_inputnode -&gt; connectivity_mapping_networkx_MergeCSVFiles_node;
 
-        connectivity_mapping_networkx_inputnode -&gt; connectivity_mapping_networkx_MergeCSVFiles_global;
+        connectivity_mapping_networkx_inputnode -&gt; connectivity_mapping_networkx_MergeCSVFiles_node;
 
-        connectivity_mapping_networkx_NetworkXMetrics -&gt; connectivity_mapping_networkx_Matlab2CSV_global;
+        connectivity_mapping_networkx_inputnode -&gt; connectivity_mapping_networkx_MergeCSVFiles_node;
+
+        connectivity_mapping_networkx_NetworkXMetrics -&gt; connectivity_mapping_networkx_Matlab2CSV_node;
 
         connectivity_mapping_networkx_NetworkXMetrics -&gt; connectivity_mapping_networkx_outputnode;
 
-        connectivity_mapping_networkx_NetworkXMetrics -&gt; connectivity_mapping_networkx_Matlab2CSV_node;
+        connectivity_mapping_networkx_NetworkXMetrics -&gt; connectivity_mapping_networkx_Matlab2CSV_global;
 
         connectivity_mapping_networkx_NetworkXMetrics -&gt; connectivity_mapping_networkx_mergeNetworks;
 
@@ -671,13 +661,13 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
         connectivity_mapping_networkx_Matlab2CSV_global -&gt; connectivity_mapping_networkx_MergeCSVFiles_global;
 
-        connectivity_mapping_networkx_MergeCSVFiles_global -&gt; connectivity_mapping_networkx_outputnode;
-
-        connectivity_mapping_networkx_MergeCSVFiles_global -&gt; connectivity_mapping_networkx_mergeCSVs;
-
         connectivity_mapping_networkx_Matlab2CSV_node -&gt; connectivity_mapping_networkx_MergeCSVFiles_node;
 
         connectivity_mapping_networkx_mergeNetworks -&gt; connectivity_mapping_networkx_outputnode;
+
+        connectivity_mapping_networkx_MergeCSVFiles_global -&gt; connectivity_mapping_networkx_outputnode;
+
+        connectivity_mapping_networkx_MergeCSVFiles_global -&gt; connectivity_mapping_networkx_mergeCSVs;
 
         connectivity_mapping_networkx_MergeCSVFiles_node -&gt; connectivity_mapping_networkx_outputnode;
 
@@ -687,105 +677,117 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     }
 
-    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHlabels;
-
-    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHlabels;
-
-    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLH;
-
-    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHinflated;
-
-    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHsphere;
-
-    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHwhite;
-
-    connectivity_mapping_mris_convertLHlabels -&gt; connectivity_mapping_GiftiLabels;
-
-    connectivity_mapping_GiftiLabels -&gt; connectivity_mapping_NxStatsCFFConverter;
-
-    connectivity_mapping_GiftiLabels -&gt; connectivity_mapping_CFFConverter;
-
-    connectivity_mapping_mris_convertLH -&gt; connectivity_mapping_GiftiSurfaces;
-
-    connectivity_mapping_mris_convertLHinflated -&gt; connectivity_mapping_GiftiSurfaces;
-
-    connectivity_mapping_mris_convertLHsphere -&gt; connectivity_mapping_GiftiSurfaces;
-
-    connectivity_mapping_mris_convertLHwhite -&gt; connectivity_mapping_GiftiSurfaces;
-
-    connectivity_mapping_mris_convertRHwhite -&gt; connectivity_mapping_GiftiSurfaces;
-
-    connectivity_mapping_GiftiSurfaces -&gt; connectivity_mapping_NxStatsCFFConverter;
-
-    connectivity_mapping_GiftiSurfaces -&gt; connectivity_mapping_CFFConverter;
-
-    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_tck2trk;
-
     connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_MRconvert;
-
-    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_csdeconv;
-
-    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_coregister;
-
-    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_NiftiVolumes;
-
-    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_bet_b0;
-
-    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_gen_WM_mask;
-
-    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_estimateresponse;
-
-    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_tracks2prob;
 
     connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_dwi2tensor;
 
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_networkx_inputnode;
+    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_tracks2prob;
 
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_eddycorrect_inputnode;
+    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_csdeconv;
 
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_cmats_to_csv_inputnode;
+    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_NiftiVolumes;
+
+    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_gen_WM_mask;
+
+    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_coregister;
+
+    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_bet_b0;
+
+    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_estimateresponse;
+
+    connectivity_mapping_eddycorrect_outputnode -&gt; connectivity_mapping_tck2trk;
+
+    connectivity_mapping_networkx_outputnode -&gt; connectivity_mapping_NxStatsCFFConverter;
 
     connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_cmats_to_csv_inputnode;
 
     connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_networkx_inputnode;
 
-    connectivity_mapping_networkx_outputnode -&gt; connectivity_mapping_NxStatsCFFConverter;
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_eddycorrect_inputnode;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_networkx_inputnode;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_cmats_to_csv_inputnode;
 
   }
 
-  subgraph cluster_mapping_cmats_to_csv {
+  subgraph cluster_mapping_networkx {
 
-      label=&quot;cmats_to_csv&quot;;
+      label=&quot;networkx&quot;;
 
-    connectivity_cmats_to_csv_inputnode[label=&quot;inputnode (utility)&quot;];
+    connectivity_networkx_inputnode[label=&quot;inputnode (utility)&quot;];
 
-    connectivity_cmats_to_csv_Matlab2CSV[label=&quot;Matlab2CSV (misc)&quot;];
+    connectivity_networkx_NetworkXMetrics[label=&quot;NetworkXMetrics (cmtk)&quot;];
 
-    connectivity_cmats_to_csv_MergeCSVFiles[label=&quot;MergeCSVFiles (misc)&quot;];
+    connectivity_networkx_Matlab2CSV_global[label=&quot;Matlab2CSV_global (misc)&quot;];
 
-    connectivity_cmats_to_csv_outputnode[label=&quot;outputnode (utility)&quot;];
+    connectivity_networkx_Matlab2CSV_node[label=&quot;Matlab2CSV_node (misc)&quot;];
 
-    connectivity_cmats_to_csv_inputnode -&gt; connectivity_cmats_to_csv_Matlab2CSV;
+    connectivity_networkx_mergeNetworks[label=&quot;mergeNetworks (utility)&quot;];
 
-    connectivity_cmats_to_csv_inputnode -&gt; connectivity_cmats_to_csv_MergeCSVFiles;
+    connectivity_networkx_MergeCSVFiles_global[label=&quot;MergeCSVFiles_global (misc)&quot;];
 
-    connectivity_cmats_to_csv_Matlab2CSV -&gt; connectivity_cmats_to_csv_MergeCSVFiles;
+    connectivity_networkx_MergeCSVFiles_node[label=&quot;MergeCSVFiles_node (misc)&quot;];
 
-    connectivity_cmats_to_csv_MergeCSVFiles -&gt; connectivity_cmats_to_csv_outputnode;
+    connectivity_networkx_mergeCSVs[label=&quot;mergeCSVs (utility)&quot;];
+
+    connectivity_networkx_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    connectivity_networkx_inputnode -&gt; connectivity_networkx_mergeNetworks;
+
+    connectivity_networkx_inputnode -&gt; connectivity_networkx_MergeCSVFiles_global;
+
+    connectivity_networkx_inputnode -&gt; connectivity_networkx_MergeCSVFiles_global;
+
+    connectivity_networkx_inputnode -&gt; connectivity_networkx_NetworkXMetrics;
+
+    connectivity_networkx_inputnode -&gt; connectivity_networkx_MergeCSVFiles_node;
+
+    connectivity_networkx_inputnode -&gt; connectivity_networkx_MergeCSVFiles_node;
+
+    connectivity_networkx_inputnode -&gt; connectivity_networkx_MergeCSVFiles_node;
+
+    connectivity_networkx_NetworkXMetrics -&gt; connectivity_networkx_Matlab2CSV_node;
+
+    connectivity_networkx_NetworkXMetrics -&gt; connectivity_networkx_outputnode;
+
+    connectivity_networkx_NetworkXMetrics -&gt; connectivity_networkx_Matlab2CSV_global;
+
+    connectivity_networkx_NetworkXMetrics -&gt; connectivity_networkx_mergeNetworks;
+
+    connectivity_networkx_Matlab2CSV_global -&gt; connectivity_networkx_MergeCSVFiles_global;
+
+    connectivity_networkx_Matlab2CSV_global -&gt; connectivity_networkx_MergeCSVFiles_global;
+
+    connectivity_networkx_Matlab2CSV_node -&gt; connectivity_networkx_MergeCSVFiles_node;
+
+    connectivity_networkx_mergeNetworks -&gt; connectivity_networkx_outputnode;
+
+    connectivity_networkx_MergeCSVFiles_global -&gt; connectivity_networkx_outputnode;
+
+    connectivity_networkx_MergeCSVFiles_global -&gt; connectivity_networkx_mergeCSVs;
+
+    connectivity_networkx_MergeCSVFiles_node -&gt; connectivity_networkx_outputnode;
+
+    connectivity_networkx_MergeCSVFiles_node -&gt; connectivity_networkx_mergeCSVs;
+
+    connectivity_networkx_mergeCSVs -&gt; connectivity_networkx_outputnode;
 
   }
+
+  mapping_networkx_outputnode -&gt; connectivity_outputnode;
+
+  connectivity_inputnode -&gt; connectivity_mapping_inputnode_within;
+
+  connectivity_inputnode -&gt; connectivity_mapping_inputnode_within;
+
+  connectivity_inputnode -&gt; connectivity_mapping_inputnode_within;
+
+  connectivity_inputnode -&gt; connectivity_mapping_inputnode_within;
+
+  connectivity_inputnode -&gt; connectivity_mapping_inputnode_within;
 
   mapping_cmats_to_csv_outputnode -&gt; connectivity_outputnode;
-
-  connectivity_inputnode -&gt; connectivity_mapping_inputnode_within;
-
-  connectivity_inputnode -&gt; connectivity_mapping_inputnode_within;
-
-  connectivity_inputnode -&gt; connectivity_mapping_inputnode_within;
-
-  connectivity_inputnode -&gt; connectivity_mapping_inputnode_within;
-
-  connectivity_inputnode -&gt; connectivity_mapping_inputnode_within;
 
   connectivity_mapping_tck2trk -&gt; connectivity_outputnode;
 
@@ -819,8 +821,6 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
   connectivity_mapping_MRconvert_tracks2prob -&gt; connectivity_outputnode;
 
-  mapping_networkx_outputnode -&gt; connectivity_outputnode;
-
 }" />
 </p>
 </div>
@@ -834,9 +834,9 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -1,0 +1,1128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.11.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.semtools.filtering.featuredetection</a><ul>
+<li><a class="reference internal" href="#cannyedge">CannyEdge</a></li>
+<li><a class="reference internal" href="#cannysegmentationlevelsetimagefilter">CannySegmentationLevelSetImageFilter</a></li>
+<li><a class="reference internal" href="#dilateimage">DilateImage</a></li>
+<li><a class="reference internal" href="#dilatemask">DilateMask</a></li>
+<li><a class="reference internal" href="#distancemaps">DistanceMaps</a></li>
+<li><a class="reference internal" href="#dumpbinarytrainingvectors">DumpBinaryTrainingVectors</a></li>
+<li><a class="reference internal" href="#erodeimage">ErodeImage</a></li>
+<li><a class="reference internal" href="#flippeddifference">FlippedDifference</a></li>
+<li><a class="reference internal" href="#generatebrainclippedimage">GenerateBrainClippedImage</a></li>
+<li><a class="reference internal" href="#generatesummedgradientimage">GenerateSummedGradientImage</a></li>
+<li><a class="reference internal" href="#generatetestimage">GenerateTestImage</a></li>
+<li><a class="reference internal" href="#gradientanisotropicdiffusionimagefilter">GradientAnisotropicDiffusionImageFilter</a></li>
+<li><a class="reference internal" href="#hammerattributecreator">HammerAttributeCreator</a></li>
+<li><a class="reference internal" href="#neighborhoodmean">NeighborhoodMean</a></li>
+<li><a class="reference internal" href="#neighborhoodmedian">NeighborhoodMedian</a></li>
+<li><a class="reference internal" href="#stapleanalysis">STAPLEAnalysis</a></li>
+<li><a class="reference internal" href="#texturefromnoiseimagefilter">TextureFromNoiseImageFilter</a></li>
+<li><a class="reference internal" href="#texturemeasurefilter">TextureMeasureFilter</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-semtools-filtering-featuredetection">
+<h1>interfaces.semtools.filtering.featuredetection<a class="headerlink" href="#interfaces-semtools-filtering-featuredetection" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-cannyedge"></span><div class="section" id="cannyedge">
+<span id="index-0"></span><h2>CannyEdge<a class="headerlink" href="#cannyedge" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L631">Link to code</a></p>
+<p>Wraps command ** CannyEdge **</p>
+<p>title: Canny Edge Detection</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Get the distance from a voxel to the nearest voxel of a given tissue type.</p>
+<p>version: 0.1.0.(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://www.na-mic.org/">http:://www.na-mic.org/</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This tool was written by Hans J. Johnson.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        Required: input tissue label image
+        flag: --inputVolume %s
+lowerThreshold: (a float)
+        Threshold is the lowest allowed value in the output image. Its data
+        type is the same as the data type of the output image. Any values
+        below the Threshold level will be replaced with the OutsideValue
+        parameter value, whose default is zero.
+        flag: --lowerThreshold %f
+outputVolume: (a boolean or a file name)
+        Required: output image
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+upperThreshold: (a float)
+        Threshold is the lowest allowed value in the output image. Its data
+        type is the same as the data type of the output image. Any values
+        below the Threshold level will be replaced with the OutsideValue
+        parameter value, whose default is zero.
+        flag: --upperThreshold %f
+variance: (a float)
+        Variance and Maximum error are used in the Gaussian smoothing of the
+        input image. See itkDiscreteGaussianImageFilter for information on
+        these parameters.
+        flag: --variance %f
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Required: output image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-cannysegmentationlevelsetimagefilter"></span></div>
+<div class="section" id="cannysegmentationlevelsetimagefilter">
+<span id="index-1"></span><h2>CannySegmentationLevelSetImageFilter<a class="headerlink" href="#cannysegmentationlevelsetimagefilter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L61">Link to code</a></p>
+<p>Wraps command ** CannySegmentationLevelSetImageFilter **</p>
+<p>title: Canny Level Set Image Filter</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: The CannySegmentationLevelSet is commonly used to refine a manually generated manual mask.</p>
+<p>version: 0.3.0</p>
+<p>license: CC</p>
+<p>contributor: Regina Kim</p>
+<p>acknowledgements: This command module was derived from Insight/Examples/Segmentation/CannySegmentationLevelSetImageFilter.cxx (copyright) Insight Software Consortium.  See <a class="reference external" href="http://wiki.na-mic.org/Wiki/index.php/Slicer3:Execution_Model_Documentation">http://wiki.na-mic.org/Wiki/index.php/Slicer3:Execution_Model_Documentation</a> for more detailed descriptions.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+advectionWeight: (a float)
+        Controls the smoothness of the resulting mask, small number are more
+        smooth, large numbers allow more sharp corners.
+        flag: --advectionWeight %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+cannyThreshold: (a float)
+        Canny Threshold Value
+        flag: --cannyThreshold %f
+cannyVariance: (a float)
+        Canny variance
+        flag: --cannyVariance %f
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+initialModel: (an existing file name)
+        flag: --initialModel %s
+initialModelIsovalue: (a float)
+        The identification of the input model iso-surface. (for a binary
+        image with 0s and 1s use 0.5) (for a binary image with 0s and 255&#39;s
+        use 127.5).
+        flag: --initialModelIsovalue %f
+inputVolume: (an existing file name)
+        flag: --inputVolume %s
+maxIterations: (an integer (int or long))
+        The
+        flag: --maxIterations %d
+outputSpeedVolume: (a boolean or a file name)
+        flag: --outputSpeedVolume %s
+outputVolume: (a boolean or a file name)
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputSpeedVolume: (an existing file name)
+outputVolume: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-dilateimage"></span></div>
+<div class="section" id="dilateimage">
+<span id="index-2"></span><h2>DilateImage<a class="headerlink" href="#dilateimage" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L97">Link to code</a></p>
+<p>Wraps command ** DilateImage **</p>
+<p>title: Dilate Image</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Uses mathematical morphology to dilate the input images.</p>
+<p>version: 0.1.0.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://www.na-mic.org/">http:://www.na-mic.org/</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This tool was developed by Mark Scully and Jeremy Bockholt.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputMaskVolume: (an existing file name)
+        Required: input brain mask image
+        flag: --inputMaskVolume %s
+inputRadius: (an integer (int or long))
+        Required: input neighborhood radius
+        flag: --inputRadius %d
+inputVolume: (an existing file name)
+        Required: input image
+        flag: --inputVolume %s
+outputVolume: (a boolean or a file name)
+        Required: output image
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Required: output image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-dilatemask"></span></div>
+<div class="section" id="dilatemask">
+<span id="index-3"></span><h2>DilateMask<a class="headerlink" href="#dilatemask" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L456">Link to code</a></p>
+<p>Wraps command ** DilateMask **</p>
+<p>title: Dilate Image</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Uses mathematical morphology to dilate the input images.</p>
+<p>version: 0.1.0.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://www.na-mic.org/">http:://www.na-mic.org/</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This tool was developed by Mark Scully and Jeremy Bockholt.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputBinaryVolume: (an existing file name)
+        Required: input brain mask image
+        flag: --inputBinaryVolume %s
+inputVolume: (an existing file name)
+        Required: input image
+        flag: --inputVolume %s
+lowerThreshold: (a float)
+        Required: lowerThreshold value
+        flag: --lowerThreshold %f
+outputVolume: (a boolean or a file name)
+        Required: output image
+        flag: --outputVolume %s
+sizeStructuralElement: (an integer (int or long))
+        size of structural element. sizeStructuralElement=1 means that 3x3x3
+        structuring element for 3D
+        flag: --sizeStructuralElement %d
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Required: output image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-distancemaps"></span></div>
+<div class="section" id="distancemaps">
+<span id="index-4"></span><h2>DistanceMaps<a class="headerlink" href="#distancemaps" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L526">Link to code</a></p>
+<p>Wraps command ** DistanceMaps **</p>
+<p>title: Mauerer Distance</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Get the distance from a voxel to the nearest voxel of a given tissue type.</p>
+<p>version: 0.1.0.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://www.na-mic.org/">http:://www.na-mic.org/</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This tool was developed by Mark Scully and Jeremy Bockholt.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputLabelVolume: (an existing file name)
+        Required: input tissue label image
+        flag: --inputLabelVolume %s
+inputMaskVolume: (an existing file name)
+        Required: input brain mask image
+        flag: --inputMaskVolume %s
+inputTissueLabel: (an integer (int or long))
+        Required: input integer value of tissue type used to calculate
+        distance
+        flag: --inputTissueLabel %d
+outputVolume: (a boolean or a file name)
+        Required: output image
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Required: output image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-dumpbinarytrainingvectors"></span></div>
+<div class="section" id="dumpbinarytrainingvectors">
+<span id="index-5"></span><h2>DumpBinaryTrainingVectors<a class="headerlink" href="#dumpbinarytrainingvectors" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L490">Link to code</a></p>
+<p>Wraps command ** DumpBinaryTrainingVectors **</p>
+<p>title: Erode Image</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Uses mathematical morphology to erode the input images.</p>
+<p>version: 0.1.0.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://www.na-mic.org/">http:://www.na-mic.org/</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This tool was developed by Mark Scully and Jeremy Bockholt.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputHeaderFilename: (an existing file name)
+        Required: input header file name
+        flag: --inputHeaderFilename %s
+inputVectorFilename: (an existing file name)
+        Required: input vector filename
+        flag: --inputVectorFilename %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-erodeimage"></span></div>
+<div class="section" id="erodeimage">
+<span id="index-6"></span><h2>ErodeImage<a class="headerlink" href="#erodeimage" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L203">Link to code</a></p>
+<p>Wraps command ** ErodeImage **</p>
+<p>title: Erode Image</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Uses mathematical morphology to erode the input images.</p>
+<p>version: 0.1.0.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://www.na-mic.org/">http:://www.na-mic.org/</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This tool was developed by Mark Scully and Jeremy Bockholt.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputMaskVolume: (an existing file name)
+        Required: input brain mask image
+        flag: --inputMaskVolume %s
+inputRadius: (an integer (int or long))
+        Required: input neighborhood radius
+        flag: --inputRadius %d
+inputVolume: (an existing file name)
+        Required: input image
+        flag: --inputVolume %s
+outputVolume: (a boolean or a file name)
+        Required: output image
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Required: output image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-flippeddifference"></span></div>
+<div class="section" id="flippeddifference">
+<span id="index-7"></span><h2>FlippedDifference<a class="headerlink" href="#flippeddifference" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L167">Link to code</a></p>
+<p>Wraps command ** FlippedDifference **</p>
+<p>title: Flip Image</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Difference between an image and the axially flipped version of that image.</p>
+<p>version: 0.1.0.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://www.na-mic.org/">http:://www.na-mic.org/</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This tool was developed by Mark Scully and Jeremy Bockholt.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputMaskVolume: (an existing file name)
+        Required: input brain mask image
+        flag: --inputMaskVolume %s
+inputVolume: (an existing file name)
+        Required: input image
+        flag: --inputVolume %s
+outputVolume: (a boolean or a file name)
+        Required: output image
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Required: output image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-generatebrainclippedimage"></span></div>
+<div class="section" id="generatebrainclippedimage">
+<span id="index-8"></span><h2>GenerateBrainClippedImage<a class="headerlink" href="#generatebrainclippedimage" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L239">Link to code</a></p>
+<p>Wraps command ** GenerateBrainClippedImage **</p>
+<p>title: GenerateBrainClippedImage</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Automatic FeatureImages using neural networks</p>
+<p>version: 1.0</p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Eun Young Kim</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputImg: (an existing file name)
+        input volume 1, usally t1 image
+        flag: --inputImg %s
+inputMsk: (an existing file name)
+        input volume 2, usally t2 image
+        flag: --inputMsk %s
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+outputFileName: (a boolean or a file name)
+        (required) output file name
+        flag: --outputFileName %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputFileName: (an existing file name)
+        (required) output file name
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-generatesummedgradientimage"></span></div>
+<div class="section" id="generatesummedgradientimage">
+<span id="index-9"></span><h2>GenerateSummedGradientImage<a class="headerlink" href="#generatesummedgradientimage" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L21">Link to code</a></p>
+<p>Wraps command ** GenerateSummedGradientImage **</p>
+<p>title: GenerateSummedGradient</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Automatic FeatureImages using neural networks</p>
+<p>version: 1.0</p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Greg Harris, Eun Young Kim</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+MaximumGradient: (a boolean)
+        If set this flag, it will compute maximum gradient between two input
+        volumes instead of sum of it.
+        flag: --MaximumGradient
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume1: (an existing file name)
+        input volume 1, usally t1 image
+        flag: --inputVolume1 %s
+inputVolume2: (an existing file name)
+        input volume 2, usally t2 image
+        flag: --inputVolume2 %s
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+outputFileName: (a boolean or a file name)
+        (required) output file name
+        flag: --outputFileName %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputFileName: (an existing file name)
+        (required) output file name
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-generatetestimage"></span></div>
+<div class="section" id="generatetestimage">
+<span id="index-10"></span><h2>GenerateTestImage<a class="headerlink" href="#generatetestimage" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L310">Link to code</a></p>
+<p>Wraps command ** GenerateTestImage **</p>
+<p>title: DownSampleImage</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Down sample image for testing</p>
+<p>version: 1.0</p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Eun Young Kim</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        input volume 1, usally t1 image
+        flag: --inputVolume %s
+lowerBoundOfOutputVolume: (a float)
+        flag: --lowerBoundOfOutputVolume %f
+outputVolume: (a boolean or a file name)
+        (required) output file name
+        flag: --outputVolume %s
+outputVolumeSize: (a float)
+        output Volume Size
+        flag: --outputVolumeSize %f
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+upperBoundOfOutputVolume: (a float)
+        flag: --upperBoundOfOutputVolume %f
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        (required) output file name
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-gradientanisotropicdiffusionimagefilter"></span></div>
+<div class="section" id="gradientanisotropicdiffusionimagefilter">
+<span id="index-11"></span><h2>GradientAnisotropicDiffusionImageFilter<a class="headerlink" href="#gradientanisotropicdiffusionimagefilter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L598">Link to code</a></p>
+<p>Wraps command ** GradientAnisotropicDiffusionImageFilter **</p>
+<p>title: GradientAnisopropicDiffusionFilter</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Image Smoothing using Gradient Anisotropic Diffuesion Filer</p>
+<p>contributor: This tool was developed by Eun Young Kim by modifying ITK Example</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+conductance: (a float)
+        Conductance for diffusion process
+        flag: --conductance %f
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        Required: input image
+        flag: --inputVolume %s
+numberOfIterations: (an integer (int or long))
+        Optional value for number of Iterations
+        flag: --numberOfIterations %d
+outputVolume: (a boolean or a file name)
+        Required: output image
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+timeStep: (a float)
+        Time step for diffusion process
+        flag: --timeStep %f
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Required: output image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-hammerattributecreator"></span></div>
+<div class="section" id="hammerattributecreator">
+<span id="index-12"></span><h2>HammerAttributeCreator<a class="headerlink" href="#hammerattributecreator" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L382">Link to code</a></p>
+<p>Wraps command ** HammerAttributeCreator **</p>
+<p>title: HAMMER Feature Vectors</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Create the feature vectors used by HAMMER.</p>
+<p>version: 0.1.0.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://www.na-mic.org/">http:://www.na-mic.org/</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This was extracted from the Hammer Registration source code, and wrapped up by Hans J. Johnson.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+Scale: (an integer (int or long))
+        Determine Scale of Ball
+        flag: --Scale %d
+Strength: (a float)
+        Determine Strength of Edges
+        flag: --Strength %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputCSFVolume: (an existing file name)
+        Required: input CSF posterior image
+        flag: --inputCSFVolume %s
+inputGMVolume: (an existing file name)
+        Required: input grey matter posterior image
+        flag: --inputGMVolume %s
+inputWMVolume: (an existing file name)
+        Required: input white matter posterior image
+        flag: --inputWMVolume %s
+outputVolumeBase: (a string)
+        Required: output image base name to be appended for each feature
+        vector.
+        flag: --outputVolumeBase %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-neighborhoodmean"></span></div>
+<div class="section" id="neighborhoodmean">
+<span id="index-13"></span><h2>NeighborhoodMean<a class="headerlink" href="#neighborhoodmean" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L344">Link to code</a></p>
+<p>Wraps command ** NeighborhoodMean **</p>
+<p>title: Neighborhood Mean</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Calculates the mean, for the given neighborhood size, at each voxel of the T1, T2, and FLAIR.</p>
+<p>version: 0.1.0.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://www.na-mic.org/">http:://www.na-mic.org/</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This tool was developed by Mark Scully and Jeremy Bockholt.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputMaskVolume: (an existing file name)
+        Required: input brain mask image
+        flag: --inputMaskVolume %s
+inputRadius: (an integer (int or long))
+        Required: input neighborhood radius
+        flag: --inputRadius %d
+inputVolume: (an existing file name)
+        Required: input image
+        flag: --inputVolume %s
+outputVolume: (a boolean or a file name)
+        Required: output image
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Required: output image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-neighborhoodmedian"></span></div>
+<div class="section" id="neighborhoodmedian">
+<span id="index-14"></span><h2>NeighborhoodMedian<a class="headerlink" href="#neighborhoodmedian" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L273">Link to code</a></p>
+<p>Wraps command ** NeighborhoodMedian **</p>
+<p>title: Neighborhood Median</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Calculates the median, for the given neighborhood size, at each voxel of the input image.</p>
+<p>version: 0.1.0.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://www.na-mic.org/">http:://www.na-mic.org/</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This tool was developed by Mark Scully and Jeremy Bockholt.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputMaskVolume: (an existing file name)
+        Required: input brain mask image
+        flag: --inputMaskVolume %s
+inputRadius: (an integer (int or long))
+        Required: input neighborhood radius
+        flag: --inputRadius %d
+inputVolume: (an existing file name)
+        Required: input image
+        flag: --inputVolume %s
+outputVolume: (a boolean or a file name)
+        Required: output image
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Required: output image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-stapleanalysis"></span></div>
+<div class="section" id="stapleanalysis">
+<span id="index-15"></span><h2>STAPLEAnalysis<a class="headerlink" href="#stapleanalysis" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L561">Link to code</a></p>
+<p>Wraps command ** STAPLEAnalysis **</p>
+<p>title: Dilate Image</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Uses mathematical morphology to dilate the input images.</p>
+<p>version: 0.1.0.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://www.na-mic.org/">http:://www.na-mic.org/</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This tool was developed by Mark Scully and Jeremy Bockholt.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputDimension: (an integer (int or long))
+        Required: input image Dimension 2 or 3
+        flag: --inputDimension %d
+inputLabelVolume: (a list of items which are an existing file name)
+        Required: input label volume
+        flag: --inputLabelVolume %s...
+outputVolume: (a boolean or a file name)
+        Required: output image
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Required: output image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-texturefromnoiseimagefilter"></span></div>
+<div class="section" id="texturefromnoiseimagefilter">
+<span id="index-16"></span><h2>TextureFromNoiseImageFilter<a class="headerlink" href="#texturefromnoiseimagefilter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L132">Link to code</a></p>
+<p>Wraps command ** TextureFromNoiseImageFilter **</p>
+<p>title: TextureFromNoiseImageFilter</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: Calculate the local noise in an image.</p>
+<p>version: 0.1.0.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://www.na-mic.org/">http:://www.na-mic.org/</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This tool was developed by Eunyoung Regina Kim</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputRadius: (an integer (int or long))
+        Required: input neighborhood radius
+        flag: --inputRadius %d
+inputVolume: (an existing file name)
+        Required: input image
+        flag: --inputVolume %s
+outputVolume: (a boolean or a file name)
+        Required: output image
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Required: output image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-filtering-featuredetection-texturemeasurefilter"></span></div>
+<div class="section" id="texturemeasurefilter">
+<span id="index-17"></span><h2>TextureMeasureFilter<a class="headerlink" href="#texturemeasurefilter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/filtering/featuredetection.py#L419">Link to code</a></p>
+<p>Wraps command ** TextureMeasureFilter **</p>
+<p>title: Canny Level Set Image Filter</p>
+<p>category: Filtering.FeatureDetection</p>
+<p>description: The CannySegmentationLevelSet is commonly used to refine a manually generated manual mask.</p>
+<p>version: 0.3.0</p>
+<p>license: CC</p>
+<p>contributor: Regina Kim</p>
+<p>acknowledgements: This command module was derived from Insight/Examples/Segmentation/CannySegmentationLevelSetImageFilter.cxx (copyright) Insight Software Consortium.  See <a class="reference external" href="http://wiki.na-mic.org/Wiki/index.php/Slicer3:Execution_Model_Documentation">http://wiki.na-mic.org/Wiki/index.php/Slicer3:Execution_Model_Documentation</a> for more detailed descriptions.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+distance: (an integer (int or long))
+        flag: --distance %d
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputMaskVolume: (an existing file name)
+        flag: --inputMaskVolume %s
+inputVolume: (an existing file name)
+        flag: --inputVolume %s
+insideROIValue: (a float)
+        flag: --insideROIValue %f
+outputFilename: (a boolean or a file name)
+        flag: --outputFilename %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputFilename: (an existing file name)
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

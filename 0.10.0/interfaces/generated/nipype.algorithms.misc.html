@@ -1,0 +1,946 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.10.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">algorithms.misc</a><ul>
+<li><a class="reference internal" href="#addcsvcolumn">AddCSVColumn</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#addcsvrow">AddCSVRow</a><ul>
+<li><a class="reference internal" href="#id1">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#addnoise">AddNoise</a><ul>
+<li><a class="reference internal" href="#id2">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#calculatenormalizedmoments">CalculateNormalizedMoments</a><ul>
+<li><a class="reference internal" href="#id3">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#createnifti">CreateNifti</a></li>
+<li><a class="reference internal" href="#distance">Distance</a></li>
+<li><a class="reference internal" href="#fuzzyoverlap">FuzzyOverlap</a></li>
+<li><a class="reference internal" href="#gunzip">Gunzip</a></li>
+<li><a class="reference internal" href="#matlab2csv">Matlab2CSV</a><ul>
+<li><a class="reference internal" href="#id4">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mergecsvfiles">MergeCSVFiles</a><ul>
+<li><a class="reference internal" href="#id5">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mergerois">MergeROIs</a><ul>
+<li><a class="reference internal" href="#id6">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#modifyaffine">ModifyAffine</a></li>
+<li><a class="reference internal" href="#normalizeprobabilitymapset">NormalizeProbabilityMapSet</a><ul>
+<li><a class="reference internal" href="#id7">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#overlap">Overlap</a></li>
+<li><a class="reference internal" href="#pickatlas">PickAtlas</a></li>
+<li><a class="reference internal" href="#simplethreshold">SimpleThreshold</a></li>
+<li><a class="reference internal" href="#splitrois">SplitROIs</a></li>
+<li><a class="reference internal" href="#tsnr">TSNR</a><ul>
+<li><a class="reference internal" href="#id8">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#calc-moments"><code class="docutils literal"><span class="pre">calc_moments()</span></code></a></li>
+<li><a class="reference internal" href="#makefmtlist"><code class="docutils literal"><span class="pre">makefmtlist()</span></code></a></li>
+<li><a class="reference internal" href="#maketypelist"><code class="docutils literal"><span class="pre">maketypelist()</span></code></a></li>
+<li><a class="reference internal" href="#id9"><code class="docutils literal"><span class="pre">matlab2csv()</span></code></a></li>
+<li><a class="reference internal" href="#merge-csvs"><code class="docutils literal"><span class="pre">merge_csvs()</span></code></a></li>
+<li><a class="reference internal" href="#merge-rois"><code class="docutils literal"><span class="pre">merge_rois()</span></code></a></li>
+<li><a class="reference internal" href="#normalize-tpms"><code class="docutils literal"><span class="pre">normalize_tpms()</span></code></a></li>
+<li><a class="reference internal" href="#remove-identical-paths"><code class="docutils literal"><span class="pre">remove_identical_paths()</span></code></a></li>
+<li><a class="reference internal" href="#replaceext"><code class="docutils literal"><span class="pre">replaceext()</span></code></a></li>
+<li><a class="reference internal" href="#split-rois"><code class="docutils literal"><span class="pre">split_rois()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="algorithms-misc">
+<h1>algorithms.misc<a class="headerlink" href="#algorithms-misc" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-algorithms-misc-addcsvcolumn"></span><div class="section" id="addcsvcolumn">
+<span id="index-0"></span><h2>AddCSVColumn<a class="headerlink" href="#addcsvcolumn" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L742">Link to code</a></p>
+<p>Short interface to add an extra column and field to a text file</p>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.algorithms</span> <span class="kn">import</span> <span class="n">misc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addcol</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">AddCSVColumn</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addcol</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;degree.csv&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addcol</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">extra_column_heading</span> <span class="o">=</span> <span class="s">&#39;group&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addcol</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">extra_field</span> <span class="o">=</span> <span class="s">&#39;male&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addcol</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        Input comma-separated value (CSV) files
+
+[Optional]
+extra_column_heading: (a string)
+        New heading to add for the added field.
+extra_field: (a string)
+        New field to add to each row. This is useful for saving the group or
+        subject ID in the file.
+out_file: (a file name, nipype default value: extra_heading.csv)
+        Output filename for merged CSV file
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>csv_file: (a file name)
+        Output CSV file containing columns
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-addcsvrow"></span></div>
+</div>
+<div class="section" id="addcsvrow">
+<span id="index-1"></span><h2>AddCSVRow<a class="headerlink" href="#addcsvrow" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L806">Link to code</a></p>
+<p>Simple interface to add an extra row to a csv file</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Requires <a class="reference external" href="http://pandas.pydata.org/">pandas</a></p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Multi-platform thread-safe execution is possible with
+<a class="reference external" href="https://pythonhosted.org/lockfile/lockfile.html">lockfile</a>. Please recall that (1)
+this module is alpha software; and (2) it should be installed for thread-safe writing.
+If lockfile is not installed, then the interface is not thread-safe.</p>
+</div>
+<div class="section" id="id1">
+<h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.algorithms</span> <span class="kn">import</span> <span class="n">misc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addrow</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">AddCSVRow</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addrow</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;scores.csv&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addrow</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">si</span> <span class="o">=</span> <span class="mf">0.74</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addrow</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">di</span> <span class="o">=</span> <span class="mf">0.93</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addrow</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="s">&#39;S400&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addrow</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">list_of_values</span> <span class="o">=</span> <span class="p">[</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.3</span> <span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">addrow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (a file name)
+        Input comma-separated value (CSV) files
+
+[Optional]
+_outputs: (a dictionary with keys which are any value and with values
+         which are any value, nipype default value: {})
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>csv_file: (a file name)
+        Output CSV file containing rows
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-addnoise"></span></div>
+</div>
+<div class="section" id="addnoise">
+<span id="index-2"></span><h2>AddNoise<a class="headerlink" href="#addnoise" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L980">Link to code</a></p>
+<p>Corrupts with noise the input image</p>
+<div class="section" id="id2">
+<h3>Example<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.algorithms.misc</span> <span class="kn">import</span> <span class="n">AddNoise</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">noise</span> <span class="o">=</span> <span class="n">AddNoise</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">noise</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;T1.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">noise</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_mask</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">noise</span><span class="o">.</span><span class="n">snr</span> <span class="o">=</span> <span class="mf">30.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">noise</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+bg_dist: (&#39;normal&#39; or &#39;rayleigh&#39;, nipype default value: normal)
+        desired noise distribution, currently only normal is implemented
+dist: (&#39;normal&#39; or &#39;rician&#39;, nipype default value: normal)
+        desired noise distribution
+in_file: (an existing file name)
+        input image that will be corrupted with noise
+
+[Optional]
+in_mask: (an existing file name)
+        input mask, voxels outside this mask will be considered background
+out_file: (a file name)
+        desired output filename
+snr: (a float, nipype default value: 10.0)
+        desired output SNR in dB
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        corrupted image
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-calculatenormalizedmoments"></span></div>
+</div>
+<div class="section" id="calculatenormalizedmoments">
+<span id="index-3"></span><h2>CalculateNormalizedMoments<a class="headerlink" href="#calculatenormalizedmoments" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L919">Link to code</a></p>
+<p>Calculates moments of timeseries.</p>
+<div class="section" id="id3">
+<h3>Example<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.algorithms</span> <span class="kn">import</span> <span class="n">misc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">skew</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">CalculateNormalizedMoments</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">skew</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moment</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">skew</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">timeseries_file</span> <span class="o">=</span> <span class="s">&#39;timeseries.txt&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">skew</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+moment: (an integer (int or long))
+        Define which moment should be calculated, 3 for skewness, 4 for
+        kurtosis.
+timeseries_file: (an existing file name)
+        Text file with timeseries in columns and timepoints in rows,
+        whitespace separated
+
+[Optional]
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>moments: (a list of items which are a float)
+        Moments
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-createnifti"></span></div>
+</div>
+<div class="section" id="createnifti">
+<span id="index-4"></span><h2>CreateNifti<a class="headerlink" href="#createnifti" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L230">Link to code</a></p>
+<p>Creates a nifti volume</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+data_file: (an existing file name)
+        ANALYZE img file
+header_file: (an existing file name)
+        corresponding ANALYZE hdr file
+
+[Optional]
+affine: (an array)
+        affine transformation array
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>nifti_file: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-distance"></span></div>
+<div class="section" id="distance">
+<span id="index-5"></span><h2>Distance<a class="headerlink" href="#distance" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L1443">Link to code</a></p>
+<p>Calculates distance between two volumes.</p>
+<div class="deprecated">
+<p><span class="versionmodified">Deprecated since version 0.10.0: </span>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.algorithms.metrics.Distance</span></code> instead.</p>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+volume1: (an existing file name)
+        Has to have the same dimensions as volume2.
+volume2: (an existing file name)
+        Has to have the same dimensions as volume1.
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask_volume: (an existing file name)
+        calculate overlap only within this mask.
+method: (&#39;eucl_min&#39; or &#39;eucl_cog&#39; or &#39;eucl_mean&#39; or &#39;eucl_wmean&#39; or
+         &#39;eucl_max&#39;, nipype default value: eucl_min)
+        &quot;&quot;eucl_min&quot;: Euclidean distance between two closest points
+        &quot;eucl_cog&quot;: mean Euclidian distance between the Center of Gravity of
+        volume1 and CoGs of volume2 &quot;eucl_mean&quot;: mean Euclidian minimum
+        distance of all volume2 voxels to volume1 &quot;eucl_wmean&quot;: mean
+        Euclidian minimum distance of all volume2 voxels to volume1 weighted
+        by their values &quot;eucl_max&quot;: maximum over minimum Euclidian distances
+        of all volume2 voxels to volume1 (also known as the Hausdorff
+        distance)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>distance: (a float)
+histogram: (a file name)
+point1: (an array with shape (3,))
+point2: (an array with shape (3,))
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-fuzzyoverlap"></span></div>
+<div class="section" id="fuzzyoverlap">
+<span id="index-6"></span><h2>FuzzyOverlap<a class="headerlink" href="#fuzzyoverlap" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L1469">Link to code</a></p>
+<p>Calculates various overlap measures between two maps, using a fuzzy
+definition.</p>
+<div class="deprecated">
+<p><span class="versionmodified">Deprecated since version 0.10.0: </span>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.algorithms.metrics.FuzzyOverlap</span></code> instead.</p>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_ref: (an existing file name)
+        Reference image. Requires the same dimensions as in_tst.
+in_tst: (an existing file name)
+        Test image. Requires the same dimensions as in_ref.
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name, nipype default value: diff.nii)
+        alternative name for resulting difference-map
+weighting: (&#39;none&#39; or &#39;volume&#39; or &#39;squared_vol&#39;, nipype default
+         value: none)
+        &#39;none&#39;: no class-overlap weighting is performed. &#39;volume&#39;: computed
+        class-overlaps are weighted by class volume &#39;squared_vol&#39;: computed
+        class-overlaps are weighted by the squared volume of the class
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>class_fdi: (a list of items which are a float)
+        Array containing the fDIs of each computed class
+class_fji: (a list of items which are a float)
+        Array containing the fJIs of each computed class
+dice: (a float)
+        Fuzzy Dice Index (fDI), all the classes
+diff_file: (an existing file name)
+        resulting difference-map of all classes, using the chosen weighting
+jaccard: (a float)
+        Fuzzy Jaccard Index (fJI), all the classes
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-gunzip"></span></div>
+<div class="section" id="gunzip">
+<span id="index-7"></span><h2>Gunzip<a class="headerlink" href="#gunzip" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L351">Link to code</a></p>
+<p>Gunzip wrapper</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-matlab2csv"></span></div>
+<div class="section" id="matlab2csv">
+<span id="index-8"></span><h2>Matlab2CSV<a class="headerlink" href="#matlab2csv" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L415">Link to code</a></p>
+<p>Simple interface to save the components of a MATLAB .mat file as a text
+file with comma-separated values (CSVs).</p>
+<p>CSV files are easily loaded in R, for use in statistical processing.
+For further information, see cran.r-project.org/doc/manuals/R-data.pdf</p>
+<div class="section" id="id4">
+<h3>Example<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.algorithms</span> <span class="kn">import</span> <span class="n">misc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mat2csv</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">Matlab2CSV</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mat2csv</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;cmatrix.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mat2csv</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        Input MATLAB .mat file
+
+[Optional]
+reshape_matrix: (a boolean, nipype default value: True)
+        The output of this interface is meant for R, so matrices will be
+        reshaped to vectors by default.
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>csv_files: (a file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-mergecsvfiles"></span></div>
+</div>
+<div class="section" id="mergecsvfiles">
+<span id="index-9"></span><h2>MergeCSVFiles<a class="headerlink" href="#mergecsvfiles" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L607">Link to code</a></p>
+<p>This interface is designed to facilitate data loading in the R environment.
+It takes input CSV files and merges them into a single CSV file.
+If provided, it will also incorporate column heading names into the
+resulting CSV file.</p>
+<p>CSV files are easily loaded in R, for use in statistical processing.
+For further information, see cran.r-project.org/doc/manuals/R-data.pdf</p>
+<div class="section" id="id5">
+<h3>Example<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.algorithms</span> <span class="kn">import</span> <span class="n">misc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mat2csv</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">MergeCSVFiles</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mat2csv</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;degree.mat&#39;</span><span class="p">,</span><span class="s">&#39;clustering.mat&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mat2csv</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">column_headings</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;degree&#39;</span><span class="p">,</span><span class="s">&#39;clustering&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mat2csv</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (an existing file name)
+        Input comma-separated value (CSV) files
+
+[Optional]
+column_headings: (a list of items which are a string)
+        List of column headings to save in merged CSV file (must be equal to
+        number of input files). If left undefined, these will be pulled from
+        the input filenames.
+extra_column_heading: (a string)
+        New heading to add for the added field.
+extra_field: (a string)
+        New field to add to each row. This is useful for saving the group or
+        subject ID in the file.
+out_file: (a file name, nipype default value: merged.csv)
+        Output filename for merged CSV file
+row_heading_title: (a string, nipype default value: label)
+        Column heading for the row headings added
+row_headings: (a list of items which are a string)
+        List of row headings to save in merged CSV file (must be equal to
+        number of rows in the input files).
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>csv_file: (a file name)
+        Output CSV file containing columns
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-mergerois"></span></div>
+</div>
+<div class="section" id="mergerois">
+<span id="index-10"></span><h2>MergeROIs<a class="headerlink" href="#mergerois" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L1186">Link to code</a></p>
+<p>Splits a 3D image in small chunks to enable parallel processing.
+ROIs keep time series structure in 4D images.</p>
+<div class="section" id="id6">
+<h3>Example<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.algorithms</span> <span class="kn">import</span> <span class="n">misc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rois</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">MergeROIs</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rois</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;roi</span><span class="si">%02d</span><span class="s">.nii&#39;</span> <span class="o">%</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rois</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_reference</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rois</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_index</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;roi</span><span class="si">%02d</span><span class="s">_idx.npz&#39;</span> <span class="o">%</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rois</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+in_files: (an existing file name)
+in_index: (an existing file name)
+        array keeping original locations
+in_reference: (an existing file name)
+        reference file
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>merged_file: (an existing file name)
+        the recomposed file
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-modifyaffine"></span></div>
+</div>
+<div class="section" id="modifyaffine">
+<span id="index-11"></span><h2>ModifyAffine<a class="headerlink" href="#modifyaffine" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L187">Link to code</a></p>
+<p>Left multiplies the affine matrix with a specified values. Saves the volume
+as a nifti file.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+volumes: (an existing file name)
+        volumes which affine matrices will be modified
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+transformation_matrix: (an array with shape (4, 4), nipype default
+         value: (&lt;bound method Array.copy_default_value of
+         &lt;traits.trait_numeric.Array object at 0x10ef89750&gt;&gt;, (array([[ 1.,
+         0.,  0.,  0.],        [ 0.,  1.,  0.,  0.],        [ 0.,  0.,  1.,
+         0.],        [ 0.,  0.,  0.,  1.]]),), None))
+        transformation matrix that will be left multiplied by the affine
+        matrix
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>transformed_volumes: (a file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-normalizeprobabilitymapset"></span></div>
+<div class="section" id="normalizeprobabilitymapset">
+<span id="index-12"></span><h2>NormalizeProbabilityMapSet<a class="headerlink" href="#normalizeprobabilitymapset" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L1084">Link to code</a></p>
+<p>Returns the input tissue probability maps (tpms, aka volume fractions)
+normalized to sum up 1.0 at each voxel within the mask.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Please recall this is not a spatial normalization algorithm</p>
+</div>
+<div class="section" id="id7">
+<h3>Example<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.algorithms</span> <span class="kn">import</span> <span class="n">misc</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">normalize</span> <span class="o">=</span> <span class="n">misc</span><span class="o">.</span><span class="n">NormalizeProbabilityMapSet</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">normalize</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span> <span class="s">&#39;tpm_00.nii.gz&#39;</span><span class="p">,</span> <span class="s">&#39;tpm_01.nii.gz&#39;</span><span class="p">,</span> <span class="s">&#39;tpm_02.nii.gz&#39;</span> <span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">normalize</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_mask</span> <span class="o">=</span> <span class="s">&#39;tpms_msk.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">normalize</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+in_files: (an existing file name)
+in_mask: (an existing file name)
+        Masked voxels must sum up 1.0, 0.0 otherwise.
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_files: (an existing file name)
+        normalized maps
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-overlap"></span></div>
+</div>
+<div class="section" id="overlap">
+<span id="index-13"></span><h2>Overlap<a class="headerlink" href="#overlap" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L1456">Link to code</a></p>
+<p>Calculates various overlap measures between two maps.</p>
+<div class="deprecated">
+<p><span class="versionmodified">Deprecated since version 0.10.0: </span>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.algorithms.metrics.Overlap</span></code> instead.</p>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+bg_overlap: (a boolean, nipype default value: False)
+        consider zeros as a label
+vol_units: (&#39;voxel&#39; or &#39;mm&#39;, nipype default value: voxel)
+        units for volumes
+volume1: (an existing file name)
+        Has to have the same dimensions as volume2.
+volume2: (an existing file name)
+        Has to have the same dimensions as volume1.
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask_volume: (an existing file name)
+        calculate overlap only within this mask.
+out_file: (a file name, nipype default value: diff.nii)
+weighting: (&#39;none&#39; or &#39;volume&#39; or &#39;squared_vol&#39;, nipype default
+         value: none)
+        &#39;none&#39;: no class-overlap weighting is performed. &#39;volume&#39;: computed
+        class-overlaps are weighted by class volume &#39;squared_vol&#39;: computed
+        class-overlaps are weighted by the squared volume of the class
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>dice: (a float)
+        averaged dice index
+diff_file: (an existing file name)
+        error map of differences
+jaccard: (a float)
+        averaged jaccard index
+labels: (a list of items which are an integer (int or long))
+        detected labels
+roi_di: (a list of items which are a float)
+        the Dice index (DI) per ROI
+roi_ji: (a list of items which are a float)
+        the Jaccard index (JI) per ROI
+roi_voldiff: (a list of items which are a float)
+        volume differences of ROIs
+volume_difference: (a float)
+        averaged volume difference
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-pickatlas"></span></div>
+<div class="section" id="pickatlas">
+<span id="index-14"></span><h2>PickAtlas<a class="headerlink" href="#pickatlas" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L67">Link to code</a></p>
+<p>Returns ROI masks given an atlas and a list of labels. Supports dilation
+and left right masking (assuming the atlas is properly aligned).</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+atlas: (an existing file name)
+        Location of the atlas that will be used.
+labels: (an integer (int or long) or a list of items which are an
+         integer (int or long))
+        Labels of regions that will be included in the mask. Must be
+        compatible with the atlas used.
+
+[Optional]
+dilation_size: (an integer (int or long), nipype default value: 0)
+        Defines how much the mask will be dilated (expanded in 3D).
+hemi: (&#39;both&#39; or &#39;left&#39; or &#39;right&#39;, nipype default value: both)
+        Restrict the mask to only one hemisphere: left or right
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+output_file: (a file name)
+        Where to store the output mask.
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>mask_file: (an existing file name)
+        output mask file
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-simplethreshold"></span></div>
+<div class="section" id="simplethreshold">
+<span id="index-15"></span><h2>SimpleThreshold<a class="headerlink" href="#simplethreshold" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L135">Link to code</a></p>
+<p>Applies a threshold to input volumes</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+threshold: (a float)
+        volumes to be thresholdedeverything below this value will be set to
+        zero
+volumes: (an existing file name)
+        volumes to be thresholded
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>thresholded_volumes: (an existing file name)
+        thresholded volumes
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-splitrois"></span></div>
+<div class="section" id="splitrois">
+<span id="index-16"></span><h2>SplitROIs<a class="headerlink" href="#splitrois" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L1136">Link to code</a></p>
+<p>Splits a 3D image in small chunks to enable parallel processing.
+ROIs keep time series structure in 4D images.
+&gt;&gt;&gt; from nipype.algorithms import misc
+&gt;&gt;&gt; rois = misc.SplitROIs()
+&gt;&gt;&gt; rois.inputs.in_file = &#8216;diffusion.nii&#8217;
+&gt;&gt;&gt; rois.inputs.in_mask = &#8216;mask.nii&#8217;
+&gt;&gt;&gt; rois.run() # doctest: +SKIP</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        file to be splitted
+
+[Optional]
+in_mask: (an existing file name)
+        only process files inside mask
+roi_size: (a tuple of the form: (an integer (int or long), an integer
+         (int or long), an integer (int or long)))
+        desired ROI size
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_files: (an existing file name)
+        the resulting ROIs
+out_index: (an existing file name)
+        arrays keeping original locations
+out_masks: (an existing file name)
+        a mask indicating valid values
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-misc-tsnr"></span></div>
+<div class="section" id="tsnr">
+<span id="index-17"></span><h2>TSNR<a class="headerlink" href="#tsnr" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L274">Link to code</a></p>
+<p>Computes the time-course SNR for a time series</p>
+<p>Typically you want to run this on a realigned time-series.</p>
+<div class="section" id="id8">
+<h3>Example<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">tsnr</span> <span class="o">=</span> <span class="n">TSNR</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsnr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">tsnr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        realigned 4D file or a list of 3D files
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+regress_poly: (an integer &gt;= 1)
+        Remove polynomials
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>detrended_file: (a file name)
+        detrended input file
+mean_file: (an existing file name)
+        mean image file
+stddev_file: (an existing file name)
+        std dev image file
+tsnr_file: (an existing file name)
+        tsnr image file
+</pre></div>
+</div>
+<span class="target" id="module-nipype.algorithms.misc"></span></div>
+</div>
+<div class="section" id="calc-moments">
+<span id="nipype-algorithms-misc-calc-moments"></span><h2><code class="xref py py-func docutils literal"><span class="pre">calc_moments()</span></code><a class="headerlink" href="#calc-moments" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L946">Link to code</a></p>
+<p>Returns nth moment (3 for skewness, 4 for kurtosis) of timeseries
+(list of values; one per timeseries).</p>
+<p>Keyword arguments:
+timeseries_file &#8211; text file with white space separated timepoints in rows</p>
+</div>
+<div class="section" id="makefmtlist">
+<span id="nipype-algorithms-misc-makefmtlist"></span><h2><code class="xref py py-func docutils literal"><span class="pre">makefmtlist()</span></code><a class="headerlink" href="#makefmtlist" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L560">Link to code</a></p>
+</div>
+<div class="section" id="maketypelist">
+<span id="nipype-algorithms-misc-maketypelist"></span><h2><code class="xref py py-func docutils literal"><span class="pre">maketypelist()</span></code><a class="headerlink" href="#maketypelist" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L544">Link to code</a></p>
+</div>
+<div class="section" id="id9">
+<span id="id10"></span><h2><code class="xref py py-func docutils literal"><span class="pre">matlab2csv()</span></code><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L387">Link to code</a></p>
+</div>
+<div class="section" id="merge-csvs">
+<span id="nipype-algorithms-misc-merge-csvs"></span><h2><code class="xref py py-func docutils literal"><span class="pre">merge_csvs()</span></code><a class="headerlink" href="#merge-csvs" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L494">Link to code</a></p>
+</div>
+<div class="section" id="merge-rois">
+<span id="nipype-algorithms-misc-merge-rois"></span><h2><code class="xref py py-func docutils literal"><span class="pre">merge_rois()</span></code><a class="headerlink" href="#merge-rois" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L1352">Link to code</a></p>
+<p>Re-builds an image resulting from a parallelized processing</p>
+</div>
+<div class="section" id="normalize-tpms">
+<span id="nipype-algorithms-misc-normalize-tpms"></span><h2><code class="xref py py-func docutils literal"><span class="pre">normalize_tpms()</span></code><a class="headerlink" href="#normalize-tpms" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L1218">Link to code</a></p>
+<p>Returns the input tissue probability maps (tpms, aka volume fractions)
+normalized to sum up 1.0 at each voxel within the mask.</p>
+</div>
+<div class="section" id="remove-identical-paths">
+<span id="nipype-algorithms-misc-remove-identical-paths"></span><h2><code class="xref py py-func docutils literal"><span class="pre">remove_identical_paths()</span></code><a class="headerlink" href="#remove-identical-paths" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L524">Link to code</a></p>
+</div>
+<div class="section" id="replaceext">
+<span id="nipype-algorithms-misc-replaceext"></span><h2><code class="xref py py-func docutils literal"><span class="pre">replaceext()</span></code><a class="headerlink" href="#replaceext" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L378">Link to code</a></p>
+</div>
+<div class="section" id="split-rois">
+<span id="nipype-algorithms-misc-split-rois"></span><h2><code class="xref py py-func docutils literal"><span class="pre">split_rois()</span></code><a class="headerlink" href="#split-rois" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/algorithms/misc.py#L1277">Link to code</a></p>
+<p>Splits an image in ROIs for parallel processing</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

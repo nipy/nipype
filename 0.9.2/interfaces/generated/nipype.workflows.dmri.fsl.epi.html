@@ -1,0 +1,974 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">workflows.dmri.fsl.epi</a><ul>
+<li><a class="reference internal" href="#create-dmri-preprocessing"><code class="docutils literal"><span class="pre">create_dmri_preprocessing()</span></code></a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+<li><a class="reference internal" href="#graph">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#create-eddy-correct-pipeline"><code class="docutils literal"><span class="pre">create_eddy_correct_pipeline()</span></code></a><ul>
+<li><a class="reference internal" href="#id1">Example</a></li>
+<li><a class="reference internal" href="#id2">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#create-epidewarp-pipeline"><code class="docutils literal"><span class="pre">create_epidewarp_pipeline()</span></code></a><ul>
+<li><a class="reference internal" href="#id3">Example</a></li>
+<li><a class="reference internal" href="#id4">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#create-motion-correct-pipeline"><code class="docutils literal"><span class="pre">create_motion_correct_pipeline()</span></code></a><ul>
+<li><a class="reference internal" href="#id5">Example</a></li>
+<li><a class="reference internal" href="#id6">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fieldmap-correction"><code class="docutils literal"><span class="pre">fieldmap_correction()</span></code></a><ul>
+<li><a class="reference internal" href="#id7">Example</a></li>
+<li><a class="reference internal" href="#id8">Graph</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#topup-correction"><code class="docutils literal"><span class="pre">topup_correction()</span></code></a><ul>
+<li><a class="reference internal" href="#id9">Example</a></li>
+<li><a class="reference internal" href="#id10">Graph</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-nipype.workflows.dmri.fsl.epi">
+<span id="workflows-dmri-fsl-epi"></span><h1>workflows.dmri.fsl.epi<a class="headerlink" href="#module-nipype.workflows.dmri.fsl.epi" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="create-dmri-preprocessing">
+<span id="nipype-workflows-dmri-fsl-epi-create-dmri-preprocessing"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_dmri_preprocessing()</span></code><a class="headerlink" href="#create-dmri-preprocessing" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/dmri/fsl/epi.py#L8">Link to code</a></p>
+<p>Creates a workflow that chains the necessary pipelines to
+correct for motion, eddy currents, and, if selected, susceptibility
+artifacts in EPI dMRI sequences.</p>
+<p>IMPORTANT NOTICE: this workflow rotates the b-vectors, so please be adviced
+that not all the dicom converters ensure the consistency between the resulting
+nifti orientation and the b matrix table (e.g. dcm2nii checks it).</p>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_dmri_preprocess</span> <span class="o">=</span> <span class="n">create_dmri_preprocessing</span><span class="p">(</span><span class="s">&#39;nipype_dmri_prep&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_dmri_preprocess</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;diffusion.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_dmri_preprocess</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bvec</span> <span class="o">=</span> <span class="s">&#39;diffusion.bvec&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_dmri_preprocess</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">ref_num</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_dmri_preprocess</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">fieldmap_mag</span> <span class="o">=</span> <span class="s">&#39;magnitude.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_dmri_preprocess</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">fieldmap_pha</span> <span class="o">=</span> <span class="s">&#39;phase.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_dmri_preprocess</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">te_diff</span> <span class="o">=</span> <span class="mf">2.46</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_dmri_preprocess</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">epi_echospacing</span> <span class="o">=</span> <span class="mf">0.77</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_dmri_preprocess</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">epi_rev_encoding</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_dmri_preprocess</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">pi_accel_factor</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_dmri_preprocess</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputnode.in_file - The diffusion data
+inputnode.in_bvec - The b-matrix file, in FSL format and consistent with the in_file orientation
+inputnode.ref_num - The reference volume (a b=0 volume in dMRI)
+inputnode.fieldmap_mag - The magnitude of the fieldmap
+inputnode.fieldmap_pha - The phase difference of the fieldmap
+inputnode.te_diff - TE increment used (in msec.) on the fieldmap acquisition (generally 2.46ms for 3T scanners)
+inputnode.epi_echospacing - The EPI EchoSpacing parameter (in msec.)
+inputnode.epi_rev_encoding - True if reverse encoding was used (generally False)
+inputnode.pi_accel_factor - Parallel imaging factor (aka GRAPPA acceleration factor)
+inputnode.vsm_sigma - Sigma (in mm.) of the gaussian kernel used for in-slice smoothing of the deformation field (voxel shift map, vsm)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">outputnode</span><span class="o">.</span><span class="n">dmri_corrected</span>
+<span class="n">outputnode</span><span class="o">.</span><span class="n">bvec_rotated</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Optional arguments::</dt>
+<dd>use_fieldmap - True if there are fieldmap files that should be used (default True)
+fieldmap_registration - True if registration to fieldmap should be performed (default False)</dd>
+</dl>
+</div>
+<div class="section" id="graph">
+<h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-87aaaecf6b28483be136f5f301309df6a8bc2573.png" alt="digraph dMRI_preprocessing{
+
+  label=&quot;dMRI_preprocessing&quot;;
+
+  dMRI_preprocessing_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  dMRI_preprocessing_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  subgraph cluster_dMRI_preprocessing_motion_correct {
+
+      label=&quot;motion_correct&quot;;
+
+    dMRI_preprocessing_motion_correct_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    dMRI_preprocessing_motion_correct_split[label=&quot;split (fsl)&quot;];
+
+    dMRI_preprocessing_motion_correct_pick_ref[label=&quot;pick_ref (utility)&quot;];
+
+    dMRI_preprocessing_motion_correct_coregistration[label=&quot;coregistration (fsl)&quot;];
+
+    dMRI_preprocessing_motion_correct_rotate_b_matrix[label=&quot;rotate_b_matrix (utility)&quot;];
+
+    dMRI_preprocessing_motion_correct_merge[label=&quot;merge (fsl)&quot;];
+
+    dMRI_preprocessing_motion_correct_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    dMRI_preprocessing_motion_correct_inputnode -&gt; dMRI_preprocessing_motion_correct_split;
+
+    dMRI_preprocessing_motion_correct_inputnode -&gt; dMRI_preprocessing_motion_correct_pick_ref;
+
+    dMRI_preprocessing_motion_correct_inputnode -&gt; dMRI_preprocessing_motion_correct_rotate_b_matrix;
+
+    dMRI_preprocessing_motion_correct_split -&gt; dMRI_preprocessing_motion_correct_pick_ref;
+
+    dMRI_preprocessing_motion_correct_split -&gt; dMRI_preprocessing_motion_correct_coregistration;
+
+    dMRI_preprocessing_motion_correct_pick_ref -&gt; dMRI_preprocessing_motion_correct_coregistration;
+
+    dMRI_preprocessing_motion_correct_coregistration -&gt; dMRI_preprocessing_motion_correct_rotate_b_matrix;
+
+    dMRI_preprocessing_motion_correct_coregistration -&gt; dMRI_preprocessing_motion_correct_merge;
+
+    dMRI_preprocessing_motion_correct_rotate_b_matrix -&gt; dMRI_preprocessing_motion_correct_outputnode;
+
+    dMRI_preprocessing_motion_correct_merge -&gt; dMRI_preprocessing_motion_correct_outputnode;
+
+  }
+
+  subgraph cluster_dMRI_preprocessing_eddy_correct {
+
+      label=&quot;eddy_correct&quot;;
+
+    dMRI_preprocessing_eddy_correct_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    dMRI_preprocessing_eddy_correct_split[label=&quot;split (fsl)&quot;];
+
+    dMRI_preprocessing_eddy_correct_pick_ref[label=&quot;pick_ref (utility)&quot;];
+
+    dMRI_preprocessing_eddy_correct_coregistration[label=&quot;coregistration (fsl)&quot;];
+
+    dMRI_preprocessing_eddy_correct_merge[label=&quot;merge (fsl)&quot;];
+
+    dMRI_preprocessing_eddy_correct_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    dMRI_preprocessing_eddy_correct_inputnode -&gt; dMRI_preprocessing_eddy_correct_split;
+
+    dMRI_preprocessing_eddy_correct_inputnode -&gt; dMRI_preprocessing_eddy_correct_pick_ref;
+
+    dMRI_preprocessing_eddy_correct_split -&gt; dMRI_preprocessing_eddy_correct_pick_ref;
+
+    dMRI_preprocessing_eddy_correct_split -&gt; dMRI_preprocessing_eddy_correct_coregistration;
+
+    dMRI_preprocessing_eddy_correct_pick_ref -&gt; dMRI_preprocessing_eddy_correct_coregistration;
+
+    dMRI_preprocessing_eddy_correct_coregistration -&gt; dMRI_preprocessing_eddy_correct_merge;
+
+    dMRI_preprocessing_eddy_correct_merge -&gt; dMRI_preprocessing_eddy_correct_outputnode;
+
+  }
+
+  subgraph cluster_dMRI_preprocessing_epidewarp {
+
+      label=&quot;epidewarp&quot;;
+
+    dMRI_preprocessing_epidewarp_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    dMRI_preprocessing_epidewarp_dwi_split[label=&quot;dwi_split (utility)&quot;];
+
+    dMRI_preprocessing_epidewarp_dwell_time[label=&quot;dwell_time (utility)&quot;];
+
+    dMRI_preprocessing_epidewarp_select_magnitude[label=&quot;select_magnitude (fsl)&quot;];
+
+    dMRI_preprocessing_epidewarp_mask_magnitude[label=&quot;mask_magnitude (fsl)&quot;];
+
+    dMRI_preprocessing_epidewarp_mask_dilate[label=&quot;mask_dilate (utility)&quot;];
+
+    dMRI_preprocessing_epidewarp_normalize_phasediff[label=&quot;normalize_phasediff (utility)&quot;];
+
+    dMRI_preprocessing_epidewarp_phase_unwrap[label=&quot;phase_unwrap (fsl)&quot;];
+
+    dMRI_preprocessing_epidewarp_fill_phasediff[label=&quot;fill_phasediff (utility)&quot;];
+
+    dMRI_preprocessing_epidewarp_generate_vsm[label=&quot;generate_vsm (fsl)&quot;];
+
+    dMRI_preprocessing_epidewarp_vsm_mean_shift[label=&quot;vsm_mean_shift (utility)&quot;];
+
+    dMRI_preprocessing_epidewarp_dwi_fugue[label=&quot;dwi_fugue (fsl)&quot;];
+
+    dMRI_preprocessing_epidewarp_dwi_merge[label=&quot;dwi_merge (fsl)&quot;];
+
+    dMRI_preprocessing_epidewarp_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    dMRI_preprocessing_epidewarp_inputnode -&gt; dMRI_preprocessing_epidewarp_normalize_phasediff;
+
+    dMRI_preprocessing_epidewarp_inputnode -&gt; dMRI_preprocessing_epidewarp_generate_vsm;
+
+    dMRI_preprocessing_epidewarp_inputnode -&gt; dMRI_preprocessing_epidewarp_generate_vsm;
+
+    dMRI_preprocessing_epidewarp_inputnode -&gt; dMRI_preprocessing_epidewarp_generate_vsm;
+
+    dMRI_preprocessing_epidewarp_inputnode -&gt; dMRI_preprocessing_epidewarp_dwi_split;
+
+    dMRI_preprocessing_epidewarp_inputnode -&gt; dMRI_preprocessing_epidewarp_dwell_time;
+
+    dMRI_preprocessing_epidewarp_inputnode -&gt; dMRI_preprocessing_epidewarp_dwell_time;
+
+    dMRI_preprocessing_epidewarp_inputnode -&gt; dMRI_preprocessing_epidewarp_dwell_time;
+
+    dMRI_preprocessing_epidewarp_inputnode -&gt; dMRI_preprocessing_epidewarp_select_magnitude;
+
+    dMRI_preprocessing_epidewarp_dwi_split -&gt; dMRI_preprocessing_epidewarp_dwi_fugue;
+
+    dMRI_preprocessing_epidewarp_dwell_time -&gt; dMRI_preprocessing_epidewarp_generate_vsm;
+
+    dMRI_preprocessing_epidewarp_select_magnitude -&gt; dMRI_preprocessing_epidewarp_mask_magnitude;
+
+    dMRI_preprocessing_epidewarp_select_magnitude -&gt; dMRI_preprocessing_epidewarp_phase_unwrap;
+
+    dMRI_preprocessing_epidewarp_mask_magnitude -&gt; dMRI_preprocessing_epidewarp_mask_dilate;
+
+    dMRI_preprocessing_epidewarp_mask_dilate -&gt; dMRI_preprocessing_epidewarp_generate_vsm;
+
+    dMRI_preprocessing_epidewarp_mask_dilate -&gt; dMRI_preprocessing_epidewarp_phase_unwrap;
+
+    dMRI_preprocessing_epidewarp_mask_dilate -&gt; dMRI_preprocessing_epidewarp_dwi_fugue;
+
+    dMRI_preprocessing_epidewarp_mask_dilate -&gt; dMRI_preprocessing_epidewarp_vsm_mean_shift;
+
+    dMRI_preprocessing_epidewarp_normalize_phasediff -&gt; dMRI_preprocessing_epidewarp_phase_unwrap;
+
+    dMRI_preprocessing_epidewarp_phase_unwrap -&gt; dMRI_preprocessing_epidewarp_fill_phasediff;
+
+    dMRI_preprocessing_epidewarp_fill_phasediff -&gt; dMRI_preprocessing_epidewarp_generate_vsm;
+
+    dMRI_preprocessing_epidewarp_generate_vsm -&gt; dMRI_preprocessing_epidewarp_vsm_mean_shift;
+
+    dMRI_preprocessing_epidewarp_generate_vsm -&gt; dMRI_preprocessing_epidewarp_vsm_mean_shift;
+
+    dMRI_preprocessing_epidewarp_vsm_mean_shift -&gt; dMRI_preprocessing_epidewarp_dwi_fugue;
+
+    dMRI_preprocessing_epidewarp_dwi_fugue -&gt; dMRI_preprocessing_epidewarp_dwi_merge;
+
+    dMRI_preprocessing_epidewarp_dwi_merge -&gt; dMRI_preprocessing_epidewarp_outputnode;
+
+  }
+
+  dMRI_preprocessing_motion_correct_outputnode -&gt; dMRI_preprocessing_eddy_correct_inputnode;
+
+  dMRI_preprocessing_motion_correct_outputnode -&gt; dMRI_preprocessing_outputnode;
+
+  dMRI_preprocessing_epidewarp_outputnode -&gt; dMRI_preprocessing_outputnode;
+
+  dMRI_preprocessing_inputnode -&gt; dMRI_preprocessing_motion_correct_inputnode;
+
+  dMRI_preprocessing_inputnode -&gt; dMRI_preprocessing_motion_correct_inputnode;
+
+  dMRI_preprocessing_inputnode -&gt; dMRI_preprocessing_motion_correct_inputnode;
+
+  dMRI_preprocessing_inputnode -&gt; dMRI_preprocessing_epidewarp_inputnode;
+
+  dMRI_preprocessing_inputnode -&gt; dMRI_preprocessing_epidewarp_inputnode;
+
+  dMRI_preprocessing_inputnode -&gt; dMRI_preprocessing_epidewarp_inputnode;
+
+  dMRI_preprocessing_inputnode -&gt; dMRI_preprocessing_epidewarp_inputnode;
+
+  dMRI_preprocessing_inputnode -&gt; dMRI_preprocessing_epidewarp_inputnode;
+
+  dMRI_preprocessing_inputnode -&gt; dMRI_preprocessing_epidewarp_inputnode;
+
+  dMRI_preprocessing_inputnode -&gt; dMRI_preprocessing_epidewarp_inputnode;
+
+  dMRI_preprocessing_inputnode -&gt; dMRI_preprocessing_epidewarp_inputnode;
+
+  dMRI_preprocessing_inputnode -&gt; dMRI_preprocessing_eddy_correct_inputnode;
+
+  dMRI_preprocessing_eddy_correct_outputnode -&gt; dMRI_preprocessing_epidewarp_inputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="create-eddy-correct-pipeline">
+<span id="nipype-workflows-dmri-fsl-epi-create-eddy-correct-pipeline"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_eddy_correct_pipeline()</span></code><a class="headerlink" href="#create-eddy-correct-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/dmri/fsl/epi.py#L185">Link to code</a></p>
+<p>Creates a pipeline that replaces eddy_correct script in FSL. It takes a
+series of diffusion weighted images and linearly co-registers them to one
+reference image. No rotation of the B-matrix is performed, so this pipeline
+should be executed after the motion correction pipeline.</p>
+<div class="section" id="id1">
+<h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_eddycorrect</span> <span class="o">=</span> <span class="n">create_eddy_correct_pipeline</span><span class="p">(</span><span class="s">&#39;nipype_eddycorrect&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_eddycorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;diffusion.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_eddycorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">ref_num</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_eddycorrect</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span>
+<span class="n">inputnode</span><span class="o">.</span><span class="n">ref_num</span>
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">outputnode</span><span class="o">.</span><span class="n">eddy_corrected</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3>Graph<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-f6b81b2d948da439f28e8589ed55e6de0dabb164.png" alt="digraph eddy_correct{
+
+  label=&quot;eddy_correct&quot;;
+
+  eddy_correct_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  eddy_correct_split[label=&quot;split (fsl)&quot;];
+
+  eddy_correct_pick_ref[label=&quot;pick_ref (utility)&quot;];
+
+  eddy_correct_coregistration[label=&quot;coregistration (fsl)&quot;];
+
+  eddy_correct_merge[label=&quot;merge (fsl)&quot;];
+
+  eddy_correct_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  eddy_correct_inputnode -&gt; eddy_correct_pick_ref;
+
+  eddy_correct_inputnode -&gt; eddy_correct_split;
+
+  eddy_correct_split -&gt; eddy_correct_pick_ref;
+
+  eddy_correct_split -&gt; eddy_correct_coregistration;
+
+  eddy_correct_pick_ref -&gt; eddy_correct_coregistration;
+
+  eddy_correct_coregistration -&gt; eddy_correct_merge;
+
+  eddy_correct_merge -&gt; eddy_correct_outputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="create-epidewarp-pipeline">
+<span id="nipype-workflows-dmri-fsl-epi-create-epidewarp-pipeline"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_epidewarp_pipeline()</span></code><a class="headerlink" href="#create-epidewarp-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/dmri/fsl/epi.py#L437">Link to code</a></p>
+<p>Replaces the epidewarp.fsl script (<a class="reference external" href="http://www.nmr.mgh.harvard.edu/~greve/fbirn/b0/epidewarp.fsl">http://www.nmr.mgh.harvard.edu/~greve/fbirn/b0/epidewarp.fsl</a>)
+for susceptibility distortion correction of dMRI &amp; fMRI acquired with EPI sequences and the fieldmap
+information (Jezzard et al., 1995) using FSL&#8217;s FUGUE. The registration to the (warped) fieldmap
+(strictly following the original script) is available using fieldmap_registration=True.</p>
+<div class="section" id="id3">
+<h3>Example<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span> <span class="o">=</span> <span class="n">create_epidewarp_pipeline</span><span class="p">(</span><span class="s">&#39;nipype_epidewarp&#39;</span><span class="p">,</span> <span class="n">fieldmap_registration</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;diffusion.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">fieldmap_mag</span> <span class="o">=</span> <span class="s">&#39;magnitude.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">fieldmap_pha</span> <span class="o">=</span> <span class="s">&#39;phase.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">te_diff</span> <span class="o">=</span> <span class="mf">2.46</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">epi_echospacing</span> <span class="o">=</span> <span class="mf">0.77</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">epi_rev_encoding</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">ref_num</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">pi_accel_factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputnode.in_file - The volume acquired with EPI sequence
+inputnode.fieldmap_mag - The magnitude of the fieldmap
+inputnode.fieldmap_pha - The phase difference of the fieldmap
+inputnode.te_diff - Time difference between TE in ms.
+inputnode.epi_echospacing - The echo spacing (aka dwell time) in the EPI sequence
+inputnode.epi_ph_encoding_dir - The phase encoding direction in EPI acquisition (default y)
+inputnode.epi_rev_encoding - True if it is acquired with reverse encoding
+inputnode.pi_accel_factor - Acceleration factor used for EPI parallel imaging (GRAPPA)
+inputnode.vsm_sigma - Sigma value of the gaussian smoothing filter applied to the vsm (voxel shift map)
+inputnode.ref_num - The reference volume (B=0 in dMRI or a central frame in fMRI)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">outputnode</span><span class="o">.</span><span class="n">epi_corrected</span>
+</pre></div>
+</div>
+<p>Optional arguments:</p>
+<div class="highlight-python"><div class="highlight"><pre>fieldmap_registration - True if registration to fieldmap should be done (default False)
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>Graph<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-2cf4032b2d575a3c57d6fe859f6daadb343f11fe.png" alt="digraph epidewarp{
+
+  label=&quot;epidewarp&quot;;
+
+  epidewarp_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  epidewarp_dwell_time[label=&quot;dwell_time (utility)&quot;];
+
+  epidewarp_dwi_split[label=&quot;dwi_split (utility)&quot;];
+
+  epidewarp_select_magnitude[label=&quot;select_magnitude (fsl)&quot;];
+
+  epidewarp_mask_magnitude[label=&quot;mask_magnitude (fsl)&quot;];
+
+  epidewarp_mask_dilate[label=&quot;mask_dilate (utility)&quot;];
+
+  epidewarp_normalize_phasediff[label=&quot;normalize_phasediff (utility)&quot;];
+
+  epidewarp_phase_unwrap[label=&quot;phase_unwrap (fsl)&quot;];
+
+  epidewarp_fill_phasediff[label=&quot;fill_phasediff (utility)&quot;];
+
+  epidewarp_generate_vsm[label=&quot;generate_vsm (fsl)&quot;];
+
+  epidewarp_vsm_mean_shift[label=&quot;vsm_mean_shift (utility)&quot;];
+
+  epidewarp_dwi_fugue[label=&quot;dwi_fugue (fsl)&quot;];
+
+  epidewarp_dwi_merge[label=&quot;dwi_merge (fsl)&quot;];
+
+  epidewarp_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  epidewarp_inputnode -&gt; epidewarp_generate_vsm;
+
+  epidewarp_inputnode -&gt; epidewarp_generate_vsm;
+
+  epidewarp_inputnode -&gt; epidewarp_generate_vsm;
+
+  epidewarp_inputnode -&gt; epidewarp_normalize_phasediff;
+
+  epidewarp_inputnode -&gt; epidewarp_dwi_split;
+
+  epidewarp_inputnode -&gt; epidewarp_dwell_time;
+
+  epidewarp_inputnode -&gt; epidewarp_dwell_time;
+
+  epidewarp_inputnode -&gt; epidewarp_dwell_time;
+
+  epidewarp_inputnode -&gt; epidewarp_select_magnitude;
+
+  epidewarp_dwell_time -&gt; epidewarp_generate_vsm;
+
+  epidewarp_dwi_split -&gt; epidewarp_dwi_fugue;
+
+  epidewarp_select_magnitude -&gt; epidewarp_mask_magnitude;
+
+  epidewarp_select_magnitude -&gt; epidewarp_phase_unwrap;
+
+  epidewarp_mask_magnitude -&gt; epidewarp_mask_dilate;
+
+  epidewarp_mask_dilate -&gt; epidewarp_dwi_fugue;
+
+  epidewarp_mask_dilate -&gt; epidewarp_vsm_mean_shift;
+
+  epidewarp_mask_dilate -&gt; epidewarp_phase_unwrap;
+
+  epidewarp_mask_dilate -&gt; epidewarp_generate_vsm;
+
+  epidewarp_normalize_phasediff -&gt; epidewarp_phase_unwrap;
+
+  epidewarp_phase_unwrap -&gt; epidewarp_fill_phasediff;
+
+  epidewarp_fill_phasediff -&gt; epidewarp_generate_vsm;
+
+  epidewarp_generate_vsm -&gt; epidewarp_vsm_mean_shift;
+
+  epidewarp_generate_vsm -&gt; epidewarp_vsm_mean_shift;
+
+  epidewarp_vsm_mean_shift -&gt; epidewarp_dwi_fugue;
+
+  epidewarp_dwi_fugue -&gt; epidewarp_dwi_merge;
+
+  epidewarp_dwi_merge -&gt; epidewarp_outputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="create-motion-correct-pipeline">
+<span id="nipype-workflows-dmri-fsl-epi-create-motion-correct-pipeline"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_motion_correct_pipeline()</span></code><a class="headerlink" href="#create-motion-correct-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/dmri/fsl/epi.py#L114">Link to code</a></p>
+<p>Creates a pipeline that corrects for motion artifact in dMRI sequences.
+It takes a series of diffusion weighted images and rigidly co-registers
+them to one reference image. Finally, the b-matrix is rotated accordingly
+(Leemans et al. 2009 - <a class="reference external" href="http://www.ncbi.nlm.nih.gov/pubmed/19319973">http://www.ncbi.nlm.nih.gov/pubmed/19319973</a>),
+making use of the rotation matrix obtained by FLIRT.</p>
+<p>IMPORTANT NOTICE: this workflow rotates the b-vectors, so please be adviced
+that not all the dicom converters ensure the consistency between the resulting
+nifti orientation and the b matrix table (e.g. dcm2nii checks it).</p>
+<div class="section" id="id5">
+<h3>Example<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_motioncorrect</span> <span class="o">=</span> <span class="n">create_motion_correct_pipeline</span><span class="p">(</span><span class="s">&#39;nipype_motioncorrect&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_motioncorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;diffusion.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_motioncorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_bvec</span> <span class="o">=</span> <span class="s">&#39;diffusion.bvec&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_motioncorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">ref_num</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_motioncorrect</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span>
+<span class="n">inputnode</span><span class="o">.</span><span class="n">ref_num</span>
+<span class="n">inputnode</span><span class="o">.</span><span class="n">in_bvec</span>
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">outputnode</span><span class="o">.</span><span class="n">motion_corrected</span>
+<span class="n">outputnode</span><span class="o">.</span><span class="n">out_bvec</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>Graph<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-685d1d89a3bdbab5c4f63db5ac9f9b274217402b.png" alt="digraph motion_correct{
+
+  label=&quot;motion_correct&quot;;
+
+  motion_correct_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  motion_correct_split[label=&quot;split (fsl)&quot;];
+
+  motion_correct_pick_ref[label=&quot;pick_ref (utility)&quot;];
+
+  motion_correct_coregistration[label=&quot;coregistration (fsl)&quot;];
+
+  motion_correct_merge[label=&quot;merge (fsl)&quot;];
+
+  motion_correct_rotate_b_matrix[label=&quot;rotate_b_matrix (utility)&quot;];
+
+  motion_correct_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  motion_correct_inputnode -&gt; motion_correct_split;
+
+  motion_correct_inputnode -&gt; motion_correct_pick_ref;
+
+  motion_correct_inputnode -&gt; motion_correct_rotate_b_matrix;
+
+  motion_correct_split -&gt; motion_correct_pick_ref;
+
+  motion_correct_split -&gt; motion_correct_coregistration;
+
+  motion_correct_pick_ref -&gt; motion_correct_coregistration;
+
+  motion_correct_coregistration -&gt; motion_correct_rotate_b_matrix;
+
+  motion_correct_coregistration -&gt; motion_correct_merge;
+
+  motion_correct_merge -&gt; motion_correct_outputnode;
+
+  motion_correct_rotate_b_matrix -&gt; motion_correct_outputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="fieldmap-correction">
+<span id="nipype-workflows-dmri-fsl-epi-fieldmap-correction"></span><h2><code class="xref py py-func docutils literal"><span class="pre">fieldmap_correction()</span></code><a class="headerlink" href="#fieldmap-correction" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/dmri/fsl/epi.py#L238">Link to code</a></p>
+<p>Fieldmap-based retrospective correction of EPI images for the susceptibility distortion
+artifact (Jezzard et al., 1995). Fieldmap images are assumed to be already registered
+to EPI data, and a brain mask is required.</p>
+<p>Replaces the former workflow, still available as create_epidewarp_pipeline().  The difference
+with respect the epidewarp pipeline is that now the workflow uses the new fsl_prepare_fieldmap
+available as of FSL 5.0.</p>
+<div class="section" id="id7">
+<h3>Example<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span> <span class="o">=</span> <span class="n">fieldmap_correction</span><span class="p">(</span><span class="s">&#39;nipype_epidewarp&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;diffusion.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_mask</span> <span class="o">=</span> <span class="s">&#39;brainmask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">fieldmap_pha</span> <span class="o">=</span> <span class="s">&#39;phase.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">fieldmap_mag</span> <span class="o">=</span> <span class="s">&#39;magnitude.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">te_diff</span> <span class="o">=</span> <span class="mf">2.46</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">epi_echospacing</span> <span class="o">=</span> <span class="mf">0.77</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">encoding_direction</span> <span class="o">=</span> <span class="s">&#39;y&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputnode.in_file - The volume acquired with EPI sequence
+inputnode.in_mask - A brain mask
+inputnode.fieldmap_pha - The phase difference map from the fieldmapping, registered to in_file
+inputnode.fieldmap_mag - The magnitud maps (usually 4D, one magnitude per GRE scan)
+                         from the fieldmapping, registered to in_file
+inputnode.te_diff - Time difference in msec. between TE in ms of the fieldmapping (usually a GRE sequence).
+inputnode.epi_echospacing - The effective echo spacing (aka dwell time) in msec. of the EPI sequence. If
+                            EPI was acquired with parallel imaging, then the effective echo spacing is
+                            eff_es = es / acc_factor.
+inputnode.encoding_direction - The phase encoding direction in EPI acquisition (default y)
+inputnode.vsm_sigma - Sigma value of the gaussian smoothing filter applied to the vsm (voxel shift map)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">outputnode</span><span class="o">.</span><span class="n">epi_corrected</span>
+<span class="n">outputnode</span><span class="o">.</span><span class="n">out_vsm</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id8">
+<h3>Graph<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-2aaceaa5549bcadb6dc4026368051abe665f1cba.png" alt="digraph fieldmap_correction{
+
+  label=&quot;fieldmap_correction&quot;;
+
+  fieldmap_correction_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  fieldmap_correction_select_magnitude[label=&quot;select_magnitude (fsl)&quot;];
+
+  fieldmap_correction_mask_magnitude[label=&quot;mask_magnitude (fsl)&quot;];
+
+  fieldmap_correction_prepare_fieldmap[label=&quot;prepare_fieldmap (fsl)&quot;];
+
+  fieldmap_correction_generate_vsm[label=&quot;generate_vsm (fsl)&quot;];
+
+  fieldmap_correction_dwi_split[label=&quot;dwi_split (utility)&quot;];
+
+  fieldmap_correction_dwi_fugue[label=&quot;dwi_fugue (fsl)&quot;];
+
+  fieldmap_correction_dwi_merge[label=&quot;dwi_merge (fsl)&quot;];
+
+  fieldmap_correction_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  fieldmap_correction_inputnode -&gt; fieldmap_correction_dwi_split;
+
+  fieldmap_correction_inputnode -&gt; fieldmap_correction_dwi_fugue;
+
+  fieldmap_correction_inputnode -&gt; fieldmap_correction_prepare_fieldmap;
+
+  fieldmap_correction_inputnode -&gt; fieldmap_correction_prepare_fieldmap;
+
+  fieldmap_correction_inputnode -&gt; fieldmap_correction_generate_vsm;
+
+  fieldmap_correction_inputnode -&gt; fieldmap_correction_generate_vsm;
+
+  fieldmap_correction_inputnode -&gt; fieldmap_correction_generate_vsm;
+
+  fieldmap_correction_inputnode -&gt; fieldmap_correction_generate_vsm;
+
+  fieldmap_correction_inputnode -&gt; fieldmap_correction_generate_vsm;
+
+  fieldmap_correction_inputnode -&gt; fieldmap_correction_select_magnitude;
+
+  fieldmap_correction_inputnode -&gt; fieldmap_correction_mask_magnitude;
+
+  fieldmap_correction_select_magnitude -&gt; fieldmap_correction_mask_magnitude;
+
+  fieldmap_correction_mask_magnitude -&gt; fieldmap_correction_prepare_fieldmap;
+
+  fieldmap_correction_mask_magnitude -&gt; fieldmap_correction_dwi_fugue;
+
+  fieldmap_correction_mask_magnitude -&gt; fieldmap_correction_generate_vsm;
+
+  fieldmap_correction_prepare_fieldmap -&gt; fieldmap_correction_generate_vsm;
+
+  fieldmap_correction_generate_vsm -&gt; fieldmap_correction_dwi_fugue;
+
+  fieldmap_correction_generate_vsm -&gt; fieldmap_correction_outputnode;
+
+  fieldmap_correction_dwi_split -&gt; fieldmap_correction_dwi_fugue;
+
+  fieldmap_correction_dwi_fugue -&gt; fieldmap_correction_dwi_merge;
+
+  fieldmap_correction_dwi_merge -&gt; fieldmap_correction_outputnode;
+
+}" />
+</p>
+</div>
+</div>
+<div class="section" id="topup-correction">
+<span id="nipype-workflows-dmri-fsl-epi-topup-correction"></span><h2><code class="xref py py-func docutils literal"><span class="pre">topup_correction()</span></code><a class="headerlink" href="#topup-correction" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/dmri/fsl/epi.py#L361">Link to code</a></p>
+<blockquote>
+<div>Corrects for susceptibilty distortion of EPI images when one reverse encoding dataset has
+been acquired</div></blockquote>
+<div class="section" id="id9">
+<h3>Example<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span> <span class="o">=</span> <span class="n">topup_correction</span><span class="p">(</span><span class="s">&#39;nipype_topup&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file_dir</span> <span class="o">=</span> <span class="s">&#39;epi.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">in_file_rev</span> <span class="o">=</span> <span class="s">&#39;epi_rev.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">encoding_direction</span> <span class="o">=</span> <span class="s">&#39;y&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputnode</span><span class="o">.</span><span class="n">ref_num</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nipype_epicorrect</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Inputs::</dt>
+<dd>inputnode.in_file_dir - EPI volume acquired in &#8216;forward&#8217; phase encoding
+inputnode.in_file_rev - EPI volume acquired in &#8216;reversed&#8217; phase encoding
+inputnode.encoding_direction - Direction encoding of in_file_dir
+inputnode.ref_num - Identifier of the reference volumes (usually B0 volume)</dd>
+</dl>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">outputnode</span><span class="o">.</span><span class="n">epi_corrected</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id10">
+<h3>Graph<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<p class="graphviz">
+<img src="../../_images/graphviz-a42f1932e72db0a8ba0595e113100be007bb0581.png" alt="digraph topup_correction{
+
+  label=&quot;topup_correction&quot;;
+
+  topup_correction_inputnode[label=&quot;inputnode (utility)&quot;];
+
+  topup_correction_b0_1[label=&quot;b0_1 (fsl)&quot;];
+
+  topup_correction_merge2[label=&quot;merge2 (utility)&quot;];
+
+  topup_correction_b0_2[label=&quot;b0_2 (fsl)&quot;];
+
+  topup_correction_merge[label=&quot;merge (utility)&quot;];
+
+  topup_correction_b0_comb[label=&quot;b0_comb (fsl)&quot;];
+
+  topup_correction_topup[label=&quot;topup (fsl)&quot;];
+
+  topup_correction_applytopup[label=&quot;applytopup (fsl)&quot;];
+
+  topup_correction_outputnode[label=&quot;outputnode (utility)&quot;];
+
+  topup_correction_inputnode -&gt; topup_correction_merge2;
+
+  topup_correction_inputnode -&gt; topup_correction_merge2;
+
+  topup_correction_inputnode -&gt; topup_correction_b0_1;
+
+  topup_correction_inputnode -&gt; topup_correction_b0_1;
+
+  topup_correction_inputnode -&gt; topup_correction_topup;
+
+  topup_correction_inputnode -&gt; topup_correction_topup;
+
+  topup_correction_inputnode -&gt; topup_correction_b0_2;
+
+  topup_correction_inputnode -&gt; topup_correction_b0_2;
+
+  topup_correction_b0_1 -&gt; topup_correction_merge;
+
+  topup_correction_merge2 -&gt; topup_correction_applytopup;
+
+  topup_correction_b0_2 -&gt; topup_correction_merge;
+
+  topup_correction_merge -&gt; topup_correction_b0_comb;
+
+  topup_correction_b0_comb -&gt; topup_correction_topup;
+
+  topup_correction_topup -&gt; topup_correction_outputnode;
+
+  topup_correction_topup -&gt; topup_correction_outputnode;
+
+  topup_correction_topup -&gt; topup_correction_outputnode;
+
+  topup_correction_topup -&gt; topup_correction_outputnode;
+
+  topup_correction_topup -&gt; topup_correction_applytopup;
+
+  topup_correction_topup -&gt; topup_correction_applytopup;
+
+  topup_correction_applytopup -&gt; topup_correction_outputnode;
+
+}" />
+</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

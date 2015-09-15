@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -157,11 +157,11 @@
 <li><a class="reference internal" href="#id8">Examples</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#add-traits"><tt class="docutils literal"><span class="pre">add_traits()</span></tt></a></li>
-<li><a class="reference internal" href="#copytree"><tt class="docutils literal"><span class="pre">copytree()</span></tt></a></li>
-<li><a class="reference internal" href="#push-file"><tt class="docutils literal"><span class="pre">push_file()</span></tt></a></li>
-<li><a class="reference internal" href="#quote-id"><tt class="docutils literal"><span class="pre">quote_id()</span></tt></a></li>
-<li><a class="reference internal" href="#unquote-id"><tt class="docutils literal"><span class="pre">unquote_id()</span></tt></a></li>
+<li><a class="reference internal" href="#add-traits"><code class="docutils literal"><span class="pre">add_traits()</span></code></a></li>
+<li><a class="reference internal" href="#copytree"><code class="docutils literal"><span class="pre">copytree()</span></code></a></li>
+<li><a class="reference internal" href="#push-file"><code class="docutils literal"><span class="pre">push_file()</span></code></a></li>
+<li><a class="reference internal" href="#quote-id"><code class="docutils literal"><span class="pre">quote_id()</span></code></a></li>
+<li><a class="reference internal" href="#unquote-id"><code class="docutils literal"><span class="pre">unquote_id()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -184,7 +184,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -196,7 +196,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -219,9 +219,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -231,13 +231,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-io">
 <h1>interfaces.io<a class="headerlink" href="#interfaces-io" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-io-datafinder"></span><div class="section" id="datafinder">
 <span id="index-0"></span><h2>DataFinder<a class="headerlink" href="#datafinder" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L732">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L739">Link to code</a></p>
 <p>Search for paths that match a given regular expression. Allows a less
 proscriptive approach to gathering input files compared to DataGrabber.
 Will recursively search any subdirectories by default. This can be limited
@@ -282,9 +282,9 @@ ignore_regexes: (a list of items which are any value)
         ignored.
 match_regex: (a string, nipype default value: (.+))
         Regular expression for matching paths.
-max_depth: (an integer)
+max_depth: (an integer (int or long))
         The maximum depth to search beneath the root_paths
-min_depth: (an integer)
+min_depth: (an integer (int or long))
         The minimum depth to search beneath the root paths
 unpack_single: (a boolean, nipype default value: False)
         Unpack single results from list
@@ -298,7 +298,7 @@ unpack_single: (a boolean, nipype default value: False)
 </div>
 <div class="section" id="datagrabber">
 <span id="index-1"></span><h2>DataGrabber<a class="headerlink" href="#datagrabber" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L381">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L388">Link to code</a></p>
 <p>Generic datagrabber module that wraps around glob in an
 intelligent way for neuroimaging tasks to grab files</p>
 <div class="admonition attention">
@@ -374,7 +374,7 @@ template_args: (a dictionary with keys which are a string and with
 </div>
 <div class="section" id="datasink">
 <span id="index-2"></span><h2>DataSink<a class="headerlink" href="#datasink" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L162">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L166">Link to code</a></p>
 <p>Generic datasink module to store structured outputs</p>
 <p>Primarily for use within a workflow. This interface allows arbitrary
 creation of input attributes. The names of these attributes define the
@@ -465,7 +465,7 @@ substitutions: (a list of items which are a tuple of the form: (a
 </div>
 <div class="section" id="freesurfersource">
 <span id="index-3"></span><h2>FreeSurferSource<a class="headerlink" href="#freesurfersource" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L947">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L954">Link to code</a></p>
 <p>Generates freesurfer subject info from their directories</p>
 <div class="section" id="id3">
 <h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
@@ -567,7 +567,7 @@ wmparc_stats: (a list of items which are an existing file name)
 </div>
 <div class="section" id="iobase">
 <span id="index-4"></span><h2>IOBase<a class="headerlink" href="#iobase" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L109">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L113">Link to code</a></p>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
 
@@ -584,7 +584,7 @@ ignore_exception: (a boolean, nipype default value: False)
 <span class="target" id="nipype-interfaces-io-jsonfilegrabber"></span></div>
 <div class="section" id="jsonfilegrabber">
 <span id="index-5"></span><h2>JSONFileGrabber<a class="headerlink" href="#jsonfilegrabber" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L1819">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L1826">Link to code</a></p>
 <p>Datagrabber interface that loads a json file and generates an output for
 every first-level object</p>
 <div class="section" id="example">
@@ -624,7 +624,7 @@ in_file: (an existing file name)
 </div>
 <div class="section" id="jsonfilesink">
 <span id="index-6"></span><h2>JSONFileSink<a class="headerlink" href="#jsonfilesink" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L1889">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L1896">Link to code</a></p>
 <p>Very simple frontend for storing values into a JSON file.
 Entries already existing in in_dict will be overridden by matching
 entries dynamically added as inputs.</p>
@@ -673,7 +673,7 @@ out_file: (a file name)
 <span class="target" id="nipype-interfaces-io-mysqlsink"></span></div>
 <div class="section" id="mysqlsink">
 <span id="index-7"></span><h2>MySQLSink<a class="headerlink" href="#mysqlsink" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L1505">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L1512">Link to code</a></p>
 <p>Very simple frontend for storing values into MySQL database.</p>
 <div class="section" id="id4">
 <h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
@@ -715,7 +715,7 @@ username: (a string)
 </div>
 <div class="section" id="sqlitesink">
 <span id="index-8"></span><h2>SQLiteSink<a class="headerlink" href="#sqlitesink" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L1449">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L1456">Link to code</a></p>
 <p>Very simple frontend for storing values into SQLite database.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
@@ -751,7 +751,7 @@ ignore_exception: (a boolean, nipype default value: False)
 </div>
 <div class="section" id="sshdatagrabber">
 <span id="index-9"></span><h2>SSHDataGrabber<a class="headerlink" href="#sshdatagrabber" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L1565">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L1572">Link to code</a></p>
 <p>Extension of DataGrabber module that downloads the file list and
 optionally the files from a SSH server. The SSH operation must
 not need user and password so an SSH agent must be active in
@@ -850,7 +850,7 @@ username: (a string)
 </div>
 <div class="section" id="selectfiles">
 <span id="index-10"></span><h2>SelectFiles<a class="headerlink" href="#selectfiles" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L584">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L591">Link to code</a></p>
 <p>Flexibly collect data from disk to feed into workflows.</p>
 <p>This interface uses the {}-based string formatting syntax to plug
 values (possibly known only at workflow execution time) into string
@@ -905,7 +905,7 @@ sort_filelist: (a boolean, nipype default value: True)
 </div>
 <div class="section" id="xnatsink">
 <span id="index-11"></span><h2>XNATSink<a class="headerlink" href="#xnatsink" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L1266">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L1273">Link to code</a></p>
 <p>Generic datasink module that takes a directory containing a
 list of nifti files and provides a set of structured output
 fields.</p>
@@ -953,7 +953,7 @@ user: (a string)
 <span class="target" id="nipype-interfaces-io-xnatsource"></span></div>
 <div class="section" id="xnatsource">
 <span id="index-12"></span><h2>XNATSource<a class="headerlink" href="#xnatsource" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L1031">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L1038">Link to code</a></p>
 <p>Generic XNATSource module that wraps around the pyxnat module in
 an intelligent way for neuroimaging tasks to grab files and data
 from an XNAT server.</p>
@@ -1014,14 +1014,14 @@ user: (a string)
 <span class="target" id="module-nipype.interfaces.io"></span></div>
 </div>
 <div class="section" id="add-traits">
-<span id="nipype-interfaces-io-add-traits"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">add_traits()</span></tt><a class="headerlink" href="#add-traits" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L91">Link to code</a></p>
+<span id="nipype-interfaces-io-add-traits"></span><h2><code class="xref py py-func docutils literal"><span class="pre">add_traits()</span></code><a class="headerlink" href="#add-traits" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L95">Link to code</a></p>
 <p>Add traits to a traited class.</p>
 <p>All traits are set to Undefined by default</p>
 </div>
 <div class="section" id="copytree">
-<span id="nipype-interfaces-io-copytree"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">copytree()</span></tt><a class="headerlink" href="#copytree" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L56">Link to code</a></p>
+<span id="nipype-interfaces-io-copytree"></span><h2><code class="xref py py-func docutils literal"><span class="pre">copytree()</span></code><a class="headerlink" href="#copytree" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L59">Link to code</a></p>
 <p>Recursively copy a directory tree using
 nipype.utils.filemanip.copyfile()</p>
 <p>This is not a thread-safe routine. However, in the case of creating new
@@ -1029,16 +1029,16 @@ directories, it checks to see if a particular directory has already been
 created by another process.</p>
 </div>
 <div class="section" id="push-file">
-<span id="nipype-interfaces-io-push-file"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">push_file()</span></tt><a class="headerlink" href="#push-file" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L1358">Link to code</a></p>
+<span id="nipype-interfaces-io-push-file"></span><h2><code class="xref py py-func docutils literal"><span class="pre">push_file()</span></code><a class="headerlink" href="#push-file" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L1365">Link to code</a></p>
 </div>
 <div class="section" id="quote-id">
-<span id="nipype-interfaces-io-quote-id"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">quote_id()</span></tt><a class="headerlink" href="#quote-id" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L1350">Link to code</a></p>
+<span id="nipype-interfaces-io-quote-id"></span><h2><code class="xref py py-func docutils literal"><span class="pre">quote_id()</span></code><a class="headerlink" href="#quote-id" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L1357">Link to code</a></p>
 </div>
 <div class="section" id="unquote-id">
-<span id="nipype-interfaces-io-unquote-id"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">unquote_id()</span></tt><a class="headerlink" href="#unquote-id" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/io.py#L1354">Link to code</a></p>
+<span id="nipype-interfaces-io-unquote-id"></span><h2><code class="xref py py-func docutils literal"><span class="pre">unquote_id()</span></code><a class="headerlink" href="#unquote-id" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/io.py#L1361">Link to code</a></p>
 </div>
 </div>
 
@@ -1049,9 +1049,9 @@ created by another process.</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,25 +114,25 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">workflows.dmri.fsl.dti</a><ul>
-<li><a class="reference internal" href="#bedpostx-parallel"><tt class="docutils literal"><span class="pre">bedpostx_parallel()</span></tt></a><ul>
+<li><a class="reference internal" href="#bedpostx-parallel"><code class="docutils literal"><span class="pre">bedpostx_parallel()</span></code></a><ul>
 <li><a class="reference internal" href="#example">Example</a></li>
 <li><a class="reference internal" href="#graph">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-bedpostx-pipeline"><tt class="docutils literal"><span class="pre">create_bedpostx_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-bedpostx-pipeline"><code class="docutils literal"><span class="pre">create_bedpostx_pipeline()</span></code></a><ul>
 <li><a class="reference internal" href="#id1">Example</a></li>
 <li><a class="reference internal" href="#id2">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#merge-and-mean"><tt class="docutils literal"><span class="pre">merge_and_mean()</span></tt></a><ul>
+<li><a class="reference internal" href="#merge-and-mean"><code class="docutils literal"><span class="pre">merge_and_mean()</span></code></a><ul>
 <li><a class="reference internal" href="#id3">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#merge-and-mean-parallel"><tt class="docutils literal"><span class="pre">merge_and_mean_parallel()</span></tt></a><ul>
+<li><a class="reference internal" href="#merge-and-mean-parallel"><code class="docutils literal"><span class="pre">merge_and_mean_parallel()</span></code></a><ul>
 <li><a class="reference internal" href="#id4">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#transpose"><tt class="docutils literal"><span class="pre">transpose()</span></tt></a></li>
+<li><a class="reference internal" href="#transpose"><code class="docutils literal"><span class="pre">transpose()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -155,7 +155,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -167,7 +167,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -190,9 +190,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -202,14 +202,14 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-nipype.workflows.dmri.fsl.dti">
 <span id="workflows-dmri-fsl-dti"></span><h1>workflows.dmri.fsl.dti<a class="headerlink" href="#module-nipype.workflows.dmri.fsl.dti" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="bedpostx-parallel">
-<span id="nipype-workflows-dmri-fsl-dti-bedpostx-parallel"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">bedpostx_parallel()</span></tt><a class="headerlink" href="#bedpostx-parallel" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/dti.py#L127">Link to code</a></p>
-<p>Does the same as <tt class="xref py py-func docutils literal"><span class="pre">create_bedpostx_pipeline()</span></tt> by splitting
+<span id="nipype-workflows-dmri-fsl-dti-bedpostx-parallel"></span><h2><code class="xref py py-func docutils literal"><span class="pre">bedpostx_parallel()</span></code><a class="headerlink" href="#bedpostx-parallel" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/dti.py#L129">Link to code</a></p>
+<p>Does the same as <code class="xref py py-func docutils literal"><span class="pre">create_bedpostx_pipeline()</span></code> by splitting
 the input dMRI in small ROIs that are better suited for parallel
 processing).</p>
 <div class="section" id="example">
@@ -240,7 +240,7 @@ processing).</p>
 <div class="section" id="graph">
 <h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-d84be4aad4ad134eea76ee7243f95fbb2c86022f.png" alt="digraph bedpostx_parallel{
+<img src="../../_images/graphviz-3f4ba60fadeb1cec45ddafafa2e390752c8f0cd3.png" alt="digraph bedpostx_parallel{
 
   label=&quot;bedpostx_parallel&quot;;
 
@@ -250,63 +250,65 @@ processing).</p>
 
   bedpostx_parallel_xfibres[label=&quot;xfibres (fsl)&quot;];
 
-  bedpostx_parallel_Make_dyads[label=&quot;Make_dyads (fsl)&quot;];
-
   bedpostx_parallel_Merge_dyads[label=&quot;Merge_dyads (misc)&quot;];
+
+  bedpostx_parallel_Make_dyads[label=&quot;Make_dyads (fsl)&quot;];
 
   bedpostx_parallel_Merge_mean_fsamples[label=&quot;Merge_mean_fsamples (misc)&quot;];
 
   bedpostx_parallel_outputnode[label=&quot;outputnode (utility)&quot;];
 
-  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_xfibres;
-
-  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_xfibres;
-
-  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_slice_dwi;
-
-  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_slice_dwi;
-
   bedpostx_parallel_inputnode -&gt; bedpostx_parallel_Merge_mean_fsamples;
-
-  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_Merge_dyads;
 
   bedpostx_parallel_inputnode -&gt; bedpostx_parallel_Make_dyads;
 
-  bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_xfibres;
+  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_Merge_dyads;
 
-  bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_xfibres;
+  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_xfibres;
+
+  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_xfibres;
+
+  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_slice_dwi;
+
+  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_slice_dwi;
+
+  bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_Merge_dyads;
 
   bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_Merge_mean_fsamples;
 
-  bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_Merge_dyads;
+  bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_xfibres;
+
+  bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_xfibres;
 
   bedpostx_parallel_xfibres -&gt; bedpostx_parallel_Merge_dyads;
 
   bedpostx_parallel_xfibres -&gt; bedpostx_parallel_Merge_mean_fsamples;
 
-  subgraph cluster_bedpostx_parallel_fsamples {
+  bedpostx_parallel_Merge_dyads -&gt; bedpostx_parallel_outputnode;
 
-      label=&quot;fsamples&quot;;
+  subgraph cluster_bedpostx_parallel_thsamples {
 
-    bedpostx_parallel_fsamples_inputnode[label=&quot;inputnode (utility)&quot;];
+      label=&quot;thsamples&quot;;
 
-    bedpostx_parallel_fsamples_Merge[label=&quot;Merge (misc)&quot;];
+    bedpostx_parallel_thsamples_inputnode[label=&quot;inputnode (utility)&quot;];
 
-    bedpostx_parallel_fsamples_Mean[label=&quot;Mean (fsl)&quot;];
+    bedpostx_parallel_thsamples_Merge[label=&quot;Merge (misc)&quot;];
 
-    bedpostx_parallel_fsamples_outputnode[label=&quot;outputnode (utility)&quot;];
+    bedpostx_parallel_thsamples_Mean[label=&quot;Mean (fsl)&quot;];
 
-    bedpostx_parallel_fsamples_inputnode -&gt; bedpostx_parallel_fsamples_Merge;
+    bedpostx_parallel_thsamples_outputnode[label=&quot;outputnode (utility)&quot;];
 
-    bedpostx_parallel_fsamples_inputnode -&gt; bedpostx_parallel_fsamples_Merge;
+    bedpostx_parallel_thsamples_inputnode -&gt; bedpostx_parallel_thsamples_Merge;
 
-    bedpostx_parallel_fsamples_inputnode -&gt; bedpostx_parallel_fsamples_Merge;
+    bedpostx_parallel_thsamples_inputnode -&gt; bedpostx_parallel_thsamples_Merge;
 
-    bedpostx_parallel_fsamples_Merge -&gt; bedpostx_parallel_fsamples_Mean;
+    bedpostx_parallel_thsamples_inputnode -&gt; bedpostx_parallel_thsamples_Merge;
 
-    bedpostx_parallel_fsamples_Merge -&gt; bedpostx_parallel_fsamples_outputnode;
+    bedpostx_parallel_thsamples_Merge -&gt; bedpostx_parallel_thsamples_outputnode;
 
-    bedpostx_parallel_fsamples_Mean -&gt; bedpostx_parallel_fsamples_outputnode;
+    bedpostx_parallel_thsamples_Merge -&gt; bedpostx_parallel_thsamples_Mean;
+
+    bedpostx_parallel_thsamples_Mean -&gt; bedpostx_parallel_thsamples_outputnode;
 
   }
 
@@ -328,67 +330,49 @@ processing).</p>
 
     bedpostx_parallel_phsamples_inputnode -&gt; bedpostx_parallel_phsamples_Merge;
 
-    bedpostx_parallel_phsamples_Merge -&gt; bedpostx_parallel_phsamples_Mean;
-
     bedpostx_parallel_phsamples_Merge -&gt; bedpostx_parallel_phsamples_outputnode;
+
+    bedpostx_parallel_phsamples_Merge -&gt; bedpostx_parallel_phsamples_Mean;
 
     bedpostx_parallel_phsamples_Mean -&gt; bedpostx_parallel_phsamples_outputnode;
 
   }
 
-  subgraph cluster_bedpostx_parallel_thsamples {
-
-      label=&quot;thsamples&quot;;
-
-    bedpostx_parallel_thsamples_inputnode[label=&quot;inputnode (utility)&quot;];
-
-    bedpostx_parallel_thsamples_Merge[label=&quot;Merge (misc)&quot;];
-
-    bedpostx_parallel_thsamples_Mean[label=&quot;Mean (fsl)&quot;];
-
-    bedpostx_parallel_thsamples_outputnode[label=&quot;outputnode (utility)&quot;];
-
-    bedpostx_parallel_thsamples_inputnode -&gt; bedpostx_parallel_thsamples_Merge;
-
-    bedpostx_parallel_thsamples_inputnode -&gt; bedpostx_parallel_thsamples_Merge;
-
-    bedpostx_parallel_thsamples_inputnode -&gt; bedpostx_parallel_thsamples_Merge;
-
-    bedpostx_parallel_thsamples_Merge -&gt; bedpostx_parallel_thsamples_Mean;
-
-    bedpostx_parallel_thsamples_Merge -&gt; bedpostx_parallel_thsamples_outputnode;
-
-    bedpostx_parallel_thsamples_Mean -&gt; bedpostx_parallel_thsamples_outputnode;
-
-  }
-
   bedpostx_parallel_Make_dyads -&gt; bedpostx_parallel_outputnode;
-
-  bedpostx_parallel_Merge_dyads -&gt; bedpostx_parallel_outputnode;
 
   bedpostx_parallel_Merge_mean_fsamples -&gt; bedpostx_parallel_outputnode;
 
-  bedpostx_parallel_xfibres -&gt; bedpostx_parallel_fsamples_inputnode;
+  subgraph cluster_bedpostx_parallel_fsamples {
 
-  bedpostx_parallel_xfibres -&gt; bedpostx_parallel_phsamples_inputnode;
+      label=&quot;fsamples&quot;;
 
-  bedpostx_parallel_xfibres -&gt; bedpostx_parallel_thsamples_inputnode;
+    bedpostx_parallel_fsamples_inputnode[label=&quot;inputnode (utility)&quot;];
 
-  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_fsamples_inputnode;
+    bedpostx_parallel_fsamples_Merge[label=&quot;Merge (misc)&quot;];
 
-  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_thsamples_inputnode;
+    bedpostx_parallel_fsamples_Mean[label=&quot;Mean (fsl)&quot;];
+
+    bedpostx_parallel_fsamples_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    bedpostx_parallel_fsamples_inputnode -&gt; bedpostx_parallel_fsamples_Merge;
+
+    bedpostx_parallel_fsamples_inputnode -&gt; bedpostx_parallel_fsamples_Merge;
+
+    bedpostx_parallel_fsamples_inputnode -&gt; bedpostx_parallel_fsamples_Merge;
+
+    bedpostx_parallel_fsamples_Merge -&gt; bedpostx_parallel_fsamples_outputnode;
+
+    bedpostx_parallel_fsamples_Merge -&gt; bedpostx_parallel_fsamples_Mean;
+
+    bedpostx_parallel_fsamples_Mean -&gt; bedpostx_parallel_fsamples_outputnode;
+
+  }
 
   bedpostx_parallel_inputnode -&gt; bedpostx_parallel_phsamples_inputnode;
 
-  bedpostx_parallel_fsamples_outputnode -&gt; bedpostx_parallel_outputnode;
+  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_thsamples_inputnode;
 
-  bedpostx_parallel_fsamples_outputnode -&gt; bedpostx_parallel_outputnode;
-
-  bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_fsamples_inputnode;
-
-  bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_phsamples_inputnode;
-
-  bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_thsamples_inputnode;
+  bedpostx_parallel_inputnode -&gt; bedpostx_parallel_fsamples_inputnode;
 
   bedpostx_parallel_phsamples_outputnode -&gt; bedpostx_parallel_outputnode;
 
@@ -402,13 +386,29 @@ processing).</p>
 
   bedpostx_parallel_thsamples_outputnode -&gt; bedpostx_parallel_Make_dyads;
 
+  bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_phsamples_inputnode;
+
+  bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_thsamples_inputnode;
+
+  bedpostx_parallel_slice_dwi -&gt; bedpostx_parallel_fsamples_inputnode;
+
+  bedpostx_parallel_xfibres -&gt; bedpostx_parallel_fsamples_inputnode;
+
+  bedpostx_parallel_xfibres -&gt; bedpostx_parallel_thsamples_inputnode;
+
+  bedpostx_parallel_xfibres -&gt; bedpostx_parallel_phsamples_inputnode;
+
+  bedpostx_parallel_fsamples_outputnode -&gt; bedpostx_parallel_outputnode;
+
+  bedpostx_parallel_fsamples_outputnode -&gt; bedpostx_parallel_outputnode;
+
 }" />
 </p>
 </div>
 </div>
 <div class="section" id="create-bedpostx-pipeline">
-<span id="nipype-workflows-dmri-fsl-dti-create-bedpostx-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_bedpostx_pipeline()</span></tt><a class="headerlink" href="#create-bedpostx-pipeline" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/dti.py#L19">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-dti-create-bedpostx-pipeline"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_bedpostx_pipeline()</span></code><a class="headerlink" href="#create-bedpostx-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/dti.py#L19">Link to code</a></p>
 <p>Creates a pipeline that does the same as bedpostx script from FSL -
 calculates diffusion model parameters (distributions not MLE) voxelwise for
 the whole volume (by splitting it slicewise).</p>
@@ -440,15 +440,15 @@ the whole volume (by splitting it slicewise).</p>
 <div class="section" id="id2">
 <h3>Graph<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-319073aec5f9f8241f3ea02cefebac7833cf89d7.png" alt="digraph bedpostx{
+<img src="../../_images/graphviz-b7d7bc227de8827d00480ce40982373f95626794.png" alt="digraph bedpostx{
 
   label=&quot;bedpostx&quot;;
 
   bedpostx_inputnode[label=&quot;inputnode (utility)&quot;];
 
-  bedpostx_slice_dwi[label=&quot;slice_dwi (fsl)&quot;];
-
   bedpostx_slice_msk[label=&quot;slice_msk (fsl)&quot;];
+
+  bedpostx_slice_dwi[label=&quot;slice_dwi (fsl)&quot;];
 
   bedpostx_mask_dwi[label=&quot;mask_dwi (fsl)&quot;];
 
@@ -458,67 +458,23 @@ the whole volume (by splitting it slicewise).</p>
 
   bedpostx_outputnode[label=&quot;outputnode (utility)&quot;];
 
+  bedpostx_inputnode -&gt; bedpostx_slice_msk;
+
   bedpostx_inputnode -&gt; bedpostx_make_dyads;
-
-  bedpostx_inputnode -&gt; bedpostx_xfibres;
-
-  bedpostx_inputnode -&gt; bedpostx_xfibres;
 
   bedpostx_inputnode -&gt; bedpostx_slice_dwi;
 
-  bedpostx_inputnode -&gt; bedpostx_slice_msk;
+  bedpostx_inputnode -&gt; bedpostx_xfibres;
+
+  bedpostx_inputnode -&gt; bedpostx_xfibres;
+
+  bedpostx_slice_msk -&gt; bedpostx_mask_dwi;
 
   bedpostx_slice_dwi -&gt; bedpostx_mask_dwi;
 
   bedpostx_slice_dwi -&gt; bedpostx_xfibres;
 
-  bedpostx_slice_msk -&gt; bedpostx_mask_dwi;
-
   bedpostx_mask_dwi -&gt; bedpostx_xfibres;
-
-  subgraph cluster_bedpostx_fsamples {
-
-      label=&quot;fsamples&quot;;
-
-    bedpostx_fsamples_inputnode[label=&quot;inputnode (utility)&quot;];
-
-    bedpostx_fsamples_Merge[label=&quot;Merge (fsl)&quot;];
-
-    bedpostx_fsamples_Mean[label=&quot;Mean (fsl)&quot;];
-
-    bedpostx_fsamples_outputnode[label=&quot;outputnode (utility)&quot;];
-
-    bedpostx_fsamples_inputnode -&gt; bedpostx_fsamples_Merge;
-
-    bedpostx_fsamples_Merge -&gt; bedpostx_fsamples_outputnode;
-
-    bedpostx_fsamples_Merge -&gt; bedpostx_fsamples_Mean;
-
-    bedpostx_fsamples_Mean -&gt; bedpostx_fsamples_outputnode;
-
-  }
-
-  subgraph cluster_bedpostx_thsamples {
-
-      label=&quot;thsamples&quot;;
-
-    bedpostx_thsamples_inputnode[label=&quot;inputnode (utility)&quot;];
-
-    bedpostx_thsamples_Merge[label=&quot;Merge (fsl)&quot;];
-
-    bedpostx_thsamples_Mean[label=&quot;Mean (fsl)&quot;];
-
-    bedpostx_thsamples_outputnode[label=&quot;outputnode (utility)&quot;];
-
-    bedpostx_thsamples_inputnode -&gt; bedpostx_thsamples_Merge;
-
-    bedpostx_thsamples_Merge -&gt; bedpostx_thsamples_outputnode;
-
-    bedpostx_thsamples_Merge -&gt; bedpostx_thsamples_Mean;
-
-    bedpostx_thsamples_Mean -&gt; bedpostx_thsamples_outputnode;
-
-  }
 
   subgraph cluster_bedpostx_phsamples {
 
@@ -542,9 +498,57 @@ the whole volume (by splitting it slicewise).</p>
 
   }
 
+  subgraph cluster_bedpostx_thsamples {
+
+      label=&quot;thsamples&quot;;
+
+    bedpostx_thsamples_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    bedpostx_thsamples_Merge[label=&quot;Merge (fsl)&quot;];
+
+    bedpostx_thsamples_Mean[label=&quot;Mean (fsl)&quot;];
+
+    bedpostx_thsamples_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    bedpostx_thsamples_inputnode -&gt; bedpostx_thsamples_Merge;
+
+    bedpostx_thsamples_Merge -&gt; bedpostx_thsamples_Mean;
+
+    bedpostx_thsamples_Merge -&gt; bedpostx_thsamples_outputnode;
+
+    bedpostx_thsamples_Mean -&gt; bedpostx_thsamples_outputnode;
+
+  }
+
   bedpostx_make_dyads -&gt; bedpostx_outputnode;
 
   bedpostx_make_dyads -&gt; bedpostx_outputnode;
+
+  subgraph cluster_bedpostx_fsamples {
+
+      label=&quot;fsamples&quot;;
+
+    bedpostx_fsamples_inputnode[label=&quot;inputnode (utility)&quot;];
+
+    bedpostx_fsamples_Merge[label=&quot;Merge (fsl)&quot;];
+
+    bedpostx_fsamples_Mean[label=&quot;Mean (fsl)&quot;];
+
+    bedpostx_fsamples_outputnode[label=&quot;outputnode (utility)&quot;];
+
+    bedpostx_fsamples_inputnode -&gt; bedpostx_fsamples_Merge;
+
+    bedpostx_fsamples_Merge -&gt; bedpostx_fsamples_Mean;
+
+    bedpostx_fsamples_Merge -&gt; bedpostx_fsamples_outputnode;
+
+    bedpostx_fsamples_Mean -&gt; bedpostx_fsamples_outputnode;
+
+  }
+
+  bedpostx_fsamples_outputnode -&gt; bedpostx_outputnode;
+
+  bedpostx_fsamples_outputnode -&gt; bedpostx_outputnode;
 
   bedpostx_phsamples_outputnode -&gt; bedpostx_make_dyads;
 
@@ -552,33 +556,29 @@ the whole volume (by splitting it slicewise).</p>
 
   bedpostx_phsamples_outputnode -&gt; bedpostx_outputnode;
 
-  bedpostx_xfibres -&gt; bedpostx_fsamples_inputnode;
-
-  bedpostx_xfibres -&gt; bedpostx_thsamples_inputnode;
-
-  bedpostx_xfibres -&gt; bedpostx_phsamples_inputnode;
-
-  bedpostx_fsamples_outputnode -&gt; bedpostx_outputnode;
-
-  bedpostx_fsamples_outputnode -&gt; bedpostx_outputnode;
-
   bedpostx_thsamples_outputnode -&gt; bedpostx_make_dyads;
 
   bedpostx_thsamples_outputnode -&gt; bedpostx_outputnode;
 
   bedpostx_thsamples_outputnode -&gt; bedpostx_outputnode;
 
+  bedpostx_xfibres -&gt; bedpostx_phsamples_inputnode;
+
+  bedpostx_xfibres -&gt; bedpostx_thsamples_inputnode;
+
+  bedpostx_xfibres -&gt; bedpostx_fsamples_inputnode;
+
 }" />
 </p>
 </div>
 </div>
 <div class="section" id="merge-and-mean">
-<span id="nipype-workflows-dmri-fsl-dti-merge-and-mean"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">merge_and_mean()</span></tt><a class="headerlink" href="#merge-and-mean" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/dti.py#L107">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-dti-merge-and-mean"></span><h2><code class="xref py py-func docutils literal"><span class="pre">merge_and_mean()</span></code><a class="headerlink" href="#merge-and-mean" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/dti.py#L109">Link to code</a></p>
 <div class="section" id="id3">
 <h3>Graph<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-de35eb74d336d37b67bce08dba7e5ba3e0011ce6.png" alt="digraph mm{
+<img src="../../_images/graphviz-42610817eafb1b63ef0ce87dd75d453d31faede5.png" alt="digraph mm{
 
   label=&quot;mm&quot;;
 
@@ -592,9 +592,9 @@ the whole volume (by splitting it slicewise).</p>
 
   mm_inputnode -&gt; mm_Merge;
 
-  mm_Merge -&gt; mm_Mean;
-
   mm_Merge -&gt; mm_outputnode;
+
+  mm_Merge -&gt; mm_Mean;
 
   mm_Mean -&gt; mm_outputnode;
 
@@ -603,12 +603,12 @@ the whole volume (by splitting it slicewise).</p>
 </div>
 </div>
 <div class="section" id="merge-and-mean-parallel">
-<span id="nipype-workflows-dmri-fsl-dti-merge-and-mean-parallel"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">merge_and_mean_parallel()</span></tt><a class="headerlink" href="#merge-and-mean-parallel" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/dti.py#L233">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-dti-merge-and-mean-parallel"></span><h2><code class="xref py py-func docutils literal"><span class="pre">merge_and_mean_parallel()</span></code><a class="headerlink" href="#merge-and-mean-parallel" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/dti.py#L237">Link to code</a></p>
 <div class="section" id="id4">
 <h3>Graph<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-db9509f9520c03fb61fdd80f52dc2a6a44566283.png" alt="digraph mm{
+<img src="../../_images/graphviz-a2c2fd2f116e863bef64d2abb688490f4e497ff2.png" alt="digraph mm{
 
   label=&quot;mm&quot;;
 
@@ -626,9 +626,9 @@ the whole volume (by splitting it slicewise).</p>
 
   mm_inputnode -&gt; mm_Merge;
 
-  mm_Merge -&gt; mm_outputnode;
-
   mm_Merge -&gt; mm_Mean;
+
+  mm_Merge -&gt; mm_outputnode;
 
   mm_Mean -&gt; mm_outputnode;
 
@@ -637,8 +637,8 @@ the whole volume (by splitting it slicewise).</p>
 </div>
 </div>
 <div class="section" id="transpose">
-<span id="nipype-workflows-dmri-fsl-dti-transpose"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">transpose()</span></tt><a class="headerlink" href="#transpose" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/dti.py#L13">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-dti-transpose"></span><h2><code class="xref py py-func docutils literal"><span class="pre">transpose()</span></code><a class="headerlink" href="#transpose" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/dti.py#L13">Link to code</a></p>
 </div>
 </div>
 
@@ -649,9 +649,9 @@ the whole volume (by splitting it slicewise).</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

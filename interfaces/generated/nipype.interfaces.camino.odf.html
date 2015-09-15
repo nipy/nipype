@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -153,7 +153,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -165,7 +165,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -188,9 +188,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -200,26 +200,36 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-camino-odf">
 <h1>interfaces.camino.odf<a class="headerlink" href="#interfaces-camino-odf" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-camino-odf-linrecon"></span><div class="section" id="linrecon">
 <span id="index-0"></span><h2>LinRecon<a class="headerlink" href="#linrecon" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/odf.py#L111">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/odf.py#L111">Link to code</a></p>
 <p>Wraps command <strong>linrecon</strong></p>
 <p>Runs a linear transformation in each voxel.</p>
 <p>Reads  a  linear  transformation from the matrix file assuming the
 imaging scheme specified in the scheme file. Performs the linear
 transformation on the data in every voxel and outputs the result to
 the standard output. The ouput in every voxel is actually:</p>
-<blockquote>
-<div>[exit code, ln(S(0)), p1, ..., pR]</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre>[exit code, ln(S(0)), p1, ..., pR]
+</pre></div>
+</div>
 <p>where p1, ..., pR are the parameters of the reconstruction.
 Possible exit codes are:</p>
 <blockquote>
-<div>0. No problems.
-6. Bad data replaced by substitution of zero.</div></blockquote>
+<div><ul class="simple">
+<li><ol class="first arabic" start="0">
+<li>No problems.</li>
+</ol>
+</li>
+<li><ol class="first arabic" start="6">
+<li>Bad data replaced by substitution of zero.</li>
+</ol>
+</li>
+</ul>
+</div></blockquote>
 <p>The matrix must be R by N+M where N+M is the number of measurements
 and R is the number of parameters of the reconstruction. The matrix
 file contains binary double-precision floats. The matrix elements
@@ -296,7 +306,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="mesd">
 <span id="index-1"></span><h2>MESD<a class="headerlink" href="#mesd" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/odf.py#L194">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/odf.py#L198">Link to code</a></p>
 <p>Wraps command <strong>mesd</strong></p>
 <p>MESD is a general program for maximum entropy spherical deconvolution.
 It also runs PASMRI, which is a special case of spherical deconvolution.
@@ -317,26 +327,15 @@ code is increased by 100. An exitcode of 112 means that all three tests were
 failed and the result is likely to be unreliable.  If all is well the exitcode
 is zero. Results are often still reliable even if one or two of the tests are
 failed.</p>
-<dl class="docutils">
-<dt>Other possible exitcodes are:</dt>
-<dd>5   - The optimization failed to converge</dd>
-</dl>
-<table class="docutils option-list" frame="void" rules="none">
-<col class="option" />
-<col class="description" />
-<tbody valign="top">
-<tr><td class="option-group">
-<kbd><span class="option">-1</span></kbd></td>
-<td><ul class="first last simple">
-<li>Background</li>
+<p>Other possible exitcodes are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>5 - The optimization failed to converge</li>
+<li>-1 - Background</li>
+<li>-100 - Something wrong in the MRI data, e.g. negative or zero measurements,
+so that the optimization could not run.</li>
 </ul>
-</td></tr>
-</tbody>
-</table>
-<dl class="docutils">
-<dt>-100 - Something wrong in the MRI data, e.g. negative or zero measurements,</dt>
-<dd>so that the optimization could not run.</dd>
-</dl>
+</div></blockquote>
 <p>The  standard  MESD  implementation  is computationally demanding, particularly
 as the number of measurements increases (computation is approximately O(N^2),
 where N is the number of measurements). There are two ways to obtain significant
@@ -423,7 +422,7 @@ inputdatatype: (&#39;float&#39; or &#39;char&#39; or &#39;short&#39; or &#39;int
         &quot;long&quot;,&quot;float&quot; or &quot;double&quot;. The input file must have BIG-ENDIAN
         ordering.By default, the input type is &quot;float&quot;.
         flag: -inputdatatype %s
-mepointset: (an integer)
+mepointset: (an integer (int or long))
         Use a set of directions other than those in the scheme file for the
         deconvolution kernel.The number refers to the number of directions
         on the unit sphere. For example, &quot;-mepointset 54&quot; uses the
@@ -446,7 +445,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="qballmx">
 <span id="index-2"></span><h2>QBallMX<a class="headerlink" href="#qballmx" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/odf.py#L39">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/odf.py#L39">Link to code</a></p>
 <p>Wraps command <strong>qballmx</strong></p>
 <p>Generates a reconstruction matrix for Q-Ball. Used in LinRecon with
 the same scheme file to reconstruct data.</p>
@@ -506,13 +505,13 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-order: (an integer)
+order: (an integer (int or long))
         Specific to sh. Maximum order of the spherical harmonic series.
         Default is 4.
         flag: -order %d
 out_file: (a file name)
         flag: &gt; %s, position: -1
-rbfpointset: (an integer)
+rbfpointset: (an integer (int or long))
         Specific to rbf. Sets the number of radial basis functions to use.
         The value specified must be present in the Pointsets directory. The
         default value is 246.
@@ -540,7 +539,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="sfpeaks">
 <span id="index-3"></span><h2>SFPeaks<a class="headerlink" href="#sfpeaks" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/odf.py#L336">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/odf.py#L341">Link to code</a></p>
 <p>Wraps command <strong>sfpeaks</strong></p>
 <p>Finds the peaks of spherical functions.</p>
 <p>This utility reads coefficients of the spherical functions and
@@ -566,26 +565,26 @@ utility to use an evenly distributed set of points (index 0 gives
 away with fewer points. We estimate that you can use a factor of 2.5
 less evenly distributed points than randomly distributed points and
 still expect similar performance levels.</p>
-<p>The output for each voxel is:
-- exitcode (inherited from the input data).
-- ln(A(0))
-- number of peaks found.
-- flag for consistency with a repeated run (number of directions is</p>
-<blockquote>
-<div>the same and the directions are the same to within a threshold.)</div></blockquote>
+<p>The output for each voxel is:</p>
 <ul class="simple">
+<li>exitcode (inherited from the input data).</li>
+<li>ln(A(0))</li>
+<li>number of peaks found.</li>
+<li>flag for consistency with a repeated run (number of directions is
+the same and the directions are the same to within a threshold.)</li>
 <li>mean(f).</li>
 <li>std(f).</li>
 <li>direction 1 (x, y, z, f, H00, H01, H10, H11).</li>
 <li>direction 2 (x, y, z, f, H00, H01, H10, H11).</li>
 <li>direction 3 (x, y, z, f, H00, H01, H10, H11).</li>
 </ul>
-<p>H is the Hessian of f at the peak. It is the matrix:
-[d^2f/ds^2 d^2f/dsdt]
+<p>H is the Hessian of f at the peak. It is the matrix:</p>
+<div class="highlight-python"><div class="highlight"><pre>[d^2f/ds^2 d^2f/dsdt]
 [d^2f/dtds d^2f/dt^2]
-= [H00 H01]</p>
-<blockquote>
-<div>[H10 H11]</div></blockquote>
+= [H00 H01]
+  [H10 H11]
+</pre></div>
+</div>
 <p>where s and t are orthogonal coordinates local to the peak.</p>
 <p>By default the maximum number of peak directions output in each
 voxel is three. If less than three directions are found, zeros are
@@ -633,7 +632,7 @@ inputmodel: (&#39;sh&#39; or &#39;maxent&#39; or &#39;rbf&#39;)
 args: (a string)
         Additional parameters to the command
         flag: %s
-density: (an integer)
+density: (an integer (int or long))
         The number of randomly rotated icosahedra to use in constructing the
         set of points for random sampling in the peak finding algorithm.
         Default is 1000, which works well for very spiky maxent functions.
@@ -648,7 +647,7 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-mepointset: (an integer)
+mepointset: (an integer (int or long))
         Use a set of directions other than those in the scheme file for the
         deconvolution kernel. The number refers to the number of directions
         on the unit sphere. For example, &quot;mepointset = 54&quot; uses the
@@ -661,10 +660,10 @@ noconsistencycheck: (a boolean)
         Turns off the consistency check. The output shows all consistencies
         as true.
         flag: -noconsistencycheck
-numpds: (an integer)
+numpds: (an integer (int or long))
         The largest number of peak directions to output in each voxel.
         flag: -numpds %d
-order: (an integer)
+order: (an integer (int or long))
         Specific to sh. Maximum order of the spherical harmonic series.
         flag: -order %d
 out_file: (a file name)
@@ -674,13 +673,13 @@ pdthresh: (a float)
         mean of the function. The default is 1.0 (the peak must be equal or
         greater than the mean).
         flag: -pdthresh %f
-pointset: (an integer)
+pointset: (an integer (int or long))
         To sample using an evenly distributed set of points instead. The
         integer can be 0, 1, ..., 7. Index 0 gives 1082 points, 1 gives
         1922, 2 gives 3002, 3 gives 4322, 4 gives 5882, 5 gives 8672, 6
         gives 12002, 7 gives 15872.
         flag: -pointset %d
-rbfpointset: (an integer)
+rbfpointset: (an integer (int or long))
         Specific to rbf. Sets the number of radial basis functions to use.
         The value specified must be present in the Pointsets directory. The
         default value is 246.
@@ -718,9 +717,9 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

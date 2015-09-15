@@ -1,0 +1,926 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.10.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.camino.convert</a><ul>
+<li><a class="reference internal" href="#analyzeheader">AnalyzeHeader</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dt2nifti">DT2NIfTI</a></li>
+<li><a class="reference internal" href="#image2voxel">Image2Voxel</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#niftidt2camino">NIfTIDT2Camino</a></li>
+<li><a class="reference internal" href="#procstreamlines">ProcStreamlines</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#shredder">Shredder</a><ul>
+<li><a class="reference internal" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tractshredder">TractShredder</a><ul>
+<li><a class="reference internal" href="#id3">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vtkstreamlines">VtkStreamlines</a><ul>
+<li><a class="reference internal" href="#id4">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-camino-convert">
+<h1>interfaces.camino.convert<a class="headerlink" href="#interfaces-camino-convert" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-camino-convert-analyzeheader"></span><div class="section" id="analyzeheader">
+<span id="index-0"></span><h2>AnalyzeHeader<a class="headerlink" href="#analyzeheader" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/camino/convert.py#L579">Link to code</a></p>
+<p>Wraps command <strong>analyzeheader</strong></p>
+<p>Create or read an Analyze 7.5 header file.</p>
+<p>Analyze image header, provides support for the most common header fields.
+Some fields, such as patient_id, are not currently supported. The program allows
+three nonstandard options: the field image_dimension.funused1 is the image scale.
+The intensity of each pixel in the associated .img file is (image value from file) * scale.
+Also, the origin of the Talairach coordinates (midline of the anterior commisure) are encoded
+in the field data_history.originator. These changes are included for compatibility with SPM.</p>
+<p>All headers written with this program are big endian by default.</p>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hdr</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">AnalyzeHeader</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hdr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;tensor_fitted_data.Bdouble&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hdr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">scheme_file</span> <span class="o">=</span> <span class="s">&#39;A.scheme&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hdr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">data_dims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">256</span><span class="p">,</span><span class="mi">256</span><span class="p">,</span><span class="mi">256</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hdr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">voxel_dims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hdr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+datatype: (&#39;byte&#39; or &#39;char&#39; or &#39;[u]short&#39; or &#39;[u]int&#39; or &#39;float&#39; or
+         &#39;complex&#39; or &#39;double&#39;)
+        The char datatype is 8 bit (not the 16 bit char of Java), as
+        specified by the Analyze 7.5 standard. The byte, ushort and uint
+        types are not part of the Analyze specification but are supported by
+        SPM.
+        flag: -datatype %s
+in_file: (an existing file name)
+        Tensor-fitted data filename
+        flag: &lt; %s, position: 1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+centre: (a list of from 3 to 3 items which are an integer (int or
+         long))
+        Voxel specifying origin of Talairach coordinate system for SPM,
+        default [0 0 0].
+        flag: -centre %s
+data_dims: (a list of from 3 to 3 items which are an integer (int or
+         long))
+        data dimensions in voxels
+        flag: -datadims %s
+description: (a string)
+        Short description - No spaces, max length 79 bytes. Will be null
+        terminated automatically.
+        flag: -description %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+greylevels: (a list of from 2 to 2 items which are an integer (int or
+         long))
+        Minimum and maximum greylevels. Stored as shorts in the header.
+        flag: -gl %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+initfromheader: (an existing file name)
+        Reads header information from file and intializes a new header with
+        the values read from the file. You may replace any combination of
+        fields in the new header by specifying subsequent options.
+        flag: -initfromheader %s, position: 3
+intelbyteorder: (a boolean)
+        Write header in intel byte order (little-endian).
+        flag: -intelbyteorder
+networkbyteorder: (a boolean)
+        Write header in network byte order (big-endian). This is the default
+        for new headers.
+        flag: -networkbyteorder
+nimages: (an integer (int or long))
+        Number of images in the img file. Default 1.
+        flag: -nimages %d
+offset: (an integer (int or long))
+        According to the Analyze 7.5 standard, this is the byte offset in
+        the .img file at which voxels start. This value can be negative to
+        specify that the absolute value is applied for every image in the
+        file.
+        flag: -offset %d
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+picoseed: (a list of from 3 to 3 items which are an integer (int or
+         long))
+        Voxel specifying the seed (for PICo maps), default [0 0 0].
+        flag: -picoseed %s
+printbigendian: (an existing file name)
+        Prints 1 if the header is big-endian, 0 otherwise.
+        flag: -printbigendian %s, position: 3
+printimagedims: (an existing file name)
+        Prints image data and voxel dimensions as Camino arguments and
+        exits.
+        flag: -printimagedims %s, position: 3
+printintelbyteorder: (an existing file name)
+        Prints 1 if the header is little-endian, 0 otherwise.
+        flag: -printintelbyteorder %s, position: 3
+printprogargs: (an existing file name)
+        Prints data dimension (and type, if relevant) arguments for a
+        specific Camino program, where prog is one of shredder,
+        scanner2voxel, vcthreshselect, pdview, track.
+        flag: -printprogargs %s, position: 3
+readheader: (an existing file name)
+        Reads header information from file and prints to stdout. If this
+        option is not specified, then the program writes a header based on
+        the other arguments.
+        flag: -readheader %s, position: 3
+scaleinter: (a float)
+        Constant to add to the image intensities. Used by SPM and MRIcro.
+        flag: -scaleinter %d
+scaleslope: (a float)
+        Intensities in the image are scaled by this factor by SPM and
+        MRICro. Default is 1.0.
+        flag: -scaleslope %d
+scheme_file: (an existing file name)
+        Camino scheme file (b values / vectors, see camino.fsl2scheme)
+        flag: %s, position: 2
+voxel_dims: (a list of from 3 to 3 items which are a float)
+        voxel dimensions in mm
+        flag: -voxeldims %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>header: (an existing file name)
+        Analyze header
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-convert-dt2nifti"></span></div>
+</div>
+<div class="section" id="dt2nifti">
+<span id="index-1"></span><h2>DT2NIfTI<a class="headerlink" href="#dt2nifti" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/camino/convert.py#L366">Link to code</a></p>
+<p>Wraps command <strong>dt2nii</strong></p>
+<p>Converts camino tensor data to NIfTI format</p>
+<p>Reads Camino diffusion tensors, and converts them to NIFTI format as three .nii files.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+header_file: (an existing file name)
+         A Nifti .nii or .hdr file containing the header information
+        flag: -header %s, position: 3
+in_file: (an existing file name)
+        tract file
+        flag: -inputfile %s, position: 1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+output_root: (a file name)
+        filename root prepended onto the names of three output files.
+        flag: -outputroot %s, position: 2
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>dt: (an existing file name)
+        diffusion tensors in NIfTI format
+exitcode: (an existing file name)
+        exit codes from Camino reconstruction in NIfTI format
+lns0: (an existing file name)
+        estimated lns0 from Camino reconstruction in NIfTI format
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-convert-image2voxel"></span></div>
+<div class="section" id="image2voxel">
+<span id="index-2"></span><h2>Image2Voxel<a class="headerlink" href="#image2voxel" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/camino/convert.py#L36">Link to code</a></p>
+<p>Wraps command <strong>image2voxel</strong></p>
+<p>Converts Analyze / NIFTI / MHA files to voxel order.</p>
+<p>Converts scanner-order data in a supported image format to voxel-order data.
+Either takes a 4D file (all measurements in single image)
+or a list of 3D images.</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">img2vox</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">Image2Voxel</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">img2vox</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;4d_dwi.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">img2vox</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        4d image file
+        flag: -4dimage %s, position: 1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+out_type: (&#39;float&#39; or &#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;long&#39; or
+         &#39;double&#39;, nipype default value: float)
+        &quot;i.e. Bfloat&quot;. Can be &quot;char&quot;, &quot;short&quot;, &quot;int&quot;, &quot;long&quot;, &quot;float&quot; or
+        &quot;double&quot;
+        flag: -outputdatatype %s, position: 2
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>voxel_order: (an existing file name)
+        path/name of 4D volume in voxel order
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-convert-niftidt2camino"></span></div>
+</div>
+<div class="section" id="niftidt2camino">
+<span id="index-3"></span><h2>NIfTIDT2Camino<a class="headerlink" href="#niftidt2camino" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/camino/convert.py#L431">Link to code</a></p>
+<p>Wraps command <strong>niftidt2camino</strong></p>
+<p>Converts NIFTI-1 diffusion tensors to Camino format. The program reads the
+NIFTI header but does not apply any spatial transformations to the data. The
+NIFTI intensity scaling parameters are applied.</p>
+<p>The output is the tensors in Camino voxel ordering: [exit, ln(S0), dxx, dxy,
+dxz, dyy, dyz, dzz].</p>
+<p>The exit code is set to 0 unless a background mask is supplied, in which case
+the code is 0 in brain voxels and -1 in background voxels.</p>
+<p>The value of ln(S0) in the output is taken from a file if one is supplied,
+otherwise it is set to 0.</p>
+<p>NOTE FOR FSL USERS - FSL&#8217;s dtifit can output NIFTI tensors, but they are not
+stored in the usual way (which is using NIFTI_INTENT_SYMMATRIX). FSL&#8217;s
+tensors follow the ITK / VTK &#8220;upper-triangular&#8221; convention, so you will need
+to use the -uppertriangular option to convert these correctly.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        A NIFTI-1 dataset containing diffusion tensors. The tensors are
+        assumed to be in lower-triangular order as specified by the NIFTI
+        standard for the storage of symmetric matrices. This file should be
+        either a .nii or a .hdr file.
+        flag: -inputfile %s, position: 1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bgmask: (an existing file name)
+        Binary valued brain / background segmentation, may be a raw binary
+        file (specify type with -maskdatatype) or a supported image file.
+        flag: -bgmask %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+lns0_file: (an existing file name)
+        File containing the log of the unweighted signal for each voxel, may
+        be a raw binary file (specify type with -inputdatatype) or a
+        supported image file.
+        flag: -lns0 %s
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+s0_file: (an existing file name)
+        File containing the unweighted signal for each voxel, may be a raw
+        binary file (specify type with -inputdatatype) or a supported image
+        file.
+        flag: -s0 %s
+scaleinter: (a float)
+        A value v in the diffusion tensor is scaled to v * s + i. This is
+        applied after any scaling specified by the input image. Default is
+        0.0.
+        flag: -scaleinter %s
+scaleslope: (a float)
+        A value v in the diffusion tensor is scaled to v * s + i. This is
+        applied after any scaling specified by the input image. Default is
+        1.0.
+        flag: -scaleslope %s
+uppertriangular: (a boolean)
+        Specifies input in upper-triangular (VTK style) order.
+        flag: -uppertriangular %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (a file name)
+        diffusion tensors data in Camino format
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-convert-procstreamlines"></span></div>
+<div class="section" id="procstreamlines">
+<span id="index-4"></span><h2>ProcStreamlines<a class="headerlink" href="#procstreamlines" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/camino/convert.py#L247">Link to code</a></p>
+<p>Wraps command <strong>procstreamlines</strong></p>
+<p>Process streamline data</p>
+<dl class="docutils">
+<dt>This program does post-processing of streamline output from track. It can either output streamlines or connection probability maps.</dt>
+<dd><ul class="first last simple">
+<li><a class="reference external" href="http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Man.procstreamlines">http://web4.cs.ucl.ac.uk/research/medic/camino/pmwiki/pmwiki.php?n=Man.procstreamlines</a></li>
+</ul>
+</dd>
+</dl>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proc</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">ProcStreamlines</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;tract_data.Bfloat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">proc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        data file
+        flag: -inputfile %s, position: 1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+allowmultitargets: (a boolean)
+        Allows streamlines to connect to multiple target volumes.
+        flag: -allowmultitargets
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+datadims: (a list of from 3 to 3 items which are an integer (int or
+         long))
+        data dimensions in voxels
+        flag: -datadims %s
+directional: (a list of from 3 to 3 items which are an integer (int
+         or long))
+        Splits the streamlines at the seed point and computes separate
+        connection probabilities for each segment. Streamline segments are
+        grouped according to their dot product with the vector (X, Y, Z).
+        The ideal vector will be tangential to the streamline trajectory at
+        the seed, such that the streamline projects from the seed along (X,
+        Y, Z) and -(X, Y, Z). However, it is only necessary for the
+        streamline trajectory to not be orthogonal to (X, Y, Z).
+        flag: -directional %s
+discardloops: (a boolean)
+        This option allows streamlines to enter a waypoint exactly once.
+        After the streamline leaves the waypoint, the entire streamline is
+        discarded upon a second entry to the waypoint.
+        flag: -discardloops
+endpointfile: (a file name)
+        Image containing endpoint ROIs. This should be an Analyze 7.5 header
+        / image file.hdr and file.img.
+        flag: -endpointfile %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+exclusionfile: (a file name)
+        Image containing exclusion ROIs. This should be an Analyze 7.5
+        header / image file.hdr and file.img.
+        flag: -exclusionfile %s
+gzip: (a boolean)
+        save the output image in gzip format
+        flag: -gzip
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputmodel: (&#39;raw&#39; or &#39;voxels&#39;, nipype default value: raw)
+        input model type (raw or voxels)
+        flag: -inputmodel %s
+iterations: (a float)
+        Number of streamlines generated for each seed. Not required when
+        outputting streamlines, but needed to create PICo images. The
+        default is 1 if the output is streamlines, and 5000 if the output is
+        connection probability images.
+        flag: -iterations %d
+maxtractlength: (an integer (int or long))
+        maximum length of tracts
+        flag: -maxtractlength %d
+maxtractpoints: (an integer (int or long))
+        maximum number of tract points
+        flag: -maxtractpoints %d
+mintractlength: (an integer (int or long))
+        minimum length of tracts
+        flag: -mintractlength %d
+mintractpoints: (an integer (int or long))
+        minimum number of tract points
+        flag: -mintractpoints %d
+noresample: (a boolean)
+        Disables resampling of input streamlines. Resampling is
+        automatically disabled if the input model is voxels.
+        flag: -noresample
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+outputacm: (a boolean)
+        output all tracts in a single connection probability map (Analyze
+        image)
+        flag: -outputacm
+        requires: outputroot, seedfile
+outputcbs: (a boolean)
+        outputs connectivity-based segmentation maps; requires target
+        outputfile
+        flag: -outputcbs
+        requires: outputroot, targetfile, seedfile
+outputcp: (a boolean)
+        output the connection probability map (Analyze image, float)
+        flag: -outputcp
+        requires: outputroot, seedfile
+outputroot: (a file name)
+        Prepended onto all output file names.
+        flag: -outputroot %s
+outputsc: (a boolean)
+        output the connection probability map (raw streamlines, int)
+        flag: -outputsc
+        requires: outputroot, seedfile
+outputtracts: (a boolean)
+        Output streamlines in raw binary format.
+        flag: -outputtracts
+regionindex: (an integer (int or long))
+        index of specific region to process
+        flag: -regionindex %d
+resamplestepsize: (a float)
+        Each point on a streamline is tested for entry into target,
+        exclusion or waypoint volumes. If the length between points on a
+        tract is not much smaller than the voxel length, then streamlines
+        may pass through part of a voxel without being counted. To avoid
+        this, the program resamples streamlines such that the step size is
+        one tenth of the smallest voxel dimension in the image. This
+        increases the size of raw or oogl streamline output and incurs some
+        performance penalty. The resample resolution can be controlled with
+        this option or disabled altogether by passing a negative step size
+        or by passing the -noresample option.
+        flag: -resamplestepsize %d
+seedfile: (a file name)
+        Image Containing Seed Points
+        flag: -seedfile %s
+seedpointmm: (a list of from 3 to 3 items which are an integer (int
+         or long))
+        The coordinates of a single seed point for tractography in mm
+        flag: -seedpointmm %s
+seedpointvox: (a list of from 3 to 3 items which are an integer (int
+         or long))
+        The coordinates of a single seed point for tractography in voxels
+        flag: -seedpointvox %s
+targetfile: (a file name)
+        Image containing target volumes.
+        flag: -targetfile %s
+truncateinexclusion: (a boolean)
+        Retain segments of a streamline before entry to an exclusion ROI.
+        flag: -truncateinexclusion
+truncateloops: (a boolean)
+        This option allows streamlines to enter a waypoint exactly once.
+        After the streamline leaves the waypoint, it is truncated upon a
+        second entry to the waypoint.
+        flag: -truncateloops
+voxeldims: (a list of from 3 to 3 items which are an integer (int or
+         long))
+        voxel dimensions in mm
+        flag: -voxeldims %s
+waypointfile: (a file name)
+        Image containing waypoints. Waypoints are defined as regions of the
+        image with the same intensity, where 0 is background and any value &gt;
+        0 is a waypoint.
+        flag: -waypointfile %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputroot_files: (an existing file name)
+proc: (an existing file name)
+        Processed Streamlines
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-convert-shredder"></span></div>
+</div>
+<div class="section" id="shredder">
+<span id="index-5"></span><h2>Shredder<a class="headerlink" href="#shredder" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/camino/convert.py#L631">Link to code</a></p>
+<p>Wraps command <strong>shredder</strong></p>
+<p>Extracts periodic chunks from a data stream.</p>
+<p>Shredder makes an initial offset of offset bytes. It then reads and outputs
+chunksize bytes, skips space bytes, and repeats until there is no more input.</p>
+<p>If  the  chunksize  is  negative, chunks of size <a href="#id5"><span class="problematic" id="id6">|chunksize|</span></a> are read and the
+byte ordering of each chunk is reversed. The whole chunk will be reversed, so
+the chunk must be the same size as the data type, otherwise the order of the
+values in the chunk, as well as their endianness, will be reversed.</p>
+<div class="section" id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cam</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shred</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">Shredder</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shred</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;SubjectA.Bfloat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shred</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shred</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">chunksize</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shred</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">space</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shred</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        raw binary data file
+        flag: &lt; %s, position: -2
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+chunksize: (an integer (int or long))
+        reads and outputs a chunk of chunksize bytes
+        flag: %d, position: 2
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+offset: (an integer (int or long))
+        initial offset of offset bytes
+        flag: %d, position: 1
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+space: (an integer (int or long))
+        skips space bytes
+        flag: %d, position: 3
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>shredded: (an existing file name)
+        Shredded binary data file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-convert-tractshredder"></span></div>
+</div>
+<div class="section" id="tractshredder">
+<span id="index-6"></span><h2>TractShredder<a class="headerlink" href="#tractshredder" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/camino/convert.py#L314">Link to code</a></p>
+<p>Wraps command <strong>tractshredder</strong></p>
+<p>Extracts bunches of streamlines.</p>
+<p>tractshredder works in a similar way to shredder, but processes streamlines instead of scalar data.
+The input is raw streamlines, in the format produced by track or procstreamlines.</p>
+<p>The program first makes an initial offset of offset tracts.  It then reads and outputs a group of
+bunchsize tracts, skips space tracts, and repeats until there is no more input.</p>
+<div class="section" id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shred</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">TractShredder</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shred</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;tract_data.Bfloat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shred</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shred</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bunchsize</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shred</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">space</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shred</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        tract file
+        flag: &lt; %s, position: -2
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bunchsize: (an integer (int or long))
+        reads and outputs a group of bunchsize tracts
+        flag: %d, position: 2
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+offset: (an integer (int or long))
+        initial offset of offset tracts
+        flag: %d, position: 1
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+space: (an integer (int or long))
+        skips space tracts
+        flag: %d, position: 3
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>shredded: (an existing file name)
+        Shredded tract file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-camino-convert-vtkstreamlines"></span></div>
+</div>
+<div class="section" id="vtkstreamlines">
+<span id="index-7"></span><h2>VtkStreamlines<a class="headerlink" href="#vtkstreamlines" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/camino/convert.py#L147">Link to code</a></p>
+<p>Wraps command <strong>vtkstreamlines</strong></p>
+<p>Use vtkstreamlines to convert raw or voxel format streamlines to VTK polydata</p>
+<div class="section" id="id4">
+<h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">cmon</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vtk</span> <span class="o">=</span> <span class="n">cmon</span><span class="o">.</span><span class="n">VtkStreamlines</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vtk</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;tract_data.Bfloat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vtk</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">voxeldims</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vtk</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                  
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        data file
+        flag:  &lt; %s, position: -2
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+colourorient: (a boolean)
+        Each point on the streamline is coloured by the local orientation.
+        flag: -colourorient
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputmodel: (&#39;raw&#39; or &#39;voxels&#39;, nipype default value: raw)
+        input model type (raw or voxels)
+        flag: -inputmodel %s
+interpolate: (a boolean)
+        the scalar value at each point on the streamline is calculated by
+        trilinear interpolation
+        flag: -interpolate
+interpolatescalars: (a boolean)
+        the scalar value at each point on the streamline is calculated by
+        trilinear interpolation
+        flag: -interpolatescalars
+out_file: (a file name)
+        flag: &gt; %s, position: -1
+scalar_file: (a file name)
+        image that is in the same physical space as the tracts
+        flag: -scalarfile %s, position: 3
+seed_file: (a file name)
+        image containing seed points
+        flag: -seedfile %s, position: 1
+target_file: (a file name)
+        image containing integer-valued target regions
+        flag: -targetfile %s, position: 2
+voxeldims: (a list of from 3 to 3 items which are an integer (int or
+         long))
+        voxel dimensions in mm
+        flag: -voxeldims %s, position: 4
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>vtk: (an existing file name)
+        Streamlines in VTK format
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

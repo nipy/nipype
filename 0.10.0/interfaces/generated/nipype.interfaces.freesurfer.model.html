@@ -1,0 +1,1397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.10.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.freesurfer.model</a><ul>
+<li><a class="reference internal" href="#binarize">Binarize</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#concatenate">Concatenate</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#glmfit">GLMFit</a><ul>
+<li><a class="reference internal" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#label2vol">Label2Vol</a><ul>
+<li><a class="reference internal" href="#id3">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mrispreproc">MRISPreproc</a><ul>
+<li><a class="reference internal" href="#id4">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ms-lda">MS_LDA</a><ul>
+<li><a class="reference internal" href="#id5">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#onesamplettest">OneSampleTTest</a></li>
+<li><a class="reference internal" href="#segstats">SegStats</a><ul>
+<li><a class="reference internal" href="#id6">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-freesurfer-model">
+<h1>interfaces.freesurfer.model<a class="headerlink" href="#interfaces-freesurfer-model" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-freesurfer-model-binarize"></span><div class="section" id="binarize">
+<span id="index-0"></span><h2>Binarize<a class="headerlink" href="#binarize" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/freesurfer/model.py#L403">Link to code</a></p>
+<p>Wraps command <strong>mri_binarize</strong></p>
+<p>Use FreeSurfer mri_binarize to threshold an input volume</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">binvol</span> <span class="o">=</span> <span class="n">Binarize</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s">&#39;structural.nii&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">binary_file</span><span class="o">=</span><span class="s">&#39;foo_out.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">binvol</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mri_binarize --o foo_out.nii --i structural.nii --min 10.000000&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input volume
+        flag: --i %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+abs: (a boolean)
+        take abs of invol first (ie, make unsigned)
+        flag: --abs
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bin_col_num: (a boolean)
+        set binarized voxel value to its column number
+        flag: --bincol
+bin_val: (an integer (int or long))
+        set vox within thresh to val (default is 1)
+        flag: --binval %d
+bin_val_not: (an integer (int or long))
+        set vox outside range to val (default is 0)
+        flag: --binvalnot %d
+binary_file: (a file name)
+        binary output volume
+        flag: --o %s
+count_file: (a boolean or a file name)
+        save number of hits in ascii file (hits, ntotvox, pct)
+        flag: --count %s
+dilate: (an integer (int or long))
+        niters: dilate binarization in 3D
+        flag: --dilate %d
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+erode: (an integer (int or long))
+        nerode: erode binarization in 3D (after any dilation)
+        flag: --erode  %d
+erode2d: (an integer (int or long))
+        nerode2d: erode binarization in 2D (after any 3D erosion)
+        flag: --erode2d %d
+frame_no: (an integer (int or long))
+        use 0-based frame of input (default is 0)
+        flag: --frame %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+invert: (a boolean)
+        set binval=0, binvalnot=1
+        flag: --inv
+mask_file: (an existing file name)
+        must be within mask
+        flag: --mask maskvol
+mask_thresh: (a float)
+        set thresh for mask
+        flag: --mask-thresh %f
+match: (a list of items which are an integer (int or long))
+        match instead of threshold
+        flag: --match %d...
+max: (a float)
+        max thresh
+        flag: --max %f
+        mutually_exclusive: wm_ven_csf
+merge_file: (an existing file name)
+        merge with mergevol
+        flag: --merge %s
+min: (a float)
+        min thresh
+        flag: --min %f
+        mutually_exclusive: wm_ven_csf
+out_type: (&#39;nii&#39; or &#39;nii.gz&#39; or &#39;mgz&#39;)
+        output file type
+rmax: (a float)
+        compute max based on rmax*globalmean
+        flag: --rmax %f
+rmin: (a float)
+        compute min based on rmin*globalmean
+        flag: --rmin %f
+subjects_dir: (an existing directory name)
+        subjects directory
+ventricles: (a boolean)
+        set match vals those for aseg ventricles+choroid (not 4th)
+        flag: --ventricles
+wm: (a boolean)
+        set match vals to 2 and 41 (aseg for cerebral WM)
+        flag: --wm
+wm_ven_csf: (a boolean)
+        WM and ventricular CSF, including choroid (not 4th)
+        flag: --wm+vcsf
+        mutually_exclusive: min, max
+zero_edges: (a boolean)
+        zero the edge voxels
+        flag: --zero-edges
+zero_slice_edge: (a boolean)
+        zero the edge slice voxels
+        flag: --zero-slice-edges
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>binary_file: (an existing file name)
+        binarized output volume
+count_file: (a file name)
+        ascii file containing number of hits
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-model-concatenate"></span></div>
+</div>
+<div class="section" id="concatenate">
+<span id="index-1"></span><h2>Concatenate<a class="headerlink" href="#concatenate" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/freesurfer/model.py#L506">Link to code</a></p>
+<p>Wraps command <strong>mri_concat</strong></p>
+<p>Use Freesurfer mri_concat to combine several input volumes
+into one output volume.  Can concatenate by frames, or compute
+a variety of statistics on the input volumes.</p>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Combine two input volumes into one volume with two frames</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">concat</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">concat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;cont1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;cont2.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">concat</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">concatenated_file</span> <span class="o">=</span> <span class="s">&#39;bar.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">concat</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mri_concat --o bar.nii --i cont1.nii --i cont2.nii&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (an existing file name)
+        Individual volumes to be concatenated
+        flag: --i %s...
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+add_val: (a float)
+        Add some amount to the input volume
+        flag: --add %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+combine: (a boolean)
+        Combine non-zero values into single frame volume
+        flag: --combine
+concatenated_file: (a file name)
+        Output volume
+        flag: --o %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+gmean: (an integer (int or long))
+        create matrix to average Ng groups, Nper=Ntot/Ng
+        flag: --gmean %d
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+keep_dtype: (a boolean)
+        Keep voxelwise precision type (default is float
+        flag: --keep-datatype
+mask_file: (an existing file name)
+        Mask input with a volume
+        flag: --mask %s
+max_bonfcor: (a boolean)
+        Compute max and bonferroni correct (assumes -log10(ps))
+        flag: --max-bonfcor
+max_index: (a boolean)
+        Compute the index of max voxel in concatenated volumes
+        flag: --max-index
+mean_div_n: (a boolean)
+        compute mean/nframes (good for var)
+        flag: --mean-div-n
+multiply_by: (a float)
+        Multiply input volume by some amount
+        flag: --mul %f
+multiply_matrix_file: (an existing file name)
+        Multiply input by an ascii matrix in file
+        flag: --mtx %s
+paired_stats: (&#39;sum&#39; or &#39;avg&#39; or &#39;diff&#39; or &#39;diff-norm&#39; or &#39;diff-
+         norm1&#39; or &#39;diff-norm2&#39;)
+        Compute paired sum, avg, or diff
+        flag: --paired-%s
+sign: (&#39;abs&#39; or &#39;pos&#39; or &#39;neg&#39;)
+        Take only pos or neg voxles from input, or take abs
+        flag: --%s
+sort: (a boolean)
+        Sort each voxel by ascending frame value
+        flag: --sort
+stats: (&#39;sum&#39; or &#39;var&#39; or &#39;std&#39; or &#39;max&#39; or &#39;min&#39; or &#39;mean&#39;)
+        Compute the sum, var, std, max, min or mean of the input volumes
+        flag: --%s
+subjects_dir: (an existing directory name)
+        subjects directory
+vote: (a boolean)
+        Most frequent value at each voxel and fraction of occurances
+        flag: --vote
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>concatenated_file: (an existing file name)
+        Path/name of the output volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-model-glmfit"></span></div>
+</div>
+<div class="section" id="glmfit">
+<span id="index-2"></span><h2>GLMFit<a class="headerlink" href="#glmfit" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/freesurfer/model.py#L256">Link to code</a></p>
+<p>Wraps command <strong>mri_glmfit</strong></p>
+<p>Use FreeSurfer&#8217;s mri_glmfit to specify and estimate a general linear model.</p>
+<div class="section" id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">glmfit</span> <span class="o">=</span> <span class="n">GLMFit</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">glmfit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">glmfit</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">one_sample</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">glmfit</span><span class="o">.</span><span class="n">cmdline</span> <span class="o">==</span> <span class="s">&#39;mri_glmfit --glmdir </span><span class="si">%s</span><span class="s"> --y functional.nii --osgm&#39;</span><span class="o">%</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (a file name)
+        input 4D file
+        flag: --y %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+allow_ill_cond: (a boolean)
+        allow ill-conditioned design matrices
+        flag: --illcond
+allow_repeated_subjects: (a boolean)
+        allow subject names to repeat in the fsgd file (must appear before
+        --fsgd
+        flag: --allowsubjrep
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+calc_AR1: (a boolean)
+        compute and save temporal AR1 of residual
+        flag: --tar1
+check_opts: (a boolean)
+        don&#39;t run anything, just check options and exit
+        flag: --checkopts
+compute_log_y: (a boolean)
+        compute natural log of y prior to analysis
+        flag: --logy
+contrast: (an existing file name)
+        contrast file
+        flag: --C %s...
+cortex: (a boolean)
+        use subjects ?h.cortex.label as label
+        flag: --cortex
+        mutually_exclusive: label_file
+debug: (a boolean)
+        turn on debugging
+        flag: --debug
+design: (an existing file name)
+        design matrix file
+        flag: --X %s
+        mutually_exclusive: fsgd, design, one_sample
+diag: (an integer (int or long))
+        Gdiag_no : set diagnositc level
+diag_cluster: (a boolean)
+        save sig volume and exit from first sim loop
+        flag: --diag-cluster
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fixed_fx_dof: (an integer (int or long))
+        dof for fixed effects analysis
+        flag: --ffxdof %d
+        mutually_exclusive: fixed_fx_dof_file
+fixed_fx_dof_file: (a file name)
+        text file with dof for fixed effects analysis
+        flag: --ffxdofdat %d
+        mutually_exclusive: fixed_fx_dof
+fixed_fx_var: (an existing file name)
+        for fixed effects analysis
+        flag: --yffxvar %s
+force_perm: (a boolean)
+        force perumtation test, even when design matrix is not orthog
+        flag: --perm-force
+fsgd: (a tuple of the form: (an existing file name, &#39;doss&#39; or
+         &#39;dods&#39;))
+        freesurfer descriptor file
+        flag: --fsgd %s %s
+        mutually_exclusive: fsgd, design, one_sample
+fwhm: (a floating point number &gt;= 0.0)
+        smooth input by fwhm
+        flag: --fwhm %f
+glm_dir: (a string)
+        save outputs to dir
+        flag: --glmdir %s
+hemi: (&#39;lh&#39; or &#39;rh&#39;)
+        surface hemisphere
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+invert_mask: (a boolean)
+        invert mask
+        flag: --mask-inv
+label_file: (an existing file name)
+        use label as mask, surfaces only
+        flag: --label %s
+        mutually_exclusive: cortex
+mask_file: (an existing file name)
+        binary mask
+        flag: --mask %s
+no_contrast_sok: (a boolean)
+        do not fail if no contrasts specified
+        flag: --no-contrasts-ok
+no_est_fwhm: (a boolean)
+        turn off FWHM output estimation
+        flag: --no-est-fwhm
+no_mask_smooth: (a boolean)
+        do not mask when smoothing
+        flag: --no-mask-smooth
+no_prune: (a boolean)
+        do not prune
+        flag: --no-prune
+        mutually_exclusive: prunethresh
+one_sample: (a boolean)
+        construct X and C as a one-sample group mean
+        flag: --osgm
+        mutually_exclusive: one_sample, fsgd, design, contrast
+pca: (a boolean)
+        perform pca/svd analysis on residual
+        flag: --pca
+per_voxel_reg: (an existing file name)
+        per-voxel regressors
+        flag: --pvr %s...
+profile: (an integer (int or long))
+        niters : test speed
+        flag: --profile %d
+prune: (a boolean)
+        remove voxels that do not have a non-zero value at each frame (def)
+        flag: --prune
+prune_thresh: (a float)
+        prune threshold. Default is FLT_MIN
+        flag: --prune_thr %f
+        mutually_exclusive: noprune
+resynth_test: (an integer (int or long))
+        test GLM by resynthsis
+        flag: --resynthtest %d
+save_cond: (a boolean)
+        flag to save design matrix condition at each voxel
+        flag: --save-cond
+save_estimate: (a boolean)
+        save signal estimate (yhat)
+        flag: --yhat-save
+save_res_corr_mtx: (a boolean)
+        save residual error spatial correlation matrix (eres.scm). Big!
+        flag: --eres-scm
+save_residual: (a boolean)
+        save residual error (eres)
+        flag: --eres-save
+seed: (an integer (int or long))
+        used for synthesizing noise
+        flag: --seed %d
+self_reg: (a tuple of the form: (an integer (int or long), an integer
+         (int or long), an integer (int or long)))
+        self-regressor from index col row slice
+        flag: --selfreg %d %d %d
+sim_done_file: (a file name)
+        create file when simulation finished
+        flag: --sim-done %s
+sim_sign: (&#39;abs&#39; or &#39;pos&#39; or &#39;neg&#39;)
+        abs, pos, or neg
+        flag: --sim-sign %s
+simulation: (a tuple of the form: (&#39;perm&#39; or &#39;mc-full&#39; or &#39;mc-z&#39;, an
+         integer (int or long), a float, a string))
+        nulltype nsim thresh csdbasename
+        flag: --sim %s %d %f %s
+subject_id: (a string)
+        subject id for surface geometry
+subjects_dir: (an existing directory name)
+        subjects directory
+surf: (a boolean)
+        analysis is on a surface mesh
+        flag: --surf %s %s %s
+        requires: subject_id, hemi
+surf_geo: (a string, nipype default value: white)
+        surface geometry name (e.g. white, pial)
+synth: (a boolean)
+        replace input with gaussian
+        flag: --synth
+uniform: (a tuple of the form: (a float, a float))
+        use uniform distribution instead of gaussian
+        flag: --uniform %f %f
+var_fwhm: (a floating point number &gt;= 0.0)
+        smooth variance by fwhm
+        flag: --var-fwhm %f
+vox_dump: (a tuple of the form: (an integer (int or long), an integer
+         (int or long), an integer (int or long)))
+        dump voxel GLM and exit
+        flag: --voxdump %d %d %d
+weight_file: (an existing file name)
+        weight for each input at each voxel
+        mutually_exclusive: weighted_ls
+weight_inv: (a boolean)
+        invert weights
+        flag: --w-inv
+        mutually_exclusive: weighted_ls
+weight_sqrt: (a boolean)
+        sqrt of weights
+        flag: --w-sqrt
+        mutually_exclusive: weighted_ls
+weighted_ls: (an existing file name)
+        weighted least squares
+        flag: --wls %s
+        mutually_exclusive: weight_file, weight_inv, weight_sqrt
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>beta_file: (an existing file name)
+        map of regression coefficients
+dof_file: (a file name)
+        text file with effective degrees-of-freedom for the analysis
+error_file: (a file name)
+        map of residual error
+error_stddev_file: (a file name)
+        map of residual error standard deviation
+error_var_file: (a file name)
+        map of residual error variance
+estimate_file: (a file name)
+        map of the estimated Y values
+frame_eigenvectors: (a file name)
+        matrix of frame eigenvectors from residual PCA
+ftest_file
+        map of test statistic values
+fwhm_file: (a file name)
+        text file with estimated smoothness
+gamma_file
+        map of contrast of regression coefficients
+gamma_var_file
+        map of regression contrast variance
+glm_dir: (an existing directory name)
+        output directory
+mask_file: (a file name)
+        map of the mask used in the analysis
+sig_file
+        map of F-test significance (in -log10p)
+singular_values: (a file name)
+        matrix singular values from residual PCA
+spatial_eigenvectors: (a file name)
+        map of spatial eigenvectors from residual PCA
+svd_stats_file: (a file name)
+        text file summarizing the residual PCA
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-model-label2vol"></span></div>
+</div>
+<div class="section" id="label2vol">
+<span id="index-3"></span><h2>Label2Vol<a class="headerlink" href="#label2vol" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/freesurfer/model.py#L738">Link to code</a></p>
+<p>Wraps command <strong>mri_label2vol</strong></p>
+<p>Make a binary volume from a Freesurfer label</p>
+<div class="section" id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">binvol</span> <span class="o">=</span> <span class="n">Label2Vol</span><span class="p">(</span><span class="n">label_file</span><span class="o">=</span><span class="s">&#39;cortex.label&#39;</span><span class="p">,</span> <span class="n">template_file</span><span class="o">=</span><span class="s">&#39;structural.nii&#39;</span><span class="p">,</span> <span class="n">reg_file</span><span class="o">=</span><span class="s">&#39;register.dat&#39;</span><span class="p">,</span> <span class="n">fill_thresh</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">vol_label_file</span><span class="o">=</span><span class="s">&#39;foo_out.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">binvol</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mri_label2vol --fillthresh 0 --label cortex.label --reg register.dat --temp structural.nii --o foo_out.nii&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+annot_file: (an existing file name)
+        surface annotation file
+        flag: --annot %s
+        mutually_exclusive: label_file, annot_file, seg_file, aparc_aseg
+        requires: subject_id, hemi
+aparc_aseg: (a boolean)
+        use aparc+aseg.mgz in subjectdir as seg
+        flag: --aparc+aseg
+        mutually_exclusive: label_file, annot_file, seg_file, aparc_aseg
+label_file: (an existing file name)
+        list of label files
+        flag: --label %s...
+        mutually_exclusive: label_file, annot_file, seg_file, aparc_aseg
+seg_file: (an existing file name)
+        segmentation file
+        flag: --seg %s
+        mutually_exclusive: label_file, annot_file, seg_file, aparc_aseg
+template_file: (an existing file name)
+        output template volume
+        flag: --temp %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fill_thresh: (0.0 &lt;= a floating point number &lt;= 1.0)
+        thresh : between 0 and 1
+        flag: --fillthresh %.f
+hemi: (&#39;lh&#39; or &#39;rh&#39;)
+        hemisphere to use lh or rh
+        flag: --hemi %s
+identity: (a boolean)
+        set R=I
+        flag: --identity
+        mutually_exclusive: reg_file, reg_header, identity
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+invert_mtx: (a boolean)
+        Invert the registration matrix
+        flag: --invertmtx
+label_hit_file: (a file name)
+        file with each frame is nhits for a label
+        flag: --hits %s
+label_voxel_volume: (a float)
+        volume of each label point (def 1mm3)
+        flag: --labvoxvol %f
+map_label_stat: (a file name)
+        map the label stats field into the vol
+        flag: --label-stat %s
+native_vox2ras: (a boolean)
+        use native vox2ras xform instead of tkregister-style
+        flag: --native-vox2ras
+proj: (a tuple of the form: (&#39;abs&#39; or &#39;frac&#39;, a float, a float, a
+         float))
+        project along surface normal
+        flag: --proj %s %f %f %f
+        requires: subject_id, hemi
+reg_file: (an existing file name)
+        tkregister style matrix VolXYZ = R*LabelXYZ
+        flag: --reg %s
+        mutually_exclusive: reg_file, reg_header, identity
+reg_header: (an existing file name)
+        label template volume
+        flag: --regheader %s
+        mutually_exclusive: reg_file, reg_header, identity
+subject_id: (a string)
+        subject id
+        flag: --subject %s
+subjects_dir: (an existing directory name)
+        subjects directory
+surface: (a string)
+        use surface instead of white
+        flag: --surf %s
+vol_label_file: (a file name)
+        output volume
+        flag: --o %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>vol_label_file: (an existing file name)
+        output volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-model-mrispreproc"></span></div>
+</div>
+<div class="section" id="mrispreproc">
+<span id="index-4"></span><h2>MRISPreproc<a class="headerlink" href="#mrispreproc" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/freesurfer/model.py#L78">Link to code</a></p>
+<p>Wraps command <strong>mris_preproc</strong></p>
+<p>Use FreeSurfer mris_preproc to prepare a group of contrasts for
+a second level analysis</p>
+<div class="section" id="id4">
+<h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span> <span class="o">=</span> <span class="n">MRISPreproc</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="s">&#39;fsaverage&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">hemi</span> <span class="o">=</span> <span class="s">&#39;lh&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">vol_measure_file</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;cont1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;register.dat&#39;</span><span class="p">),</span>                                            <span class="p">(</span><span class="s">&#39;cont1a.nii&#39;</span><span class="p">,</span> <span class="s">&#39;register.dat&#39;</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;concatenated_file.mgz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preproc</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mris_preproc --hemi lh --out concatenated_file.mgz --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+hemi: (&#39;lh&#39; or &#39;rh&#39;)
+        hemisphere for source and target
+        flag: --hemi %s
+target: (a string)
+        target subject name
+        flag: --target %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fsgd_file: (an existing file name)
+        specify subjects using fsgd file
+        flag: --fsgd %s
+        mutually_exclusive: subjects, fsgd_file, subject_file
+fwhm: (a float)
+        smooth by fwhm mm on the target surface
+        flag: --fwhm %f
+        mutually_exclusive: num_iters
+fwhm_source: (a float)
+        smooth by fwhm mm on the source surface
+        flag: --fwhm-src %f
+        mutually_exclusive: num_iters_source
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+num_iters: (an integer (int or long))
+        niters : smooth by niters on the target surface
+        flag: --niters %d
+        mutually_exclusive: fwhm
+num_iters_source: (an integer (int or long))
+        niters : smooth by niters on the source surface
+        flag: --niterssrc %d
+        mutually_exclusive: fwhm_source
+out_file: (a file name)
+        output filename
+        flag: --out %s
+proj_frac: (a float)
+        projection fraction for vol2surf
+        flag: --projfrac %s
+smooth_cortex_only: (a boolean)
+        only smooth cortex (ie, exclude medial wall)
+        flag: --smooth-cortex-only
+source_format: (a string)
+        source format
+        flag: --srcfmt %s
+subject_file: (an existing file name)
+        file specifying subjects separated by white space
+        flag: --f %s
+        mutually_exclusive: subjects, fsgd_file, subject_file
+subjects: (a list of items which are any value)
+        subjects from who measures are calculated
+        flag: --s %s...
+        mutually_exclusive: subjects, fsgd_file, subject_file
+subjects_dir: (an existing directory name)
+        subjects directory
+surf_area: (a string)
+        Extract vertex area from subject/surf/hemi.surfname to use as input.
+        flag: --area %s
+        mutually_exclusive: surf_measure, surf_measure_file, surf_area
+surf_dir: (a string)
+        alternative directory (instead of surf)
+        flag: --surfdir %s
+surf_measure: (a string)
+        Use subject/surf/hemi.surf_measure as input
+        flag: --meas %s
+        mutually_exclusive: surf_measure, surf_measure_file, surf_area
+surf_measure_file: (an existing file name)
+        file alternative to surfmeas, still requires list of subjects
+        flag: --is %s...
+        mutually_exclusive: surf_measure, surf_measure_file, surf_area
+vol_measure_file: (a tuple of the form: (an existing file name, an
+         existing file name))
+        list of volume measure and reg file tuples
+        flag: --iv %s %s...
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        preprocessed output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-model-ms-lda"></span></div>
+</div>
+<div class="section" id="ms-lda">
+<span id="index-5"></span><h2>MS_LDA<a class="headerlink" href="#ms-lda" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/freesurfer/model.py#L810">Link to code</a></p>
+<p>Wraps command <strong>mri_ms_LDA</strong></p>
+<p>Perform LDA reduction on the intensity space of an arbitrary # of FLASH images</p>
+<div class="section" id="id5">
+<h3>Examples<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">grey_label</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">white_label</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zero_value</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">optimalWeights</span> <span class="o">=</span> <span class="n">MS_LDA</span><span class="p">(</span><span class="n">lda_labels</span><span class="o">=</span><span class="p">[</span><span class="n">grey_label</span><span class="p">,</span> <span class="n">white_label</span><span class="p">],</span>                                 <span class="n">label_file</span><span class="o">=</span><span class="s">&#39;label.mgz&#39;</span><span class="p">,</span> <span class="n">weight_file</span><span class="o">=</span><span class="s">&#39;weights.txt&#39;</span><span class="p">,</span>                                 <span class="n">shift</span><span class="o">=</span><span class="n">zero_value</span><span class="p">,</span> <span class="n">vol_synth_file</span><span class="o">=</span><span class="s">&#39;synth_out.mgz&#39;</span><span class="p">,</span>                                 <span class="n">conform</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">use_weights</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>                                 <span class="n">images</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;FLASH1.mgz&#39;</span><span class="p">,</span> <span class="s">&#39;FLASH2.mgz&#39;</span><span class="p">,</span> <span class="s">&#39;FLASH3.mgz&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">optimalWeights</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mri_ms_LDA -conform -label label.mgz -lda 2 3 -shift 1 -W -synth synth_out.mgz -weight weights.txt FLASH1.mgz FLASH2.mgz FLASH3.mgz&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+images: (an existing file name)
+        list of input FLASH images
+        flag: %s, position: -1
+lda_labels: (a list of from 2 to 2 items which are an integer (int or
+         long))
+        pair of class labels to optimize
+        flag: -lda %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+vol_synth_file: (a file name)
+        filename for the synthesized output volume
+        flag: -synth %s
+weight_file: (a file name)
+        filename for the LDA weights (input or output)
+        flag: -weight %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+conform: (a boolean)
+        Conform the input volumes (brain mask typically already conformed)
+        flag: -conform
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+label_file: (a file name)
+        filename of the label volume
+        flag: -label %s
+mask_file: (a file name)
+        filename of the brain mask volume
+        flag: -mask %s
+shift: (an integer (int or long))
+        shift all values equal to the given value to zero
+        flag: -shift %d
+subjects_dir: (an existing directory name)
+        subjects directory
+use_weights: (a boolean)
+        Use the weights from a previously generated weight file
+        flag: -W
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>vol_synth_file: (an existing file name)
+weight_file: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-model-onesamplettest"></span></div>
+</div>
+<div class="section" id="onesamplettest">
+<span id="index-6"></span><h2>OneSampleTTest<a class="headerlink" href="#onesamplettest" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/freesurfer/model.py#L335">Link to code</a></p>
+<p>Wraps command <strong>mri_glmfit</strong></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (a file name)
+        input 4D file
+        flag: --y %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+allow_ill_cond: (a boolean)
+        allow ill-conditioned design matrices
+        flag: --illcond
+allow_repeated_subjects: (a boolean)
+        allow subject names to repeat in the fsgd file (must appear before
+        --fsgd
+        flag: --allowsubjrep
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+calc_AR1: (a boolean)
+        compute and save temporal AR1 of residual
+        flag: --tar1
+check_opts: (a boolean)
+        don&#39;t run anything, just check options and exit
+        flag: --checkopts
+compute_log_y: (a boolean)
+        compute natural log of y prior to analysis
+        flag: --logy
+contrast: (an existing file name)
+        contrast file
+        flag: --C %s...
+cortex: (a boolean)
+        use subjects ?h.cortex.label as label
+        flag: --cortex
+        mutually_exclusive: label_file
+debug: (a boolean)
+        turn on debugging
+        flag: --debug
+design: (an existing file name)
+        design matrix file
+        flag: --X %s
+        mutually_exclusive: fsgd, design, one_sample
+diag: (an integer (int or long))
+        Gdiag_no : set diagnositc level
+diag_cluster: (a boolean)
+        save sig volume and exit from first sim loop
+        flag: --diag-cluster
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fixed_fx_dof: (an integer (int or long))
+        dof for fixed effects analysis
+        flag: --ffxdof %d
+        mutually_exclusive: fixed_fx_dof_file
+fixed_fx_dof_file: (a file name)
+        text file with dof for fixed effects analysis
+        flag: --ffxdofdat %d
+        mutually_exclusive: fixed_fx_dof
+fixed_fx_var: (an existing file name)
+        for fixed effects analysis
+        flag: --yffxvar %s
+force_perm: (a boolean)
+        force perumtation test, even when design matrix is not orthog
+        flag: --perm-force
+fsgd: (a tuple of the form: (an existing file name, &#39;doss&#39; or
+         &#39;dods&#39;))
+        freesurfer descriptor file
+        flag: --fsgd %s %s
+        mutually_exclusive: fsgd, design, one_sample
+fwhm: (a floating point number &gt;= 0.0)
+        smooth input by fwhm
+        flag: --fwhm %f
+glm_dir: (a string)
+        save outputs to dir
+        flag: --glmdir %s
+hemi: (&#39;lh&#39; or &#39;rh&#39;)
+        surface hemisphere
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+invert_mask: (a boolean)
+        invert mask
+        flag: --mask-inv
+label_file: (an existing file name)
+        use label as mask, surfaces only
+        flag: --label %s
+        mutually_exclusive: cortex
+mask_file: (an existing file name)
+        binary mask
+        flag: --mask %s
+no_contrast_sok: (a boolean)
+        do not fail if no contrasts specified
+        flag: --no-contrasts-ok
+no_est_fwhm: (a boolean)
+        turn off FWHM output estimation
+        flag: --no-est-fwhm
+no_mask_smooth: (a boolean)
+        do not mask when smoothing
+        flag: --no-mask-smooth
+no_prune: (a boolean)
+        do not prune
+        flag: --no-prune
+        mutually_exclusive: prunethresh
+one_sample: (a boolean)
+        construct X and C as a one-sample group mean
+        flag: --osgm
+        mutually_exclusive: one_sample, fsgd, design, contrast
+pca: (a boolean)
+        perform pca/svd analysis on residual
+        flag: --pca
+per_voxel_reg: (an existing file name)
+        per-voxel regressors
+        flag: --pvr %s...
+profile: (an integer (int or long))
+        niters : test speed
+        flag: --profile %d
+prune: (a boolean)
+        remove voxels that do not have a non-zero value at each frame (def)
+        flag: --prune
+prune_thresh: (a float)
+        prune threshold. Default is FLT_MIN
+        flag: --prune_thr %f
+        mutually_exclusive: noprune
+resynth_test: (an integer (int or long))
+        test GLM by resynthsis
+        flag: --resynthtest %d
+save_cond: (a boolean)
+        flag to save design matrix condition at each voxel
+        flag: --save-cond
+save_estimate: (a boolean)
+        save signal estimate (yhat)
+        flag: --yhat-save
+save_res_corr_mtx: (a boolean)
+        save residual error spatial correlation matrix (eres.scm). Big!
+        flag: --eres-scm
+save_residual: (a boolean)
+        save residual error (eres)
+        flag: --eres-save
+seed: (an integer (int or long))
+        used for synthesizing noise
+        flag: --seed %d
+self_reg: (a tuple of the form: (an integer (int or long), an integer
+         (int or long), an integer (int or long)))
+        self-regressor from index col row slice
+        flag: --selfreg %d %d %d
+sim_done_file: (a file name)
+        create file when simulation finished
+        flag: --sim-done %s
+sim_sign: (&#39;abs&#39; or &#39;pos&#39; or &#39;neg&#39;)
+        abs, pos, or neg
+        flag: --sim-sign %s
+simulation: (a tuple of the form: (&#39;perm&#39; or &#39;mc-full&#39; or &#39;mc-z&#39;, an
+         integer (int or long), a float, a string))
+        nulltype nsim thresh csdbasename
+        flag: --sim %s %d %f %s
+subject_id: (a string)
+        subject id for surface geometry
+subjects_dir: (an existing directory name)
+        subjects directory
+surf: (a boolean)
+        analysis is on a surface mesh
+        flag: --surf %s %s %s
+        requires: subject_id, hemi
+surf_geo: (a string, nipype default value: white)
+        surface geometry name (e.g. white, pial)
+synth: (a boolean)
+        replace input with gaussian
+        flag: --synth
+uniform: (a tuple of the form: (a float, a float))
+        use uniform distribution instead of gaussian
+        flag: --uniform %f %f
+var_fwhm: (a floating point number &gt;= 0.0)
+        smooth variance by fwhm
+        flag: --var-fwhm %f
+vox_dump: (a tuple of the form: (an integer (int or long), an integer
+         (int or long), an integer (int or long)))
+        dump voxel GLM and exit
+        flag: --voxdump %d %d %d
+weight_file: (an existing file name)
+        weight for each input at each voxel
+        mutually_exclusive: weighted_ls
+weight_inv: (a boolean)
+        invert weights
+        flag: --w-inv
+        mutually_exclusive: weighted_ls
+weight_sqrt: (a boolean)
+        sqrt of weights
+        flag: --w-sqrt
+        mutually_exclusive: weighted_ls
+weighted_ls: (an existing file name)
+        weighted least squares
+        flag: --wls %s
+        mutually_exclusive: weight_file, weight_inv, weight_sqrt
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>beta_file: (an existing file name)
+        map of regression coefficients
+dof_file: (a file name)
+        text file with effective degrees-of-freedom for the analysis
+error_file: (a file name)
+        map of residual error
+error_stddev_file: (a file name)
+        map of residual error standard deviation
+error_var_file: (a file name)
+        map of residual error variance
+estimate_file: (a file name)
+        map of the estimated Y values
+frame_eigenvectors: (a file name)
+        matrix of frame eigenvectors from residual PCA
+ftest_file
+        map of test statistic values
+fwhm_file: (a file name)
+        text file with estimated smoothness
+gamma_file
+        map of contrast of regression coefficients
+gamma_var_file
+        map of regression contrast variance
+glm_dir: (an existing directory name)
+        output directory
+mask_file: (a file name)
+        map of the mask used in the analysis
+sig_file
+        map of F-test significance (in -log10p)
+singular_values: (a file name)
+        matrix singular values from residual PCA
+spatial_eigenvectors: (a file name)
+        map of spatial eigenvectors from residual PCA
+svd_stats_file: (a file name)
+        text file summarizing the residual PCA
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-freesurfer-model-segstats"></span></div>
+<div class="section" id="segstats">
+<span id="index-7"></span><h2>SegStats<a class="headerlink" href="#segstats" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/freesurfer/model.py#L614">Link to code</a></p>
+<p>Wraps command <strong>mri_segstats</strong></p>
+<p>Use FreeSurfer mri_segstats for ROI analysis</p>
+<div class="section" id="id6">
+<h3>Examples<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">as</span> <span class="nn">fs</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">SegStats</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">annot</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;PWS04&#39;</span><span class="p">,</span> <span class="s">&#39;lh&#39;</span><span class="p">,</span> <span class="s">&#39;aparc&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subjects_dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">avgwf_txt_file</span> <span class="o">=</span> <span class="s">&#39;./avgwf.txt&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">summary_file</span> <span class="o">=</span> <span class="s">&#39;./summary.stats&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ss</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --i functional.nii --sum ./summary.stats&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+annot: (a tuple of the form: (a string, &#39;lh&#39; or &#39;rh&#39;, a string))
+        subject hemi parc : use surface parcellation
+        flag: --annot %s %s %s
+        mutually_exclusive: segmentation_file, annot, surf_label
+segmentation_file: (an existing file name)
+        segmentation volume path
+        flag: --seg %s
+        mutually_exclusive: segmentation_file, annot, surf_label
+surf_label: (a tuple of the form: (a string, &#39;lh&#39; or &#39;rh&#39;, a string))
+        subject hemi label : use surface label
+        flag: --slabel %s %s %s
+        mutually_exclusive: segmentation_file, annot, surf_label
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+avgwf_file: (a boolean or a file name)
+        Save as binary volume (bool or filename)
+        flag: --avgwfvol %s
+avgwf_txt_file: (a boolean or a file name)
+        Save average waveform into file (bool or filename)
+        flag: --avgwf %s
+brain_vol: (&#39;brain-vol-from-seg&#39; or &#39;brainmask&#39; or &#39;--%s&#39;)
+        Compute brain volume either with ``brainmask`` or ``brain-vol-from-
+        seg``
+calc_power: (&#39;sqr&#39; or &#39;sqrt&#39;)
+        Compute either the sqr or the sqrt of the input
+        flag: --%s
+calc_snr: (a boolean)
+        save mean/std as extra column in output table
+        flag: --snr
+color_table_file: (an existing file name)
+        color table file with seg id names
+        flag: --ctab %s
+        mutually_exclusive: color_table_file, default_color_table,
+         gca_color_table
+cortex_vol_from_surf: (a boolean)
+        Compute cortex volume from surf
+        flag: --surf-ctx-vol
+default_color_table: (a boolean)
+        use $FREESURFER_HOME/FreeSurferColorLUT.txt
+        flag: --ctab-default
+        mutually_exclusive: color_table_file, default_color_table,
+         gca_color_table
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+etiv: (a boolean)
+        Compute ICV from talairach transform
+        flag: --etiv
+etiv_only: (&#39;etiv&#39; or &#39;old-etiv&#39; or &#39;--%s-only&#39;)
+        Compute etiv and exit. Use ``etiv`` or ``old-etiv``
+exclude_ctx_gm_wm: (a boolean)
+        exclude cortical gray and white matter
+        flag: --excl-ctxgmwm
+exclude_id: (an integer (int or long))
+        Exclude seg id from report
+        flag: --excludeid %d
+frame: (an integer (int or long))
+        Report stats on nth frame of input volume
+        flag: --frame %d
+gca_color_table: (an existing file name)
+        get color table from GCA (CMA)
+        flag: --ctab-gca %s
+        mutually_exclusive: color_table_file, default_color_table,
+         gca_color_table
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        Use the segmentation to report stats on this volume
+        flag: --i %s
+mask_erode: (an integer (int or long))
+        Erode mask by some amount
+        flag: --maskerode %d
+mask_file: (an existing file name)
+        Mask volume (same size as seg
+        flag: --mask %s
+mask_frame: (an integer (int or long))
+        Mask with this (0 based) frame of the mask volume
+        requires: mask_file
+mask_invert: (a boolean)
+        Invert binarized mask volume
+        flag: --maskinvert
+mask_sign: (&#39;abs&#39; or &#39;pos&#39; or &#39;neg&#39; or &#39;--masksign %s&#39;)
+        Sign for mask threshold: pos, neg, or abs
+mask_thresh: (a float)
+        binarize mask with this threshold &lt;0.5&gt;
+        flag: --maskthresh %f
+multiply: (a float)
+        multiply input by val
+        flag: --mul %f
+non_empty_only: (a boolean)
+        Only report nonempty segmentations
+        flag: --nonempty
+partial_volume_file: (an existing file name)
+        Compensate for partial voluming
+        flag: --pv %f
+segment_id: (a list of items which are any value)
+        Manually specify segmentation ids
+        flag: --id %s...
+sf_avg_file: (a boolean or a file name)
+        Save mean across space and time
+        flag: --sfavg %s
+subjects_dir: (an existing directory name)
+        subjects directory
+summary_file: (a file name)
+        Segmentation stats summary table file
+        flag: --sum %s
+vox: (a list of items which are an integer (int or long))
+        Replace seg with all 0s except at C R S (three int inputs)
+        flag: --vox %s
+wm_vol_from_surf: (a boolean)
+        Compute wm volume from surf
+        flag: --surf-wm-vol
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>avgwf_file: (a file name)
+        Volume with functional statistics averaged over segs
+avgwf_txt_file: (a file name)
+        Text file with functional statistics averaged over segs
+sf_avg_file: (a file name)
+        Text file with func statistics averaged over segs and framss
+summary_file: (an existing file name)
+        Segmentation summary statistics table
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

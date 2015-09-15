@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -126,7 +126,7 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#trim">Trim</a><ul>
-<li><a class="reference internal" href="#id8">Examples</a></li>
+<li><a class="reference internal" href="#id7">Examples</a></li>
 </ul>
 </li>
 </ul>
@@ -151,7 +151,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -163,7 +163,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -186,9 +186,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -198,13 +198,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-nipy-preprocess">
 <h1>interfaces.nipy.preprocess<a class="headerlink" href="#interfaces-nipy-preprocess" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-nipy-preprocess-computemask"></span><div class="section" id="computemask">
 <span id="index-0"></span><h2>ComputeMask<a class="headerlink" href="#computemask" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/nipy/preprocess.py#L49">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/nipy/preprocess.py#L49">Link to code</a></p>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
 mean_volume: (an existing file name)
@@ -232,9 +232,9 @@ reference_volume: (an existing file name)
 <span class="target" id="nipype-interfaces-nipy-preprocess-fmrirealign4d"></span></div>
 <div class="section" id="fmrirealign4d">
 <span id="index-1"></span><h2>FmriRealign4d<a class="headerlink" href="#fmrirealign4d" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/nipy/preprocess.py#L121">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/nipy/preprocess.py#L121">Link to code</a></p>
 <p>Simultaneous motion and slice timing correction algorithm</p>
-<p>This interface wraps nipy&#8217;s FmriRealign4d algorithm <a href="#id9"><span class="problematic" id="id10"><span id="id1"></span>[1]_</span></a>.</p>
+<p>This interface wraps nipy&#8217;s FmriRealign4d algorithm <a class="footnote-reference" href="#id2" id="id1">[1]</a>.</p>
 <div class="section" id="examples">
 <h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.nipy.preprocess</span> <span class="kn">import</span> <span class="n">FmriRealign4d</span>
@@ -251,7 +251,7 @@ reference_volume: (an existing file name)
 <table class="docutils footnote" frame="void" id="id2" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td>Roche A. A four-dimensional registration algorithm with        application to joint correction of motion and slice timing        in fMRI. IEEE Trans Med Imaging. 2011 Aug;30(8):1546-54. <a class="reference external" href="http://dx.doi.org/10.1109/TMI.2011.2131152">DOI</a>.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Roche A. A four-dimensional registration algorithm with        application to joint correction of motion and slice timing        in fMRI. IEEE Trans Med Imaging. 2011 Aug;30(8):1546-54. <a class="reference external" href="http://dx.doi.org/10.1109/TMI.2011.2131152">DOI</a>.</td></tr>
 </tbody>
 </table>
 <p>Inputs:</p>
@@ -262,24 +262,24 @@ tr: (a float)
         TR in seconds
 
 [Optional]
-between_loops: (a list of items which are an integer, nipype default
-         value: [5])
+between_loops: (a list of items which are an integer (int or long),
+         nipype default value: [5])
         loops used to realign different runs
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-loops: (a list of items which are an integer, nipype default value:
-         [5])
+loops: (a list of items which are an integer (int or long), nipype
+         default value: [5])
         loops within each run
-slice_order: (a list of items which are an integer)
+slice_order: (a list of items which are an integer (int or long))
         0 based slice order. This would be equivalent to
         enteringnp.argsort(spm_slice_order) for this field. This
         effectsinterleaved acquisition. This field will be deprecated
         infuture Nipy releases and be replaced by actual sliceacquisition
         times.
         requires: time_interp
-speedup: (a list of items which are an integer, nipype default value:
-         [5])
+speedup: (a list of items which are an integer (int or long), nipype
+         default value: [5])
         successive image sub-sampling factors for acceleration
 start: (a float, nipype default value: 0.0)
         time offset into TR to align slices to
@@ -303,11 +303,11 @@ par_file: (a list of items which are an existing file name)
 </div>
 <div class="section" id="spacetimerealigner">
 <span id="index-2"></span><h2>SpaceTimeRealigner<a class="headerlink" href="#spacetimerealigner" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/nipy/preprocess.py#L239">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/nipy/preprocess.py#L239">Link to code</a></p>
 <p>Simultaneous motion and slice timing correction algorithm</p>
 <p>If slice_times is not specified, this algorithm performs spatial motion
 correction</p>
-<p>This interface wraps nipy&#8217;s SpaceTimeRealign algorithm <a href="#id11"><span class="problematic" id="id12"><span id="id3"></span>[1]_</span></a> or simply the
+<p>This interface wraps nipy&#8217;s SpaceTimeRealign algorithm <a class="reference internal" href="#roche2011" id="id3">[Roche2011]</a> or simply the
 SpatialRealign algorithm when timing info is not provided.</p>
 <div class="section" id="id4">
 <h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
@@ -329,10 +329,10 @@ SpatialRealign algorithm when timing info is not provided.</p>
 </div>
 <div class="section" id="id5">
 <h3>References<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
-<table class="docutils footnote" frame="void" id="id6" rules="none">
+<table class="docutils citation" frame="void" id="roche2011" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label">[1]</td><td>Roche A. A four-dimensional registration algorithm with        application to joint correction of motion and slice timing        in fMRI. IEEE Trans Med Imaging. 2011 Aug;30(8):1546-54. <a class="reference external" href="http://dx.doi.org/10.1109/TMI.2011.2131152">DOI</a>.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id3">[Roche2011]</a></td><td>Roche A. A four-dimensional registration algorithm with        application to joint correction of motion and slice timing        in fMRI. IEEE Trans Med Imaging. 2011 Aug;30(8):1546-54. <a class="reference external" href="http://dx.doi.org/10.1109/TMI.2011.2131152">DOI</a>.</td></tr>
 </tbody>
 </table>
 <p>Inputs:</p>
@@ -344,7 +344,8 @@ in_file: (a list of items which are an existing file name)
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-slice_info: (an integer or a list of items which are any value)
+slice_info: (an integer (int or long) or a list of items which are
+         any value)
         Single integer or length 2 sequence If int, the axis in `images`
         that is the slice axis. In a 4D image, this will often be axis = 2.
         If a 2 sequence, then elements are ``(slice_axis,
@@ -374,10 +375,10 @@ par_file: (a list of items which are an existing file name)
 </div>
 <div class="section" id="trim">
 <span id="index-3"></span><h2>Trim<a class="headerlink" href="#trim" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/nipy/preprocess.py#L351">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/nipy/preprocess.py#L351">Link to code</a></p>
 <p>Simple interface to trim a few volumes from a 4d fmri nifti file</p>
-<div class="section" id="id8">
-<h3>Examples<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id7">
+<h3>Examples<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.nipy.preprocess</span> <span class="kn">import</span> <span class="n">Trim</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">trim</span> <span class="o">=</span> <span class="n">Trim</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">trim</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
@@ -391,9 +392,9 @@ in_file: (an existing file name)
         EPI image to trim
 
 [Optional]
-begin_index: (an integer, nipype default value: 0)
+begin_index: (an integer (int or long), nipype default value: 0)
         first volume
-end_index: (an integer, nipype default value: 0)
+end_index: (an integer (int or long), nipype default value: 0)
         last volume indexed as in python (and 0 for last)
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
@@ -419,9 +420,9 @@ suffix: (a string, nipype default value: _trim)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

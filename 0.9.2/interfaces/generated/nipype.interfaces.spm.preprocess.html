@@ -1,0 +1,1220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.spm.preprocess</a><ul>
+<li><a class="reference internal" href="#applydeformations">ApplyDeformations</a></li>
+<li><a class="reference internal" href="#coregister">Coregister</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#createwarped">CreateWarped</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dartel">DARTEL</a><ul>
+<li><a class="reference internal" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dartelnorm2mni">DARTELNorm2MNI</a><ul>
+<li><a class="reference internal" href="#id3">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#newsegment">NewSegment</a><ul>
+<li><a class="reference internal" href="#id4">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#normalize">Normalize</a><ul>
+<li><a class="reference internal" href="#id5">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#realign">Realign</a><ul>
+<li><a class="reference internal" href="#id6">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#segment">Segment</a><ul>
+<li><a class="reference internal" href="#id7">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#slicetiming">SliceTiming</a><ul>
+<li><a class="reference internal" href="#id8">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#smooth">Smooth</a><ul>
+<li><a class="reference internal" href="#id9">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#vbmsegment">VBMSegment</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-spm-preprocess">
+<h1>interfaces.spm.preprocess<a class="headerlink" href="#interfaces-spm-preprocess" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-spm-preprocess-applydeformations"></span><div class="section" id="applydeformations">
+<span id="index-0"></span><h2>ApplyDeformations<a class="headerlink" href="#applydeformations" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/spm/preprocess.py#L1148">Link to code</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+deformation_field: (an existing file name)
+in_files: (an existing file name)
+reference_volume: (an existing file name)
+
+[Optional]
+deformation_field: (an existing file name)
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_files: (an existing file name)
+interp: (0 &lt;= an integer &lt;= 7)
+        degree of b-spline used for interpolation
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+paths: (a directory name)
+        Paths to add to matlabpath
+reference_volume: (an existing file name)
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_files: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-preprocess-coregister"></span></div>
+<div class="section" id="coregister">
+<span id="index-1"></span><h2>Coregister<a class="headerlink" href="#coregister" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/spm/preprocess.py#L302">Link to code</a></p>
+<p>Use spm_coreg for estimating cross-modality rigid body alignment</p>
+<p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=39">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=39</a></p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coreg</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">Coregister</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coreg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">coreg</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+source: (an existing file name)
+        file to register to target
+target: (an existing file name)
+        reference file to register to
+
+[Optional]
+apply_to_files: (an existing file name)
+        files to apply transformation to
+cost_function: (&#39;mi&#39; or &#39;nmi&#39; or &#39;ecc&#39; or &#39;ncc&#39;)
+        cost function, one of: &#39;mi&#39; - Mutual Information,
+         &#39;nmi&#39; - Normalised Mutual Information,
+         &#39;ecc&#39; - Entropy Correlation Coefficient,
+         &#39;ncc&#39; - Normalised Cross Correlation
+fwhm: (a list of from 2 to 2 items which are a float)
+        gaussian smoothing kernel width (mm)
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+jobtype: (&#39;estwrite&#39; or &#39;estimate&#39; or &#39;write&#39;, nipype default value:
+         estwrite)
+        one of: estimate, write, estwrite
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+out_prefix: (a string, nipype default value: r)
+        coregistered output prefix
+paths: (a directory name)
+        Paths to add to matlabpath
+separation: (a list of items which are a float)
+        sampling separation in mm
+source: (an existing file name)
+        file to register to target
+target: (an existing file name)
+        reference file to register to
+tolerance: (a list of items which are a float)
+        acceptable tolerance for each of 12 params
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+write_interp: (0 &lt;= an integer &lt;= 7)
+        degree of b-spline used for interpolation
+write_mask: (a boolean)
+        True/False mask output image
+write_wrap: (a list of from 3 to 3 items which are an integer (int or
+         long))
+        Check if interpolation should wrap in [x,y,z]
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>coregistered_files: (an existing file name)
+        Coregistered other files
+coregistered_source: (an existing file name)
+        Coregistered source files
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-preprocess-createwarped"></span></div>
+</div>
+<div class="section" id="createwarped">
+<span id="index-2"></span><h2>CreateWarped<a class="headerlink" href="#createwarped" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/spm/preprocess.py#L1093">Link to code</a></p>
+<p>Apply a flow field estimated by DARTEL to create warped images</p>
+<p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=202">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=202</a></p>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">create_warped</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">CreateWarped</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">create_warped</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">image_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;rc1s1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;rc1s2.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">create_warped</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">flowfield_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;u_rc1s1_Template.nii&#39;</span><span class="p">,</span> <span class="s">&#39;u_rc1s2_Template.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">create_warped</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+flowfield_files: (an existing file name)
+        DARTEL flow fields u_rc1*
+image_files: (an existing file name)
+        A list of files to be warped
+
+[Optional]
+flowfield_files: (an existing file name)
+        DARTEL flow fields u_rc1*
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+image_files: (an existing file name)
+        A list of files to be warped
+interp: (0 &lt;= an integer &lt;= 7)
+        degree of b-spline used for interpolation
+iterations: (0 &lt;= an integer &lt;= 9)
+        The number of iterations: log2(number of time steps)
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+paths: (a directory name)
+        Paths to add to matlabpath
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>warped_files: (a list of items which are an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-preprocess-dartel"></span></div>
+</div>
+<div class="section" id="dartel">
+<span id="index-3"></span><h2>DARTEL<a class="headerlink" href="#dartel" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/spm/preprocess.py#L916">Link to code</a></p>
+<p>Use spm DARTEL to create a template and flow fields</p>
+<p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=197">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=197</a></p>
+<div class="section" id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dartel</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">DARTEL</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dartel</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">image_files</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;rc1s1.nii&#39;</span><span class="p">,</span><span class="s">&#39;rc1s2.nii&#39;</span><span class="p">],[</span><span class="s">&#39;rc2s1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;rc2s2.nii&#39;</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dartel</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+image_files: (a list of items which are a list of items which are an
+         existing file name)
+        A list of files to be segmented
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+image_files: (a list of items which are a list of items which are an
+         existing file name)
+        A list of files to be segmented
+iteration_parameters: (a list of from 3 to 12 items which are a tuple
+         of the form: (1 &lt;= an integer &lt;= 10, a tuple of the form: (a float,
+         a float, a float), 1 or 2 or 4 or 8 or 16 or 32 or 64 or 128 or 256
+         or 512, 0 or 0.5 or 1 or 2 or 4 or 8 or 16 or 32))
+        List of tuples for each iteration
+         - Inner iterations
+         - Regularization parameters
+         - Time points for deformation model
+         - smoothing parameter
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+optimization_parameters: (a tuple of the form: (a float, 1 &lt;= an
+         integer &lt;= 8, 1 &lt;= an integer &lt;= 8))
+        Optimization settings a tuple
+         - LM regularization
+         - cycles of multigrid solver
+         - relaxation iterations
+paths: (a directory name)
+        Paths to add to matlabpath
+regularization_form: (&#39;Linear&#39; or &#39;Membrane&#39; or &#39;Bending&#39;)
+        Form of regularization energy term
+template_prefix: (a string, nipype default value: Template)
+        Prefix for template
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>dartel_flow_fields: (a list of items which are an existing file name)
+        DARTEL flow fields
+final_template_file: (an existing file name)
+        final DARTEL template
+template_files: (a list of items which are an existing file name)
+        Templates from different stages of iteration
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-preprocess-dartelnorm2mni"></span></div>
+</div>
+<div class="section" id="dartelnorm2mni">
+<span id="index-4"></span><h2>DARTELNorm2MNI<a class="headerlink" href="#dartelnorm2mni" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/spm/preprocess.py#L1009">Link to code</a></p>
+<p>Use spm DARTEL to normalize data to MNI space</p>
+<p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=200">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=200</a></p>
+<div class="section" id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nm</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">DARTELNorm2MNI</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_file</span> <span class="o">=</span> <span class="s">&#39;Template_6.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">flowfield_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;u_rc1s1_Template.nii&#39;</span><span class="p">,</span> <span class="s">&#39;u_rc1s3_Template.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">apply_to_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;c1s1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;c1s3.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">modulate</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nm</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+apply_to_files: (an existing file name)
+        Files to apply the transform to
+flowfield_files: (an existing file name)
+        DARTEL flow fields u_rc1*
+template_file: (an existing file name)
+        DARTEL template
+
+[Optional]
+apply_to_files: (an existing file name)
+        Files to apply the transform to
+bounding_box: (a tuple of the form: (a float, a float, a float, a
+         float, a float, a float))
+        Voxel sizes for output file
+flowfield_files: (an existing file name)
+        DARTEL flow fields u_rc1*
+fwhm: (a list of from 3 to 3 items which are a float or a float)
+        3-list of fwhm for each dimension
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+modulate: (a boolean)
+        Modulate out images - no modulation preserves concentrations
+paths: (a directory name)
+        Paths to add to matlabpath
+template_file: (an existing file name)
+        DARTEL template
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+voxel_size: (a tuple of the form: (a float, a float, a float))
+        Voxel sizes for output file
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>normalization_parameter_file: (an existing file name)
+        Transform parameters to MNI space
+normalized_files: (an existing file name)
+        Normalized files in MNI space
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-preprocess-newsegment"></span></div>
+</div>
+<div class="section" id="newsegment">
+<span id="index-5"></span><h2>NewSegment<a class="headerlink" href="#newsegment" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/spm/preprocess.py#L693">Link to code</a></p>
+<p>Use spm_preproc8 (New Segment) to separate structural images into different
+tissue classes. Supports multiple modalities.</p>
+<p>NOTE: This interface currently supports single channel input only</p>
+<p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=185">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=185</a></p>
+<div class="section" id="id4">
+<h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">NewSegment</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">channel_files</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">channel_info</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0001</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>For VBM pre-processing [<a class="reference external" href="http://www.fil.ion.ucl.ac.uk/~john/misc/VBMclass10.pdf">http://www.fil.ion.ucl.ac.uk/~john/misc/VBMclass10.pdf</a>],
+TPM.nii should be replaced by /path/to/spm8/toolbox/Seg/TPM.nii</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span> <span class="o">=</span> <span class="n">NewSegment</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">channel_files</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tissue1</span> <span class="o">=</span> <span class="p">((</span><span class="s">&#39;TPM.nii&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tissue2</span> <span class="o">=</span> <span class="p">((</span><span class="s">&#39;TPM.nii&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span><span class="bp">True</span><span class="p">),</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tissue3</span> <span class="o">=</span> <span class="p">((</span><span class="s">&#39;TPM.nii&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span><span class="bp">False</span><span class="p">),</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tissue4</span> <span class="o">=</span> <span class="p">((</span><span class="s">&#39;TPM.nii&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">),</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tissue5</span> <span class="o">=</span> <span class="p">((</span><span class="s">&#39;TPM.nii&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span><span class="bp">False</span><span class="p">),</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">tissues</span> <span class="o">=</span> <span class="p">[</span><span class="n">tissue1</span><span class="p">,</span> <span class="n">tissue2</span><span class="p">,</span> <span class="n">tissue3</span><span class="p">,</span> <span class="n">tissue4</span><span class="p">,</span> <span class="n">tissue5</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+channel_files: (an existing file name)
+        A list of files to be segmented
+
+[Optional]
+affine_regularization: (&#39;mni&#39; or &#39;eastern&#39; or &#39;subj&#39; or &#39;none&#39;)
+        mni, eastern, subj, none
+channel_files: (an existing file name)
+        A list of files to be segmented
+channel_info: (a tuple of the form: (a float, a float, a tuple of the
+         form: (a boolean, a boolean)))
+        A tuple with the following fields:
+         - bias reguralisation (0-10)
+         - FWHM of Gaussian smoothness of bias
+         - which maps to save (Corrected, Field) - a tuple of two boolean
+        values
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+paths: (a directory name)
+        Paths to add to matlabpath
+sampling_distance: (a float)
+        Sampling distance on data for parameter estimation
+tissues: (a list of items which are a tuple of the form: (a tuple of
+         the form: (an existing file name, an integer (int or long)), an
+         integer (int or long), a tuple of the form: (a boolean, a boolean),
+         a tuple of the form: (a boolean, a boolean)))
+        A list of tuples (one per tissue) with the following fields:
+         - tissue probability map (4D), 1-based index to frame
+         - number of gaussians
+         - which maps to save [Native, DARTEL] - a tuple of two boolean
+        values
+         - which maps to save [Modulated, Unmodualted] - a tuple of two
+        boolean values
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+warping_regularization: (a float)
+        Aproximate distance between sampling points.
+write_deformation_fields: (a list of from 2 to 2 items which are a
+         boolean)
+        Which deformation fields to write:[Inverse, Forward]
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>bias_corrected_images: (an existing file name)
+        bias corrected images
+bias_field_images: (an existing file name)
+        bias field images
+dartel_input_images: (a list of items which are a list of items which
+         are an existing file name)
+        dartel imported class images
+forward_deformation_field: (an existing file name)
+inverse_deformation_field: (an existing file name)
+modulated_class_images: (a list of items which are a list of items
+         which are an existing file name)
+        modulated+normalized class images
+native_class_images: (a list of items which are a list of items which
+         are an existing file name)
+        native space probability maps
+normalized_class_images: (a list of items which are a list of items
+         which are an existing file name)
+        normalized class images
+transformation_mat: (an existing file name)
+        Normalization transformation
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-preprocess-normalize"></span></div>
+</div>
+<div class="section" id="normalize">
+<span id="index-6"></span><h2>Normalize<a class="headerlink" href="#normalize" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/spm/preprocess.py#L428">Link to code</a></p>
+<p>use spm_normalise for warping an image to a template</p>
+<p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=51">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=51</a></p>
+<div class="section" id="id5">
+<h3>Examples<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norm</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">Normalize</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norm</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+parameter_file: (a file name)
+        normalization parameter file*_sn.mat
+        mutually_exclusive: source, template
+source: (an existing file name)
+        file to normalize to template
+        mutually_exclusive: parameter_file
+template: (an existing file name)
+        template file to normalize to
+        mutually_exclusive: parameter_file
+
+[Optional]
+DCT_period_cutoff: (a float)
+        Cutoff of for DCT bases (opt)
+affine_regularization_type: (&#39;mni&#39; or &#39;size&#39; or &#39;none&#39;)
+        mni, size, none (opt)
+apply_to_files: (an existing file name or a list of items which are
+         an existing file name)
+        files to apply transformation to (opt)
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+jobtype: (&#39;estwrite&#39; or &#39;est&#39; or &#39;write&#39;, nipype default value:
+         estwrite)
+        one of: est, write, estwrite (opt, estwrite)
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+nonlinear_iterations: (an integer (int or long))
+        Number of iterations of nonlinear warping (opt)
+nonlinear_regularization: (a float)
+        the amount of the regularization for the nonlinear part of the
+        normalization (opt)
+out_prefix: (a string, nipype default value: w)
+        normalized output prefix
+parameter_file: (a file name)
+        normalization parameter file*_sn.mat
+        mutually_exclusive: source, template
+paths: (a directory name)
+        Paths to add to matlabpath
+source: (an existing file name)
+        file to normalize to template
+        mutually_exclusive: parameter_file
+source_image_smoothing: (a float)
+        source smoothing (opt)
+source_weight: (a file name)
+        name of weighting image for source (opt)
+template: (an existing file name)
+        template file to normalize to
+        mutually_exclusive: parameter_file
+template_image_smoothing: (a float)
+        template smoothing (opt)
+template_weight: (a file name)
+        name of weighting image for template (opt)
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+write_bounding_box: (a list of from 2 to 2 items which are a list of
+         from 3 to 3 items which are a float)
+        3x2-element list of lists (opt)
+write_interp: (0 &lt;= an integer &lt;= 7)
+        degree of b-spline used for interpolation
+write_preserve: (a boolean)
+        True/False warped images are modulated (opt,)
+write_voxel_sizes: (a list of from 3 to 3 items which are a float)
+        3-element list (opt)
+write_wrap: (a list of items which are an integer (int or long))
+        Check if interpolation should wrap in [x,y,z] - list of bools (opt)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>normalization_parameters: (an existing file name)
+        MAT files containing the normalization parameters
+normalized_files: (an existing file name)
+        Normalized other files
+normalized_source: (an existing file name)
+        Normalized source files
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-preprocess-realign"></span></div>
+</div>
+<div class="section" id="realign">
+<span id="index-7"></span><h2>Realign<a class="headerlink" href="#realign" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/spm/preprocess.py#L168">Link to code</a></p>
+<p>Use spm_realign for estimating within modality rigid body alignment</p>
+<p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=25">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=25</a></p>
+<div class="section" id="id6">
+<h3>Examples<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">realign</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">Realign</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">realign</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">realign</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">register_to_mean</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">realign</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (a list of items which are an existing file name or an
+         existing file name)
+        list of filenames to realign
+register_to_mean: (a boolean, nipype default value: True)
+        Indicate whether realignment is done to the mean image
+
+[Optional]
+fwhm: (a floating point number &gt;= 0.0)
+        gaussian smoothing kernel width
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_files: (a list of items which are an existing file name or an
+         existing file name)
+        list of filenames to realign
+interp: (0 &lt;= an integer &lt;= 7)
+        degree of b-spline used for interpolation
+jobtype: (&#39;estwrite&#39; or &#39;estimate&#39; or &#39;write&#39;, nipype default value:
+         estwrite)
+        one of: estimate, write, estwrite
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+out_prefix: (a string, nipype default value: r)
+        realigned output prefix
+paths: (a directory name)
+        Paths to add to matlabpath
+quality: (0.0 &lt;= a floating point number &lt;= 1.0)
+        0.1 = fast, 1.0 = precise
+register_to_mean: (a boolean, nipype default value: True)
+        Indicate whether realignment is done to the mean image
+separation: (a floating point number &gt;= 0.0)
+        sampling separation in mm
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+weight_img: (an existing file name)
+        filename of weighting image
+wrap: (a list of from 3 to 3 items which are an integer (int or
+         long))
+        Check if interpolation should wrap in [x,y,z]
+write_interp: (0 &lt;= an integer &lt;= 7)
+        degree of b-spline used for interpolation
+write_mask: (a boolean)
+        True/False mask output image
+write_which: (a list of items which are a value of type &#39;int&#39;, nipype
+         default value: [2, 1])
+        determines which images to reslice
+write_wrap: (a list of from 3 to 3 items which are an integer (int or
+         long))
+        Check if interpolation should wrap in [x,y,z]
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>mean_image: (an existing file name)
+        Mean image file from the realignment
+modified_in_files: (a list of items which are an existing file name
+         or an existing file name)
+        Copies of all files passed to in_files. Headers will have been
+        modified to align all images with the first, or optionally to first
+        do that, extract a mean image, and re-align to that mean image.
+realigned_files: (a list of items which are an existing file name or
+         an existing file name)
+        If jobtype is write or estwrite, these will be the resliced files.
+        Otherwise, they will be copies of in_files that have had their
+        headers rewritten.
+realignment_parameters: (an existing file name)
+        Estimated translation and rotation parameters
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-preprocess-segment"></span></div>
+</div>
+<div class="section" id="segment">
+<span id="index-8"></span><h2>Segment<a class="headerlink" href="#segment" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/spm/preprocess.py#L588">Link to code</a></p>
+<p>use spm_segment to separate structural images into different
+tissue classes.</p>
+<p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=43">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=43</a></p>
+<div class="section" id="id7">
+<h3>Examples<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">Segment</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+data: (an existing file name)
+        one scan per subject
+
+[Optional]
+affine_regularization: (&#39;mni&#39; or &#39;eastern&#39; or &#39;subj&#39; or &#39;none&#39; or &#39;&#39;)
+        Possible options: &quot;mni&quot;, &quot;eastern&quot;, &quot;subj&quot;, &quot;none&quot; (no
+        reguralisation), &quot;&quot; (no affine registration)
+bias_fwhm: (30 or 40 or 50 or 60 or 70 or 80 or 90 or 100 or 110 or
+         120 or 130 or &#39;Inf&#39;)
+        FWHM of Gaussian smoothness of bias
+bias_regularization: (0 or 1e-05 or 0.0001 or 0.001 or 0.01 or 0.1 or
+         1 or 10)
+        no(0) - extremely heavy (10)
+clean_masks: (&#39;no&#39; or &#39;light&#39; or &#39;thorough&#39;)
+        clean using estimated brain mask (&#39;no&#39;,&#39;light&#39;,&#39;thorough&#39;)
+csf_output_type: (a list of from 3 to 3 items which are a boolean)
+        Options to produce CSF images: c3*.img, wc3*.img and mwc3*.img.
+         None: [False,False,False],
+         Native Space: [False,False,True],
+         Unmodulated Normalised: [False,True,False],
+         Modulated Normalised: [True,False,False],
+         Native + Unmodulated Normalised: [False,True,True],
+         Native + Modulated Normalised: [True,False,True],
+         Native + Modulated + Unmodulated: [True,True,True],
+         Modulated + Unmodulated Normalised: [True,True,False]
+data: (an existing file name)
+        one scan per subject
+gaussians_per_class: (a list of items which are an integer (int or
+         long))
+        num Gaussians capture intensity distribution
+gm_output_type: (a list of from 3 to 3 items which are a boolean)
+        Options to produce grey matter images: c1*.img, wc1*.img and
+        mwc1*.img.
+         None: [False,False,False],
+         Native Space: [False,False,True],
+         Unmodulated Normalised: [False,True,False],
+         Modulated Normalised: [True,False,False],
+         Native + Unmodulated Normalised: [False,True,True],
+         Native + Modulated Normalised: [True,False,True],
+         Native + Modulated + Unmodulated: [True,True,True],
+         Modulated + Unmodulated Normalised: [True,True,False]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask_image: (an existing file name)
+        Binary image to restrict parameter estimation
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+paths: (a directory name)
+        Paths to add to matlabpath
+sampling_distance: (a float)
+        Sampling distance on data for parameter estimation
+save_bias_corrected: (a boolean)
+        True/False produce a bias corrected image
+tissue_prob_maps: (a list of items which are an existing file name)
+        list of gray, white &amp; csf prob. (opt,)
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+warp_frequency_cutoff: (a float)
+        Cutoff of DCT bases
+warping_regularization: (a float)
+        Controls balance between parameters and data
+wm_output_type: (a list of from 3 to 3 items which are a boolean)
+        Options to produce white matter images: c2*.img, wc2*.img and
+        mwc2*.img.
+         None: [False,False,False],
+         Native Space: [False,False,True],
+         Unmodulated Normalised: [False,True,False],
+         Modulated Normalised: [True,False,False],
+         Native + Unmodulated Normalised: [False,True,True],
+         Native + Modulated Normalised: [True,False,True],
+         Native + Modulated + Unmodulated: [True,True,True],
+         Modulated + Unmodulated Normalised: [True,True,False]
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>bias_corrected_image: (a file name)
+        bias-corrected version of input image
+inverse_transformation_mat: (an existing file name)
+        Inverse normalization info
+modulated_csf_image: (a file name)
+        modulated, normalized csf probability map
+modulated_gm_image: (a file name)
+        modulated, normalized grey probability map
+modulated_input_image: (a file name)
+        bias-corrected version of input image
+modulated_wm_image: (a file name)
+        modulated, normalized white probability map
+native_csf_image: (a file name)
+        native space csf probability map
+native_gm_image: (a file name)
+        native space grey probability map
+native_wm_image: (a file name)
+        native space white probability map
+normalized_csf_image: (a file name)
+        normalized csf probability map
+normalized_gm_image: (a file name)
+        normalized grey probability map
+normalized_wm_image: (a file name)
+        normalized white probability map
+transformation_mat: (an existing file name)
+        Normalization transformation
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-preprocess-slicetiming"></span></div>
+</div>
+<div class="section" id="slicetiming">
+<span id="index-9"></span><h2>SliceTiming<a class="headerlink" href="#slicetiming" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/spm/preprocess.py#L63">Link to code</a></p>
+<p>Use spm to perform slice timing correction.</p>
+<p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=19">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=19</a></p>
+<div class="section" id="id8">
+<h3>Examples<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">import</span> <span class="n">SliceTiming</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">st</span> <span class="o">=</span> <span class="n">SliceTiming</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">st</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">st</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_slices</span> <span class="o">=</span> <span class="mi">32</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">st</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">time_repetition</span> <span class="o">=</span> <span class="mf">6.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">st</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">time_acquisition</span> <span class="o">=</span> <span class="mf">6.</span> <span class="o">-</span> <span class="mf">6.</span><span class="o">/</span><span class="mf">32.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">st</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">slice_order</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">st</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">ref_slice</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">st</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (a list of items which are an existing file name or an
+         existing file name)
+        list of filenames to apply slice timing
+num_slices: (an integer (int or long))
+        number of slices in a volume
+ref_slice: (an integer (int or long))
+        1-based Number of the reference slice
+slice_order: (a list of items which are an integer (int or long))
+        1-based order in which slices are acquired
+time_acquisition: (a float)
+        time of volume acquisition. usually calculated as TR-(TR/num_slices)
+time_repetition: (a float)
+        time between volume acquisitions (start to start time)
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_files: (a list of items which are an existing file name or an
+         existing file name)
+        list of filenames to apply slice timing
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+num_slices: (an integer (int or long))
+        number of slices in a volume
+out_prefix: (a string, nipype default value: a)
+        slicetimed output prefix
+paths: (a directory name)
+        Paths to add to matlabpath
+ref_slice: (an integer (int or long))
+        1-based Number of the reference slice
+slice_order: (a list of items which are an integer (int or long))
+        1-based order in which slices are acquired
+time_acquisition: (a float)
+        time of volume acquisition. usually calculated as TR-(TR/num_slices)
+time_repetition: (a float)
+        time between volume acquisitions (start to start time)
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>timecorrected_files: (a list of items which are an existing file name
+         or an existing file name)
+        slice time corrected files
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-preprocess-smooth"></span></div>
+</div>
+<div class="section" id="smooth">
+<span id="index-10"></span><h2>Smooth<a class="headerlink" href="#smooth" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/spm/preprocess.py#L830">Link to code</a></p>
+<p>Use spm_smooth for 3D Gaussian smoothing of image volumes.</p>
+<p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=57">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=57</a></p>
+<div class="section" id="id9">
+<h3>Examples<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">smooth</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">Smooth</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">smooth</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">smooth</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">smooth</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (an existing file name)
+        list of files to smooth
+
+[Optional]
+data_type: (an integer (int or long))
+        Data type of the output images (opt)
+fwhm: (a list of from 3 to 3 items which are a float or a float)
+        3-list of fwhm for each dimension (opt)
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+implicit_masking: (a boolean)
+        A mask implied by a particular voxel value
+in_files: (an existing file name)
+        list of files to smooth
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+out_prefix: (a string, nipype default value: s)
+        smoothed output prefix
+paths: (a directory name)
+        Paths to add to matlabpath
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>smoothed_files: (an existing file name)
+        smoothed files
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-spm-preprocess-vbmsegment"></span></div>
+</div>
+<div class="section" id="vbmsegment">
+<span id="index-11"></span><h2>VBMSegment<a class="headerlink" href="#vbmsegment" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/spm/preprocess.py#L1314">Link to code</a></p>
+<p>Use VBM8 toolbox to separate structural images into different
+tissue classes.</p>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">VBMSegment</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">tissues</span> <span class="o">=</span> <span class="s">&#39;TPM.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dartel_template</span> <span class="o">=</span> <span class="s">&#39;Template_1_IXI550_MNI152.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bias_corrected_native</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">gm_native</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">wm_native</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">csf_native</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">pve_label_native</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">deformation_field</span> <span class="o">=</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seg</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (an existing file name)
+        A list of files to be segmented
+
+[Optional]
+bias_corrected_affine: (a boolean, nipype default value: False)
+bias_corrected_native: (a boolean, nipype default value: False)
+bias_corrected_normalized: (a boolean, nipype default value: True)
+bias_fwhm: (30 or 40 or 50 or 60 or 70 or 80 or 90 or 100 or 110 or
+         120 or 130 or &#39;Inf&#39;, nipype default value: 60)
+        FWHM of Gaussian smoothness of bias
+bias_regularization: (0 or 1e-05 or 0.0001 or 0.001 or 0.01 or 0.1 or
+         1 or 10, nipype default value: 0.0001)
+        no(0) - extremely heavy (10)
+cleanup_partitions: (an integer (int or long), nipype default value:
+         1)
+        0=None,1=light,2=thorough
+csf_dartel: (0 &lt;= an integer &lt;= 2, nipype default value: 0)
+        0=None,1=rigid(SPM8 default),2=affine
+csf_modulated_normalized: (0 &lt;= an integer &lt;= 2, nipype default
+         value: 2)
+        0=none,1=affine+non-linear(SPM8 default),2=non-linear only
+csf_native: (a boolean, nipype default value: False)
+csf_normalized: (a boolean, nipype default value: False)
+dartel_template: (an existing file name)
+deformation_field: (a tuple of the form: (a boolean, a boolean),
+         nipype default value: (0, 0))
+        forward and inverse field
+display_results: (a boolean, nipype default value: True)
+gaussians_per_class: (a tuple of the form: (an integer (int or long),
+         an integer (int or long), an integer (int or long), an integer (int
+         or long), an integer (int or long), an integer (int or long)),
+         nipype default value: (2, 2, 2, 3, 4, 2))
+        number of gaussians for each tissue class
+gm_dartel: (0 &lt;= an integer &lt;= 2, nipype default value: 0)
+        0=None,1=rigid(SPM8 default),2=affine
+gm_modulated_normalized: (0 &lt;= an integer &lt;= 2, nipype default value:
+         2)
+        0=none,1=affine+non-linear(SPM8 default),2=non-linear only
+gm_native: (a boolean, nipype default value: False)
+gm_normalized: (a boolean, nipype default value: False)
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_files: (an existing file name)
+        A list of files to be segmented
+jacobian_determinant: (a boolean, nipype default value: False)
+matlab_cmd: (a string)
+        matlab command to use
+mfile: (a boolean, nipype default value: True)
+        Run m-code using m-file
+mrf_weighting: (a float, nipype default value: 0.15)
+paths: (a directory name)
+        Paths to add to matlabpath
+pve_label_dartel: (0 &lt;= an integer &lt;= 2, nipype default value: 0)
+        0=None,1=rigid(SPM8 default),2=affine
+pve_label_native: (a boolean, nipype default value: False)
+pve_label_normalized: (a boolean, nipype default value: False)
+sampling_distance: (a float, nipype default value: 3)
+        Sampling distance on data for parameter estimation
+spatial_normalization: (&#39;high&#39; or &#39;low&#39;, nipype default value: high)
+tissues: (an existing file name)
+        tissue probability map
+use_mcr: (a boolean)
+        Run m-code using SPM MCR
+use_sanlm_denoising_filter: (0 &lt;= an integer &lt;= 2, nipype default
+         value: 2)
+        0=No denoising, 1=denoising,2=denoising multi-threaded
+use_v8struct: (a boolean, nipype default value: True)
+        Generate SPM8 and higher compatible jobs
+warping_regularization: (a float, nipype default value: 4)
+        Controls balance between parameters and data
+wm_dartel: (0 &lt;= an integer &lt;= 2, nipype default value: 0)
+        0=None,1=rigid(SPM8 default),2=affine
+wm_modulated_normalized: (0 &lt;= an integer &lt;= 2, nipype default value:
+         2)
+        0=none,1=affine+non-linear(SPM8 default),2=non-linear only
+wm_native: (a boolean, nipype default value: False)
+wm_normalized: (a boolean, nipype default value: False)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>bias_corrected_images: (an existing file name)
+        bias corrected images
+dartel_input_images: (a list of items which are a list of items which
+         are an existing file name)
+        dartel imported class images
+forward_deformation_field: (an existing file name)
+inverse_deformation_field: (an existing file name)
+jacobian_determinant_images: (an existing file name)
+modulated_class_images: (a list of items which are a list of items
+         which are an existing file name)
+        modulated+normalized class images
+native_class_images: (a list of items which are a list of items which
+         are an existing file name)
+        native space probability maps
+normalized_bias_corrected_images: (an existing file name)
+        bias corrected images
+normalized_class_images: (a list of items which are a list of items
+         which are an existing file name)
+        normalized class images
+pve_label_native_images: (an existing file name)
+pve_label_normalized_images: (an existing file name)
+pve_label_registered_images: (an existing file name)
+transformation_mat: (an existing file name)
+        Normalization transformation
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

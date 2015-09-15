@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -124,10 +124,13 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#lsf">LSF</a></li>
-<li><a class="reference internal" href="#slurm">SLURM</a></li>
+<li><a class="reference internal" href="#slurm">SLURM</a><ul>
+<li><a class="reference internal" href="#slurmgraph">SLURMGraph</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#htcondor">HTCondor</a><ul>
 <li><a class="reference internal" href="#dagman">DAGMan</a></li>
-<li><a class="reference internal" href="#qsub-emulation"><tt class="docutils literal"><span class="pre">qsub</span></tt> emulation</a></li>
+<li><a class="reference internal" href="#qsub-emulation"><code class="docutils literal"><span class="pre">qsub</span></code> emulation</a></li>
 </ul>
 </li>
 </ul>
@@ -154,7 +157,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="install.html">Download</a></td>
@@ -166,7 +169,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -189,9 +192,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -201,7 +204,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="using-nipype-plugins">
 <span id="plugins"></span><h1>Using Nipype Plugins<a class="headerlink" href="#using-nipype-plugins" title="Permalink to this headline">¶</a></h1>
@@ -327,9 +330,11 @@ this local configuration:</p>
 </div>
 <div class="section" id="sgegraph">
 <h4>SGEGraph<a class="headerlink" href="#sgegraph" title="Permalink to this headline">¶</a></h4>
-<p><a class="reference internal" href="#sgegraph">SGEGraph</a> is a exuction plugin working with Sun Grid Engine that allows for
+<p><a class="reference internal" href="#sgegraph">SGEGraph</a> is an execution plugin working with Sun Grid Engine that allows for
 submitting entire graph of dependent jobs at once. This way Nipype does not
-need to run a monitoring process - SGE takes care of this.</p>
+need to run a monitoring process - SGE takes care of this. The use of <a class="reference internal" href="#sgegraph">SGEGraph</a>
+is preferred over <a class="reference external" href="http://www.oracle.com/us/products/tools/oracle-grid-engine-075549.html">SGE</a> since the latter adds unnecessary load on the submit
+machine.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p>When rerunning unfinished workflows using SGEGraph you may decide not to
@@ -364,18 +369,36 @@ bsub_args: any other command line args to be passed to bsub.
 sbatch_args: any other command line args to be passed to bsub.
 </pre></div>
 </div>
+<div class="section" id="slurmgraph">
+<h4>SLURMGraph<a class="headerlink" href="#slurmgraph" title="Permalink to this headline">¶</a></h4>
+<p><a class="reference internal" href="#slurmgraph">SLURMGraph</a> is an execution plugin working with SLURM that allows for
+submitting entire graph of dependent jobs at once. This way Nipype does not
+need to run a monitoring process - SLURM takes care of this. The use of <a class="reference internal" href="#slurmgraph">SLURMGraph</a>
+plugin is preferred over the vanilla <a class="reference external" href="http://slurm.schedmd.com/">SLURM</a> plugin since the latter adds
+unnecessary load on the submit machine.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>When rerunning unfinished workflows using SLURMGraph you may decide not to
+submit jobs for Nodes that previously finished running. This can speed up
+execution, but new or modified inputs that would previously trigger a Node
+to rerun will be ignored. The following option turns on this functionality:</p>
+<div class="last highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s">&#39;SLURMGraph&#39;</span><span class="p">,</span> <span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;dont_resubmit_completed_jobs&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+</div>
 </div>
 <div class="section" id="htcondor">
 <h3>HTCondor<a class="headerlink" href="#htcondor" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="dagman">
 <h4>DAGMan<a class="headerlink" href="#dagman" title="Permalink to this headline">¶</a></h4>
 <p>With its <a class="reference external" href="http://research.cs.wisc.edu/htcondor/dagman/dagman.html">DAGMan</a> component <a class="reference external" href="http://www.cs.wisc.edu/htcondor/">HTCondor</a> (previously Condor) allows for submitting
-entire graphs of dependent jobs at once (similar to <a class="reference internal" href="#sgegraph">SGEGraph</a>). With the <tt class="docutils literal"><span class="pre">CondorDAGMan</span></tt> plug-in
-Nipype can utilize this functionality to submit complete workflows directly and
-in a single step.  Consequently, and in contrast to other plug-ins, workflow
-execution returns almost instantaneously &#8211; Nipype is only used to generate the
-workflow graph, while job scheduling and dependency resolution are entirely
-managed by <a class="reference external" href="http://www.cs.wisc.edu/htcondor/">HTCondor</a>.</p>
+entire graphs of dependent jobs at once (similar to <a class="reference internal" href="#sgegraph">SGEGraph</a> and <a class="reference internal" href="#slurmgraph">SLURMGraph</a>).
+With the <code class="docutils literal"><span class="pre">CondorDAGMan</span></code> plug-in Nipype can utilize this functionality to
+submit complete workflows directly and in a single step.  Consequently, and
+in contrast to other plug-ins, workflow execution returns almost
+instantaneously &#8211; Nipype is only used to generate the workflow graph,
+while job scheduling and dependency resolution are entirely managed by <a class="reference external" href="http://www.cs.wisc.edu/htcondor/">HTCondor</a>.</p>
 <p>Please note that although <a class="reference external" href="http://research.cs.wisc.edu/htcondor/dagman/dagman.html">DAGMan</a> supports specification of data dependencies
 as well as data provisioning on compute nodes this functionality is currently
 not supported by this plug-in. As with all other batch systems supported by
@@ -409,7 +432,7 @@ block : if True the plugin call will block until Condor has finished
 </div>
 <p>Please see the <a class="reference external" href="http://research.cs.wisc.edu/htcondor/manual">HTCondor documentation</a> for details on possible configuration
 options and command line arguments.</p>
-<p>Using the <tt class="docutils literal"><span class="pre">wrapper_cmd</span></tt> argument it is possible to combine Nipype workflow
+<p>Using the <code class="docutils literal"><span class="pre">wrapper_cmd</span></code> argument it is possible to combine Nipype workflow
 execution with checkpoint/migration functionality offered by, for example,
 <a class="reference external" href="http://dmtcp.sourceforge.net">DMTCP</a>. This is especially useful in the case of workflows with long running
 nodes, such as Freesurfer&#8217;s recon-all pipeline, where Condor&#8217;s job
@@ -439,28 +462,28 @@ for all nodes could look like this:</p>
 </div>
 </div>
 <div class="section" id="qsub-emulation">
-<h4><tt class="docutils literal"><span class="pre">qsub</span></tt> emulation<a class="headerlink" href="#qsub-emulation" title="Permalink to this headline">¶</a></h4>
+<h4><code class="docutils literal"><span class="pre">qsub</span></code> emulation<a class="headerlink" href="#qsub-emulation" title="Permalink to this headline">¶</a></h4>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">This plug-in is deprecated and users should migrate to the more robust and
-more versatile <tt class="docutils literal"><span class="pre">CondorDAGMan</span></tt> plug-in.</p>
+more versatile <code class="docutils literal"><span class="pre">CondorDAGMan</span></code> plug-in.</p>
 </div>
 <p>Despite the differences between HTCondor and SGE-like batch systems the plugin
 usage (incl. supported arguments) is almost identical. The HTCondor plugin relies
-on a <tt class="docutils literal"><span class="pre">qsub</span></tt> emulation script for HTCondor, called <tt class="docutils literal"><span class="pre">condor_qsub</span></tt> that can be
+on a <code class="docutils literal"><span class="pre">qsub</span></code> emulation script for HTCondor, called <code class="docutils literal"><span class="pre">condor_qsub</span></code> that can be
 obtained from a <a class="reference external" href="http://anonscm.debian.org/gitweb/?p=pkg-exppsy/condor.git;a=blob_plain;f=debian/condor_qsub;hb=HEAD">Git repository on git.debian.org</a>. This script is currently
 not shipped with a standard HTCondor distribution, but is included in the HTCondor
 package from <a class="reference external" href="http://neuro.debian.net">http://neuro.debian.net</a>. It is sufficient to download this script
-and install it in any location on a system that is included in the <tt class="docutils literal"><span class="pre">PATH</span></tt>
+and install it in any location on a system that is included in the <code class="docutils literal"><span class="pre">PATH</span></code>
 configuration.</p>
 <p>Running a workflow in a HTCondor pool is done by calling:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">plugin</span><span class="o">=</span><span class="s">&#39;Condor&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The plugin supports a limited set of qsub arguments (<tt class="docutils literal"><span class="pre">qsub_args</span></tt>) that cover
-the most common use cases. The <tt class="docutils literal"><span class="pre">condor_qsub</span></tt> emulation script translates qsub
+<p>The plugin supports a limited set of qsub arguments (<code class="docutils literal"><span class="pre">qsub_args</span></code>) that cover
+the most common use cases. The <code class="docutils literal"><span class="pre">condor_qsub</span></code> emulation script translates qsub
 arguments into the corresponding HTCondor terminology and handles the actual job
-submission. For details on supported options see the manpage of <tt class="docutils literal"><span class="pre">condor_qsub</span></tt>.</p>
+submission. For details on supported options see the manpage of <code class="docutils literal"><span class="pre">condor_qsub</span></code>.</p>
 <p>Optional arguments:</p>
 <div class="highlight-python"><div class="highlight"><pre>qsub_args: any other command line args to be passed to condor_qsub.
 </pre></div>
@@ -477,9 +500,9 @@ submission. For details on supported options see the manpage of <tt class="docut
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

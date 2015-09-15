@@ -1,0 +1,80 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+interfaces.slicer.segmentation.simpleregiongrowingsegmentation
+==============================================================
+
+
+.. _nipype.interfaces.slicer.segmentation.simpleregiongrowingsegmentation.SimpleRegionGrowingSegmentation:
+
+
+.. index:: SimpleRegionGrowingSegmentation
+
+SimpleRegionGrowingSegmentation
+-------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/slicer/segmentation/simpleregiongrowingsegmentation.py#L25>`__
+
+Wraps command **SimpleRegionGrowingSegmentation **
+
+title: Simple Region Growing Segmentation
+
+category: Segmentation
+
+description: A simple region growing segmentation algorithm based on intensity statistics. To create a list of fiducials (Seeds) for this algorithm, click on the tool bar icon of an arrow pointing to a starburst fiducial to enter the 'place a new object mode' and then use the fiducials module. This module uses the Slicer Command Line Interface (CLI) and the ITK filters CurvatureFlowImageFilter and ConfidenceConnectedImageFilter.
+
+version: 0.1.0.$Revision: 19904 $(alpha)
+
+documentation-url: http://www.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/SimpleRegionGrowingSegmentation
+
+contributor: Jim Miller (GE)
+
+acknowledgements: This command module was derived from Insight/Examples (copyright) Insight Software Consortium
+
+Inputs::
+
+        [Mandatory]
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        inputVolume: (an existing file name)
+                Input volume to be filtered
+        iterations: (an integer (int or long))
+                Number of iterations of region growing
+        labelvalue: (an integer (int or long))
+                The integer value (0-255) to use for the segmentation results. This
+                will determine the color of the segmentation that will be generated
+                by the Region growing algorithm
+        multiplier: (a float)
+                Number of standard deviations to include in intensity model
+        neighborhood: (an integer (int or long))
+                The radius of the neighborhood over which to calculate intensity
+                model
+        outputVolume: (a boolean or a file name)
+                Output filtered
+        seed: (a list of from 3 to 3 items which are a float)
+                Seed point(s) for region growing
+        smoothingIterations: (an integer (int or long))
+                Number of smoothing iterations
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        timestep: (a float)
+                Timestep for curvature flow
+
+Outputs::
+
+        outputVolume: (an existing file name)
+                Output filtered

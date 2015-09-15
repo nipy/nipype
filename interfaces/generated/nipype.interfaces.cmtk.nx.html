@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -122,18 +122,18 @@
 <li><a class="reference internal" href="#id1">Example</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#add-dicts-by-key"><tt class="docutils literal"><span class="pre">add_dicts_by_key()</span></tt></a></li>
-<li><a class="reference internal" href="#add-edge-data"><tt class="docutils literal"><span class="pre">add_edge_data()</span></tt></a></li>
-<li><a class="reference internal" href="#add-node-data"><tt class="docutils literal"><span class="pre">add_node_data()</span></tt></a></li>
-<li><a class="reference internal" href="#average-networks"><tt class="docutils literal"><span class="pre">average_networks()</span></tt></a></li>
-<li><a class="reference internal" href="#compute-dict-measures"><tt class="docutils literal"><span class="pre">compute_dict_measures()</span></tt></a></li>
-<li><a class="reference internal" href="#compute-edge-measures"><tt class="docutils literal"><span class="pre">compute_edge_measures()</span></tt></a></li>
-<li><a class="reference internal" href="#compute-network-measures"><tt class="docutils literal"><span class="pre">compute_network_measures()</span></tt></a></li>
-<li><a class="reference internal" href="#compute-node-measures"><tt class="docutils literal"><span class="pre">compute_node_measures()</span></tt></a></li>
-<li><a class="reference internal" href="#compute-singlevalued-measures"><tt class="docutils literal"><span class="pre">compute_singlevalued_measures()</span></tt></a></li>
-<li><a class="reference internal" href="#fix-keys-for-gexf"><tt class="docutils literal"><span class="pre">fix_keys_for_gexf()</span></tt></a></li>
-<li><a class="reference internal" href="#read-unknown-ntwk"><tt class="docutils literal"><span class="pre">read_unknown_ntwk()</span></tt></a></li>
-<li><a class="reference internal" href="#remove-all-edges"><tt class="docutils literal"><span class="pre">remove_all_edges()</span></tt></a></li>
+<li><a class="reference internal" href="#add-dicts-by-key"><code class="docutils literal"><span class="pre">add_dicts_by_key()</span></code></a></li>
+<li><a class="reference internal" href="#add-edge-data"><code class="docutils literal"><span class="pre">add_edge_data()</span></code></a></li>
+<li><a class="reference internal" href="#add-node-data"><code class="docutils literal"><span class="pre">add_node_data()</span></code></a></li>
+<li><a class="reference internal" href="#average-networks"><code class="docutils literal"><span class="pre">average_networks()</span></code></a></li>
+<li><a class="reference internal" href="#compute-dict-measures"><code class="docutils literal"><span class="pre">compute_dict_measures()</span></code></a></li>
+<li><a class="reference internal" href="#compute-edge-measures"><code class="docutils literal"><span class="pre">compute_edge_measures()</span></code></a></li>
+<li><a class="reference internal" href="#compute-network-measures"><code class="docutils literal"><span class="pre">compute_network_measures()</span></code></a></li>
+<li><a class="reference internal" href="#compute-node-measures"><code class="docutils literal"><span class="pre">compute_node_measures()</span></code></a></li>
+<li><a class="reference internal" href="#compute-singlevalued-measures"><code class="docutils literal"><span class="pre">compute_singlevalued_measures()</span></code></a></li>
+<li><a class="reference internal" href="#fix-keys-for-gexf"><code class="docutils literal"><span class="pre">fix_keys_for_gexf()</span></code></a></li>
+<li><a class="reference internal" href="#read-unknown-ntwk"><code class="docutils literal"><span class="pre">read_unknown_ntwk()</span></code></a></li>
+<li><a class="reference internal" href="#remove-all-edges"><code class="docutils literal"><span class="pre">remove_all_edges()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -156,7 +156,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -168,7 +168,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -191,9 +191,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -203,13 +203,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-cmtk-nx">
 <h1>interfaces.cmtk.nx<a class="headerlink" href="#interfaces-cmtk-nx" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-cmtk-nx-averagenetworks"></span><div class="section" id="averagenetworks">
 <span id="index-0"></span><h2>AverageNetworks<a class="headerlink" href="#averagenetworks" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L505">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L505">Link to code</a></p>
 <p>Calculates and outputs the average network given a set of input NetworkX gpickle files</p>
 <p>This interface will only keep an edge in the averaged network if that edge is present in
 at least half of the input networks.</p>
@@ -254,7 +254,7 @@ matlab_groupavgs: (a list of items which are a file name)
 </div>
 <div class="section" id="networkxmetrics">
 <span id="index-1"></span><h2>NetworkXMetrics<a class="headerlink" href="#networkxmetrics" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L362">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L362">Link to code</a></p>
 <p>Calculates and outputs NetworkX-based measures for an input network</p>
 <div class="section" id="id1">
 <h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
@@ -325,60 +325,60 @@ pickled_extra_measures: (a file name)
 <span class="target" id="module-nipype.interfaces.cmtk.nx"></span></div>
 </div>
 <div class="section" id="add-dicts-by-key">
-<span id="nipype-interfaces-cmtk-nx-add-dicts-by-key"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">add_dicts_by_key()</span></tt><a class="headerlink" href="#add-dicts-by-key" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L85">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-nx-add-dicts-by-key"></span><h2><code class="xref py py-func docutils literal"><span class="pre">add_dicts_by_key()</span></code><a class="headerlink" href="#add-dicts-by-key" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L85">Link to code</a></p>
 <p>Combines two dictionaries and adds the values for those keys that are shared</p>
 </div>
 <div class="section" id="add-edge-data">
-<span id="nipype-interfaces-cmtk-nx-add-edge-data"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">add_edge_data()</span></tt><a class="headerlink" href="#add-edge-data" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L319">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-nx-add-edge-data"></span><h2><code class="xref py py-func docutils literal"><span class="pre">add_edge_data()</span></code><a class="headerlink" href="#add-edge-data" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L319">Link to code</a></p>
 </div>
 <div class="section" id="add-node-data">
-<span id="nipype-interfaces-cmtk-nx-add-node-data"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">add_node_data()</span></tt><a class="headerlink" href="#add-node-data" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L308">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-nx-add-node-data"></span><h2><code class="xref py py-func docutils literal"><span class="pre">add_node_data()</span></code><a class="headerlink" href="#add-node-data" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L308">Link to code</a></p>
 </div>
 <div class="section" id="average-networks">
-<span id="nipype-interfaces-cmtk-nx-average-networks"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">average_networks()</span></tt><a class="headerlink" href="#average-networks" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L97">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-nx-average-networks"></span><h2><code class="xref py py-func docutils literal"><span class="pre">average_networks()</span></code><a class="headerlink" href="#average-networks" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L97">Link to code</a></p>
 <p>Sums the edges of input networks and divides by the number of networks
 Writes the average network as .pck and .gexf and returns the name of the written networks</p>
 </div>
 <div class="section" id="compute-dict-measures">
-<span id="nipype-interfaces-cmtk-nx-compute-dict-measures"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">compute_dict_measures()</span></tt><a class="headerlink" href="#compute-dict-measures" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L246">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-nx-compute-dict-measures"></span><h2><code class="xref py py-func docutils literal"><span class="pre">compute_dict_measures()</span></code><a class="headerlink" href="#compute-dict-measures" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L246">Link to code</a></p>
 <p>Returns a dictionary</p>
 </div>
 <div class="section" id="compute-edge-measures">
-<span id="nipype-interfaces-cmtk-nx-compute-edge-measures"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">compute_edge_measures()</span></tt><a class="headerlink" href="#compute-edge-measures" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L231">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-nx-compute-edge-measures"></span><h2><code class="xref py py-func docutils literal"><span class="pre">compute_edge_measures()</span></code><a class="headerlink" href="#compute-edge-measures" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L231">Link to code</a></p>
 <p>These return edge-based measures</p>
 </div>
 <div class="section" id="compute-network-measures">
-<span id="nipype-interfaces-cmtk-nx-compute-network-measures"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">compute_network_measures()</span></tt><a class="headerlink" href="#compute-network-measures" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L297">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-nx-compute-network-measures"></span><h2><code class="xref py py-func docutils literal"><span class="pre">compute_network_measures()</span></code><a class="headerlink" href="#compute-network-measures" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L297">Link to code</a></p>
 </div>
 <div class="section" id="compute-node-measures">
-<span id="nipype-interfaces-cmtk-nx-compute-node-measures"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">compute_node_measures()</span></tt><a class="headerlink" href="#compute-node-measures" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L192">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-nx-compute-node-measures"></span><h2><code class="xref py py-func docutils literal"><span class="pre">compute_node_measures()</span></code><a class="headerlink" href="#compute-node-measures" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L192">Link to code</a></p>
 <p>These return node-based measures</p>
 </div>
 <div class="section" id="compute-singlevalued-measures">
-<span id="nipype-interfaces-cmtk-nx-compute-singlevalued-measures"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">compute_singlevalued_measures()</span></tt><a class="headerlink" href="#compute-singlevalued-measures" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L257">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-nx-compute-singlevalued-measures"></span><h2><code class="xref py py-func docutils literal"><span class="pre">compute_singlevalued_measures()</span></code><a class="headerlink" href="#compute-singlevalued-measures" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L257">Link to code</a></p>
 <p>Returns a single value per network</p>
 </div>
 <div class="section" id="fix-keys-for-gexf">
-<span id="nipype-interfaces-cmtk-nx-fix-keys-for-gexf"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">fix_keys_for_gexf()</span></tt><a class="headerlink" href="#fix-keys-for-gexf" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L54">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-nx-fix-keys-for-gexf"></span><h2><code class="xref py py-func docutils literal"><span class="pre">fix_keys_for_gexf()</span></code><a class="headerlink" href="#fix-keys-for-gexf" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L54">Link to code</a></p>
 <p>GEXF Networks can be read in Gephi, however, the keys for the node and edge IDs must be converted to strings</p>
 </div>
 <div class="section" id="read-unknown-ntwk">
-<span id="nipype-interfaces-cmtk-nx-read-unknown-ntwk"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">read_unknown_ntwk()</span></tt><a class="headerlink" href="#read-unknown-ntwk" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L36">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-nx-read-unknown-ntwk"></span><h2><code class="xref py py-func docutils literal"><span class="pre">read_unknown_ntwk()</span></code><a class="headerlink" href="#read-unknown-ntwk" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L36">Link to code</a></p>
 </div>
 <div class="section" id="remove-all-edges">
-<span id="nipype-interfaces-cmtk-nx-remove-all-edges"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">remove_all_edges()</span></tt><a class="headerlink" href="#remove-all-edges" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/nx.py#L46">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-nx-remove-all-edges"></span><h2><code class="xref py py-func docutils literal"><span class="pre">remove_all_edges()</span></code><a class="headerlink" href="#remove-all-edges" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/nx.py#L46">Link to code</a></p>
 </div>
 </div>
 
@@ -389,9 +389,9 @@ Writes the average network as .pck and .gexf and returns the name of the written
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

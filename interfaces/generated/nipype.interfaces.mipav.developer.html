@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -157,7 +157,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -169,7 +169,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -192,9 +192,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -204,13 +204,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-mipav-developer">
 <h1>interfaces.mipav.developer<a class="headerlink" href="#interfaces-mipav-developer" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-mipav-developer-jistbrainmgdmsegmentation"></span><div class="section" id="jistbrainmgdmsegmentation">
 <span id="index-0"></span><h2>JistBrainMgdmSegmentation<a class="headerlink" href="#jistbrainmgdmsegmentation" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L91">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L91">Link to code</a></p>
 <p>Wraps command <a href="#id1"><span class="problematic" id="id2">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMgdmSegmentation **</p>
 <p>title: MGDM Whole Brain Segmentation</p>
 <p>category: Developer Tools</p>
@@ -257,7 +257,7 @@ inMP2RAGE2: (an existing file name)
 inMPRAGE: (an existing file name)
         MPRAGE T1-weighted Image
         flag: --inMPRAGE %s
-inMax: (an integer)
+inMax: (an integer (int or long))
         Max iterations
         flag: --inMax %d
 inMin: (a float)
@@ -272,7 +272,7 @@ inPV: (an existing file name)
 inPosterior: (a float)
         Posterior scale (mm)
         flag: --inPosterior %f
-inSteps: (an integer)
+inSteps: (an integer (int or long))
         Steps
         flag: --inSteps %d
 inTopology: (&#39;26/6&#39; or &#39;6/26&#39; or &#39;18/6&#39; or &#39;6/18&#39; or &#39;6/6&#39; or &#39;wcs&#39;
@@ -298,10 +298,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -323,7 +323,7 @@ outSegmented: (an existing file name)
 <span class="target" id="nipype-interfaces-mipav-developer-jistbrainmp2rageduraestimation"></span></div>
 <div class="section" id="jistbrainmp2rageduraestimation">
 <span id="index-1"></span><h2>JistBrainMp2rageDuraEstimation<a class="headerlink" href="#jistbrainmp2rageduraestimation" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L497">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L497">Link to code</a></p>
 <p>Wraps command <a href="#id3"><span class="problematic" id="id4">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation **</p>
 <p>title: MP2RAGE Dura Estimation</p>
 <p>category: Developer Tools</p>
@@ -367,10 +367,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -386,7 +386,7 @@ xPrefExt: (&#39;nrrd&#39;)
 <span class="target" id="nipype-interfaces-mipav-developer-jistbrainmp2rageskullstripping"></span></div>
 <div class="section" id="jistbrainmp2rageskullstripping">
 <span id="index-2"></span><h2>JistBrainMp2rageSkullStripping<a class="headerlink" href="#jistbrainmp2rageskullstripping" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L345">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L345">Link to code</a></p>
 <p>Wraps command <a href="#id5"><span class="problematic" id="id6">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMp2rageSkullStripping **</p>
 <p>title: MP2RAGE Skull Stripping</p>
 <p>category: Developer Tools</p>
@@ -440,10 +440,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -465,7 +465,7 @@ outMasked3: (an existing file name)
 <span class="target" id="nipype-interfaces-mipav-developer-jistbrainpartialvolumefilter"></span></div>
 <div class="section" id="jistbrainpartialvolumefilter">
 <span id="index-3"></span><h2>JistBrainPartialVolumeFilter<a class="headerlink" href="#jistbrainpartialvolumefilter" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L695">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L695">Link to code</a></p>
 <p>Wraps command <a href="#id7"><span class="problematic" id="id8">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainPartialVolumeFilter **</p>
 <p>title: Partial Volume Filter</p>
 <p>category: Developer Tools</p>
@@ -505,10 +505,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -524,7 +524,7 @@ xPrefExt: (&#39;nrrd&#39;)
 <span class="target" id="nipype-interfaces-mipav-developer-jistcortexsurfacemeshinflation"></span></div>
 <div class="section" id="jistcortexsurfacemeshinflation">
 <span id="index-4"></span><h2>JistCortexSurfaceMeshInflation<a class="headerlink" href="#jistcortexsurfacemeshinflation" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L384">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L384">Link to code</a></p>
 <p>Wraps command <a href="#id9"><span class="problematic" id="id10">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.cortex.JistCortexSurfaceMeshInflation **</p>
 <p>title: Surface Mesh Inflation</p>
 <p>category: Developer Tools</p>
@@ -552,7 +552,7 @@ inLevelset: (an existing file name)
 inLorentzian: (&#39;true&#39; or &#39;false&#39;)
         Lorentzian Norm
         flag: --inLorentzian %s
-inMax: (an integer)
+inMax: (an integer (int or long))
         Max Iterations
         flag: --inMax %d
 inMean: (a float)
@@ -561,7 +561,7 @@ inMean: (a float)
 inSOR: (a float)
         SOR Parameter
         flag: --inSOR %f
-inStep: (an integer)
+inStep: (an integer (int or long))
         Step Size
         flag: --inStep %d
 inTopology: (&#39;26/6&#39; or &#39;6/26&#39; or &#39;18/6&#39; or &#39;6/18&#39; or &#39;6/6&#39; or &#39;wcs&#39;
@@ -581,10 +581,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -602,7 +602,7 @@ outOriginal: (an existing file name)
 <span class="target" id="nipype-interfaces-mipav-developer-jistintensitymp2ragemasking"></span></div>
 <div class="section" id="jistintensitymp2ragemasking">
 <span id="index-5"></span><h2>JistIntensityMp2rageMasking<a class="headerlink" href="#jistintensitymp2ragemasking" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L737">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L737">Link to code</a></p>
 <p>Wraps command <a href="#id11"><span class="problematic" id="id12">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.intensity.JistIntensityMp2rageMasking **</p>
 <p>title: MP2RAGE Background Masking</p>
 <p>category: Developer Tools</p>
@@ -661,10 +661,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -686,7 +686,7 @@ outSignal2: (an existing file name)
 <span class="target" id="nipype-interfaces-mipav-developer-jistlaminarprofilecalculator"></span></div>
 <div class="section" id="jistlaminarprofilecalculator">
 <span id="index-6"></span><h2>JistLaminarProfileCalculator<a class="headerlink" href="#jistlaminarprofilecalculator" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L159">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L159">Link to code</a></p>
 <p>Wraps command <a href="#id13"><span class="problematic" id="id14">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarProfileCalculator **</p>
 <p>title: Profile Calculator</p>
 <p>category: Developer Tools</p>
@@ -725,10 +725,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -744,7 +744,7 @@ xPrefExt: (&#39;nrrd&#39;)
 <span class="target" id="nipype-interfaces-mipav-developer-jistlaminarprofilegeometry"></span></div>
 <div class="section" id="jistlaminarprofilegeometry">
 <span id="index-7"></span><h2>JistLaminarProfileGeometry<a class="headerlink" href="#jistlaminarprofilegeometry" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L126">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L126">Link to code</a></p>
 <p>Wraps command <a href="#id15"><span class="problematic" id="id16">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarProfileGeometry **</p>
 <p>title: Profile Geometry</p>
 <p>category: Developer Tools</p>
@@ -791,10 +791,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -810,7 +810,7 @@ xPrefExt: (&#39;nrrd&#39;)
 <span class="target" id="nipype-interfaces-mipav-developer-jistlaminarprofilesampling"></span></div>
 <div class="section" id="jistlaminarprofilesampling">
 <span id="index-8"></span><h2>JistLaminarProfileSampling<a class="headerlink" href="#jistlaminarprofilesampling" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L532">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L532">Link to code</a></p>
 <p>Wraps command <a href="#id17"><span class="problematic" id="id18">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarProfileSampling **</p>
 <p>title: Profile Sampling</p>
 <p>category: Developer Tools</p>
@@ -852,10 +852,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -873,7 +873,7 @@ outProfilemapped: (an existing file name)
 <span class="target" id="nipype-interfaces-mipav-developer-jistlaminarroiaveraging"></span></div>
 <div class="section" id="jistlaminarroiaveraging">
 <span id="index-9"></span><h2>JistLaminarROIAveraging<a class="headerlink" href="#jistlaminarroiaveraging" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L234">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L234">Link to code</a></p>
 <p>Wraps command <a href="#id19"><span class="problematic" id="id20">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarROIAveraging **</p>
 <p>title: Profile ROI Averaging</p>
 <p>category: Developer Tools</p>
@@ -915,10 +915,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -934,7 +934,7 @@ xPrefExt: (&#39;nrrd&#39;)
 <span class="target" id="nipype-interfaces-mipav-developer-jistlaminarvolumetriclayering"></span></div>
 <div class="section" id="jistlaminarvolumetriclayering">
 <span id="index-10"></span><h2>JistLaminarVolumetricLayering<a class="headerlink" href="#jistlaminarvolumetriclayering" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L36">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L36">Link to code</a></p>
 <p>Wraps command <a href="#id21"><span class="problematic" id="id22">**</span></a>java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarVolumetricLayering **</p>
 <p>title: Volumetric Layering</p>
 <p>category: Developer Tools</p>
@@ -965,13 +965,13 @@ inLayering: (&#39;distance-preserving&#39; or &#39;volume-preserving&#39;)
 inLayering2: (&#39;outward&#39; or &#39;inward&#39;)
         Layering direction
         flag: --inLayering2 %s
-inMax: (an integer)
+inMax: (an integer (int or long))
         Max iterations for narrow band evolution
         flag: --inMax %d
 inMin: (a float)
         Min change ratio for narrow band evolution
         flag: --inMin %f
-inNumber: (an integer)
+inNumber: (an integer (int or long))
         Number of layers
         flag: --inNumber %d
 inOuter: (an existing file name)
@@ -981,7 +981,7 @@ inTopology: (&#39;26/6&#39; or &#39;6/26&#39; or &#39;18/6&#39; or &#39;6/18&#39
          or &#39;wco&#39; or &#39;no&#39;)
         Topology
         flag: --inTopology %s
-incurvature: (an integer)
+incurvature: (an integer (int or long))
         curvature approximation scale (voxels)
         flag: --incurvature %d
 inpresmooth: (&#39;true&#39; or &#39;false&#39;)
@@ -1006,10 +1006,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -1029,7 +1029,7 @@ outLayer: (an existing file name)
 <span class="target" id="nipype-interfaces-mipav-developer-medicalgorithmimagecalculator"></span></div>
 <div class="section" id="medicalgorithmimagecalculator">
 <span id="index-11"></span><h2>MedicAlgorithmImageCalculator<a class="headerlink" href="#medicalgorithmimagecalculator" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L461">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L461">Link to code</a></p>
 <p>Wraps command <a href="#id23"><span class="problematic" id="id24">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.utilities.math.MedicAlgorithmImageCalculator **</p>
 <p>title: Image Calculator</p>
 <p>category: Developer Tools</p>
@@ -1070,10 +1070,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -1089,7 +1089,7 @@ xPrefExt: (&#39;nrrd&#39;)
 <span class="target" id="nipype-interfaces-mipav-developer-medicalgorithmlesiontoads"></span></div>
 <div class="section" id="medicalgorithmlesiontoads">
 <span id="index-12"></span><h2>MedicAlgorithmLesionToads<a class="headerlink" href="#medicalgorithmlesiontoads" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L301">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L301">Link to code</a></p>
 <p>Wraps command <a href="#id25"><span class="problematic" id="id26">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.classification.MedicAlgorithmLesionToads **</p>
 <p>title: Lesion TOADS</p>
 <p>category: Developer Tools</p>
@@ -1141,21 +1141,21 @@ inFLAIR: (an existing file name)
 inInclude: (&#39;true&#39; or &#39;false&#39;)
         Include lesion in WM class in hard classification
         flag: --inInclude %s
-inMaximum: (an integer)
+inMaximum: (an integer (int or long))
         Maximum distance from the interventricular WM boundary to downweight
         the lesion membership to avoid false postives
         flag: --inMaximum %d
-inMaximum2: (an integer)
+inMaximum2: (an integer (int or long))
         Maximum Ventircle Distance
         flag: --inMaximum2 %d
-inMaximum3: (an integer)
+inMaximum3: (an integer (int or long))
         Maximum InterVentricular Distance
         flag: --inMaximum3 %d
 inMaximum4: (a float)
         Maximum amount of relative change in the energy function considered
         as the convergence criteria
         flag: --inMaximum4 %f
-inMaximum5: (an integer)
+inMaximum5: (an integer (int or long))
         Maximum iterations
         flag: --inMaximum5 %d
 inOutput: (&#39;hard segmentation&#39; or &#39;hard segmentation+memberships&#39; or
@@ -1212,10 +1212,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -1247,7 +1247,7 @@ outWM: (an existing file name)
 <span class="target" id="nipype-interfaces-mipav-developer-medicalgorithmmipavreorient"></span></div>
 <div class="section" id="medicalgorithmmipavreorient">
 <span id="index-13"></span><h2>MedicAlgorithmMipavReorient<a class="headerlink" href="#medicalgorithmmipavreorient" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L571">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L571">Link to code</a></p>
 <p>Wraps command <a href="#id27"><span class="problematic" id="id28">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmMipavReorient **</p>
 <p>title: Reorient Volume</p>
 <p>category: Developer Tools</p>
@@ -1317,10 +1317,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -1335,7 +1335,7 @@ xPrefExt: (&#39;nrrd&#39;)
 <span class="target" id="nipype-interfaces-mipav-developer-medicalgorithmn3"></span></div>
 <div class="section" id="medicalgorithmn3">
 <span id="index-14"></span><h2>MedicAlgorithmN3<a class="headerlink" href="#medicalgorithmn3" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L200">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L200">Link to code</a></p>
 <p>Wraps command <a href="#id29"><span class="problematic" id="id30">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.classification.MedicAlgorithmN3 **</p>
 <p>title: N3 Correction</p>
 <p>category: Developer Tools</p>
@@ -1378,7 +1378,7 @@ inKernel: (a float)
         sharpen the histogram. Larger values give faster convergence while
         smaller values give greater accuracy.
         flag: --inKernel %f
-inMaximum: (an integer)
+inMaximum: (an integer (int or long))
         Maximum number of Iterations
         flag: --inMaximum %d
 inSignal: (a float)
@@ -1407,10 +1407,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -1428,7 +1428,7 @@ outInhomogeneity2: (an existing file name)
 <span class="target" id="nipype-interfaces-mipav-developer-medicalgorithmspectre2010"></span></div>
 <div class="section" id="medicalgorithmspectre2010">
 <span id="index-15"></span><h2>MedicAlgorithmSPECTRE2010<a class="headerlink" href="#medicalgorithmspectre2010" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L651">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L651">Link to code</a></p>
 <p>Wraps command <a href="#id31"><span class="problematic" id="id32">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010 **</p>
 <p>title: SPECTRE 2010</p>
 <p>category: Developer Tools</p>
@@ -1490,7 +1490,7 @@ inInhomogeneity: (&#39;true&#39; or &#39;false&#39;)
         Set to false by default, this parameter will make FANTASM try to do
         inhomogeneity correction during it&#39;s iterative cycle.
         flag: --inInhomogeneity %s
-inInitial: (an integer)
+inInitial: (an integer (int or long))
         Erosion of the inital mask, which is based on the probability mask
         and the classification., The initial mask is ouput as the d0 volume
         at the conclusion of SPECTRE.
@@ -1501,11 +1501,11 @@ inInitial2: (a float)
 inInput: (an existing file name)
         Input volume to be skullstripped.
         flag: --inInput %s
-inMMC: (an integer)
+inMMC: (an integer (int or long))
         The size of the dilation step within the Modified Morphological
         Closing.
         flag: --inMMC %d
-inMMC2: (an integer)
+inMMC2: (an integer (int or long))
         The size of the erosion step within the Modified Morphological
         Closing.
         flag: --inMMC2 %d
@@ -1518,17 +1518,17 @@ inMinimum: (a float)
 inMinimum2: (a float)
         Minimum angle
         flag: --inMinimum2 %f
-inMultiple: (an integer)
+inMultiple: (an integer (int or long))
         Multiple of tolerance to bracket the minimum
         flag: --inMultiple %d
 inMultithreading: (&#39;true&#39; or &#39;false&#39;)
         Set to false by default, this parameter controls the multithreaded
         behavior of the linear registration.
         flag: --inMultithreading %s
-inNumber: (an integer)
+inNumber: (an integer (int or long))
         Number of iterations
         flag: --inNumber %d
-inNumber2: (an integer)
+inNumber2: (an integer (int or long))
         Number of minima from Level 8 to test at Level 4
         flag: --inNumber2 %d
 inOutput: (&#39;true&#39; or &#39;false&#39;)
@@ -1608,10 +1608,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -1645,7 +1645,7 @@ outd0: (an existing file name)
 </div>
 <div class="section" id="medicalgorithmthresholdtobinarymask">
 <span id="index-16"></span><h2>MedicAlgorithmThresholdToBinaryMask<a class="headerlink" href="#medicalgorithmthresholdtobinarymask" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L771">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L771">Link to code</a></p>
 <p>Wraps command <a href="#id33"><span class="problematic" id="id34">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmThresholdToBinaryMask **</p>
 <p>title: Threshold to Binary Mask</p>
 <p>category: Developer Tools</p>
@@ -1688,10 +1688,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -1706,7 +1706,7 @@ xPrefExt: (&#39;nrrd&#39;)
 <span class="target" id="nipype-interfaces-mipav-developer-randomvol"></span></div>
 <div class="section" id="randomvol">
 <span id="index-17"></span><h2>RandomVol<a class="headerlink" href="#randomvol" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/mipav/developer.py#L426">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/mipav/developer.py#L426">Link to code</a></p>
 <p>Wraps command <a href="#id35"><span class="problematic" id="id36">**</span></a>java edu.jhu.ece.iacl.jist.cli.run edu.jhu.bme.smile.demo.RandomVol **</p>
 <p>title: Random Volume Generator</p>
 <p>category: Developer Tools</p>
@@ -1733,25 +1733,25 @@ inField: (&#39;Uniform&#39; or &#39;Normal&#39; or &#39;Exponential&#39;)
 inLambda: (a float)
         Lambda Value for Exponential Distribution
         flag: --inLambda %f
-inMaximum: (an integer)
+inMaximum: (an integer (int or long))
         Maximum Value
         flag: --inMaximum %d
-inMinimum: (an integer)
+inMinimum: (an integer (int or long))
         Minimum Value
         flag: --inMinimum %d
-inSize: (an integer)
+inSize: (an integer (int or long))
         Size of Volume in X direction
         flag: --inSize %d
-inSize2: (an integer)
+inSize2: (an integer (int or long))
         Size of Volume in Y direction
         flag: --inSize2 %d
-inSize3: (an integer)
+inSize3: (an integer (int or long))
         Size of Volume in Z direction
         flag: --inSize3 %d
-inSize4: (an integer)
+inSize4: (an integer (int or long))
         Size of Volume in t direction
         flag: --inSize4 %d
-inStandard: (an integer)
+inStandard: (an integer (int or long))
         Standard Deviation for Normal Distribution
         flag: --inStandard %d
 null: (a string)
@@ -1764,10 +1764,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-xDefaultMem: (an integer)
+xDefaultMem: (an integer (int or long))
         Set default maximum heap size
         flag: -xDefaultMem %d
-xMaxProcess: (an integer, nipype default value: 1)
+xMaxProcess: (an integer (int or long), nipype default value: 1)
         Set default maximum number of processes.
         flag: -xMaxProcess %d
 xPrefExt: (&#39;nrrd&#39;)
@@ -1790,9 +1790,9 @@ xPrefExt: (&#39;nrrd&#39;)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

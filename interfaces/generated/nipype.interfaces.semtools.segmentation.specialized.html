@@ -1,0 +1,1047 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.11.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.semtools.segmentation.specialized</a><ul>
+<li><a class="reference internal" href="#brainsabc">BRAINSABC</a></li>
+<li><a class="reference internal" href="#brainsconstellationdetector">BRAINSConstellationDetector</a></li>
+<li><a class="reference internal" href="#brainscreatelabelmapfromprobabilitymaps">BRAINSCreateLabelMapFromProbabilityMaps</a></li>
+<li><a class="reference internal" href="#brainscut">BRAINSCut</a></li>
+<li><a class="reference internal" href="#brainsmultistaple">BRAINSMultiSTAPLE</a></li>
+<li><a class="reference internal" href="#brainsroiauto">BRAINSROIAuto</a></li>
+<li><a class="reference internal" href="#binarymaskeditorbasedonlandmarks">BinaryMaskEditorBasedOnLandmarks</a></li>
+<li><a class="reference internal" href="#eslr">ESLR</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-semtools-segmentation-specialized">
+<h1>interfaces.semtools.segmentation.specialized<a class="headerlink" href="#interfaces-semtools-segmentation-specialized" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-semtools-segmentation-specialized-brainsabc"></span><div class="section" id="brainsabc">
+<span id="index-0"></span><h2>BRAINSABC<a class="headerlink" href="#brainsabc" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/segmentation/specialized.py#L340">Link to code</a></p>
+<p>Wraps command ** BRAINSABC **</p>
+<p>title: Intra-subject registration, bias Correction, and tissue classification (BRAINS)</p>
+<p>category: Segmentation.Specialized</p>
+<p>description: Atlas-based tissue segmentation method.  This is an algorithmic extension of work done by XXXX at UNC and Utah XXXX need more description here.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+atlasDefinition: (an existing file name)
+        Contains all parameters for Atlas
+        flag: --atlasDefinition %s
+atlasToSubjectInitialTransform: (a boolean or a file name)
+        The initial transform from atlas to the subject
+        flag: --atlasToSubjectInitialTransform %s
+atlasToSubjectTransform: (a boolean or a file name)
+        The transform from atlas to the subject
+        flag: --atlasToSubjectTransform %s
+atlasToSubjectTransformType: (&#39;Identity&#39; or &#39;Rigid&#39; or &#39;Affine&#39; or
+         &#39;BSpline&#39; or &#39;SyN&#39;)
+         What type of linear transform type do you want to use to register
+        the atlas to the reference subject image.
+        flag: --atlasToSubjectTransformType %s
+atlasWarpingOff: (a boolean)
+        Deformable registration of atlas to subject
+        flag: --atlasWarpingOff
+debuglevel: (an integer (int or long))
+        Display debug messages, and produce debug intermediate results.
+        0=OFF, 1=Minimal, 10=Maximum debugging.
+        flag: --debuglevel %d
+defaultSuffix: (a string)
+        flag: --defaultSuffix %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+filterIteration: (an integer (int or long))
+        Filter iterations
+        flag: --filterIteration %d
+filterMethod: (&#39;None&#39; or &#39;CurvatureFlow&#39; or
+         &#39;GradientAnisotropicDiffusion&#39; or &#39;Median&#39;)
+        Filter method for preprocessing of registration
+        flag: --filterMethod %s
+filterTimeStep: (a float)
+        Filter time step should be less than (PixelSpacing/(1^(DIM+1)),
+        value is set to negative, then allow automatic setting of this
+        value.
+        flag: --filterTimeStep %f
+gridSize: (a list of items which are an integer (int or long))
+        Grid size for atlas warping with BSplines
+        flag: --gridSize %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+implicitOutputs: (a boolean or a list of items which are a file name)
+        Outputs to be made available to NiPype. Needed because not all
+        BRAINSABC outputs have command line arguments.
+        flag: --implicitOutputs %s...
+inputVolumeTypes: (a list of items which are a string)
+        The list of input image types corresponding to the inputVolumes.
+        flag: --inputVolumeTypes %s
+inputVolumes: (a list of items which are an existing file name)
+        The list of input image files to be segmented.
+        flag: --inputVolumes %s...
+interpolationMode: (&#39;BSpline&#39; or &#39;NearestNeighbor&#39; or &#39;WindowedSinc&#39;
+         or &#39;Linear&#39; or &#39;ResampleInPlace&#39; or &#39;Hamming&#39; or &#39;Cosine&#39; or
+         &#39;Welch&#39; or &#39;Lanczos&#39; or &#39;Blackman&#39;)
+        Type of interpolation to be used when applying transform to moving
+        volume. Options are Linear, NearestNeighbor, BSpline, WindowedSinc,
+        or ResampleInPlace. The ResampleInPlace option will create an image
+        with the same discrete voxel values and will adjust the origin and
+        direction of the physical space interpretation.
+        flag: --interpolationMode %s
+maxBiasDegree: (an integer (int or long))
+        Maximum bias degree
+        flag: --maxBiasDegree %d
+maxIterations: (an integer (int or long))
+        Filter iterations
+        flag: --maxIterations %d
+medianFilterSize: (a list of items which are an integer (int or
+         long))
+        The radius for the optional MedianImageFilter preprocessing in all 3
+        directions.
+        flag: --medianFilterSize %s
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+outputDir: (a boolean or a directory name)
+        Ouput directory
+        flag: --outputDir %s
+outputDirtyLabels: (a boolean or a file name)
+        Output Dirty Label Image
+        flag: --outputDirtyLabels %s
+outputFormat: (&#39;NIFTI&#39; or &#39;Meta&#39; or &#39;Nrrd&#39;)
+        Output format
+        flag: --outputFormat %s
+outputLabels: (a boolean or a file name)
+        Output Label Image
+        flag: --outputLabels %s
+outputVolumes: (a boolean or a list of items which are a file name)
+        Corrected Output Images: should specify the same number of images as
+        inputVolume, if only one element is given, then it is used as a file
+        pattern where %s is replaced by the imageVolumeType, and %d by the
+        index list location.
+        flag: --outputVolumes %s...
+posteriorTemplate: (a string)
+        filename template for Posterior output files
+        flag: --posteriorTemplate %s
+restoreState: (an existing file name)
+        The initial state for the registration process
+        flag: --restoreState %s
+saveState: (a boolean or a file name)
+        (optional) Filename to which save the final state of the
+        registration
+        flag: --saveState %s
+subjectIntermodeTransformType: (&#39;Identity&#39; or &#39;Rigid&#39; or &#39;Affine&#39; or
+         &#39;BSpline&#39;)
+         What type of linear transform type do you want to use to register
+        the atlas to the reference subject image.
+        flag: --subjectIntermodeTransformType %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+useKNN: (a boolean)
+        Use the KNN stage of estimating posteriors.
+        flag: --useKNN
+writeLess: (a boolean)
+        Does not write posteriors and filtered, bias corrected images
+        flag: --writeLess
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>atlasToSubjectInitialTransform: (an existing file name)
+        The initial transform from atlas to the subject
+atlasToSubjectTransform: (an existing file name)
+        The transform from atlas to the subject
+implicitOutputs: (a list of items which are an existing file name)
+        Outputs to be made available to NiPype. Needed because not all
+        BRAINSABC outputs have command line arguments.
+outputDir: (an existing directory name)
+        Ouput directory
+outputDirtyLabels: (an existing file name)
+        Output Dirty Label Image
+outputLabels: (an existing file name)
+        Output Label Image
+outputVolumes: (a list of items which are an existing file name)
+        Corrected Output Images: should specify the same number of images as
+        inputVolume, if only one element is given, then it is used as a file
+        pattern where %s is replaced by the imageVolumeType, and %d by the
+        index list location.
+saveState: (an existing file name)
+        (optional) Filename to which save the final state of the
+        registration
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-segmentation-specialized-brainsconstellationdetector"></span></div>
+<div class="section" id="brainsconstellationdetector">
+<span id="index-1"></span><h2>BRAINSConstellationDetector<a class="headerlink" href="#brainsconstellationdetector" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/segmentation/specialized.py#L171">Link to code</a></p>
+<p>Wraps command ** BRAINSConstellationDetector **</p>
+<p>title: Brain Landmark Constellation Detector (BRAINS)</p>
+<p>category: Segmentation.Specialized</p>
+<p>description: This program will find the mid-sagittal plane, a constellation of landmarks in a volume, and create an AC/PC aligned data set with the AC point at the center of the voxel lattice (labeled at the origin of the image physical space.)  Part of this work is an extention of the algorithms originally described by Dr. Babak A. Ardekani, Alvin H. Bachman, Model-based automatic detection of the anterior and posterior commissures on MRI scans, NeuroImage, Volume 46, Issue 3, 1 July 2009, Pages 677-682, ISSN 1053-8119, DOI: 10.1016/j.neuroimage.2009.02.030.  (<a class="reference external" href="http://www.sciencedirect.com/science/article/B6WNP-4VRP25C-4/2/8207b962a38aa83c822c6379bc43fe4c">http://www.sciencedirect.com/science/article/B6WNP-4VRP25C-4/2/8207b962a38aa83c822c6379bc43fe4c</a>)</p>
+<p>version: 1.0</p>
+<p>documentation-url: <a class="reference external" href="http://www.nitrc.org/projects/brainscdetector/">http://www.nitrc.org/projects/brainscdetector/</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+BackgroundFillValue: (a string)
+        Fill the background of image with specified short int value. Enter
+        number or use BIGNEG for a large negative number.
+        flag: --BackgroundFillValue %s
+LLSModel: (an existing file name)
+        Linear least squares model filename in HD5 format
+        flag: --LLSModel %s
+acLowerBound: (a float)
+        , When generating a resampled output image, replace the image with
+        the BackgroundFillValue everywhere below the plane This Far in
+        physical units (millimeters) below (inferior to) the AC point (as
+        found by the model.) The oversize default was chosen to have no
+        effect. Based on visualizing a thousand masks in the IPIG study, we
+        recommend a limit no smaller than 80.0 mm.,
+        flag: --acLowerBound %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+atlasLandmarkWeights: (an existing file name)
+        Weights associated with atlas landmarks to be used for BRAINSFit
+        registration initialization,
+        flag: --atlasLandmarkWeights %s
+atlasLandmarks: (an existing file name)
+        Atlas landmarks to be used for BRAINSFit registration
+        initialization,
+        flag: --atlasLandmarks %s
+atlasVolume: (an existing file name)
+        Atlas volume image to be used for BRAINSFit registration
+        flag: --atlasVolume %s
+cutOutHeadInOutputVolume: (a boolean)
+        , Flag to cut out just the head tissue when producing an
+        (un)transformed clipped volume.,
+        flag: --cutOutHeadInOutputVolume
+debug: (a boolean)
+        , Show internal debugging information.,
+        flag: --debug
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+forceACPoint: (a list of items which are a float)
+        , Use this flag to manually specify the AC point from the original
+        image on the command line.,
+        flag: --forceACPoint %s
+forceHoughEyeDetectorReportFailure: (a boolean)
+        , Flag indicates whether the Hough eye detector should report
+        failure,
+        flag: --forceHoughEyeDetectorReportFailure
+forcePCPoint: (a list of items which are a float)
+        , Use this flag to manually specify the PC point from the original
+        image on the command line.,
+        flag: --forcePCPoint %s
+forceRPPoint: (a list of items which are a float)
+        , Use this flag to manually specify the RP point from the original
+        image on the command line.,
+        flag: --forceRPPoint %s
+forceVN4Point: (a list of items which are a float)
+        , Use this flag to manually specify the VN4 point from the original
+        image on the command line.,
+        flag: --forceVN4Point %s
+houghEyeDetectorMode: (an integer (int or long))
+        , This flag controls the mode of Hough eye detector. By default,
+        value of 1 is for T1W images, while the value of 0 is for T2W and PD
+        images.,
+        flag: --houghEyeDetectorMode %d
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputLandmarksEMSP: (an existing file name)
+        , The filename for the new subject-specific landmark definition file
+        in the same format produced by Slicer3 (in .fcsv) with the landmarks
+        in the estimated MSP aligned space to be loaded. The detector will
+        only process landmarks not enlisted on the file.,
+        flag: --inputLandmarksEMSP %s
+inputTemplateModel: (an existing file name)
+        User-specified template model.,
+        flag: --inputTemplateModel %s
+inputVolume: (an existing file name)
+        Input image in which to find ACPC points
+        flag: --inputVolume %s
+interpolationMode: (&#39;NearestNeighbor&#39; or &#39;Linear&#39; or
+         &#39;ResampleInPlace&#39; or &#39;BSpline&#39; or &#39;WindowedSinc&#39; or &#39;Hamming&#39; or
+         &#39;Cosine&#39; or &#39;Welch&#39; or &#39;Lanczos&#39; or &#39;Blackman&#39;)
+        Type of interpolation to be used when applying transform to moving
+        volume. Options are Linear, ResampleInPlace, NearestNeighbor,
+        BSpline, or WindowedSinc
+        flag: --interpolationMode %s
+mspQualityLevel: (an integer (int or long))
+        , Flag cotrols how agressive the MSP is estimated. 0=quick estimate
+        (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22
+        seconds), 3=best estimate (58 seconds), NOTE: -1= Prealigned so no
+        estimate!.,
+        flag: --mspQualityLevel %d
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+otsuPercentileThreshold: (a float)
+        , This is a parameter to FindLargestForegroundFilledMask, which is
+        employed when acLowerBound is set and an
+        outputUntransformedClippedVolume is requested.,
+        flag: --otsuPercentileThreshold %f
+outputLandmarksInACPCAlignedSpace: (a boolean or a file name)
+        , The filename for the new subject-specific landmark definition file
+        in the same format produced by Slicer3 (.fcsv) with the landmarks in
+        the output image space (the detected RP, AC, PC, and VN4) in it to
+        be written.,
+        flag: --outputLandmarksInACPCAlignedSpace %s
+outputLandmarksInInputSpace: (a boolean or a file name)
+        , The filename for the new subject-specific landmark definition file
+        in the same format produced by Slicer3 (.fcsv) with the landmarks in
+        the original image space (the detected RP, AC, PC, and VN4) in it to
+        be written.,
+        flag: --outputLandmarksInInputSpace %s
+outputMRML: (a boolean or a file name)
+        , The filename for the new subject-specific scene definition file in
+        the same format produced by Slicer3 (in .mrml format). Only the
+        components that were specified by the user on command line would be
+        generated. Compatible components include inputVolume, outputVolume,
+        outputLandmarksInInputSpace, outputLandmarksInACPCAlignedSpace, and
+        outputTransform.,
+        flag: --outputMRML %s
+outputResampledVolume: (a boolean or a file name)
+        ACPC-aligned output image in a resampled unifor space. Currently
+        this is a 1mm, 256^3, Identity direction image.
+        flag: --outputResampledVolume %s
+outputTransform: (a boolean or a file name)
+        The filename for the original space to ACPC alignment to be written
+        (in .h5 format).,
+        flag: --outputTransform %s
+outputUntransformedClippedVolume: (a boolean or a file name)
+        Output image in which to store neck-clipped input image, with the
+        use of --acLowerBound and maybe --cutOutHeadInUntransformedVolume.
+        flag: --outputUntransformedClippedVolume %s
+outputVerificationScript: (a boolean or a file name)
+        , The filename for the Slicer3 script that verifies the aligned
+        landmarks against the aligned image file. This will happen only in
+        conjunction with saveOutputLandmarks and an outputVolume.,
+        flag: --outputVerificationScript %s
+outputVolume: (a boolean or a file name)
+        ACPC-aligned output image with the same voxels, but updated origin,
+        and direction cosign so that the AC point would fall at the physical
+        location (0.0,0.0,0.0), and the mid-sagital plane is the plane where
+        physical L/R coordinate is 0.0.
+        flag: --outputVolume %s
+rVN4: (a float)
+        , Search radius for VN4 in unit of mm,
+        flag: --rVN4 %f
+rac: (a float)
+        , Search radius for AC in unit of mm,
+        flag: --rac %f
+rescaleIntensities: (a boolean)
+        , Flag to turn on rescaling image intensities on input.,
+        flag: --rescaleIntensities
+rescaleIntensitiesOutputRange: (a list of items which are an integer
+         (int or long))
+        , This pair of integers gives the lower and upper bounds on the
+        signal portion of the output image. Out-of-field voxels are taken
+        from BackgroundFillValue.,
+        flag: --rescaleIntensitiesOutputRange %s
+resultsDir: (a boolean or a directory name)
+        , The directory for the debuging images to be written.,
+        flag: --resultsDir %s
+rmpj: (a float)
+        , Search radius for MPJ in unit of mm,
+        flag: --rmpj %f
+rpc: (a float)
+        , Search radius for PC in unit of mm,
+        flag: --rpc %f
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+trimRescaledIntensities: (a float)
+        , Turn on clipping the rescaled image one-tailed on input. Units of
+        standard deviations above the mean. Very large values are very
+        permissive. Non-positive value turns clipping off. Defaults to
+        removing 0.00001 of a normal tail above the mean.,
+        flag: --trimRescaledIntensities %f
+verbose: (a boolean)
+        , Show more verbose output,
+        flag: --verbose
+writeBranded2DImage: (a boolean or a file name)
+        , The filename for the 2D .png branded midline debugging image. This
+        will happen only in conjunction with requesting an outputVolume.,
+        flag: --writeBranded2DImage %s
+writedebuggingImagesLevel: (an integer (int or long))
+        , This flag controls if debugging images are produced. By default
+        value of 0 is no images. Anything greater than zero will be
+        increasing level of debugging images.,
+        flag: --writedebuggingImagesLevel %d
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputLandmarksInACPCAlignedSpace: (an existing file name)
+        , The filename for the new subject-specific landmark definition file
+        in the same format produced by Slicer3 (.fcsv) with the landmarks in
+        the output image space (the detected RP, AC, PC, and VN4) in it to
+        be written.,
+outputLandmarksInInputSpace: (an existing file name)
+        , The filename for the new subject-specific landmark definition file
+        in the same format produced by Slicer3 (.fcsv) with the landmarks in
+        the original image space (the detected RP, AC, PC, and VN4) in it to
+        be written.,
+outputMRML: (an existing file name)
+        , The filename for the new subject-specific scene definition file in
+        the same format produced by Slicer3 (in .mrml format). Only the
+        components that were specified by the user on command line would be
+        generated. Compatible components include inputVolume, outputVolume,
+        outputLandmarksInInputSpace, outputLandmarksInACPCAlignedSpace, and
+        outputTransform.,
+outputResampledVolume: (an existing file name)
+        ACPC-aligned output image in a resampled unifor space. Currently
+        this is a 1mm, 256^3, Identity direction image.
+outputTransform: (an existing file name)
+        The filename for the original space to ACPC alignment to be written
+        (in .h5 format).,
+outputUntransformedClippedVolume: (an existing file name)
+        Output image in which to store neck-clipped input image, with the
+        use of --acLowerBound and maybe --cutOutHeadInUntransformedVolume.
+outputVerificationScript: (an existing file name)
+        , The filename for the Slicer3 script that verifies the aligned
+        landmarks against the aligned image file. This will happen only in
+        conjunction with saveOutputLandmarks and an outputVolume.,
+outputVolume: (an existing file name)
+        ACPC-aligned output image with the same voxels, but updated origin,
+        and direction cosign so that the AC point would fall at the physical
+        location (0.0,0.0,0.0), and the mid-sagital plane is the plane where
+        physical L/R coordinate is 0.0.
+resultsDir: (an existing directory name)
+        , The directory for the debuging images to be written.,
+writeBranded2DImage: (an existing file name)
+        , The filename for the 2D .png branded midline debugging image. This
+        will happen only in conjunction with requesting an outputVolume.,
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-segmentation-specialized-brainscreatelabelmapfromprobabilitymaps"></span></div>
+<div class="section" id="brainscreatelabelmapfromprobabilitymaps">
+<span id="index-2"></span><h2>BRAINSCreateLabelMapFromProbabilityMaps<a class="headerlink" href="#brainscreatelabelmapfromprobabilitymaps" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/segmentation/specialized.py#L208">Link to code</a></p>
+<p>Wraps command ** BRAINSCreateLabelMapFromProbabilityMaps **</p>
+<p>title: Create Label Map From Probability Maps (BRAINS)</p>
+<p>category: Segmentation.Specialized</p>
+<p>description: Given A list of Probability Maps, generate a LabelMap.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+cleanLabelVolume: (a boolean or a file name)
+        the foreground labels volume
+        flag: --cleanLabelVolume %s
+dirtyLabelVolume: (a boolean or a file name)
+        the labels prior to cleaning
+        flag: --dirtyLabelVolume %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+foregroundPriors: (a list of items which are an integer (int or
+         long))
+        A list: For each Prior Label, 1 if foreground, 0 if background
+        flag: --foregroundPriors %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inclusionThreshold: (a float)
+        tolerance for inclusion
+        flag: --inclusionThreshold %f
+inputProbabilityVolume: (a list of items which are an existing file
+         name)
+        The list of proobabilityimages.
+        flag: --inputProbabilityVolume %s...
+nonAirRegionMask: (an existing file name)
+        a mask representing the &#39;NonAirRegion&#39; -- Just force pixels in this
+        region to zero
+        flag: --nonAirRegionMask %s
+priorLabelCodes: (a list of items which are an integer (int or long))
+        A list of PriorLabelCode values used for coding the output label
+        images
+        flag: --priorLabelCodes %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>cleanLabelVolume: (an existing file name)
+        the foreground labels volume
+dirtyLabelVolume: (an existing file name)
+        the labels prior to cleaning
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-segmentation-specialized-brainscut"></span></div>
+<div class="section" id="brainscut">
+<span id="index-3"></span><h2>BRAINSCut<a class="headerlink" href="#brainscut" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/segmentation/specialized.py#L33">Link to code</a></p>
+<p>Wraps command ** BRAINSCut **</p>
+<p>title: BRAINSCut (BRAINS)</p>
+<p>category: Segmentation.Specialized</p>
+<p>description: Automatic Segmentation using neural networks</p>
+<p>version: 1.0</p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Vince Magnotta, Hans Johnson, Greg Harris, Kent Williams, Eunyoung Regina Kim</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+NoTrainingVectorShuffling: (a boolean)
+        If this flag is on, there will be no shuffling.
+        flag: --NoTrainingVectorShuffling
+applyModel: (a boolean)
+        apply the neural net
+        flag: --applyModel
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+computeSSEOn: (a boolean)
+        compute Sum of Square Error (SSE) along the trained model until the
+        number of iteration given in the modelConfigurationFilename file
+        flag: --computeSSEOn
+createVectors: (a boolean)
+        create vectors for training neural net
+        flag: --createVectors
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+generateProbability: (a boolean)
+        Generate probability map
+        flag: --generateProbability
+histogramEqualization: (a boolean)
+        A Histogram Equalization process could be added to the
+        creating/applying process from Subject To Atlas. Default is false,
+        which genreate input vectors without Histogram Equalization.
+        flag: --histogramEqualization
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+method: (&#39;RandomForest&#39; or &#39;ANN&#39;)
+        flag: --method %s
+modelConfigurationFilename: (an existing file name)
+        XML File defining BRAINSCut parameters
+        flag: --modelConfigurationFilename %s
+modelFilename: (a string)
+         model file name given from user (not by xml configuration file)
+        flag: --modelFilename %s
+multiStructureThreshold: (a boolean)
+        multiStructureThreshold module to deal with overlaping area
+        flag: --multiStructureThreshold
+netConfiguration: (an existing file name)
+        XML File defining BRAINSCut parameters. OLD NAME. PLEASE USE
+        modelConfigurationFilename instead.
+        flag: --netConfiguration %s
+numberOfTrees: (an integer (int or long))
+         Random tree: number of trees. This is to be used when only one
+        model with specified depth wish to be created.
+        flag: --numberOfTrees %d
+randomTreeDepth: (an integer (int or long))
+         Random tree depth. This is to be used when only one model with
+        specified depth wish to be created.
+        flag: --randomTreeDepth %d
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+trainModel: (a boolean)
+        train the neural net
+        flag: --trainModel
+trainModelStartIndex: (an integer (int or long))
+        Starting iteration for training
+        flag: --trainModelStartIndex %d
+validate: (a boolean)
+        validate data set.Just need for the first time run ( This is for
+        validation of xml file and not working yet )
+        flag: --validate
+verbose: (an integer (int or long))
+        print out some debugging information
+        flag: --verbose %d
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-segmentation-specialized-brainsmultistaple"></span></div>
+<div class="section" id="brainsmultistaple">
+<span id="index-4"></span><h2>BRAINSMultiSTAPLE<a class="headerlink" href="#brainsmultistaple" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/segmentation/specialized.py#L276">Link to code</a></p>
+<p>Wraps command ** BRAINSMultiSTAPLE **</p>
+<p>title: Create best representative label map)</p>
+<p>category: Segmentation.Specialized</p>
+<p>description: given a list of label map images, create a representative/average label map.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputCompositeT1Volume: (an existing file name)
+        Composite T1, all label maps transofrmed into the space for this
+        image.
+        flag: --inputCompositeT1Volume %s
+inputLabelVolume: (a list of items which are an existing file name)
+        The list of proobabilityimages.
+        flag: --inputLabelVolume %s...
+inputTransform: (a list of items which are an existing file name)
+        transforms to apply to label volumes
+        flag: --inputTransform %s...
+labelForUndecidedPixels: (an integer (int or long))
+        Label for undecided pixels
+        flag: --labelForUndecidedPixels %d
+outputConfusionMatrix: (a boolean or a file name)
+        Confusion Matrix
+        flag: --outputConfusionMatrix %s
+outputMultiSTAPLE: (a boolean or a file name)
+        the MultiSTAPLE average of input label volumes
+        flag: --outputMultiSTAPLE %s
+resampledVolumePrefix: (a string)
+        if given, write out resampled volumes with this prefix
+        flag: --resampledVolumePrefix %s
+skipResampling: (a boolean)
+        Omit resampling images into reference space
+        flag: --skipResampling
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputConfusionMatrix: (an existing file name)
+        Confusion Matrix
+outputMultiSTAPLE: (an existing file name)
+        the MultiSTAPLE average of input label volumes
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-segmentation-specialized-brainsroiauto"></span></div>
+<div class="section" id="brainsroiauto">
+<span id="index-5"></span><h2>BRAINSROIAuto<a class="headerlink" href="#brainsroiauto" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/segmentation/specialized.py#L76">Link to code</a></p>
+<p>Wraps command ** BRAINSROIAuto **</p>
+<p>title: Foreground masking (BRAINS)</p>
+<p>category: Segmentation.Specialized</p>
+<p>description: This program is used to create a mask over the most prominant forground region in an image.  This is accomplished via a combination of otsu thresholding and a closing operation.  More documentation is available here: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ForegroundMasking">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ForegroundMasking</a>.</p>
+<p>version: 2.4.1</p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Hans J. Johnson, hans-johnson -at- uiowa.edu, <a class="reference external" href="http://www.psychiatry.uiowa.edu">http://www.psychiatry.uiowa.edu</a></p>
+<p>acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); Gregory Harris(1), Vincent Magnotta(1,2,3);  Andriy Fedorov(5), fedorov -at- bwh.harvard.edu (Slicer integration); (1=University of Iowa Department of Psychiatry, 2=University of Iowa Department of Radiology, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering, 5=Surgical Planning Lab, Harvard)</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+ROIAutoDilateSize: (a float)
+        This flag is only relavent when using ROIAUTO mode for initializing
+        masks. It defines the final dilation size to capture a bit of
+        background outside the tissue region. At setting of 10mm has been
+        shown to help regularize a BSpline registration type so that there
+        is some background constraints to match the edges of the head
+        better.
+        flag: --ROIAutoDilateSize %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+closingSize: (a float)
+        The Closing Size (in millimeters) for largest connected filled mask.
+        This value is divided by image spacing and rounded to the next
+        largest voxel number.
+        flag: --closingSize %f
+cropOutput: (a boolean)
+        The inputVolume cropped to the region of the ROI mask.
+        flag: --cropOutput
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        The input image for finding the largest region filled mask.
+        flag: --inputVolume %s
+maskOutput: (a boolean)
+        The inputVolume multiplied by the ROI mask.
+        flag: --maskOutput
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+otsuPercentileThreshold: (a float)
+        Parameter to the Otsu threshold algorithm.
+        flag: --otsuPercentileThreshold %f
+outputROIMaskVolume: (a boolean or a file name)
+        The ROI automatically found from the input image.
+        flag: --outputROIMaskVolume %s
+outputVolume: (a boolean or a file name)
+        The inputVolume with optional [maskOutput|cropOutput] to the region
+        of the brain mask.
+        flag: --outputVolume %s
+outputVolumePixelType: (&#39;float&#39; or &#39;short&#39; or &#39;ushort&#39; or &#39;int&#39; or
+         &#39;uint&#39; or &#39;uchar&#39;)
+        The output image Pixel Type is the scalar datatype for
+        representation of the Output Volume.
+        flag: --outputVolumePixelType %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+thresholdCorrectionFactor: (a float)
+        A factor to scale the Otsu algorithm&#39;s result threshold, in case
+        clipping mangles the image.
+        flag: --thresholdCorrectionFactor %f
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputROIMaskVolume: (an existing file name)
+        The ROI automatically found from the input image.
+outputVolume: (an existing file name)
+        The inputVolume with optional [maskOutput|cropOutput] to the region
+        of the brain mask.
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-segmentation-specialized-binarymaskeditorbasedonlandmarks"></span></div>
+<div class="section" id="binarymaskeditorbasedonlandmarks">
+<span id="index-6"></span><h2>BinaryMaskEditorBasedOnLandmarks<a class="headerlink" href="#binarymaskeditorbasedonlandmarks" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/segmentation/specialized.py#L241">Link to code</a></p>
+<p>Wraps command ** BinaryMaskEditorBasedOnLandmarks **</p>
+<p>title: BRAINS Binary Mask Editor Based On Landmarks(BRAINS)</p>
+<p>category: Segmentation.Specialized</p>
+<p>version: 1.0</p>
+<p>documentation-url: <a class="reference external" href="http://www.nitrc.org/projects/brainscdetector/">http://www.nitrc.org/projects/brainscdetector/</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputBinaryVolume: (an existing file name)
+        Input binary image in which to be edited
+        flag: --inputBinaryVolume %s
+inputLandmarkNames: (a list of items which are a string)
+         A target input landmark name to be edited. This should be listed in
+        the inputLandmakrFilename Given.
+        flag: --inputLandmarkNames %s
+inputLandmarkNamesForObliquePlane: (a list of items which are a
+         string)
+         Three subset landmark names of inputLandmarksFilename for a oblique
+        plane computation. The plane computed for binary volume editing.
+        flag: --inputLandmarkNamesForObliquePlane %s
+inputLandmarksFilename: (an existing file name)
+         The filename for the landmark definition file in the same format
+        produced by Slicer3 (.fcsv).
+        flag: --inputLandmarksFilename %s
+outputBinaryVolume: (a boolean or a file name)
+        Output binary image in which to be edited
+        flag: --outputBinaryVolume %s
+setCutDirectionForLandmark: (a list of items which are a string)
+        Setting the cutting out direction of the input binary image to the
+        one of anterior, posterior, left, right, superior or posterior.
+        (ENUMERATION: ANTERIOR, POSTERIOR, LEFT, RIGHT, SUPERIOR, POSTERIOR)
+        flag: --setCutDirectionForLandmark %s
+setCutDirectionForObliquePlane: (a list of items which are a string)
+        If this is true, the mask will be thresholded out to the direction
+        of inferior, posterior, and/or left. Default behavrior is that
+        cutting out to the direction of superior, anterior and/or right.
+        flag: --setCutDirectionForObliquePlane %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputBinaryVolume: (an existing file name)
+        Output binary image in which to be edited
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-segmentation-specialized-eslr"></span></div>
+<div class="section" id="eslr">
+<span id="index-7"></span><h2>ESLR<a class="headerlink" href="#eslr" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/segmentation/specialized.py#L374">Link to code</a></p>
+<p>Wraps command ** ESLR **</p>
+<p>title: Clean Contiguous Label Map (BRAINS)</p>
+<p>category: Segmentation.Specialized</p>
+<p>description: From a range of label map values, extract the largest contiguous region of those labels</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+closingSize: (an integer (int or long))
+        The closing size for hole filling.
+        flag: --closingSize %d
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+high: (an integer (int or long))
+        The higher bound of the labels to be used.
+        flag: --high %d
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        Input Label Volume
+        flag: --inputVolume %s
+low: (an integer (int or long))
+        The lower bound of the labels to be used.
+        flag: --low %d
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+openingSize: (an integer (int or long))
+        The opening size for hole filling.
+        flag: --openingSize %d
+outputVolume: (a boolean or a file name)
+        Output Label Volume
+        flag: --outputVolume %s
+preserveOutside: (a boolean)
+        For values outside the specified range, preserve those values.
+        flag: --preserveOutside
+safetySize: (an integer (int or long))
+        The safetySize size for the clipping region.
+        flag: --safetySize %d
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Output Label Volume
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

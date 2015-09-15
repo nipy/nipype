@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -261,7 +261,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -273,7 +273,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -296,9 +296,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -308,13 +308,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-afni-preprocess">
 <h1>interfaces.afni.preprocess<a class="headerlink" href="#interfaces-afni-preprocess" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-afni-preprocess-allineate"></span><div class="section" id="allineate">
 <span id="index-0"></span><h2>Allineate<a class="headerlink" href="#allineate" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1083">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1121">Link to code</a></p>
 <p>Wraps command <strong>3dAllineate</strong></p>
 <p>Program to align one dataset (the &#8216;source&#8217;) to a base dataset</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAllineate.html">3dAllineate Documentation.</a></p>
@@ -342,7 +342,7 @@ autobox: (a boolean)
         Expand the -automask function to enclose a rectangular
          box that holds the irregular mask.
         flag: -autobox
-automask: (an integer)
+automask: (an integer (int or long))
         Compute a mask function, set a value for dilation or 0.
         flag: -automask+%d
 autoweight: (a string)
@@ -412,7 +412,7 @@ master: (an existing file name)
 newgrid: (a float)
         Write the output dataset using isotropic grid spacing in mm
         flag: -newgrid %f
-nmatch: (an integer)
+nmatch: (an integer (int or long))
         Use at most n scattered points to match the datasets.
         flag: -nmatch %d
 no_pad: (a boolean)
@@ -468,7 +468,7 @@ replacemeth: (&#39;leastsq&#39; or &#39;ls&#39; or &#39;mutualinfo&#39; or &#39;
         After first volume is aligned, switch method for later volumes.
          For use with &#39;-replacebase&#39;.
         flag: -replacemeth %s
-source_automask: (an integer)
+source_automask: (an integer (int or long))
         Automatically mask the source dataset with dilation or 0.
         flag: -source_automask+%d
 source_mask: (an existing file name)
@@ -478,7 +478,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-two_best: (an integer)
+two_best: (an integer (int or long))
         In the coarse pass, use the best &#39;bb&#39; set of initial
          points to search for the starting point for the fine
          pass. If bb==0, then no search is made for the best
@@ -530,7 +530,7 @@ out_file: (a file name)
 </div>
 <div class="section" id="autotcorrelate">
 <span id="index-1"></span><h2>AutoTcorrelate<a class="headerlink" href="#autotcorrelate" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L345">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L368">Link to code</a></p>
 <p>Wraps command <strong>3dAutoTcorrelate</strong></p>
 <p>Computes the correlation coefficient between the time series of each
 pair of voxels in the input dataset, and stores the output into a
@@ -585,7 +585,7 @@ out_file: (a file name)
         flag: -prefix %s
 outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
         AFNI output filetype
-polort: (an integer)
+polort: (an integer (int or long))
         Remove polynomical trend of order m or -1 for no detrending
         flag: -polort %d
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -603,7 +603,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="autobox">
 <span id="index-2"></span><h2>Autobox<a class="headerlink" href="#autobox" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1788">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1826">Link to code</a></p>
 <p>Wraps command <strong>3dAutobox</strong></p>
 <p>Computes size of a box that fits around the volume.
 Also can be used to crop the volume to that box.</p>
@@ -645,7 +645,7 @@ out_file: (a file name)
         flag: -prefix %s
 outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
         AFNI output filetype
-padding: (an integer)
+padding: (an integer (int or long))
         Number of extra voxels to pad on each side of box
         flag: -npad %d
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -657,19 +657,19 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <p>Outputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>out_file: (a file name)
         output file
-x_max: (an integer)
-x_min: (an integer)
-y_max: (an integer)
-y_min: (an integer)
-z_max: (an integer)
-z_min: (an integer)
+x_max: (an integer (int or long))
+x_min: (an integer (int or long))
+y_max: (an integer (int or long))
+y_min: (an integer (int or long))
+z_max: (an integer (int or long))
+z_min: (an integer (int or long))
 </pre></div>
 </div>
 <span class="target" id="nipype-interfaces-afni-preprocess-automask"></span></div>
 </div>
 <div class="section" id="automask">
 <span id="index-3"></span><h2>Automask<a class="headerlink" href="#automask" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L526">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L549">Link to code</a></p>
 <p>Wraps command <strong>3dAutomask</strong></p>
 <p>Create a brain-only mask of the image using AFNI 3dAutomask command</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dAutomask.html">3dAutomask Documentation.</a></p>
@@ -702,14 +702,14 @@ clfrac: (a float)
         sets the clip level fraction (must be 0.1-0.9). A small value will
         tend to make the mask larger [default = 0.5].
         flag: -clfrac %s
-dilate: (an integer)
+dilate: (an integer (int or long))
         dilate the mask outwards
         flag: -dilate %s
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-erode: (an integer)
+erode: (an integer (int or long))
         erode the mask inwards
         flag: -erode %s
 ignore_exception: (a boolean, nipype default value: False)
@@ -737,7 +737,7 @@ out_file: (an existing file name)
 </div>
 <div class="section" id="bandpass">
 <span id="index-4"></span><h2>Bandpass<a class="headerlink" href="#bandpass" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L825">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L863">Link to code</a></p>
 <p>Wraps command <strong>3dBandpass</strong></p>
 <p>Program to lowpass and/or highpass each voxel time series in a
 dataset, offering more/different options than Fourier</p>
@@ -798,7 +798,7 @@ localPV: (a float)
 mask: (an existing file name)
         mask file
         flag: -mask %s, position: 2
-nfft: (an integer)
+nfft: (an integer (int or long))
         set the FFT length [must be a legal value]
         flag: -nfft %d
 no_detrend: (a boolean)
@@ -850,7 +850,7 @@ tr: (a float)
 </div>
 <div class="section" id="blurinmask">
 <span id="index-5"></span><h2>BlurInMask<a class="headerlink" href="#blurinmask" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1631">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1669">Link to code</a></p>
 <p>Wraps command <strong>3dBlurInMask</strong></p>
 <p>Blurs a dataset spatially inside a mask.  That&#8217;s all.  Experimental.</p>
 <p>For complete details, see the <a href="#id7"><span class="problematic" id="id8">`</span></a>3dBlurInMask Documentation.
@@ -929,7 +929,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="brickstat">
 <span id="index-6"></span><h2>BrickStat<a class="headerlink" href="#brickstat" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1422">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1460">Link to code</a></p>
 <p>Wraps command <strong>3dBrickStat</strong></p>
 <p>Compute maximum and/or minimum voxel values of an input dataset</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dBrickStat.html">3dBrickStat Documentation.</a></p>
@@ -986,7 +986,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="calc">
 <span id="index-7"></span><h2>Calc<a class="headerlink" href="#calc" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1556">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1594">Link to code</a></p>
 <p>Wraps command <strong>3dcalc</strong></p>
 <p>This program does voxel-by-voxel arithmetic on 3D datasets</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dcalc.html">3dcalc Documentation.</a></p>
@@ -1036,12 +1036,12 @@ out_file: (a file name)
         flag: -prefix %s
 outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
         AFNI output filetype
-single_idx: (an integer)
+single_idx: (an integer (int or long))
         volume index for in_file_a
-start_idx: (an integer)
+start_idx: (an integer (int or long))
         start index for in_file_a
         requires: stop_idx
-stop_idx: (an integer)
+stop_idx: (an integer (int or long))
         stop index for in_file_a
         requires: start_idx
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -1059,7 +1059,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="copy">
 <span id="index-8"></span><h2>Copy<a class="headerlink" href="#copy" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L673">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L696">Link to code</a></p>
 <p>Wraps command <strong>3dcopy</strong></p>
 <p>Copies an image of one type to an image of the same
 or different type using 3dcopy command</p>
@@ -1067,10 +1067,29 @@ or different type using 3dcopy command</p>
 <div class="section" id="id12">
 <h3>Examples<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">afni</span> <span class="k">as</span> <span class="n">afni</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">copy</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Copy</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">copy</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">copy</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;new_func.nii&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy3d</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Copy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy3d</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy3d</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3dcopy functional.nii functional_copy&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy3d_2</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">copy3d</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy3d_2</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">outputtype</span> <span class="o">=</span> <span class="s">&#39;NIFTI&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy3d_2</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3dcopy functional.nii functional_copy.nii&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">copy3d_3</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">copy3d</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy3d_3</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">outputtype</span> <span class="o">=</span> <span class="s">&#39;NIFTI_GZ&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy3d_3</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3dcopy functional.nii functional_copy.nii.gz&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">copy3d_4</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">copy3d</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy3d_4</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;new_func.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">copy3d_4</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3dcopy functional.nii new_func.nii&#39;</span>
 </pre></div>
 </div>
 <p>Inputs:</p>
@@ -1092,7 +1111,7 @@ ignore_exception: (a boolean, nipype default value: False)
         interface fails to run
 out_file: (a file name)
         output image file name
-        flag: -prefix %s
+        flag: %s, position: -1
 outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
         AFNI output filetype
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -1110,7 +1129,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="despike">
 <span id="index-9"></span><h2>Despike<a class="headerlink" href="#despike" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L468">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L491">Link to code</a></p>
 <p>Wraps command <strong>3dDespike</strong></p>
 <p>Removes &#8216;spikes&#8217; from the 3D+time input dataset</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDespike.html">3dDespike Documentation.</a></p>
@@ -1161,7 +1180,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="detrend">
 <span id="index-10"></span><h2>Detrend<a class="headerlink" href="#detrend" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L430">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L453">Link to code</a></p>
 <p>Wraps command <strong>3dDetrend</strong></p>
 <p>This program removes components from voxel time series using
 linear least squares</p>
@@ -1215,7 +1234,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="eval">
 <span id="index-11"></span><h2>Eval<a class="headerlink" href="#eval" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1959">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1997">Link to code</a></p>
 <p>Wraps command <strong>1deval</strong></p>
 <p>Evaluates an expression that may include columns of data from one or more text files</p>
 <p>see AFNI Documentation: &lt;<a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/1deval.html">http://afni.nimh.nih.gov/pub/dist/doc/program_help/1deval.html</a>&gt;</p>
@@ -1268,12 +1287,12 @@ out_file: (a file name)
         flag: -prefix %s
 outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
         AFNI output filetype
-single_idx: (an integer)
+single_idx: (an integer (int or long))
         volume index for in_file_a
-start_idx: (an integer)
+start_idx: (an integer (int or long))
         start index for in_file_a
         requires: stop_idx
-stop_idx: (an integer)
+stop_idx: (an integer (int or long))
         stop index for in_file_a
         requires: start_idx
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -1291,7 +1310,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="fim">
 <span id="index-12"></span><h2>Fim<a class="headerlink" href="#fim" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1260">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1298">Link to code</a></p>
 <p>Wraps command <strong>3dfim+</strong></p>
 <p>Program to calculate the cross-correlation of
 an ideal reference waveform with the measured FMRI
@@ -1355,7 +1374,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="fourier">
 <span id="index-13"></span><h2>Fourier<a class="headerlink" href="#fourier" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L715">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L753">Link to code</a></p>
 <p>Wraps command <strong>3dFourier</strong></p>
 <p>Program to lowpass and/or highpass each voxel time series in a
 dataset, via the FFT</p>
@@ -1414,7 +1433,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="maskave">
 <span id="index-14"></span><h2>Maskave<a class="headerlink" href="#maskave" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1144">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1182">Link to code</a></p>
 <p>Wraps command <strong>3dmaskave</strong></p>
 <p>Computes average of all voxels in the input dataset
 which satisfy the criterion in the options list</p>
@@ -1474,7 +1493,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="means">
 <span id="index-15"></span><h2>Means<a class="headerlink" href="#means" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L2021">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L2059">Link to code</a></p>
 <p>Wraps command <strong>3dMean</strong></p>
 <p>Takes the voxel-by-voxel mean of all input datasets using 3dMean</p>
 <p>see AFNI Documentation: &lt;<a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dMean.html">http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dMean.html</a>&gt;</p>
@@ -1553,7 +1572,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="merge">
 <span id="index-16"></span><h2>Merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L638">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L661">Link to code</a></p>
 <p>Wraps command <strong>3dmerge</strong></p>
 <p>Merge or edit volumes using AFNI 3dmerge command</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dmerge.html">3dmerge Documentation.</a></p>
@@ -1577,7 +1596,7 @@ in_files: (a list of items which are an existing file name)
 args: (a string)
         Additional parameters to the command
         flag: %s
-blurfwhm: (an integer)
+blurfwhm: (an integer (int or long))
         FWHM blur value (mm)
         flag: -1blur_fwhm %d
 doall: (a boolean)
@@ -1610,7 +1629,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="roistats">
 <span id="index-17"></span><h2>ROIStats<a class="headerlink" href="#roistats" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1505">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1543">Link to code</a></p>
 <p>Wraps command <strong>3dROIstats</strong></p>
 <p>Display statistics over masked regions</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dROIstats.html">3dROIstats Documentation.</a></p>
@@ -1665,7 +1684,7 @@ quiet: (a boolean)
 </div>
 <div class="section" id="refit">
 <span id="index-18"></span><h2>Refit<a class="headerlink" href="#refit" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L174">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L188">Link to code</a></p>
 <p>Wraps command <strong>3drefit</strong></p>
 <p>Changes some of the information inside a 3D dataset&#8217;s header</p>
 <p>For complete details, see the <a href="#id22"><span class="problematic" id="id23">`</span></a>3drefit Documentation.
@@ -1701,16 +1720,29 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
+space: (&#39;TLRC&#39; or &#39;MNI&#39; or &#39;ORIG&#39;)
+        Associates the dataset with a specific template type, e.g. TLRC,
+        MNI, ORIG
+        flag: -space %s
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
+xdel: (a float)
+        new x voxel dimension in mm
+        flag: -xdel %f
 xorigin: (a string)
         x distance for edge voxel offset
         flag: -xorigin %s
+ydel: (a float)
+        new y voxel dimension in mm
+        flag: -ydel %f
 yorigin: (a string)
         y distance for edge voxel offset
         flag: -yorigin %s
+zdel: (a float)
+        new z voxel dimension in mm
+        flag: -zdel %f
 zorigin: (a string)
         z distance for edge voxel offset
         flag: -zorigin %s
@@ -1725,7 +1757,7 @@ zorigin: (a string)
 </div>
 <div class="section" id="resample">
 <span id="index-19"></span><h2>Resample<a class="headerlink" href="#resample" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L293">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L316">Link to code</a></p>
 <p>Wraps command <strong>3dresample</strong></p>
 <p>Resample or reorient an image using AFNI 3dresample command</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dresample.html">3dresample Documentation.</a></p>
@@ -1792,7 +1824,7 @@ voxel_size: (a tuple of the form: (a float, a float, a float))
 </div>
 <div class="section" id="retroicor">
 <span id="index-20"></span><h2>Retroicor<a class="headerlink" href="#retroicor" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1861">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1899">Link to code</a></p>
 <p>Wraps command <strong>3dretroicor</strong></p>
 <p>Performs Retrospective Image Correction for physiological
 motion effects, using a slightly modified version of the
@@ -1845,7 +1877,7 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-order: (an integer)
+order: (an integer (int or long))
         The order of the correction (2 is typical)
         flag: -order %s, position: -5
 outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
@@ -1860,7 +1892,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-threshold: (an integer)
+threshold: (an integer (int or long))
         Threshold for detection of R-wave peaks in input (Make sure it is
         above the background noise level, Try 3/4 or 4/5 times range plus
         minimum)
@@ -1876,7 +1908,7 @@ threshold: (an integer)
 </div>
 <div class="section" id="skullstrip">
 <span id="index-21"></span><h2>SkullStrip<a class="headerlink" href="#skullstrip" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1181">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1219">Link to code</a></p>
 <p>Wraps command <strong>3dSkullStrip</strong></p>
 <p>A program to extract the brain from surrounding
 tissue from MRI T1-weighted images</p>
@@ -1927,7 +1959,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="tcat">
 <span id="index-22"></span><h2>TCat<a class="headerlink" href="#tcat" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1216">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1254">Link to code</a></p>
 <p>Wraps command <strong>3dTcat</strong></p>
 <p>Concatenate sub-bricks from input datasets into
 one big 3D+time dataset</p>
@@ -1982,7 +2014,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="tcorr1d">
 <span id="index-23"></span><h2>TCorr1D<a class="headerlink" href="#tcorr1d" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1381">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1419">Link to code</a></p>
 <p>Wraps command <strong>3dTcorr1D</strong></p>
 <p>Computes the correlation coefficient between each voxel time series
 in the input 3D+time dataset.
@@ -2051,7 +2083,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-afni-preprocess-tcorrmap"></span></div>
 <div class="section" id="tcorrmap">
 <span id="index-24"></span><h2>TCorrMap<a class="headerlink" href="#tcorrmap" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1726">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1764">Link to code</a></p>
 <p>Wraps command <strong>3dTcorrMap</strong></p>
 <p>For each voxel time series, computes the correlation between it
 and all other voxels, and combines this set of values into the
@@ -2104,7 +2136,7 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
 expr: (a string)
 histogram: (a file name)
         flag: -Hist %d %s
-histogram_bin_numbers: (an integer)
+histogram_bin_numbers: (an integer (int or long))
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
@@ -2119,7 +2151,7 @@ outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
         AFNI output filetype
 pmean: (a file name)
         flag: -Pmean %s
-polort: (an integer)
+polort: (an integer (int or long))
         flag: -polort %d
 qmean: (a file name)
         flag: -Qmean %s
@@ -2138,7 +2170,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-thresholds: (a list of items which are an integer)
+thresholds: (a list of items which are an integer (int or long))
 var_absolute_threshold: (a file name)
         flag: -VarThresh %f %f %f %s
         mutually_exclusive: absolute_threshold, var_absolute_threshold,
@@ -2171,7 +2203,7 @@ zmean: (a file name)
 </div>
 <div class="section" id="tcorrelate">
 <span id="index-25"></span><h2>TCorrelate<a class="headerlink" href="#tcorrelate" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L1310">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L1348">Link to code</a></p>
 <p>Wraps command <strong>3dTcorrelate</strong></p>
 <p>Computes the correlation coefficient between corresponding voxel
 time series in two input 3D+time datasets &#8216;xset&#8217; and &#8216;yset&#8217;</p>
@@ -2216,7 +2248,7 @@ outputtype: (&#39;NIFTI_GZ&#39; or &#39;AFNI&#39; or &#39;NIFTI&#39;)
 pearson: (a boolean)
         Correlation is the normal Pearson correlation coefficient
         flag: -pearson, position: 1
-polort: (an integer)
+polort: (an integer (int or long))
         Remove polynomical trend of order m
         flag: -polort %d, position: 2
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -2234,7 +2266,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="tshift">
 <span id="index-26"></span><h2>TShift<a class="headerlink" href="#tshift" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L126">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L126">Link to code</a></p>
 <p>Wraps command <strong>3dTshift</strong></p>
 <p>Shifts voxel time series from input
 so that seperate slices are aligned to the same
@@ -2267,7 +2299,7 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-ignore: (an integer)
+ignore: (an integer (int or long))
         ignore the first set of points specified
         flag: -ignore %s
 ignore_exception: (a boolean, nipype default value: False)
@@ -2300,7 +2332,7 @@ tr: (a string)
         manually set the TRYou can attach suffix &quot;s&quot; for seconds or &quot;ms&quot; for
         milliseconds.
         flag: -TR %s
-tslice: (an integer)
+tslice: (an integer (int or long))
         align each slice to time offset of given slice
         flag: -slice %s
         mutually_exclusive: tzero
@@ -2319,7 +2351,7 @@ tzero: (a float)
 </div>
 <div class="section" id="tstat">
 <span id="index-27"></span><h2>TStat<a class="headerlink" href="#tstat" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L393">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L416">Link to code</a></p>
 <p>Wraps command <strong>3dTstat</strong></p>
 <p>Compute voxel-wise statistics using AFNI 3dTstat command</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dTstat.html">3dTstat Documentation.</a></p>
@@ -2378,7 +2410,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="to3d">
 <span id="index-28"></span><h2>To3D<a class="headerlink" href="#to3d" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L58">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L58">Link to code</a></p>
 <p>Wraps command <strong>to3d</strong></p>
 <p>Create a 3D dataset from 2D image files using AFNI to3d command</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/to3d.html">to3d Documentation</a></p>
@@ -2450,7 +2482,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="volreg">
 <span id="index-29"></span><h2>Volreg<a class="headerlink" href="#volreg" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L596">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L619">Link to code</a></p>
 <p>Wraps command <strong>3dvolreg</strong></p>
 <p>Register input volumes to a base volume using AFNI 3dvolreg command</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dvolreg.html">3dvolreg Documentation.</a></p>
@@ -2514,7 +2546,7 @@ timeshift: (a boolean)
 verbose: (a boolean)
         more detailed description of the process
         flag: -verbose
-zpad: (an integer)
+zpad: (an integer (int or long))
         Zeropad around the edges by &#39;n&#39; voxels during rotations
         flag: -zpad %d, position: -5
 </pre></div>
@@ -2534,7 +2566,7 @@ out_file: (an existing file name)
 </div>
 <div class="section" id="warp">
 <span id="index-30"></span><h2>Warp<a class="headerlink" href="#warp" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L241">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L258">Link to code</a></p>
 <p>Wraps command <strong>3dWarp</strong></p>
 <p>Use 3dWarp for spatially transforming a dataset</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dWarp.html">3dWarp Documentation.</a></p>
@@ -2547,7 +2579,14 @@ out_file: (an existing file name)
 <span class="gp">&gt;&gt;&gt; </span><span class="n">warp</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&quot;trans.nii.gz&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">warp</span><span class="o">.</span><span class="n">cmdline</span>
 <span class="go">&#39;3dWarp -deoblique -prefix trans.nii.gz structural.nii&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">warp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">warp_2</span> <span class="o">=</span> <span class="n">afni</span><span class="o">.</span><span class="n">Warp</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">warp_2</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">warp_2</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">newgrid</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">warp_2</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&quot;trans.nii.gz&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">warp_2</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;3dWarp -newgrid 1.000000 -prefix trans.nii.gz structural.nii&#39;</span>
 </pre></div>
 </div>
 <p>Inputs:</p>
@@ -2582,6 +2621,9 @@ matparent: (an existing file name)
 mni2tta: (a boolean)
         transform dataset from MNI152 to Talaraich
         flag: -mni2tta
+newgrid: (a float)
+        specify grid of this size (mm)
+        flag: -newgrid %f
 out_file: (a file name)
         output image file name
         flag: -prefix %s
@@ -2594,7 +2636,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 tta2mni: (a boolean)
         transform dataset from Talairach to MNI152
         flag: -tta2mni
-zpad: (an integer)
+zpad: (an integer (int or long))
         pad input dataset with N planes of zero on all sides.
         flag: -zpad %d
 </pre></div>
@@ -2608,7 +2650,7 @@ zpad: (an integer)
 </div>
 <div class="section" id="zcutup">
 <span id="index-31"></span><h2>ZCutUp<a class="headerlink" href="#zcutup" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/afni/preprocess.py#L863">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/afni/preprocess.py#L901">Link to code</a></p>
 <p>Wraps command <strong>3dZcutup</strong></p>
 <p>Cut z-slices from a volume using AFNI 3dZcutup command</p>
 <p>For complete details, see the <a class="reference external" href="http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dZcutup.html">3dZcutup Documentation.</a></p>
@@ -2669,9 +2711,9 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

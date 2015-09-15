@@ -1,0 +1,1039 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../index.html">
+            <img src="../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../index.html">Home</a> ·
+<a class="navbar" href="../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../documentation.html">Documentation</a> ·
+<a class="navbar" href="../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-and-algorithms">
+<span id="interface-index"></span><h1>Interfaces and Algorithms<a class="headerlink" href="#interfaces-and-algorithms" title="Permalink to this headline">¶</a></h1>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Release:</th><td class="field-body">0.9.2</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Date:</th><td class="field-body">September 15, 2015, 15:33 PDT</td>
+</tr>
+</tbody>
+</table>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.algorithms.icc.html">algorithms.icc</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.icc.html#icc">ICC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.icc.html#icc-rep-anova"><code class="docutils literal"><span class="pre">ICC_rep_anova()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.algorithms.mesh.html">algorithms.mesh</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.mesh.html#p2pdistance">P2PDistance</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.algorithms.misc.html">algorithms.misc</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#addcsvcolumn">AddCSVColumn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#calculatenormalizedmoments">CalculateNormalizedMoments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#createnifti">CreateNifti</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#distance">Distance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#fuzzyoverlap">FuzzyOverlap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#gunzip">Gunzip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#matlab2csv">Matlab2CSV</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#mergecsvfiles">MergeCSVFiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#modifyaffine">ModifyAffine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#overlap">Overlap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#pickatlas">PickAtlas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#simplethreshold">SimpleThreshold</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#tsnr">TSNR</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#calc-moments"><code class="docutils literal"><span class="pre">calc_moments()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#makefmtlist"><code class="docutils literal"><span class="pre">makefmtlist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#maketypelist"><code class="docutils literal"><span class="pre">maketypelist()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#id7"><code class="docutils literal"><span class="pre">matlab2csv()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#merge-csvs"><code class="docutils literal"><span class="pre">merge_csvs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#remove-identical-paths"><code class="docutils literal"><span class="pre">remove_identical_paths()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.misc.html#replaceext"><code class="docutils literal"><span class="pre">replaceext()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.algorithms.modelgen.html">algorithms.modelgen</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.modelgen.html#specifymodel">SpecifyModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.modelgen.html#specifyspmmodel">SpecifySPMModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.modelgen.html#specifysparsemodel">SpecifySparseModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.modelgen.html#gcd"><code class="docutils literal"><span class="pre">gcd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.modelgen.html#gen-info"><code class="docutils literal"><span class="pre">gen_info()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.modelgen.html#orth"><code class="docutils literal"><span class="pre">orth()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.modelgen.html#scale-timings"><code class="docutils literal"><span class="pre">scale_timings()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.modelgen.html#spm-hrf"><code class="docutils literal"><span class="pre">spm_hrf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.algorithms.rapidart.html">algorithms.rapidart</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.rapidart.html#artifactdetect">ArtifactDetect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.algorithms.rapidart.html#stimuluscorrelation">StimulusCorrelation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html">interfaces.afni.preprocess</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#allineate">Allineate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#autotcorrelate">AutoTcorrelate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#autobox">Autobox</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#automask">Automask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#bandpass">Bandpass</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#blurinmask">BlurInMask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#brickstat">BrickStat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#calc">Calc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#copy">Copy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#despike">Despike</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#detrend">Detrend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#fim">Fim</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#fourier">Fourier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#maskave">Maskave</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#merge">Merge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#roistats">ROIStats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#refit">Refit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#resample">Resample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#retroicor">Retroicor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#skullstrip">SkullStrip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#tcat">TCat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#tcorr1d">TCorr1D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#tcorrmap">TCorrMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#tcorrelate">TCorrelate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#tshift">TShift</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#tstat">TStat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#to3d">To3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#volreg">Volreg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#warp">Warp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.afni.preprocess.html#zcutup">ZCutUp</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.ants.legacy.html">interfaces.ants.legacy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.legacy.html#genwarpfields">GenWarpFields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.legacy.html#antsintroduction">antsIntroduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.legacy.html#buildtemplateparallel">buildtemplateparallel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.ants.registration.html">interfaces.ants.registration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.registration.html#registration">Registration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.ants.resampling.html">interfaces.ants.resampling</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.resampling.html#applytransforms">ApplyTransforms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.resampling.html#warpimagemultitransform">WarpImageMultiTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.resampling.html#warptimeseriesimagemultitransform">WarpTimeSeriesImageMultiTransform</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.ants.segmentation.html">interfaces.ants.segmentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.segmentation.html#atropos">Atropos</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.segmentation.html#n4biasfieldcorrection">N4BiasFieldCorrection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.ants.utils.html">interfaces.ants.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.utils.html#averageaffinetransform">AverageAffineTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.utils.html#averageimages">AverageImages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.utils.html#jacobiandeterminant">JacobianDeterminant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.ants.utils.html#multiplyimages">MultiplyImages</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.c3.html">interfaces.c3</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.c3.html#c3daffinetool">C3dAffineTool</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.camino.calib.html">interfaces.camino.calib</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.calib.html#sflutgen">SFLUTGen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.calib.html#sfpicocalibdata">SFPICOCalibData</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.camino.connectivity.html">interfaces.camino.connectivity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.connectivity.html#conmat">Conmat</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.camino.convert.html">interfaces.camino.convert</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.convert.html#analyzeheader">AnalyzeHeader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.convert.html#dt2nifti">DT2NIfTI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.convert.html#image2voxel">Image2Voxel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.convert.html#niftidt2camino">NIfTIDT2Camino</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.convert.html#procstreamlines">ProcStreamlines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.convert.html#tractshredder">TractShredder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.convert.html#vtkstreamlines">VtkStreamlines</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html">interfaces.camino.dti</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#computeeigensystem">ComputeEigensystem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#computefractionalanisotropy">ComputeFractionalAnisotropy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#computemeandiffusivity">ComputeMeanDiffusivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#computetensortrace">ComputeTensorTrace</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#dtifit">DTIFit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#dtlutgen">DTLUTGen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#dtmetric">DTMetric</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#modelfit">ModelFit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#picopdfs">PicoPDFs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#track">Track</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#trackballstick">TrackBallStick</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#trackbayesdirac">TrackBayesDirac</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#trackbootstrap">TrackBootstrap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#trackdt">TrackDT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.dti.html#trackpico">TrackPICo</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.camino.odf.html">interfaces.camino.odf</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.odf.html#linrecon">LinRecon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.odf.html#qballmx">QBallMX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino.odf.html#sfpeaks">SFPeaks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.camino2trackvis.convert.html">interfaces.camino2trackvis.convert</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino2trackvis.convert.html#camino2trackvis">Camino2Trackvis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.camino2trackvis.convert.html#trackvis2camino">Trackvis2Camino</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.cmtk.cmtk.html">interfaces.cmtk.cmtk</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.cmtk.html#creatematrix">CreateMatrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.cmtk.html#createnodes">CreateNodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.cmtk.html#roigen">ROIGen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.cmtk.html#cmat"><code class="docutils literal"><span class="pre">cmat()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.cmtk.html#create-allpoints-cmat"><code class="docutils literal"><span class="pre">create_allpoints_cmat()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.cmtk.html#create-endpoints-array"><code class="docutils literal"><span class="pre">create_endpoints_array()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.cmtk.html#create-nodes"><code class="docutils literal"><span class="pre">create_nodes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.cmtk.html#get-connectivity-matrix"><code class="docutils literal"><span class="pre">get_connectivity_matrix()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.cmtk.html#get-rois-crossed"><code class="docutils literal"><span class="pre">get_rois_crossed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.cmtk.html#length"><code class="docutils literal"><span class="pre">length()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.cmtk.html#save-fibers"><code class="docutils literal"><span class="pre">save_fibers()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.cmtk.convert.html">interfaces.cmtk.convert</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.convert.html#cffconverter">CFFConverter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.convert.html#mergecnetworks">MergeCNetworks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nbs.html">interfaces.cmtk.nbs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nbs.html#networkbasedstatistic">NetworkBasedStatistic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nbs.html#ntwks-to-matrices"><code class="docutils literal"><span class="pre">ntwks_to_matrices()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html">interfaces.cmtk.nx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#averagenetworks">AverageNetworks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#networkxmetrics">NetworkXMetrics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#add-dicts-by-key"><code class="docutils literal"><span class="pre">add_dicts_by_key()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#add-edge-data"><code class="docutils literal"><span class="pre">add_edge_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#add-node-data"><code class="docutils literal"><span class="pre">add_node_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#average-networks"><code class="docutils literal"><span class="pre">average_networks()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#compute-dict-measures"><code class="docutils literal"><span class="pre">compute_dict_measures()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#compute-edge-measures"><code class="docutils literal"><span class="pre">compute_edge_measures()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#compute-network-measures"><code class="docutils literal"><span class="pre">compute_network_measures()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#compute-node-measures"><code class="docutils literal"><span class="pre">compute_node_measures()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#compute-singlevalued-measures"><code class="docutils literal"><span class="pre">compute_singlevalued_measures()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#fix-keys-for-gexf"><code class="docutils literal"><span class="pre">fix_keys_for_gexf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#read-unknown-ntwk"><code class="docutils literal"><span class="pre">read_unknown_ntwk()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.nx.html#remove-all-edges"><code class="docutils literal"><span class="pre">remove_all_edges()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.cmtk.parcellation.html">interfaces.cmtk.parcellation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.parcellation.html#parcellate">Parcellate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.parcellation.html#create-annot-label"><code class="docutils literal"><span class="pre">create_annot_label()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.parcellation.html#create-roi"><code class="docutils literal"><span class="pre">create_roi()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.parcellation.html#create-wm-mask"><code class="docutils literal"><span class="pre">create_wm_mask()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.parcellation.html#crop-and-move-datasets"><code class="docutils literal"><span class="pre">crop_and_move_datasets()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.cmtk.parcellation.html#extract"><code class="docutils literal"><span class="pre">extract()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.dcm2nii.html">interfaces.dcm2nii</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dcm2nii.html#dcm2nii">Dcm2nii</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.dcmstack.html">interfaces.dcmstack</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dcmstack.html#copymeta">CopyMeta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dcmstack.html#dcmstack">DcmStack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dcmstack.html#groupandstack">GroupAndStack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dcmstack.html#lookupmeta">LookupMeta</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dcmstack.html#mergenifti">MergeNifti</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dcmstack.html#niftigeneratorbase">NiftiGeneratorBase</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dcmstack.html#splitnifti">SplitNifti</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dcmstack.html#make-key-func"><code class="docutils literal"><span class="pre">make_key_func()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dcmstack.html#sanitize-path-comp"><code class="docutils literal"><span class="pre">sanitize_path_comp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.diffusion_toolkit.dti.html">interfaces.diffusion_toolkit.dti</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.diffusion_toolkit.dti.html#dtirecon">DTIRecon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.diffusion_toolkit.dti.html#dtitracker">DTITracker</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.diffusion_toolkit.odf.html">interfaces.diffusion_toolkit.odf</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.diffusion_toolkit.odf.html#hardimat">HARDIMat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.diffusion_toolkit.odf.html#odfrecon">ODFRecon</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.diffusion_toolkit.odf.html#odftracker">ODFTracker</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.diffusion_toolkit.postproc.html">interfaces.diffusion_toolkit.postproc</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.diffusion_toolkit.postproc.html#splinefilter">SplineFilter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.dipy.tensors.html">interfaces.dipy.tensors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dipy.tensors.html#tensormode">TensorMode</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.dipy.tracks.html">interfaces.dipy.tracks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dipy.tracks.html#trackdensitymap">TrackDensityMap</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.dynamic_slicer.html">interfaces.dynamic_slicer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.dynamic_slicer.html#slicercommandline">SlicerCommandLine</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.model.html">interfaces.freesurfer.model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.model.html#binarize">Binarize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.model.html#concatenate">Concatenate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.model.html#glmfit">GLMFit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.model.html#label2vol">Label2Vol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.model.html#mrispreproc">MRISPreproc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.model.html#ms-lda">MS_LDA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.model.html#onesamplettest">OneSampleTTest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.model.html#segstats">SegStats</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html">interfaces.freesurfer.preprocess</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html#applyvoltransform">ApplyVolTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html#bbregister">BBRegister</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html#dicomconvert">DICOMConvert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html#fitmsparams">FitMSParams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html#mriconvert">MRIConvert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html#parsedicomdir">ParseDICOMDir</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html#reconall">ReconAll</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html#resample">Resample</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html#robustregister">RobustRegister</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html#smooth">Smooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html#synthesizeflash">SynthesizeFLASH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.preprocess.html#unpacksdicomdir">UnpackSDICOMDir</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html">interfaces.freesurfer.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html#applymask">ApplyMask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html#extractmaincomponent">ExtractMainComponent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html#mrimarchingcubes">MRIMarchingCubes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html#mritessellate">MRITessellate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html#mrisconvert">MRIsConvert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html#makeaveragesubject">MakeAverageSubject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html#sampletosurface">SampleToSurface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html#smoothtessellation">SmoothTessellation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html#surface2voltransform">Surface2VolTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html#surfacesmooth">SurfaceSmooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html#surfacesnapshots">SurfaceSnapshots</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.freesurfer.utils.html#surfacetransform">SurfaceTransform</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.fsl.dti.html">interfaces.fsl.dti</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.dti.html#bedpostx">BEDPOSTX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.dti.html#dtifit">DTIFit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.dti.html#distancemap">DistanceMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.dti.html#findthebiggest">FindTheBiggest</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.dti.html#makedyadicvectors">MakeDyadicVectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.dti.html#probtrackx">ProbTrackX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.dti.html#projthresh">ProjThresh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.dti.html#tractskeleton">TractSkeleton</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.dti.html#vecreg">VecReg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.dti.html#xfibres">XFibres</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.fsl.epi.html">interfaces.fsl.epi</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.epi.html#applytopup">ApplyTOPUP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.epi.html#epidewarp">EPIDeWarp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.epi.html#eddy">Eddy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.epi.html#eddycorrect">EddyCorrect</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.epi.html#preparefieldmap">PrepareFieldmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.epi.html#sigloss">SigLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.epi.html#topup">TOPUP</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html">interfaces.fsl.maths</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#applymask">ApplyMask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#binarymaths">BinaryMaths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#changedatatype">ChangeDataType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#dilateimage">DilateImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#erodeimage">ErodeImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#isotropicsmooth">IsotropicSmooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#mathscommand">MathsCommand</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#maximage">MaxImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#meanimage">MeanImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#multiimagemaths">MultiImageMaths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#spatialfilter">SpatialFilter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#temporalfilter">TemporalFilter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#threshold">Threshold</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.maths.html#unarymaths">UnaryMaths</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html">interfaces.fsl.model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#cluster">Cluster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#contrastmgr">ContrastMgr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#feat">FEAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#featmodel">FEATModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#featregister">FEATRegister</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#filmgls">FILMGLS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#flameo">FLAMEO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#glm">GLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#l2model">L2Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#level1design">Level1Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#melodic">MELODIC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#multipleregressdesign">MultipleRegressDesign</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#randomise">Randomise</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#smm">SMM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.model.html#smoothestimate">SmoothEstimate</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html">interfaces.fsl.preprocess</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html#applywarp">ApplyWarp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html#applyxfm">ApplyXfm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html#bet">BET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html#fast">FAST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html#first">FIRST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html#flirt">FLIRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html#fnirt">FNIRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html#fugue">FUGUE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html#mcflirt">MCFLIRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html#prelude">PRELUDE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html#susan">SUSAN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.preprocess.html#slicetimer">SliceTimer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html">interfaces.fsl.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#avscale">AvScale</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#complex">Complex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#convertxfm">ConvertXFM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#extractroi">ExtractROI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#filterregressor">FilterRegressor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#imagemaths">ImageMaths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#imagemeants">ImageMeants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#imagestats">ImageStats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#invwarp">InvWarp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#merge">Merge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#overlay">Overlay</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#plotmotionparams">PlotMotionParams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#plottimeseries">PlotTimeSeries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#powerspectrum">PowerSpectrum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#reorient2std">Reorient2Std</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#sigloss">SigLoss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#slicer">Slicer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#smooth">Smooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#split">Split</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.fsl.utils.html#swapdimensions">SwapDimensions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.io.html">interfaces.io</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#datafinder">DataFinder</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#datagrabber">DataGrabber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#datasink">DataSink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#freesurfersource">FreeSurferSource</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#iobase">IOBase</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#mysqlsink">MySQLSink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#sqlitesink">SQLiteSink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#selectfiles">SelectFiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#xnatsink">XNATSink</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#xnatsource">XNATSource</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#add-traits"><code class="docutils literal"><span class="pre">add_traits()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#copytree"><code class="docutils literal"><span class="pre">copytree()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#push-file"><code class="docutils literal"><span class="pre">push_file()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#quote-id"><code class="docutils literal"><span class="pre">quote_id()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.io.html#unquote-id"><code class="docutils literal"><span class="pre">unquote_id()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.meshfix.html">interfaces.meshfix</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.meshfix.html#meshfix">MeshFix</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.mne.base.html">interfaces.mne.base</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mne.base.html#watershedbem">WatershedBEM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.convert.html">interfaces.mrtrix.convert</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.convert.html#mrtrix2trackvis">MRTrix2TrackVis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.convert.html#read-mrtrix-header"><code class="docutils literal"><span class="pre">read_mrtrix_header()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.convert.html#read-mrtrix-streamlines"><code class="docutils literal"><span class="pre">read_mrtrix_streamlines()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.convert.html#read-mrtrix-tracks"><code class="docutils literal"><span class="pre">read_mrtrix_tracks()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.convert.html#transform-to-affine"><code class="docutils literal"><span class="pre">transform_to_affine()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html">interfaces.mrtrix.preprocess</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html#dwi2tensor">DWI2Tensor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html#erode">Erode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html#generatewhitemattermask">GenerateWhiteMatterMask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html#mrconvert">MRConvert</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html#mrmultiply">MRMultiply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html#mrtransform">MRTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html#mrtrixviewer">MRTrixViewer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html#medianfilter3d">MedianFilter3D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html#tensor2apparentdiffusion">Tensor2ApparentDiffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html#tensor2fractionalanisotropy">Tensor2FractionalAnisotropy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html#tensor2vector">Tensor2Vector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.preprocess.html#threshold">Threshold</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tensors.html">interfaces.mrtrix.tensors</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tensors.html#constrainedsphericaldeconvolution">ConstrainedSphericalDeconvolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tensors.html#dwi2sphericalharmonicsimage">DWI2SphericalHarmonicsImage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tensors.html#directions2amplitude">Directions2Amplitude</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tensors.html#estimateresponseforsh">EstimateResponseForSH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tensors.html#findshpeaks">FindShPeaks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tensors.html#generatedirections">GenerateDirections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tensors.html#concat-files"><code class="docutils literal"><span class="pre">concat_files()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tracking.html">interfaces.mrtrix.tracking</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tracking.html#diffusiontensorstreamlinetrack">DiffusionTensorStreamlineTrack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tracking.html#probabilisticsphericallydeconvolutedstreamlinetrack">ProbabilisticSphericallyDeconvolutedStreamlineTrack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tracking.html#sphericallydeconvolutedstreamlinetrack">SphericallyDeconvolutedStreamlineTrack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tracking.html#streamlinetrack">StreamlineTrack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.mrtrix.tracking.html#tracks2prob">Tracks2Prob</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.nipy.model.html">interfaces.nipy.model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.nipy.model.html#estimatecontrast">EstimateContrast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.nipy.model.html#fitglm">FitGLM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.nipy.preprocess.html">interfaces.nipy.preprocess</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.nipy.preprocess.html#computemask">ComputeMask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.nipy.preprocess.html#fmrirealign4d">FmriRealign4d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.nipy.preprocess.html#spacetimerealigner">SpaceTimeRealigner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.nipy.preprocess.html#trim">Trim</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.nipy.utils.html">interfaces.nipy.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.nipy.utils.html#similarity">Similarity</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.nitime.analysis.html">interfaces.nitime.analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.nitime.analysis.html#coherenceanalyzer">CoherenceAnalyzer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.base.html">interfaces.slicer.base</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.base.html#slicercommandline">SlicerCommandLine</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.converters.html">interfaces.slicer.converters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.converters.html#dicomtonrrdconverter">DicomToNrrdConverter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.converters.html#orientscalarvolume">OrientScalarVolume</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.diffusion.diffusion.html">interfaces.slicer.diffusion.diffusion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.diffusion.diffusion.html#dtiexport">DTIexport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.diffusion.diffusion.html#dtiimport">DTIimport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.diffusion.diffusion.html#dwijointricianlmmsefilter">DWIJointRicianLMMSEFilter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.diffusion.diffusion.html#dwiricianlmmsefilter">DWIRicianLMMSEFilter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.diffusion.diffusion.html#dwitodtiestimation">DWIToDTIEstimation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.diffusion.diffusion.html#diffusiontensorscalarmeasurements">DiffusionTensorScalarMeasurements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.diffusion.diffusion.html#diffusionweightedvolumemasking">DiffusionWeightedVolumeMasking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.diffusion.diffusion.html#resampledtivolume">ResampleDTIVolume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.diffusion.diffusion.html#tractographylabelmapseeding">TractographyLabelMapSeeding</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.arithmetic.html">interfaces.slicer.filtering.arithmetic</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.arithmetic.html#addscalarvolumes">AddScalarVolumes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.arithmetic.html#castscalarvolume">CastScalarVolume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.arithmetic.html#maskscalarvolume">MaskScalarVolume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.arithmetic.html#multiplyscalarvolumes">MultiplyScalarVolumes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.arithmetic.html#subtractscalarvolumes">SubtractScalarVolumes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.checkerboardfilter.html">interfaces.slicer.filtering.checkerboardfilter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.checkerboardfilter.html#checkerboardfilter">CheckerBoardFilter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.denoising.html">interfaces.slicer.filtering.denoising</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.denoising.html#curvatureanisotropicdiffusion">CurvatureAnisotropicDiffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.denoising.html#gaussianblurimagefilter">GaussianBlurImageFilter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.denoising.html#gradientanisotropicdiffusion">GradientAnisotropicDiffusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.denoising.html#medianimagefilter">MedianImageFilter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.extractskeleton.html">interfaces.slicer.filtering.extractskeleton</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.extractskeleton.html#extractskeleton">ExtractSkeleton</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.histogrammatching.html">interfaces.slicer.filtering.histogrammatching</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.histogrammatching.html#histogrammatching">HistogramMatching</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.imagelabelcombine.html">interfaces.slicer.filtering.imagelabelcombine</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.imagelabelcombine.html#imagelabelcombine">ImageLabelCombine</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.morphology.html">interfaces.slicer.filtering.morphology</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.morphology.html#grayscalefillholeimagefilter">GrayscaleFillHoleImageFilter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.morphology.html#grayscalegrindpeakimagefilter">GrayscaleGrindPeakImageFilter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.n4itkbiasfieldcorrection.html">interfaces.slicer.filtering.n4itkbiasfieldcorrection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.n4itkbiasfieldcorrection.html#n4itkbiasfieldcorrection">N4ITKBiasFieldCorrection</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.resamplescalarvectordwivolume.html">interfaces.slicer.filtering.resamplescalarvectordwivolume</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.resamplescalarvectordwivolume.html#resamplescalarvectordwivolume">ResampleScalarVectorDWIVolume</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.thresholdscalarvolume.html">interfaces.slicer.filtering.thresholdscalarvolume</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.thresholdscalarvolume.html#thresholdscalarvolume">ThresholdScalarVolume</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.votingbinaryholefillingimagefilter.html">interfaces.slicer.filtering.votingbinaryholefillingimagefilter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.filtering.votingbinaryholefillingimagefilter.html#votingbinaryholefillingimagefilter">VotingBinaryHoleFillingImageFilter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.converters.html">interfaces.slicer.legacy.converters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.converters.html#bsplinetodeformationfield">BSplineToDeformationField</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.diffusion.denoising.html">interfaces.slicer.legacy.diffusion.denoising</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.diffusion.denoising.html#dwiunbiasednonlocalmeansfilter">DWIUnbiasedNonLocalMeansFilter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.filtering.html">interfaces.slicer.legacy.filtering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.filtering.html#otsuthresholdimagefilter">OtsuThresholdImageFilter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.filtering.html#resamplescalarvolume">ResampleScalarVolume</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.registration.html">interfaces.slicer.legacy.registration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.registration.html#affineregistration">AffineRegistration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.registration.html#bsplinedeformableregistration">BSplineDeformableRegistration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.registration.html#expertautomatedregistration">ExpertAutomatedRegistration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.registration.html#linearregistration">LinearRegistration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.registration.html#multiresolutionaffineregistration">MultiResolutionAffineRegistration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.registration.html#rigidregistration">RigidRegistration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.segmentation.html">interfaces.slicer.legacy.segmentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.legacy.segmentation.html#otsuthresholdsegmentation">OtsuThresholdSegmentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.quantification.changequantification.html">interfaces.slicer.quantification.changequantification</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.quantification.changequantification.html#intensitydifferencemetric">IntensityDifferenceMetric</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.quantification.petstandarduptakevaluecomputation.html">interfaces.slicer.quantification.petstandarduptakevaluecomputation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.quantification.petstandarduptakevaluecomputation.html#petstandarduptakevaluecomputation">PETStandardUptakeValueComputation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.registration.brainsfit.html">interfaces.slicer.registration.brainsfit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.registration.brainsfit.html#brainsfit">BRAINSFit</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.registration.brainsresample.html">interfaces.slicer.registration.brainsresample</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.registration.brainsresample.html#brainsresample">BRAINSResample</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.registration.specialized.html">interfaces.slicer.registration.specialized</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.registration.specialized.html#acpctransform">ACPCTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.registration.specialized.html#brainsdemonwarp">BRAINSDemonWarp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.registration.specialized.html#fiducialregistration">FiducialRegistration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.registration.specialized.html#vbrainsdemonwarp">VBRAINSDemonWarp</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.segmentation.simpleregiongrowingsegmentation.html">interfaces.slicer.segmentation.simpleregiongrowingsegmentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.segmentation.simpleregiongrowingsegmentation.html#simpleregiongrowingsegmentation">SimpleRegionGrowingSegmentation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.segmentation.specialized.html">interfaces.slicer.segmentation.specialized</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.segmentation.specialized.html#brainsroiauto">BRAINSROIAuto</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.segmentation.specialized.html#emsegmentcommandline">EMSegmentCommandLine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.segmentation.specialized.html#robuststatisticssegmenter">RobustStatisticsSegmenter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.surface.html">interfaces.slicer.surface</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.surface.html#grayscalemodelmaker">GrayscaleModelMaker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.surface.html#labelmapsmoothing">LabelMapSmoothing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.surface.html#mergemodels">MergeModels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.surface.html#modelmaker">ModelMaker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.surface.html#modeltolabelmap">ModelToLabelMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.surface.html#probevolumewithmodel">ProbeVolumeWithModel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.slicer.utilities.html">interfaces.slicer.utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.slicer.utilities.html#emsegmenttransformtonewformat">EMSegmentTransformToNewFormat</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.spm.model.html">interfaces.spm.model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.model.html#estimatecontrast">EstimateContrast</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.model.html#estimatemodel">EstimateModel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.model.html#factorialdesign">FactorialDesign</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.model.html#level1design">Level1Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.model.html#multipleregressiondesign">MultipleRegressionDesign</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.model.html#onesamplettestdesign">OneSampleTTestDesign</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.model.html#pairedttestdesign">PairedTTestDesign</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.model.html#threshold">Threshold</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.model.html#thresholdstatistics">ThresholdStatistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.model.html#twosamplettestdesign">TwoSampleTTestDesign</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html">interfaces.spm.preprocess</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html#applydeformations">ApplyDeformations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html#coregister">Coregister</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html#createwarped">CreateWarped</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html#dartel">DARTEL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html#dartelnorm2mni">DARTELNorm2MNI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html#newsegment">NewSegment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html#normalize">Normalize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html#realign">Realign</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html#segment">Segment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html#slicetiming">SliceTiming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html#smooth">Smooth</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.preprocess.html#vbmsegment">VBMSegment</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.spm.utils.html">interfaces.spm.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.utils.html#analyze2nii">Analyze2nii</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.utils.html#applyinversedeformation">ApplyInverseDeformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.utils.html#applytransform">ApplyTransform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.utils.html#calccoregaffine">CalcCoregAffine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.utils.html#dicomimport">DicomImport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.utils.html#reslice">Reslice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.spm.utils.html#reslicetoreference">ResliceToReference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.utility.html">interfaces.utility</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.utility.html#assertequal">AssertEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.utility.html#function">Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.utility.html#index-2">IdentityInterface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.utility.html#merge">Merge</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.utility.html#rename">Rename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.utility.html#select">Select</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.utility.html#split">Split</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.interfaces.vista.vista.html">interfaces.vista.vista</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.vista.vista.html#vnifti2image">Vnifti2Image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.interfaces.vista.vista.html#vtomat">VtoMat</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.pkg_info.html">pkg_info</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.pkg_info.html#get-pkg-info"><code class="docutils literal"><span class="pre">get_pkg_info()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.pkg_info.html#pkg-commit-hash"><code class="docutils literal"><span class="pre">pkg_commit_hash()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.dmri.camino.connectivity_mapping.html">workflows.dmri.camino.connectivity_mapping</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.camino.connectivity_mapping.html#create-connectivity-pipeline"><code class="docutils literal"><span class="pre">create_connectivity_pipeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.dmri.camino.diffusion.html">workflows.dmri.camino.diffusion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.camino.diffusion.html#create-camino-dti-pipeline"><code class="docutils literal"><span class="pre">create_camino_dti_pipeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.dmri.camino.group_connectivity.html">workflows.dmri.camino.group_connectivity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.camino.group_connectivity.html#create-group-connectivity-pipeline"><code class="docutils literal"><span class="pre">create_group_connectivity_pipeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.group_connectivity.html">workflows.dmri.connectivity.group_connectivity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.group_connectivity.html#concatcsv"><code class="docutils literal"><span class="pre">concatcsv()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.group_connectivity.html#create-average-networks-by-group-workflow"><code class="docutils literal"><span class="pre">create_average_networks_by_group_workflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.group_connectivity.html#create-merge-group-network-results-workflow"><code class="docutils literal"><span class="pre">create_merge_group_network_results_workflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.group_connectivity.html#create-merge-group-networks-workflow"><code class="docutils literal"><span class="pre">create_merge_group_networks_workflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.group_connectivity.html#create-merge-network-results-by-group-workflow"><code class="docutils literal"><span class="pre">create_merge_network_results_by_group_workflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.group_connectivity.html#create-merge-networks-by-group-workflow"><code class="docutils literal"><span class="pre">create_merge_networks_by_group_workflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.group_connectivity.html#pullnodeids"><code class="docutils literal"><span class="pre">pullnodeIDs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.nx.html">workflows.dmri.connectivity.nx</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.nx.html#create-cmats-to-csv-pipeline"><code class="docutils literal"><span class="pre">create_cmats_to_csv_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.nx.html#create-networkx-pipeline"><code class="docutils literal"><span class="pre">create_networkx_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.nx.html#add-global-to-filename"><code class="docutils literal"><span class="pre">add_global_to_filename()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.connectivity.nx.html#add-nodal-to-filename"><code class="docutils literal"><span class="pre">add_nodal_to_filename()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.dti.html">workflows.dmri.fsl.dti</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.dti.html#create-bedpostx-pipeline"><code class="docutils literal"><span class="pre">create_bedpostx_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.dti.html#transpose"><code class="docutils literal"><span class="pre">transpose()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.epi.html">workflows.dmri.fsl.epi</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.epi.html#create-dmri-preprocessing"><code class="docutils literal"><span class="pre">create_dmri_preprocessing()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.epi.html#create-eddy-correct-pipeline"><code class="docutils literal"><span class="pre">create_eddy_correct_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.epi.html#create-epidewarp-pipeline"><code class="docutils literal"><span class="pre">create_epidewarp_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.epi.html#create-motion-correct-pipeline"><code class="docutils literal"><span class="pre">create_motion_correct_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.epi.html#fieldmap-correction"><code class="docutils literal"><span class="pre">fieldmap_correction()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.epi.html#topup-correction"><code class="docutils literal"><span class="pre">topup_correction()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.tbss.html">workflows.dmri.fsl.tbss</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.tbss.html#create-tbss-1-preproc"><code class="docutils literal"><span class="pre">create_tbss_1_preproc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.tbss.html#create-tbss-2-reg"><code class="docutils literal"><span class="pre">create_tbss_2_reg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.tbss.html#create-tbss-3-postreg"><code class="docutils literal"><span class="pre">create_tbss_3_postreg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.tbss.html#create-tbss-4-prestats"><code class="docutils literal"><span class="pre">create_tbss_4_prestats()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.tbss.html#create-tbss-all"><code class="docutils literal"><span class="pre">create_tbss_all()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.tbss.html#create-tbss-non-fa"><code class="docutils literal"><span class="pre">create_tbss_non_FA()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.tbss.html#tbss1-op-string"><code class="docutils literal"><span class="pre">tbss1_op_string()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.fsl.tbss.html#tbss4-op-string"><code class="docutils literal"><span class="pre">tbss4_op_string()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.dmri.mrtrix.connectivity_mapping.html">workflows.dmri.mrtrix.connectivity_mapping</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.mrtrix.connectivity_mapping.html#create-connectivity-pipeline"><code class="docutils literal"><span class="pre">create_connectivity_pipeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.dmri.mrtrix.diffusion.html">workflows.dmri.mrtrix.diffusion</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.mrtrix.diffusion.html#create-mrtrix-dti-pipeline"><code class="docutils literal"><span class="pre">create_mrtrix_dti_pipeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.dmri.mrtrix.group_connectivity.html">workflows.dmri.mrtrix.group_connectivity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.dmri.mrtrix.group_connectivity.html#create-group-connectivity-pipeline"><code class="docutils literal"><span class="pre">create_group_connectivity_pipeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.estimate.html">workflows.fmri.fsl.estimate</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.estimate.html#create-fixed-effects-flow"><code class="docutils literal"><span class="pre">create_fixed_effects_flow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.estimate.html#create-modelfit-workflow"><code class="docutils literal"><span class="pre">create_modelfit_workflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.estimate.html#create-overlay-workflow"><code class="docutils literal"><span class="pre">create_overlay_workflow()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html">workflows.fmri.fsl.preprocess</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#create-featreg-preproc"><code class="docutils literal"><span class="pre">create_featreg_preproc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#create-fsl-fs-preproc"><code class="docutils literal"><span class="pre">create_fsl_fs_preproc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#create-parallelfeat-preproc"><code class="docutils literal"><span class="pre">create_parallelfeat_preproc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#create-reg-workflow"><code class="docutils literal"><span class="pre">create_reg_workflow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#create-susan-smooth"><code class="docutils literal"><span class="pre">create_susan_smooth()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#chooseindex"><code class="docutils literal"><span class="pre">chooseindex()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#getbtthresh"><code class="docutils literal"><span class="pre">getbtthresh()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#getmeanscale"><code class="docutils literal"><span class="pre">getmeanscale()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#getthreshop"><code class="docutils literal"><span class="pre">getthreshop()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#getusans"><code class="docutils literal"><span class="pre">getusans()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#pickfirst"><code class="docutils literal"><span class="pre">pickfirst()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#pickmiddle"><code class="docutils literal"><span class="pre">pickmiddle()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.fsl.preprocess.html#pickvol"><code class="docutils literal"><span class="pre">pickvol()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.fmri.spm.preprocess.html">workflows.fmri.spm.preprocess</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.spm.preprocess.html#create-dartel-template"><code class="docutils literal"><span class="pre">create_DARTEL_template()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.spm.preprocess.html#create-spm-preproc"><code class="docutils literal"><span class="pre">create_spm_preproc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.fmri.spm.preprocess.html#create-vbm-preproc"><code class="docutils literal"><span class="pre">create_vbm_preproc()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.misc.utils.html">workflows.misc.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.misc.utils.html#get-affine"><code class="docutils literal"><span class="pre">get_affine()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.misc.utils.html#get-data-dims"><code class="docutils literal"><span class="pre">get_data_dims()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.misc.utils.html#get-vox-dims"><code class="docutils literal"><span class="pre">get_vox_dims()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.misc.utils.html#nipype-workflows-misc-utils-id-list-from-lookup-table"><code class="docutils literal"><span class="pre">id_list_from_lookup_table()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.misc.utils.html#region-list-from-volume"><code class="docutils literal"><span class="pre">region_list_from_volume()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.misc.utils.html#select-aparc"><code class="docutils literal"><span class="pre">select_aparc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.misc.utils.html#select-aparc-annot"><code class="docutils literal"><span class="pre">select_aparc_annot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.rsfmri.fsl.resting.html">workflows.rsfmri.fsl.resting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.rsfmri.fsl.resting.html#create-realign-flow"><code class="docutils literal"><span class="pre">create_realign_flow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.rsfmri.fsl.resting.html#create-resting-preproc"><code class="docutils literal"><span class="pre">create_resting_preproc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.rsfmri.fsl.resting.html#extract-noise-components"><code class="docutils literal"><span class="pre">extract_noise_components()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.rsfmri.fsl.resting.html#select-volume"><code class="docutils literal"><span class="pre">select_volume()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.smri.ants.ANTSBuildTemplate.html">workflows.smri.ants.ANTSBuildTemplate</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.ANTSBuildTemplate.html#antstemplatebuildsingleiterationwf"><code class="docutils literal"><span class="pre">ANTSTemplateBuildSingleIterationWF()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.ANTSBuildTemplate.html#flattentransformandimageslist"><code class="docutils literal"><span class="pre">FlattenTransformAndImagesList()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.ANTSBuildTemplate.html#getfirstlistelement"><code class="docutils literal"><span class="pre">GetFirstListElement()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.ANTSBuildTemplate.html#makelistsoftransformlists"><code class="docutils literal"><span class="pre">MakeListsOfTransformLists()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.ANTSBuildTemplate.html#maketransformlistwithgradientwarps"><code class="docutils literal"><span class="pre">MakeTransformListWithGradientWarps()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.ANTSBuildTemplate.html#renestdeformedpassiveimages"><code class="docutils literal"><span class="pre">RenestDeformedPassiveImages()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.smri.ants.antsRegistrationBuildTemplate.html">workflows.smri.ants.antsRegistrationBuildTemplate</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.antsRegistrationBuildTemplate.html#antsregistrationtemplatebuildsingleiterationwf"><code class="docutils literal"><span class="pre">antsRegistrationTemplateBuildSingleIterationWF()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.antsRegistrationBuildTemplate.html#flattentransformandimageslist"><code class="docutils literal"><span class="pre">FlattenTransformAndImagesList()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.antsRegistrationBuildTemplate.html#getfirstlistelement"><code class="docutils literal"><span class="pre">GetFirstListElement()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.antsRegistrationBuildTemplate.html#getmovingimages"><code class="docutils literal"><span class="pre">GetMovingImages()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.antsRegistrationBuildTemplate.html#getpassiveimages"><code class="docutils literal"><span class="pre">GetPassiveImages()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.antsRegistrationBuildTemplate.html#maketransformlistwithgradientwarps"><code class="docutils literal"><span class="pre">MakeTransformListWithGradientWarps()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.antsRegistrationBuildTemplate.html#renestdeformedpassiveimages"><code class="docutils literal"><span class="pre">RenestDeformedPassiveImages()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.antsRegistrationBuildTemplate.html#splitaffineandwarpcomponents"><code class="docutils literal"><span class="pre">SplitAffineAndWarpComponents()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.ants.antsRegistrationBuildTemplate.html#makelistofoneelement"><code class="docutils literal"><span class="pre">makeListOfOneElement()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.smri.freesurfer.bem.html">workflows.smri.freesurfer.bem</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.freesurfer.bem.html#create-bem-flow"><code class="docutils literal"><span class="pre">create_bem_flow()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generated/nipype.workflows.smri.freesurfer.utils.html">workflows.smri.freesurfer.utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.freesurfer.utils.html#create-get-stats-flow"><code class="docutils literal"><span class="pre">create_get_stats_flow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.freesurfer.utils.html#create-getmask-flow"><code class="docutils literal"><span class="pre">create_getmask_flow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.freesurfer.utils.html#create-tessellation-flow"><code class="docutils literal"><span class="pre">create_tessellation_flow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/nipype.workflows.smri.freesurfer.utils.html#get-aparc-aseg"><code class="docutils literal"><span class="pre">get_aparc_aseg()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

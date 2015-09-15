@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,18 +114,18 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">workflows.smri.ants.antsRegistrationBuildTemplate</a><ul>
-<li><a class="reference internal" href="#antsregistrationtemplatebuildsingleiterationwf"><tt class="docutils literal"><span class="pre">antsRegistrationTemplateBuildSingleIterationWF()</span></tt></a><ul>
+<li><a class="reference internal" href="#antsregistrationtemplatebuildsingleiterationwf"><code class="docutils literal"><span class="pre">antsRegistrationTemplateBuildSingleIterationWF()</span></code></a><ul>
 <li><a class="reference internal" href="#graph">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#flattentransformandimageslist"><tt class="docutils literal"><span class="pre">FlattenTransformAndImagesList()</span></tt></a></li>
-<li><a class="reference internal" href="#getfirstlistelement"><tt class="docutils literal"><span class="pre">GetFirstListElement()</span></tt></a></li>
-<li><a class="reference internal" href="#getmovingimages"><tt class="docutils literal"><span class="pre">GetMovingImages()</span></tt></a></li>
-<li><a class="reference internal" href="#getpassiveimages"><tt class="docutils literal"><span class="pre">GetPassiveImages()</span></tt></a></li>
-<li><a class="reference internal" href="#maketransformlistwithgradientwarps"><tt class="docutils literal"><span class="pre">MakeTransformListWithGradientWarps()</span></tt></a></li>
-<li><a class="reference internal" href="#renestdeformedpassiveimages"><tt class="docutils literal"><span class="pre">RenestDeformedPassiveImages()</span></tt></a></li>
-<li><a class="reference internal" href="#splitaffineandwarpcomponents"><tt class="docutils literal"><span class="pre">SplitAffineAndWarpComponents()</span></tt></a></li>
-<li><a class="reference internal" href="#makelistofoneelement"><tt class="docutils literal"><span class="pre">makeListOfOneElement()</span></tt></a></li>
+<li><a class="reference internal" href="#flattentransformandimageslist"><code class="docutils literal"><span class="pre">FlattenTransformAndImagesList()</span></code></a></li>
+<li><a class="reference internal" href="#getfirstlistelement"><code class="docutils literal"><span class="pre">GetFirstListElement()</span></code></a></li>
+<li><a class="reference internal" href="#getmovingimages"><code class="docutils literal"><span class="pre">GetMovingImages()</span></code></a></li>
+<li><a class="reference internal" href="#getpassiveimages"><code class="docutils literal"><span class="pre">GetPassiveImages()</span></code></a></li>
+<li><a class="reference internal" href="#maketransformlistwithgradientwarps"><code class="docutils literal"><span class="pre">MakeTransformListWithGradientWarps()</span></code></a></li>
+<li><a class="reference internal" href="#renestdeformedpassiveimages"><code class="docutils literal"><span class="pre">RenestDeformedPassiveImages()</span></code></a></li>
+<li><a class="reference internal" href="#splitaffineandwarpcomponents"><code class="docutils literal"><span class="pre">SplitAffineAndWarpComponents()</span></code></a></li>
+<li><a class="reference internal" href="#makelistofoneelement"><code class="docutils literal"><span class="pre">makeListOfOneElement()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -148,7 +148,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -160,7 +160,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -183,9 +183,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -195,13 +195,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-nipype.workflows.smri.ants.antsRegistrationBuildTemplate">
 <span id="workflows-smri-ants-antsregistrationbuildtemplate"></span><h1>workflows.smri.ants.antsRegistrationBuildTemplate<a class="headerlink" href="#module-nipype.workflows.smri.ants.antsRegistrationBuildTemplate" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="antsregistrationtemplatebuildsingleiterationwf">
-<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-antsregistrationtemplatebuildsingleiterationwf"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">antsRegistrationTemplateBuildSingleIterationWF()</span></tt><a class="headerlink" href="#antsregistrationtemplatebuildsingleiterationwf" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L152">Link to code</a></p>
+<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-antsregistrationtemplatebuildsingleiterationwf"></span><h2><code class="xref py py-func docutils literal"><span class="pre">antsRegistrationTemplateBuildSingleIterationWF()</span></code><a class="headerlink" href="#antsregistrationtemplatebuildsingleiterationwf" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L152">Link to code</a></p>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>inputspec.images :
 inputspec.fixed_image :
@@ -218,7 +218,7 @@ outputspec.passive_deformed_templates :
 <div class="section" id="graph">
 <h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-d7a9f86aa445c06baff3d2d109a8ab99c2a2003e.png" alt="digraph antsRegistrationTemplateBuildSingleIterationWF_{
+<img src="../../_images/graphviz-caef12343ee81918cc4aac81e142e58ff9f1adde.png" alt="digraph antsRegistrationTemplateBuildSingleIterationWF_{
 
   label=&quot;antsRegistrationTemplateBuildSingleIterationWF_&quot;;
 
@@ -230,15 +230,17 @@ outputspec.passive_deformed_templates :
 
   antsRegistrationTemplateBuildSingleIterationWF__BeginANTS[label=&quot;BeginANTS (ants)&quot;];
 
-  antsRegistrationTemplateBuildSingleIterationWF__99_SplitAffineAndWarpsNode[label=&quot;99_SplitAffineAndWarpsNode (utility)&quot;];
-
-  antsRegistrationTemplateBuildSingleIterationWF__AvgAffineTransform[label=&quot;AvgAffineTransform (ants)&quot;];
-
   antsRegistrationTemplateBuildSingleIterationWF__wimtdeformed[label=&quot;wimtdeformed (ants)&quot;];
 
   antsRegistrationTemplateBuildSingleIterationWF__AvgDeformedImages[label=&quot;AvgDeformedImages (ants)&quot;];
 
   antsRegistrationTemplateBuildSingleIterationWF__99_FlattenTransformAndImagesList[label=&quot;99_FlattenTransformAndImagesList (utility)&quot;];
+
+  antsRegistrationTemplateBuildSingleIterationWF__wimtPassivedeformed[label=&quot;wimtPassivedeformed (ants)&quot;];
+
+  antsRegistrationTemplateBuildSingleIterationWF__99_SplitAffineAndWarpsNode[label=&quot;99_SplitAffineAndWarpsNode (utility)&quot;];
+
+  antsRegistrationTemplateBuildSingleIterationWF__AvgAffineTransform[label=&quot;AvgAffineTransform (ants)&quot;];
 
   antsRegistrationTemplateBuildSingleIterationWF__AvgWarpImages[label=&quot;AvgWarpImages (ants)&quot;];
 
@@ -250,8 +252,6 @@ outputspec.passive_deformed_templates :
 
   antsRegistrationTemplateBuildSingleIterationWF__ReshapeAverageImageWithShapeUpdate[label=&quot;ReshapeAverageImageWithShapeUpdate (ants)&quot;];
 
-  antsRegistrationTemplateBuildSingleIterationWF__wimtPassivedeformed[label=&quot;wimtPassivedeformed (ants)&quot;];
-
   antsRegistrationTemplateBuildSingleIterationWF__99_RenestDeformedPassiveImages[label=&quot;99_RenestDeformedPassiveImages (utility)&quot;];
 
   antsRegistrationTemplateBuildSingleIterationWF__AvgDeformedPassiveImages[label=&quot;AvgDeformedPassiveImages (ants)&quot;];
@@ -259,12 +259,6 @@ outputspec.passive_deformed_templates :
   antsRegistrationTemplateBuildSingleIterationWF__ReshapeAveragePassiveImageWithShapeUpdate[label=&quot;ReshapeAveragePassiveImageWithShapeUpdate (ants)&quot;];
 
   antsRegistrationTemplateBuildSingleIterationWF__outputspec[label=&quot;outputspec (utility)&quot;];
-
-  antsRegistrationTemplateBuildSingleIterationWF__inputspec -&gt; antsRegistrationTemplateBuildSingleIterationWF__BeginANTS;
-
-  antsRegistrationTemplateBuildSingleIterationWF__inputspec -&gt; antsRegistrationTemplateBuildSingleIterationWF__wimtdeformed;
-
-  antsRegistrationTemplateBuildSingleIterationWF__inputspec -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_FlattenTransformAndImagesList;
 
   antsRegistrationTemplateBuildSingleIterationWF__inputspec -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_GetPassiveImagesNode;
 
@@ -278,41 +272,39 @@ outputspec.passive_deformed_templates :
 
   antsRegistrationTemplateBuildSingleIterationWF__inputspec -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_RenestDeformedPassiveImages;
 
+  antsRegistrationTemplateBuildSingleIterationWF__inputspec -&gt; antsRegistrationTemplateBuildSingleIterationWF__wimtdeformed;
+
+  antsRegistrationTemplateBuildSingleIterationWF__inputspec -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_FlattenTransformAndImagesList;
+
+  antsRegistrationTemplateBuildSingleIterationWF__inputspec -&gt; antsRegistrationTemplateBuildSingleIterationWF__BeginANTS;
+
   antsRegistrationTemplateBuildSingleIterationWF__99_GetPassiveImagesNode -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_FlattenTransformAndImagesList;
-
-  antsRegistrationTemplateBuildSingleIterationWF__99_GetMovingImagesNode -&gt; antsRegistrationTemplateBuildSingleIterationWF__BeginANTS;
-
-  antsRegistrationTemplateBuildSingleIterationWF__99_GetMovingImagesNode -&gt; antsRegistrationTemplateBuildSingleIterationWF__BeginANTS;
 
   antsRegistrationTemplateBuildSingleIterationWF__99_GetMovingImagesNode -&gt; antsRegistrationTemplateBuildSingleIterationWF__wimtdeformed;
 
+  antsRegistrationTemplateBuildSingleIterationWF__99_GetMovingImagesNode -&gt; antsRegistrationTemplateBuildSingleIterationWF__BeginANTS;
+
+  antsRegistrationTemplateBuildSingleIterationWF__99_GetMovingImagesNode -&gt; antsRegistrationTemplateBuildSingleIterationWF__BeginANTS;
+
   antsRegistrationTemplateBuildSingleIterationWF__BeginANTS -&gt; antsRegistrationTemplateBuildSingleIterationWF__wimtdeformed;
 
   antsRegistrationTemplateBuildSingleIterationWF__BeginANTS -&gt; antsRegistrationTemplateBuildSingleIterationWF__wimtdeformed;
+
+  antsRegistrationTemplateBuildSingleIterationWF__BeginANTS -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_FlattenTransformAndImagesList;
+
+  antsRegistrationTemplateBuildSingleIterationWF__BeginANTS -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_FlattenTransformAndImagesList;
 
   antsRegistrationTemplateBuildSingleIterationWF__BeginANTS -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_SplitAffineAndWarpsNode;
 
-  antsRegistrationTemplateBuildSingleIterationWF__BeginANTS -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_FlattenTransformAndImagesList;
-
-  antsRegistrationTemplateBuildSingleIterationWF__BeginANTS -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_FlattenTransformAndImagesList;
-
-  antsRegistrationTemplateBuildSingleIterationWF__99_SplitAffineAndWarpsNode -&gt; antsRegistrationTemplateBuildSingleIterationWF__AvgWarpImages;
-
-  antsRegistrationTemplateBuildSingleIterationWF__99_SplitAffineAndWarpsNode -&gt; antsRegistrationTemplateBuildSingleIterationWF__AvgAffineTransform;
-
-  antsRegistrationTemplateBuildSingleIterationWF__AvgAffineTransform -&gt; antsRegistrationTemplateBuildSingleIterationWF__UpdateTemplateShape;
-
-  antsRegistrationTemplateBuildSingleIterationWF__AvgAffineTransform -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_MakeTransformListWithGradientWarps;
-
   antsRegistrationTemplateBuildSingleIterationWF__wimtdeformed -&gt; antsRegistrationTemplateBuildSingleIterationWF__AvgDeformedImages;
-
-  antsRegistrationTemplateBuildSingleIterationWF__AvgDeformedImages -&gt; antsRegistrationTemplateBuildSingleIterationWF__wimtPassivedeformed;
 
   antsRegistrationTemplateBuildSingleIterationWF__AvgDeformedImages -&gt; antsRegistrationTemplateBuildSingleIterationWF__UpdateTemplateShape;
 
   antsRegistrationTemplateBuildSingleIterationWF__AvgDeformedImages -&gt; antsRegistrationTemplateBuildSingleIterationWF__ReshapeAverageImageWithShapeUpdate;
 
   antsRegistrationTemplateBuildSingleIterationWF__AvgDeformedImages -&gt; antsRegistrationTemplateBuildSingleIterationWF__ReshapeAverageImageWithShapeUpdate;
+
+  antsRegistrationTemplateBuildSingleIterationWF__AvgDeformedImages -&gt; antsRegistrationTemplateBuildSingleIterationWF__wimtPassivedeformed;
 
   antsRegistrationTemplateBuildSingleIterationWF__99_FlattenTransformAndImagesList -&gt; antsRegistrationTemplateBuildSingleIterationWF__wimtPassivedeformed;
 
@@ -323,6 +315,16 @@ outputspec.passive_deformed_templates :
   antsRegistrationTemplateBuildSingleIterationWF__99_FlattenTransformAndImagesList -&gt; antsRegistrationTemplateBuildSingleIterationWF__wimtPassivedeformed;
 
   antsRegistrationTemplateBuildSingleIterationWF__99_FlattenTransformAndImagesList -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_RenestDeformedPassiveImages;
+
+  antsRegistrationTemplateBuildSingleIterationWF__wimtPassivedeformed -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_RenestDeformedPassiveImages;
+
+  antsRegistrationTemplateBuildSingleIterationWF__99_SplitAffineAndWarpsNode -&gt; antsRegistrationTemplateBuildSingleIterationWF__AvgAffineTransform;
+
+  antsRegistrationTemplateBuildSingleIterationWF__99_SplitAffineAndWarpsNode -&gt; antsRegistrationTemplateBuildSingleIterationWF__AvgWarpImages;
+
+  antsRegistrationTemplateBuildSingleIterationWF__AvgAffineTransform -&gt; antsRegistrationTemplateBuildSingleIterationWF__UpdateTemplateShape;
+
+  antsRegistrationTemplateBuildSingleIterationWF__AvgAffineTransform -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_MakeTransformListWithGradientWarps;
 
   antsRegistrationTemplateBuildSingleIterationWF__AvgWarpImages -&gt; antsRegistrationTemplateBuildSingleIterationWF__GradientStepWarpImage;
 
@@ -335,8 +337,6 @@ outputspec.passive_deformed_templates :
   antsRegistrationTemplateBuildSingleIterationWF__99_MakeTransformListWithGradientWarps -&gt; antsRegistrationTemplateBuildSingleIterationWF__ReshapeAveragePassiveImageWithShapeUpdate;
 
   antsRegistrationTemplateBuildSingleIterationWF__ReshapeAverageImageWithShapeUpdate -&gt; antsRegistrationTemplateBuildSingleIterationWF__outputspec;
-
-  antsRegistrationTemplateBuildSingleIterationWF__wimtPassivedeformed -&gt; antsRegistrationTemplateBuildSingleIterationWF__99_RenestDeformedPassiveImages;
 
   antsRegistrationTemplateBuildSingleIterationWF__99_RenestDeformedPassiveImages -&gt; antsRegistrationTemplateBuildSingleIterationWF__AvgDeformedPassiveImages;
 
@@ -357,39 +357,39 @@ outputspec.passive_deformed_templates :
 </div>
 </div>
 <div class="section" id="flattentransformandimageslist">
-<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-flattentransformandimageslist"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">FlattenTransformAndImagesList()</span></tt><a class="headerlink" href="#flattentransformandimageslist" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L81">Link to code</a></p>
+<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-flattentransformandimageslist"></span><h2><code class="xref py py-func docutils literal"><span class="pre">FlattenTransformAndImagesList()</span></code><a class="headerlink" href="#flattentransformandimageslist" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L81">Link to code</a></p>
 </div>
 <div class="section" id="getfirstlistelement">
-<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-getfirstlistelement"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">GetFirstListElement()</span></tt><a class="headerlink" href="#getfirstlistelement" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L27">Link to code</a></p>
+<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-getfirstlistelement"></span><h2><code class="xref py py-func docutils literal"><span class="pre">GetFirstListElement()</span></code><a class="headerlink" href="#getfirstlistelement" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L27">Link to code</a></p>
 </div>
 <div class="section" id="getmovingimages">
-<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-getmovingimages"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">GetMovingImages()</span></tt><a class="headerlink" href="#getmovingimages" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L122">Link to code</a></p>
+<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-getmovingimages"></span><h2><code class="xref py py-func docutils literal"><span class="pre">GetMovingImages()</span></code><a class="headerlink" href="#getmovingimages" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L122">Link to code</a></p>
 <p>This currently ONLY works when registrationImageTypes has
 length of exactly 1.  When the new multi-variate registration
 is introduced, it will be expanded.</p>
 </div>
 <div class="section" id="getpassiveimages">
-<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-getpassiveimages"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">GetPassiveImages()</span></tt><a class="headerlink" href="#getpassiveimages" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L134">Link to code</a></p>
+<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-getpassiveimages"></span><h2><code class="xref py py-func docutils literal"><span class="pre">GetPassiveImages()</span></code><a class="headerlink" href="#getpassiveimages" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L134">Link to code</a></p>
 </div>
 <div class="section" id="maketransformlistwithgradientwarps">
-<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-maketransformlistwithgradientwarps"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">MakeTransformListWithGradientWarps()</span></tt><a class="headerlink" href="#maketransformlistwithgradientwarps" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L30">Link to code</a></p>
+<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-maketransformlistwithgradientwarps"></span><h2><code class="xref py py-func docutils literal"><span class="pre">MakeTransformListWithGradientWarps()</span></code><a class="headerlink" href="#maketransformlistwithgradientwarps" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L30">Link to code</a></p>
 </div>
 <div class="section" id="renestdeformedpassiveimages">
-<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-renestdeformedpassiveimages"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">RenestDeformedPassiveImages()</span></tt><a class="headerlink" href="#renestdeformedpassiveimages" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L34">Link to code</a></p>
+<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-renestdeformedpassiveimages"></span><h2><code class="xref py py-func docutils literal"><span class="pre">RenestDeformedPassiveImages()</span></code><a class="headerlink" href="#renestdeformedpassiveimages" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L34">Link to code</a></p>
 </div>
 <div class="section" id="splitaffineandwarpcomponents">
-<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-splitaffineandwarpcomponents"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">SplitAffineAndWarpComponents()</span></tt><a class="headerlink" href="#splitaffineandwarpcomponents" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L69">Link to code</a></p>
+<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-splitaffineandwarpcomponents"></span><h2><code class="xref py py-func docutils literal"><span class="pre">SplitAffineAndWarpComponents()</span></code><a class="headerlink" href="#splitaffineandwarpcomponents" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L69">Link to code</a></p>
 </div>
 <div class="section" id="makelistofoneelement">
-<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-makelistofoneelement"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">makeListOfOneElement()</span></tt><a class="headerlink" href="#makelistofoneelement" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L23">Link to code</a></p>
+<span id="nipype-workflows-smri-ants-antsregistrationbuildtemplate-makelistofoneelement"></span><h2><code class="xref py py-func docutils literal"><span class="pre">makeListOfOneElement()</span></code><a class="headerlink" href="#makelistofoneelement" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/smri/ants/antsRegistrationBuildTemplate.py#L23">Link to code</a></p>
 </div>
 </div>
 
@@ -400,9 +400,9 @@ is introduced, it will be expanded.</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -139,7 +139,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../users/install.html">Download</a></td>
@@ -151,7 +151,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -174,9 +174,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -186,7 +186,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="how-to-wrap-a-command-line-tool">
 <span id="interface-devel"></span><h1>How to wrap a command line tool<a class="headerlink" href="#how-to-wrap-a-command-line-tool" title="Permalink to this headline">¶</a></h1>
@@ -216,11 +216,11 @@ For example:</p>
 inherited from TraitedSpec (however, this does not have to be direct
 inheritance).</p>
 <p>Traits (File, Int etc.) have different parameters (called metadata). In the
-above example we have used the <tt class="docutils literal"><span class="pre">desc</span></tt> metadata which holds human readable
-description of the input. The <tt class="docutils literal"><span class="pre">mandatory</span></tt> flag forces Nipype to throw an
-exception if the input was not set. <tt class="docutils literal"><span class="pre">exists</span></tt> is a special flag that works only
-for <tt class="docutils literal"><span class="pre">File</span> <span class="pre">traits</span></tt> and checks if the provided file exists. More details can be
-found at <a href="#id1"><span class="problematic" id="id2">`interface_specs`_</span></a>.</p>
+above example we have used the <code class="docutils literal"><span class="pre">desc</span></code> metadata which holds human readable
+description of the input. The <code class="docutils literal"><span class="pre">mandatory</span></code> flag forces Nipype to throw an
+exception if the input was not set. <code class="docutils literal"><span class="pre">exists</span></code> is a special flag that works only
+for <code class="docutils literal"><span class="pre">File</span> <span class="pre">traits</span></code> and checks if the provided file exists. More details can be
+found at <a class="reference internal" href="interface_specs.html"><em>Interface Specifications</em></a>.</p>
 <p>The input and output specifications have to be connected to the our example
 interface class:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">Interface</span><span class="p">):</span>
@@ -241,8 +241,8 @@ Command line input spec has to inherit from CommandLineInputSpec which adds two
 extra inputs: environ (a dictionary of environmental variables), and args (a
 string defining extra flags). In addition input spec can define the relation
 between the inputs and the generated command line. To achieve this we have
-added two metadata: <tt class="docutils literal"><span class="pre">argstr</span></tt> (string defining how the argument should be
-formated) and <tt class="docutils literal"><span class="pre">position</span></tt> (number defining the order of the arguments).
+added two metadata: <code class="docutils literal"><span class="pre">argstr</span></code> (string defining how the argument should be
+formated) and <code class="docutils literal"><span class="pre">position</span></code> (number defining the order of the arguments).
 For example</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ExampleInputSpec</span><span class="p">(</span><span class="n">CommandLineSpec</span><span class="p">):</span>
         <span class="n">input_volume</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;Input volume&quot;</span><span class="p">,</span> <span class="n">exists</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
@@ -250,12 +250,12 @@ For example</p>
         <span class="n">parameter</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="n">desc</span> <span class="o">=</span> <span class="s">&quot;some parameter&quot;</span><span class="p">,</span> <span class="n">argstr</span> <span class="o">=</span> <span class="s">&quot;--param </span><span class="si">%d</span><span class="s">&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>As you probably noticed the <tt class="docutils literal"><span class="pre">argstr</span></tt> is a printf type string with formatting
+<p>As you probably noticed the <code class="docutils literal"><span class="pre">argstr</span></code> is a printf type string with formatting
 symbols. For an input defined in InputSpec to be included into the executed
-commandline <tt class="docutils literal"><span class="pre">argstr</span></tt> has to be included. Additionally inside the main
+commandline <code class="docutils literal"><span class="pre">argstr</span></code> has to be included. Additionally inside the main
 interface class you need to specify the name of the executable by assigning it
-to the <tt class="docutils literal"><span class="pre">_cmd</span></tt> field. Also the main interface class needs to inherit from
-<a href="#id3"><span class="problematic" id="id4">`CommandLine`_</span></a>:</p>
+to the <code class="docutils literal"><span class="pre">_cmd</span></code> field. Also the main interface class needs to inherit from
+<a class="reference internal" href="../api/generated/nipype.interfaces.base.html#nipype.interfaces.base.CommandLine" title="nipype.interfaces.base.CommandLine"><code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.base.CommandLine</span></code></a>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">CommandLine</span><span class="p">):</span>
         <span class="n">_cmd</span> <span class="o">=</span> <span class="s">&#39;my_command&#39;</span>
         <span class="n">input_spec</span> <span class="o">=</span> <span class="n">ExampleInputSpec</span>
@@ -265,7 +265,7 @@ to the <tt class="docutils literal"><span class="pre">_cmd</span></tt> field. Al
 <p>There is one more thing we need to take care of. When the executable finishes
 processing it will presumably create some output files. We need to know which
 files to look for, check if they exist and expose them to whatever node would
-like to use them. This is done by implementing <a href="#id5"><span class="problematic" id="id6">`_list_outputs`_</span></a> method in the
+like to use them. This is done by implementing <code class="docutils literal"><span class="pre">_list_outputs</span></code> method in the
 main interface class. Basically what it does is assigning the expected output
 files to the fields of our output spec:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_list_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -332,10 +332,10 @@ in the main interface class:</p>
 <h2>Creating outputs on the fly<a class="headerlink" href="#creating-outputs-on-the-fly" title="Permalink to this headline">¶</a></h2>
 <p>In many cases, command line executables will require specifying output file
 names as arguments on the command line. We have simplified this procedure with
-three additional metadata terms: <tt class="docutils literal"><span class="pre">name_source</span></tt>, <tt class="docutils literal"><span class="pre">name_template</span></tt>,
-<tt class="docutils literal"><span class="pre">keep_extension</span></tt>.</p>
-<p>For example in the <em class="xref std std-ref">InvWarp</em> class, the
-<tt class="docutils literal"><span class="pre">inverse_warp</span></tt> parameter is the name of the output file that is created by
+three additional metadata terms: <code class="docutils literal"><span class="pre">name_source</span></code>, <code class="docutils literal"><span class="pre">name_template</span></code>,
+<code class="docutils literal"><span class="pre">keep_extension</span></code>.</p>
+<p>For example in the <span class="xref std std-ref">InvWarp</span> class, the
+<code class="docutils literal"><span class="pre">inverse_warp</span></code> parameter is the name of the output file that is created by
 the routine.</p>
 <div class="highlight-python"><div class="highlight"><pre>class InvWarpInputSpec(FSLCommandInputSpec):
     ...
@@ -352,7 +352,7 @@ the routine.</p>
 <dd>indicates that the input for this field if provided should not be used in
 computing the input hash for this interface.</dd>
 <dt>name_template (optional)</dt>
-<dd>overrides the default <tt class="docutils literal"><span class="pre">_generated</span></tt> suffix</dd>
+<dd>overrides the default <code class="docutils literal"><span class="pre">_generated</span></code> suffix</dd>
 <dt>output_name (optional)</dt>
 <dd>name of the output (if this is not set same name as the input will be
 assumed)</dd>
@@ -382,9 +382,9 @@ changing extensions specific to package or interface</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -153,7 +153,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -165,7 +165,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -188,9 +188,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -200,18 +200,18 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="development-workflow">
 <span id="id1"></span><h1>Development workflow<a class="headerlink" href="#development-workflow" title="Permalink to this headline">¶</a></h1>
 <p>You already have your own forked copy of the <a class="reference external" href="http://nipy.org/nipype">nipype</a> repository, by
-following <a class="reference internal" href="forking_hell.html#forking"><em>Making your own copy (fork) of nipype</em></a>, <a class="reference internal" href="set_up_fork.html#set-up-fork"><em>Set up your fork</em></a>, and you have configured
-<a class="reference external" href="http://git-scm.com/">git</a> by following <a class="reference internal" href="configure_git.html#configure-git"><em>Configure git</em></a>.</p>
+following <a class="reference internal" href="forking_hell.html#forking"><span>Making your own copy (fork) of nipype</span></a>, <a class="reference internal" href="set_up_fork.html#set-up-fork"><span>Set up your fork</span></a>, and you have configured
+<a class="reference external" href="http://git-scm.com/">git</a> by following <a class="reference internal" href="configure_git.html#configure-git"><span>Configure git</span></a>.</p>
 <div class="section" id="workflow-summary">
 <h2>Workflow summary<a class="headerlink" href="#workflow-summary" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Keep your <tt class="docutils literal"><span class="pre">master</span></tt> branch clean of edits that have not been merged
-to the main <a class="reference external" href="http://nipy.org/nipype">nipype</a> development repo.  Your <tt class="docutils literal"><span class="pre">master</span></tt> then will follow
+<li>Keep your <code class="docutils literal"><span class="pre">master</span></code> branch clean of edits that have not been merged
+to the main <a class="reference external" href="http://nipy.org/nipype">nipype</a> development repo.  Your <code class="docutils literal"><span class="pre">master</span></code> then will follow
 the main <a class="reference external" href="http://nipy.org/nipype">nipype</a> repository.</li>
 <li>Start a new <em>feature branch</em> for each set of edits that you do.</li>
 <li>If you can avoid it, try not to merge other branches into your feature
@@ -232,17 +232,17 @@ git checkout my-new-feature
 of <a class="reference external" href="http://nipy.org/nipype">nipype</a>.  To do this, you <a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-push.html">git push</a> this new branch up to your <a class="reference external" href="http://github.com">github</a>
 repo.  Generally (if you followed the instructions in these pages, and
 by default), git will have a link to your <a class="reference external" href="http://github.com">github</a> repo, called
-<tt class="docutils literal"><span class="pre">origin</span></tt>.  You push up to your own repo on <a class="reference external" href="http://github.com">github</a> with:</p>
+<code class="docutils literal"><span class="pre">origin</span></code>.  You push up to your own repo on <a class="reference external" href="http://github.com">github</a> with:</p>
 <div class="highlight-python"><div class="highlight"><pre>git push origin my-new-feature
 </pre></div>
 </div>
 <p>In git &gt;1.7 you can ensure that the link is correctly set by using the
-<tt class="docutils literal"><span class="pre">--set-upstream</span></tt> option:</p>
+<code class="docutils literal"><span class="pre">--set-upstream</span></code> option:</p>
 <div class="highlight-python"><div class="highlight"><pre>git push --set-upstream origin my-new-feature
 </pre></div>
 </div>
-<p>From now on <a class="reference external" href="http://git-scm.com/">git</a> will know that <tt class="docutils literal"><span class="pre">my-new-feature</span></tt> is related to the
-<tt class="docutils literal"><span class="pre">my-new-feature</span></tt> branch in the <a class="reference external" href="http://github.com">github</a> repo.</p>
+<p>From now on <a class="reference external" href="http://git-scm.com/">git</a> will know that <code class="docutils literal"><span class="pre">my-new-feature</span></code> is related to the
+<code class="docutils literal"><span class="pre">my-new-feature</span></code> branch in the <a class="reference external" href="http://github.com">github</a> repo.</p>
 </div>
 <div class="section" id="the-editing-workflow">
 <h2>The editing workflow<a class="headerlink" href="#the-editing-workflow" title="Permalink to this headline">¶</a></h2>
@@ -260,7 +260,7 @@ git push
 <ol class="arabic">
 <li><p class="first">Make some changes</p>
 </li>
-<li><p class="first">See which files have changed with <tt class="docutils literal"><span class="pre">git</span> <span class="pre">status</span></tt> (see <a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-status.html">git status</a>).
+<li><p class="first">See which files have changed with <code class="docutils literal"><span class="pre">git</span> <span class="pre">status</span></code> (see <a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-status.html">git status</a>).
 You&#8217;ll see a listing like this one:</p>
 <div class="highlight-python"><div class="highlight"><pre># On branch ny-new-feature
 # Changed but not updated:
@@ -277,21 +277,21 @@ no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&q
 </pre></div>
 </div>
 </li>
-<li><p class="first">Check what the actual changes are with <tt class="docutils literal"><span class="pre">git</span> <span class="pre">diff</span></tt> (<a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-diff.html">git diff</a>).</p>
+<li><p class="first">Check what the actual changes are with <code class="docutils literal"><span class="pre">git</span> <span class="pre">diff</span></code> (<a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-diff.html">git diff</a>).</p>
 </li>
-<li><p class="first">Add any new files to version control <tt class="docutils literal"><span class="pre">git</span> <span class="pre">add</span> <span class="pre">new_file_name</span></tt> (see
+<li><p class="first">Add any new files to version control <code class="docutils literal"><span class="pre">git</span> <span class="pre">add</span> <span class="pre">new_file_name</span></code> (see
 <a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-add.html">git add</a>).</p>
 </li>
 <li><p class="first">To commit all modified files into the local copy of your repo,, do
-<tt class="docutils literal"><span class="pre">git</span> <span class="pre">commit</span> <span class="pre">-am</span> <span class="pre">'A</span> <span class="pre">commit</span> <span class="pre">message'</span></tt>.  Note the <tt class="docutils literal"><span class="pre">-am</span></tt> options to
-<tt class="docutils literal"><span class="pre">commit</span></tt>. The <tt class="docutils literal"><span class="pre">m</span></tt> flag just signals that you&#8217;re going to type a
-message on the command line.  The <tt class="docutils literal"><span class="pre">a</span></tt> flag — you can just take on
+<code class="docutils literal"><span class="pre">git</span> <span class="pre">commit</span> <span class="pre">-am</span> <span class="pre">'A</span> <span class="pre">commit</span> <span class="pre">message'</span></code>.  Note the <code class="docutils literal"><span class="pre">-am</span></code> options to
+<code class="docutils literal"><span class="pre">commit</span></code>. The <code class="docutils literal"><span class="pre">m</span></code> flag just signals that you&#8217;re going to type a
+message on the command line.  The <code class="docutils literal"><span class="pre">a</span></code> flag — you can just take on
 faith — or see <a class="reference external" href="http://www.gitready.com/beginner/2009/01/18/the-staging-area.html">why the -a flag?</a> — and the helpful use-case
 description in the <a class="reference external" href="http://tomayko.com/writings/the-thing-about-git">tangled working copy problem</a>. The <a class="reference external" href="http://www.kernel.org/pub/software/scm/git/docs/git-commit.html">git commit</a> manual
 page might also be useful.</p>
 </li>
-<li><p class="first">To push the changes up to your forked repo on <a class="reference external" href="http://github.com">github</a>, do a <tt class="docutils literal"><span class="pre">git</span>
-<span class="pre">push</span></tt> (see <cite>git push</cite>).</p>
+<li><p class="first">To push the changes up to your forked repo on <a class="reference external" href="http://github.com">github</a>, do a <code class="docutils literal"><span class="pre">git</span>
+<span class="pre">push</span></code> (see <cite>git push</cite>).</p>
 </li>
 </ol>
 </div>
@@ -299,22 +299,22 @@ page might also be useful.</p>
 <div class="section" id="asking-for-code-review">
 <h2>Asking for code review<a class="headerlink" href="#asking-for-code-review" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
-<li><p class="first">Go to your repo URL — e.g. <tt class="docutils literal"><span class="pre">http://github.com/your-user-name/nipype</span></tt>.</p>
+<li><p class="first">Go to your repo URL — e.g. <code class="docutils literal"><span class="pre">http://github.com/your-user-name/nipype</span></code>.</p>
 </li>
 <li><p class="first">Click on the <em>Branch list</em> button:</p>
 <img alt="../../_images/branch_list.png" src="../../_images/branch_list.png" />
 </li>
-<li><p class="first">Click on the <em>Compare</em> button for your feature branch — here <tt class="docutils literal"><span class="pre">my-new-feature</span></tt>:</p>
+<li><p class="first">Click on the <em>Compare</em> button for your feature branch — here <code class="docutils literal"><span class="pre">my-new-feature</span></code>:</p>
 <img alt="../../_images/branch_list_compare.png" src="../../_images/branch_list_compare.png" />
 </li>
 <li><p class="first">If asked, select the <em>base</em> and <em>comparison</em> branch names you want to
-compare.  Usually these will be <tt class="docutils literal"><span class="pre">master</span></tt> and <tt class="docutils literal"><span class="pre">my-new-feature</span></tt>
+compare.  Usually these will be <code class="docutils literal"><span class="pre">master</span></code> and <code class="docutils literal"><span class="pre">my-new-feature</span></code>
 (where that is your feature branch name).</p>
 </li>
 <li><p class="first">At this point you should get a nice summary of the changes.  Copy the
 URL for this, and post it to the <a class="reference external" href="http://mail.scipy.org/mailman/listinfo/nipy-devel">nipype mailing list</a>, asking for
 review.  The URL will look something like:
-<tt class="docutils literal"><span class="pre">http://github.com/your-user-name/nipype/compare/master...my-new-feature</span></tt>.
+<code class="docutils literal"><span class="pre">http://github.com/your-user-name/nipype/compare/master...my-new-feature</span></code>.
 There&#8217;s an example at
 <a class="reference external" href="http://github.com/matthew-brett/nipy/compare/master...find-install-data">http://github.com/matthew-brett/nipy/compare/master...find-install-data</a>
 See: <a class="reference external" href="http://github.com/blog/612-introducing-github-compare-view">http://github.com/blog/612-introducing-github-compare-view</a> for
@@ -322,10 +322,10 @@ more detail.</p>
 </li>
 </ol>
 <p>The generated comparison, is between your feature branch
-<tt class="docutils literal"><span class="pre">my-new-feature</span></tt>, and the place in <tt class="docutils literal"><span class="pre">master</span></tt> from which you branched
-<tt class="docutils literal"><span class="pre">my-new-feature</span></tt>.  In other words, you can keep updating <tt class="docutils literal"><span class="pre">master</span></tt>
+<code class="docutils literal"><span class="pre">my-new-feature</span></code>, and the place in <code class="docutils literal"><span class="pre">master</span></code> from which you branched
+<code class="docutils literal"><span class="pre">my-new-feature</span></code>.  In other words, you can keep updating <code class="docutils literal"><span class="pre">master</span></code>
 without interfering with the output from the comparison.  More detail?
-Note the three dots in the URL above (<tt class="docutils literal"><span class="pre">master...my-new-feature</span></tt>).</p>
+Note the three dots in the URL above (<code class="docutils literal"><span class="pre">master...my-new-feature</span></code>).</p>
 <div class="admonition-two-vs-three-dots admonition">
 <p class="first admonition-title">Two vs three dots</p>
 <p>Imagine a series of commits A, B, C, D...  Imagine that there are two
@@ -354,11 +354,11 @@ C). <a class="footnote-reference" href="#thank-yarik" id="id2">[1]</a></p>
 <p>When you are ready to ask for the merge of your code:</p>
 <ol class="arabic">
 <li><p class="first">Go to the URL of your forked repo, say
-<tt class="docutils literal"><span class="pre">http://github.com/your-user-name/nipype.git</span></tt>.</p>
+<code class="docutils literal"><span class="pre">http://github.com/your-user-name/nipype.git</span></code>.</p>
 </li>
 <li><p class="first">Click on the &#8216;Pull request&#8217; button:</p>
 <img alt="../../_images/pull_button.png" src="../../_images/pull_button.png" />
-<p>Enter a message; we suggest you select only <tt class="docutils literal"><span class="pre">nipype</span></tt> as the
+<p>Enter a message; we suggest you select only <code class="docutils literal"><span class="pre">nipype</span></code> as the
 recipient.  The message will go to the <a class="reference external" href="http://mail.scipy.org/mailman/listinfo/nipy-devel">nipype mailing list</a>.  Please
 feel free to add others from the list as you like.</p>
 </li>
@@ -380,13 +380,13 @@ git merge upstream/master
 </div>
 <div class="section" id="in-detail">
 <h3>In detail<a class="headerlink" href="#in-detail" title="Permalink to this headline">¶</a></h3>
-<p>We suggest that you do this only for your <tt class="docutils literal"><span class="pre">master</span></tt> branch, and leave
+<p>We suggest that you do this only for your <code class="docutils literal"><span class="pre">master</span></code> branch, and leave
 your &#8216;feature&#8217; branches unmerged, to keep their history as clean as
 possible.  This makes code review easier:</p>
 <div class="highlight-python"><div class="highlight"><pre>git checkout master
 </pre></div>
 </div>
-<p>Make sure you have done <a class="reference internal" href="set_up_fork.html#linking-to-upstream"><em>Linking your repository to the upstream repo</em></a>.</p>
+<p>Make sure you have done <a class="reference internal" href="set_up_fork.html#linking-to-upstream"><span>Linking your repository to the upstream repo</span></a>.</p>
 <p>Merge the upstream code into your current development by first pulling
 the upstream repo to a copy on your local machine:</p>
 <div class="highlight-python"><div class="highlight"><pre>git fetch upstream
@@ -407,7 +407,7 @@ git branch -D my-unwanted-branch
 git push origin :my-unwanted-branch
 </pre></div>
 </div>
-<p>(Note the colon <tt class="docutils literal"><span class="pre">:</span></tt> before <tt class="docutils literal"><span class="pre">test-branch</span></tt>.  See also:
+<p>(Note the colon <code class="docutils literal"><span class="pre">:</span></code> before <code class="docutils literal"><span class="pre">test-branch</span></code>.  See also:
 <a class="reference external" href="http://github.com/guides/remove-a-remote-branch">http://github.com/guides/remove-a-remote-branch</a></p>
 </div>
 <div class="section" id="several-people-sharing-a-single-repository">
@@ -415,9 +415,9 @@ git push origin :my-unwanted-branch
 <p>If you want to work on some stuff with other people, where you are all
 committing into the same repository, or even the same branch, then just
 share it via <a class="reference external" href="http://github.com">github</a>.</p>
-<p>First fork nipype into your account, as from <a class="reference internal" href="forking_hell.html#forking"><em>Making your own copy (fork) of nipype</em></a>.</p>
+<p>First fork nipype into your account, as from <a class="reference internal" href="forking_hell.html#forking"><span>Making your own copy (fork) of nipype</span></a>.</p>
 <p>Then, go to your forked repository github page, say
-<tt class="docutils literal"><span class="pre">http://github.com/your-user-name/nipype</span></tt></p>
+<code class="docutils literal"><span class="pre">http://github.com/your-user-name/nipype</span></code></p>
 <p>Click on the &#8216;Admin&#8217; button, and add anyone else to the repo as a
 collaborator:</p>
 <blockquote>
@@ -427,8 +427,8 @@ collaborator:</p>
 <div class="highlight-python"><div class="highlight"><pre>git clone git@githhub.com:your-user-name/nipype.git
 </pre></div>
 </div>
-<p>Remember that links starting with <tt class="docutils literal"><span class="pre">git&#64;</span></tt> use the ssh protocol and are
-read-write; links starting with <tt class="docutils literal"><span class="pre">git://</span></tt> are read-only.</p>
+<p>Remember that links starting with <code class="docutils literal"><span class="pre">git&#64;</span></code> use the ssh protocol and are
+read-write; links starting with <code class="docutils literal"><span class="pre">git://</span></code> are read-only.</p>
 <p>Your collaborators can then commit directly into that repo with the
 usual:</p>
 <div class="highlight-python"><div class="highlight"><pre>git commit -am &#39;ENH - much better code&#39;
@@ -466,9 +466,9 @@ repo.</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -1,0 +1,64 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+interfaces.nipy.utils
+=====================
+
+
+.. _nipype.interfaces.nipy.utils.Similarity:
+
+
+.. index:: Similarity
+
+Similarity
+----------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/nipy/utils.py#L49>`__
+
+Calculates similarity between two 3D volumes. Both volumes have to be in
+the same coordinate system, same space within that coordinate system and
+with the same voxel dimensions.
+
+.. deprecated:: 0.10.0
+   Use :py:class:`nipype.algorithms.metrics.Similarity` instead.
+
+Example
+~~~~~~~
+>>> from nipype.interfaces.nipy.utils import Similarity
+>>> similarity = Similarity()
+>>> similarity.inputs.volume1 = 'rc1s1.nii'
+>>> similarity.inputs.volume2 = 'rc1s2.nii'
+>>> similarity.inputs.mask1 = 'mask.nii'
+>>> similarity.inputs.mask2 = 'mask.nii'
+>>> similarity.inputs.metric = 'cr'
+>>> res = similarity.run() # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        volume1: (an existing file name)
+                3D volume
+        volume2: (an existing file name)
+                3D volume
+
+        [Optional]
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        mask1: (an existing file name)
+                3D volume
+        mask2: (an existing file name)
+                3D volume
+        metric
+                str or callable
+                Cost-function for assessing image similarity. If a string,
+                one of 'cc': correlation coefficient, 'cr': correlation
+                ratio, 'crl1': L1-norm based correlation ratio, 'mi': mutual
+                information, 'nmi': normalized mutual information, 'slr':
+                supervised log-likelihood ratio. If a callable, it should
+                take a two-dimensional array representing the image joint
+                histogram as an input and return a float.
+
+Outputs::
+
+        similarity: (a float)
+                Similarity between volume 1 and 2

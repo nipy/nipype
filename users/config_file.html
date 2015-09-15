@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -141,7 +141,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="install.html">Download</a></td>
@@ -153,7 +153,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -176,9 +176,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -188,13 +188,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="configuration-file">
 <span id="config-file"></span><h1>Configuration File<a class="headerlink" href="#configuration-file" title="Permalink to this headline">¶</a></h1>
 <p>Some of the system wide options of Nipype can be configured using a
 configuration file. Nipype looks for the file in the local folder under the name
-<tt class="docutils literal"><span class="pre">nipype.cfg</span></tt> and in <tt class="docutils literal"><span class="pre">~/.nipype/nipype.cfg</span></tt> (in this order). If an option
+<code class="docutils literal"><span class="pre">nipype.cfg</span></code> and in <code class="docutils literal"><span class="pre">~/.nipype/nipype.cfg</span></code> (in this order). If an option
 will not be specified a default value will be assumed. The file is divided into
 following sections:</p>
 <div class="section" id="logging">
@@ -202,17 +202,17 @@ following sections:</p>
 <dl class="docutils">
 <dt><em>workflow_level</em></dt>
 <dd>How detailed the logs regarding workflow should be (possible values:
-<tt class="docutils literal"><span class="pre">INFO</span></tt> and <tt class="docutils literal"><span class="pre">DEBUG</span></tt>; default value: <tt class="docutils literal"><span class="pre">INFO</span></tt>)</dd>
+<code class="docutils literal"><span class="pre">INFO</span></code> and <code class="docutils literal"><span class="pre">DEBUG</span></code>; default value: <code class="docutils literal"><span class="pre">INFO</span></code>)</dd>
 <dt><em>filemanip_level</em></dt>
 <dd>How detailed the logs regarding file operations (for example overwriting
-warning) should be (possible values: <tt class="docutils literal"><span class="pre">INFO</span></tt> and <tt class="docutils literal"><span class="pre">DEBUG</span></tt>; default value:
-<tt class="docutils literal"><span class="pre">INFO</span></tt>)</dd>
+warning) should be (possible values: <code class="docutils literal"><span class="pre">INFO</span></code> and <code class="docutils literal"><span class="pre">DEBUG</span></code>; default value:
+<code class="docutils literal"><span class="pre">INFO</span></code>)</dd>
 <dt><em>interface_level</em></dt>
 <dd>How detailed the logs regarding interface execution should be (possible
-values: <tt class="docutils literal"><span class="pre">INFO</span></tt> and <tt class="docutils literal"><span class="pre">DEBUG</span></tt>; default value: <tt class="docutils literal"><span class="pre">INFO</span></tt>)</dd>
+values: <code class="docutils literal"><span class="pre">INFO</span></code> and <code class="docutils literal"><span class="pre">DEBUG</span></code>; default value: <code class="docutils literal"><span class="pre">INFO</span></code>)</dd>
 <dt><em>log_to_file</em></dt>
 <dd>Indicates whether logging should also send the output to a file (possible
-values: <tt class="docutils literal"><span class="pre">true</span></tt> and <tt class="docutils literal"><span class="pre">false</span></tt>; default value: <tt class="docutils literal"><span class="pre">false</span></tt>)</dd>
+values: <code class="docutils literal"><span class="pre">true</span></code> and <code class="docutils literal"><span class="pre">false</span></code>; default value: <code class="docutils literal"><span class="pre">false</span></code>)</dd>
 <dt><em>log_directory</em></dt>
 <dd>Where to store logs. (string, default value: home directory)</dd>
 <dt><em>log_size</em></dt>
@@ -225,33 +225,33 @@ values: <tt class="docutils literal"><span class="pre">true</span></tt> and <tt 
 <h2>Execution<a class="headerlink" href="#execution" title="Permalink to this headline">¶</a></h2>
 <dl class="docutils">
 <dt><em>plugin</em></dt>
-<dd>This defines which execution plugin to use. (possible values: <tt class="docutils literal"><span class="pre">Linear</span></tt>,
-<tt class="docutils literal"><span class="pre">MultiProc</span></tt>, <tt class="docutils literal"><span class="pre">SGE</span></tt>, <tt class="docutils literal"><span class="pre">IPython</span></tt>; default value: <tt class="docutils literal"><span class="pre">Linear</span></tt>)</dd>
+<dd>This defines which execution plugin to use. (possible values: <code class="docutils literal"><span class="pre">Linear</span></code>,
+<code class="docutils literal"><span class="pre">MultiProc</span></code>, <code class="docutils literal"><span class="pre">SGE</span></code>, <code class="docutils literal"><span class="pre">IPython</span></code>; default value: <code class="docutils literal"><span class="pre">Linear</span></code>)</dd>
 <dt><em>stop_on_first_crash</em></dt>
 <dd>Should the workflow stop upon first node crashing or try to execute as many
-nodes as possible? (possible values: <tt class="docutils literal"><span class="pre">true</span></tt> and <tt class="docutils literal"><span class="pre">false</span></tt>; default value:
-<tt class="docutils literal"><span class="pre">false</span></tt>)</dd>
+nodes as possible? (possible values: <code class="docutils literal"><span class="pre">true</span></code> and <code class="docutils literal"><span class="pre">false</span></code>; default value:
+<code class="docutils literal"><span class="pre">false</span></code>)</dd>
 <dt><em>stop_on_first_rerun</em></dt>
 <dd>Should the workflow stop upon first node trying to recompute (by that we
 mean rerunning a node that has been run before - this can happen due changed
-inputs and/or hash_method since the last run). (possible values: <tt class="docutils literal"><span class="pre">true</span></tt>
-and <tt class="docutils literal"><span class="pre">false</span></tt>; default value: <tt class="docutils literal"><span class="pre">false</span></tt>)</dd>
+inputs and/or hash_method since the last run). (possible values: <code class="docutils literal"><span class="pre">true</span></code>
+and <code class="docutils literal"><span class="pre">false</span></code>; default value: <code class="docutils literal"><span class="pre">false</span></code>)</dd>
 <dt><em>hash_method</em></dt>
 <dd>Should the input files be checked for changes using their content (slow, but
 100% accurate) or just their size and modification date (fast, but
-potentially prone to errors)? (possible values: <tt class="docutils literal"><span class="pre">content</span></tt> and
-<tt class="docutils literal"><span class="pre">timestamp</span></tt>; default value: <tt class="docutils literal"><span class="pre">content</span></tt>)</dd>
+potentially prone to errors)? (possible values: <code class="docutils literal"><span class="pre">content</span></code> and
+<code class="docutils literal"><span class="pre">timestamp</span></code>; default value: <code class="docutils literal"><span class="pre">content</span></code>)</dd>
 <dt><em>keep_inputs</em></dt>
 <dd>Ensures that all inputs that are created in the nodes working directory are
-kept after node execution (possible values: <tt class="docutils literal"><span class="pre">true</span></tt> and <tt class="docutils literal"><span class="pre">false</span></tt>; default
-value: <tt class="docutils literal"><span class="pre">false</span></tt>)</dd>
+kept after node execution (possible values: <code class="docutils literal"><span class="pre">true</span></code> and <code class="docutils literal"><span class="pre">false</span></code>; default
+value: <code class="docutils literal"><span class="pre">false</span></code>)</dd>
 <dt><em>single_thread_matlab</em></dt>
 <dd>Should all of the Matlab interfaces (including SPM) use only one thread?
 This is useful if you are parallelizing your workflow using MultiProc or
-IPython on a single multicore machine. (possible values: <tt class="docutils literal"><span class="pre">true</span></tt> and
-<tt class="docutils literal"><span class="pre">false</span></tt>; default value: <tt class="docutils literal"><span class="pre">true</span></tt>)</dd>
+IPython on a single multicore machine. (possible values: <code class="docutils literal"><span class="pre">true</span></code> and
+<code class="docutils literal"><span class="pre">false</span></code>; default value: <code class="docutils literal"><span class="pre">true</span></code>)</dd>
 <dt><em>display_variable</em></dt>
-<dd>What <tt class="docutils literal"><span class="pre">DISPLAY</span></tt> variable should all command line interfaces be
+<dd>What <code class="docutils literal"><span class="pre">DISPLAY</span></code> variable should all command line interfaces be
 run with. This is useful if you are using <a class="reference external" href="http://www.x.org/archive/X11R7.5/doc/man/man1/Xnest.1.html">xnest</a>
 or <a class="reference external" href="http://www.x.org/archive/X11R6.8.1/doc/Xvfb.1.html">Xvfb</a>
 and you would like to redirect all spawned windows to
@@ -262,18 +262,28 @@ set)</dd>
 required outputs from a node changes, rerunning the workflow will rerun the
 node. Outputs of leaf nodes (nodes whose outputs are not connected to any
 other nodes) will never be deleted independent of this parameter. (possible
-values: <tt class="docutils literal"><span class="pre">true</span></tt> and <tt class="docutils literal"><span class="pre">false</span></tt>; default value: <tt class="docutils literal"><span class="pre">true</span></tt>)</dd>
+values: <code class="docutils literal"><span class="pre">true</span></code> and <code class="docutils literal"><span class="pre">false</span></code>; default value: <code class="docutils literal"><span class="pre">true</span></code>)</dd>
+<dt><em>try_hard_link_datasink</em></dt>
+<dd>When the DataSink is used to produce an orginized output file outside
+of nipypes internal cache structure, a file system hard link will be
+attempted first. A hard link allow multiple file paths to point to the
+same physical storage location on disk if the condisions allow. By
+refering to the same physical file on disk (instead of copying files
+byte-by-byte) we can avoid unnecessary data duplication.  If hard links
+are not supported for the source or destination paths specified, then
+a standard byte-by-byte copy is used.  (possible values: <code class="docutils literal"><span class="pre">true</span></code> and
+<code class="docutils literal"><span class="pre">false</span></code>; default value: <code class="docutils literal"><span class="pre">true</span></code>)</dd>
 <dt><em>use_relative_paths</em></dt>
 <dd>Should the paths stored in results (and used to look for inputs)
 be relative or absolute. Relative paths allow moving the whole
 working directory around but may cause problems with
-symlinks. (possible values: <tt class="docutils literal"><span class="pre">true</span></tt> and <tt class="docutils literal"><span class="pre">false</span></tt>; default
-value: <tt class="docutils literal"><span class="pre">false</span></tt>)</dd>
+symlinks. (possible values: <code class="docutils literal"><span class="pre">true</span></code> and <code class="docutils literal"><span class="pre">false</span></code>; default
+value: <code class="docutils literal"><span class="pre">false</span></code>)</dd>
 <dt><em>local_hash_check</em></dt>
 <dd>Perform the hash check on the job submission machine. This option minimizes
 the number of jobs submitted to a cluster engine or a multiprocessing pool
-to only those that need to be rerun. (possible values: <tt class="docutils literal"><span class="pre">true</span></tt> and
-<tt class="docutils literal"><span class="pre">false</span></tt>; default value: <tt class="docutils literal"><span class="pre">true</span></tt>)</dd>
+to only those that need to be rerun. (possible values: <code class="docutils literal"><span class="pre">true</span></code> and
+<code class="docutils literal"><span class="pre">false</span></code>; default value: <code class="docutils literal"><span class="pre">true</span></code>)</dd>
 <dt><em>job_finished_timeout</em></dt>
 <dd>When batch jobs are submitted through, SGE/PBS/Condor they could be killed
 externally. Nipype checks to see if a results file exists to determine if
@@ -282,23 +292,23 @@ done after a job finish is detected. (float in seconds; default value: 5)</dd>
 <dt><em>remove_node_directories (EXPERIMENTAL)</em></dt>
 <dd>Removes directories whose outputs have already been used
 up. Doesn&#8217;t work with IdentiInterface or any node that patches
-data through (without copying) (possible values: <tt class="docutils literal"><span class="pre">true</span></tt> and
-<tt class="docutils literal"><span class="pre">false</span></tt>; default value: <tt class="docutils literal"><span class="pre">false</span></tt>)</dd>
+data through (without copying) (possible values: <code class="docutils literal"><span class="pre">true</span></code> and
+<code class="docutils literal"><span class="pre">false</span></code>; default value: <code class="docutils literal"><span class="pre">false</span></code>)</dd>
 <dt><em>stop_on_unknown_version</em></dt>
 <dd>If this is set to True, an underlying interface will raise an error, when no
 version information is available. Please notify developers or submit a
 patch.</dd>
 <dt><em>parameterize_dirs</em></dt>
-<dd><p class="first">If this is set to True, the node&#8217;s output directory will contain full
+<dd>If this is set to True, the node&#8217;s output directory will contain full
 parameterization of any iterable, otherwise parameterizations over 32
-characters will be replaced by their hash. (possible values: <tt class="docutils literal"><span class="pre">true</span></tt> and</p>
-<blockquote class="last">
-<div><tt class="docutils literal"><span class="pre">false</span></tt>; default value: <tt class="docutils literal"><span class="pre">true</span></tt>)</div></blockquote>
-</dd>
+characters will be replaced by their hash. (possible values: <code class="docutils literal"><span class="pre">true</span></code> and
+<code class="docutils literal"><span class="pre">false</span></code>; default value: <code class="docutils literal"><span class="pre">true</span></code>)</dd>
 <dt><em>poll_sleep_duration</em></dt>
 <dd>This controls how long the job submission loop will sleep between submitting
 all pending jobs and checking for job completion. To be nice to cluster
 schedulers the default is set to 60 seconds.</dd>
+<dt><em>xvfb_max_wait</em></dt>
+<dd>Maximum time (in seconds) to wait for Xvfb to start, if the _redirect_x parameter of an Interface is True.</dd>
 </dl>
 </div>
 <div class="section" id="example">
@@ -369,9 +379,9 @@ output directory, logging level, etc.,.</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

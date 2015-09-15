@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,38 +114,38 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">workflows.dmri.fsl.tbss</a><ul>
-<li><a class="reference internal" href="#create-tbss-1-preproc"><tt class="docutils literal"><span class="pre">create_tbss_1_preproc()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-tbss-1-preproc"><code class="docutils literal"><span class="pre">create_tbss_1_preproc()</span></code></a><ul>
 <li><a class="reference internal" href="#example">Example</a></li>
 <li><a class="reference internal" href="#graph">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-tbss-2-reg"><tt class="docutils literal"><span class="pre">create_tbss_2_reg()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-tbss-2-reg"><code class="docutils literal"><span class="pre">create_tbss_2_reg()</span></code></a><ul>
 <li><a class="reference internal" href="#id1">Example</a></li>
 <li><a class="reference internal" href="#id2">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-tbss-3-postreg"><tt class="docutils literal"><span class="pre">create_tbss_3_postreg()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-tbss-3-postreg"><code class="docutils literal"><span class="pre">create_tbss_3_postreg()</span></code></a><ul>
 <li><a class="reference internal" href="#id3">Example</a></li>
 <li><a class="reference internal" href="#id4">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-tbss-4-prestats"><tt class="docutils literal"><span class="pre">create_tbss_4_prestats()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-tbss-4-prestats"><code class="docutils literal"><span class="pre">create_tbss_4_prestats()</span></code></a><ul>
 <li><a class="reference internal" href="#id5">Example</a></li>
 <li><a class="reference internal" href="#id6">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-tbss-all"><tt class="docutils literal"><span class="pre">create_tbss_all()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-tbss-all"><code class="docutils literal"><span class="pre">create_tbss_all()</span></code></a><ul>
 <li><a class="reference internal" href="#id7">Example</a></li>
 <li><a class="reference internal" href="#id8">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-tbss-non-fa"><tt class="docutils literal"><span class="pre">create_tbss_non_FA()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-tbss-non-fa"><code class="docutils literal"><span class="pre">create_tbss_non_FA()</span></code></a><ul>
 <li><a class="reference internal" href="#id9">Example</a></li>
 <li><a class="reference internal" href="#id10">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#tbss1-op-string"><tt class="docutils literal"><span class="pre">tbss1_op_string()</span></tt></a></li>
-<li><a class="reference internal" href="#tbss4-op-string"><tt class="docutils literal"><span class="pre">tbss4_op_string()</span></tt></a></li>
+<li><a class="reference internal" href="#tbss1-op-string"><code class="docutils literal"><span class="pre">tbss1_op_string()</span></code></a></li>
+<li><a class="reference internal" href="#tbss4-op-string"><code class="docutils literal"><span class="pre">tbss4_op_string()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -168,7 +168,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -180,7 +180,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -203,9 +203,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -215,13 +215,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-nipype.workflows.dmri.fsl.tbss">
 <span id="workflows-dmri-fsl-tbss"></span><h1>workflows.dmri.fsl.tbss<a class="headerlink" href="#module-nipype.workflows.dmri.fsl.tbss" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="create-tbss-1-preproc">
-<span id="nipype-workflows-dmri-fsl-tbss-create-tbss-1-preproc"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_tbss_1_preproc()</span></tt><a class="headerlink" href="#create-tbss-1-preproc" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/tbss.py#L23">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-tbss-create-tbss-1-preproc"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_tbss_1_preproc()</span></code><a class="headerlink" href="#create-tbss-1-preproc" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/tbss.py#L24">Link to code</a></p>
 <p>Preprocess FA data for TBSS: erodes a little and zero end slicers and
 creates masks(for use in FLIRT &amp; FNIRT from FSL).
 A pipeline that does the same as tbss_1_preproc script in FSL</p>
@@ -285,8 +285,8 @@ A pipeline that does the same as tbss_1_preproc script in FSL</p>
 </div>
 </div>
 <div class="section" id="create-tbss-2-reg">
-<span id="nipype-workflows-dmri-fsl-tbss-create-tbss-2-reg"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_tbss_2_reg()</span></tt><a class="headerlink" href="#create-tbss-2-reg" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/tbss.py#L94">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-tbss-create-tbss-2-reg"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_tbss_2_reg()</span></code><a class="headerlink" href="#create-tbss-2-reg" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/tbss.py#L95">Link to code</a></p>
 <p>TBSS nonlinear registration:
 A pipeline that does the same as &#8216;tbss_2_reg -t&#8217; script in FSL. &#8216;-n&#8217; option
 is not supported at the moment.</p>
@@ -346,8 +346,8 @@ is not supported at the moment.</p>
 </div>
 </div>
 <div class="section" id="create-tbss-3-postreg">
-<span id="nipype-workflows-dmri-fsl-tbss-create-tbss-3-postreg"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_tbss_3_postreg()</span></tt><a class="headerlink" href="#create-tbss-3-postreg" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/tbss.py#L166">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-tbss-create-tbss-3-postreg"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_tbss_3_postreg()</span></code><a class="headerlink" href="#create-tbss-3-postreg" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/tbss.py#L167">Link to code</a></p>
 <p>Post-registration processing: derive mean_FA and mean_FA_skeleton from
 mean of all subjects in study. Target is assumed to be FMRIB58_FA_1mm.
 A pipeline that does the same as &#8216;tbss_3_postreg -S&#8217; script from FSL
@@ -376,7 +376,7 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 <div class="section" id="id4">
 <h3>Graph<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-2f95972beab4e2ca258eaf46a14c37fd2e5bae67.png" alt="digraph tbss_3_postreg{
+<img src="../../_images/graphviz-f425a71ab9f55c4d102daedf709f66fc5f93e5dd.png" alt="digraph tbss_3_postreg{
 
   label=&quot;tbss_3_postreg&quot;;
 
@@ -406,17 +406,17 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 
   tbss_3_postreg_mergefa -&gt; tbss_3_postreg_maskgroup;
 
-  tbss_3_postreg_groupmask -&gt; tbss_3_postreg_maskgroup;
-
   tbss_3_postreg_groupmask -&gt; tbss_3_postreg_outputnode;
 
-  tbss_3_postreg_maskgroup -&gt; tbss_3_postreg_outputnode;
+  tbss_3_postreg_groupmask -&gt; tbss_3_postreg_maskgroup;
 
   tbss_3_postreg_maskgroup -&gt; tbss_3_postreg_meanfa;
 
-  tbss_3_postreg_meanfa -&gt; tbss_3_postreg_outputnode;
+  tbss_3_postreg_maskgroup -&gt; tbss_3_postreg_outputnode;
 
   tbss_3_postreg_meanfa -&gt; tbss_3_postreg_makeskeleton;
+
+  tbss_3_postreg_meanfa -&gt; tbss_3_postreg_outputnode;
 
   tbss_3_postreg_makeskeleton -&gt; tbss_3_postreg_outputnode;
 
@@ -425,8 +425,8 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 </div>
 </div>
 <div class="section" id="create-tbss-4-prestats">
-<span id="nipype-workflows-dmri-fsl-tbss-create-tbss-4-prestats"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_tbss_4_prestats()</span></tt><a class="headerlink" href="#create-tbss-4-prestats" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/tbss.py#L293">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-tbss-create-tbss-4-prestats"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_tbss_4_prestats()</span></code><a class="headerlink" href="#create-tbss-4-prestats" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/tbss.py#L294">Link to code</a></p>
 <dl class="docutils">
 <dt>Post-registration processing:Creating skeleton mask using a threshold</dt>
 <dd>projecting all FA data onto skeleton.</dd>
@@ -458,7 +458,7 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 <div class="section" id="id6">
 <h3>Graph<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-26056f7dbbdc36bf5a656c19d9bc604837388ac8.png" alt="digraph tbss_4_prestats{
+<img src="../../_images/graphviz-a10c9cc1d60676ffb5161aa54e8d4d02aa5a86a7.png" alt="digraph tbss_4_prestats{
 
   label=&quot;tbss_4_prestats&quot;;
 
@@ -476,15 +476,15 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 
   tbss_4_prestats_inputnode -&gt; tbss_4_prestats_invertmask;
 
+  tbss_4_prestats_inputnode -&gt; tbss_4_prestats_projectfa;
+
+  tbss_4_prestats_inputnode -&gt; tbss_4_prestats_projectfa;
+
+  tbss_4_prestats_inputnode -&gt; tbss_4_prestats_projectfa;
+
   tbss_4_prestats_inputnode -&gt; tbss_4_prestats_skeletonmask;
 
   tbss_4_prestats_inputnode -&gt; tbss_4_prestats_skeletonmask;
-
-  tbss_4_prestats_inputnode -&gt; tbss_4_prestats_projectfa;
-
-  tbss_4_prestats_inputnode -&gt; tbss_4_prestats_projectfa;
-
-  tbss_4_prestats_inputnode -&gt; tbss_4_prestats_projectfa;
 
   tbss_4_prestats_skeletonmask -&gt; tbss_4_prestats_invertmask;
 
@@ -505,8 +505,8 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 </div>
 </div>
 <div class="section" id="create-tbss-all">
-<span id="nipype-workflows-dmri-fsl-tbss-create-tbss-all"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_tbss_all()</span></tt><a class="headerlink" href="#create-tbss-all" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/tbss.py#L382">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-tbss-create-tbss-all"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_tbss_all()</span></code><a class="headerlink" href="#create-tbss-all" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/tbss.py#L383">Link to code</a></p>
 <p>Create a pipeline that combines create_tbss_* pipelines</p>
 <div class="section" id="id7">
 <h3>Example<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
@@ -531,7 +531,7 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 <div class="section" id="id8">
 <h3>Graph<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-e0e2fb18942fa4dc1270513ca74d8eeb9cb83a28.png" alt="digraph tbss_all{
+<img src="../../_images/graphviz-51212af03ffbe4026b8ab669cfa0176924c8a654.png" alt="digraph tbss_all{
 
   label=&quot;tbss_all&quot;;
 
@@ -549,11 +549,11 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 
     tbss_all_tbss1_prepfa[label=&quot;prepfa (fsl)&quot;];
 
+    tbss_all_tbss1_slicer[label=&quot;slicer (fsl)&quot;];
+
     tbss_all_tbss1_getmask1[label=&quot;getmask1 (fsl)&quot;];
 
     tbss_all_tbss1_getmask2[label=&quot;getmask2 (fsl)&quot;];
-
-    tbss_all_tbss1_slicer[label=&quot;slicer (fsl)&quot;];
 
     tbss_all_tbss1_outputnode[label=&quot;outputnode (utility)&quot;];
 
@@ -561,19 +561,19 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 
     tbss_all_tbss1_inputnode -&gt; tbss_all_tbss1_prepfa;
 
+    tbss_all_tbss1_prepfa -&gt; tbss_all_tbss1_slicer;
+
     tbss_all_tbss1_prepfa -&gt; tbss_all_tbss1_getmask1;
 
     tbss_all_tbss1_prepfa -&gt; tbss_all_tbss1_outputnode;
 
-    tbss_all_tbss1_prepfa -&gt; tbss_all_tbss1_slicer;
+    tbss_all_tbss1_slicer -&gt; tbss_all_tbss1_outputnode;
 
     tbss_all_tbss1_getmask1 -&gt; tbss_all_tbss1_getmask2;
 
     tbss_all_tbss1_getmask1 -&gt; tbss_all_tbss1_getmask2;
 
     tbss_all_tbss1_getmask2 -&gt; tbss_all_tbss1_outputnode;
-
-    tbss_all_tbss1_slicer -&gt; tbss_all_tbss1_outputnode;
 
   }
 
@@ -633,9 +633,9 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 
     tbss_all_tbss3_applywarp -&gt; tbss_all_tbss3_mergefa;
 
-    tbss_all_tbss3_mergefa -&gt; tbss_all_tbss3_maskgroup;
-
     tbss_all_tbss3_mergefa -&gt; tbss_all_tbss3_groupmask;
+
+    tbss_all_tbss3_mergefa -&gt; tbss_all_tbss3_maskgroup;
 
     tbss_all_tbss3_groupmask -&gt; tbss_all_tbss3_maskgroup;
 
@@ -645,9 +645,9 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 
     tbss_all_tbss3_maskgroup -&gt; tbss_all_tbss3_outputnode;
 
-    tbss_all_tbss3_meanfa -&gt; tbss_all_tbss3_makeskeleton;
-
     tbss_all_tbss3_meanfa -&gt; tbss_all_tbss3_outputnode;
+
+    tbss_all_tbss3_meanfa -&gt; tbss_all_tbss3_makeskeleton;
 
     tbss_all_tbss3_makeskeleton -&gt; tbss_all_tbss3_outputnode;
 
@@ -669,13 +669,13 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 
     tbss_all_tbss4_outputnode[label=&quot;outputnode (utility)&quot;];
 
+    tbss_all_tbss4_inputnode -&gt; tbss_all_tbss4_projectfa;
+
+    tbss_all_tbss4_inputnode -&gt; tbss_all_tbss4_projectfa;
+
+    tbss_all_tbss4_inputnode -&gt; tbss_all_tbss4_projectfa;
+
     tbss_all_tbss4_inputnode -&gt; tbss_all_tbss4_invertmask;
-
-    tbss_all_tbss4_inputnode -&gt; tbss_all_tbss4_projectfa;
-
-    tbss_all_tbss4_inputnode -&gt; tbss_all_tbss4_projectfa;
-
-    tbss_all_tbss4_inputnode -&gt; tbss_all_tbss4_projectfa;
 
     tbss_all_tbss4_inputnode -&gt; tbss_all_tbss4_skeletonmask;
 
@@ -697,41 +697,51 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 
   }
 
+  tbss_all_tbss3_outputnode -&gt; tbss_all_tbss4_inputnode;
+
+  tbss_all_tbss3_outputnode -&gt; tbss_all_tbss4_inputnode;
+
+  tbss_all_tbss3_outputnode -&gt; tbss_all_tbss4_inputnode;
+
+  tbss_all_tbss3_outputnode -&gt; tbss_all_tbss4_inputnode;
+
+  tbss_all_tbss3_outputnode -&gt; tbss_all_outputnode;
+
+  tbss_all_tbss3_outputnode -&gt; tbss_all_outputnode;
+
+  tbss_all_tbss3_outputnode -&gt; tbss_all_outputnode;
+
+  tbss_all_tbss3_outputnode -&gt; tbss_all_outputnode;
+
+  tbss_all_tbss3_outputnode -&gt; tbss_all_outputall_node;
+
+  tbss_all_tbss3_outputnode -&gt; tbss_all_outputall_node;
+
+  tbss_all_tbss3_outputnode -&gt; tbss_all_outputall_node;
+
+  tbss_all_tbss3_outputnode -&gt; tbss_all_outputall_node;
+
+  tbss_all_inputnode -&gt; tbss_all_tbss1_inputnode;
+
+  tbss_all_inputnode -&gt; tbss_all_tbss4_inputnode;
+
   tbss_all_tbss2_outputnode -&gt; tbss_all_tbss3_inputnode;
 
   tbss_all_tbss2_outputnode -&gt; tbss_all_outputall_node;
 
-  tbss_all_tbss3_outputnode -&gt; tbss_all_tbss4_inputnode;
+  tbss_all_tbss4_outputnode -&gt; tbss_all_outputnode;
 
-  tbss_all_tbss3_outputnode -&gt; tbss_all_tbss4_inputnode;
+  tbss_all_tbss4_outputnode -&gt; tbss_all_outputnode;
 
-  tbss_all_tbss3_outputnode -&gt; tbss_all_tbss4_inputnode;
+  tbss_all_tbss4_outputnode -&gt; tbss_all_outputnode;
 
-  tbss_all_tbss3_outputnode -&gt; tbss_all_tbss4_inputnode;
+  tbss_all_tbss4_outputnode -&gt; tbss_all_outputnode;
 
-  tbss_all_tbss3_outputnode -&gt; tbss_all_outputnode;
+  tbss_all_tbss4_outputnode -&gt; tbss_all_outputall_node;
 
-  tbss_all_tbss3_outputnode -&gt; tbss_all_outputnode;
+  tbss_all_tbss4_outputnode -&gt; tbss_all_outputall_node;
 
-  tbss_all_tbss3_outputnode -&gt; tbss_all_outputnode;
-
-  tbss_all_tbss3_outputnode -&gt; tbss_all_outputnode;
-
-  tbss_all_tbss3_outputnode -&gt; tbss_all_outputall_node;
-
-  tbss_all_tbss3_outputnode -&gt; tbss_all_outputall_node;
-
-  tbss_all_tbss3_outputnode -&gt; tbss_all_outputall_node;
-
-  tbss_all_tbss3_outputnode -&gt; tbss_all_outputall_node;
-
-  tbss_all_inputnode -&gt; tbss_all_tbss4_inputnode;
-
-  tbss_all_inputnode -&gt; tbss_all_tbss1_inputnode;
-
-  tbss_all_tbss1_outputnode -&gt; tbss_all_outputall_node;
-
-  tbss_all_tbss1_outputnode -&gt; tbss_all_outputall_node;
+  tbss_all_tbss4_outputnode -&gt; tbss_all_outputall_node;
 
   tbss_all_tbss1_outputnode -&gt; tbss_all_tbss2_inputnode;
 
@@ -739,27 +749,17 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 
   tbss_all_tbss1_outputnode -&gt; tbss_all_tbss3_inputnode;
 
-  tbss_all_tbss4_outputnode -&gt; tbss_all_outputnode;
+  tbss_all_tbss1_outputnode -&gt; tbss_all_outputall_node;
 
-  tbss_all_tbss4_outputnode -&gt; tbss_all_outputnode;
-
-  tbss_all_tbss4_outputnode -&gt; tbss_all_outputnode;
-
-  tbss_all_tbss4_outputnode -&gt; tbss_all_outputnode;
-
-  tbss_all_tbss4_outputnode -&gt; tbss_all_outputall_node;
-
-  tbss_all_tbss4_outputnode -&gt; tbss_all_outputall_node;
-
-  tbss_all_tbss4_outputnode -&gt; tbss_all_outputall_node;
+  tbss_all_tbss1_outputnode -&gt; tbss_all_outputall_node;
 
 }" />
 </p>
 </div>
 </div>
 <div class="section" id="create-tbss-non-fa">
-<span id="nipype-workflows-dmri-fsl-tbss-create-tbss-non-fa"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_tbss_non_FA()</span></tt><a class="headerlink" href="#create-tbss-non-fa" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/tbss.py#L492">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-tbss-create-tbss-non-fa"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_tbss_non_FA()</span></code><a class="headerlink" href="#create-tbss-non-fa" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/tbss.py#L493">Link to code</a></p>
 <p>A pipeline that implement tbss_non_FA in FSL</p>
 <div class="section" id="id9">
 <h3>Example<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
@@ -792,7 +792,7 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 <div class="section" id="id10">
 <h3>Graph<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-8b51fbba609a759d601b185b674ebb70dc90524e.png" alt="digraph tbss_non_FA{
+<img src="../../_images/graphviz-d9dfccbf92f7c965fd07c16e6953daea48713d14.png" alt="digraph tbss_non_FA{
 
   label=&quot;tbss_non_FA&quot;;
 
@@ -808,19 +808,19 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 
   tbss_non_FA_outputnode[label=&quot;outputnode (utility)&quot;];
 
-  tbss_non_FA_inputnode -&gt; tbss_non_FA_applywarp;
-
-  tbss_non_FA_inputnode -&gt; tbss_non_FA_applywarp;
-
-  tbss_non_FA_inputnode -&gt; tbss_non_FA_projectfa;
-
-  tbss_non_FA_inputnode -&gt; tbss_non_FA_projectfa;
-
-  tbss_non_FA_inputnode -&gt; tbss_non_FA_projectfa;
-
-  tbss_non_FA_inputnode -&gt; tbss_non_FA_projectfa;
-
   tbss_non_FA_inputnode -&gt; tbss_non_FA_maskgroup;
+
+  tbss_non_FA_inputnode -&gt; tbss_non_FA_applywarp;
+
+  tbss_non_FA_inputnode -&gt; tbss_non_FA_applywarp;
+
+  tbss_non_FA_inputnode -&gt; tbss_non_FA_projectfa;
+
+  tbss_non_FA_inputnode -&gt; tbss_non_FA_projectfa;
+
+  tbss_non_FA_inputnode -&gt; tbss_non_FA_projectfa;
+
+  tbss_non_FA_inputnode -&gt; tbss_non_FA_projectfa;
 
   tbss_non_FA_applywarp -&gt; tbss_non_FA_merge;
 
@@ -835,12 +835,12 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
 </div>
 </div>
 <div class="section" id="tbss1-op-string">
-<span id="nipype-workflows-dmri-fsl-tbss-tbss1-op-string"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">tbss1_op_string()</span></tt><a class="headerlink" href="#tbss1-op-string" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/tbss.py#L12">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-tbss-tbss1-op-string"></span><h2><code class="xref py py-func docutils literal"><span class="pre">tbss1_op_string()</span></code><a class="headerlink" href="#tbss1-op-string" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/tbss.py#L12">Link to code</a></p>
 </div>
 <div class="section" id="tbss4-op-string">
-<span id="nipype-workflows-dmri-fsl-tbss-tbss4-op-string"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">tbss4_op_string()</span></tt><a class="headerlink" href="#tbss4-op-string" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/fsl/tbss.py#L288">Link to code</a></p>
+<span id="nipype-workflows-dmri-fsl-tbss-tbss4-op-string"></span><h2><code class="xref py py-func docutils literal"><span class="pre">tbss4_op_string()</span></code><a class="headerlink" href="#tbss4-op-string" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/fsl/tbss.py#L289">Link to code</a></p>
 </div>
 </div>
 
@@ -851,9 +851,9 @@ skeleton (same as &#8216;tbss_3_postreg -T&#8217;).</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

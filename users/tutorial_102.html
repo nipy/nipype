@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -143,7 +143,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="install.html">Download</a></td>
@@ -155,7 +155,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -178,9 +178,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -190,15 +190,15 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="pipeline-102">
 <span id="tutorial-102"></span><h1>Pipeline 102<a class="headerlink" href="#pipeline-102" title="Permalink to this headline">¶</a></h1>
 <p>Now that you know how to construct a workflow and execute it, we will go
 into more advanced concepts. This tutorial focuses on
-<a class="reference internal" href="../api/generated/nipype.pipeline.engine.html#nipype.pipeline.engine.Workflow" title="nipype.pipeline.engine.Workflow"><tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Workflow</span></tt></a>
-<a class="reference internal" href="../api/generated/nipype.pipeline.engine.html#nipype.pipeline.engine.Node" title="nipype.pipeline.engine.Node"><tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Node</span></tt></a> and
-<a class="reference internal" href="../api/generated/nipype.pipeline.engine.html#nipype.pipeline.engine.MapNode" title="nipype.pipeline.engine.MapNode"><tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.MapNode</span></tt></a>.</p>
+<a class="reference internal" href="../api/generated/nipype.pipeline.engine.html#nipype.pipeline.engine.Workflow" title="nipype.pipeline.engine.Workflow"><code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Workflow</span></code></a>
+<a class="reference internal" href="../api/generated/nipype.pipeline.engine.html#nipype.pipeline.engine.Node" title="nipype.pipeline.engine.Node"><code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Node</span></code></a> and
+<a class="reference internal" href="../api/generated/nipype.pipeline.engine.html#nipype.pipeline.engine.MapNode" title="nipype.pipeline.engine.MapNode"><code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.MapNode</span></code></a>.</p>
 <p>A workflow is a <strong>directed acyclic graph (DAG)</strong> consisting of nodes
 which can be of type <cite>Workflow</cite>, <cite>Node</cite> or <cite>MapNode</cite>. Workflows can
 be re-used and hierarchical workflows can be easily constructed.</p>
@@ -223,10 +223,10 @@ embedded workflows.</p>
 <div class="section" id="iterables">
 <h3>iterables<a class="headerlink" href="#iterables" title="Permalink to this headline">¶</a></h3>
 <p>This can only be set for Node and MapNode. This is syntactic sugar for
-running a subgraph with the Node/MapNode at its root in a <tt class="docutils literal"><span class="pre">for</span></tt>
+running a subgraph with the Node/MapNode at its root in a <code class="docutils literal"><span class="pre">for</span></code>
 loop. For example, consider an fMRI preprocessing pipeline that you
 would like to run for all your subjects. You can define a workflow and
-then execute it for every single subject inside a <tt class="docutils literal"><span class="pre">for</span></tt> loop. Consider
+then execute it for every single subject inside a <code class="docutils literal"><span class="pre">for</span></code> loop. Consider
 the simplistic example below, where startnode is a node belonging to
 workflow &#8216;mywork.&#8217;</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">subjects</span><span class="p">:</span>
@@ -256,7 +256,7 @@ would be:</p>
         <span class="n">remainingworkflow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Instead of having multiple <tt class="docutils literal"><span class="pre">for</span></tt> loops at various stages, you can set up
+<p>Instead of having multiple <code class="docutils literal"><span class="pre">for</span></code> loops at various stages, you can set up
 another set of iterables for the smoothnode.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">startnode</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subjects</span><span class="p">)</span>
 <span class="n">smoothnode</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;fwhm&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
@@ -275,7 +275,7 @@ executed for each combination of subject and smoothing.</p>
 <p>This is a mandatory keyword arg for MapNode. This enables running the
 underlying interface over a set of inputs and is particularly useful
 when the interface can only operate on a single input. For example, the
-<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.fsl.BET</span></tt> will operate on only one (3d or 4d)
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.fsl.BET</span></code> will operate on only one (3d or 4d)
 NIfTI file. But wrapping BET in a MapNode can execute it over a list of files:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">better</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fsl</span><span class="o">.</span><span class="n">Bet</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;stripper&#39;</span><span class="p">,</span>
                     <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">])</span>
@@ -283,8 +283,8 @@ NIfTI file. But wrapping BET in a MapNode can execute it over a list of files:</
 <span class="n">better</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>This will create a directory called <tt class="docutils literal"><span class="pre">stripper</span></tt> and inside it two
-subdirectories called <tt class="docutils literal"><span class="pre">in_file_0</span></tt> and <tt class="docutils literal"><span class="pre">in_file_1</span></tt>. The output of running bet
+<p>This will create a directory called <code class="docutils literal"><span class="pre">stripper</span></code> and inside it two
+subdirectories called <code class="docutils literal"><span class="pre">in_file_0</span></code> and <code class="docutils literal"><span class="pre">in_file_1</span></code>. The output of running bet
 separately on each of those files will be stored in those two
 subdirectories.</p>
 <p>This can be extended to run it on pairwise inputs. For example,</p>
@@ -321,9 +321,9 @@ duplicate workflow.</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

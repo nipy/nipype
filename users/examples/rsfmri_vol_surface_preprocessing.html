@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -129,7 +129,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../install.html">Download</a></td>
@@ -141,7 +141,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -164,9 +164,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -176,7 +176,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="rsfmri-ants-fs-fsl-spm-acompcor">
 <span id="example-rsfmri-vol-surface-preprocessing"></span><h1>rsfMRI: ANTS, FS, FSL, SPM, aCompCor<a class="headerlink" href="#rsfmri-ants-fs-fsl-spm-acompcor" title="Permalink to this headline">¶</a></h1>
@@ -537,8 +537,6 @@ available from:</p>
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 
-<span class="sd">    ::</span>
-
 <span class="sd">        name : name of workflow (default: &#39;registration&#39;)</span>
 
 <span class="sd">    Inputs::</span>
@@ -674,7 +672,7 @@ All parameters are set using the example from:
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_histogram_matching</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_lower_quantile</span> <span class="o">=</span> <span class="mf">0.005</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_upper_quantile</span> <span class="o">=</span> <span class="mf">0.995</span>
-<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;--float&#39;</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">float</span> <span class="o">=</span> <span class="bp">True</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_warped_image</span> <span class="o">=</span> <span class="s">&#39;output_warped_image.nii.gz&#39;</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;qsub_args&#39;</span><span class="p">:</span> <span class="s">&#39;-l nodes=1:ppn=4&#39;</span><span class="p">}</span>
@@ -683,11 +681,9 @@ All parameters are set using the example from:
 </pre></div>
 </div>
 <p>Concatenate the affine and ants transforms into a list</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pickfirst</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="n">merge</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in2&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;mergexfm&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">merge</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in2&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;mergexfm&#39;</span><span class="p">)</span>
 <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;itk_transform&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in2&#39;</span><span class="p">)</span>
-<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;composite_transform&#39;</span><span class="p">,</span> <span class="n">pickfirst</span><span class="p">),</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="s">&#39;composite_transform&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Transform the mean image. First to anatomical and then to target</p>
@@ -781,7 +777,7 @@ All parameters are set using the example from:
 <span class="n">registration</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">target_image</span> <span class="o">=</span> <span class="n">target_file</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.algorithms.rapidart</span></tt> to determine which of the
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.algorithms.rapidart</span></code> to determine which of the
 images in the functional series are outliers based on deviations in
 intensity or movement.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">art</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">ArtifactDetect</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;art&quot;</span><span class="p">)</span>
@@ -893,7 +889,7 @@ voxel sizes.</p>
 </pre></div>
 </div>
 <p>Smooth the functional data using
-<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Smooth</span></tt>.</p>
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Smooth</span></code>.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">smooth</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Smooth</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;smooth&quot;</span><span class="p">)</span>
 <span class="n">smooth</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="n">vol_fwhm</span>
 
@@ -1168,9 +1164,9 @@ voxel sizes.</p>
 </div>
 <div class="admonition-example-source-code admonition">
 <p class="first admonition-title">Example source code</p>
-<p class="last">You can download <a class="reference download internal" href="../../_downloads/rsfmri_vol_surface_preprocessing.py"><tt class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></tt></a>.
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/rsfmri_vol_surface_preprocessing.py"><code class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></code></a>.
 This same script is also included in the Nipype source distribution under the
-<tt class="file docutils literal"><span class="pre">examples</span></tt> directory.</p>
+<code class="file docutils literal"><span class="pre">examples</span></code> directory.</p>
 </div>
 </div>
 
@@ -1181,9 +1177,9 @@ This same script is also included in the Nipype source distribution under the
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

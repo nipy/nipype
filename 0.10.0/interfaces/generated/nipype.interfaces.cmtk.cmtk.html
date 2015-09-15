@@ -1,0 +1,490 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.10.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.cmtk.cmtk</a><ul>
+<li><a class="reference internal" href="#creatematrix">CreateMatrix</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#createnodes">CreateNodes</a><ul>
+<li><a class="reference internal" href="#id1">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#roigen">ROIGen</a><ul>
+<li><a class="reference internal" href="#id2">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cmat"><code class="docutils literal"><span class="pre">cmat()</span></code></a></li>
+<li><a class="reference internal" href="#create-allpoints-cmat"><code class="docutils literal"><span class="pre">create_allpoints_cmat()</span></code></a></li>
+<li><a class="reference internal" href="#create-endpoints-array"><code class="docutils literal"><span class="pre">create_endpoints_array()</span></code></a></li>
+<li><a class="reference internal" href="#create-nodes"><code class="docutils literal"><span class="pre">create_nodes()</span></code></a></li>
+<li><a class="reference internal" href="#get-connectivity-matrix"><code class="docutils literal"><span class="pre">get_connectivity_matrix()</span></code></a></li>
+<li><a class="reference internal" href="#get-rois-crossed"><code class="docutils literal"><span class="pre">get_rois_crossed()</span></code></a></li>
+<li><a class="reference internal" href="#length"><code class="docutils literal"><span class="pre">length()</span></code></a><ul>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#returns">Returns</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#save-fibers"><code class="docutils literal"><span class="pre">save_fibers()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-cmtk-cmtk">
+<h1>interfaces.cmtk.cmtk<a class="headerlink" href="#interfaces-cmtk-cmtk" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-cmtk-cmtk-creatematrix"></span><div class="section" id="creatematrix">
+<span id="index-0"></span><h2>CreateMatrix<a class="headerlink" href="#creatematrix" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/cmtk/cmtk.py#L430">Link to code</a></p>
+<p>Performs connectivity mapping and outputs the result as a NetworkX graph and a Matlab matrix</p>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.cmtk</span> <span class="kn">as</span> <span class="nn">cmtk</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conmap</span> <span class="o">=</span> <span class="n">cmtk</span><span class="o">.</span><span class="n">CreateMatrix</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conmap</span><span class="o">.</span><span class="n">roi_file</span> <span class="o">=</span> <span class="s">&#39;fsLUT_aparc+aseg.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conmap</span><span class="o">.</span><span class="n">tract_file</span> <span class="o">=</span> <span class="s">&#39;fibers.trk&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">conmap</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+resolution_network_file: (an existing file name)
+        Parcellation files from Connectome Mapping Toolkit
+roi_file: (an existing file name)
+        Freesurfer aparc+aseg file
+tract_file: (an existing file name)
+        Trackvis tract file
+
+[Optional]
+count_region_intersections: (a boolean, nipype default value: False)
+        Counts all of the fiber-region traversals in the connectivity matrix
+        (requires significantly more computational time)
+out_endpoint_array_name: (a file name)
+        Name for the generated endpoint arrays
+out_fiber_length_std_matrix_mat_file: (a file name)
+        Matlab matrix describing the deviation in fiber lengths connecting
+        each node.
+out_intersection_matrix_mat_file: (a file name)
+        Matlab connectivity matrix if all region/fiber intersections are
+        counted.
+out_matrix_file: (a file name)
+        NetworkX graph describing the connectivity
+out_matrix_mat_file: (a file name, nipype default value: cmatrix.mat)
+        Matlab matrix describing the connectivity
+out_mean_fiber_length_matrix_mat_file: (a file name)
+        Matlab matrix describing the mean fiber lengths between each node.
+out_median_fiber_length_matrix_mat_file: (a file name)
+        Matlab matrix describing the mean fiber lengths between each node.
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>endpoint_file: (an existing file name)
+        Saved Numpy array with the endpoints of each fiber
+endpoint_file_mm: (an existing file name)
+        Saved Numpy array with the endpoints of each fiber (in millimeters)
+fiber_label_file: (an existing file name)
+        Saved Numpy array with the labels for each fiber
+fiber_labels_noorphans: (an existing file name)
+        Saved Numpy array with the labels for each non-orphan fiber
+fiber_length_file: (an existing file name)
+        Saved Numpy array with the lengths of each fiber
+fiber_length_std_matrix_mat_file: (an existing file name)
+        Matlab matrix describing the deviation in fiber lengths connecting
+        each node.
+filtered_tractographies: (an existing file name)
+filtered_tractography: (an existing file name)
+        TrackVis file containing only those fibers originate in one and
+        terminate in another region
+filtered_tractography_by_intersections: (an existing file name)
+        TrackVis file containing all fibers which connect two regions
+intersection_matrix_file: (an existing file name)
+        NetworkX graph describing the connectivity
+intersection_matrix_mat_file: (an existing file name)
+        Matlab matrix describing the mean fiber lengths between each node.
+matlab_matrix_files: (an existing file name)
+matrix_file: (an existing file name)
+        NetworkX graph describing the connectivity
+matrix_files: (an existing file name)
+matrix_mat_file: (an existing file name)
+        Matlab matrix describing the connectivity
+mean_fiber_length_matrix_mat_file: (an existing file name)
+        Matlab matrix describing the mean fiber lengths between each node.
+median_fiber_length_matrix_mat_file: (an existing file name)
+        Matlab matrix describing the median fiber lengths between each node.
+stats_file: (an existing file name)
+        Saved Matlab .mat file with the number of fibers saved at each stage
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-cmtk-cmtk-createnodes"></span></div>
+</div>
+<div class="section" id="createnodes">
+<span id="index-1"></span><h2>CreateNodes<a class="headerlink" href="#createnodes" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/cmtk/cmtk.py#L747">Link to code</a></p>
+<p>Generates a NetworkX graph containing nodes at the centroid of each region in the input ROI file.
+Node data is added from the resolution network file.</p>
+<div class="section" id="id1">
+<h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.cmtk</span> <span class="kn">as</span> <span class="nn">cmtk</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mknode</span> <span class="o">=</span> <span class="n">cmtk</span><span class="o">.</span><span class="n">CreateNodes</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mknode</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">roi_file</span> <span class="o">=</span> <span class="s">&#39;ROI_scale500.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mknode</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+resolution_network_file: (an existing file name)
+        Parcellation file from Connectome Mapping Toolkit
+roi_file: (an existing file name)
+        Region of interest file
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_filename: (a file name, nipype default value: nodenetwork.pck)
+        Output gpickled network with the nodes defined.
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>node_network: (a file name)
+        Output gpickled network with the nodes defined.
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-cmtk-cmtk-roigen"></span></div>
+</div>
+<div class="section" id="roigen">
+<span id="index-2"></span><h2>ROIGen<a class="headerlink" href="#roigen" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/cmtk/cmtk.py#L578">Link to code</a></p>
+<p>Generates a ROI file for connectivity mapping and a dictionary file containing relevant node information</p>
+<div class="section" id="id2">
+<h3>Example<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.cmtk</span> <span class="kn">as</span> <span class="nn">cmtk</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rg</span> <span class="o">=</span> <span class="n">cmtk</span><span class="o">.</span><span class="n">ROIGen</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">aparc_aseg_file</span> <span class="o">=</span> <span class="s">&#39;aparc+aseg.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_freesurfer_LUT</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">freesurfer_dir</span> <span class="o">=</span> <span class="s">&#39;/usr/local/freesurfer&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rg</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>The label dictionary is written to disk using Pickle. Resulting data can be loaded using:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;FreeSurferColorLUT_adapted_aparc+aseg_out.pck&quot;</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;fsLUT_aparc+aseg.pck&quot;</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">labelDict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">labelDict</span>                     
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+aparc_aseg_file: (an existing file name)
+        Freesurfer aparc+aseg file
+
+[Optional]
+LUT_file: (an existing file name)
+        Custom lookup table (cf. FreeSurferColorLUT.txt)
+        mutually_exclusive: use_freesurfer_LUT
+freesurfer_dir: (a directory name)
+        Freesurfer main directory
+        requires: use_freesurfer_LUT
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_dict_file: (a file name)
+        Label dictionary saved in Pickle format
+out_roi_file: (a file name)
+        Region of Interest file for connectivity mapping
+use_freesurfer_LUT: (a boolean)
+        Boolean value; Set to True to use default Freesurfer LUT, False for
+        custom LUT
+        mutually_exclusive: LUT_file
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>dict_file: (a file name)
+        Label dictionary saved in Pickle format
+roi_file: (a file name)
+        Region of Interest file for connectivity mapping
+</pre></div>
+</div>
+<span class="target" id="module-nipype.interfaces.cmtk.cmtk"></span></div>
+</div>
+<div class="section" id="cmat">
+<span id="nipype-interfaces-cmtk-cmtk-cmat"></span><h2><code class="xref py py-func docutils literal"><span class="pre">cmat()</span></code><a class="headerlink" href="#cmat" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/cmtk/cmtk.py#L165">Link to code</a></p>
+<p>Create the connection matrix for each resolution using fibers and ROIs.</p>
+</div>
+<div class="section" id="create-allpoints-cmat">
+<span id="nipype-interfaces-cmtk-cmtk-create-allpoints-cmat"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_allpoints_cmat()</span></code><a class="headerlink" href="#create-allpoints-cmat" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/cmtk/cmtk.py#L95">Link to code</a></p>
+<p>Create the intersection arrays for each fiber</p>
+</div>
+<div class="section" id="create-endpoints-array">
+<span id="nipype-interfaces-cmtk-cmtk-create-endpoints-array"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_endpoints_array()</span></code><a class="headerlink" href="#create-endpoints-array" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/cmtk/cmtk.py#L120">Link to code</a></p>
+<p>Create the endpoints arrays for each fiber
+Parameters
+~~~~~~~~~~
+fib: the fibers data
+voxelSize: 3-tuple containing the voxel size of the ROI image
+Returns
+~~~~~~~
+(endpoints: matrix of size [#fibers, 2, 3] containing for each fiber the
+index of its first and last point in the voxelSize volume
+endpointsmm) : endpoints in milimeter coordinates</p>
+</div>
+<div class="section" id="create-nodes">
+<span id="nipype-interfaces-cmtk-cmtk-create-nodes"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_nodes()</span></code><a class="headerlink" href="#create-nodes" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/cmtk/cmtk.py#L726">Link to code</a></p>
+</div>
+<div class="section" id="get-connectivity-matrix">
+<span id="nipype-interfaces-cmtk-cmtk-get-connectivity-matrix"></span><h2><code class="xref py py-func docutils literal"><span class="pre">get_connectivity_matrix()</span></code><a class="headerlink" href="#get-connectivity-matrix" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/cmtk/cmtk.py#L84">Link to code</a></p>
+</div>
+<div class="section" id="get-rois-crossed">
+<span id="nipype-interfaces-cmtk-cmtk-get-rois-crossed"></span><h2><code class="xref py py-func docutils literal"><span class="pre">get_rois_crossed()</span></code><a class="headerlink" href="#get-rois-crossed" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/cmtk/cmtk.py#L71">Link to code</a></p>
+</div>
+<div class="section" id="length">
+<span id="nipype-interfaces-cmtk-cmtk-length"></span><h2><code class="xref py py-func docutils literal"><span class="pre">length()</span></code><a class="headerlink" href="#length" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/cmtk/cmtk.py#L27">Link to code</a></p>
+<p>Euclidean length of track line</p>
+<div class="section" id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>xyz <span class="classifier-delimiter">:</span> <span class="classifier">array-like shape (N,3)</span></dt>
+<dd>array representing x,y,z of N points in a track</dd>
+<dt>along <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
+<dd>If True, return array giving cumulative length along track,
+otherwise (default) return scalar giving total length.</dd>
+</dl>
+</div>
+<div class="section" id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>L <span class="classifier-delimiter">:</span> <span class="classifier">scalar or array shape (N-1,)</span></dt>
+<dd>scalar in case of <cite>along</cite> == False, giving total length, array if
+<cite>along</cite> == True, giving cumulative lengths.</dd>
+</dl>
+</div>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">xyz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">expected_lens</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">([</span><span class="mi">1</span><span class="o">+</span><span class="mi">2</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">3</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">3</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mi">4</span><span class="o">**</span><span class="mi">2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">length</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span> <span class="o">==</span> <span class="n">expected_lens</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">len_along</span> <span class="o">=</span> <span class="n">length</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">along</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">len_along</span><span class="p">,</span> <span class="n">expected_lens</span><span class="o">.</span><span class="n">cumsum</span><span class="p">())</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">length</span><span class="p">([])</span>
+<span class="go">~</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">length</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]])</span>
+<span class="go">~</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">length</span><span class="p">([],</span> <span class="n">along</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="go">array([0])</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="save-fibers">
+<span id="nipype-interfaces-cmtk-cmtk-save-fibers"></span><h2><code class="xref py py-func docutils literal"><span class="pre">save_fibers()</span></code><a class="headerlink" href="#save-fibers" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/cmtk/cmtk.py#L385">Link to code</a></p>
+<p>Stores a new trackvis file fname using only given indices</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

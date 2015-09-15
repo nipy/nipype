@@ -1,0 +1,543 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+interfaces.mrtrix.tensors
+=========================
+
+
+.. _nipype.interfaces.mrtrix.tensors.ConstrainedSphericalDeconvolution:
+
+
+.. index:: ConstrainedSphericalDeconvolution
+
+ConstrainedSphericalDeconvolution
+---------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/mrtrix/tensors.py#L117>`__
+
+Wraps command **csdeconv**
+
+Perform non-negativity constrained spherical deconvolution.
+
+Note that this program makes use of implied symmetries in the diffusion profile.
+First, the fact the signal attenuation profile is real implies that it has conjugate symmetry,
+i.e. Y(l,-m) = Y(l,m)* (where * denotes the complex conjugate). Second, the diffusion profile should be
+antipodally symmetric (i.e. S(x) = S(-x)), implying that all odd l components should be zero.
+Therefore, this program only computes the even elements.    Note that the spherical harmonics equations used here
+differ slightly from those conventionally used, in that the (-1)^m factor has been omitted. This should be taken
+into account in all subsequent calculations. Each volume in the output image corresponds to a different spherical
+harmonic component, according to the following convention:
+
+* [0] Y(0,0)
+* [1] Im {Y(2,2)}
+* [2] Im {Y(2,1)}
+* [3] Y(2,0)
+* [4] Re {Y(2,1)}
+* [5] Re {Y(2,2)}
+* [6] Im {Y(4,4)}
+* [7] Im {Y(4,3)}
+
+Example
+~~~~~~~
+
+>>> import nipype.interfaces.mrtrix as mrt
+>>> csdeconv = mrt.ConstrainedSphericalDeconvolution()
+>>> csdeconv.inputs.in_file = 'dwi.mif'
+>>> csdeconv.inputs.encoding_file = 'encoding.txt'
+>>> csdeconv.run()                                          # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                diffusion-weighted image
+                flag: %s, position: -3
+        response_file: (an existing file name)
+                the diffusion-weighted signal response function for a single fibre
+                population (see EstimateResponse)
+                flag: %s, position: -2
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        debug: (a boolean)
+                Display debugging messages.
+                flag: -debug
+        directions_file: (an existing file name)
+                a text file containing the [ el az ] pairs for the directions:
+                Specify the directions over which to apply the non-negativity
+                constraint (by default, the built-in 300 direction set is used)
+                flag: -directions %s, position: -2
+        encoding_file: (an existing file name)
+                Gradient encoding, supplied as a 4xN text file with each line is in
+                the format [ X Y Z b ], where [ X Y Z ] describe the direction of
+                the applied gradient, and b gives the b-value in units (1000
+                s/mm^2). See FSL2MRTrix
+                flag: -grad %s, position: 1
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        filter_file: (an existing file name)
+                a text file containing the filtering coefficients for each even
+                harmonic order.the linear frequency filtering parameters used for
+                the initial linear spherical deconvolution step (default = [ 1 1 1 0
+                0 ]).
+                flag: -filter %s, position: -2
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        iterations: (an integer (int or long))
+                the maximum number of iterations to perform for each voxel (default
+                = 50)
+                flag: -niter %s
+        lambda_value: (a float)
+                the regularisation parameter lambda that controls the strength of
+                the constraint (default = 1.0).
+                flag: -lambda %s
+        mask_image: (an existing file name)
+                only perform computation within the specified binary brain mask
+                image
+                flag: -mask %s, position: 2
+        maximum_harmonic_order: (an integer (int or long))
+                set the maximum harmonic order for the output series. By default,
+                the program will use the highest possible lmax given the number of
+                diffusion-weighted images.
+                flag: -lmax %s
+        normalise: (a boolean)
+                normalise the DW signal to the b=0 image
+                flag: -normalise, position: 3
+        out_filename: (a file name)
+                Output filename
+                flag: %s, position: -1
+        threshold_value: (a float)
+                the threshold below which the amplitude of the FOD is assumed to be
+                zero, expressed as a fraction of the mean value of the initial FOD
+                (default = 0.1)
+                flag: -threshold %s
+
+Outputs::
+
+        spherical_harmonics_image: (an existing file name)
+                Spherical harmonics image
+
+.. _nipype.interfaces.mrtrix.tensors.DWI2SphericalHarmonicsImage:
+
+
+.. index:: DWI2SphericalHarmonicsImage
+
+DWI2SphericalHarmonicsImage
+---------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/mrtrix/tensors.py#L32>`__
+
+Wraps command **dwi2SH**
+
+Convert base diffusion-weighted images to their spherical harmonic representation.
+
+This program outputs the spherical harmonic decomposition for the set measured signal attenuations.
+The signal attenuations are calculated by identifying the b-zero images from the diffusion encoding supplied
+(i.e. those with zero as the b-value), and dividing the remaining signals by the mean b-zero signal intensity.
+The spherical harmonic decomposition is then calculated by least-squares linear fitting.
+Note that this program makes use of implied symmetries in the diffusion profile.
+
+First, the fact the signal attenuation profile is real implies that it has conjugate symmetry,
+i.e. Y(l,-m) = Y(l,m)* (where * denotes the complex conjugate). Second, the diffusion profile should be
+antipodally symmetric (i.e. S(x) = S(-x)), implying that all odd l components should be zero. Therefore,
+this program only computes the even elements.
+
+Note that the spherical harmonics equations used here differ slightly from those conventionally used,
+in that the (-1)^m factor has been omitted. This should be taken into account in all subsequent calculations.
+
+Each volume in the output image corresponds to a different spherical harmonic component, according to the following convention:
+
+* [0] Y(0,0)
+* [1] Im {Y(2,2)}
+* [2] Im {Y(2,1)}
+* [3] Y(2,0)
+* [4] Re {Y(2,1)}
+* [5] Re {Y(2,2)}
+* [6] Im {Y(4,4)}
+* [7] Im {Y(4,3)}
+
+Example
+~~~~~~~
+
+>>> import nipype.interfaces.mrtrix as mrt
+>>> dwi2SH = mrt.DWI2SphericalHarmonicsImage()
+>>> dwi2SH.inputs.in_file = 'diffusion.nii'
+>>> dwi2SH.inputs.encoding_file = 'encoding.txt'
+>>> dwi2SH.run()                                    # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        encoding_file: (an existing file name)
+                Gradient encoding, supplied as a 4xN text file with each line is in
+                the format [ X Y Z b ], where [ X Y Z ] describe the direction of
+                the applied gradient, and b gives the b-value in units (1000
+                s/mm^2). See FSL2MRTrix
+                flag: -grad %s, position: 1
+        in_file: (an existing file name)
+                Diffusion-weighted images
+                flag: %s, position: -2
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        maximum_harmonic_order: (a float)
+                set the maximum harmonic order for the output series. By default,
+                the program will use the highest possible lmax given the number of
+                diffusion-weighted images.
+                flag: -lmax %s
+        normalise: (a boolean)
+                normalise the DW signal to the b=0 image
+                flag: -normalise, position: 3
+        out_filename: (a file name)
+                Output filename
+                flag: %s, position: -1
+
+Outputs::
+
+        spherical_harmonics_image: (an existing file name)
+                Spherical harmonics image
+
+.. _nipype.interfaces.mrtrix.tensors.Directions2Amplitude:
+
+
+.. index:: Directions2Amplitude
+
+Directions2Amplitude
+--------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/mrtrix/tensors.py#L386>`__
+
+Wraps command **dir2amp**
+
+convert directions image to amplitudes
+
+Example
+~~~~~~~
+
+>>> import nipype.interfaces.mrtrix as mrt
+>>> amplitudes = mrt.Directions2Amplitude()
+>>> amplitudes.inputs.in_file = 'peak_directions.mif'
+>>> amplitudes.run()                                          # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        in_file: (an existing file name)
+                the input directions image. Each volume corresponds to the x, y & z
+                component of each direction vector in turn.
+                flag: %s, position: -2
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        display_debug: (a boolean)
+                Display debugging messages.
+                flag: -debug
+        display_info: (a boolean)
+                Display information messages.
+                flag: -info
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        num_peaks: (an integer (int or long))
+                the number of peaks to extract (default is 3)
+                flag: -num %s
+        out_file: (a file name)
+                the output amplitudes image
+                flag: %s, position: -1
+        peak_directions: (a list of from 2 to 2 items which are a float)
+                phi theta. the direction of a peak to estimate. The algorithm will
+                attempt to find the same number of peaks as have been specified
+                using this option phi: the azimuthal angle of the direction (in
+                degrees). theta: the elevation angle of the direction (in degrees,
+                from the vertical z-axis)
+                flag: -direction %s
+        peaks_image: (an existing file name)
+                the program will try to find the peaks that most closely match those
+                in the image provided
+                flag: -peaks %s
+        quiet_display: (a boolean)
+                do not display information messages or progress status.
+                flag: -quiet
+
+Outputs::
+
+        out_file: (an existing file name)
+                amplitudes image
+
+.. _nipype.interfaces.mrtrix.tensors.EstimateResponseForSH:
+
+
+.. index:: EstimateResponseForSH
+
+EstimateResponseForSH
+---------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/mrtrix/tensors.py#L185>`__
+
+Wraps command **estimate_response**
+
+Estimates the fibre response function for use in spherical deconvolution.
+
+Example
+~~~~~~~
+
+>>> import nipype.interfaces.mrtrix as mrt
+>>> estresp = mrt.EstimateResponseForSH()
+>>> estresp.inputs.in_file = 'dwi.mif'
+>>> estresp.inputs.mask_image = 'dwi_WMProb.mif'
+>>> estresp.inputs.encoding_file = 'encoding.txt'
+>>> estresp.run()                                   # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        encoding_file: (an existing file name)
+                Gradient encoding, supplied as a 4xN text file with each line is in
+                the format [ X Y Z b ], where [ X Y Z ] describe the direction of
+                the applied gradient, and b gives the b-value in units (1000
+                s/mm^2). See FSL2MRTrix
+                flag: -grad %s, position: 1
+        in_file: (an existing file name)
+                Diffusion-weighted images
+                flag: %s, position: -3
+        mask_image: (an existing file name)
+                only perform computation within the specified binary brain mask
+                image
+                flag: %s, position: -2
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        debug: (a boolean)
+                Display debugging messages.
+                flag: -debug
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        maximum_harmonic_order: (an integer (int or long))
+                set the maximum harmonic order for the output series. By default,
+                the program will use the highest possible lmax given the number of
+                diffusion-weighted images.
+                flag: -lmax %s
+        normalise: (a boolean)
+                normalise the DW signal to the b=0 image
+                flag: -normalise
+        out_filename: (a file name)
+                Output filename
+                flag: %s, position: -1
+        quiet: (a boolean)
+                Do not display information messages or progress status.
+                flag: -quiet
+
+Outputs::
+
+        response: (an existing file name)
+                Spherical harmonics image
+
+.. _nipype.interfaces.mrtrix.tensors.FindShPeaks:
+
+
+.. index:: FindShPeaks
+
+FindShPeaks
+-----------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/mrtrix/tensors.py#L349>`__
+
+Wraps command **find_SH_peaks**
+
+identify the orientations of the N largest peaks of a SH profile
+
+Example
+~~~~~~~
+
+>>> import nipype.interfaces.mrtrix as mrt
+>>> shpeaks = mrt.FindShPeaks()
+>>> shpeaks.inputs.in_file = 'csd.mif'
+>>> shpeaks.inputs.directions_file = 'dirs.txt'
+>>> shpeaks.inputs.num_peaks = 2
+>>> shpeaks.run()                                          # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        directions_file: (an existing file name)
+                the set of directions to use as seeds for the peak finding
+                flag: %s, position: -2
+        in_file: (an existing file name)
+                the input image of SH coefficients.
+                flag: %s, position: -3
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        display_debug: (a boolean)
+                Display debugging messages.
+                flag: -debug
+        display_info: (a boolean)
+                Display information messages.
+                flag: -info
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        num_peaks: (an integer (int or long))
+                the number of peaks to extract (default is 3)
+                flag: -num %s
+        out_file: (a file name)
+                the output image. Each volume corresponds to the x, y & z component
+                of each peak direction vector in turn
+                flag: %s, position: -1
+        peak_directions: (a list of from 2 to 2 items which are a float)
+                phi theta. the direction of a peak to estimate. The algorithm will
+                attempt to find the same number of peaks as have been specified
+                using this option phi: the azimuthal angle of the direction (in
+                degrees). theta: the elevation angle of the direction (in degrees,
+                from the vertical z-axis)
+                flag: -direction %s
+        peak_threshold: (a float)
+                only peak amplitudes greater than the threshold will be considered
+                flag: -threshold %s
+        peaks_image: (an existing file name)
+                the program will try to find the peaks that most closely match those
+                in the image provided
+                flag: -peaks %s
+        quiet_display: (a boolean)
+                do not display information messages or progress status.
+                flag: -quiet
+
+Outputs::
+
+        out_file: (an existing file name)
+                Peak directions image
+
+.. _nipype.interfaces.mrtrix.tensors.GenerateDirections:
+
+
+.. index:: GenerateDirections
+
+GenerateDirections
+------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/mrtrix/tensors.py#L313>`__
+
+Wraps command **gendir**
+
+generate a set of directions evenly distributed over a hemisphere.
+
+Example
+~~~~~~~
+
+>>> import nipype.interfaces.mrtrix as mrt
+>>> gendir = mrt.GenerateDirections()
+>>> gendir.inputs.num_dirs = 300
+>>> gendir.run()                                          # doctest: +SKIP
+
+Inputs::
+
+        [Mandatory]
+        num_dirs: (an integer (int or long))
+                the number of directions to generate.
+                flag: %s, position: -2
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        display_debug: (a boolean)
+                Display debugging messages.
+                flag: -debug
+        display_info: (a boolean)
+                Display information messages.
+                flag: -info
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        niter: (an integer (int or long))
+                specify the maximum number of iterations to perform.
+                flag: -niter %s
+        out_file: (a file name)
+                the text file to write the directions to, as [ az el ] pairs.
+                flag: %s, position: -1
+        power: (a float)
+                specify exponent to use for repulsion power law.
+                flag: -power %s
+        quiet_display: (a boolean)
+                do not display information messages or progress status.
+                flag: -quiet
+
+Outputs::
+
+        out_file: (an existing file name)
+                directions file
+
+.. module:: nipype.interfaces.mrtrix.tensors
+
+
+.. _nipype.interfaces.mrtrix.tensors.concat_files:
+
+:func:`concat_files`
+--------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/mrtrix/tensors.py#L221>`__
+
+
+
+
+

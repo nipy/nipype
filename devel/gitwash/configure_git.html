@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -144,7 +144,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -156,7 +156,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -179,9 +179,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -191,15 +191,15 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="configure-git">
 <span id="id1"></span><h1>Configure git<a class="headerlink" href="#configure-git" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="overview">
 <span id="git-config-basic"></span><h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<p>Your personal <a class="reference external" href="http://git-scm.com/">git</a> configurations are saved in the <tt class="docutils literal"><span class="pre">.gitconfig</span></tt> file in
+<p>Your personal <a class="reference external" href="http://git-scm.com/">git</a> configurations are saved in the <code class="docutils literal"><span class="pre">.gitconfig</span></code> file in
 your home directory.
-Here is an example <tt class="docutils literal"><span class="pre">.gitconfig</span></tt> file:</p>
+Here is an example <code class="docutils literal"><span class="pre">.gitconfig</span></code> file:</p>
 <div class="highlight-python"><div class="highlight"><pre>[user]
         name = Your Name
         email = you@yourdomain.example.com
@@ -219,7 +219,7 @@ Here is an example <tt class="docutils literal"><span class="pre">.gitconfig</sp
         summary = true
 </pre></div>
 </div>
-<p>You can edit this file directly or you can use the <tt class="docutils literal"><span class="pre">git</span> <span class="pre">config</span> <span class="pre">--global</span></tt>
+<p>You can edit this file directly or you can use the <code class="docutils literal"><span class="pre">git</span> <span class="pre">config</span> <span class="pre">--global</span></code>
 command:</p>
 <div class="highlight-python"><div class="highlight"><pre>git config --global user.name &quot;Your Name&quot;
 git config --global user.email you@yourdomain.example.com
@@ -233,7 +233,7 @@ git config --global core.editor vim
 git config --global merge.summary true
 </pre></div>
 </div>
-<p>To set up on another computer, you can copy your <tt class="docutils literal"><span class="pre">~/.gitconfig</span></tt> file,
+<p>To set up on another computer, you can copy your <code class="docutils literal"><span class="pre">~/.gitconfig</span></code> file,
 or run the commands above.</p>
 </div>
 <div class="section" id="in-detail">
@@ -254,16 +254,16 @@ should now contain a user section with your name and email:</p>
       email = you@yourdomain.example.com
 </pre></div>
 </div>
-<p>Of course you&#8217;ll need to replace <tt class="docutils literal"><span class="pre">Your</span> <span class="pre">Name</span></tt> and <tt class="docutils literal"><span class="pre">you&#64;yourdomain.example.com</span></tt>
+<p>Of course you&#8217;ll need to replace <code class="docutils literal"><span class="pre">Your</span> <span class="pre">Name</span></code> and <code class="docutils literal"><span class="pre">you&#64;yourdomain.example.com</span></code>
 with your actual name and email address.</p>
 </div>
 <div class="section" id="aliases">
 <h3>Aliases<a class="headerlink" href="#aliases" title="Permalink to this headline">¶</a></h3>
 <p>You might well benefit from some aliases to common commands.</p>
-<p>For example, you might well want to be able to shorten <tt class="docutils literal"><span class="pre">git</span> <span class="pre">checkout</span></tt>
-to <tt class="docutils literal"><span class="pre">git</span> <span class="pre">co</span></tt>.  Or you may want to alias <tt class="docutils literal"><span class="pre">git</span> <span class="pre">diff</span> <span class="pre">--color-words</span></tt>
-(which gives a nicely formatted output of the diff) to <tt class="docutils literal"><span class="pre">git</span> <span class="pre">wdiff</span></tt></p>
-<p>The following <tt class="docutils literal"><span class="pre">git</span> <span class="pre">config</span> <span class="pre">--global</span></tt> commands:</p>
+<p>For example, you might well want to be able to shorten <code class="docutils literal"><span class="pre">git</span> <span class="pre">checkout</span></code>
+to <code class="docutils literal"><span class="pre">git</span> <span class="pre">co</span></code>.  Or you may want to alias <code class="docutils literal"><span class="pre">git</span> <span class="pre">diff</span> <span class="pre">--color-words</span></code>
+(which gives a nicely formatted output of the diff) to <code class="docutils literal"><span class="pre">git</span> <span class="pre">wdiff</span></code></p>
+<p>The following <code class="docutils literal"><span class="pre">git</span> <span class="pre">config</span> <span class="pre">--global</span></code> commands:</p>
 <div class="highlight-python"><div class="highlight"><pre>git config --global alias.ci &quot;commit -a&quot;
 git config --global alias.co checkout
 git config --global alias.st &quot;status -a&quot;
@@ -272,7 +272,7 @@ git config --global alias.br branch
 git config --global alias.wdiff &quot;diff --color-words&quot;
 </pre></div>
 </div>
-<p>will create an <tt class="docutils literal"><span class="pre">alias</span></tt> section in your <tt class="docutils literal"><span class="pre">.gitconfig</span></tt> file with contents
+<p>will create an <code class="docutils literal"><span class="pre">alias</span></code> section in your <code class="docutils literal"><span class="pre">.gitconfig</span></code> file with contents
 like this:</p>
 <div class="highlight-python"><div class="highlight"><pre>[alias]
         ci = commit -a
@@ -293,7 +293,7 @@ like this:</p>
 </div>
 <div class="section" id="merging">
 <h3>Merging<a class="headerlink" href="#merging" title="Permalink to this headline">¶</a></h3>
-<p>To enforce summaries when doing merges (<tt class="docutils literal"><span class="pre">~/.gitconfig</span></tt> file again):</p>
+<p>To enforce summaries when doing merges (<code class="docutils literal"><span class="pre">~/.gitconfig</span></code> file again):</p>
 <div class="highlight-python"><div class="highlight"><pre>[merge]
    log = true
 </pre></div>
@@ -313,9 +313,9 @@ like this:</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

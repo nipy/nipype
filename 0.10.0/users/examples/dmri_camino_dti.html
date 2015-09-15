@@ -1,0 +1,477 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.10.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dMRI: Camino, DTI</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a><ul>
+<li><a class="reference internal" href="#setup-for-diffusion-tensor-computation">Setup for Diffusion Tensor Computation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dmri-camino-dti">
+<span id="example-dmri-camino-dti"></span><h1>dMRI: Camino, DTI<a class="headerlink" href="#dmri-camino-dti" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>This script, camino_dti_tutorial.py, demonstrates the ability to perform basic diffusion analysis
+in a Nipype pipeline.</p>
+<blockquote>
+<div>python dmri_camino_dti.py</div></blockquote>
+<p>We perform this analysis using the FSL course data, which can be acquired from here:
+<a class="reference external" href="http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz">http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz</a></p>
+<p>Import necessary modules from nipype.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">as</span> <span class="nn">nio</span>           <span class="c"># Data i/o</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.utility</span> <span class="kn">as</span> <span class="nn">util</span>     <span class="c"># utility</span>
+<span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="kn">as</span> <span class="nn">pe</span>          <span class="c"># pypeline engine</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.camino</span> <span class="kn">as</span> <span class="nn">camino</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.camino2trackvis</span> <span class="kn">as</span> <span class="nn">cam2trk</span>
+<span class="kn">import</span> <span class="nn">nipype.algorithms.misc</span> <span class="kn">as</span> <span class="nn">misc</span>
+<span class="kn">import</span> <span class="nn">os</span>                                    <span class="c"># system functions</span>
+</pre></div>
+</div>
+<p>We use the following functions to scrape the voxel and data dimensions of the input images. This allows the
+pipeline to be flexible enough to accept and process images of varying size. The SPM Face tutorial
+(fmri_spm_face.py) also implements this inferral of voxel size from the data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_vox_dims</span><span class="p">(</span><span class="n">volume</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">nibabel</span> <span class="kn">as</span> <span class="nn">nb</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">volume</span> <span class="o">=</span> <span class="n">volume</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">nii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+    <span class="n">hdr</span> <span class="o">=</span> <span class="n">nii</span><span class="o">.</span><span class="n">get_header</span><span class="p">()</span>
+    <span class="n">voxdims</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">voxdims</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">voxdims</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">voxdims</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+
+<span class="k">def</span> <span class="nf">get_data_dims</span><span class="p">(</span><span class="n">volume</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">nibabel</span> <span class="kn">as</span> <span class="nn">nb</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">volume</span> <span class="o">=</span> <span class="n">volume</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">nii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+    <span class="n">hdr</span> <span class="o">=</span> <span class="n">nii</span><span class="o">.</span><span class="n">get_header</span><span class="p">()</span>
+    <span class="n">datadims</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get_data_shape</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">datadims</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">datadims</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">datadims</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+
+<span class="k">def</span> <span class="nf">get_affine</span><span class="p">(</span><span class="n">volume</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">nibabel</span> <span class="kn">as</span> <span class="nn">nb</span>
+    <span class="n">nii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nii</span><span class="o">.</span><span class="n">get_affine</span><span class="p">()</span>
+
+<span class="n">subject_list</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;subj1&#39;</span><span class="p">]</span>
+<span class="n">fsl</span><span class="o">.</span><span class="n">FSLCommand</span><span class="o">.</span><span class="n">set_default_output_type</span><span class="p">(</span><span class="s">&#39;NIFTI&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Map field names to individual subject runs</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dwi</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">]],</span>
+            <span class="n">bvecs</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;bvecs&#39;</span><span class="p">]],</span>
+            <span class="n">bvals</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;bvals&#39;</span><span class="p">]])</span>
+
+<span class="n">infosource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">]),</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s">&quot;infosource&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here we set up iteration over all the subjects. The following line
+is a particular example of the flexibility of the system.  The
+<code class="docutils literal"><span class="pre">datasource</span></code> attribute <code class="docutils literal"><span class="pre">iterables</span></code> tells the pipeline engine that
+it should repeat the analysis on each of the items in the
+<code class="docutils literal"><span class="pre">subject_list</span></code>. In the current example, the entire first level
+preprocessing and estimation will be repeated for each subject
+contained in subject_list.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">infosource</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subject_list</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we create a <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.DataGrabber</span></code> object and
+fill in the information from above about the layout of our data.  The
+<a class="reference internal" href="../../api/generated/nipype.pipeline.engine.html#nipype.pipeline.engine.Node" title="nipype.pipeline.engine.Node"><code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Node</span></code></a> module wraps the interface object
+and provides additional housekeeping and pipeline specific
+functionality.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">datasource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">],</span>
+                                               <span class="n">outfields</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                     <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;datasource&#39;</span><span class="p">)</span>
+
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&quot;</span>
+
+<span class="c"># This needs to point to the fdt folder you can find after extracting</span>
+<span class="c"># http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;fsl_course_data/fdt/&#39;</span><span class="p">)</span>
+
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">field_template</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dwi</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">.nii.gz&#39;</span><span class="p">)</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span> <span class="o">=</span> <span class="n">info</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>An inputnode is used to pass the data obtained by the data grabber to the actual processing functions</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;dwi&quot;</span><span class="p">,</span> <span class="s">&quot;bvecs&quot;</span><span class="p">,</span> <span class="s">&quot;bvals&quot;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;inputnode&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="setup-for-diffusion-tensor-computation">
+<h3>Setup for Diffusion Tensor Computation<a class="headerlink" href="#setup-for-diffusion-tensor-computation" title="Permalink to this headline">¶</a></h3>
+<p>In this section we create the nodes necessary for diffusion analysis.
+First, the diffusion image is converted to voxel order.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">image2voxel</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">camino</span><span class="o">.</span><span class="n">Image2Voxel</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;image2voxel&quot;</span><span class="p">)</span>
+<span class="n">fsl2scheme</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">camino</span><span class="o">.</span><span class="n">FSL2Scheme</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;fsl2scheme&quot;</span><span class="p">)</span>
+<span class="n">fsl2scheme</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">usegradmod</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>Second, diffusion tensors are fit to the voxel-order data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dtifit</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">camino</span><span class="o">.</span><span class="n">DTIFit</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;dtifit&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Next, a lookup table is generated from the schemefile and the
+signal-to-noise ratio (SNR) of the unweighted (q=0) data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dtlutgen</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">camino</span><span class="o">.</span><span class="n">DTLUTGen</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;dtlutgen&quot;</span><span class="p">)</span>
+<span class="n">dtlutgen</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">snr</span> <span class="o">=</span> <span class="mf">16.0</span>
+<span class="n">dtlutgen</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inversion</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>In this tutorial we implement probabilistic tractography using the PICo algorithm.
+PICo tractography requires an estimate of the fibre direction and a model of its
+uncertainty in each voxel; this is produced using the following node.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">picopdfs</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">camino</span><span class="o">.</span><span class="n">PicoPDFs</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;picopdfs&quot;</span><span class="p">)</span>
+<span class="n">picopdfs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputmodel</span> <span class="o">=</span> <span class="s">&#39;dt&#39;</span>
+</pre></div>
+</div>
+<p>An FSL BET node creates a brain mask is generated from the diffusion image for seeding the PICo tractography.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">bet</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;bet&quot;</span><span class="p">)</span>
+<span class="n">bet</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>Finally, tractography is performed.
+First DT streamline tractography.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">trackdt</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">camino</span><span class="o">.</span><span class="n">TrackDT</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;trackdt&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now camino&#8217;s Probablistic Index of connectivity algorithm.
+In this tutorial, we will use only 1 iteration for time-saving purposes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">trackpico</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">camino</span><span class="o">.</span><span class="n">TrackPICo</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;trackpico&quot;</span><span class="p">)</span>
+<span class="n">trackpico</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">iterations</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>Currently, the best program for visualizing tracts is TrackVis. For this reason, a node is included to
+convert the raw tract data to .trk format. Solely for testing purposes, another node is added to perform the reverse.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cam2trk_dt</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">cam2trk</span><span class="o">.</span><span class="n">Camino2Trackvis</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;cam2trk_dt&quot;</span><span class="p">)</span>
+<span class="n">cam2trk_dt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">min_length</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">cam2trk_dt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">voxel_order</span> <span class="o">=</span> <span class="s">&#39;LAS&#39;</span>
+
+<span class="n">cam2trk_pico</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">cam2trk</span><span class="o">.</span><span class="n">Camino2Trackvis</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;cam2trk_pico&quot;</span><span class="p">)</span>
+<span class="n">cam2trk_pico</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">min_length</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">cam2trk_pico</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">voxel_order</span> <span class="o">=</span> <span class="s">&#39;LAS&#39;</span>
+
+<span class="n">trk2camino</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">cam2trk</span><span class="o">.</span><span class="n">Trackvis2Camino</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;trk2camino&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Tracts can also be converted to VTK and OOGL formats, for use in programs such as GeomView and Paraview,
+using the following two nodes. For VTK use VtkStreamlines.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">procstreamlines</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">camino</span><span class="o">.</span><span class="n">ProcStreamlines</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;procstreamlines&quot;</span><span class="p">)</span>
+<span class="n">procstreamlines</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">outputtracts</span> <span class="o">=</span> <span class="s">&#39;oogl&#39;</span>
+</pre></div>
+</div>
+<p>We can also produce a variety of scalar values from our fitted tensors. The following nodes generate the
+fractional anisotropy and diffusivity trace maps and their associated headers.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fa</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">camino</span><span class="o">.</span><span class="n">ComputeFractionalAnisotropy</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;fa&#39;</span><span class="p">)</span>
+<span class="n">trace</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">camino</span><span class="o">.</span><span class="n">ComputeTensorTrace</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;trace&#39;</span><span class="p">)</span>
+<span class="n">dteig</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">camino</span><span class="o">.</span><span class="n">ComputeEigensystem</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;dteig&#39;</span><span class="p">)</span>
+
+<span class="n">analyzeheader_fa</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span> <span class="n">camino</span><span class="o">.</span><span class="n">AnalyzeHeader</span><span class="p">(),</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;analyzeheader_fa&quot;</span><span class="p">)</span>
+<span class="n">analyzeheader_fa</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">datatype</span> <span class="o">=</span> <span class="s">&quot;double&quot;</span>
+<span class="n">analyzeheader_trace</span> <span class="o">=</span> <span class="n">analyzeheader_fa</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="s">&#39;analyzeheader_trace&#39;</span><span class="p">)</span>
+
+<span class="n">fa2nii</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">misc</span><span class="o">.</span><span class="n">CreateNifti</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;fa2nii&#39;</span><span class="p">)</span>
+<span class="n">trace2nii</span> <span class="o">=</span> <span class="n">fa2nii</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="s">&quot;trace2nii&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Since we have now created all our nodes, we can now define our workflow and start making connections.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;tractography&#39;</span><span class="p">)</span>
+
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">bet</span><span class="p">,[(</span><span class="s">&quot;dwi&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+<p>File format conversion</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">image2voxel</span><span class="p">,</span> <span class="p">[(</span><span class="s">&quot;dwi&quot;</span><span class="p">,</span> <span class="s">&quot;in_file&quot;</span><span class="p">)]),</span>
+                      <span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">fsl2scheme</span><span class="p">,</span> <span class="p">[(</span><span class="s">&quot;bvecs&quot;</span><span class="p">,</span> <span class="s">&quot;bvec_file&quot;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s">&quot;bvals&quot;</span><span class="p">,</span> <span class="s">&quot;bval_file&quot;</span><span class="p">)])</span>
+                      <span class="p">])</span>
+</pre></div>
+</div>
+<p>Tensor fitting</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">image2voxel</span><span class="p">,</span> <span class="n">dtifit</span><span class="p">,[[</span><span class="s">&#39;voxel_order&#39;</span><span class="p">,</span><span class="s">&#39;in_file&#39;</span><span class="p">]]),</span>
+                      <span class="p">(</span><span class="n">fsl2scheme</span><span class="p">,</span> <span class="n">dtifit</span><span class="p">,[[</span><span class="s">&#39;scheme&#39;</span><span class="p">,</span><span class="s">&#39;scheme_file&#39;</span><span class="p">]])</span>
+                     <span class="p">])</span>
+</pre></div>
+</div>
+<p>Workflow for applying DT streamline tractogpahy</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">bet</span><span class="p">,</span> <span class="n">trackdt</span><span class="p">,[(</span><span class="s">&quot;mask_file&quot;</span><span class="p">,</span><span class="s">&quot;seed_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">dtifit</span><span class="p">,</span> <span class="n">trackdt</span><span class="p">,[(</span><span class="s">&quot;tensor_fitted&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+<p>Workflow for applying PICo</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">bet</span><span class="p">,</span> <span class="n">trackpico</span><span class="p">,[(</span><span class="s">&quot;mask_file&quot;</span><span class="p">,</span><span class="s">&quot;seed_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">fsl2scheme</span><span class="p">,</span> <span class="n">dtlutgen</span><span class="p">,[(</span><span class="s">&quot;scheme&quot;</span><span class="p">,</span><span class="s">&quot;scheme_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">dtlutgen</span><span class="p">,</span> <span class="n">picopdfs</span><span class="p">,[(</span><span class="s">&quot;dtLUT&quot;</span><span class="p">,</span><span class="s">&quot;luts&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">dtifit</span><span class="p">,</span> <span class="n">picopdfs</span><span class="p">,[(</span><span class="s">&quot;tensor_fitted&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">picopdfs</span><span class="p">,</span> <span class="n">trackpico</span><span class="p">,[(</span><span class="s">&quot;pdfs&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+
+<span class="c"># ProcStreamlines might throw memory errors - comment this line out in such case</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">trackdt</span><span class="p">,</span> <span class="n">procstreamlines</span><span class="p">,[(</span><span class="s">&quot;tracked&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+<p>Connecting the Fractional Anisotropy and Trace nodes is simple, as they obtain their input from the
+tensor fitting.</p>
+<p>This is also where our voxel- and data-grabbing functions come in. We pass these functions, along with
+the original DWI image from the input node, to the header-generating nodes. This ensures that the files
+will be correct and readable.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">dtifit</span><span class="p">,</span> <span class="n">fa</span><span class="p">,[(</span><span class="s">&quot;tensor_fitted&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">fa</span><span class="p">,</span> <span class="n">analyzeheader_fa</span><span class="p">,[(</span><span class="s">&quot;fa&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">analyzeheader_fa</span><span class="p">,[((</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span> <span class="n">get_vox_dims</span><span class="p">),</span> <span class="s">&#39;voxel_dims&#39;</span><span class="p">),</span>
+<span class="p">((</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span> <span class="n">get_data_dims</span><span class="p">),</span> <span class="s">&#39;data_dims&#39;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">fa</span><span class="p">,</span> <span class="n">fa2nii</span><span class="p">,[(</span><span class="s">&#39;fa&#39;</span><span class="p">,</span><span class="s">&#39;data_file&#39;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">fa2nii</span><span class="p">,[((</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span> <span class="n">get_affine</span><span class="p">),</span> <span class="s">&#39;affine&#39;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">analyzeheader_fa</span><span class="p">,</span> <span class="n">fa2nii</span><span class="p">,[(</span><span class="s">&#39;header&#39;</span><span class="p">,</span> <span class="s">&#39;header_file&#39;</span><span class="p">)])])</span>
+
+
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">dtifit</span><span class="p">,</span> <span class="n">trace</span><span class="p">,[(</span><span class="s">&quot;tensor_fitted&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">trace</span><span class="p">,</span> <span class="n">analyzeheader_trace</span><span class="p">,[(</span><span class="s">&quot;trace&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">analyzeheader_trace</span><span class="p">,[((</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span> <span class="n">get_vox_dims</span><span class="p">),</span> <span class="s">&#39;voxel_dims&#39;</span><span class="p">),</span>
+<span class="p">((</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span> <span class="n">get_data_dims</span><span class="p">),</span> <span class="s">&#39;data_dims&#39;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">trace</span><span class="p">,</span> <span class="n">trace2nii</span><span class="p">,[(</span><span class="s">&#39;trace&#39;</span><span class="p">,</span><span class="s">&#39;data_file&#39;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">trace2nii</span><span class="p">,[((</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span> <span class="n">get_affine</span><span class="p">),</span> <span class="s">&#39;affine&#39;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">analyzeheader_trace</span><span class="p">,</span> <span class="n">trace2nii</span><span class="p">,[(</span><span class="s">&#39;header&#39;</span><span class="p">,</span> <span class="s">&#39;header_file&#39;</span><span class="p">)])])</span>
+
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">dtifit</span><span class="p">,</span> <span class="n">dteig</span><span class="p">,[(</span><span class="s">&quot;tensor_fitted&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">trackpico</span><span class="p">,</span> <span class="n">cam2trk_pico</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;tracked&#39;</span><span class="p">,</span><span class="s">&#39;in_file&#39;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">trackdt</span><span class="p">,</span> <span class="n">cam2trk_dt</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;tracked&#39;</span><span class="p">,</span><span class="s">&#39;in_file&#39;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">cam2trk_pico</span><span class="p">,[((</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span> <span class="n">get_vox_dims</span><span class="p">),</span> <span class="s">&#39;voxel_dims&#39;</span><span class="p">),</span>
+                                                <span class="p">((</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span> <span class="n">get_data_dims</span><span class="p">),</span> <span class="s">&#39;data_dims&#39;</span><span class="p">)])])</span>
+
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">cam2trk_dt</span><span class="p">,[((</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span> <span class="n">get_vox_dims</span><span class="p">),</span> <span class="s">&#39;voxel_dims&#39;</span><span class="p">),</span>
+                                              <span class="p">((</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span> <span class="n">get_data_dims</span><span class="p">),</span> <span class="s">&#39;data_dims&#39;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+<p>Finally, we create another higher-level workflow to connect our tractography workflow with the info and datagrabbing nodes
+declared at the beginning. Our tutorial can is now extensible to any arbitrary number of subjects by simply adding
+their names to the subject list and their data to the proper folders.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;workflow&quot;</span><span class="p">)</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;camino_dti_tutorial&#39;</span><span class="p">)</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">infosource</span><span class="p">,</span><span class="n">datasource</span><span class="p">,[(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">datasource</span><span class="p">,</span><span class="n">tractography</span><span class="p">,[(</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span><span class="s">&#39;inputnode.dwi&#39;</span><span class="p">),</span>
+                                            <span class="p">(</span><span class="s">&#39;bvals&#39;</span><span class="p">,</span><span class="s">&#39;inputnode.bvals&#39;</span><span class="p">),</span>
+                                            <span class="p">(</span><span class="s">&#39;bvecs&#39;</span><span class="p">,</span><span class="s">&#39;inputnode.bvecs&#39;</span><span class="p">)</span>
+                                           <span class="p">])</span>
+                 <span class="p">])</span>
+</pre></div>
+</div>
+<p>The following functions run the whole workflow and produce a .dot and .png graph of the processing pipeline.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">workflow</span><span class="o">.</span><span class="n">write_graph</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You can choose the format of the experted graph with the <code class="docutils literal"><span class="pre">format</span></code> option. For example <code class="docutils literal"><span class="pre">workflow.write_graph(format='eps')</span></code></p>
+<div class="admonition-example-source-code admonition">
+<p class="first admonition-title">Example source code</p>
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/dmri_camino_dti.py"><code class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></code></a>.
+This same script is also included in the Nipype source distribution under the
+<code class="file docutils literal"><span class="pre">examples</span></code> directory.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

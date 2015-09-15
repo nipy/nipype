@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -163,7 +163,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../users/install.html">Download</a></td>
@@ -175,7 +175,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -198,9 +198,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -210,7 +210,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interface-specifications">
 <span id="interface-specs"></span><h1>Interface Specifications<a class="headerlink" href="#interface-specifications" title="Permalink to this headline">¶</a></h1>
@@ -220,7 +220,7 @@
 Even though the documentation might be sparse or cryptic at times we strongly
 encourage you to contact us on the official nipype developers mailing list in
 case of any troubles: <a class="reference external" href="mailto:nipy-devel&#37;&#52;&#48;neuroimaging&#46;scipy&#46;org">nipy-devel<span>&#64;</span>neuroimaging<span>&#46;</span>scipy<span>&#46;</span>org</a> (we are sharing a
-mailing list with the nipy community therefore please add <tt class="docutils literal"><span class="pre">[nipype]</span></tt> to the
+mailing list with the nipy community therefore please add <code class="docutils literal"><span class="pre">[nipype]</span></code> to the
 messsage title).</p>
 </div>
 <div class="section" id="overview">
@@ -283,8 +283,8 @@ correspond to the different command-line parameters that can be passed
 to Bet.  If you are familiar with the Nipype 0.2 code-base, these
 attributes are the same as the keys in the opt_map dictionaries.  When
 an interfaces class is instantiated, the InputSpec is bound to the
-<tt class="docutils literal"><span class="pre">inputs</span></tt> attribute of that object.  Below is an example of how the
-<tt class="docutils literal"><span class="pre">inputs</span></tt> appear to a user for Bet:</p>
+<code class="docutils literal"><span class="pre">inputs</span></code> attribute of that object.  Below is an example of how the
+<code class="docutils literal"><span class="pre">inputs</span></code> appear to a user for Bet:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">bet</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">bet</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
@@ -313,30 +313,30 @@ an interfaces class is instantiated, the InputSpec is bound to the
 <p>Each Spec inherits from a parent Spec.  The parent Specs provide
 attribute(s) that are common to all child classes.  For example, FSL
 InputSpecs inherit from interfaces.fsl.base.FSLTraitedSpec.
-FSLTraitedSpec defines an <tt class="docutils literal"><span class="pre">outputtype</span></tt> attribute, which stores the
+FSLTraitedSpec defines an <code class="docutils literal"><span class="pre">outputtype</span></code> attribute, which stores the
 file type (NIFTI, NIFTI_PAIR, etc...) for all generated output files.</p>
 <div class="section" id="inputspec-class-hierarchy">
 <h3>InputSpec class hierarchy<a class="headerlink" href="#inputspec-class-hierarchy" title="Permalink to this headline">¶</a></h3>
 <p>Below is the current class hierarchy for InputSpec classes (from
 base class down to subclasses).:</p>
 <blockquote>
-<div><p><tt class="docutils literal"><span class="pre">TraitedSpec</span></tt>: Nipype&#8217;s primary base class for all Specs.
+<div><p><code class="docutils literal"><span class="pre">TraitedSpec</span></code>: Nipype&#8217;s primary base class for all Specs.
 Provides initialization, some nipype-specific methods and any trait
 handlers we define. Inherits from traits.HasTraits.</p>
 <blockquote>
-<div><p><tt class="docutils literal"><span class="pre">BaseInterfaceInputSpec</span></tt>: Defines inputs common to all
-Interfaces (<tt class="docutils literal"><span class="pre">ignore_exception</span></tt>). If in doubt inherit from this.</p>
+<div><p><code class="docutils literal"><span class="pre">BaseInterfaceInputSpec</span></code>: Defines inputs common to all
+Interfaces (<code class="docutils literal"><span class="pre">ignore_exception</span></code>). If in doubt inherit from this.</p>
 <blockquote>
-<div><p><tt class="docutils literal"><span class="pre">CommandLineInputSpec</span></tt>: Defines inputs common to all
-command-line classes (<tt class="docutils literal"><span class="pre">args</span></tt> and <tt class="docutils literal"><span class="pre">environ</span></tt>)</p>
+<div><p><code class="docutils literal"><span class="pre">CommandLineInputSpec</span></code>: Defines inputs common to all
+command-line classes (<code class="docutils literal"><span class="pre">args</span></code> and <code class="docutils literal"><span class="pre">environ</span></code>)</p>
 <blockquote>
-<div><p><tt class="docutils literal"><span class="pre">FSLTraitedSpec</span></tt>: Defines inputs common to all FSL classes
-(<tt class="docutils literal"><span class="pre">outputtype</span></tt>)</p>
-<p><tt class="docutils literal"><span class="pre">SPMCommandInputSpec</span></tt>: Defines inputs common to all SPM classes (<tt class="docutils literal"><span class="pre">matlab_cmd</span></tt>, <tt class="docutils literal"><span class="pre">path</span></tt>, and <tt class="docutils literal"><span class="pre">mfile</span></tt>)</p>
-<p><tt class="docutils literal"><span class="pre">FSTraitedSpec</span></tt>: Defines inputs common to all FreeSurfer classes
-(<tt class="docutils literal"><span class="pre">sbjects_dir</span></tt>)</p>
-<p><tt class="docutils literal"><span class="pre">MatlabInputSpec</span></tt>: Defines inputs common to all Matlab classes (<tt class="docutils literal"><span class="pre">script</span></tt>, <tt class="docutils literal"><span class="pre">nodesktop</span></tt>, <tt class="docutils literal"><span class="pre">nosplash</span></tt>, <tt class="docutils literal"><span class="pre">logfile</span></tt>, <tt class="docutils literal"><span class="pre">single_comp_thread</span></tt>, <tt class="docutils literal"><span class="pre">mfile</span></tt>, <tt class="docutils literal"><span class="pre">script_file</span></tt>, and <tt class="docutils literal"><span class="pre">paths</span></tt>)</p>
-<p><tt class="docutils literal"><span class="pre">SlicerCommandLineInputSpec</span></tt>: Defines inputs common to all Slicer classes (<tt class="docutils literal"><span class="pre">module</span></tt>)</p>
+<div><p><code class="docutils literal"><span class="pre">FSLTraitedSpec</span></code>: Defines inputs common to all FSL classes
+(<code class="docutils literal"><span class="pre">outputtype</span></code>)</p>
+<p><code class="docutils literal"><span class="pre">SPMCommandInputSpec</span></code>: Defines inputs common to all SPM classes (<code class="docutils literal"><span class="pre">matlab_cmd</span></code>, <code class="docutils literal"><span class="pre">path</span></code>, and <code class="docutils literal"><span class="pre">mfile</span></code>)</p>
+<p><code class="docutils literal"><span class="pre">FSTraitedSpec</span></code>: Defines inputs common to all FreeSurfer classes
+(<code class="docutils literal"><span class="pre">sbjects_dir</span></code>)</p>
+<p><code class="docutils literal"><span class="pre">MatlabInputSpec</span></code>: Defines inputs common to all Matlab classes (<code class="docutils literal"><span class="pre">script</span></code>, <code class="docutils literal"><span class="pre">nodesktop</span></code>, <code class="docutils literal"><span class="pre">nosplash</span></code>, <code class="docutils literal"><span class="pre">logfile</span></code>, <code class="docutils literal"><span class="pre">single_comp_thread</span></code>, <code class="docutils literal"><span class="pre">mfile</span></code>, <code class="docutils literal"><span class="pre">script_file</span></code>, and <code class="docutils literal"><span class="pre">paths</span></code>)</p>
+<p><code class="docutils literal"><span class="pre">SlicerCommandLineInputSpec</span></code>: Defines inputs common to all Slicer classes (<code class="docutils literal"><span class="pre">module</span></code>)</p>
 </div></blockquote>
 </div></blockquote>
 </div></blockquote>
@@ -347,7 +347,7 @@ command-line classes (<tt class="docutils literal"><span class="pre">args</span>
 <h3>Output Specs<a class="headerlink" href="#output-specs" title="Permalink to this headline">¶</a></h3>
 <p>The OutputSpec defines the outputs that are generated, or possibly
 generated depending on inputs, by the tool.  OutputSpecs inherit from
-<tt class="docutils literal"><span class="pre">interfaces.base.TraitedSpec</span></tt> directly.</p>
+<code class="docutils literal"><span class="pre">interfaces.base.TraitedSpec</span></code> directly.</p>
 </div>
 </div>
 <div class="section" id="traited-attributes">
@@ -358,11 +358,11 @@ with additional behavior like type checking.  (<em>See the documentation
 on traits for more information on these trait types.</em>) To handle
 unique behaviors of our attributes we us traits metadata.  These are
 keyword arguments supplied in the initialization of the attributes.
-The base classes <tt class="docutils literal"><span class="pre">BaseInterface</span></tt> and <tt class="docutils literal"><span class="pre">CommandLine</span></tt>
-(defined in <tt class="docutils literal"><span class="pre">nipype.interfaces.base</span></tt>) check for the existence/or
+The base classes <code class="docutils literal"><span class="pre">BaseInterface</span></code> and <code class="docutils literal"><span class="pre">CommandLine</span></code>
+(defined in <code class="docutils literal"><span class="pre">nipype.interfaces.base</span></code>) check for the existence/or
 value of these metadata and handle the inputs/outputs accordingly.
-For example, all mandatory parameters will have the <tt class="docutils literal"><span class="pre">mandatory</span> <span class="pre">=</span>
-<span class="pre">True</span></tt> metadata:</p>
+For example, all mandatory parameters will have the <code class="docutils literal"><span class="pre">mandatory</span> <span class="pre">=</span>
+<span class="pre">True</span></code> metadata:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">BetInputSpec</span><span class="p">(</span><span class="n">FSLTraitedSpec</span><span class="p">):</span>
   <span class="n">infile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                 <span class="n">desc</span> <span class="o">=</span> <span class="s">&#39;input file to skull strip&#39;</span><span class="p">,</span>
@@ -372,9 +372,9 @@ For example, all mandatory parameters will have the <tt class="docutils literal"
 <div class="section" id="common">
 <h3>Common<a class="headerlink" href="#common" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
-<dt><tt class="docutils literal"><span class="pre">exists</span></tt></dt>
-<dd><p class="first">For files, use <tt class="docutils literal"><span class="pre">nipype.interfaces.base.File</span></tt> as the trait type.  If
-the file must exist for the tool to execute, specify <tt class="docutils literal"><span class="pre">exists</span> <span class="pre">=</span> <span class="pre">True</span></tt>
+<dt><code class="docutils literal"><span class="pre">exists</span></code></dt>
+<dd><p class="first">For files, use <code class="docutils literal"><span class="pre">nipype.interfaces.base.File</span></code> as the trait type.  If
+the file must exist for the tool to execute, specify <code class="docutils literal"><span class="pre">exists</span> <span class="pre">=</span> <span class="pre">True</span></code>
 in the initialization of File (as shown in BetInputSpec above). This
 will trigger the underlying traits code to confirm the file assigned
 to that <em>input</em> actually exists.  If it does not exist, the user will
@@ -392,27 +392,27 @@ be presented with an error message:</p>
 </pre></div>
 </div>
 </dd>
-<dt><tt class="docutils literal"><span class="pre">hash_files</span></tt></dt>
+<dt><code class="docutils literal"><span class="pre">hash_files</span></code></dt>
 <dd>To be used with inputs that are defining output filenames. When this flag
 is set to false any Nipype will not try to hash any files described by this
 input. This is useful to avoid rerunning when the specified output file
 already exists and has changed.</dd>
-<dt><tt class="docutils literal"><span class="pre">desc</span></tt></dt>
-<dd><p class="first">All trait objects have a set of default metadata attributes.  <tt class="docutils literal"><span class="pre">desc</span></tt>
+<dt><code class="docutils literal"><span class="pre">desc</span></code></dt>
+<dd><p class="first">All trait objects have a set of default metadata attributes.  <code class="docutils literal"><span class="pre">desc</span></code>
 is one of those and is used as a simple, one-line docstring.  The
-<tt class="docutils literal"><span class="pre">desc</span></tt> is printed when users use the <tt class="docutils literal"><span class="pre">help()</span></tt> methods.</p>
+<code class="docutils literal"><span class="pre">desc</span></code> is printed when users use the <code class="docutils literal"><span class="pre">help()</span></code> methods.</p>
 <dl class="last docutils">
 <dt><strong>Required:</strong> This metadata is required by all nipype interface</dt>
 <dd>classes.</dd>
 </dl>
 </dd>
-<dt><tt class="docutils literal"><span class="pre">usedefault</span></tt></dt>
+<dt><code class="docutils literal"><span class="pre">usedefault</span></code></dt>
 <dd><p class="first">Set this metadata to True when the <em>default value</em> for the trait type
 of this attribute is an acceptable value.  All trait objects have a
-default value, <tt class="docutils literal"><span class="pre">traits.Int</span></tt> has a default of <tt class="docutils literal"><span class="pre">0</span></tt>, <tt class="docutils literal"><span class="pre">traits.Float</span></tt>
-has a default of <tt class="docutils literal"><span class="pre">0.0</span></tt>, etc...  You can also define a default value
+default value, <code class="docutils literal"><span class="pre">traits.Int</span></code> has a default of <code class="docutils literal"><span class="pre">0</span></code>, <code class="docutils literal"><span class="pre">traits.Float</span></code>
+has a default of <code class="docutils literal"><span class="pre">0.0</span></code>, etc...  You can also define a default value
 when you define the class.  For example, in the code below all objects
-of <tt class="docutils literal"><span class="pre">Foo</span></tt> will have a default value of 12 for <tt class="docutils literal"><span class="pre">x</span></tt>:</p>
+of <code class="docutils literal"><span class="pre">Foo</span></code> will have a default value of 12 for <code class="docutils literal"><span class="pre">x</span></code>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">enthought.traits.api</span> <span class="kn">as</span> <span class="nn">traits</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="n">traits</span><span class="o">.</span><span class="n">HasTraits</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="n">x</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Int</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
@@ -425,9 +425,9 @@ of <tt class="docutils literal"><span class="pre">Foo</span></tt> will have a de
 <span class="go">0</span>
 </pre></div>
 </div>
-<p>Nipype only passes <tt class="docutils literal"><span class="pre">inputs</span></tt> on to the underlying package if they
+<p>Nipype only passes <code class="docutils literal"><span class="pre">inputs</span></code> on to the underlying package if they
 have been defined (more on this later).  So if you specify
-<tt class="docutils literal"><span class="pre">usedefault</span> <span class="pre">=</span> <span class="pre">True</span></tt>, you are telling the parser to pass the default
+<code class="docutils literal"><span class="pre">usedefault</span> <span class="pre">=</span> <span class="pre">True</span></code>, you are telling the parser to pass the default
 value on to the underlying package.  Let&#8217;s look at the InputSpec for
 SPM Realign:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">RealignInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
@@ -436,10 +436,10 @@ SPM Realign:</p>
                           <span class="n">usedefault</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Here we&#8217;ve defined <tt class="docutils literal"><span class="pre">jobtype</span></tt> to be an enumerated trait type,
-<tt class="docutils literal"><span class="pre">Enum</span></tt>, which can be set to one of the following: <tt class="docutils literal"><span class="pre">estwrite</span></tt>,
-<tt class="docutils literal"><span class="pre">estimate</span></tt>, or <tt class="docutils literal"><span class="pre">write</span></tt>.  In a container, the default is always the
-first element.  So in this case, the default will be <tt class="docutils literal"><span class="pre">estwrite</span></tt>:</p>
+<p>Here we&#8217;ve defined <code class="docutils literal"><span class="pre">jobtype</span></code> to be an enumerated trait type,
+<code class="docutils literal"><span class="pre">Enum</span></code>, which can be set to one of the following: <code class="docutils literal"><span class="pre">estwrite</span></code>,
+<code class="docutils literal"><span class="pre">estimate</span></code>, or <code class="docutils literal"><span class="pre">write</span></code>.  In a container, the default is always the
+first element.  So in this case, the default will be <code class="docutils literal"><span class="pre">estwrite</span></code>:</p>
 <div class="last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">spm</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rlgn</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">Realign</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rlgn</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">infile</span>
@@ -449,21 +449,21 @@ first element.  So in this case, the default will be <tt class="docutils literal
 </pre></div>
 </div>
 </dd>
-<dt><tt class="docutils literal"><span class="pre">xor</span></tt> and <tt class="docutils literal"><span class="pre">requires</span></tt></dt>
-<dd>Both of these accept a list of trait names. The <tt class="docutils literal"><span class="pre">xor</span></tt> metadata reflects
+<dt><code class="docutils literal"><span class="pre">xor</span></code> and <code class="docutils literal"><span class="pre">requires</span></code></dt>
+<dd>Both of these accept a list of trait names. The <code class="docutils literal"><span class="pre">xor</span></code> metadata reflects
 mutually exclusive traits, while the requires metadata reflects traits
 that have to be set together. When a xor-ed trait is set, all other
 traits belonging to the list are set to Undefined. The function
 check_mandatory_inputs ensures that all requirements (both mandatory and
 via the requires metadata are satisfied). These are also reflected in
 the help function.</dd>
-<dt><tt class="docutils literal"><span class="pre">copyfile</span></tt></dt>
+<dt><code class="docutils literal"><span class="pre">copyfile</span></code></dt>
 <dd>This is metadata for a File or Directory trait that is relevant only in
 the context of wrapping an interface in a <cite>Node</cite> and <cite>MapNode</cite>. <cite>copyfile</cite>
 can be set to either <cite>True</cite> or <cite>False</cite>. <cite>False</cite> indicates that contents
 should be symlinked, while <cite>True</cite> indicates that the contents should be
 copied over.</dd>
-<dt><tt class="docutils literal"><span class="pre">min_ver</span></tt> and <tt class="docutils literal"><span class="pre">max_ver</span></tt></dt>
+<dt><code class="docutils literal"><span class="pre">min_ver</span></code> and <code class="docutils literal"><span class="pre">max_ver</span></code></dt>
 <dd><p class="first">These metadata determine if a particular trait will be available when a
 given version of the underlying interface runs. Note that this check is
 performed at runtime.:</p>
@@ -473,7 +473,7 @@ performed at runtime.:</p>
 </pre></div>
 </div>
 </dd>
-<dt><tt class="docutils literal"><span class="pre">deprecated</span></tt> and <tt class="docutils literal"><span class="pre">new_name</span></tt></dt>
+<dt><code class="docutils literal"><span class="pre">deprecated</span></code> and <code class="docutils literal"><span class="pre">new_name</span></code></dt>
 <dd><p class="first">This is metadata for removing or renaming an input field from a spec.:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">RealignInputSpec</span><span class="p">(</span><span class="n">BaseInterfaceInputSpec</span><span class="p">):</span>
     <span class="n">jobtype</span> <span class="o">=</span> <span class="n">traits</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s">&#39;estwrite&#39;</span><span class="p">,</span> <span class="s">&#39;estimate&#39;</span><span class="p">,</span> <span class="s">&#39;write&#39;</span><span class="p">,</span>
@@ -512,13 +512,13 @@ provided as a string. For example, <cite>min_ver=&#8216;0.1&#8217;</cite>.</p>
 <div class="section" id="commandline">
 <h3>CommandLine<a class="headerlink" href="#commandline" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
-<dt><tt class="docutils literal"><span class="pre">argstr</span></tt></dt>
+<dt><code class="docutils literal"><span class="pre">argstr</span></code></dt>
 <dd><p class="first">The metadata keyword for specifying the format strings
 for the parameters. This was the <em>value</em> string in the opt_map
 dictionaries of Nipype 0.2 code.  If we look at the
-<tt class="docutils literal"><span class="pre">FlirtInputSpec</span></tt>, the <tt class="docutils literal"><span class="pre">argstr</span></tt> for the reference file corresponds
+<code class="docutils literal"><span class="pre">FlirtInputSpec</span></code>, the <code class="docutils literal"><span class="pre">argstr</span></code> for the reference file corresponds
 to the argument string I would need to provide with the command-line
-version of <tt class="docutils literal"><span class="pre">flirt</span></tt>:</p>
+version of <code class="docutils literal"><span class="pre">flirt</span></code>:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FlirtInputSpec</span><span class="p">(</span><span class="n">FSLTraitedSpec</span><span class="p">):</span>
     <span class="n">reference</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="n">exists</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">argstr</span> <span class="o">=</span> <span class="s">&#39;-ref </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">mandatory</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
                      <span class="n">position</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">desc</span> <span class="o">=</span> <span class="s">&#39;reference file&#39;</span><span class="p">)</span>
@@ -526,42 +526,42 @@ version of <tt class="docutils literal"><span class="pre">flirt</span></tt>:</p>
 </div>
 <p class="last"><strong>Required:</strong> This metadata is required by all command-line interface classes.</p>
 </dd>
-<dt><tt class="docutils literal"><span class="pre">position</span></tt></dt>
+<dt><code class="docutils literal"><span class="pre">position</span></code></dt>
 <dd>This metadata is used to specify the position of arguments.  Both
-positive and negative values are accepted.  <tt class="docutils literal"><span class="pre">position</span> <span class="pre">=</span> <span class="pre">0</span></tt> will
+positive and negative values are accepted.  <code class="docutils literal"><span class="pre">position</span> <span class="pre">=</span> <span class="pre">0</span></code> will
 position this argument as the first parameter after the command
-name. <tt class="docutils literal"><span class="pre">position</span> <span class="pre">=</span> <span class="pre">-1</span></tt> will position this argument as the last
+name. <code class="docutils literal"><span class="pre">position</span> <span class="pre">=</span> <span class="pre">-1</span></code> will position this argument as the last
 parameter, after all other parameters.</dd>
-<dt><tt class="docutils literal"><span class="pre">genfile</span></tt></dt>
-<dd>If True, the <tt class="docutils literal"><span class="pre">genfile</span></tt> metadata specifies that a filename should be
+<dt><code class="docutils literal"><span class="pre">genfile</span></code></dt>
+<dd>If True, the <code class="docutils literal"><span class="pre">genfile</span></code> metadata specifies that a filename should be
 generated for this parameter <em>if-and-only-if</em> the user did not provide
 one.  The nipype convention is to automatically generate output
 filenames when not specified by the user both as a convenience for the
 user and so the pipeline can easily gather the outputs. Requires
-<tt class="docutils literal"><span class="pre">_gen_filename()</span></tt> method to be implemented. This way should be used if the
+<code class="docutils literal"><span class="pre">_gen_filename()</span></code> method to be implemented. This way should be used if the
 desired file name is dependent on some runtime variables (such as file name
 of one of the inputs, or current working directory). In case when it should
-be fixed it&#8217;s recommended to just use <tt class="docutils literal"><span class="pre">usedefault</span></tt>.</dd>
-<dt><tt class="docutils literal"><span class="pre">sep</span></tt></dt>
+be fixed it&#8217;s recommended to just use <code class="docutils literal"><span class="pre">usedefault</span></code>.</dd>
+<dt><code class="docutils literal"><span class="pre">sep</span></code></dt>
 <dd>For List traits the string with witch elements of the list will be joined.</dd>
-<dt><tt class="docutils literal"><span class="pre">name_source</span></tt></dt>
+<dt><code class="docutils literal"><span class="pre">name_source</span></code></dt>
 <dd>Indicates the list of input fields from which the value of the current File
 output variable will be drawn. This input field must be the name of a File.
 Chaining is allowed, meaning that an input field can point to another as
-<tt class="docutils literal"><span class="pre">name_source</span></tt>, which also points as <tt class="docutils literal"><span class="pre">name_source</span></tt> to a third field.
+<code class="docutils literal"><span class="pre">name_source</span></code>, which also points as <code class="docutils literal"><span class="pre">name_source</span></code> to a third field.
 In this situation, the templates for substitutions are also accumulated.</dd>
-<dt><tt class="docutils literal"><span class="pre">name_template</span></tt></dt>
-<dd>By default a <tt class="docutils literal"><span class="pre">%s_generated</span></tt> template is used to create the output
+<dt><code class="docutils literal"><span class="pre">name_template</span></code></dt>
+<dd>By default a <code class="docutils literal"><span class="pre">%s_generated</span></code> template is used to create the output
 filename. This metadata keyword allows overriding the generated name.</dd>
-<dt><tt class="docutils literal"><span class="pre">keep_extension</span></tt></dt>
-<dd>Use this and set it <tt class="docutils literal"><span class="pre">True</span></tt> if you want the extension from the input to be
+<dt><code class="docutils literal"><span class="pre">keep_extension</span></code></dt>
+<dd>Use this and set it <code class="docutils literal"><span class="pre">True</span></code> if you want the extension from the input to be
 kept.</dd>
 </dl>
 </div>
 <div class="section" id="spm">
 <h3>SPM<a class="headerlink" href="#spm" title="Permalink to this headline">¶</a></h3>
 <dl class="docutils">
-<dt><tt class="docutils literal"><span class="pre">field</span></tt></dt>
+<dt><code class="docutils literal"><span class="pre">field</span></code></dt>
 <dd><p class="first">name of the structure refered by the SPM job manager</p>
 <dl class="last docutils">
 <dt><strong>Required:</strong> This metadata is required by all SPM-mediated</dt>
@@ -578,28 +578,28 @@ kept.</dd>
 <p>When you define an interface class, you will define these attributes
 and methods:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">input_spec</span></tt>: the InputSpec</li>
-<li><tt class="docutils literal"><span class="pre">output_spec</span></tt>: the OutputSpec</li>
-<li><tt class="docutils literal"><span class="pre">_list_outputs()</span></tt>: Returns a dictionary containing names of generated files that are expected after package completes execution.  This is used by <tt class="docutils literal"><span class="pre">BaseInterface.aggregate_outputs</span></tt> to gather all output files for the pipeline.</li>
+<li><code class="docutils literal"><span class="pre">input_spec</span></code>: the InputSpec</li>
+<li><code class="docutils literal"><span class="pre">output_spec</span></code>: the OutputSpec</li>
+<li><code class="docutils literal"><span class="pre">_list_outputs()</span></code>: Returns a dictionary containing names of generated files that are expected after package completes execution.  This is used by <code class="docutils literal"><span class="pre">BaseInterface.aggregate_outputs</span></code> to gather all output files for the pipeline.</li>
 </ul>
 </div>
 <div class="section" id="id2">
 <h3>CommandLine<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p>For command-line interfaces:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">_cmd</span></tt>: the command-line command</li>
+<li><code class="docutils literal"><span class="pre">_cmd</span></code>: the command-line command</li>
 </ul>
 <p>If you used genfile:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">_gen_filename(name)</span></tt>:  Generate filename, used for filenames that nipype generates as a convenience for users.  This is for parameters that are required by the wrapped package, but we&#8217;re generating from some other parameter. For example, <tt class="docutils literal"><span class="pre">BET.inputs.outfile</span></tt> is required by BET but we can generate the name from <tt class="docutils literal"><span class="pre">BET.inputs.infile</span></tt>.  Override this method in subclass to handle.</li>
+<li><code class="docutils literal"><span class="pre">_gen_filename(name)</span></code>:  Generate filename, used for filenames that nipype generates as a convenience for users.  This is for parameters that are required by the wrapped package, but we&#8217;re generating from some other parameter. For example, <code class="docutils literal"><span class="pre">BET.inputs.outfile</span></code> is required by BET but we can generate the name from <code class="docutils literal"><span class="pre">BET.inputs.infile</span></code>.  Override this method in subclass to handle.</li>
 </ul>
 <p>And optionally:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">_redirect_x</span></tt>: If set to True it will make Nipype start Xvfb before running the interface and redirect X output to it. This is useful for</li>
+<li><code class="docutils literal"><span class="pre">_redirect_x</span></code>: If set to True it will make Nipype start Xvfb before running the interface and redirect X output to it. This is useful for</li>
 </ul>
 <p>commandlines that spawn a graphical user interface.</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">_format_arg(name,</span> <span class="pre">spec,</span> <span class="pre">value)</span></tt>: For extra formatting of the input values before passing them to generic <tt class="docutils literal"><span class="pre">_parse_inputs()</span></tt> method.</li>
+<li><code class="docutils literal"><span class="pre">_format_arg(name,</span> <span class="pre">spec,</span> <span class="pre">value)</span></code>: For extra formatting of the input values before passing them to generic <code class="docutils literal"><span class="pre">_parse_inputs()</span></code> method.</li>
 </ul>
 <p>For example this is the class definition for Flirt, minus the docstring:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">FLIRTInputSpec</span><span class="p">(</span><span class="n">FSLCommandInputSpec</span><span class="p">):</span>
@@ -634,20 +634,20 @@ and methods:</p>
     <span class="n">output_spec</span> <span class="o">=</span> <span class="n">FlirtOutputSpec</span>
 </pre></div>
 </div>
-<p>There are two possible output files <tt class="docutils literal"><span class="pre">outfile</span></tt> and <tt class="docutils literal"><span class="pre">outmatrix</span></tt>,
+<p>There are two possible output files <code class="docutils literal"><span class="pre">outfile</span></code> and <code class="docutils literal"><span class="pre">outmatrix</span></code>,
 both of which can be generated if not specified by the user.</p>
-<p>Also notice the use of <tt class="docutils literal"><span class="pre">self._gen_fname()</span></tt> - a FSLCommand helper method for generating filenames (with extensions conforming with FSLOUTPUTTYPE).</p>
+<p>Also notice the use of <code class="docutils literal"><span class="pre">self._gen_fname()</span></code> - a FSLCommand helper method for generating filenames (with extensions conforming with FSLOUTPUTTYPE).</p>
 <p>See also <a class="reference internal" href="cmd_interface_devel.html"><em>How to wrap a command line tool</em></a>.</p>
 </div>
 <div class="section" id="id3">
 <h3>SPM<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <p>For SPM-mediated interfaces:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">_jobtype</span></tt> and <tt class="docutils literal"><span class="pre">_jobname</span></tt>: special names used used by the SPM job manager. You can find them by saving your batch job as an .m file and looking up the code.</li>
+<li><code class="docutils literal"><span class="pre">_jobtype</span></code> and <code class="docutils literal"><span class="pre">_jobname</span></code>: special names used used by the SPM job manager. You can find them by saving your batch job as an .m file and looking up the code.</li>
 </ul>
 <p>And optionally:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">_format_arg(name,</span> <span class="pre">spec,</span> <span class="pre">value)</span></tt>: For extra formatting of the input values before passing them to generic <tt class="docutils literal"><span class="pre">_parse_inputs()</span></tt> method.</li>
+<li><code class="docutils literal"><span class="pre">_format_arg(name,</span> <span class="pre">spec,</span> <span class="pre">value)</span></code>: For extra formatting of the input values before passing them to generic <code class="docutils literal"><span class="pre">_parse_inputs()</span></code> method.</li>
 </ul>
 </div>
 <div class="section" id="matlab">
@@ -661,13 +661,13 @@ both of which can be generated if not specified by the user.</p>
 </div>
 <div class="section" id="undefined-inputs">
 <h2>Undefined inputs<a class="headerlink" href="#undefined-inputs" title="Permalink to this headline">¶</a></h2>
-<p>All the inputs and outputs that were not explicitly set (And do not have a usedefault flag - see above) will have Undefined value. To check if something is defined you have to explicitly call <tt class="docutils literal"><span class="pre">isdefiend</span></tt> function (comparing to None will not work).</p>
+<p>All the inputs and outputs that were not explicitly set (And do not have a usedefault flag - see above) will have Undefined value. To check if something is defined you have to explicitly call <code class="docutils literal"><span class="pre">isdefiend</span></code> function (comparing to None will not work).</p>
 </div>
 <div class="section" id="example-of-inputs">
 <h2>Example of inputs<a class="headerlink" href="#example-of-inputs" title="Permalink to this headline">¶</a></h2>
 <p>Below we have an example of using Bet.  We can see from the help which
 inputs are mandatory and which are optional, along with the one-line
-description provided by the <tt class="docutils literal"><span class="pre">desc</span></tt> metadata:</p>
+description provided by the <code class="docutils literal"><span class="pre">desc</span></code> metadata:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="o">.</span><span class="n">help</span><span class="p">()</span>
 <span class="go">Inputs</span>
@@ -729,7 +729,7 @@ check our inputs to see which are defined and which are not:</p>
 </div>
 <p>We also checked the command-line that will be generated when we run
 the command and can see the generated output filename
-<tt class="docutils literal"><span class="pre">f3_brain.nii.gz</span></tt>.</p>
+<code class="docutils literal"><span class="pre">f3_brain.nii.gz</span></code>.</p>
 </div>
 </div>
 
@@ -740,9 +740,9 @@ the command and can see the generated output filename
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -127,14 +127,14 @@
 <li><a class="reference internal" href="#id3">Examples</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#gcd"><tt class="docutils literal"><span class="pre">gcd()</span></tt></a></li>
-<li><a class="reference internal" href="#gen-info"><tt class="docutils literal"><span class="pre">gen_info()</span></tt></a></li>
-<li><a class="reference internal" href="#orth"><tt class="docutils literal"><span class="pre">orth()</span></tt></a></li>
-<li><a class="reference internal" href="#scale-timings"><tt class="docutils literal"><span class="pre">scale_timings()</span></tt></a><ul>
+<li><a class="reference internal" href="#gcd"><code class="docutils literal"><span class="pre">gcd()</span></code></a></li>
+<li><a class="reference internal" href="#gen-info"><code class="docutils literal"><span class="pre">gen_info()</span></code></a></li>
+<li><a class="reference internal" href="#orth"><code class="docutils literal"><span class="pre">orth()</span></code></a></li>
+<li><a class="reference internal" href="#scale-timings"><code class="docutils literal"><span class="pre">scale_timings()</span></code></a><ul>
 <li><a class="reference internal" href="#parameters">Parameters</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#spm-hrf"><tt class="docutils literal"><span class="pre">spm_hrf()</span></tt></a></li>
+<li><a class="reference internal" href="#spm-hrf"><code class="docutils literal"><span class="pre">spm_hrf()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -157,7 +157,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -169,7 +169,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -192,9 +192,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -204,13 +204,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="algorithms-modelgen">
 <h1>algorithms.modelgen<a class="headerlink" href="#algorithms-modelgen" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-algorithms-modelgen-specifymodel"></span><div class="section" id="specifymodel">
 <span id="index-0"></span><h2>SpecifyModel<a class="headerlink" href="#specifymodel" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/algorithms/modelgen.py#L209">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/algorithms/modelgen.py#L210">Link to code</a></p>
 <p>Makes a model specification compatible with spm/fsl designers.</p>
 <p>The subject_info field should contain paradigm information in the form of
 a Bunch or a list of Bunch. The Bunch should contain the following
@@ -280,8 +280,7 @@ high_pass_filter_cutoff: (a float)
 input_units: (&#39;secs&#39; or &#39;scans&#39;)
         Units of event onsets and durations (secs or scans). Output units
         are always in secs
-subject_info: (a list of items which are an implementor of, or can be
-         adapted to implement, Bunch or None)
+subject_info: (a list of items which are a Bunch or None)
         Bunch or List(Bunch) subject specific condition information. see
         :ref:`SpecifyModel` or SpecifyModel.__doc__ for details
         mutually_exclusive: subject_info, event_files
@@ -309,7 +308,7 @@ realignment_parameters: (a list of items which are an existing file
 </div>
 <div class="section" id="specifyspmmodel">
 <span id="index-1"></span><h2>SpecifySPMModel<a class="headerlink" href="#specifyspmmodel" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/algorithms/modelgen.py#L421">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/algorithms/modelgen.py#L422">Link to code</a></p>
 <p>Adds SPM specific options to SpecifyModel</p>
 <blockquote>
 <div><dl class="docutils">
@@ -351,8 +350,7 @@ high_pass_filter_cutoff: (a float)
 input_units: (&#39;secs&#39; or &#39;scans&#39;)
         Units of event onsets and durations (secs or scans). Output units
         are always in secs
-subject_info: (a list of items which are an implementor of, or can be
-         adapted to implement, Bunch or None)
+subject_info: (a list of items which are a Bunch or None)
         Bunch or List(Bunch) subject specific condition information. see
         :ref:`SpecifyModel` or SpecifyModel.__doc__ for details
         mutually_exclusive: subject_info, event_files
@@ -384,7 +382,7 @@ realignment_parameters: (a list of items which are an existing file
 </div>
 <div class="section" id="specifysparsemodel">
 <span id="index-2"></span><h2>SpecifySparseModel<a class="headerlink" href="#specifysparsemodel" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/algorithms/modelgen.py#L569">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/algorithms/modelgen.py#L581">Link to code</a></p>
 <p>Specify a sparse model that is compatible with spm/fsl designers</p>
 <div class="section" id="references">
 <h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
@@ -427,8 +425,7 @@ high_pass_filter_cutoff: (a float)
 input_units: (&#39;secs&#39; or &#39;scans&#39;)
         Units of event onsets and durations (secs or scans). Output units
         are always in secs
-subject_info: (a list of items which are an implementor of, or can be
-         adapted to implement, Bunch or None)
+subject_info: (a list of items which are a Bunch or None)
         Bunch or List(Bunch) subject specific condition information. see
         :ref:`SpecifyModel` or SpecifyModel.__doc__ for details
         mutually_exclusive: subject_info, event_files
@@ -476,8 +473,8 @@ sparse_svg_file: (a file name)
 <span class="target" id="module-nipype.algorithms.modelgen"></span></div>
 </div>
 <div class="section" id="gcd">
-<span id="nipype-algorithms-modelgen-gcd"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">gcd()</span></tt><a class="headerlink" href="#gcd" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/algorithms/modelgen.py#L37">Link to code</a></p>
+<span id="nipype-algorithms-modelgen-gcd"></span><h2><code class="xref py py-func docutils literal"><span class="pre">gcd()</span></code><a class="headerlink" href="#gcd" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/algorithms/modelgen.py#L37">Link to code</a></p>
 <p>Returns the greatest common divisor of two integers</p>
 <p>uses Euclid&#8217;s algorithm</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">gcd</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
@@ -490,13 +487,13 @@ sparse_svg_file: (a file name)
 </div>
 </div>
 <div class="section" id="gen-info">
-<span id="nipype-algorithms-modelgen-gen-info"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">gen_info()</span></tt><a class="headerlink" href="#gen-info" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/algorithms/modelgen.py#L145">Link to code</a></p>
+<span id="nipype-algorithms-modelgen-gen-info"></span><h2><code class="xref py py-func docutils literal"><span class="pre">gen_info()</span></code><a class="headerlink" href="#gen-info" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/algorithms/modelgen.py#L146">Link to code</a></p>
 <p>Generate subject_info structure from a list of event files</p>
 </div>
 <div class="section" id="orth">
-<span id="nipype-algorithms-modelgen-orth"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">orth()</span></tt><a class="headerlink" href="#orth" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/algorithms/modelgen.py#L103">Link to code</a></p>
+<span id="nipype-algorithms-modelgen-orth"></span><h2><code class="xref py py-func docutils literal"><span class="pre">orth()</span></code><a class="headerlink" href="#orth" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/algorithms/modelgen.py#L104">Link to code</a></p>
 <p>Orthoganlize y_in with respect to x_in</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">orth_expected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.7142857142857144</span><span class="p">,</span> <span class="mf">0.42857142857142883</span><span class="p">,</span>                                   <span class="o">-</span><span class="mf">0.85714285714285676</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">orth</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span> <span class="o">-</span> <span class="n">orth_expected</span><span class="p">))</span>
@@ -506,8 +503,8 @@ sparse_svg_file: (a file name)
 </div>
 </div>
 <div class="section" id="scale-timings">
-<span id="nipype-algorithms-modelgen-scale-timings"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">scale_timings()</span></tt><a class="headerlink" href="#scale-timings" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/algorithms/modelgen.py#L123">Link to code</a></p>
+<span id="nipype-algorithms-modelgen-scale-timings"></span><h2><code class="xref py py-func docutils literal"><span class="pre">scale_timings()</span></code><a class="headerlink" href="#scale-timings" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/algorithms/modelgen.py#L124">Link to code</a></p>
 <p>Scales timings given input and output units (scans/secs)</p>
 <div class="section" id="parameters">
 <h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h3>
@@ -518,8 +515,8 @@ time_repetition: float in seconds</p>
 </div>
 </div>
 <div class="section" id="spm-hrf">
-<span id="nipype-algorithms-modelgen-spm-hrf"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">spm_hrf()</span></tt><a class="headerlink" href="#spm-hrf" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/algorithms/modelgen.py#L54">Link to code</a></p>
+<span id="nipype-algorithms-modelgen-spm-hrf"></span><h2><code class="xref py py-func docutils literal"><span class="pre">spm_hrf()</span></code><a class="headerlink" href="#spm-hrf" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/algorithms/modelgen.py#L54">Link to code</a></p>
 <p>python implementation of spm_hrf</p>
 <p>see spm_hrf for implementation details</p>
 <p>% RT   - scan repeat time
@@ -537,10 +534,11 @@ time_repetition: float in seconds</p>
 % hrf  - hemodynamic response function
 % p    - parameters of the response function</p>
 <p>the following code using scipy.stats.distributions.gamma
-doesn&#8217;t return the same result as the spm_Gpdf function
-hrf = gamma.pdf(u, p[0]/p[2], scale=dt/p[2]) -</p>
-<blockquote>
-<div>gamma.pdf(u, p[1]/p[3], scale=dt/p[3])/p[4]</div></blockquote>
+doesn&#8217;t return the same result as the spm_Gpdf function</p>
+<div class="highlight-python"><div class="highlight"><pre>hrf = gamma.pdf(u, p[0]/p[2], scale=dt/p[2]) -
+      gamma.pdf(u, p[1]/p[3], scale=dt/p[3])/p[4]
+</pre></div>
+</div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">spm_hrf</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 <span class="go">[  0.00000000e+00   8.65660810e-02   3.74888236e-01   3.84923382e-01</span>
 <span class="go">   2.16117316e-01   7.68695653e-02   1.62017720e-03  -3.06078117e-02</span>
@@ -559,9 +557,9 @@ hrf = gamma.pdf(u, p[0]/p[2], scale=dt/p[2]) -</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

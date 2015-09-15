@@ -1,0 +1,117 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+interfaces.slicer.filtering.n4itkbiasfieldcorrection
+====================================================
+
+
+.. _nipype.interfaces.slicer.filtering.n4itkbiasfieldcorrection.N4ITKBiasFieldCorrection:
+
+
+.. index:: N4ITKBiasFieldCorrection
+
+N4ITKBiasFieldCorrection
+------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/slicer/filtering/n4itkbiasfieldcorrection.py#L29>`__
+
+Wraps command **N4ITKBiasFieldCorrection **
+
+title: N4ITK MRI Bias correction
+
+category: Filtering
+
+description: Performs image bias correction using N4 algorithm. This module is based on the ITK filters contributed in the following publication:  Tustison N, Gee J "N4ITK: Nick's N3 ITK Implementation For MRI Bias Field Correction", The Insight Journal 2009 January-June, http://hdl.handle.net/10380/3053
+
+version: 9
+
+documentation-url: http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/N4ITKBiasFieldCorrection
+
+contributor: Nick Tustison (UPenn), Andrey Fedorov (SPL, BWH), Ron Kikinis (SPL, BWH)
+
+acknowledgements: The development of this module was partially supported by NIH grants R01 AA016748-01, R01 CA111288 and U01 CA151261 as well as by NA-MIC, NAC, NCIGT and the Slicer community.
+
+Inputs::
+
+        [Mandatory]
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+                flag: %s
+        bsplineorder: (an integer (int or long))
+                Order of B-spline used in the approximation. Larger values will lead
+                to longer execution times, may result in overfitting and poor
+                result.
+                flag: --bsplineorder %d
+        convergencethreshold: (a float)
+                Stopping criterion for the iterative bias estimation. Larger values
+                will lead to smaller execution time.
+                flag: --convergencethreshold %f
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        histogramsharpening: (a float)
+                A vector of up to three values. Non-zero values correspond to Bias
+                Field Full Width at Half Maximum, Wiener filter noise, and Number of
+                histogram bins.
+                flag: --histogramsharpening %s
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        inputimage: (an existing file name)
+                Input image where you observe signal inhomegeneity
+                flag: --inputimage %s
+        iterations: (an integer (int or long))
+                Maximum number of iterations at each level of resolution. Larger
+                values will increase execution time, but may lead to better results.
+                flag: --iterations %s
+        maskimage: (an existing file name)
+                Binary mask that defines the structure of your interest. NOTE: This
+                parameter is OPTIONAL. If the mask is not specified, the module will
+                use internally Otsu thresholding to define this mask. Better
+                processing results can often be obtained when a meaningful mask is
+                defined.
+                flag: --maskimage %s
+        meshresolution: (a float)
+                Resolution of the initial bspline grid defined as a sequence of
+                three numbers. The actual resolution will be defined by adding the
+                bspline order (default is 3) to the resolution in each dimension
+                specified here. For example, 1,1,1 will result in a 4x4x4 grid of
+                control points. This parameter may need to be adjusted based on your
+                input image. In the multi-resolution N4 framework, the resolution of
+                the bspline grid at subsequent iterations will be doubled. The
+                number of resolutions is implicitly defined by Number of iterations
+                parameter (the size of this list is the number of resolutions)
+                flag: --meshresolution %s
+        outputbiasfield: (a boolean or a file name)
+                Recovered bias field (OPTIONAL)
+                flag: --outputbiasfield %s
+        outputimage: (a boolean or a file name)
+                Result of processing
+                flag: --outputimage %s
+        shrinkfactor: (an integer (int or long))
+                Defines how much the image should be upsampled before estimating the
+                inhomogeneity field. Increase if you want to reduce the execution
+                time. 1 corresponds to the original resolution. Larger values will
+                significantly reduce the computation time.
+                flag: --shrinkfactor %d
+        splinedistance: (a float)
+                An alternative means to define the spline grid, by setting the
+                distance between the control points. This parameter is used only if
+                the grid resolution is not specified.
+                flag: --splinedistance %f
+        weightimage: (an existing file name)
+                Weight Image
+                flag: --weightimage %s
+
+Outputs::
+
+        outputbiasfield: (an existing file name)
+                Recovered bias field (OPTIONAL)
+        outputimage: (an existing file name)
+                Result of processing

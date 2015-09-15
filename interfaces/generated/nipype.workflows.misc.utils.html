@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,13 +114,13 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">workflows.misc.utils</a><ul>
-<li><a class="reference internal" href="#get-affine"><tt class="docutils literal"><span class="pre">get_affine()</span></tt></a></li>
-<li><a class="reference internal" href="#get-data-dims"><tt class="docutils literal"><span class="pre">get_data_dims()</span></tt></a></li>
-<li><a class="reference internal" href="#get-vox-dims"><tt class="docutils literal"><span class="pre">get_vox_dims()</span></tt></a></li>
-<li><a class="reference internal" href="#nipype-workflows-misc-utils-id-list-from-lookup-table"><tt class="docutils literal"><span class="pre">id_list_from_lookup_table()</span></tt></a></li>
-<li><a class="reference internal" href="#region-list-from-volume"><tt class="docutils literal"><span class="pre">region_list_from_volume()</span></tt></a></li>
-<li><a class="reference internal" href="#select-aparc"><tt class="docutils literal"><span class="pre">select_aparc()</span></tt></a></li>
-<li><a class="reference internal" href="#select-aparc-annot"><tt class="docutils literal"><span class="pre">select_aparc_annot()</span></tt></a></li>
+<li><a class="reference internal" href="#get-affine"><code class="docutils literal"><span class="pre">get_affine()</span></code></a></li>
+<li><a class="reference internal" href="#get-data-dims"><code class="docutils literal"><span class="pre">get_data_dims()</span></code></a></li>
+<li><a class="reference internal" href="#get-vox-dims"><code class="docutils literal"><span class="pre">get_vox_dims()</span></code></a></li>
+<li><a class="reference internal" href="#nipype-workflows-misc-utils-id-list-from-lookup-table"><code class="docutils literal"><span class="pre">id_list_from_lookup_table()</span></code></a></li>
+<li><a class="reference internal" href="#region-list-from-volume"><code class="docutils literal"><span class="pre">region_list_from_volume()</span></code></a></li>
+<li><a class="reference internal" href="#select-aparc"><code class="docutils literal"><span class="pre">select_aparc()</span></code></a></li>
+<li><a class="reference internal" href="#select-aparc-annot"><code class="docutils literal"><span class="pre">select_aparc_annot()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -143,7 +143,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -155,7 +155,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -178,9 +178,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -190,37 +190,37 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-nipype.workflows.misc.utils">
 <span id="workflows-misc-utils"></span><h1>workflows.misc.utils<a class="headerlink" href="#module-nipype.workflows.misc.utils" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="get-affine">
-<span id="nipype-workflows-misc-utils-get-affine"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">get_affine()</span></tt><a class="headerlink" href="#get-affine" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/misc/utils.py#L24">Link to code</a></p>
+<span id="nipype-workflows-misc-utils-get-affine"></span><h2><code class="xref py py-func docutils literal"><span class="pre">get_affine()</span></code><a class="headerlink" href="#get-affine" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/misc/utils.py#L24">Link to code</a></p>
 </div>
 <div class="section" id="get-data-dims">
-<span id="nipype-workflows-misc-utils-get-data-dims"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">get_data_dims()</span></tt><a class="headerlink" href="#get-data-dims" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/misc/utils.py#L14">Link to code</a></p>
+<span id="nipype-workflows-misc-utils-get-data-dims"></span><h2><code class="xref py py-func docutils literal"><span class="pre">get_data_dims()</span></code><a class="headerlink" href="#get-data-dims" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/misc/utils.py#L14">Link to code</a></p>
 </div>
 <div class="section" id="get-vox-dims">
-<span id="nipype-workflows-misc-utils-get-vox-dims"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">get_vox_dims()</span></tt><a class="headerlink" href="#get-vox-dims" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/misc/utils.py#L4">Link to code</a></p>
+<span id="nipype-workflows-misc-utils-get-vox-dims"></span><h2><code class="xref py py-func docutils literal"><span class="pre">get_vox_dims()</span></code><a class="headerlink" href="#get-vox-dims" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/misc/utils.py#L4">Link to code</a></p>
 </div>
 <div class="section" id="nipype-workflows-misc-utils-id-list-from-lookup-table">
-<span id="id-list-from-lookup-table"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">id_list_from_lookup_table()</span></tt><a class="headerlink" href="#nipype-workflows-misc-utils-id-list-from-lookup-table" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/misc/utils.py#L57">Link to code</a></p>
+<span id="id-list-from-lookup-table"></span><h2><code class="xref py py-func docutils literal"><span class="pre">id_list_from_lookup_table()</span></code><a class="headerlink" href="#nipype-workflows-misc-utils-id-list-from-lookup-table" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/misc/utils.py#L57">Link to code</a></p>
 </div>
 <div class="section" id="region-list-from-volume">
-<span id="nipype-workflows-misc-utils-region-list-from-volume"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">region_list_from_volume()</span></tt><a class="headerlink" href="#region-list-from-volume" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/misc/utils.py#L44">Link to code</a></p>
+<span id="nipype-workflows-misc-utils-region-list-from-volume"></span><h2><code class="xref py py-func docutils literal"><span class="pre">region_list_from_volume()</span></code><a class="headerlink" href="#region-list-from-volume" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/misc/utils.py#L44">Link to code</a></p>
 </div>
 <div class="section" id="select-aparc">
-<span id="nipype-workflows-misc-utils-select-aparc"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">select_aparc()</span></tt><a class="headerlink" href="#select-aparc" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/misc/utils.py#L30">Link to code</a></p>
+<span id="nipype-workflows-misc-utils-select-aparc"></span><h2><code class="xref py py-func docutils literal"><span class="pre">select_aparc()</span></code><a class="headerlink" href="#select-aparc" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/misc/utils.py#L30">Link to code</a></p>
 </div>
 <div class="section" id="select-aparc-annot">
-<span id="nipype-workflows-misc-utils-select-aparc-annot"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">select_aparc_annot()</span></tt><a class="headerlink" href="#select-aparc-annot" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/misc/utils.py#L37">Link to code</a></p>
+<span id="nipype-workflows-misc-utils-select-aparc-annot"></span><h2><code class="xref py py-func docutils literal"><span class="pre">select_aparc_annot()</span></code><a class="headerlink" href="#select-aparc-annot" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/misc/utils.py#L37">Link to code</a></p>
 </div>
 </div>
 
@@ -231,9 +231,9 @@
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

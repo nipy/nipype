@@ -1,0 +1,619 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">algorithms.modelgen</a><ul>
+<li><a class="reference internal" href="#specifymodel">SpecifyModel</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#specifyspmmodel">SpecifySPMModel</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#specifysparsemodel">SpecifySparseModel</a><ul>
+<li><a class="reference internal" href="#references">References</a></li>
+<li><a class="reference internal" href="#id3">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gcd"><code class="docutils literal"><span class="pre">gcd()</span></code></a></li>
+<li><a class="reference internal" href="#gen-info"><code class="docutils literal"><span class="pre">gen_info()</span></code></a></li>
+<li><a class="reference internal" href="#orth"><code class="docutils literal"><span class="pre">orth()</span></code></a></li>
+<li><a class="reference internal" href="#scale-timings"><code class="docutils literal"><span class="pre">scale_timings()</span></code></a><ul>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#spm-hrf"><code class="docutils literal"><span class="pre">spm_hrf()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="algorithms-modelgen">
+<h1>algorithms.modelgen<a class="headerlink" href="#algorithms-modelgen" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-algorithms-modelgen-specifymodel"></span><div class="section" id="specifymodel">
+<span id="index-0"></span><h2>SpecifyModel<a class="headerlink" href="#specifymodel" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/algorithms/modelgen.py#L203">Link to code</a></p>
+<p>Makes a model specification compatible with spm/fsl designers.</p>
+<p>The subject_info field should contain paradigm information in the form of
+a Bunch or a list of Bunch. The Bunch should contain the following
+information:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+- conditions : list of names
+- onsets : lists of onsets corresponding to each condition
+- durations : lists of durations corresponding to each condition. Should be left to a single 0 if all events are being modelled as impulses.
+
+[Optional]
+- regressor_names : list of str
+    list of names corresponding to each column. Should be None if
+    automatically assigned.
+- regressors : list of lists
+   values for each regressor - must correspond to the number of
+   volumes in the functional run
+- amplitudes : lists of amplitudes for each event. This will be ignored by
+  SPM&#39;s Level1Design.
+
+The following two (tmod, pmod) will be ignored by any Level1Design class
+other than SPM:
+
+- tmod : lists of conditions that should be temporally modulated. Should
+  default to None if not being used.
+- pmod : list of Bunch corresponding to conditions
+  - name : name of parametric modulator
+  - param : values of the modulator
+  - poly : degree of modulation
+</pre></div>
+</div>
+<p>Alternatively, you can provide information through event files.</p>
+<p>The event files have to be in 1, 2 or 3 column format with the columns
+corresponding to Onsets, Durations and Amplitudes and they have to have the
+name event_name.runXXX... e.g.: Words.run001.txt. The event_name part will
+be used to create the condition names.</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="n">Bunch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">SpecifyModel</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_units</span> <span class="o">=</span> <span class="s">&#39;secs&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">functional_runs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;functional2.nii&#39;</span><span class="p">,</span> <span class="s">&#39;functional3.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">time_repetition</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">high_pass_filter_cutoff</span> <span class="o">=</span> <span class="mf">128.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">info</span> <span class="o">=</span> <span class="p">[</span><span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;cond1&#39;</span><span class="p">],</span> <span class="n">onsets</span><span class="o">=</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">180</span><span class="p">]],</span> <span class="n">durations</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">]]),</span>             <span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;cond1&#39;</span><span class="p">],</span> <span class="n">onsets</span><span class="o">=</span><span class="p">[[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">]],</span> <span class="n">durations</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">]])]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_info</span> <span class="o">=</span> <span class="n">info</span>
+</pre></div>
+</div>
+<p>Using pmod:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">info</span> <span class="o">=</span> <span class="p">[</span><span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;cond1&#39;</span><span class="p">,</span> <span class="s">&#39;cond2&#39;</span><span class="p">],</span> <span class="n">onsets</span><span class="o">=</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">50</span><span class="p">],[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">180</span><span class="p">]],</span> <span class="n">durations</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">pmod</span><span class="o">=</span><span class="p">[</span><span class="n">Bunch</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;amp&#39;</span><span class="p">],</span> <span class="n">poly</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">param</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]),</span> <span class="bp">None</span><span class="p">]),</span>         <span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;cond1&#39;</span><span class="p">,</span> <span class="s">&#39;cond2&#39;</span><span class="p">],</span> <span class="n">onsets</span><span class="o">=</span><span class="p">[[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">120</span><span class="p">],[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">160</span><span class="p">]],</span> <span class="n">durations</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">pmod</span><span class="o">=</span><span class="p">[</span><span class="n">Bunch</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;amp&#39;</span><span class="p">],</span> <span class="n">poly</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">param</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]),</span> <span class="bp">None</span><span class="p">])]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_info</span> <span class="o">=</span> <span class="n">info</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+event_files: (a list of items which are an existing file name)
+        list of event description files 1, 2 or 3 column format
+        corresponding to onsets, durations and amplitudes
+        mutually_exclusive: subject_info
+functional_runs: (a list of items which are an existing file name or
+         an existing file name)
+        Data files for model. List of 4D files or list oflist of 3D files
+        per session
+high_pass_filter_cutoff: (a float)
+        High-pass filter cutoff in secs
+input_units: (&#39;secs&#39; or &#39;scans&#39;)
+        Units of event onsets and durations (secs or scans)Output units are
+        always in secs
+subject_info
+        Bunch or List(Bunch) subject specific condition information. see
+        :ref:`SpecifyModel` or SpecifyModel.__doc__ for details
+        mutually_exclusive: event_files
+time_repetition: (a float)
+        Time between the start of one volume to the start of the next image
+        volume.
+
+[Optional]
+event_files: (a list of items which are an existing file name)
+        list of event description files 1, 2 or 3 column format
+        corresponding to onsets, durations and amplitudes
+        mutually_exclusive: subject_info
+functional_runs: (a list of items which are an existing file name or
+         an existing file name)
+        Data files for model. List of 4D files or list oflist of 3D files
+        per session
+high_pass_filter_cutoff: (a float)
+        High-pass filter cutoff in secs
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+input_units: (&#39;secs&#39; or &#39;scans&#39;)
+        Units of event onsets and durations (secs or scans)Output units are
+        always in secs
+outlier_files: (an existing file name)
+        Files containing scan outlier indices that should be tossed
+realignment_parameters: (an existing file name)
+        Realignment parameters returned by motion correction algorithm
+subject_info
+        Bunch or List(Bunch) subject specific condition information. see
+        :ref:`SpecifyModel` or SpecifyModel.__doc__ for details
+        mutually_exclusive: event_files
+time_repetition: (a float)
+        Time between the start of one volume to the start of the next image
+        volume.
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>session_info
+        session info for level1designs
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-modelgen-specifyspmmodel"></span></div>
+</div>
+<div class="section" id="specifyspmmodel">
+<span id="index-1"></span><h2>SpecifySPMModel<a class="headerlink" href="#specifyspmmodel" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/algorithms/modelgen.py#L394">Link to code</a></p>
+<p>Adds SPM specific options to SpecifyModel</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>adds:</dt>
+<dd><ul class="first last simple">
+<li>concatenate_runs</li>
+<li>output_units</li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="n">Bunch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">SpecifySPMModel</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_units</span> <span class="o">=</span> <span class="s">&#39;secs&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_units</span> <span class="o">=</span> <span class="s">&#39;scans&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">high_pass_filter_cutoff</span> <span class="o">=</span> <span class="mf">128.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">functional_runs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;functional2.nii&#39;</span><span class="p">,</span> <span class="s">&#39;functional3.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">time_repetition</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">concatenate_runs</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">info</span> <span class="o">=</span> <span class="p">[</span><span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;cond1&#39;</span><span class="p">],</span> <span class="n">onsets</span><span class="o">=</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">180</span><span class="p">]],</span> <span class="n">durations</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">]]),</span>             <span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;cond1&#39;</span><span class="p">],</span> <span class="n">onsets</span><span class="o">=</span><span class="p">[[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">]],</span> <span class="n">durations</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">]])]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_info</span> <span class="o">=</span> <span class="n">info</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+event_files: (a list of items which are an existing file name)
+        list of event description files 1, 2 or 3 column format
+        corresponding to onsets, durations and amplitudes
+        mutually_exclusive: subject_info
+functional_runs: (a list of items which are an existing file name or
+         an existing file name)
+        Data files for model. List of 4D files or list oflist of 3D files
+        per session
+high_pass_filter_cutoff: (a float)
+        High-pass filter cutoff in secs
+input_units: (&#39;secs&#39; or &#39;scans&#39;)
+        Units of event onsets and durations (secs or scans)Output units are
+        always in secs
+subject_info
+        Bunch or List(Bunch) subject specific condition information. see
+        :ref:`SpecifyModel` or SpecifyModel.__doc__ for details
+        mutually_exclusive: event_files
+time_repetition: (a float)
+        Time between the start of one volume to the start of the next image
+        volume.
+
+[Optional]
+concatenate_runs: (a boolean, nipype default value: False)
+        Concatenate all runs to look like a single session.
+event_files: (a list of items which are an existing file name)
+        list of event description files 1, 2 or 3 column format
+        corresponding to onsets, durations and amplitudes
+        mutually_exclusive: subject_info
+functional_runs: (a list of items which are an existing file name or
+         an existing file name)
+        Data files for model. List of 4D files or list oflist of 3D files
+        per session
+high_pass_filter_cutoff: (a float)
+        High-pass filter cutoff in secs
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+input_units: (&#39;secs&#39; or &#39;scans&#39;)
+        Units of event onsets and durations (secs or scans)Output units are
+        always in secs
+outlier_files: (an existing file name)
+        Files containing scan outlier indices that should be tossed
+output_units: (&#39;secs&#39; or &#39;scans&#39;, nipype default value: secs)
+        Units of design event onsets and durations (secs or scans)
+realignment_parameters: (an existing file name)
+        Realignment parameters returned by motion correction algorithm
+subject_info
+        Bunch or List(Bunch) subject specific condition information. see
+        :ref:`SpecifyModel` or SpecifyModel.__doc__ for details
+        mutually_exclusive: event_files
+time_repetition: (a float)
+        Time between the start of one volume to the start of the next image
+        volume.
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>session_info
+        session info for level1designs
+</pre></div>
+</div>
+<span class="target" id="nipype-algorithms-modelgen-specifysparsemodel"></span></div>
+</div>
+<div class="section" id="specifysparsemodel">
+<span id="index-2"></span><h2>SpecifySparseModel<a class="headerlink" href="#specifysparsemodel" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/algorithms/modelgen.py#L530">Link to code</a></p>
+<p>Specify a sparse model that is compatible with spm/fsl designers</p>
+<div class="section" id="references">
+<h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>Ghosh et al. (2009) OHBM <a class="reference external" href="http://dl.dropbox.com/u/363467/OHBM2009_HRF.pdf">http://dl.dropbox.com/u/363467/OHBM2009_HRF.pdf</a></td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="n">Bunch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">SpecifySparseModel</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_units</span> <span class="o">=</span> <span class="s">&#39;secs&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">functional_runs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;functional2.nii&#39;</span><span class="p">,</span> <span class="s">&#39;functional3.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">time_repetition</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">time_acquisition</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">high_pass_filter_cutoff</span> <span class="o">=</span> <span class="mf">128.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">model_hrf</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">info</span> <span class="o">=</span> <span class="p">[</span><span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;cond1&#39;</span><span class="p">],</span> <span class="n">onsets</span><span class="o">=</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">180</span><span class="p">]],</span> <span class="n">durations</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">]]),</span>             <span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;cond1&#39;</span><span class="p">],</span> <span class="n">onsets</span><span class="o">=</span><span class="p">[[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">150</span><span class="p">]],</span> <span class="n">durations</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">]])]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_info</span> <span class="o">=</span> <span class="n">info</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+event_files: (a list of items which are an existing file name)
+        list of event description files 1, 2 or 3 column format
+        corresponding to onsets, durations and amplitudes
+        mutually_exclusive: subject_info
+functional_runs: (a list of items which are an existing file name or
+         an existing file name)
+        Data files for model. List of 4D files or list oflist of 3D files
+        per session
+high_pass_filter_cutoff: (a float)
+        High-pass filter cutoff in secs
+input_units: (&#39;secs&#39; or &#39;scans&#39;)
+        Units of event onsets and durations (secs or scans)Output units are
+        always in secs
+subject_info
+        Bunch or List(Bunch) subject specific condition information. see
+        :ref:`SpecifyModel` or SpecifyModel.__doc__ for details
+        mutually_exclusive: event_files
+time_acquisition: (a float)
+        Time in seconds to acquire a single image volume
+time_repetition: (a float)
+        Time between the start of one volume to the start of the next image
+        volume.
+
+[Optional]
+event_files: (a list of items which are an existing file name)
+        list of event description files 1, 2 or 3 column format
+        corresponding to onsets, durations and amplitudes
+        mutually_exclusive: subject_info
+functional_runs: (a list of items which are an existing file name or
+         an existing file name)
+        Data files for model. List of 4D files or list oflist of 3D files
+        per session
+high_pass_filter_cutoff: (a float)
+        High-pass filter cutoff in secs
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+input_units: (&#39;secs&#39; or &#39;scans&#39;)
+        Units of event onsets and durations (secs or scans)Output units are
+        always in secs
+model_hrf: (a boolean)
+        model sparse events with hrf
+outlier_files: (an existing file name)
+        Files containing scan outlier indices that should be tossed
+realignment_parameters: (an existing file name)
+        Realignment parameters returned by motion correction algorithm
+save_plot: (a boolean)
+        save plot of sparse design calculation (Requires matplotlib)
+scale_regressors: (a boolean, nipype default value: True)
+        Scale regressors by the peak
+scan_onset: (a float, nipype default value: 0.0)
+        Start of scanning relative to onset of run in secs
+stimuli_as_impulses: (a boolean, nipype default value: True)
+        Treat each stimulus to be impulse like.
+subject_info
+        Bunch or List(Bunch) subject specific condition information. see
+        :ref:`SpecifyModel` or SpecifyModel.__doc__ for details
+        mutually_exclusive: event_files
+time_acquisition: (a float)
+        Time in seconds to acquire a single image volume
+time_repetition: (a float)
+        Time between the start of one volume to the start of the next image
+        volume.
+use_temporal_deriv: (a boolean)
+        Create a temporal derivative in addition to regular regressor
+        requires: model_hrf
+volumes_in_cluster: (an integer &gt;= 1, nipype default value: 1)
+        Number of scan volumes in a cluster
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>session_info
+        session info for level1designs
+sparse_png_file: (a file name)
+        PNG file showing sparse design
+sparse_svg_file: (a file name)
+        SVG file showing sparse design
+</pre></div>
+</div>
+<span class="target" id="module-nipype.algorithms.modelgen"></span></div>
+</div>
+<div class="section" id="gcd">
+<span id="nipype-algorithms-modelgen-gcd"></span><h2><code class="xref py py-func docutils literal"><span class="pre">gcd()</span></code><a class="headerlink" href="#gcd" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/algorithms/modelgen.py#L35">Link to code</a></p>
+<p>Returns the greatest common divisor of two integers</p>
+<p>uses Euclid&#8217;s algorithm</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">gcd</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="go">~</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcd</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+<span class="go">~</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gcd</span><span class="p">(</span><span class="mi">22</span><span class="p">,</span> <span class="mi">55</span><span class="p">)</span>
+<span class="go">~~</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="gen-info">
+<span id="nipype-algorithms-modelgen-gen-info"></span><h2><code class="xref py py-func docutils literal"><span class="pre">gen_info()</span></code><a class="headerlink" href="#gen-info" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/algorithms/modelgen.py#L139">Link to code</a></p>
+<p>Generate subject_info structure from a list of event files</p>
+</div>
+<div class="section" id="orth">
+<span id="nipype-algorithms-modelgen-orth"></span><h2><code class="xref py py-func docutils literal"><span class="pre">orth()</span></code><a class="headerlink" href="#orth" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/algorithms/modelgen.py#L99">Link to code</a></p>
+<p>Orthoganlize y_in with respect to x_in</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">orth</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.7142857142857144</span><span class="p">,</span> <span class="mf">0.42857142857142883</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.85714285714285676</span><span class="p">])))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">all</span><span class="p">(</span><span class="n">err</span><span class="o">&lt;</span><span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="scale-timings">
+<span id="nipype-algorithms-modelgen-scale-timings"></span><h2><code class="xref py py-func docutils literal"><span class="pre">scale_timings()</span></code><a class="headerlink" href="#scale-timings" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/algorithms/modelgen.py#L117">Link to code</a></p>
+<p>Scales timings given input and output units (scans/secs)</p>
+<div class="section" id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h3>
+<p>timelist: list of times to scale
+input_units: &#8216;secs&#8217; or &#8216;scans&#8217;
+output_units: Ibid.
+time_repetition: float in seconds</p>
+</div>
+</div>
+<div class="section" id="spm-hrf">
+<span id="nipype-algorithms-modelgen-spm-hrf"></span><h2><code class="xref py py-func docutils literal"><span class="pre">spm_hrf()</span></code><a class="headerlink" href="#spm-hrf" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/algorithms/modelgen.py#L52">Link to code</a></p>
+<p>python implementation of spm_hrf</p>
+<p>see spm_hrf for implementation details</p>
+<p>% RT   - scan repeat time
+% p    - parameters of the response function (two gamma
+% functions)
+% defaults  (seconds)
+%   p(0) - delay of response (relative to onset)       6
+%   p(1) - delay of undershoot (relative to onset)    16
+%   p(2) - dispersion of response                      1
+%   p(3) - dispersion of undershoot                    1
+%   p(4) - ratio of response to undershoot             6
+%   p(5) - onset (seconds)                             0
+%   p(6) - length of kernel (seconds)                 32
+~
+% hrf  - hemodynamic response function
+% p    - parameters of the response function</p>
+<p>the following code using scipy.stats.distributions.gamma
+doesn&#8217;t return the same result as the spm_Gpdf function
+hrf   = gamma.pdf(u, p[0]/p[2], scale=dt/p[2]) - gamma.pdf(u, p[1]/p[3], scale=dt/p[3])/p[4]</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">spm_hrf</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">[  0.00000000e+00   8.65660810e-02   3.74888236e-01   3.84923382e-01</span>
+<span class="go">   2.16117316e-01   7.68695653e-02   1.62017720e-03  -3.06078117e-02</span>
+<span class="go">  -3.73060781e-02  -3.08373716e-02  -2.05161334e-02  -1.16441637e-02</span>
+<span class="go">  -5.82063147e-03  -2.61854250e-03  -1.07732374e-03  -4.10443522e-04</span>
+<span class="go">  -1.46257507e-04]</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

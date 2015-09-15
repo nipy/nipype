@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -126,19 +126,19 @@
 <li><a class="reference internal" href="#id2">Example</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#cmat"><tt class="docutils literal"><span class="pre">cmat()</span></tt></a></li>
-<li><a class="reference internal" href="#create-allpoints-cmat"><tt class="docutils literal"><span class="pre">create_allpoints_cmat()</span></tt></a></li>
-<li><a class="reference internal" href="#create-endpoints-array"><tt class="docutils literal"><span class="pre">create_endpoints_array()</span></tt></a></li>
-<li><a class="reference internal" href="#create-nodes"><tt class="docutils literal"><span class="pre">create_nodes()</span></tt></a></li>
-<li><a class="reference internal" href="#get-connectivity-matrix"><tt class="docutils literal"><span class="pre">get_connectivity_matrix()</span></tt></a></li>
-<li><a class="reference internal" href="#get-rois-crossed"><tt class="docutils literal"><span class="pre">get_rois_crossed()</span></tt></a></li>
-<li><a class="reference internal" href="#length"><tt class="docutils literal"><span class="pre">length()</span></tt></a><ul>
+<li><a class="reference internal" href="#cmat"><code class="docutils literal"><span class="pre">cmat()</span></code></a></li>
+<li><a class="reference internal" href="#create-allpoints-cmat"><code class="docutils literal"><span class="pre">create_allpoints_cmat()</span></code></a></li>
+<li><a class="reference internal" href="#create-endpoints-array"><code class="docutils literal"><span class="pre">create_endpoints_array()</span></code></a></li>
+<li><a class="reference internal" href="#create-nodes"><code class="docutils literal"><span class="pre">create_nodes()</span></code></a></li>
+<li><a class="reference internal" href="#get-connectivity-matrix"><code class="docutils literal"><span class="pre">get_connectivity_matrix()</span></code></a></li>
+<li><a class="reference internal" href="#get-rois-crossed"><code class="docutils literal"><span class="pre">get_rois_crossed()</span></code></a></li>
+<li><a class="reference internal" href="#length"><code class="docutils literal"><span class="pre">length()</span></code></a><ul>
 <li><a class="reference internal" href="#parameters">Parameters</a></li>
 <li><a class="reference internal" href="#returns">Returns</a></li>
 <li><a class="reference internal" href="#examples">Examples</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#save-fibers"><tt class="docutils literal"><span class="pre">save_fibers()</span></tt></a></li>
+<li><a class="reference internal" href="#save-fibers"><code class="docutils literal"><span class="pre">save_fibers()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -161,7 +161,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -173,7 +173,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -196,9 +196,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -208,13 +208,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-cmtk-cmtk">
 <h1>interfaces.cmtk.cmtk<a class="headerlink" href="#interfaces-cmtk-cmtk" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-cmtk-cmtk-creatematrix"></span><div class="section" id="creatematrix">
 <span id="index-0"></span><h2>CreateMatrix<a class="headerlink" href="#creatematrix" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L430">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/cmtk.py#L430">Link to code</a></p>
 <p>Performs connectivity mapping and outputs the result as a NetworkX graph and a Matlab matrix</p>
 <div class="section" id="example">
 <h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
@@ -300,7 +300,7 @@ stats_file: (an existing file name)
 </div>
 <div class="section" id="createnodes">
 <span id="index-1"></span><h2>CreateNodes<a class="headerlink" href="#createnodes" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L747">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/cmtk.py#L747">Link to code</a></p>
 <p>Generates a NetworkX graph containing nodes at the centroid of each region in the input ROI file.
 Node data is added from the resolution network file.</p>
 <div class="section" id="id1">
@@ -335,7 +335,7 @@ out_filename: (a file name, nipype default value: nodenetwork.pck)
 </div>
 <div class="section" id="roigen">
 <span id="index-2"></span><h2>ROIGen<a class="headerlink" href="#roigen" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L578">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/cmtk.py#L578">Link to code</a></p>
 <p>Generates a ROI file for connectivity mapping and a dictionary file containing relevant node information</p>
 <div class="section" id="id2">
 <h3>Example<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
@@ -389,18 +389,18 @@ roi_file: (a file name)
 <span class="target" id="module-nipype.interfaces.cmtk.cmtk"></span></div>
 </div>
 <div class="section" id="cmat">
-<span id="nipype-interfaces-cmtk-cmtk-cmat"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">cmat()</span></tt><a class="headerlink" href="#cmat" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L165">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-cmtk-cmat"></span><h2><code class="xref py py-func docutils literal"><span class="pre">cmat()</span></code><a class="headerlink" href="#cmat" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/cmtk.py#L165">Link to code</a></p>
 <p>Create the connection matrix for each resolution using fibers and ROIs.</p>
 </div>
 <div class="section" id="create-allpoints-cmat">
-<span id="nipype-interfaces-cmtk-cmtk-create-allpoints-cmat"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_allpoints_cmat()</span></tt><a class="headerlink" href="#create-allpoints-cmat" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L95">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-cmtk-create-allpoints-cmat"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_allpoints_cmat()</span></code><a class="headerlink" href="#create-allpoints-cmat" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/cmtk.py#L95">Link to code</a></p>
 <p>Create the intersection arrays for each fiber</p>
 </div>
 <div class="section" id="create-endpoints-array">
-<span id="nipype-interfaces-cmtk-cmtk-create-endpoints-array"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_endpoints_array()</span></tt><a class="headerlink" href="#create-endpoints-array" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L120">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-cmtk-create-endpoints-array"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_endpoints_array()</span></code><a class="headerlink" href="#create-endpoints-array" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/cmtk.py#L120">Link to code</a></p>
 <p>Create the endpoints arrays for each fiber
 Parameters
 ~~~~~~~~~~
@@ -413,20 +413,20 @@ index of its first and last point in the voxelSize volume
 endpointsmm) : endpoints in milimeter coordinates</p>
 </div>
 <div class="section" id="create-nodes">
-<span id="nipype-interfaces-cmtk-cmtk-create-nodes"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_nodes()</span></tt><a class="headerlink" href="#create-nodes" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L726">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-cmtk-create-nodes"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_nodes()</span></code><a class="headerlink" href="#create-nodes" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/cmtk.py#L726">Link to code</a></p>
 </div>
 <div class="section" id="get-connectivity-matrix">
-<span id="nipype-interfaces-cmtk-cmtk-get-connectivity-matrix"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">get_connectivity_matrix()</span></tt><a class="headerlink" href="#get-connectivity-matrix" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L84">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-cmtk-get-connectivity-matrix"></span><h2><code class="xref py py-func docutils literal"><span class="pre">get_connectivity_matrix()</span></code><a class="headerlink" href="#get-connectivity-matrix" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/cmtk.py#L84">Link to code</a></p>
 </div>
 <div class="section" id="get-rois-crossed">
-<span id="nipype-interfaces-cmtk-cmtk-get-rois-crossed"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">get_rois_crossed()</span></tt><a class="headerlink" href="#get-rois-crossed" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L71">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-cmtk-get-rois-crossed"></span><h2><code class="xref py py-func docutils literal"><span class="pre">get_rois_crossed()</span></code><a class="headerlink" href="#get-rois-crossed" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/cmtk.py#L71">Link to code</a></p>
 </div>
 <div class="section" id="length">
-<span id="nipype-interfaces-cmtk-cmtk-length"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">length()</span></tt><a class="headerlink" href="#length" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L27">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-cmtk-length"></span><h2><code class="xref py py-func docutils literal"><span class="pre">length()</span></code><a class="headerlink" href="#length" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/cmtk.py#L27">Link to code</a></p>
 <p>Euclidean length of track line</p>
 <div class="section" id="parameters">
 <h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h3>
@@ -466,8 +466,8 @@ otherwise (default) return scalar giving total length.</dd>
 </div>
 </div>
 <div class="section" id="save-fibers">
-<span id="nipype-interfaces-cmtk-cmtk-save-fibers"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">save_fibers()</span></tt><a class="headerlink" href="#save-fibers" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/cmtk.py#L385">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-cmtk-save-fibers"></span><h2><code class="xref py py-func docutils literal"><span class="pre">save_fibers()</span></code><a class="headerlink" href="#save-fibers" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/cmtk.py#L385">Link to code</a></p>
 <p>Stores a new trackvis file fname using only given indices</p>
 </div>
 </div>
@@ -479,9 +479,9 @@ otherwise (default) return scalar giving total length.</dd>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

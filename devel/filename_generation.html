@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -138,7 +138,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../users/install.html">Download</a></td>
@@ -150,7 +150,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -173,9 +173,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -185,7 +185,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="auto-generated-filenames">
 <h1>Auto-generated filenames<a class="headerlink" href="#auto-generated-filenames" title="Permalink to this headline">¶</a></h1>
@@ -199,46 +199,46 @@ across all Interfaces (if possible).</p>
 <h2>Current Rules<a class="headerlink" href="#current-rules" title="Permalink to this headline">¶</a></h2>
 <p>These rules are for fsl.Bet, but it appears they are the same for all
 fsl and spm Interfaces.</p>
-<p>Bet has two mandatory parameters, <tt class="docutils literal"><span class="pre">infile</span></tt> and <tt class="docutils literal"><span class="pre">outfile</span></tt>.  These
+<p>Bet has two mandatory parameters, <code class="docutils literal"><span class="pre">infile</span></code> and <code class="docutils literal"><span class="pre">outfile</span></code>.  These
 are the rules for how they are handled in different use cases.</p>
 <ol class="arabic simple">
-<li>If <tt class="docutils literal"><span class="pre">infile</span></tt> or <tt class="docutils literal"><span class="pre">outfile</span></tt> are absolute paths, they are used
+<li>If <code class="docutils literal"><span class="pre">infile</span></code> or <code class="docutils literal"><span class="pre">outfile</span></code> are absolute paths, they are used
 as-is and never changed.  This allows users to override any
 filename/path generation.</li>
-<li>If <tt class="docutils literal"><span class="pre">outfile</span></tt> is not specified, a filename is generated.</li>
-<li>Generated filenames (at least for <tt class="docutils literal"><span class="pre">outfile</span></tt>) are based on:</li>
+<li>If <code class="docutils literal"><span class="pre">outfile</span></code> is not specified, a filename is generated.</li>
+<li>Generated filenames (at least for <code class="docutils literal"><span class="pre">outfile</span></code>) are based on:</li>
 </ol>
 <blockquote>
 <div><ul>
-<li><p class="first"><tt class="docutils literal"><span class="pre">infile</span></tt>, the filename minus the extensions.</p>
+<li><p class="first"><code class="docutils literal"><span class="pre">infile</span></code>, the filename minus the extensions.</p>
 </li>
 <li><p class="first">A suffix specified by the Interface. For example Bet uses
 <em>_brain</em> suffix.</p>
 </li>
 <li><p class="first">The current working directory, os.getcwd().  Example:</p>
-<p>If <tt class="docutils literal"><span class="pre">infile</span></tt> == &#8216;foo.nii&#8217; and the cwd is <tt class="docutils literal"><span class="pre">/home/cburns</span></tt> then
-generated <tt class="docutils literal"><span class="pre">outfile</span></tt> for Bet will be
-<tt class="docutils literal"><span class="pre">/home/cburns/foo_brain.nii.gz</span></tt></p>
+<p>If <code class="docutils literal"><span class="pre">infile</span></code> == &#8216;foo.nii&#8217; and the cwd is <code class="docutils literal"><span class="pre">/home/cburns</span></code> then
+generated <code class="docutils literal"><span class="pre">outfile</span></code> for Bet will be
+<code class="docutils literal"><span class="pre">/home/cburns/foo_brain.nii.gz</span></code></p>
 </li>
 </ul>
 </div></blockquote>
 <ol class="arabic simple" start="4">
-<li>If <tt class="docutils literal"><span class="pre">outfile</span></tt> is not an absolute path, for instance just a
+<li>If <code class="docutils literal"><span class="pre">outfile</span></code> is not an absolute path, for instance just a
 filename, the absolute path is generated using
-<tt class="docutils literal"><span class="pre">os.path.realpath</span></tt>. This absolute path is needed to make sure the
+<code class="docutils literal"><span class="pre">os.path.realpath</span></code>. This absolute path is needed to make sure the
 packages (Bet in this case) write the output file to a location of
 our choosing.  The generated absolute path is only used in the
-<tt class="docutils literal"><span class="pre">cmdline</span></tt> at runtime and does __not__ overwrite the class attr
-<tt class="docutils literal"><span class="pre">self.inputs.outfile</span></tt>.  It is generated only when the <tt class="docutils literal"><span class="pre">cmdline</span></tt>
+<code class="docutils literal"><span class="pre">cmdline</span></code> at runtime and does __not__ overwrite the class attr
+<code class="docutils literal"><span class="pre">self.inputs.outfile</span></code>.  It is generated only when the <code class="docutils literal"><span class="pre">cmdline</span></code>
 is invoked.</li>
 </ol>
 </div>
 <div class="section" id="walking-through-some-examples">
 <h2>Walking through some examples<a class="headerlink" href="#walking-through-some-examples" title="Permalink to this headline">¶</a></h2>
-<p>In this example we assign <tt class="docutils literal"><span class="pre">infile</span></tt> directly but <tt class="docutils literal"><span class="pre">outfile</span></tt> is
-generated in <tt class="docutils literal"><span class="pre">Bet._parse_inputs</span></tt> based on <tt class="docutils literal"><span class="pre">infile</span></tt>.  The generated
-<tt class="docutils literal"><span class="pre">outfile</span></tt> is only used in the cmdline at runtime and not stored in
-<tt class="docutils literal"><span class="pre">self.inputs.outfile</span></tt>.  This seems correct.</p>
+<p>In this example we assign <code class="docutils literal"><span class="pre">infile</span></code> directly but <code class="docutils literal"><span class="pre">outfile</span></code> is
+generated in <code class="docutils literal"><span class="pre">Bet._parse_inputs</span></code> based on <code class="docutils literal"><span class="pre">infile</span></code>.  The generated
+<code class="docutils literal"><span class="pre">outfile</span></code> is only used in the cmdline at runtime and not stored in
+<code class="docutils literal"><span class="pre">self.inputs.outfile</span></code>.  This seems correct.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [15]: </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
 
 <span class="gp">In [16]: </span><span class="n">mybet</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Bet</span><span class="p">()</span>
@@ -265,7 +265,7 @@ generated in <tt class="docutils literal"><span class="pre">Bet._parse_inputs</s
 <span class="gh">Out[26]: </span><span class="go">&#39;foo.nii&#39;</span>
 </pre></div>
 </div>
-<p>We get the same behavior here when we assign <tt class="docutils literal"><span class="pre">infile</span></tt> at initialization:</p>
+<p>We get the same behavior here when we assign <code class="docutils literal"><span class="pre">infile</span></code> at initialization:</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [28]: </span><span class="n">mybet</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Bet</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="s">&#39;foo.nii&#39;</span><span class="p">)</span>
 
 <span class="gp">In [29]: </span><span class="n">mybet</span><span class="o">.</span><span class="n">cmdline</span>
@@ -283,8 +283,8 @@ generated in <tt class="docutils literal"><span class="pre">Bet._parse_inputs</s
 <span class="gh">Out[32]: </span><span class="go">&#39;bet foo.nii /Users/cburns/src/nipy-sf/nipype/trunk/nipype/interfaces/tests/foo_brain.nii.gz&#39;</span>
 </pre></div>
 </div>
-<p>Here we specify absolute paths for both <tt class="docutils literal"><span class="pre">infile</span></tt> and
-<tt class="docutils literal"><span class="pre">outfile</span></tt>. The command line&#8217;s look as expected:</p>
+<p>Here we specify absolute paths for both <code class="docutils literal"><span class="pre">infile</span></code> and
+<code class="docutils literal"><span class="pre">outfile</span></code>. The command line&#8217;s look as expected:</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [53]: </span><span class="kn">import</span> <span class="nn">os</span>
 
 <span class="gp">In [54]: </span><span class="n">mybet</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Bet</span><span class="p">()</span>
@@ -301,8 +301,8 @@ generated in <tt class="docutils literal"><span class="pre">Bet._parse_inputs</s
 <span class="gh">Out[59]: </span><span class="go">&#39;bet /Users/cburns/tmp/junk/foo.nii /Users/cburns/tmp/junk/bar.nii&#39;</span>
 </pre></div>
 </div>
-<p>Here passing in a new <tt class="docutils literal"><span class="pre">outfile</span></tt> in the <tt class="docutils literal"><span class="pre">run</span></tt> method will update
-<tt class="docutils literal"><span class="pre">mybet.inputs.outfile</span></tt> to the passed in value.  Should this be the
+<p>Here passing in a new <code class="docutils literal"><span class="pre">outfile</span></code> in the <code class="docutils literal"><span class="pre">run</span></code> method will update
+<code class="docutils literal"><span class="pre">mybet.inputs.outfile</span></code> to the passed in value.  Should this be the
 case?</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [110]: </span><span class="n">mybet</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Bet</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="s">&#39;foo.nii&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s">&#39;bar.nii&#39;</span><span class="p">)</span>
 
@@ -321,9 +321,9 @@ case?</p>
 <span class="gh">Out[115]: </span><span class="go">&#39;bet foo.nii /Users/cburns/tmp/junk/not_bar.nii&#39;</span>
 </pre></div>
 </div>
-<p>In this case we provide <tt class="docutils literal"><span class="pre">outfile</span></tt> but not as an absolue path, so the
-absolue path is generated and used for the <tt class="docutils literal"><span class="pre">cmdline</span></tt> when run, but
-<tt class="docutils literal"><span class="pre">mybet.inputs.outfile</span></tt> is not updated with the absolute path.</p>
+<p>In this case we provide <code class="docutils literal"><span class="pre">outfile</span></code> but not as an absolue path, so the
+absolue path is generated and used for the <code class="docutils literal"><span class="pre">cmdline</span></code> when run, but
+<code class="docutils literal"><span class="pre">mybet.inputs.outfile</span></code> is not updated with the absolute path.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [74]: </span><span class="n">mybet</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Bet</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="s">&#39;foo.nii&#39;</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span><span class="s">&#39;bar.nii&#39;</span><span class="p">)</span>
 
 <span class="gp">In [75]: </span><span class="n">mybet</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">outfile</span>
@@ -351,9 +351,9 @@ absolue path is generated and used for the <tt class="docutils literal"><span cl
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

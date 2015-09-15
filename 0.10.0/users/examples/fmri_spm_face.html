@@ -1,0 +1,645 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.10.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">fMRI: Famous vs non-famous faces, SPM</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a><ul>
+<li><a class="reference internal" href="#preliminaries">Preliminaries</a></li>
+<li><a class="reference internal" href="#setting-up-workflows">Setting up workflows</a></li>
+<li><a class="reference internal" href="#setup-preprocessing-workflow">Setup preprocessing workflow</a></li>
+<li><a class="reference internal" href="#set-up-analysis-workflow">Set up analysis workflow</a></li>
+<li><a class="reference internal" href="#preproc-analysis-pipeline">Preproc + Analysis pipeline</a></li>
+<li><a class="reference internal" href="#data-specific-components">Data specific components</a></li>
+<li><a class="reference internal" href="#experimental-paradigm-specific-components">Experimental paradigm specific components</a></li>
+<li><a class="reference internal" href="#setup-the-pipeline">Setup the pipeline</a></li>
+<li><a class="reference internal" href="#setup-storage-results">Setup storage results</a></li>
+<li><a class="reference internal" href="#execute-the-pipeline">Execute the pipeline</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="fmri-famous-vs-non-famous-faces-spm">
+<span id="example-fmri-spm-face"></span><h1>fMRI: Famous vs non-famous faces, SPM<a class="headerlink" href="#fmri-famous-vs-non-famous-faces-spm" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The fmri_spm_face.py recreates the classical workflow described in the SPM8
+manual (<a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf</a>) using auditory dataset
+that can be downloaded from
+<a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/face_rep_SPM5.html">http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/face_rep_SPM5.html</a>:</p>
+<div class="highlight-python"><div class="highlight"><pre>python fmri_spm.py
+</pre></div>
+</div>
+<p>Import necessary modules from nipype.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">as</span> <span class="nn">nio</span>           <span class="c"># Data i/o</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>          <span class="c"># spm</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.matlab</span> <span class="kn">as</span> <span class="nn">mlab</span>      <span class="c"># how to run matlab</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.utility</span> <span class="kn">as</span> <span class="nn">util</span>     <span class="c"># utility</span>
+<span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="kn">as</span> <span class="nn">pe</span>          <span class="c"># pypeline engine</span>
+<span class="kn">import</span> <span class="nn">nipype.algorithms.modelgen</span> <span class="kn">as</span> <span class="nn">model</span>   <span class="c"># model specification</span>
+<span class="kn">import</span> <span class="nn">os</span>                                    <span class="c"># system functions</span>
+</pre></div>
+</div>
+<div class="section" id="preliminaries">
+<h3>Preliminaries<a class="headerlink" href="#preliminaries" title="Permalink to this headline">¶</a></h3>
+<p>Set any package specific configuration. The output file format
+for FSL routines is being set to uncompressed NIFTI and a specific
+version of matlab is being used. The uncompressed format is required
+because SPM does not handle compressed NIFTI.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Set the way matlab should be called</span>
+<span class="n">mlab</span><span class="o">.</span><span class="n">MatlabCommand</span><span class="o">.</span><span class="n">set_default_matlab_cmd</span><span class="p">(</span><span class="s">&quot;matlab -nodesktop -nosplash&quot;</span><span class="p">)</span>
+<span class="c"># If SPM is not in your MATLAB path you should add it here</span>
+<span class="c"># mlab.MatlabCommand.set_default_paths(&#39;/path/to/your/spm8&#39;)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setting-up-workflows">
+<h3>Setting up workflows<a class="headerlink" href="#setting-up-workflows" title="Permalink to this headline">¶</a></h3>
+<p>In this tutorial we will be setting up a hierarchical workflow for spm
+analysis. It one is slightly different then the one used in spm_tutorial2.</p>
+</div>
+<div class="section" id="setup-preprocessing-workflow">
+<h3>Setup preprocessing workflow<a class="headerlink" href="#setup-preprocessing-workflow" title="Permalink to this headline">¶</a></h3>
+<p>This is a generic preprocessing workflow that can be used by different analyses</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">preproc</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;preproc&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Realign</span></code> for motion correction
+and register all images to the mean image.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">realign</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Realign</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;realign&quot;</span><span class="p">)</span>
+
+<span class="n">slice_timing</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">SliceTiming</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;slice_timing&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Coregister</span></code> to perform a rigid
+body registration of the functional data to the structural data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">coregister</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Coregister</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;coregister&quot;</span><span class="p">)</span>
+<span class="n">coregister</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">jobtype</span> <span class="o">=</span> <span class="s">&#39;estimate&#39;</span>
+
+
+
+<span class="n">segment</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Segment</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;segment&quot;</span><span class="p">)</span>
+<span class="n">segment</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">save_bias_corrected</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>Uncomment the following line for faster execution</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#segment.inputs.gaussians_per_class = [1, 1, 1, 4]</span>
+</pre></div>
+</div>
+<p>Warp functional and structural data to SPM&#8217;s T1 template using
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Normalize</span></code>.  The tutorial data set
+includes the template image, T1.nii.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">normalize_func</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(),</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;normalize_func&quot;</span><span class="p">)</span>
+<span class="n">normalize_func</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">jobtype</span> <span class="o">=</span> <span class="s">&quot;write&quot;</span>
+
+<span class="n">normalize_struc</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(),</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;normalize_struc&quot;</span><span class="p">)</span>
+<span class="n">normalize_struc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">jobtype</span> <span class="o">=</span> <span class="s">&quot;write&quot;</span>
+</pre></div>
+</div>
+<p>Smooth the functional data using
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Smooth</span></code>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">smooth</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Smooth</span><span class="p">(),</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&quot;smooth&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><cite>write_voxel_sizes</cite> is the input of the normalize interface that is recommended to be set to
+the voxel sizes of the target volume. There is no need to set it manually since we van infer it from data
+using the following function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_vox_dims</span><span class="p">(</span><span class="n">volume</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">nibabel</span> <span class="kn">as</span> <span class="nn">nb</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">volume</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">volume</span> <span class="o">=</span> <span class="n">volume</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">nii</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+    <span class="n">hdr</span> <span class="o">=</span> <span class="n">nii</span><span class="o">.</span><span class="n">get_header</span><span class="p">()</span>
+    <span class="n">voxdims</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get_zooms</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">voxdims</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">voxdims</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">voxdims</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+</pre></div>
+</div>
+<p>Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
+to use 4D. Also <cite>get_vox_dims</cite> function is passed along the input volume of normalise to set the optimal
+voxel sizes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">preproc</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">realign</span><span class="p">,</span><span class="n">coregister</span><span class="p">,[(</span><span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="s">&#39;target&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">coregister</span><span class="p">,</span> <span class="n">segment</span><span class="p">,[(</span><span class="s">&#39;coregistered_source&#39;</span><span class="p">,</span><span class="s">&#39;data&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">segment</span><span class="p">,</span> <span class="n">normalize_func</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;transformation_mat&#39;</span><span class="p">,</span><span class="s">&#39;parameter_file&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">segment</span><span class="p">,</span> <span class="n">normalize_struc</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;transformation_mat&#39;</span><span class="p">,</span><span class="s">&#39;parameter_file&#39;</span><span class="p">),</span>
+                                             <span class="p">(</span><span class="s">&#39;bias_corrected_image&#39;</span><span class="p">,</span> <span class="s">&#39;apply_to_files&#39;</span><span class="p">),</span>
+                                             <span class="p">((</span><span class="s">&#39;bias_corrected_image&#39;</span><span class="p">,</span> <span class="n">get_vox_dims</span><span class="p">),</span> <span class="s">&#39;write_voxel_sizes&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">realign</span><span class="p">,</span> <span class="n">slice_timing</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;realigned_files&#39;</span><span class="p">,</span> <span class="s">&#39;in_files&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">slice_timing</span><span class="p">,</span> <span class="n">normalize_func</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;timecorrected_files&#39;</span><span class="p">,</span> <span class="s">&#39;apply_to_files&#39;</span><span class="p">),</span>
+                                            <span class="p">((</span><span class="s">&#39;timecorrected_files&#39;</span><span class="p">,</span> <span class="n">get_vox_dims</span><span class="p">),</span> <span class="s">&#39;write_voxel_sizes&#39;</span><span class="p">)]),</span>
+                 <span class="p">(</span><span class="n">normalize_func</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;normalized_files&#39;</span><span class="p">,</span> <span class="s">&#39;in_files&#39;</span><span class="p">)]),</span>
+                 <span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="set-up-analysis-workflow">
+<h3>Set up analysis workflow<a class="headerlink" href="#set-up-analysis-workflow" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l1analysis</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;analysis&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Generate SPM-specific design information using
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.SpecifyModel</span></code>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">modelspec</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">SpecifySPMModel</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span> <span class="s">&quot;modelspec&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Generate a first level SPM.mat file for analysis
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Level1Design</span></code>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">level1design</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Level1Design</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span> <span class="s">&quot;level1design&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.EstimateModel</span></code> to determine the
+parameters of the model.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">level1estimate</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">EstimateModel</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;level1estimate&quot;</span><span class="p">)</span>
+<span class="n">level1estimate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">estimation_method</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Classical&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+
+<span class="n">threshold</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Threshold</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;threshold&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.EstimateContrast</span></code> to estimate the
+first level contrasts specified in a few steps above.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">contrastestimate</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">EstimateContrast</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;contrastestimate&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">pickfirst</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">l1analysis</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">modelspec</span><span class="p">,</span><span class="n">level1design</span><span class="p">,[(</span><span class="s">&#39;session_info&#39;</span><span class="p">,</span><span class="s">&#39;session_info&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">level1design</span><span class="p">,</span><span class="n">level1estimate</span><span class="p">,[(</span><span class="s">&#39;spm_mat_file&#39;</span><span class="p">,</span><span class="s">&#39;spm_mat_file&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">level1estimate</span><span class="p">,</span><span class="n">contrastestimate</span><span class="p">,[(</span><span class="s">&#39;spm_mat_file&#39;</span><span class="p">,</span><span class="s">&#39;spm_mat_file&#39;</span><span class="p">),</span>
+                                                  <span class="p">(</span><span class="s">&#39;beta_images&#39;</span><span class="p">,</span><span class="s">&#39;beta_images&#39;</span><span class="p">),</span>
+                                                  <span class="p">(</span><span class="s">&#39;residual_image&#39;</span><span class="p">,</span><span class="s">&#39;residual_image&#39;</span><span class="p">)]),</span>
+                  <span class="p">(</span><span class="n">contrastestimate</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,[(</span><span class="s">&#39;spm_mat_file&#39;</span><span class="p">,</span><span class="s">&#39;spm_mat_file&#39;</span><span class="p">),</span>
+                                                    <span class="p">((</span><span class="s">&#39;spmT_images&#39;</span><span class="p">,</span> <span class="n">pickfirst</span><span class="p">),</span> <span class="s">&#39;stat_image&#39;</span><span class="p">)]),</span>
+                  <span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="preproc-analysis-pipeline">
+<h3>Preproc + Analysis pipeline<a class="headerlink" href="#preproc-analysis-pipeline" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l1pipeline</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;firstlevel&#39;</span><span class="p">)</span>
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">preproc</span><span class="p">,</span> <span class="n">l1analysis</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;realign.realignment_parameters&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;modelspec.realignment_parameters&#39;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+<p>Pluging in <cite>functional_runs</cite> is a bit more complicated, because model spec expects a list of <cite>runs</cite>.
+Every run can be a 4D file or a list of 3D files. Therefore for 3D analysis we need a list of lists and
+to make one we need a helper function.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">makelist</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">item</span><span class="p">]</span>
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">preproc</span><span class="p">,</span> <span class="n">l1analysis</span><span class="p">,</span> <span class="p">[((</span><span class="s">&#39;smooth.smoothed_files&#39;</span><span class="p">,</span><span class="n">makelist</span><span class="p">),</span>
+                                            <span class="s">&#39;modelspec.functional_runs&#39;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="data-specific-components">
+<h3>Data specific components<a class="headerlink" href="#data-specific-components" title="Permalink to this headline">¶</a></h3>
+<p>In this tutorial there is only one subject <cite>M03953</cite>.</p>
+<p>Below we set some variables to inform the <code class="docutils literal"><span class="pre">datasource</span></code> about the
+layout of our data.  We specify the location of the data, the subject
+sub-directories and a dictionary that maps each run to a mnemonic (or
+field) for the run type (<code class="docutils literal"><span class="pre">struct</span></code> or <code class="docutils literal"><span class="pre">func</span></code>).  These fields become
+the output fields of the <code class="docutils literal"><span class="pre">datasource</span></code> node in the pipeline.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Specify the location of the data downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/face_rep_SPM5.html</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;spm_face_data&#39;</span><span class="p">)</span>
+<span class="c"># Specify the subject directories</span>
+<span class="n">subject_list</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;M03953&#39;</span><span class="p">]</span>
+<span class="c"># Map field names to individual subject runs.</span>
+<span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;RawEPI&#39;</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">[</span><span class="s">&quot;_</span><span class="si">%04d</span><span class="s">&quot;</span><span class="o">%</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">357</span><span class="p">)]]],</span>
+            <span class="n">struct</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;Structural&#39;</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">]])</span>
+
+<span class="n">infosource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">]),</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s">&quot;infosource&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here we set up iteration over all the subjects. The following line
+is a particular example of the flexibility of the system.  The
+<code class="docutils literal"><span class="pre">datasource</span></code> attribute <code class="docutils literal"><span class="pre">iterables</span></code> tells the pipeline engine that
+it should repeat the analysis on each of the items in the
+<code class="docutils literal"><span class="pre">subject_list</span></code>. In the current example, the entire first level
+preprocessing and estimation will be repeated for each subject
+contained in subject_list.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">infosource</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subject_list</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we create a <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.DataGrabber</span></code> object and
+fill in the information from above about the layout of our data.  The
+<code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.NodeWrapper</span></code> module wraps the interface object
+and provides additional housekeeping and pipeline specific
+functionality.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">datasource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">],</span>
+                                               <span class="n">outfields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;func&#39;</span><span class="p">,</span> <span class="s">&#39;struct&#39;</span><span class="p">]),</span>
+                     <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;datasource&#39;</span><span class="p">)</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">data_dir</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/s</span><span class="si">%s</span><span class="s">_</span><span class="si">%04d%s</span><span class="s">.img&#39;</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span> <span class="o">=</span> <span class="n">info</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="experimental-paradigm-specific-components">
+<h3>Experimental paradigm specific components<a class="headerlink" href="#experimental-paradigm-specific-components" title="Permalink to this headline">¶</a></h3>
+<p>Here we create a structure that provides information
+about the experimental paradigm. This is used by the
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.SpecifyModel</span></code> to create the information
+necessary to generate an SPM design matrix.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="n">Bunch</span>
+</pre></div>
+</div>
+<p>We&#8217;re importing the onset times from a mat file (found on
+<a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/face_rep_SPM5.html">http://www.fil.ion.ucl.ac.uk/spm/data/face_rep/face_rep_SPM5.html</a></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">scipy.io.matlab</span> <span class="kn">import</span> <span class="n">loadmat</span>
+<span class="n">mat</span> <span class="o">=</span> <span class="n">loadmat</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s">&quot;sots.mat&quot;</span><span class="p">),</span> <span class="n">struct_as_record</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">sot</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[</span><span class="s">&#39;sot&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">itemlag</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[</span><span class="s">&#39;itemlag&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">subjectinfo</span> <span class="o">=</span> <span class="p">[</span><span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;N1&#39;</span><span class="p">,</span> <span class="s">&#39;N2&#39;</span><span class="p">,</span> <span class="s">&#39;F1&#39;</span><span class="p">,</span> <span class="s">&#39;F2&#39;</span><span class="p">],</span>
+                            <span class="n">onsets</span><span class="o">=</span><span class="p">[</span><span class="n">sot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sot</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">sot</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">sot</span><span class="p">[</span><span class="mi">3</span><span class="p">]],</span>
+                            <span class="n">durations</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                            <span class="n">amplitudes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">tmod</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">pmod</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">regressor_names</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">regressors</span><span class="o">=</span><span class="bp">None</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>Setup the contrast structure that needs to be evaluated. This is a
+list of lists. The inner list specifies the contrasts and has the
+following format - [Name,Stat,[list of condition names],[weights on
+those conditions]. The condition names must match the <cite>names</cite> listed
+in the <cite>subjectinfo</cite> function described above.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cond1</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;positive effect of condition&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N1*bf(1)&#39;</span><span class="p">,</span><span class="s">&#39;N2*bf(1)&#39;</span><span class="p">,</span><span class="s">&#39;F1*bf(1)&#39;</span><span class="p">,</span><span class="s">&#39;F2*bf(1)&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">cond2</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;positive effect of condition_dtemo&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N1*bf(2)&#39;</span><span class="p">,</span><span class="s">&#39;N2*bf(2)&#39;</span><span class="p">,</span><span class="s">&#39;F1*bf(2)&#39;</span><span class="p">,</span><span class="s">&#39;F2*bf(2)&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">cond3</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;positive effect of condition_ddisp&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N1*bf(3)&#39;</span><span class="p">,</span><span class="s">&#39;N2*bf(3)&#39;</span><span class="p">,</span><span class="s">&#39;F1*bf(3)&#39;</span><span class="p">,</span><span class="s">&#39;F2*bf(3)&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="c"># non-famous &gt; famous</span>
+<span class="n">fam1</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;positive effect of Fame&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N1*bf(1)&#39;</span><span class="p">,</span><span class="s">&#39;N2*bf(1)&#39;</span><span class="p">,</span><span class="s">&#39;F1*bf(1)&#39;</span><span class="p">,</span><span class="s">&#39;F2*bf(1)&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">fam2</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;positive effect of Fame_dtemp&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N1*bf(2)&#39;</span><span class="p">,</span><span class="s">&#39;N2*bf(2)&#39;</span><span class="p">,</span><span class="s">&#39;F1*bf(2)&#39;</span><span class="p">,</span><span class="s">&#39;F2*bf(2)&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">fam3</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;positive effect of Fame_ddisp&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N1*bf(3)&#39;</span><span class="p">,</span><span class="s">&#39;N2*bf(3)&#39;</span><span class="p">,</span><span class="s">&#39;F1*bf(3)&#39;</span><span class="p">,</span><span class="s">&#39;F2*bf(3)&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="c"># rep1 &gt; rep2</span>
+<span class="n">rep1</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;positive effect of Rep&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N1*bf(1)&#39;</span><span class="p">,</span><span class="s">&#39;N2*bf(1)&#39;</span><span class="p">,</span><span class="s">&#39;F1*bf(1)&#39;</span><span class="p">,</span><span class="s">&#39;F2*bf(1)&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">rep2</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;positive effect of Rep_dtemp&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N1*bf(2)&#39;</span><span class="p">,</span><span class="s">&#39;N2*bf(2)&#39;</span><span class="p">,</span><span class="s">&#39;F1*bf(2)&#39;</span><span class="p">,</span><span class="s">&#39;F2*bf(2)&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">rep3</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;positive effect of Rep_ddisp&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N1*bf(3)&#39;</span><span class="p">,</span><span class="s">&#39;N2*bf(3)&#39;</span><span class="p">,</span><span class="s">&#39;F1*bf(3)&#39;</span><span class="p">,</span><span class="s">&#39;F2*bf(3)&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">int1</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;positive interaction of Fame x Rep&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N1*bf(1)&#39;</span><span class="p">,</span><span class="s">&#39;N2*bf(1)&#39;</span><span class="p">,</span><span class="s">&#39;F1*bf(1)&#39;</span><span class="p">,</span><span class="s">&#39;F2*bf(1)&#39;</span><span class="p">],[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">int2</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;positive interaction of Fame x Rep_dtemp&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N1*bf(2)&#39;</span><span class="p">,</span><span class="s">&#39;N2*bf(2)&#39;</span><span class="p">,</span><span class="s">&#39;F1*bf(2)&#39;</span><span class="p">,</span><span class="s">&#39;F2*bf(2)&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">int3</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;positive interaction of Fame x Rep_ddisp&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;N1*bf(3)&#39;</span><span class="p">,</span><span class="s">&#39;N2*bf(3)&#39;</span><span class="p">,</span><span class="s">&#39;F1*bf(3)&#39;</span><span class="p">,</span><span class="s">&#39;F2*bf(3)&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="n">contf1</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;average effect condition&#39;</span><span class="p">,</span><span class="s">&#39;F&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">cond1</span><span class="p">,</span> <span class="n">cond2</span><span class="p">,</span> <span class="n">cond3</span><span class="p">]]</span>
+<span class="n">contf2</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;main effect Fam&#39;</span><span class="p">,</span> <span class="s">&#39;F&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">fam1</span><span class="p">,</span> <span class="n">fam2</span><span class="p">,</span> <span class="n">fam3</span><span class="p">]]</span>
+<span class="n">contf3</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;main effect Rep&#39;</span><span class="p">,</span> <span class="s">&#39;F&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">rep1</span><span class="p">,</span> <span class="n">rep2</span><span class="p">,</span> <span class="n">rep3</span><span class="p">]]</span>
+<span class="n">contf4</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;interaction: Fam x Rep&#39;</span><span class="p">,</span> <span class="s">&#39;F&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">int1</span><span class="p">,</span> <span class="n">int2</span><span class="p">,</span> <span class="n">int3</span><span class="p">]]</span>
+<span class="n">contrasts</span> <span class="o">=</span> <span class="p">[</span><span class="n">cond1</span><span class="p">,</span> <span class="n">cond2</span><span class="p">,</span> <span class="n">cond3</span><span class="p">,</span> <span class="n">fam1</span><span class="p">,</span> <span class="n">fam2</span><span class="p">,</span> <span class="n">fam3</span><span class="p">,</span> <span class="n">rep1</span><span class="p">,</span> <span class="n">rep2</span><span class="p">,</span> <span class="n">rep3</span><span class="p">,</span> <span class="n">int1</span><span class="p">,</span> <span class="n">int2</span><span class="p">,</span> <span class="n">int3</span><span class="p">,</span> <span class="n">contf1</span><span class="p">,</span> <span class="n">contf2</span><span class="p">,</span><span class="n">contf3</span><span class="p">,</span><span class="n">contf4</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Setting up nodes inputs</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">num_slices</span> <span class="o">=</span> <span class="mi">24</span>
+<span class="n">TR</span> <span class="o">=</span> <span class="mf">2.</span>
+
+<span class="n">slice_timingref</span> <span class="o">=</span> <span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">preproc</span><span class="o">.</span><span class="n">slice_timing</span>
+<span class="n">slice_timingref</span><span class="o">.</span><span class="n">num_slices</span> <span class="o">=</span> <span class="n">num_slices</span>
+<span class="n">slice_timingref</span><span class="o">.</span><span class="n">time_repetition</span> <span class="o">=</span> <span class="n">TR</span>
+<span class="n">slice_timingref</span><span class="o">.</span><span class="n">time_acquisition</span> <span class="o">=</span> <span class="n">TR</span> <span class="o">-</span> <span class="n">TR</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">num_slices</span><span class="p">)</span>
+<span class="n">slice_timingref</span><span class="o">.</span><span class="n">slice_order</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_slices</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">slice_timingref</span><span class="o">.</span><span class="n">ref_slice</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_slices</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">preproc</span><span class="o">.</span><span class="n">smooth</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span>
+
+<span class="c"># set up node specific inputs</span>
+<span class="n">modelspecref</span> <span class="o">=</span> <span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">modelspec</span>
+<span class="n">modelspecref</span><span class="o">.</span><span class="n">input_units</span>             <span class="o">=</span> <span class="s">&#39;scans&#39;</span>
+<span class="n">modelspecref</span><span class="o">.</span><span class="n">output_units</span>            <span class="o">=</span> <span class="s">&#39;scans&#39;</span>
+<span class="n">modelspecref</span><span class="o">.</span><span class="n">time_repetition</span>         <span class="o">=</span> <span class="n">TR</span>
+<span class="n">modelspecref</span><span class="o">.</span><span class="n">high_pass_filter_cutoff</span> <span class="o">=</span> <span class="mi">120</span>
+
+<span class="n">l1designref</span> <span class="o">=</span> <span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">level1design</span>
+<span class="n">l1designref</span><span class="o">.</span><span class="n">timing_units</span>       <span class="o">=</span> <span class="n">modelspecref</span><span class="o">.</span><span class="n">output_units</span>
+<span class="n">l1designref</span><span class="o">.</span><span class="n">interscan_interval</span> <span class="o">=</span> <span class="n">modelspecref</span><span class="o">.</span><span class="n">time_repetition</span>
+<span class="n">l1designref</span><span class="o">.</span><span class="n">microtime_resolution</span> <span class="o">=</span> <span class="n">slice_timingref</span><span class="o">.</span><span class="n">num_slices</span>
+<span class="n">l1designref</span><span class="o">.</span><span class="n">microtime_onset</span> <span class="o">=</span> <span class="n">slice_timingref</span><span class="o">.</span><span class="n">ref_slice</span>
+<span class="n">l1designref</span><span class="o">.</span><span class="n">bases</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;hrf&#39;</span><span class="p">:{</span><span class="s">&#39;derivs&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]}}</span>
+</pre></div>
+</div>
+<p>The following lines automatically inform SPM to create a default set of
+contrats for a factorial design.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#l1designref.factor_info = [dict(name = &#39;Fame&#39;, levels = 2),</span>
+<span class="c">#                           dict(name = &#39;Rep&#39;, levels = 2)]</span>
+
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">modelspec</span><span class="o">.</span><span class="n">subject_info</span> <span class="o">=</span> <span class="n">subjectinfo</span>
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">contrastestimate</span><span class="o">.</span><span class="n">contrasts</span> <span class="o">=</span> <span class="n">contrasts</span>
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">threshold</span><span class="o">.</span><span class="n">contrast_index</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>Use derivative estimates in the non-parametric model</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">l1pipeline</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">contrastestimate</span><span class="o">.</span><span class="n">use_derivs</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>Setting up parametricvariation of the model</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">subjectinfo_param</span> <span class="o">=</span> <span class="p">[</span><span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;N1&#39;</span><span class="p">,</span> <span class="s">&#39;N2&#39;</span><span class="p">,</span> <span class="s">&#39;F1&#39;</span><span class="p">,</span> <span class="s">&#39;F2&#39;</span><span class="p">],</span>
+                            <span class="n">onsets</span><span class="o">=</span><span class="p">[</span><span class="n">sot</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sot</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">sot</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">sot</span><span class="p">[</span><span class="mi">3</span><span class="p">]],</span>
+                            <span class="n">durations</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                            <span class="n">amplitudes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">tmod</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">pmod</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span>
+                                  <span class="n">Bunch</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Lag&#39;</span><span class="p">],</span>
+                                        <span class="n">param</span><span class="o">=</span><span class="n">itemlag</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                                        <span class="n">poly</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                                  <span class="bp">None</span><span class="p">,</span>
+                                  <span class="n">Bunch</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Lag&#39;</span><span class="p">],</span>
+                                        <span class="n">param</span><span class="o">=</span><span class="n">itemlag</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+                                        <span class="n">poly</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">])],</span>
+                            <span class="n">regressor_names</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                            <span class="n">regressors</span><span class="o">=</span><span class="bp">None</span><span class="p">)]</span>
+
+<span class="n">cont1</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Famous_lag1&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;F2xLag^1&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">cont2</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Famous_lag2&#39;</span><span class="p">,</span><span class="s">&#39;T&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;F2xLag^2&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">fcont1</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Famous Lag&#39;</span><span class="p">,</span> <span class="s">&#39;F&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">cont1</span><span class="p">,</span> <span class="n">cont2</span><span class="p">])</span>
+<span class="n">paramcontrasts</span> <span class="o">=</span> <span class="p">[</span><span class="n">cont1</span><span class="p">,</span> <span class="n">cont2</span><span class="p">,</span> <span class="n">fcont1</span><span class="p">]</span>
+
+<span class="n">paramanalysis</span> <span class="o">=</span> <span class="n">l1analysis</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;paramanalysis&#39;</span><span class="p">)</span>
+
+<span class="n">paramanalysis</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">level1design</span><span class="o">.</span><span class="n">bases</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;hrf&#39;</span><span class="p">:{</span><span class="s">&#39;derivs&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]}}</span>
+<span class="n">paramanalysis</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">modelspec</span><span class="o">.</span><span class="n">subject_info</span> <span class="o">=</span> <span class="n">subjectinfo_param</span>
+<span class="n">paramanalysis</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">contrastestimate</span><span class="o">.</span><span class="n">contrasts</span> <span class="o">=</span> <span class="n">paramcontrasts</span>
+<span class="n">paramanalysis</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">contrastestimate</span><span class="o">.</span><span class="n">use_derivs</span> <span class="o">=</span> <span class="bp">False</span>
+
+<span class="n">l1pipeline</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">preproc</span><span class="p">,</span> <span class="n">paramanalysis</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;realign.realignment_parameters&#39;</span><span class="p">,</span>
+                                            <span class="s">&#39;modelspec.realignment_parameters&#39;</span><span class="p">),</span>
+                                            <span class="p">((</span><span class="s">&#39;smooth.smoothed_files&#39;</span><span class="p">,</span><span class="n">makelist</span><span class="p">),</span>
+                                                <span class="s">&#39;modelspec.functional_runs&#39;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setup-the-pipeline">
+<h3>Setup the pipeline<a class="headerlink" href="#setup-the-pipeline" title="Permalink to this headline">¶</a></h3>
+<p>The nodes created above do not describe the flow of data. They merely
+describe the parameters used for each function. In this section we
+setup the connections between the nodes such that appropriate outputs
+from nodes are piped into appropriate inputs of other nodes.</p>
+<p>Use the <code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Pipeline</span></code> to create a
+graph-based execution pipeline for first level analysis. The config
+options tells the pipeline engine to use <cite>workdir</cite> as the disk
+location to use when running the processes and keeping their
+outputs. The <cite>use_parameterized_dirs</cite> tells the engine to create
+sub-directories under <cite>workdir</cite> corresponding to the iterables in the
+pipeline. Thus for this pipeline there will be subject specific
+sub-directories.</p>
+<p>The <code class="docutils literal"><span class="pre">nipype.pipeline.engine.Pipeline.connect</span></code> function creates the
+links between the processes, i.e., how data should flow in and out of
+the processing nodes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">level1</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;level1&quot;</span><span class="p">)</span>
+<span class="n">level1</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;spm_face_tutorial/workingdir&#39;</span><span class="p">)</span>
+
+<span class="n">level1</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">infosource</span><span class="p">,</span> <span class="n">datasource</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">datasource</span><span class="p">,</span><span class="n">l1pipeline</span><span class="p">,[(</span><span class="s">&#39;struct&#39;</span><span class="p">,</span> <span class="s">&#39;preproc.coregister.source&#39;</span><span class="p">),</span>
+                                        <span class="p">(</span><span class="s">&#39;func&#39;</span><span class="p">,</span><span class="s">&#39;preproc.realign.in_files&#39;</span><span class="p">)])</span>
+                <span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setup-storage-results">
+<h3>Setup storage results<a class="headerlink" href="#setup-storage-results" title="Permalink to this headline">¶</a></h3>
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.DataSink</span></code> to store selected outputs
+from the pipeline in a specific location. This allows the user to
+selectively choose important output bits from the analysis and keep
+them.</p>
+<p>The first step is to create a datasink node and then to connect
+outputs from the modules above to storage locations. These take the
+following form directory_name[.[&#64;]subdir] where parts between [] are
+optional. For example &#8216;realign.&#64;mean&#8217; below creates a directory called
+realign in &#8216;l1output/subject_id/&#8217; and stores the mean image output
+from the Realign process in the realign directory. If the &#64; is left
+out, then a sub-directory with the name &#8216;mean&#8217; would be created and
+the mean image would be copied to that directory.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">datasink</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataSink</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;datasink&quot;</span><span class="p">)</span>
+<span class="n">datasink</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;spm_auditory_tutorial/l1output&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">getstripdir</span><span class="p">(</span><span class="n">subject_id</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;spm_auditory_tutorial/workingdir&#39;</span><span class="p">),</span><span class="s">&#39;_subject_id_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">subject_id</span><span class="p">)</span>
+
+<span class="c"># store relevant outputs from various stages of the 1st level analysis</span>
+<span class="n">level1</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">infosource</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,[(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;container&#39;</span><span class="p">),</span>
+                                       <span class="p">((</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">getstripdir</span><span class="p">),</span><span class="s">&#39;strip_dir&#39;</span><span class="p">)]),</span>
+                <span class="p">(</span><span class="n">l1pipeline</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,[(</span><span class="s">&#39;analysis.contrastestimate.con_images&#39;</span><span class="p">,</span><span class="s">&#39;contrasts.@con&#39;</span><span class="p">),</span>
+                                       <span class="p">(</span><span class="s">&#39;analysis.contrastestimate.spmT_images&#39;</span><span class="p">,</span><span class="s">&#39;contrasts.@T&#39;</span><span class="p">),</span>
+                                       <span class="p">(</span><span class="s">&#39;paramanalysis.contrastestimate.con_images&#39;</span><span class="p">,</span><span class="s">&#39;paramcontrasts.@con&#39;</span><span class="p">),</span>
+                                       <span class="p">(</span><span class="s">&#39;paramanalysis.contrastestimate.spmT_images&#39;</span><span class="p">,</span><span class="s">&#39;paramcontrasts.@T&#39;</span><span class="p">)]),</span>
+                <span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="execute-the-pipeline">
+<h3>Execute the pipeline<a class="headerlink" href="#execute-the-pipeline" title="Permalink to this headline">¶</a></h3>
+<p>The code discussed above sets up all the necessary data structures
+with appropriate parameters and the connectivity between the
+processes, but does not generate any output. To actually run the
+analysis on the data the <code class="docutils literal"><span class="pre">nipype.pipeline.engine.Pipeline.Run</span></code>
+function needs to be called.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">level1</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">level1</span><span class="o">.</span><span class="n">write_graph</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition-example-source-code admonition">
+<p class="first admonition-title">Example source code</p>
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/fmri_spm_face.py"><code class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></code></a>.
+This same script is also included in the Nipype source distribution under the
+<code class="file docutils literal"><span class="pre">examples</span></code> directory.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

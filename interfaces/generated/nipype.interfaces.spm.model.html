@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -173,7 +173,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -185,7 +185,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -208,9 +208,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -220,13 +220,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-spm-model">
 <h1>interfaces.spm.model<a class="headerlink" href="#interfaces-spm-model" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-spm-model-estimatecontrast"></span><div class="section" id="estimatecontrast">
 <span id="index-0"></span><h2>EstimateContrast<a class="headerlink" href="#estimatecontrast" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/model.py#L301">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/model.py#L301">Link to code</a></p>
 <p>use spm_contrasts to estimate contrasts of interest</p>
 <div class="section" id="examples">
 <h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
@@ -304,7 +304,7 @@ spm_mat_file: (an existing file name)
 </div>
 <div class="section" id="estimatemodel">
 <span id="index-1"></span><h2>EstimateModel<a class="headerlink" href="#estimatemodel" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/model.py#L182">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/model.py#L182">Link to code</a></p>
 <p>Use spm_spm to estimate the parameters of a model</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=69">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=69</a></p>
 <div class="section" id="id1">
@@ -357,7 +357,7 @@ spm_mat_file: (an existing file name)
 </div>
 <div class="section" id="factorialdesign">
 <span id="index-2"></span><h2>FactorialDesign<a class="headerlink" href="#factorialdesign" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/model.py#L744">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/model.py#L744">Link to code</a></p>
 <p>Base class for factorial designs</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=77">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=77</a></p>
 <p>Inputs:</p>
@@ -419,7 +419,7 @@ use_v8struct: (a boolean, nipype default value: True)
 <span class="target" id="nipype-interfaces-spm-model-level1design"></span></div>
 <div class="section" id="level1design">
 <span id="index-3"></span><h2>Level1Design<a class="headerlink" href="#level1design" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/model.py#L92">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/model.py#L92">Link to code</a></p>
 <p>Generate an SPM design matrix</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=59">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=59</a></p>
 <div class="section" id="id2">
@@ -477,7 +477,7 @@ mfile: (a boolean, nipype default value: True)
         Run m-code using m-file
 microtime_onset: (a float)
         The onset/time-bin in seconds for alignment (opt)
-microtime_resolution: (an integer)
+microtime_resolution: (an integer (int or long))
         Number of time-bins per scan in secs (opt)
 model_serial_correlations: (&#39;AR(1)&#39; or &#39;FAST&#39; or &#39;none&#39;)
         Model serial correlations AR(1), FAST or none. FAST is available in
@@ -503,7 +503,7 @@ volterra_expansion_order: (1 or 2)
 </div>
 <div class="section" id="multipleregressiondesign">
 <span id="index-4"></span><h2>MultipleRegressionDesign<a class="headerlink" href="#multipleregressiondesign" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/model.py#L900">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/model.py#L900">Link to code</a></p>
 <p>Create SPM design for multiple regression</p>
 <div class="section" id="id3">
 <h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
@@ -581,7 +581,7 @@ user_covariates: (a list of items which are a dictionary with keys
 </div>
 <div class="section" id="onesamplettestdesign">
 <span id="index-5"></span><h2>OneSampleTTestDesign<a class="headerlink" href="#onesamplettestdesign" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/model.py#L795">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/model.py#L795">Link to code</a></p>
 <p>Create SPM design for one sample t-test</p>
 <div class="section" id="id4">
 <h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
@@ -653,7 +653,7 @@ use_v8struct: (a boolean, nipype default value: True)
 </div>
 <div class="section" id="pairedttestdesign">
 <span id="index-6"></span><h2>PairedTTestDesign<a class="headerlink" href="#pairedttestdesign" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/model.py#L864">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/model.py#L864">Link to code</a></p>
 <p>Create SPM design for paired t-test</p>
 <div class="section" id="id5">
 <h3>Examples<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
@@ -729,7 +729,7 @@ use_v8struct: (a boolean, nipype default value: True)
 </div>
 <div class="section" id="threshold">
 <span id="index-7"></span><h2>Threshold<a class="headerlink" href="#threshold" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/model.py#L439">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/model.py#L439">Link to code</a></p>
 <p>Topological FDR thresholding based on cluster extent/size. Smoothness is
 estimated from GLM residuals but is assumed to be the same for all of the
 voxels.</p>
@@ -745,7 +745,7 @@ voxels.</p>
 </div>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
-contrast_index: (an integer)
+contrast_index: (an integer (int or long))
         which contrast in the SPM.mat to use
 spm_mat_file: (an existing file name)
         absolute path to SPM.mat
@@ -755,7 +755,7 @@ stat_image: (an existing file name)
 [Optional]
 extent_fdr_p_threshold: (a float, nipype default value: 0.05)
         p threshold on FDR corrected cluster size probabilities
-extent_threshold: (an integer, nipype default value: 0)
+extent_threshold: (an integer (int or long), nipype default value: 0)
         Minimum cluster size in voxels
 force_activation: (a boolean, nipype default value: False)
         In case no clusters survive the topological inference step this will
@@ -788,9 +788,9 @@ use_v8struct: (a boolean, nipype default value: True)
 <p>Outputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>activation_forced: (a boolean)
 cluster_forming_thr: (a float)
-n_clusters: (an integer)
+n_clusters: (an integer (int or long))
 pre_topo_fdr_map: (an existing file name)
-pre_topo_n_clusters: (an integer)
+pre_topo_n_clusters: (an integer (int or long))
 thresholded_map: (an existing file name)
 </pre></div>
 </div>
@@ -798,7 +798,7 @@ thresholded_map: (an existing file name)
 </div>
 <div class="section" id="thresholdstatistics">
 <span id="index-8"></span><h2>ThresholdStatistics<a class="headerlink" href="#thresholdstatistics" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/model.py#L618">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/model.py#L618">Link to code</a></p>
 <p>Given height and cluster size threshold calculate theoretical probabilities
 concerning false positives</p>
 <div class="section" id="id7">
@@ -813,7 +813,7 @@ concerning false positives</p>
 </div>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
-contrast_index: (an integer)
+contrast_index: (an integer (int or long))
         which contrast in the SPM.mat to use
 height_threshold: (a float)
         stat value for initial thresholding (defining clusters)
@@ -823,7 +823,7 @@ stat_image: (an existing file name)
         stat image
 
 [Optional]
-extent_threshold: (an integer, nipype default value: 0)
+extent_threshold: (an integer (int or long), nipype default value: 0)
         Minimum cluster size in voxels
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
@@ -853,7 +853,7 @@ voxelwise_P_uncor: (a float)
 </div>
 <div class="section" id="twosamplettestdesign">
 <span id="index-9"></span><h2>TwoSampleTTestDesign<a class="headerlink" href="#twosamplettestdesign" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/model.py#L831">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/model.py#L831">Link to code</a></p>
 <p>Create SPM design for two sample t-test</p>
 <div class="section" id="id8">
 <h3>Examples<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
@@ -940,9 +940,9 @@ use_v8struct: (a boolean, nipype default value: True)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -1,0 +1,1498 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.fsl.model</a><ul>
+<li><a class="reference internal" href="#cluster">Cluster</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#contrastmgr">ContrastMgr</a></li>
+<li><a class="reference internal" href="#feat">FEAT</a></li>
+<li><a class="reference internal" href="#featmodel">FEATModel</a></li>
+<li><a class="reference internal" href="#featregister">FEATRegister</a></li>
+<li><a class="reference internal" href="#filmgls">FILMGLS</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#flameo">FLAMEO</a><ul>
+<li><a class="reference internal" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#glm">GLM</a><ul>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#l2model">L2Model</a><ul>
+<li><a class="reference internal" href="#id3">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#level1design">Level1Design</a><ul>
+<li><a class="reference internal" href="#id4">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#melodic">MELODIC</a><ul>
+<li><a class="reference internal" href="#id5">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#multipleregressdesign">MultipleRegressDesign</a><ul>
+<li><a class="reference internal" href="#id6">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#randomise">Randomise</a><ul>
+<li><a class="reference internal" href="#id7">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#smm">SMM</a></li>
+<li><a class="reference internal" href="#smoothestimate">SmoothEstimate</a><ul>
+<li><a class="reference internal" href="#id8">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-fsl-model">
+<h1>interfaces.fsl.model<a class="headerlink" href="#interfaces-fsl-model" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-fsl-model-cluster"></span><div class="section" id="cluster">
+<span id="index-0"></span><h2>Cluster<a class="headerlink" href="#cluster" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L1521">Link to code</a></p>
+<p>Wraps command <strong>cluster</strong></p>
+<p>Uses FSL cluster to perform clustering on statistical output</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">cl</span> <span class="o">=</span> <span class="n">Cluster</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cl</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mf">2.3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cl</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;zstat1.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cl</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_localmax_txt_file</span> <span class="o">=</span> <span class="s">&#39;stats.txt&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cl</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;cluster --in=zstat1.nii.gz --olmax=stats.txt --thresh=2.3000000000&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input volume
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+threshold: (a float)
+        threshold for input volume
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+connectivity: (an integer (int or long))
+        the connectivity of voxels (default 26)
+cope_file: (a file name)
+        cope volume
+dlh: (a float)
+        smoothness estimate = sqrt(det(Lambda))
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+find_min: (a boolean)
+        find minima instead of maxima
+fractional: (a boolean)
+        interprets the threshold as a fraction of the robust range
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input volume
+minclustersize: (a boolean)
+        prints out minimum significant cluster size
+no_table: (a boolean)
+        suppresses printing of the table info
+num_maxima: (an integer (int or long))
+        no of local maxima to report
+out_index_file: (a boolean or a file name)
+        output of cluster index (in size order)
+out_localmax_txt_file: (a boolean or a file name)
+        local maxima text file
+out_localmax_vol_file: (a boolean or a file name)
+        output of local maxima volume
+out_max_file: (a boolean or a file name)
+        filename for output of max image
+out_mean_file: (a boolean or a file name)
+        filename for output of mean image
+out_pval_file: (a boolean or a file name)
+        filename for image output of log pvals
+out_size_file: (a boolean or a file name)
+        filename for output of size image
+out_threshold_file: (a boolean or a file name)
+        thresholded image
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+peak_distance: (a float)
+        minimum distance between local maxima/minima, in mm (default 0)
+pthreshold: (a float)
+        p-threshold for clusters
+        requires: dlh, volume
+std_space_file: (a file name)
+        filename for standard-space volume
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+threshold: (a float)
+        threshold for input volume
+use_mm: (a boolean)
+        use mm, not voxel, coordinates
+volume: (an integer (int or long))
+        number of voxels in the mask
+warpfield_file: (a file name)
+        file contining warpfield
+xfm_file: (a file name)
+        filename for Linear: input-&gt;standard-space transform. Non-linear:
+        input-&gt;highres transform
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>index_file: (a file name)
+        output of cluster index (in size order)
+localmax_txt_file: (a file name)
+        local maxima text file
+localmax_vol_file: (a file name)
+        output of local maxima volume
+max_file: (a file name)
+        filename for output of max image
+mean_file: (a file name)
+        filename for output of mean image
+pval_file: (a file name)
+        filename for image output of log pvals
+size_file: (a file name)
+        filename for output of size image
+threshold_file: (a file name)
+        thresholded image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-contrastmgr"></span></div>
+</div>
+<div class="section" id="contrastmgr">
+<span id="index-1"></span><h2>ContrastMgr<a class="headerlink" href="#contrastmgr" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L900">Link to code</a></p>
+<p>Wraps command <strong>contrast_mgr</strong></p>
+<p>Use FSL contrast_mgr command to evaluate contrasts</p>
+<p>In interface mode this file assumes that all the required inputs are in the
+same location.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+corrections: (an existing file name)
+        statistical corrections used within FILM modelling
+dof_file: (an existing file name)
+        degrees of freedom
+param_estimates: (an existing file name)
+        Parameter estimates for each column of the design matrix
+sigmasquareds: (an existing file name)
+        summary of residuals, See Woolrich, et. al., 2001
+tcon_file: (an existing file name)
+        contrast file containing T-contrasts
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+contrast_num: (an integer &gt;= 1)
+        contrast number to start labeling copes from
+corrections: (an existing file name)
+        statistical corrections used within FILM modelling
+dof_file: (an existing file name)
+        degrees of freedom
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fcon_file: (an existing file name)
+        contrast file containing F-contrasts
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+param_estimates: (an existing file name)
+        Parameter estimates for each column of the design matrix
+sigmasquareds: (an existing file name)
+        summary of residuals, See Woolrich, et. al., 2001
+suffix: (a string)
+        suffix to put on the end of the cope filename before the contrast
+        number, default is nothing
+tcon_file: (an existing file name)
+        contrast file containing T-contrasts
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>copes: (an existing file name)
+        Contrast estimates for each contrast
+fstats: (an existing file name)
+        f-stat file for each contrast
+neffs: (an existing file name)
+        neff file ?? for each contrast
+tstats: (an existing file name)
+        t-stat file for each contrast
+varcopes: (an existing file name)
+        Variance estimates for each contrast
+zfstats: (an existing file name)
+        z-stat file for each F contrast
+zstats: (an existing file name)
+        z-stat file for each contrast
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-feat"></span></div>
+<div class="section" id="feat">
+<span id="index-2"></span><h2>FEAT<a class="headerlink" href="#feat" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L378">Link to code</a></p>
+<p>Wraps command <strong>feat</strong></p>
+<p>Uses FSL feat to calculate first level stats</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+fsf_file: (an existing file name)
+        File specifying the feat design spec file
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fsf_file: (an existing file name)
+        File specifying the feat design spec file
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>feat_dir: (an existing directory name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-featmodel"></span></div>
+<div class="section" id="featmodel">
+<span id="index-3"></span><h2>FEATModel<a class="headerlink" href="#featmodel" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L433">Link to code</a></p>
+<p>Wraps command <strong>feat_model</strong></p>
+<p>Uses FSL feat_model to generate design.mat files</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+ev_files: (a list of items which are an existing file name)
+        Event spec files generated by level1design
+fsf_file: (an existing file name)
+        File specifying the feat design spec file
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ev_files: (a list of items which are an existing file name)
+        Event spec files generated by level1design
+fsf_file: (an existing file name)
+        File specifying the feat design spec file
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>con_file: (an existing file name)
+        Contrast file containing contrast vectors
+design_cov: (an existing file name)
+        Graphical representation of design covariance
+design_file: (an existing file name)
+        Mat file containing ascii matrix for design
+design_image: (an existing file name)
+        Graphical representation of design matrix
+fcon_file: (a file name)
+        Contrast file containing contrast vectors
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-featregister"></span></div>
+<div class="section" id="featregister">
+<span id="index-4"></span><h2>FEATRegister<a class="headerlink" href="#featregister" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L657">Link to code</a></p>
+<p>Register feat directories to a specific standard</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+feat_dirs: (an existing directory name)
+        Lower level feat dirs
+reg_image: (an existing file name)
+        image to register to (will be treated as standard)
+
+[Optional]
+feat_dirs: (an existing directory name)
+        Lower level feat dirs
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+reg_dof: (an integer (int or long), nipype default value: 12)
+        registration degrees of freedom
+reg_image: (an existing file name)
+        image to register to (will be treated as standard)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>fsf_file: (an existing file name)
+        FSL feat specification file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-filmgls"></span></div>
+<div class="section" id="filmgls">
+<span id="index-5"></span><h2>FILMGLS<a class="headerlink" href="#filmgls" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L568">Link to code</a></p>
+<p>Wraps command <strong>film_gls</strong></p>
+<p>Use FSL film_gls command to fit a design matrix to voxel timeseries</p>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Initialize with no options, assigning them when calling run:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fgls</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FILMGLS</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">fgls</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s">&#39;in_file&#39;</span><span class="p">,</span> <span class="s">&#39;design_file&#39;</span><span class="p">,</span> <span class="s">&#39;thresh&#39;</span><span class="p">,</span> <span class="n">rn</span><span class="o">=</span><span class="s">&#39;stats&#39;</span><span class="p">)</span> 
+</pre></div>
+</div>
+<p>Assign options through the <code class="docutils literal"><span class="pre">inputs</span></code> attribute:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fgls</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FILMGLS</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fgls</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fgls</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">design_file</span> <span class="o">=</span> <span class="s">&#39;design.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fgls</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fgls</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">results_dir</span> <span class="o">=</span> <span class="s">&#39;stats&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">fgls</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Specify options when creating an instance:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fgls</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FILMGLS</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s">&#39;functional.nii&#39;</span><span class="p">,</span> <span class="n">design_file</span><span class="o">=</span><span class="s">&#39;design.mat&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">results_dir</span><span class="o">=</span><span class="s">&#39;stats&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">fgls</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input data file
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+autocorr_estimate_only: (a boolean)
+        perform autocorrelation estimation only
+        mutually_exclusive: autocorr_estimate_only, fit_armodel,
+         tukey_window, multitaper_product, use_pava, autocorr_noestimate
+autocorr_noestimate: (a boolean)
+        do not estimate autocorrs
+        mutually_exclusive: autocorr_estimate_only, fit_armodel,
+         tukey_window, multitaper_product, use_pava, autocorr_noestimate
+brightness_threshold: (an integer &gt;= 0)
+        susan brightness threshold, otherwise it is estimated
+design_file: (an existing file name)
+        design matrix file
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fit_armodel: (a boolean)
+        fits autoregressive model - default is to use tukey with
+        M=sqrt(numvols)
+        mutually_exclusive: autocorr_estimate_only, fit_armodel,
+         tukey_window, multitaper_product, use_pava, autocorr_noestimate
+full_data: (a boolean)
+        output full data
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input data file
+mask_size: (an integer (int or long))
+        susan mask size
+multitaper_product: (an integer (int or long))
+        multitapering with slepian tapers and num is the time-bandwidth
+        product
+        mutually_exclusive: autocorr_estimate_only, fit_armodel,
+         tukey_window, multitaper_product, use_pava, autocorr_noestimate
+output_pwdata: (a boolean)
+        output prewhitened data and average design matrix
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+results_dir: (a directory name, nipype default value: results)
+        directory to store results in
+smooth_autocorr: (a boolean)
+        Smooth auto corr estimates
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+threshold: (a floating point number &gt;= 0.0, nipype default value:
+         0.0)
+        threshold
+tukey_window: (an integer (int or long))
+        tukey window size to estimate autocorr
+        mutually_exclusive: autocorr_estimate_only, fit_armodel,
+         tukey_window, multitaper_product, use_pava, autocorr_noestimate
+use_pava: (a boolean)
+        estimates autocorr using PAVA
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>corrections: (an existing file name)
+        statistical corrections used within FILM modelling
+dof_file: (an existing file name)
+        degrees of freedom
+logfile: (an existing file name)
+        FILM run logfile
+param_estimates: (an existing file name)
+        Parameter estimates for each column of the design matrix
+residual4d: (an existing file name)
+        Model fit residual mean-squared error for each time point
+results_dir: (an existing directory name)
+        directory storing model estimation output
+sigmasquareds: (an existing file name)
+        summary of residuals, See Woolrich, et. al., 2001
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-flameo"></span></div>
+</div>
+<div class="section" id="flameo">
+<span id="index-6"></span><h2>FLAMEO<a class="headerlink" href="#flameo" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L760">Link to code</a></p>
+<p>Wraps command <strong>flameo</strong></p>
+<p>Use FSL flameo command to perform higher level model fits</p>
+<div class="section" id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>Initialize FLAMEO with no options, assigning them when calling run:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flameo</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FLAMEO</span><span class="p">(</span><span class="n">cope_file</span><span class="o">=</span><span class="s">&#39;cope.nii.gz&#39;</span><span class="p">,</span>                             <span class="n">var_cope_file</span><span class="o">=</span><span class="s">&#39;varcope.nii.gz&#39;</span><span class="p">,</span>                             <span class="n">cov_split_file</span><span class="o">=</span><span class="s">&#39;cov_split.mat&#39;</span><span class="p">,</span>                             <span class="n">design_file</span><span class="o">=</span><span class="s">&#39;design.mat&#39;</span><span class="p">,</span>                             <span class="n">t_con_file</span><span class="o">=</span><span class="s">&#39;design.con&#39;</span><span class="p">,</span>                             <span class="n">mask_file</span><span class="o">=</span><span class="s">&#39;mask.nii&#39;</span><span class="p">,</span>                             <span class="n">run_mode</span><span class="o">=</span><span class="s">&#39;fe&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flameo</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;flameo --copefile=cope.nii.gz --covsplitfile=cov_split.mat --designfile=design.mat --ld=stats --maskfile=mask.nii --runmode=fe --tcontrastsfile=design.con --varcopefile=varcope.nii.gz&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+cope_file: (an existing file name)
+        cope regressor data file
+cov_split_file: (an existing file name)
+        ascii matrix specifying the groups the covariance is split into
+design_file: (an existing file name)
+        design matrix file
+mask_file: (an existing file name)
+        mask file
+run_mode: (&#39;fe&#39; or &#39;ols&#39; or &#39;flame1&#39; or &#39;flame12&#39;)
+        inference to perform
+t_con_file: (an existing file name)
+        ascii matrix specifying t-contrasts
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+burnin: (an integer (int or long))
+        number of jumps at start of mcmc to be discarded
+cope_file: (an existing file name)
+        cope regressor data file
+cov_split_file: (an existing file name)
+        ascii matrix specifying the groups the covariance is split into
+design_file: (an existing file name)
+        design matrix file
+dof_var_cope_file: (an existing file name)
+        dof data file for varcope data
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+f_con_file: (an existing file name)
+        ascii matrix specifying f-contrasts
+fix_mean: (a boolean)
+        fix mean for tfit
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+infer_outliers: (a boolean)
+        infer outliers - not for fe
+log_dir: (a directory name, nipype default value: stats)
+mask_file: (an existing file name)
+        mask file
+n_jumps: (an integer (int or long))
+        number of jumps made by mcmc
+no_pe_outputs: (a boolean)
+        do not output pe files
+outlier_iter: (an integer (int or long))
+        Number of max iterations to use when inferring outliers. Default is
+        12.
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+run_mode: (&#39;fe&#39; or &#39;ols&#39; or &#39;flame1&#39; or &#39;flame12&#39;)
+        inference to perform
+sample_every: (an integer (int or long))
+        number of jumps for each sample
+sigma_dofs: (an integer (int or long))
+        sigma (in mm) to use for Gaussian smoothing the DOFs in FLAME 2.
+        Default is 1mm, -1 indicates no smoothing
+t_con_file: (an existing file name)
+        ascii matrix specifying t-contrasts
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+var_cope_file: (an existing file name)
+        varcope weightings data file
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>copes: (an existing file name)
+        Contrast estimates for each contrast
+fstats: (an existing file name)
+        f-stat file for each contrast
+mrefvars: (an existing file name)
+        mean random effect variances for each contrast
+pes: (an existing file name)
+        Parameter estimates for each column of the design matrix for each
+        voxel
+res4d: (an existing file name)
+        Model fit residual mean-squared error for each time point
+stats_dir: (a directory name)
+        directory storing model estimation output
+tdof: (an existing file name)
+        temporal dof file for each contrast
+tstats: (an existing file name)
+        t-stat file for each contrast
+var_copes: (an existing file name)
+        Variance estimates for each contrast
+weights: (an existing file name)
+        weights file for each contrast
+zfstats: (an existing file name)
+        z stat file for each f contrast
+zstats: (an existing file name)
+        z-stat file for each contrast
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-glm"></span></div>
+</div>
+<div class="section" id="glm">
+<span id="index-7"></span><h2>GLM<a class="headerlink" href="#glm" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L1796">Link to code</a></p>
+<p>Wraps command <strong>fsl_glm</strong></p>
+<p>FSL GLM:</p>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">glm</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">GLM</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s">&#39;functional.nii&#39;</span><span class="p">,</span> <span class="n">design</span><span class="o">=</span><span class="s">&#39;maps.nii&#39;</span><span class="p">,</span> <span class="n">output_type</span><span class="o">=</span><span class="s">&#39;NIFTI&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">glm</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;fsl_glm -i functional.nii -d maps.nii -o functional_glm.nii&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+design: (an existing file name)
+        file name of the GLM design matrix (text time courses for temporal
+        regression or an image file for spatial regression)
+in_file: (an existing file name)
+        input file name (text matrix or 3D/4D image file)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+contrasts: (an existing file name)
+        matrix of t-statics contrasts
+dat_norm: (a boolean)
+        switch on normalization of the data time series to unit std
+        deviation
+demean: (a boolean)
+        switch on demeaining of design and data
+des_norm: (a boolean)
+        switch on normalization of the design matrix columns to unit std
+        deviation
+design: (an existing file name)
+        file name of the GLM design matrix (text time courses for temporal
+        regression or an image file for spatial regression)
+dof: (an integer (int or long))
+        set degrees of freedom explicitly
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input file name (text matrix or 3D/4D image file)
+mask: (an existing file name)
+        mask image file name if input is image
+out_cope: (a file name)
+        output file name for COPE (either as txt or image
+out_data_name: (a file name)
+        output file name for pre-processed data
+out_f_name: (a file name)
+        output file name for F-value of full model fit
+out_file: (a file name)
+        filename for GLM parameter estimates (GLM betas)
+out_p_name: (a file name)
+        output file name for p-values of Z-stats (either as text file or
+        image)
+out_pf_name: (a file name)
+        output file name for p-value for full model fit
+out_res_name: (a file name)
+        output file name for residuals
+out_sigsq_name: (a file name)
+        output file name for residual noise variance sigma-square
+out_t_name: (a file name)
+        output file name for t-stats (either as txt or image
+out_varcb_name: (a file name)
+        output file name for variance of COPEs
+out_vnscales_name: (a file name)
+        output file name for scaling factors for variance normalisation
+out_z_name: (a file name)
+        output file name for Z-stats (either as txt or image
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+var_norm: (a boolean)
+        perform MELODIC variance-normalisation on data
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_cope: (an existing file name)
+        output file name for COPEs (either as text file or image)
+out_data: (an existing file name)
+        output file for preprocessed data
+out_f: (an existing file name)
+        output file name for F-value of full model fit
+out_file: (an existing file name)
+        file name of GLM parameters (if generated)
+out_p: (an existing file name)
+        output file name for p-values of Z-stats (either as text file or
+        image)
+out_pf: (an existing file name)
+        output file name for p-value for full model fit
+out_res: (an existing file name)
+        output file name for residuals
+out_sigsq: (an existing file name)
+        output file name for residual noise variance sigma-square
+out_t: (an existing file name)
+        output file name for t-stats (either as text file or image)
+out_varcb: (an existing file name)
+        output file name for variance of COPEs
+out_vnscales: (an existing file name)
+        output file name for scaling factors for variance normalisation
+out_z: (an existing file name)
+        output file name for COPEs (either as text file or image)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-l2model"></span></div>
+</div>
+<div class="section" id="l2model">
+<span id="index-8"></span><h2>L2Model<a class="headerlink" href="#l2model" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L1007">Link to code</a></p>
+<p>Generate subject specific second level model</p>
+<div class="section" id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">L2Model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">L2Model</span><span class="p">(</span><span class="n">num_copes</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="c"># 3 sessions</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+num_copes: (an integer &gt;= 1)
+        number of copes to be combined
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+num_copes: (an integer &gt;= 1)
+        number of copes to be combined
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>design_con: (an existing file name)
+        design contrast file
+design_grp: (an existing file name)
+        design group file
+design_mat: (an existing file name)
+        design matrix file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-level1design"></span></div>
+</div>
+<div class="section" id="level1design">
+<span id="index-9"></span><h2>Level1Design<a class="headerlink" href="#level1design" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L98">Link to code</a></p>
+<p>Generate FEAT specific files</p>
+<div class="section" id="id4">
+<h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">level1design</span> <span class="o">=</span> <span class="n">Level1Design</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">level1design</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">interscan_interval</span> <span class="o">=</span> <span class="mf">2.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">level1design</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bases</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;dgamma&#39;</span><span class="p">:{</span><span class="s">&#39;derivs&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">level1design</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">session_info</span> <span class="o">=</span> <span class="s">&#39;session_info.npz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">level1design</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+bases: (a dictionary with keys which are &#39;dgamma&#39; and with values
+         which are a dictionary with keys which are &#39;derivs&#39; and with values
+         which are a boolean or a dictionary with keys which are &#39;gamma&#39; and
+         with values which are a dictionary with keys which are &#39;derivs&#39; and
+         with values which are a boolean or a dictionary with keys which are
+         &#39;none&#39; and with values which are None)
+        name of basis function and options e.g., {&#39;dgamma&#39;: {&#39;derivs&#39;:
+        True}}
+interscan_interval: (a float)
+        Interscan interval (in secs)
+model_serial_correlations: (a boolean)
+        Option to model serial correlations using an autoregressive
+        estimator (order 1). Setting this option is only useful in the
+        context of the fsf file. If you set this to False, you need to
+        repeat this option for FILMGLS by setting autocorr_noestimate to
+        True
+session_info
+        Session specific information generated by ``modelgen.SpecifyModel``
+
+[Optional]
+bases: (a dictionary with keys which are &#39;dgamma&#39; and with values
+         which are a dictionary with keys which are &#39;derivs&#39; and with values
+         which are a boolean or a dictionary with keys which are &#39;gamma&#39; and
+         with values which are a dictionary with keys which are &#39;derivs&#39; and
+         with values which are a boolean or a dictionary with keys which are
+         &#39;none&#39; and with values which are None)
+        name of basis function and options e.g., {&#39;dgamma&#39;: {&#39;derivs&#39;:
+        True}}
+contrasts: (a list of items which are a tuple of the form: (a string,
+         &#39;T&#39;, a list of items which are a string, a list of items which are
+         a float) or a tuple of the form: (a string, &#39;T&#39;, a list of items
+         which are a string, a list of items which are a float, a list of
+         items which are a float) or a tuple of the form: (a string, &#39;F&#39;, a
+         list of items which are a tuple of the form: (a string, &#39;T&#39;, a list
+         of items which are a string, a list of items which are a float) or
+         a tuple of the form: (a string, &#39;T&#39;, a list of items which are a
+         string, a list of items which are a float, a list of items which
+         are a float)))
+        List of contrasts with each contrast being a list of the form -
+        [(&#39;name&#39;, &#39;stat&#39;, [condition list], [weight list], [session list])].
+        if session list is None or not provided, all sessions are used. For
+        F contrasts, the condition list should contain previously defined
+        T-contrasts.
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+interscan_interval: (a float)
+        Interscan interval (in secs)
+model_serial_correlations: (a boolean)
+        Option to model serial correlations using an autoregressive
+        estimator (order 1). Setting this option is only useful in the
+        context of the fsf file. If you set this to False, you need to
+        repeat this option for FILMGLS by setting autocorr_noestimate to
+        True
+session_info
+        Session specific information generated by ``modelgen.SpecifyModel``
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>ev_files: (a list of items which are an existing file name)
+        condition information files
+fsf_files: (an existing file name)
+        FSL feat specification files
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-melodic"></span></div>
+</div>
+<div class="section" id="melodic">
+<span id="index-10"></span><h2>MELODIC<a class="headerlink" href="#melodic" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L1359">Link to code</a></p>
+<p>Wraps command <strong>melodic</strong></p>
+<p>Multivariate Exploratory Linear Optimised Decomposition into Independent Components</p>
+<div class="section" id="id5">
+<h3>Examples<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span> <span class="o">=</span> <span class="n">MELODIC</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">approach</span> <span class="o">=</span> <span class="s">&#39;tica&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;functional.nii&#39;</span><span class="p">,</span> <span class="s">&#39;functional2.nii&#39;</span><span class="p">,</span> <span class="s">&#39;functional3.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">no_bet</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bg_threshold</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">tr_sec</span> <span class="o">=</span> <span class="mf">1.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mm_thresh</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_stats</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t_des</span> <span class="o">=</span> <span class="s">&#39;timeDesign.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">t_con</span> <span class="o">=</span> <span class="s">&#39;timeDesign.con&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">s_des</span> <span class="o">=</span> <span class="s">&#39;subjectDesign.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">s_con</span> <span class="o">=</span> <span class="s">&#39;subjectDesign.con&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">=</span> <span class="s">&#39;groupICA.out&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">melodic_setup</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (an existing file name)
+        input file names (either single file name or a list)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+ICs: (an existing file name)
+        filename of the IC components file for mixture modelling
+approach: (a string)
+        approach for decomposition, 2D: defl, symm (default), 3D: tica
+        (default), concat
+args: (a string)
+        Additional parameters to the command
+bg_image: (an existing file name)
+        specify background image for report (default: mean image)
+bg_threshold: (a float)
+        brain/non-brain threshold used to mask non-brain voxels, as a
+        percentage (only if --nobet selected)
+cov_weight: (a float)
+        voxel-wise weights for the covariance matrix (e.g. segmentation
+        information)
+dim: (an integer (int or long))
+        dimensionality reduction into #num dimensions(default: automatic
+        estimation)
+dim_est: (a string)
+        use specific dim. estimation technique: lap, bic, mdl, aic, mean
+        (default: lap)
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+epsilon: (a float)
+        minimum error change
+epsilonS: (a float)
+        minimum error change for rank-1 approximation in TICA
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_files: (an existing file name)
+        input file names (either single file name or a list)
+log_power: (a boolean)
+        calculate log of power for frequency spectrum
+mask: (an existing file name)
+        file name of mask for thresholding
+max_restart: (an integer (int or long))
+        maximum number of restarts
+maxit: (an integer (int or long))
+        maximum number of iterations before restart
+mix: (an existing file name)
+        mixing matrix for mixture modelling / filtering
+mm_thresh: (a float)
+        threshold for Mixture Model based inference
+no_bet: (a boolean)
+        switch off BET
+no_mask: (a boolean)
+        switch off masking
+no_mm: (a boolean)
+        switch off mixture modelling on IC maps
+non_linearity: (a string)
+        nonlinearity: gauss, tanh, pow3, pow4
+num_ICs: (an integer (int or long))
+        number of IC&#39;s to extract (for deflation approach)
+out_all: (a boolean)
+        output everything
+out_dir: (a directory name)
+        output directory name
+out_mean: (a boolean)
+        output mean volume
+out_orig: (a boolean)
+        output the original ICs
+out_pca: (a boolean)
+        output PCA results
+out_stats: (a boolean)
+        output thresholded maps and probability maps
+out_unmix: (a boolean)
+        output unmixing matrix
+out_white: (a boolean)
+        output whitening/dewhitening matrices
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+pbsc: (a boolean)
+        switch off conversion to percent BOLD signal change
+rem_cmp: (a list of items which are an integer (int or long))
+        component numbers to remove
+remove_deriv: (a boolean)
+        removes every second entry in paradigm file (EV derivatives)
+report: (a boolean)
+        generate Melodic web report
+report_maps: (a string)
+        control string for spatial map images (see slicer)
+s_con: (an existing file name)
+        t-contrast matrix across subject-domain
+s_des: (an existing file name)
+        design matrix across subject-domain
+sep_vn: (a boolean)
+        switch off joined variance normalization
+sep_whiten: (a boolean)
+        switch on separate whitening
+smode: (an existing file name)
+        matrix of session modes for report generation
+t_con: (an existing file name)
+        t-contrast matrix across time-domain
+t_des: (an existing file name)
+        design matrix across time-domain
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tr_sec: (a float)
+        TR in seconds
+update_mask: (a boolean)
+        switch off mask updating
+var_norm: (a boolean)
+        switch off variance normalization
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_dir: (an existing directory name)
+report_dir: (an existing directory name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-multipleregressdesign"></span></div>
+</div>
+<div class="section" id="multipleregressdesign">
+<span id="index-11"></span><h2>MultipleRegressDesign<a class="headerlink" href="#multipleregressdesign" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L1106">Link to code</a></p>
+<p>Generate multiple regression design</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">FSL does not demean columns for higher level analysis.</p>
+</div>
+<p>Please see <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/feat5/detail.html#higher">FSL documentation</a>
+for more details on model specification for higher level analysis.</p>
+<div class="section" id="id6">
+<h3>Examples<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">MultipleRegressDesign</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">MultipleRegressDesign</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">contrasts</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;group mean&#39;</span><span class="p">,</span> <span class="s">&#39;T&#39;</span><span class="p">,[</span><span class="s">&#39;reg1&#39;</span><span class="p">],[</span><span class="mi">1</span><span class="p">]]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">regressors</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">reg1</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">reg2</span><span class="o">=</span><span class="p">[</span><span class="mf">2.</span><span class="p">,</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+contrasts: (a list of items which are a tuple of the form: (a string,
+         &#39;T&#39;, a list of items which are a string, a list of items which are
+         a float) or a tuple of the form: (a string, &#39;F&#39;, a list of items
+         which are a tuple of the form: (a string, &#39;T&#39;, a list of items
+         which are a string, a list of items which are a float)))
+        List of contrasts with each contrast being a list of the form -
+        [(&#39;name&#39;, &#39;stat&#39;, [condition list], [weight list])]. if session list
+        is None or not provided, all sessions are used. For F contrasts, the
+        condition list should contain previously defined T-contrasts without
+        any weight list.
+regressors: (a dictionary with keys which are a string and with
+         values which are a list of items which are a float)
+        dictionary containing named lists of regressors
+
+[Optional]
+contrasts: (a list of items which are a tuple of the form: (a string,
+         &#39;T&#39;, a list of items which are a string, a list of items which are
+         a float) or a tuple of the form: (a string, &#39;F&#39;, a list of items
+         which are a tuple of the form: (a string, &#39;T&#39;, a list of items
+         which are a string, a list of items which are a float)))
+        List of contrasts with each contrast being a list of the form -
+        [(&#39;name&#39;, &#39;stat&#39;, [condition list], [weight list])]. if session list
+        is None or not provided, all sessions are used. For F contrasts, the
+        condition list should contain previously defined T-contrasts without
+        any weight list.
+groups: (a list of items which are an integer (int or long))
+        list of group identifiers (defaults to single group)
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+regressors: (a dictionary with keys which are a string and with
+         values which are a list of items which are a float)
+        dictionary containing named lists of regressors
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>design_con: (an existing file name)
+        design t-contrast file
+design_fts: (an existing file name)
+        design f-contrast file
+design_grp: (an existing file name)
+        design group file
+design_mat: (an existing file name)
+        design matrix file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-randomise"></span></div>
+</div>
+<div class="section" id="randomise">
+<span id="index-12"></span><h2>Randomise<a class="headerlink" href="#randomise" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L1655">Link to code</a></p>
+<p>Wraps command <strong>randomise</strong></p>
+<p>XXX UNSTABLE DO NOT USE</p>
+<p>FSL Randomise: feeds the 4D projected FA data into GLM
+modelling and thresholding
+in order to find voxels which correlate with your model</p>
+<div class="section" id="id7">
+<h3>Example<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rand</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Randomise</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s">&#39;allFA.nii&#39;</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span><span class="p">,</span> <span class="n">tcon</span><span class="o">=</span><span class="s">&#39;design.con&#39;</span><span class="p">,</span> <span class="n">design_mat</span><span class="o">=</span><span class="s">&#39;design.mat&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rand</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;randomise -i allFA.nii -o &quot;tbss_&quot; -d design.mat -t design.con -m mask.nii&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        4D input file
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+base_name: (a string, nipype default value: tbss_)
+        the rootname that all generated files will have
+c_thresh: (a float)
+        carry out cluster-based thresholding
+cm_thresh: (a float)
+        carry out cluster-mass-based thresholding
+demean: (a boolean)
+        demean data temporally before model fitting
+design_mat: (an existing file name)
+        design matrix file
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+f_c_thresh: (a float)
+        carry out f cluster thresholding
+f_cm_thresh: (a float)
+        carry out f cluster-mass thresholding
+f_only: (a boolean)
+        calculate f-statistics only
+fcon: (an existing file name)
+        f contrasts file
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        4D input file
+mask: (an existing file name)
+        mask image
+num_perm: (an integer (int or long))
+        number of permutations (default 5000, set to 0 for exhaustive)
+one_sample_group_mean: (a boolean)
+        perform 1-sample group-mean test instead of generic permutation test
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+p_vec_n_dist_files: (a boolean)
+        output permutation vector and null distribution text files
+raw_stats_imgs: (a boolean)
+        output raw ( unpermuted ) statistic images
+seed: (an integer (int or long))
+        specific integer seed for random number generator
+show_info_parallel_mode: (a boolean)
+        print out information required for parallel mode and exit
+show_total_perms: (a boolean)
+        print out how many unique permutations would be generated and exit
+tcon: (an existing file name)
+        t contrasts file
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tfce: (a boolean)
+        carry out Threshold-Free Cluster Enhancement
+tfce2D: (a boolean)
+        carry out Threshold-Free Cluster Enhancement with 2D optimisation
+tfce_C: (a float)
+        TFCE connectivity (6 or 26; default=6)
+tfce_E: (a float)
+        TFCE extent parameter (default=0.5)
+tfce_H: (a float)
+        TFCE height parameter (default=2)
+var_smooth: (an integer (int or long))
+        use variance smoothing (std is in mm)
+vox_p_values: (a boolean)
+        output voxelwise (corrected and uncorrected) p-value images
+x_block_labels: (an existing file name)
+        exchangeability block labels file
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>f_corrected_p_files: (a list of items which are an existing file
+         name)
+        f contrast FWE (Family-wise error) corrected p values files
+f_p_files: (a list of items which are an existing file name)
+        f contrast uncorrected p values files
+fstat_files: (a list of items which are an existing file name)
+        f contrast raw statistic
+t_corrected_p_files: (a list of items which are an existing file
+         name)
+        t contrast FWE (Family-wise error) corrected p values files
+t_p_files: (a list of items which are an existing file name)
+        f contrast uncorrected p values files
+tstat_files: (a list of items which are an existing file name)
+        t contrast raw statistic
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-smm"></span></div>
+</div>
+<div class="section" id="smm">
+<span id="index-13"></span><h2>SMM<a class="headerlink" href="#smm" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L1249">Link to code</a></p>
+<p>Wraps command <strong>mm &#8211;ld=logdir</strong></p>
+<p>Spatial Mixture Modelling. For more detail on the spatial mixture modelling see
+Mixture Models with Adaptive Spatial Regularisation for Segmentation with an Application to FMRI Data;
+Woolrich, M., Behrens, T., Beckmann, C., and Smith, S.; IEEE Trans. Medical Imaging, 24(1):1-11, 2005.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+mask: (an existing file name)
+        mask file
+spatial_data_file: (an existing file name)
+        statistics spatial map
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask: (an existing file name)
+        mask file
+no_deactivation_class: (a boolean)
+        enforces no deactivation class
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+spatial_data_file: (an existing file name)
+        statistics spatial map
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>activation_p_map: (an existing file name)
+deactivation_p_map: (an existing file name)
+null_p_map: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-model-smoothestimate"></span></div>
+<div class="section" id="smoothestimate">
+<span id="index-14"></span><h2>SmoothEstimate<a class="headerlink" href="#smoothestimate" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/model.py#L1422">Link to code</a></p>
+<p>Wraps command <strong>smoothest</strong></p>
+<p>Estimates the smoothness of an image</p>
+<div class="section" id="id8">
+<h3>Examples<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">est</span> <span class="o">=</span> <span class="n">SmoothEstimate</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">est</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">zstat_file</span> <span class="o">=</span> <span class="s">&#39;zstat1.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">est</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_file</span> <span class="o">=</span> <span class="s">&#39;mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">est</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;smoothest --mask=mask.nii --zstat=zstat1.nii.gz&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+dof: (an integer (int or long))
+        number of degrees of freedom
+        mutually_exclusive: zstat_file
+mask_file: (an existing file name)
+        brain mask volume
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+dof: (an integer (int or long))
+        number of degrees of freedom
+        mutually_exclusive: zstat_file
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask_file: (an existing file name)
+        brain mask volume
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+residual_fit_file: (an existing file name)
+        residual-fit image file
+        requires: dof
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+zstat_file: (an existing file name)
+        zstat image file
+        mutually_exclusive: dof
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>dlh: (a float)
+        smoothness estimate sqrt(det(Lambda))
+resels: (a float)
+        number of resels
+volume: (an integer (int or long))
+        number of voxels in mask
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

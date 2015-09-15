@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,8 +114,17 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">interfaces.dipy.tensors</a><ul>
-<li><a class="reference internal" href="#tensormode">TensorMode</a><ul>
+<li><a class="reference internal" href="#dti">DTI</a><ul>
 <li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tensormode">TensorMode</a><ul>
+<li><a class="reference internal" href="#id2">Example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tensor-fitting"><code class="docutils literal"><span class="pre">tensor_fitting()</span></code></a><ul>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#returns">Returns</a></li>
 </ul>
 </li>
 </ul>
@@ -140,7 +149,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -152,7 +161,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -175,9 +184,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -187,13 +196,49 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-dipy-tensors">
 <h1>interfaces.dipy.tensors<a class="headerlink" href="#interfaces-dipy-tensors" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="nipype-interfaces-dipy-tensors-tensormode"></span><div class="section" id="tensormode">
-<span id="index-0"></span><h2>TensorMode<a class="headerlink" href="#tensormode" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dipy/tensors.py#L46">Link to code</a></p>
+<span class="target" id="nipype-interfaces-dipy-tensors-dti"></span><div class="section" id="dti">
+<span id="index-0"></span><h2>DTI<a class="headerlink" href="#dti" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/dipy/tensors.py#L84">Link to code</a></p>
+<p>Calculates the diffusion tensor model parameters</p>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.dipy</span> <span class="kn">as</span> <span class="nn">dipy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dti</span> <span class="o">=</span> <span class="n">dipy</span><span class="o">.</span><span class="n">DTI</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dti</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;diffusion.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dti</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bvecs</span> <span class="o">=</span> <span class="s">&#39;bvecs&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dti</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bvals</span> <span class="o">=</span> <span class="s">&#39;bvals&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dti</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>                                   
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+bvals: (an existing file name)
+        The input b-value text file
+bvecs: (an existing file name)
+        The input b-vector text file
+in_file: (an existing file name)
+        The input 4D diffusion-weighted image file
+
+[Optional]
+mask_file: (an existing file name)
+        An optional white matter mask
+out_filename: (a file name)
+        The output filename for the DTI parameters image
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-dipy-tensors-tensormode"></span></div>
+</div>
+<div class="section" id="tensormode">
+<span id="index-1"></span><h2>TensorMode<a class="headerlink" href="#tensormode" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/dipy/tensors.py#L146">Link to code</a></p>
 <p>Creates a map of the mode of the diffusion tensors given a set of
 diffusion-weighted images, as well as their associated b-values and
 b-vectors. Fits the diffusion tensors and calculates tensor mode
@@ -207,8 +252,8 @@ Images&#8221;, Magnetic Resonance in Medicine, vol. 55, no. 1, pp. 136-146,
 2006.</td></tr>
 </tbody>
 </table>
-<div class="section" id="example">
-<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id2">
+<h3>Example<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.dipy</span> <span class="kn">as</span> <span class="nn">dipy</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mode</span> <span class="o">=</span> <span class="n">dipy</span><span class="o">.</span><span class="n">TensorMode</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mode</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;diffusion.nii&#39;</span>
@@ -227,6 +272,8 @@ in_file: (an existing file name)
         The input 4D diffusion-weighted image file
 
 [Optional]
+mask_file: (an existing file name)
+        An optional white matter mask
 out_filename: (a file name)
         The output filename for the Tensor mode image
 </pre></div>
@@ -235,6 +282,28 @@ out_filename: (a file name)
 <div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
 </pre></div>
 </div>
+<span class="target" id="module-nipype.interfaces.dipy.tensors"></span></div>
+</div>
+<div class="section" id="tensor-fitting">
+<span id="nipype-interfaces-dipy-tensors-tensor-fitting"></span><h2><code class="xref py py-func docutils literal"><span class="pre">tensor_fitting()</span></code><a class="headerlink" href="#tensor-fitting" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/dipy/tensors.py#L32">Link to code</a></p>
+<p>Use dipy to fit DTI</p>
+<div class="section" id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>in_file <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Full path to a DWI data file.</dd>
+<dt>bvals <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Full path to a file containing gradient magnitude information (b-values).</dd>
+<dt>bvecs <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>Full path to a file containing gradient direction information (b-vectors).</dd>
+<dt>mask_file <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd>Full path to a file containing a binary mask. Defaults to use the entire volume.</dd>
+</dl>
+</div>
+<div class="section" id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Permalink to this headline">¶</a></h3>
+<p>TensorFit object, affine</p>
 </div>
 </div>
 </div>
@@ -246,9 +315,9 @@ out_filename: (a file name)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

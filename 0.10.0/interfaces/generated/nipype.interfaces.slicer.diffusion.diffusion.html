@@ -1,0 +1,833 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.10.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.slicer.diffusion.diffusion</a><ul>
+<li><a class="reference internal" href="#dtiexport">DTIexport</a></li>
+<li><a class="reference internal" href="#dtiimport">DTIimport</a></li>
+<li><a class="reference internal" href="#dwijointricianlmmsefilter">DWIJointRicianLMMSEFilter</a></li>
+<li><a class="reference internal" href="#dwiricianlmmsefilter">DWIRicianLMMSEFilter</a></li>
+<li><a class="reference internal" href="#dwitodtiestimation">DWIToDTIEstimation</a></li>
+<li><a class="reference internal" href="#diffusiontensorscalarmeasurements">DiffusionTensorScalarMeasurements</a></li>
+<li><a class="reference internal" href="#diffusionweightedvolumemasking">DiffusionWeightedVolumeMasking</a></li>
+<li><a class="reference internal" href="#resampledtivolume">ResampleDTIVolume</a></li>
+<li><a class="reference internal" href="#tractographylabelmapseeding">TractographyLabelMapSeeding</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-slicer-diffusion-diffusion">
+<h1>interfaces.slicer.diffusion.diffusion<a class="headerlink" href="#interfaces-slicer-diffusion-diffusion" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-slicer-diffusion-diffusion-dtiexport"></span><div class="section" id="dtiexport">
+<span id="index-0"></span><h2>DTIexport<a class="headerlink" href="#dtiexport" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/slicer/diffusion/diffusion.py#L351">Link to code</a></p>
+<p>Wraps command <a href="#id1"><span class="problematic" id="id2">**</span></a>DTIexport **</p>
+<p>title: DTIexport</p>
+<p>category: Diffusion.Diffusion Data Conversion</p>
+<p>description: Export DTI data to various file formats</p>
+<p>version: 1.0</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DTIExport">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DTIExport</a></p>
+<p>contributor: Sonia Pujol (SPL, BWH)</p>
+<p>acknowledgements: This work is part of the National Alliance for Medical Image Computing (NA-MIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputTensor: (an existing file name)
+        Input DTI volume
+        flag: %s, position: -2
+outputFile: (a boolean or a file name)
+        Output DTI file
+        flag: %s, position: -1
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputFile: (an existing file name)
+        Output DTI file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-diffusion-diffusion-dtiimport"></span></div>
+<div class="section" id="dtiimport">
+<span id="index-1"></span><h2>DTIimport<a class="headerlink" href="#dtiimport" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/slicer/diffusion/diffusion.py#L245">Link to code</a></p>
+<p>Wraps command <a href="#id3"><span class="problematic" id="id4">**</span></a>DTIimport **</p>
+<p>title: DTIimport</p>
+<p>category: Diffusion.Diffusion Data Conversion</p>
+<p>description: Import tensor datasets from various formats, including the NifTi file format</p>
+<p>version: 1.0</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DTIImport">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DTIImport</a></p>
+<p>contributor: Sonia Pujol (SPL, BWH)</p>
+<p>acknowledgements: This work is part of the National Alliance for Medical Image Computing (NA-MIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputFile: (an existing file name)
+        Input DTI file
+        flag: %s, position: -2
+outputTensor: (a boolean or a file name)
+        Output DTI volume
+        flag: %s, position: -1
+testingmode: (a boolean)
+        Enable testing mode. Sample helix file (helix-DTI.nhdr) will be
+        loaded into Slicer and converted in Nifti.
+        flag: --testingmode
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputTensor: (an existing file name)
+        Output DTI volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-diffusion-diffusion-dwijointricianlmmsefilter"></span></div>
+<div class="section" id="dwijointricianlmmsefilter">
+<span id="index-2"></span><h2>DWIJointRicianLMMSEFilter<a class="headerlink" href="#dwijointricianlmmsefilter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/slicer/diffusion/diffusion.py#L173">Link to code</a></p>
+<p>Wraps command <a href="#id5"><span class="problematic" id="id6">**</span></a>DWIJointRicianLMMSEFilter **</p>
+<p>title: DWI Joint Rician LMMSE Filter</p>
+<p>category: Diffusion.Diffusion Weighted Images</p>
+<p>description: This module reduces Rician noise (or unwanted detail) on a set of diffusion weighted images. For this, it filters the image in the mean squared error sense using a Rician noise model. The N closest gradient directions to the direction being processed are filtered together to improve the results: the noise-free signal is seen as an n-diemensional vector which has to be estimated with the LMMSE method from a set of corrupted measurements. To that end, the covariance matrix of the noise-free vector and the cross covariance between this signal and the noise have to be estimated, which is done taking into account the image formation process.
+The noise parameter is automatically estimated from a rough segmentation of the background of the image. In this area the signal is simply 0, so that Rician statistics reduce to Rayleigh and the noise power can be easily estimated from the mode of the histogram.
+A complete description of the algorithm may be found in:
+Antonio Tristan-Vega and Santiago Aja-Fernandez, DWI filtering using joint information for DTI and HARDI, Medical Image Analysis, Volume 14, Issue 2, Pages 205-218. 2010.</p>
+<p>version: 0.1.1.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/JointRicianLMMSEImageFilter">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/JointRicianLMMSEImageFilter</a></p>
+<p>contributor: Antonio Tristan Vega (UVa), Santiago Aja Fernandez (UVa)</p>
+<p>acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the Comision Interministerial de Ciencia y Tecnologia (Spain).</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+compressOutput: (a boolean)
+        Compress the data of the compressed file using gzip
+        flag: --compressOutput
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        Input DWI volume.
+        flag: %s, position: -2
+ng: (an integer (int or long))
+        The number of the closest gradients that are used to jointly filter
+        a given gradient direction (0 to use all).
+        flag: --ng %d
+outputVolume: (a boolean or a file name)
+        Output DWI volume.
+        flag: %s, position: -1
+re: (an integer (int or long))
+        Estimation radius.
+        flag: --re %s
+rf: (an integer (int or long))
+        Filtering radius.
+        flag: --rf %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Output DWI volume.
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-diffusion-diffusion-dwiricianlmmsefilter"></span></div>
+<div class="section" id="dwiricianlmmsefilter">
+<span id="index-3"></span><h2>DWIRicianLMMSEFilter<a class="headerlink" href="#dwiricianlmmsefilter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/slicer/diffusion/diffusion.py#L84">Link to code</a></p>
+<p>Wraps command <a href="#id7"><span class="problematic" id="id8">**</span></a>DWIRicianLMMSEFilter **</p>
+<p>title: DWI Rician LMMSE Filter</p>
+<p>category: Diffusion.Diffusion Weighted Images</p>
+<p>description: This module reduces noise (or unwanted detail) on a set of diffusion weighted images. For this, it filters the image in the mean squared error sense using a Rician noise model. Images corresponding to each gradient direction, including baseline, are processed individually. The noise parameter is automatically estimated (noise estimation improved but slower).
+Note that this is a general purpose filter for MRi images. The module jointLMMSE has been specifically designed for DWI volumes and shows a better performance, so its use is recommended instead.
+A complete description of the algorithm in this module can be found in:
+S. Aja-Fernandez, M. Niethammer, M. Kubicki, M. Shenton, and C.-F. Westin. Restoration of DWI data using a Rician LMMSE estimator. IEEE Transactions on Medical Imaging, 27(10): pp. 1389-1403, Oct. 2008.</p>
+<p>version: 0.1.1.$Revision: 1 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/RicianLMMSEImageFilter">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/RicianLMMSEImageFilter</a></p>
+<p>contributor: Antonio Tristan Vega (UVa), Santiago Aja Fernandez (UVa), Marc Niethammer (UNC)</p>
+<p>acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the Comision Interministerial de Ciencia y Tecnologia (Spain).</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+compressOutput: (a boolean)
+        Compress the data of the compressed file using gzip
+        flag: --compressOutput
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+hrf: (a float)
+        How many histogram bins per unit interval.
+        flag: --hrf %f
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        Input DWI volume.
+        flag: %s, position: -2
+iter: (an integer (int or long))
+        Number of iterations for the noise removal filter.
+        flag: --iter %d
+maxnstd: (an integer (int or long))
+        Maximum allowed noise standard deviation.
+        flag: --maxnstd %d
+minnstd: (an integer (int or long))
+        Minimum allowed noise standard deviation.
+        flag: --minnstd %d
+mnve: (an integer (int or long))
+        Minimum number of voxels in kernel used for estimation.
+        flag: --mnve %d
+mnvf: (an integer (int or long))
+        Minimum number of voxels in kernel used for filtering.
+        flag: --mnvf %d
+outputVolume: (a boolean or a file name)
+        Output DWI volume.
+        flag: %s, position: -1
+re: (an integer (int or long))
+        Estimation radius.
+        flag: --re %s
+rf: (an integer (int or long))
+        Filtering radius.
+        flag: --rf %s
+uav: (a boolean)
+        Use absolute value in case of negative square.
+        flag: --uav
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Output DWI volume.
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-diffusion-diffusion-dwitodtiestimation"></span></div>
+<div class="section" id="dwitodtiestimation">
+<span id="index-4"></span><h2>DWIToDTIEstimation<a class="headerlink" href="#dwitodtiestimation" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/slicer/diffusion/diffusion.py#L282">Link to code</a></p>
+<p>Wraps command <a href="#id9"><span class="problematic" id="id10">**</span></a>DWIToDTIEstimation **</p>
+<p>title: DWI to DTI Estimation</p>
+<p>category: Diffusion.Diffusion Weighted Images</p>
+<p>description: Performs a tensor model estimation from diffusion weighted images.</p>
+<p>There are three estimation methods available: least squares, weigthed least squares and non-linear estimation. The first method is the traditional method for tensor estimation and the fastest one. Weighted least squares takes into account the noise characteristics of the MRI images to weight the DWI samples used in the estimation based on its intensity magnitude. The last method is the more complex.</p>
+<p>version: 0.1.0.$Revision: 1892 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DiffusionTensorEstimation">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DiffusionTensorEstimation</a></p>
+<p>license: slicer3</p>
+<p>contributor: Raul San Jose (SPL, BWH)</p>
+<p>acknowledgements: This command module is based on the estimation functionality provided by the Teem library. This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+enumeration: (&#39;LS&#39; or &#39;WLS&#39;)
+        LS: Least Squares, WLS: Weighted Least Squares
+        flag: --enumeration %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        Input DWI volume
+        flag: %s, position: -3
+mask: (an existing file name)
+        Mask where the tensors will be computed
+        flag: --mask %s
+outputBaseline: (a boolean or a file name)
+        Estimated baseline volume
+        flag: %s, position: -1
+outputTensor: (a boolean or a file name)
+        Estimated DTI volume
+        flag: %s, position: -2
+shiftNeg: (a boolean)
+        Shift eigenvalues so all are positive (accounts for bad tensors
+        related to noise or acquisition error)
+        flag: --shiftNeg
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputBaseline: (an existing file name)
+        Estimated baseline volume
+outputTensor: (an existing file name)
+        Estimated DTI volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-diffusion-diffusion-diffusiontensorscalarmeasurements"></span></div>
+<div class="section" id="diffusiontensorscalarmeasurements">
+<span id="index-5"></span><h2>DiffusionTensorScalarMeasurements<a class="headerlink" href="#diffusiontensorscalarmeasurements" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/slicer/diffusion/diffusion.py#L319">Link to code</a></p>
+<p>Wraps command <a href="#id11"><span class="problematic" id="id12">**</span></a>DiffusionTensorScalarMeasurements **</p>
+<p>title: Diffusion Tensor Scalar Measurements</p>
+<p>category: Diffusion.Diffusion Tensor Images</p>
+<p>description: Compute a set of different scalar measurements from a tensor field, specially oriented for Diffusion Tensors where some rotationally invariant measurements, like Fractional Anisotropy, are highly used to describe the anistropic behaviour of the tensor.</p>
+<p>version: 0.1.0.$Revision: 1892 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DiffusionTensorMathematics">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DiffusionTensorMathematics</a></p>
+<p>contributor: Raul San Jose (SPL, BWH)</p>
+<p>acknowledgements: LMI</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+enumeration: (&#39;Trace&#39; or &#39;Determinant&#39; or &#39;RelativeAnisotropy&#39; or
+         &#39;FractionalAnisotropy&#39; or &#39;Mode&#39; or &#39;LinearMeasure&#39; or
+         &#39;PlanarMeasure&#39; or &#39;SphericalMeasure&#39; or &#39;MinEigenvalue&#39; or
+         &#39;MidEigenvalue&#39; or &#39;MaxEigenvalue&#39; or &#39;MaxEigenvalueProjectionX&#39; or
+         &#39;MaxEigenvalueProjectionY&#39; or &#39;MaxEigenvalueProjectionZ&#39; or
+         &#39;RAIMaxEigenvecX&#39; or &#39;RAIMaxEigenvecY&#39; or &#39;RAIMaxEigenvecZ&#39; or
+         &#39;MaxEigenvecX&#39; or &#39;MaxEigenvecY&#39; or &#39;MaxEigenvecZ&#39; or &#39;D11&#39; or
+         &#39;D22&#39; or &#39;D33&#39; or &#39;ParallelDiffusivity&#39; or
+         &#39;PerpendicularDffusivity&#39;)
+        An enumeration of strings
+        flag: --enumeration %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        Input DTI volume
+        flag: %s, position: -3
+outputScalar: (a boolean or a file name)
+        Scalar volume derived from tensor
+        flag: %s, position: -1
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputScalar: (an existing file name)
+        Scalar volume derived from tensor
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-diffusion-diffusion-diffusionweightedvolumemasking"></span></div>
+<div class="section" id="diffusionweightedvolumemasking">
+<span id="index-6"></span><h2>DiffusionWeightedVolumeMasking<a class="headerlink" href="#diffusionweightedvolumemasking" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/slicer/diffusion/diffusion.py#L212">Link to code</a></p>
+<p>Wraps command <a href="#id13"><span class="problematic" id="id14">**</span></a>DiffusionWeightedVolumeMasking **</p>
+<p>title: Diffusion Weighted Volume Masking</p>
+<p>category: Diffusion.Diffusion Weighted Images</p>
+<p>description: &lt;p&gt;Performs a mask calculation from a diffusion weighted (DW) image.&lt;/p&gt;&lt;p&gt;Starting from a dw image, this module computes the baseline image averaging all the images without diffusion weighting and then applies the otsu segmentation algorithm in order to produce a mask. this mask can then be used when estimating the diffusion tensor (dt) image, not to estimate tensors all over the volume.&lt;/p&gt;</p>
+<p>version: 0.1.0.$Revision: 1892 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DiffusionWeightedMasking">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/DiffusionWeightedMasking</a></p>
+<p>license: slicer3</p>
+<p>contributor: Demian Wassermann (SPL, BWH)</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        Input DWI volume
+        flag: %s, position: -4
+otsuomegathreshold: (a float)
+        Control the sharpness of the threshold in the Otsu computation. 0:
+        lower threshold, 1: higher threhold
+        flag: --otsuomegathreshold %f
+outputBaseline: (a boolean or a file name)
+        Estimated baseline volume
+        flag: %s, position: -2
+removeislands: (a boolean)
+        Remove Islands in Threshold Mask?
+        flag: --removeislands
+thresholdMask: (a boolean or a file name)
+        Otsu Threshold Mask
+        flag: %s, position: -1
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputBaseline: (an existing file name)
+        Estimated baseline volume
+thresholdMask: (an existing file name)
+        Otsu Threshold Mask
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-diffusion-diffusion-resampledtivolume"></span></div>
+<div class="section" id="resampledtivolume">
+<span id="index-7"></span><h2>ResampleDTIVolume<a class="headerlink" href="#resampledtivolume" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/slicer/diffusion/diffusion.py#L42">Link to code</a></p>
+<p>Wraps command <a href="#id15"><span class="problematic" id="id16">**</span></a>ResampleDTIVolume **</p>
+<p>title: Resample DTI Volume</p>
+<p>category: Diffusion.Diffusion Tensor Images</p>
+<p>description: Resampling an image is a very important task in image analysis. It is especially important in the frame of image registration. This module implements DT image resampling through the use of itk Transforms. The resampling is controlled by the Output Spacing. &#8220;Resampling&#8221; is performed in space coordinates, not pixel/grid coordinates. It is quite important to ensure that image spacing is properly set on the images involved. The interpolator is required since the mapping from one space to the other will often require evaluation of the intensity of the image at non-grid positions.</p>
+<p>version: 0.1</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ResampleDTI">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ResampleDTI</a></p>
+<p>contributor: Francois Budin (UNC)</p>
+<p>acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149. Information on the National Centers for Biomedical Computing can be obtained from <a class="reference external" href="http://nihroadmap.nih.gov/bioinformatics">http://nihroadmap.nih.gov/bioinformatics</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+Inverse_ITK_Transformation: (a boolean)
+        Inverse the transformation before applying it from output image to
+        input image (only for rigid and affine transforms)
+        flag: --Inverse_ITK_Transformation
+Reference: (an existing file name)
+        Reference Volume (spacing,size,orientation,origin)
+        flag: --Reference %s
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+centered_transform: (a boolean)
+        Set the center of the transformation to the center of the input
+        image (only for rigid and affine transforms)
+        flag: --centered_transform
+correction: (&#39;zero&#39; or &#39;none&#39; or &#39;abs&#39; or &#39;nearest&#39;)
+        Correct the tensors if computed tensor is not semi-definite positive
+        flag: --correction %s
+defField: (an existing file name)
+        File containing the deformation field (3D vector image containing
+        vectors with 3 components)
+        flag: --defField %s
+default_pixel_value: (a float)
+        Default pixel value for samples falling outside of the input region
+        flag: --default_pixel_value %f
+direction_matrix: (a float)
+        9 parameters of the direction matrix by rows (ijk to LPS if LPS
+        transform, ijk to RAS if RAS transform)
+        flag: --direction_matrix %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+hfieldtype: (&#39;displacement&#39; or &#39;h-Field&#39;)
+        Set if the deformation field is an -Field
+        flag: --hfieldtype %s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+image_center: (&#39;input&#39; or &#39;output&#39;)
+        Image to use to center the transform (used only if &#39;Centered
+        Transform&#39; is selected)
+        flag: --image_center %s
+inputVolume: (an existing file name)
+        Input volume to be resampled
+        flag: %s, position: -2
+interpolation: (&#39;linear&#39; or &#39;nn&#39; or &#39;ws&#39; or &#39;bs&#39;)
+        Sampling algorithm (linear , nn (nearest neighborhoor), ws
+        (WindowedSinc), bs (BSpline) )
+        flag: --interpolation %s
+notbulk: (a boolean)
+        The transform following the BSpline transform is not set as a bulk
+        transform for the BSpline transform
+        flag: --notbulk
+number_of_thread: (an integer (int or long))
+        Number of thread used to compute the output image
+        flag: --number_of_thread %d
+origin: (a list of items which are any value)
+        Origin of the output Image
+        flag: --origin %s
+outputVolume: (a boolean or a file name)
+        Resampled Volume
+        flag: %s, position: -1
+rotation_point: (a list of items which are any value)
+        Center of rotation (only for rigid and affine transforms)
+        flag: --rotation_point %s
+size: (a float)
+        Size along each dimension (0 means use input size)
+        flag: --size %s
+spaceChange: (a boolean)
+        Space Orientation between transform and image is different (RAS/LPS)
+        (warning: if the transform is a Transform Node in Slicer3, do not
+        select)
+        flag: --spaceChange
+spacing: (a float)
+        Spacing along each dimension (0 means use input spacing)
+        flag: --spacing %s
+spline_order: (an integer (int or long))
+        Spline Order (Spline order may be from 0 to 5)
+        flag: --spline_order %d
+transform: (&#39;rt&#39; or &#39;a&#39;)
+        Transform algorithm, rt = Rigid Transform, a = Affine Transform
+        flag: --transform %s
+transform_matrix: (a float)
+        12 parameters of the transform matrix by rows ( --last 3 being
+        translation-- )
+        flag: --transform_matrix %s
+transform_order: (&#39;input-to-output&#39; or &#39;output-to-input&#39;)
+        Select in what order the transforms are read
+        flag: --transform_order %s
+transform_tensor_method: (&#39;PPD&#39; or &#39;FS&#39;)
+        Chooses between 2 methods to transform the tensors: Finite Strain
+        (FS), faster but less accurate, or Preservation of the Principal
+        Direction (PPD)
+        flag: --transform_tensor_method %s
+transformationFile: (an existing file name)
+        flag: --transformationFile %s
+window_function: (&#39;h&#39; or &#39;c&#39; or &#39;w&#39; or &#39;l&#39; or &#39;b&#39;)
+        Window Function , h = Hamming , c = Cosine , w = Welch , l = Lanczos
+        , b = Blackman
+        flag: --window_function %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Resampled Volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-diffusion-diffusion-tractographylabelmapseeding"></span></div>
+<div class="section" id="tractographylabelmapseeding">
+<span id="index-8"></span><h2>TractographyLabelMapSeeding<a class="headerlink" href="#tractographylabelmapseeding" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/slicer/diffusion/diffusion.py#L135">Link to code</a></p>
+<p>Wraps command <a href="#id17"><span class="problematic" id="id18">**</span></a>TractographyLabelMapSeeding **</p>
+<p>title: Tractography Label Map Seeding</p>
+<p>category: Diffusion.Diffusion Tensor Images</p>
+<p>description: Seed tracts on a Diffusion Tensor Image (DT) from a label map</p>
+<p>version: 0.1.0.$Revision: 1892 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/Seeding">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/Seeding</a></p>
+<p>license: slicer3</p>
+<p>contributor: Raul San Jose (SPL, BWH), Demian Wassermann (SPL, BWH)</p>
+<p>acknowledgements: Laboratory of Mathematics in Imaging. This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+InputVolume: (an existing file name)
+        Input DTI volume
+        flag: %s, position: -2
+OutputFibers: (a boolean or a file name)
+        Tractography result
+        flag: %s, position: -1
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+clthreshold: (a float)
+        Minimum Linear Measure for the seeding to start.
+        flag: --clthreshold %f
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputroi: (an existing file name)
+        Label map with seeding ROIs
+        flag: --inputroi %s
+integrationsteplength: (a float)
+        Distance between points on the same fiber in mm
+        flag: --integrationsteplength %f
+label: (an integer (int or long))
+        Label value that defines seeding region.
+        flag: --label %d
+maximumlength: (a float)
+        Maximum length of fibers (in mm)
+        flag: --maximumlength %f
+minimumlength: (a float)
+        Minimum length of the fibers (in mm)
+        flag: --minimumlength %f
+name: (a string)
+        Name to use for fiber files
+        flag: --name %s
+outputdirectory: (a boolean or a directory name)
+        Directory in which to save fiber(s)
+        flag: --outputdirectory %s
+randomgrid: (a boolean)
+        Enable random placing of seeds
+        flag: --randomgrid
+seedspacing: (a float)
+        Spacing (in mm) between seed points, only matters if use Use Index
+        Space is off
+        flag: --seedspacing %f
+stoppingcurvature: (a float)
+        Tractography will stop if radius of curvature becomes smaller than
+        this number units are degrees per mm
+        flag: --stoppingcurvature %f
+stoppingmode: (&#39;LinearMeasure&#39; or &#39;FractionalAnisotropy&#39;)
+        Tensor measurement used to stop the tractography
+        flag: --stoppingmode %s
+stoppingvalue: (a float)
+        Tractography will stop when the stopping measurement drops below
+        this value
+        flag: --stoppingvalue %f
+useindexspace: (a boolean)
+        Seed at IJK voxel grid
+        flag: --useindexspace
+writetofile: (a boolean)
+        Write fibers to disk or create in the scene?
+        flag: --writetofile
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>OutputFibers: (an existing file name)
+        Tractography result
+outputdirectory: (an existing directory name)
+        Directory in which to save fiber(s)
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

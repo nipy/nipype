@@ -1,0 +1,272 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+workflows.smri.freesurfer.utils
+===============================
+
+
+.. module:: nipype.workflows.smri.freesurfer.utils
+
+
+.. _nipype.workflows.smri.freesurfer.utils.create_get_stats_flow:
+
+:func:`create_get_stats_flow`
+-----------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/smri/freesurfer/utils.py#L151>`__
+
+
+
+Retrieves stats from labels
+
+Parameters
+~~~~~~~~~~
+
+name : string
+    name of workflow
+withreg : boolean
+    indicates whether to register source to label
+
+Example
+~~~~~~~
+
+
+Inputs::
+
+       inputspec.source_file : reference image for mask generation
+       inputspec.label_file : label file from which to get ROIs
+
+       (optionally with registration)
+       inputspec.reg_file : bbreg file (assumes reg from source to label
+       inputspec.inverse : boolean whether to invert the registration
+       inputspec.subjects_dir : freesurfer subjects directory
+
+Outputs::
+
+       outputspec.stats_file : stats file
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph getstats{
+
+	  label="getstats";
+
+	  getstats_inputspec[label="inputspec (utility)"];
+
+	  getstats_segstats[label="segstats (freesurfer)"];
+
+	  getstats_outputspec[label="outputspec (utility)"];
+
+	  getstats_inputspec -> getstats_segstats;
+
+	  getstats_inputspec -> getstats_segstats;
+
+	  getstats_segstats -> getstats_outputspec;
+
+	}
+
+
+.. _nipype.workflows.smri.freesurfer.utils.create_getmask_flow:
+
+:func:`create_getmask_flow`
+---------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/smri/freesurfer/utils.py#L25>`__
+
+
+
+Registers a source file to freesurfer space and create a brain mask in
+source space
+
+Requires fsl tools for initializing registration
+
+Parameters
+~~~~~~~~~~
+
+name : string
+    name of workflow
+dilate_mask : boolean
+    indicates whether to dilate mask or not
+
+Example
+~~~~~~~
+
+>>> getmask = create_getmask_flow()
+>>> getmask.inputs.inputspec.source_file = 'mean.nii'
+>>> getmask.inputs.inputspec.subject_id = 's1'
+>>> getmask.inputs.inputspec.subjects_dir = '.'
+>>> getmask.inputs.inputspec.contrast_type = 't2'
+
+
+Inputs::
+
+       inputspec.source_file : reference image for mask generation
+       inputspec.subject_id : freesurfer subject id
+       inputspec.subjects_dir : freesurfer subjects directory
+       inputspec.contrast_type : MR contrast of reference image
+
+Outputs::
+
+       outputspec.mask_file : binary mask file in reference image space
+       outputspec.reg_file : registration file that maps reference image to
+                             freesurfer space
+       outputspec.reg_cost : cost of registration (useful for detecting misalignment)
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph getmask{
+
+	  label="getmask";
+
+	  getmask_inputspec[label="inputspec (utility)"];
+
+	  getmask_register[label="register (freesurfer)"];
+
+	  getmask_fssource[label="fssource (io)"];
+
+	  getmask_threshold[label="threshold (freesurfer)"];
+
+	  getmask_transform[label="transform (freesurfer)"];
+
+	  getmask_threshold2[label="threshold2 (freesurfer)"];
+
+	  getmask_outputspec[label="outputspec (utility)"];
+
+	  getmask_inputspec -> getmask_register;
+
+	  getmask_inputspec -> getmask_register;
+
+	  getmask_inputspec -> getmask_register;
+
+	  getmask_inputspec -> getmask_register;
+
+	  getmask_inputspec -> getmask_fssource;
+
+	  getmask_inputspec -> getmask_fssource;
+
+	  getmask_inputspec -> getmask_transform;
+
+	  getmask_inputspec -> getmask_transform;
+
+	  getmask_register -> getmask_transform;
+
+	  getmask_register -> getmask_outputspec;
+
+	  getmask_register -> getmask_outputspec;
+
+	  getmask_fssource -> getmask_threshold;
+
+	  getmask_threshold -> getmask_transform;
+
+	  getmask_transform -> getmask_threshold2;
+
+	  getmask_threshold2 -> getmask_outputspec;
+
+	}
+
+
+.. _nipype.workflows.smri.freesurfer.utils.create_tessellation_flow:
+
+:func:`create_tessellation_flow`
+--------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/smri/freesurfer/utils.py#L258>`__
+
+
+
+Tessellates the input subject's aseg.mgz volume and returns
+the surfaces for each region in stereolithic (.stl) format
+
+Example
+~~~~~~~
+>>> from nipype.workflows.smri.freesurfer import create_tessellation_flow
+>>> tessflow = create_tessellation_flow()
+>>> tessflow.inputs.inputspec.subject_id = 'subj1'
+>>> tessflow.inputs.inputspec.subjects_dir = '.'
+>>> tessflow.inputs.inputspec.lookup_file = 'FreeSurferColorLUT.txt' # doctest: +SKIP
+>>> tessflow.run()  # doctest: +SKIP
+
+
+Inputs::
+
+       inputspec.subject_id : freesurfer subject id
+       inputspec.subjects_dir : freesurfer subjects directory
+       inputspec.lookup_file : lookup file from freesurfer directory
+
+Outputs::
+
+       outputspec.meshes : output region meshes in (by default) stereolithographic (.stl) format
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph tessellate{
+
+	  label="tessellate";
+
+	  tessellate_inputspec[label="inputspec (utility)"];
+
+	  tessellate_fssource[label="fssource (io)"];
+
+	  tessellate_volconvert[label="volconvert (freesurfer)"];
+
+	  tessellate_region_list_from_volume_node[label="region_list_from_volume_node (utility)"];
+
+	  tessellate_id_list_from_lookup_table_node[label="id_list_from_lookup_table_node (utility)"];
+
+	  tessellate_tessellate[label="tessellate (freesurfer)"];
+
+	  tessellate_surfconvert[label="surfconvert (freesurfer)"];
+
+	  tessellate_smoother[label="smoother (meshfix)"];
+
+	  tessellate_outputspec[label="outputspec (utility)"];
+
+	  tessellate_inputspec -> tessellate_fssource;
+
+	  tessellate_inputspec -> tessellate_fssource;
+
+	  tessellate_inputspec -> tessellate_id_list_from_lookup_table_node;
+
+	  tessellate_fssource -> tessellate_volconvert;
+
+	  tessellate_fssource -> tessellate_tessellate;
+
+	  tessellate_volconvert -> tessellate_region_list_from_volume_node;
+
+	  tessellate_region_list_from_volume_node -> tessellate_tessellate;
+
+	  tessellate_region_list_from_volume_node -> tessellate_id_list_from_lookup_table_node;
+
+	  tessellate_id_list_from_lookup_table_node -> tessellate_tessellate;
+
+	  tessellate_tessellate -> tessellate_surfconvert;
+
+	  tessellate_surfconvert -> tessellate_smoother;
+
+	  tessellate_smoother -> tessellate_outputspec;
+
+	}
+
+
+.. _nipype.workflows.smri.freesurfer.utils.get_aparc_aseg:
+
+:func:`get_aparc_aseg`
+----------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/smri/freesurfer/utils.py#L17>`__
+
+
+
+Return the aparc+aseg.mgz file
+

@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -142,7 +142,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -154,7 +154,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -177,9 +177,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -189,13 +189,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-slicer-legacy-registration">
 <h1>interfaces.slicer.legacy.registration<a class="headerlink" href="#interfaces-slicer-legacy-registration" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-slicer-legacy-registration-affineregistration"></span><div class="section" id="affineregistration">
 <span id="index-0"></span><h2>AffineRegistration<a class="headerlink" href="#affineregistration" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/legacy/registration.py#L73">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/legacy/registration.py#L73">Link to code</a></p>
 <p>Wraps command <a href="#id1"><span class="problematic" id="id2">**</span></a>AffineRegistration **</p>
 <p>title: Affine Registration</p>
 <p>category: Legacy.Registration</p>
@@ -223,13 +223,13 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-fixedsmoothingfactor: (an integer)
+fixedsmoothingfactor: (an integer (int or long))
         Amount of smoothing applied to fixed image prior to registration.
         Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
         input data if there is considerable amounts of noise or the noise
         pattern in the fixed and moving images is very different.
         flag: --fixedsmoothingfactor %d
-histogrambins: (an integer)
+histogrambins: (an integer (int or long))
         Number of histogram bins to use for Mattes Mutual Information.
         Reduce the number of bins if a registration fails. If the number of
         bins is too large, the estimated PDFs will be a field of impulses
@@ -243,10 +243,10 @@ initialtransform: (an existing file name)
         positions in the fixed coordinate frame to positions in the moving
         coordinate frame. Optional.
         flag: --initialtransform %s
-iterations: (an integer)
+iterations: (an integer (int or long))
         Number of iterations
         flag: --iterations %d
-movingsmoothingfactor: (an integer)
+movingsmoothingfactor: (an integer (int or long))
         Amount of smoothing applied to moving image prior to registration.
         Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
         input data if there is considerable amounts of noise or the noise
@@ -262,7 +262,7 @@ resampledmovingfilename: (a boolean or a file name)
         Resampled moving image to the fixed image coordinate frame. Optional
         (specify an output transform or an output volume or both).
         flag: --resampledmovingfilename %s
-spatialsamples: (an integer)
+spatialsamples: (an integer (int or long))
         Number of spatial samples to use in estimating Mattes Mutual
         Information. Larger values yield more accurate PDFs and improved
         registration quality.
@@ -294,7 +294,7 @@ resampledmovingfilename: (an existing file name)
 <span class="target" id="nipype-interfaces-slicer-legacy-registration-bsplinedeformableregistration"></span></div>
 <div class="section" id="bsplinedeformableregistration">
 <span id="index-1"></span><h2>BSplineDeformableRegistration<a class="headerlink" href="#bsplinedeformableregistration" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/legacy/registration.py#L31">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/legacy/registration.py#L31">Link to code</a></p>
 <p>Wraps command <a href="#id3"><span class="problematic" id="id4">**</span></a>BSplineDeformableRegistration **</p>
 <p>title: BSpline Deformable Registration</p>
 <p>category: Legacy.Registration</p>
@@ -320,7 +320,7 @@ constrain: (a boolean)
         Constrain the deformation to the amount specified in Maximum
         Deformation
         flag: --constrain
-default: (an integer)
+default: (an integer (int or long))
         Default pixel value used if resampling a pixel outside of the
         volume.
         flag: --default %d
@@ -328,11 +328,11 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-gridSize: (an integer)
+gridSize: (an integer (int or long))
         Number of grid points on interior of the fixed image. Larger grid
         sizes allow for finer registrations.
         flag: --gridSize %d
-histogrambins: (an integer)
+histogrambins: (an integer (int or long))
         Number of histogram bins to use for Mattes Mutual Information.
         Reduce the number of bins if a deformable registration fails. If the
         number of bins is too large, the estimated PDFs will be a field of
@@ -347,7 +347,7 @@ initialtransform: (an existing file name)
         coordinate frame. This transform should be an affine or rigid
         transform. It is used an a bulk transform for the BSpline. Optional.
         flag: --initialtransform %s
-iterations: (an integer)
+iterations: (an integer (int or long))
         Number of iterations
         flag: --iterations %d
 maximumDeformation: (a float)
@@ -369,7 +369,7 @@ resampledmovingfilename: (a boolean or a file name)
         Resampled moving image to fixed image coordinate frame. Optional
         (specify an output transform or an output volume or both).
         flag: --resampledmovingfilename %s
-spatialsamples: (an integer)
+spatialsamples: (an integer (int or long))
         Number of spatial samples to use in estimating Mattes Mutual
         Information. Larger values yield more accurate PDFs and improved
         registration quality.
@@ -398,7 +398,7 @@ resampledmovingfilename: (an existing file name)
 <span class="target" id="nipype-interfaces-slicer-legacy-registration-expertautomatedregistration"></span></div>
 <div class="section" id="expertautomatedregistration">
 <span id="index-2"></span><h2>ExpertAutomatedRegistration<a class="headerlink" href="#expertautomatedregistration" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/legacy/registration.py#L277">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/legacy/registration.py#L277">Link to code</a></p>
 <p>Wraps command <a href="#id5"><span class="problematic" id="id6">**</span></a>ExpertAutomatedRegistration **</p>
 <p>title: Expert Automated Registration</p>
 <p>category: Legacy.Registration</p>
@@ -411,7 +411,7 @@ resampledmovingfilename: (an existing file name)
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
 
 [Optional]
-affineMaxIterations: (an integer)
+affineMaxIterations: (an integer (int or long))
         Maximum number of affine optimization iterations
         flag: --affineMaxIterations %d
 affineSamplingRatio: (a float)
@@ -421,14 +421,14 @@ affineSamplingRatio: (a float)
 args: (a string)
         Additional parameters to the command
         flag: %s
-bsplineMaxIterations: (an integer)
+bsplineMaxIterations: (an integer (int or long))
         Maximum number of bspline optimization iterations
         flag: --bsplineMaxIterations %d
 bsplineSamplingRatio: (a float)
         Portion of the image to use in computing the metric during BSpline
         registration
         flag: --bsplineSamplingRatio %f
-controlPointSpacing: (an integer)
+controlPointSpacing: (an integer (int or long))
         Number of pixels between control points
         flag: --controlPointSpacing %d
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -486,10 +486,10 @@ movingLandmarks: (a list of items which are a list of from 3 to 3
          items which are a float)
         Ordered list of landmarks in the moving image
         flag: --movingLandmarks %s...
-numberOfThreads: (an integer)
+numberOfThreads: (an integer (int or long))
         Number of CPU threads to use
         flag: --numberOfThreads %d
-randomNumberSeed: (an integer)
+randomNumberSeed: (an integer (int or long))
         Seed to generate a consistent random number sequence
         flag: --randomNumberSeed %d
 registration: (&#39;None&#39; or &#39;Initial&#39; or &#39;Rigid&#39; or &#39;Affine&#39; or
@@ -500,7 +500,7 @@ registration: (&#39;None&#39; or &#39;Initial&#39; or &#39;Rigid&#39; or &#39;Af
 resampledImage: (a boolean or a file name)
         Registration results
         flag: --resampledImage %s
-rigidMaxIterations: (an integer)
+rigidMaxIterations: (an integer (int or long))
         Maximum number of rigid optimization iterations
         flag: --rigidMaxIterations %d
 rigidSamplingRatio: (a float)
@@ -533,7 +533,7 @@ saveTransform: (an existing file name)
 <span class="target" id="nipype-interfaces-slicer-legacy-registration-linearregistration"></span></div>
 <div class="section" id="linearregistration">
 <span id="index-3"></span><h2>LinearRegistration<a class="headerlink" href="#linearregistration" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/legacy/registration.py#L218">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/legacy/registration.py#L218">Link to code</a></p>
 <p>Wraps command <a href="#id7"><span class="problematic" id="id8">**</span></a>LinearRegistration **</p>
 <p>title: Linear Registration</p>
 <p>category: Legacy.Registration</p>
@@ -559,13 +559,13 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-fixedsmoothingfactor: (an integer)
+fixedsmoothingfactor: (an integer (int or long))
         Amount of smoothing applied to fixed image prior to registration.
         Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
         input data if there is considerable amounts of noise or the noise
         pattern in the fixed and moving images is very different.
         flag: --fixedsmoothingfactor %d
-histogrambins: (an integer)
+histogrambins: (an integer (int or long))
         Number of histogram bins to use for Mattes Mutual Information.
         Reduce the number of bins if a registration fails. If the number of
         bins is too large, the estimated PDFs will be a field of impulses
@@ -579,7 +579,7 @@ initialtransform: (an existing file name)
         positions in the fixed coordinate frame to positions in the moving
         coordinate frame. Optional.
         flag: --initialtransform %s
-iterations: (a list of items which are an integer)
+iterations: (a list of items which are an integer (int or long))
         Comma separated list of iterations. Must have the same number of
         elements as the learning rate.
         flag: --iterations %s
@@ -595,7 +595,7 @@ learningrate: (a list of items which are a float)
         registration objective function. Default is: 0.01, 0.005, 0.0005,
         0.0002. Must have the same number of elements as iterations.
         flag: --learningrate %s
-movingsmoothingfactor: (an integer)
+movingsmoothingfactor: (an integer (int or long))
         Amount of smoothing applied to moving image prior to registration.
         Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
         input data if there is considerable amounts of noise or the noise
@@ -611,7 +611,7 @@ resampledmovingfilename: (a boolean or a file name)
         Resampled moving image to the fixed image coordinate frame. Optional
         (specify an output transform or an output volume or both).
         flag: --resampledmovingfilename %s
-spatialsamples: (an integer)
+spatialsamples: (an integer (int or long))
         Number of spatial samples to use in estimating Mattes Mutual
         Information. Larger values yield more accurate PDFs and improved
         registration quality.
@@ -642,7 +642,7 @@ resampledmovingfilename: (an existing file name)
 <span class="target" id="nipype-interfaces-slicer-legacy-registration-multiresolutionaffineregistration"></span></div>
 <div class="section" id="multiresolutionaffineregistration">
 <span id="index-4"></span><h2>MultiResolutionAffineRegistration<a class="headerlink" href="#multiresolutionaffineregistration" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/legacy/registration.py#L121">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/legacy/registration.py#L121">Link to code</a></p>
 <p>Wraps command <a href="#id9"><span class="problematic" id="id10">**</span></a>MultiResolutionAffineRegistration **</p>
 <p>title: Robust Multiresolution Affine Registration</p>
 <p>category: Legacy.Registration</p>
@@ -681,10 +681,10 @@ movingImage: (an existing file name)
         The transform goes from the fixed image&#39;s space into the moving
         image&#39;s space
         flag: %s, position: -1
-numIterations: (an integer)
+numIterations: (an integer (int or long))
         Number of iterations to run at each resolution level.
         flag: --numIterations %d
-numLineIterations: (an integer)
+numLineIterations: (an integer (int or long))
         Number of iterations to run at each resolution level.
         flag: --numLineIterations %d
 resampledImage: (a boolean or a file name)
@@ -715,7 +715,7 @@ saveTransform: (an existing file name)
 <span class="target" id="nipype-interfaces-slicer-legacy-registration-rigidregistration"></span></div>
 <div class="section" id="rigidregistration">
 <span id="index-5"></span><h2>RigidRegistration<a class="headerlink" href="#rigidregistration" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/legacy/registration.py#L165">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/legacy/registration.py#L165">Link to code</a></p>
 <p>Wraps command <a href="#id11"><span class="problematic" id="id12">**</span></a>RigidRegistration **</p>
 <p>title: Rigid Registration</p>
 <p>category: Legacy.Registration</p>
@@ -745,13 +745,13 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-fixedsmoothingfactor: (an integer)
+fixedsmoothingfactor: (an integer (int or long))
         Amount of smoothing applied to fixed image prior to registration.
         Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
         input data if there is considerable amounts of noise or the noise
         pattern in the fixed and moving images is very different.
         flag: --fixedsmoothingfactor %d
-histogrambins: (an integer)
+histogrambins: (an integer (int or long))
         Number of histogram bins to use for Mattes Mutual Information.
         Reduce the number of bins if a registration fails. If the number of
         bins is too large, the estimated PDFs will be a field of impulses
@@ -765,7 +765,7 @@ initialtransform: (an existing file name)
         positions in the fixed coordinate frame to positions in the moving
         coordinate frame. Optional.
         flag: --initialtransform %s
-iterations: (a list of items which are an integer)
+iterations: (a list of items which are an integer (int or long))
         Comma separated list of iterations. Must have the same number of
         elements as the learning rate.
         flag: --iterations %s
@@ -781,7 +781,7 @@ learningrate: (a list of items which are a float)
         registration objective function. Default is: 0.01, 0.005, 0.0005,
         0.0002. Must have the same number of elements as iterations.
         flag: --learningrate %s
-movingsmoothingfactor: (an integer)
+movingsmoothingfactor: (an integer (int or long))
         Amount of smoothing applied to moving image prior to registration.
         Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
         input data if there is considerable amounts of noise or the noise
@@ -797,7 +797,7 @@ resampledmovingfilename: (a boolean or a file name)
         Resampled moving image to the fixed image coordinate frame. Optional
         (specify an output transform or an output volume or both).
         flag: --resampledmovingfilename %s
-spatialsamples: (an integer)
+spatialsamples: (an integer (int or long))
         Number of spatial samples to use in estimating Mattes Mutual
         Information. Larger values yield more accurate PDFs and improved
         registration quality.
@@ -839,9 +839,9 @@ resampledmovingfilename: (an existing file name)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -142,7 +142,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -154,7 +154,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -177,9 +177,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -189,13 +189,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-slicer-surface">
 <h1>interfaces.slicer.surface<a class="headerlink" href="#interfaces-slicer-surface" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-slicer-surface-grayscalemodelmaker"></span><div class="section" id="grayscalemodelmaker">
 <span id="index-0"></span><h2>GrayscaleModelMaker<a class="headerlink" href="#grayscalemodelmaker" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/surface.py#L91">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/surface.py#L91">Link to code</a></p>
 <p>Wraps command <a href="#id1"><span class="problematic" id="id2">**</span></a>GrayscaleModelMaker **</p>
 <p>title: Grayscale Model Maker</p>
 <p>category: Surface Models</p>
@@ -238,7 +238,7 @@ pointnormals: (a boolean)
         surface appear smooth. Without point normals, the surface will
         appear faceted.
         flag: --pointnormals
-smooth: (an integer)
+smooth: (an integer (int or long))
         Number of smoothing iterations. If 0, no smoothing will be done.
         flag: --smooth %d
 splitnormals: (a boolean)
@@ -264,7 +264,7 @@ threshold: (a float)
 <span class="target" id="nipype-interfaces-slicer-surface-labelmapsmoothing"></span></div>
 <div class="section" id="labelmapsmoothing">
 <span id="index-1"></span><h2>LabelMapSmoothing<a class="headerlink" href="#labelmapsmoothing" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/surface.py#L162">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/surface.py#L162">Link to code</a></p>
 <p>Wraps command <a href="#id3"><span class="problematic" id="id4">**</span></a>LabelMapSmoothing **</p>
 <p>title: Label Map Smoothing</p>
 <p>category: Surface Models</p>
@@ -293,7 +293,7 @@ ignore_exception: (a boolean, nipype default value: False)
 inputVolume: (an existing file name)
         Input label map to smooth
         flag: %s, position: -2
-labelToSmooth: (an integer)
+labelToSmooth: (an integer (int or long))
         The label to smooth. All others will be ignored. If no label is
         selected by the user, the maximum label in the image is chosen by
         default.
@@ -301,7 +301,7 @@ labelToSmooth: (an integer)
 maxRMSError: (a float)
         The maximum RMS error.
         flag: --maxRMSError %f
-numberOfIterations: (an integer)
+numberOfIterations: (an integer (int or long))
         The number of iterations of the level set AntiAliasing algorithm
         flag: --numberOfIterations %d
 outputVolume: (a boolean or a file name)
@@ -321,7 +321,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-slicer-surface-mergemodels"></span></div>
 <div class="section" id="mergemodels">
 <span id="index-2"></span><h2>MergeModels<a class="headerlink" href="#mergemodels" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/surface.py#L19">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/surface.py#L19">Link to code</a></p>
 <p>Wraps command <a href="#id5"><span class="problematic" id="id6">**</span></a>MergeModels **</p>
 <p>title: Merge Models</p>
 <p>category: Surface Models</p>
@@ -367,7 +367,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-slicer-surface-modelmaker"></span></div>
 <div class="section" id="modelmaker">
 <span id="index-3"></span><h2>ModelMaker<a class="headerlink" href="#modelmaker" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/surface.py#L210">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/surface.py#L210">Link to code</a></p>
 <p>Wraps command <a href="#id7"><span class="problematic" id="id8">**</span></a>ModelMaker **</p>
 <p>title: Model Maker</p>
 <p>category: Surface Models</p>
@@ -402,7 +402,7 @@ decimate: (a float)
         the percentage of triangles to be removed. For example, 0.1 means
         10% reduction and 0.9 means 90% reduction.
         flag: --decimate %f
-end: (an integer)
+end: (an integer (int or long))
         If you want to specify a continuous range of labels from which to
         generate models, enter the higher label here. Voxel value up to
         which to continue making models. Skip any values with zero voxels.
@@ -430,7 +430,7 @@ jointsmooth: (a boolean)
         like jigsaw puzzle pieces. Otherwise the models will be smoothed
         independently and may overlap.
         flag: --jointsmooth
-labels: (a list of items which are an integer)
+labels: (a list of items which are an integer (int or long))
         A comma separated list of label values from which to make models. f
         you specify a list of Labels, it will override any start/end label
         settings. If you click Generate All Models it will override the list
@@ -478,7 +478,7 @@ skipUnNamed: (a boolean)
         table will be generated. If false, generate all models that exist
         within the label range.
         flag: --skipUnNamed
-smooth: (an integer)
+smooth: (an integer (int or long))
         Here you can set the number of smoothing iterations for Laplacian
         smoothing, or the degree of the polynomial approximating the
         windowed Sinc function. Use 0 if you wish no smoothing.
@@ -487,7 +487,7 @@ splitnormals: (a boolean)
         Splitting normals is useful for visualizing sharp features. However
         it creates holes in surfaces which affects measurements.
         flag: --splitnormals
-start: (an integer)
+start: (an integer (int or long))
         If you want to specify a continuous range of labels from which to
         generate models, enter the lower label here. Voxel value from which
         to start making models. Used instead of the label list to specify a
@@ -513,7 +513,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-slicer-surface-modeltolabelmap"></span></div>
 <div class="section" id="modeltolabelmap">
 <span id="index-4"></span><h2>ModelToLabelMap<a class="headerlink" href="#modeltolabelmap" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/surface.py#L53">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/surface.py#L53">Link to code</a></p>
 <p>Wraps command <a href="#id9"><span class="problematic" id="id10">**</span></a>ModelToLabelMap **</p>
 <p>title: Model To Label Map</p>
 <p>category: Surface Models</p>
@@ -562,7 +562,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-slicer-surface-probevolumewithmodel"></span></div>
 <div class="section" id="probevolumewithmodel">
 <span id="index-5"></span><h2>ProbeVolumeWithModel<a class="headerlink" href="#probevolumewithmodel" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/surface.py#L126">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/surface.py#L126">Link to code</a></p>
 <p>Wraps command <a href="#id11"><span class="problematic" id="id12">**</span></a>ProbeVolumeWithModel **</p>
 <p>title: Probe Volume With Model</p>
 <p>category: Surface Models</p>
@@ -615,9 +615,9 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

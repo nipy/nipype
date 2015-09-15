@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -138,7 +138,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../install.html">Download</a></td>
@@ -150,7 +150,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -173,9 +173,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -185,7 +185,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="fmri-coregistration-slicer-brains">
 <span id="example-fmri-slicer-coregistration"></span><h1>fMRI: Coregistration - Slicer, BRAINS<a class="headerlink" href="#fmri-coregistration-slicer-brains" title="Permalink to this headline">¶</a></h1>
@@ -218,14 +218,14 @@ tutorial, rarely would you put this in your own code.)</p>
 </pre></div>
 </div>
 <p>The nipype tutorial contains data for two subjects.  Subject data
-is in two subdirectories, <tt class="docutils literal"><span class="pre">s1</span></tt> and <tt class="docutils literal"><span class="pre">s2</span></tt>.  Each subject directory
+is in two subdirectories, <code class="docutils literal"><span class="pre">s1</span></code> and <code class="docutils literal"><span class="pre">s2</span></code>.  Each subject directory
 contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
 one anatomical volume named struct.nii.</p>
-<p>Below we set some variables to inform the <tt class="docutils literal"><span class="pre">datasource</span></tt> about the
+<p>Below we set some variables to inform the <code class="docutils literal"><span class="pre">datasource</span></code> about the
 layout of our data.  We specify the location of the data, the subject
 sub-directories and a dictionary that maps each run to a mnemonic (or
-field) for the run type (<tt class="docutils literal"><span class="pre">struct</span></tt> or <tt class="docutils literal"><span class="pre">func</span></tt>).  These fields become
-the output fields of the <tt class="docutils literal"><span class="pre">datasource</span></tt> node in the pipeline.</p>
+field) for the run type (<code class="docutils literal"><span class="pre">struct</span></code> or <code class="docutils literal"><span class="pre">func</span></code>).  These fields become
+the output fields of the <code class="docutils literal"><span class="pre">datasource</span></code> node in the pipeline.</p>
 <p>In the example below, run &#8216;f3&#8217; is of type &#8216;func&#8217; and gets mapped to a
 nifti filename through a template &#8216;%s.nii&#8217;. So &#8216;f3&#8217; would become
 &#8216;f3.nii&#8217;.</p>
@@ -243,9 +243,9 @@ nifti filename through a template &#8216;%s.nii&#8217;. So &#8216;f3&#8217; woul
 </div>
 <p>Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
-<tt class="docutils literal"><span class="pre">datasource</span></tt> attribute <tt class="docutils literal"><span class="pre">iterables</span></tt> tells the pipeline engine that
+<code class="docutils literal"><span class="pre">datasource</span></code> attribute <code class="docutils literal"><span class="pre">iterables</span></code> tells the pipeline engine that
 it should repeat the analysis on each of the items in the
-<tt class="docutils literal"><span class="pre">subject_list</span></tt>. In the current example, the entire first level
+<code class="docutils literal"><span class="pre">subject_list</span></code>. In the current example, the entire first level
 preprocessing and estimation will be repeated for each subject
 contained in subject_list.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">infosource</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subject_list</span><span class="p">)</span>
@@ -254,9 +254,9 @@ contained in subject_list.</p>
 </div>
 <div class="section" id="preprocessing-pipeline-nodes">
 <h2>Preprocessing pipeline nodes<a class="headerlink" href="#preprocessing-pipeline-nodes" title="Permalink to this headline">¶</a></h2>
-<p>Now we create a <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.DataSource</span></tt> object and
+<p>Now we create a <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.DataSource</span></code> object and
 fill in the information from above about the layout of our data.  The
-<tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.NodeWrapper</span></tt> module wraps the interface object
+<code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.NodeWrapper</span></code> module wraps the interface object
 and provides additional housekeeping and pipeline specific
 functionality.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">datasource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">],</span>
@@ -293,9 +293,9 @@ functionality.</p>
 </div>
 <div class="admonition-example-source-code admonition">
 <p class="first admonition-title">Example source code</p>
-<p class="last">You can download <a class="reference download internal" href="../../_downloads/fmri_slicer_coregistration.py"><tt class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></tt></a>.
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/fmri_slicer_coregistration.py"><code class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></code></a>.
 This same script is also included in the Nipype source distribution under the
-<tt class="file docutils literal"><span class="pre">examples</span></tt> directory.</p>
+<code class="file docutils literal"><span class="pre">examples</span></code> directory.</p>
 </div>
 </div>
 </div>
@@ -307,9 +307,9 @@ This same script is also included in the Nipype source distribution under the
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

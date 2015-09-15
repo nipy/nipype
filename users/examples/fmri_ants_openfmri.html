@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -129,7 +129,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../install.html">Download</a></td>
@@ -141,7 +141,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -164,9 +164,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -176,7 +176,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="fmri-openfmri-org-data-fsl-ants-c3daffine">
 <span id="example-fmri-ants-openfmri"></span><h1>fMRI: OpenfMRI.org data, FSL, ANTS, c3daffine<a class="headerlink" href="#fmri-openfmri-org-data-fsl-ants-c3daffine" title="Permalink to this headline">¶</a></h1>
@@ -278,9 +278,6 @@ This script demonstrates how to use nipype to analyze a data set:</p>
 <span class="sd">        outputspec.anat2target_transform : FLIRT+FNIRT transform</span>
 <span class="sd">        outputspec.transformed_files : transformed files in target space</span>
 <span class="sd">        outputspec.transformed_mean : mean image in target space</span>
-
-<span class="sd">    Example</span>
-<span class="sd">    -------</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">register</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
@@ -297,6 +294,7 @@ This script demonstrates how to use nipype to analyze a data set:</p>
                                                                  <span class="s">&#39;transformed_files&#39;</span><span class="p">,</span>
                                                                  <span class="s">&#39;transformed_mean&#39;</span><span class="p">,</span>
                                                                  <span class="s">&#39;anat2target&#39;</span><span class="p">,</span>
+                                                                 <span class="s">&#39;mean2anat_mask&#39;</span>
                                                                  <span class="p">]),</span>
                          <span class="n">name</span><span class="o">=</span><span class="s">&#39;outputspec&#39;</span><span class="p">)</span>
 </pre></div>
@@ -335,6 +333,11 @@ as FSL appears to be breaking.</p>
 <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;anatomical_image&#39;</span><span class="p">,</span> <span class="n">mean2anatbbr</span><span class="p">,</span> <span class="s">&#39;reference&#39;</span><span class="p">)</span>
 <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">mean2anat</span><span class="p">,</span> <span class="s">&#39;out_matrix_file&#39;</span><span class="p">,</span>
                  <span class="n">mean2anatbbr</span><span class="p">,</span> <span class="s">&#39;in_matrix_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create a mask of the median image coregistered to the anatomical image</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">mean2anat_mask</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">(</span><span class="n">mask</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;mean2anat_mask&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">mean2anatbbr</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">mean2anat_mask</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Convert the BBRegister transformation to ANTS ITK format</p>
@@ -390,7 +393,7 @@ All parameters are set using the example from:
 
 <span class="n">merge</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in2&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;mergexfm&#39;</span><span class="p">)</span>
 <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;itk_transform&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in2&#39;</span><span class="p">)</span>
-<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;composite_transform&#39;</span><span class="p">,</span> <span class="n">pickfirst</span><span class="p">),</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="s">&#39;composite_transform&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Transform the mean image. First to anatomical and then to target</p>
@@ -426,6 +429,8 @@ All parameters are set using the example from:
     register.connect(warpall, &#39;output_image&#39;, outputnode, &#39;transformed_files&#39;)
     register.connect(mean2anatbbr, &#39;out_matrix_file&#39;,
                      outputnode, &#39;func2anat_transform&#39;)
+    register.connect(mean2anat_mask, &#39;mask_file&#39;,
+                     outputnode, &#39;mean2anat_mask&#39;)
     register.connect(reg, &#39;composite_transform&#39;,
                      outputnode, &#39;anat2target_transform&#39;)
 
@@ -444,8 +449,6 @@ def create_fs_reg_workflow(name=&#39;registration&#39;):
     Parameters
     ----------
 
-    ::
-
         name : name of workflow (default: &#39;registration&#39;)
 
     Inputs::
@@ -460,87 +463,77 @@ def create_fs_reg_workflow(name=&#39;registration&#39;):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
+    &quot;&quot;&quot;
 
-    Example
-    -------
+    register = Workflow(name=name)
+
+    inputnode = Node(interface=IdentityInterface(fields=[&#39;source_files&#39;,
+                                                         &#39;mean_image&#39;,
+                                                         &#39;subject_id&#39;,
+                                                         &#39;subjects_dir&#39;,
+                                                         &#39;target_image&#39;]),
+                     name=&#39;inputspec&#39;)
+
+    outputnode = Node(interface=IdentityInterface(fields=[&#39;func2anat_transform&#39;,
+                                                          &#39;out_reg_file&#39;,
+                                                          &#39;anat2target_transform&#39;,
+                                                          &#39;transforms&#39;,
+                                                          &#39;transformed_mean&#39;,
+                                                          &#39;transformed_files&#39;,
+                                                          &#39;min_cost_file&#39;,
+                                                          &#39;anat2target&#39;,
+                                                          &#39;aparc&#39;,
+                                                          &#39;mean2anat_mask&#39;
+                                                          ]),
+                      name=&#39;outputspec&#39;)
+
+    # Get the subject&#39;s freesurfer source directory
+    fssource = Node(FreeSurferSource(),
+                    name=&#39;fssource&#39;)
+    fssource.run_without_submitting = True
+    register.connect(inputnode, &#39;subject_id&#39;, fssource, &#39;subject_id&#39;)
+    register.connect(inputnode, &#39;subjects_dir&#39;, fssource, &#39;subjects_dir&#39;)
+
+    convert = Node(freesurfer.MRIConvert(out_type=&#39;nii&#39;),
+                   name=&quot;convert&quot;)
+    register.connect(fssource, &#39;T1&#39;, convert, &#39;in_file&#39;)
+
+    # Coregister the median to the surface
+    bbregister = Node(freesurfer.BBRegister(registered_file=True),
+                    name=&#39;bbregister&#39;)
+    bbregister.inputs.init = &#39;fsl&#39;
+    bbregister.inputs.contrast_type = &#39;t2&#39;
+    bbregister.inputs.out_fsl_file = True
+    bbregister.inputs.epi_mask = True
+    register.connect(inputnode, &#39;subject_id&#39;, bbregister, &#39;subject_id&#39;)
+    register.connect(inputnode, &#39;mean_image&#39;, bbregister, &#39;source_file&#39;)
+    register.connect(inputnode, &#39;subjects_dir&#39;, bbregister, &#39;subjects_dir&#39;)
+
+    # Create a mask of the median coregistered to the anatomical image
+    mean2anat_mask = Node(fsl.BET(mask=True), name=&#39;mean2anat_mask&#39;)
+    register.connect(bbregister, &#39;registered_file&#39;, mean2anat_mask, &#39;in_file&#39;)
 </pre></div>
 </div>
-<p>register = Workflow(name=name)
-inputnode = Node(interface=IdentityInterface(fields=[&#8216;source_files&#8217;,</p>
-<blockquote>
-<div><blockquote>
-<div>&#8216;mean_image&#8217;,
-&#8216;subject_id&#8217;,
-&#8216;subjects_dir&#8217;,
-&#8216;target_image&#8217;]),</div></blockquote>
-<p>name=&#8217;inputspec&#8217;)</p>
-</div></blockquote>
-<dl class="docutils">
-<dt>outputnode = Node(interface=IdentityInterface(fields=[&#8216;func2anat_transform&#8217;,</dt>
-<dd><blockquote class="first">
-<div>&#8216;out_reg_file&#8217;,
-&#8216;anat2target_transform&#8217;,
-&#8216;transforms&#8217;,
-&#8216;transformed_mean&#8217;,
-&#8216;transformed_files&#8217;,
-&#8216;min_cost_file&#8217;,
-&#8216;anat2target&#8217;,
-&#8216;aparc&#8217;
-]),</div></blockquote>
-<p class="last">name=&#8217;outputspec&#8217;)</p>
-</dd>
-</dl>
-<p># Get the subject&#8217;s freesurfer source directory
-fssource = Node(FreeSurferSource(),</p>
-<blockquote>
-<div>name=&#8217;fssource&#8217;)</div></blockquote>
-<p>fssource.run_without_submitting = True
-register.connect(inputnode, &#8216;subject_id&#8217;, fssource, &#8216;subject_id&#8217;)
-register.connect(inputnode, &#8216;subjects_dir&#8217;, fssource, &#8216;subjects_dir&#8217;)
-convert = Node(freesurfer.MRIConvert(out_type=&#8217;nii&#8217;),</p>
-<blockquote>
-<div>name=&#8221;convert&#8221;)</div></blockquote>
-<p>register.connect(fssource, &#8216;T1&#8217;, convert, &#8216;in_file&#8217;)
-# Coregister the median to the surface
-bbregister = Node(freesurfer.BBRegister(),</p>
-<blockquote>
-<div>name=&#8217;bbregister&#8217;)</div></blockquote>
-<p>bbregister.inputs.init = &#8216;fsl&#8217;
-bbregister.inputs.contrast_type = &#8216;t2&#8217;
-bbregister.inputs.out_fsl_file = True
-bbregister.inputs.epi_mask = True
-register.connect(inputnode, &#8216;subject_id&#8217;, bbregister, &#8216;subject_id&#8217;)
-register.connect(inputnode, &#8216;mean_image&#8217;, bbregister, &#8216;source_file&#8217;)
-register.connect(inputnode, &#8216;subjects_dir&#8217;, bbregister, &#8216;subjects_dir&#8217;)</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd><p class="first">use aparc+aseg&#8217;s brain mask
-&#8220;&#8221;&#8220;</p>
-<p>binarize = Node(fs.Binarize(min=0.5, out_type=&#8221;nii.gz&#8221;, dilate=1), name=&#8221;binarize_aparc&#8221;)
-register.connect(fssource, (&#8220;aparc_aseg&#8221;, get_aparc_aseg), binarize, &#8220;in_file&#8221;)</p>
-<p class="last">stripper = Node(fsl.ApplyMask(), name =&#8217;stripper&#8217;)
-register.connect(binarize, &#8220;binary_file&#8221;, stripper, &#8220;mask_file&#8221;)
-register.connect(convert, &#8216;out_file&#8217;, stripper, &#8216;in_file&#8217;)</p>
-</dd>
-</dl>
+<p>use aparc+aseg&#8217;s brain mask</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">binarize</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">fs</span><span class="o">.</span><span class="n">Binarize</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">out_type</span><span class="o">=</span><span class="s">&quot;nii.gz&quot;</span><span class="p">,</span> <span class="n">dilate</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;binarize_aparc&quot;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fssource</span><span class="p">,</span> <span class="p">(</span><span class="s">&quot;aparc_aseg&quot;</span><span class="p">,</span> <span class="n">get_aparc_aseg</span><span class="p">),</span> <span class="n">binarize</span><span class="p">,</span> <span class="s">&quot;in_file&quot;</span><span class="p">)</span>
+
+<span class="n">stripper</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">ApplyMask</span><span class="p">(),</span> <span class="n">name</span> <span class="o">=</span><span class="s">&#39;stripper&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">binarize</span><span class="p">,</span> <span class="s">&quot;binary_file&quot;</span><span class="p">,</span> <span class="n">stripper</span><span class="p">,</span> <span class="s">&quot;mask_file&quot;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">convert</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">stripper</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Apply inverse transform to aparc file</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd><dl class="first docutils">
-<dt>aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,</dt>
-<dd><blockquote class="first">
-<div>interp=&#8217;nearest&#8217;),</div></blockquote>
-<p class="last">name=&#8217;aparc_inverse_transform&#8217;)</p>
-</dd>
-</dl>
-<p>register.connect(inputnode, &#8216;subjects_dir&#8217;, aparcxfm, &#8216;subjects_dir&#8217;)
-register.connect(bbregister, &#8216;out_reg_file&#8217;, aparcxfm, &#8216;reg_file&#8217;)
-register.connect(fssource, (&#8216;aparc_aseg&#8217;, get_aparc_aseg),</p>
-<blockquote>
-<div>aparcxfm, &#8216;target_file&#8217;)</div></blockquote>
-<p class="last">register.connect(inputnode, &#8216;mean_image&#8217;, aparcxfm, &#8216;source_file&#8217;)</p>
-</dd>
-</dl>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">aparcxfm</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">ApplyVolTransform</span><span class="p">(</span><span class="n">inverse</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                             <span class="n">interp</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="s">&#39;aparc_inverse_transform&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;subjects_dir&#39;</span><span class="p">,</span> <span class="n">aparcxfm</span><span class="p">,</span> <span class="s">&#39;subjects_dir&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;out_reg_file&#39;</span><span class="p">,</span> <span class="n">aparcxfm</span><span class="p">,</span> <span class="s">&#39;reg_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fssource</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;aparc_aseg&#39;</span><span class="p">,</span> <span class="n">get_aparc_aseg</span><span class="p">),</span>
+                 <span class="n">aparcxfm</span><span class="p">,</span> <span class="s">&#39;target_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="n">aparcxfm</span><span class="p">,</span> <span class="s">&#39;source_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Convert the BBRegister transformation to ANTS ITK format</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">convert2itk</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">C3dAffineTool</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;convert2itk&#39;</span><span class="p">)</span>
 <span class="n">convert2itk</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fsl2ras</span> <span class="o">=</span> <span class="bp">True</span>
@@ -579,7 +572,7 @@ All parameters are set using the example from:
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_histogram_matching</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_lower_quantile</span> <span class="o">=</span> <span class="mf">0.005</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_upper_quantile</span> <span class="o">=</span> <span class="mf">0.995</span>
-<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;--float&#39;</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">float</span> <span class="o">=</span> <span class="bp">True</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_warped_image</span> <span class="o">=</span> <span class="s">&#39;output_warped_image.nii.gz&#39;</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;qsub_args&#39;</span><span class="p">:</span> <span class="s">&#39;-pe orte 4&#39;</span><span class="p">,</span>
@@ -593,21 +586,20 @@ All parameters are set using the example from:
 
 <span class="n">merge</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in2&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;mergexfm&#39;</span><span class="p">)</span>
 <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;itk_transform&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in2&#39;</span><span class="p">)</span>
-<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;composite_transform&#39;</span><span class="p">,</span> <span class="n">pickfirst</span><span class="p">),</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="s">&#39;composite_transform&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Transform the mean image. First to anatomical and then to target</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd>warpmean = Node(ants.ApplyTransforms(), name=&#8217;warpmean&#8217;)
-warpmean.inputs.input_image_type = 0
-warpmean.inputs.interpolation = &#8216;Linear&#8217;
-warpmean.inputs.invert_transform_flags = [False, False]
-warpmean.inputs.terminal_output = &#8216;file&#8217;
-warpmean.inputs.args = &#8216;&#8211;float&#8217;
-#warpmean.inputs.num_threads = 4
-#warpmean.plugin_args = {&#8216;sbatch_args&#8217;: &#8216;&#8211;mem=4G -c 4&#8217;}</dd>
-</dl>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">warpmean</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">ApplyTransforms</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;warpmean&#39;</span><span class="p">)</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_image_type</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">interpolation</span> <span class="o">=</span> <span class="s">&#39;Linear&#39;</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">invert_transform_flags</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s">&#39;file&#39;</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;--float&#39;</span>
+<span class="c">#warpmean.inputs.num_threads = 4</span>
+<span class="c">#warpmean.plugin_args = {&#39;sbatch_args&#39;: &#39;--mem=4G -c 4&#39;}</span>
+</pre></div>
+</div>
 <p>Transform the remaining images. First to anatomical and then to target</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">warpall</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">ApplyTransforms</span><span class="p">(),</span>
                      <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;input_image&#39;</span><span class="p">],</span>
@@ -643,6 +635,8 @@ warpmean.inputs.args = &#8216;&#8211;float&#8217;
                  <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;out_reg_file&#39;</span><span class="p">)</span>
 <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;min_cost_file&#39;</span><span class="p">,</span>
                  <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;min_cost_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">mean2anat_mask</span><span class="p">,</span> <span class="s">&#39;mask_file&#39;</span><span class="p">,</span>
+                 <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;mean2anat_mask&#39;</span><span class="p">)</span>
 <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="s">&#39;composite_transform&#39;</span><span class="p">,</span>
                  <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;anat2target_transform&#39;</span><span class="p">)</span>
 <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">merge</span><span class="p">,</span> <span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;transforms&#39;</span><span class="p">)</span>
@@ -782,87 +776,48 @@ to the model stage</p>
 </pre></div>
 </div>
 <p>Return data components as anat, bold and behav</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd><dl class="first docutils">
-<dt>contrast_file = os.path.join(data_dir, &#8216;models&#8217;, &#8216;model%03d&#8217; % model_id,</dt>
-<dd>&#8216;task_contrasts.txt&#8217;)</dd>
-</dl>
-<p>has_contrast = os.path.exists(contrast_file)
-if has_contrast:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>datasource = pe.Node(nio.DataGrabber(infields=[&#8216;subject_id&#8217;, &#8216;run_id&#8217;,</dt>
-<dd><blockquote class="first">
-<div><blockquote>
-<div>&#8216;task_id&#8217;, &#8216;model_id&#8217;],</div></blockquote>
-<dl class="docutils">
-<dt>outfields=[&#8216;anat&#8217;, &#8216;bold&#8217;, &#8216;behav&#8217;,</dt>
-<dd>&#8216;contrasts&#8217;]),</dd>
-</dl>
-</div></blockquote>
-<p class="last">name=&#8217;datasource&#8217;)</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="docutils">
-<dt>else:</dt>
-<dd><dl class="first last docutils">
-<dt>datasource = pe.Node(nio.DataGrabber(infields=[&#8216;subject_id&#8217;, &#8216;run_id&#8217;,</dt>
-<dd><blockquote class="first">
-<div><blockquote>
-<div>&#8216;task_id&#8217;, &#8216;model_id&#8217;],</div></blockquote>
-<p>outfields=[&#8216;anat&#8217;, &#8216;bold&#8217;, &#8216;behav&#8217;]),</p>
-</div></blockquote>
-<p class="last">name=&#8217;datasource&#8217;)</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>datasource.inputs.base_directory = data_dir
-datasource.inputs.template = &#8216;*&#8217;</p>
-<dl class="docutils">
-<dt>if has_contrast:</dt>
-<dd><dl class="first last docutils">
-<dt>datasource.inputs.field_template = {&#8216;anat&#8217;: &#8216;%s/anatomy/T1_001.nii.gz&#8217;,</dt>
-<dd><p class="first">&#8216;bold&#8217;: &#8216;%s/BOLD/task%03d_r*/bold.nii.gz&#8217;,
-&#8216;behav&#8217;: (&#8216;%s/model/model%03d/onsets/task%03d_&#8217;</p>
-<blockquote>
-<div>&#8216;run%03d/cond*.txt&#8217;),</div></blockquote>
-<dl class="last docutils">
-<dt>&#8216;contrasts&#8217;: (&#8216;models/model%03d/&#8217;</dt>
-<dd>&#8216;task_contrasts.txt&#8217;)}</dd>
-</dl>
-</dd>
-<dt>datasource.inputs.template_args = {&#8216;anat&#8217;: [[&#8216;subject_id&#8217;]],</dt>
-<dd><p class="first">&#8216;bold&#8217;: [[&#8216;subject_id&#8217;, &#8216;task_id&#8217;]],
-&#8216;behav&#8217;: [[&#8216;subject_id&#8217;, &#8216;model_id&#8217;,</p>
-<blockquote>
-<div>&#8216;task_id&#8217;, &#8216;run_id&#8217;]],</div></blockquote>
-<p class="last">&#8216;contrasts&#8217;: [[&#8216;model_id&#8217;]]}</p>
-</dd>
-</dl>
-</dd>
-<dt>else:</dt>
-<dd><dl class="first last docutils">
-<dt>datasource.inputs.field_template = {&#8216;anat&#8217;: &#8216;%s/anatomy/T1_001.nii.gz&#8217;,</dt>
-<dd><p class="first">&#8216;bold&#8217;: &#8216;%s/BOLD/task%03d_r*/bold.nii.gz&#8217;,
-&#8216;behav&#8217;: (&#8216;%s/model/model%03d/onsets/task%03d_&#8217;</p>
-<blockquote class="last">
-<div>&#8216;run%03d/cond*.txt&#8217;)}</div></blockquote>
-</dd>
-<dt>datasource.inputs.template_args = {&#8216;anat&#8217;: [[&#8216;subject_id&#8217;]],</dt>
-<dd><p class="first">&#8216;bold&#8217;: [[&#8216;subject_id&#8217;, &#8216;task_id&#8217;]],
-&#8216;behav&#8217;: [[&#8216;subject_id&#8217;, &#8216;model_id&#8217;,</p>
-<blockquote class="last">
-<div>&#8216;task_id&#8217;, &#8216;run_id&#8217;]]}</div></blockquote>
-</dd>
-</dl>
-</dd>
-</dl>
-<p class="last">datasource.inputs.sort_filelist = True</p>
-</dd>
-</dl>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">contrast_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="s">&#39;models&#39;</span><span class="p">,</span> <span class="s">&#39;model</span><span class="si">%03d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">model_id</span><span class="p">,</span>
+                             <span class="s">&#39;task_contrasts.txt&#39;</span><span class="p">)</span>
+<span class="n">has_contrast</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">contrast_file</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">has_contrast</span><span class="p">:</span>
+    <span class="n">datasource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">,</span>
+                                               <span class="s">&#39;task_id&#39;</span><span class="p">,</span> <span class="s">&#39;model_id&#39;</span><span class="p">],</span>
+                                     <span class="n">outfields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;anat&#39;</span><span class="p">,</span> <span class="s">&#39;bold&#39;</span><span class="p">,</span> <span class="s">&#39;behav&#39;</span><span class="p">,</span>
+                                                <span class="s">&#39;contrasts&#39;</span><span class="p">]),</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s">&#39;datasource&#39;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">datasource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">,</span>
+                                               <span class="s">&#39;task_id&#39;</span><span class="p">,</span> <span class="s">&#39;model_id&#39;</span><span class="p">],</span>
+                                     <span class="n">outfields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;anat&#39;</span><span class="p">,</span> <span class="s">&#39;bold&#39;</span><span class="p">,</span> <span class="s">&#39;behav&#39;</span><span class="p">]),</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s">&#39;datasource&#39;</span><span class="p">)</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">data_dir</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span>
+
+<span class="k">if</span> <span class="n">has_contrast</span><span class="p">:</span>
+    <span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">field_template</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;anat&#39;</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/anatomy/T1_001.nii.gz&#39;</span><span class="p">,</span>
+                                        <span class="s">&#39;bold&#39;</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/BOLD/task</span><span class="si">%03d</span><span class="s">_r*/bold.nii.gz&#39;</span><span class="p">,</span>
+                                        <span class="s">&#39;behav&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/model/model</span><span class="si">%03d</span><span class="s">/onsets/task</span><span class="si">%03d</span><span class="s">_&#39;</span>
+                                                  <span class="s">&#39;run</span><span class="si">%03d</span><span class="s">/cond*.txt&#39;</span><span class="p">),</span>
+                                        <span class="s">&#39;contrasts&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;models/model</span><span class="si">%03d</span><span class="s">/&#39;</span>
+                                                      <span class="s">&#39;task_contrasts.txt&#39;</span><span class="p">)}</span>
+    <span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;anat&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">]],</span>
+                                   <span class="s">&#39;bold&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;task_id&#39;</span><span class="p">]],</span>
+                                   <span class="s">&#39;behav&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;model_id&#39;</span><span class="p">,</span>
+                                              <span class="s">&#39;task_id&#39;</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">]],</span>
+                                   <span class="s">&#39;contrasts&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="s">&#39;model_id&#39;</span><span class="p">]]}</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">field_template</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;anat&#39;</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/anatomy/T1_001.nii.gz&#39;</span><span class="p">,</span>
+                                        <span class="s">&#39;bold&#39;</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/BOLD/task</span><span class="si">%03d</span><span class="s">_r*/bold.nii.gz&#39;</span><span class="p">,</span>
+                                        <span class="s">&#39;behav&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/model/model</span><span class="si">%03d</span><span class="s">/onsets/task</span><span class="si">%03d</span><span class="s">_&#39;</span>
+                                                  <span class="s">&#39;run</span><span class="si">%03d</span><span class="s">/cond*.txt&#39;</span><span class="p">)}</span>
+    <span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;anat&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">]],</span>
+                                   <span class="s">&#39;bold&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;task_id&#39;</span><span class="p">]],</span>
+                                   <span class="s">&#39;behav&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;model_id&#39;</span><span class="p">,</span>
+                                              <span class="s">&#39;task_id&#39;</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">]]}</span>
+
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
 <p>Create meta workflow</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">wf</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;openfmri&#39;</span><span class="p">)</span>
 <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">infosource</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subjinfo</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)</span>
@@ -1126,6 +1081,8 @@ datasource.inputs.template = &#8216;*&#8217;</p>
     <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;/model</span><span class="si">%03d</span><span class="s">/task</span><span class="si">%03d</span><span class="s">_&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">task_id</span><span class="p">),</span> <span class="s">&#39;/&#39;</span><span class="p">))</span>
     <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_bold_dtype_mcf_bet_thresh_dil&#39;</span><span class="p">,</span> <span class="s">&#39;_mask&#39;</span><span class="p">))</span>
     <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_output_warped_image&#39;</span><span class="p">,</span> <span class="s">&#39;_anat2target&#39;</span><span class="p">))</span>
+    <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;median_flirt_brain_mask&#39;</span><span class="p">,</span> <span class="s">&#39;median_brain_mask&#39;</span><span class="p">))</span>
+    <span class="n">subs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;median_bbreg_brain_mask&#39;</span><span class="p">,</span> <span class="s">&#39;median_brain_mask&#39;</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">subs</span>
 
 <span class="n">subsgen</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">niu</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;conds&#39;</span><span class="p">,</span> <span class="s">&#39;run_id&#39;</span><span class="p">,</span>
@@ -1160,6 +1117,7 @@ datasource.inputs.template = &#8216;*&#8217;</p>
                                  <span class="p">(</span><span class="s">&#39;outputspec.motion_plots&#39;</span><span class="p">,</span>
                                   <span class="s">&#39;qa.motion.plots&#39;</span><span class="p">),</span>
                                  <span class="p">(</span><span class="s">&#39;outputspec.mask&#39;</span><span class="p">,</span> <span class="s">&#39;qa.mask&#39;</span><span class="p">)])])</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.mean2anat_mask&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;qa.mask.mean2anat&#39;</span><span class="p">)</span>
 <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="s">&#39;norm_files&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;qa.art.@norm&#39;</span><span class="p">)</span>
 <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="s">&#39;intensity_files&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;qa.art.@intensity&#39;</span><span class="p">)</span>
 <span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="s">&#39;outlier_files&#39;</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="s">&#39;qa.art.@outlier_files&#39;</span><span class="p">)</span>
@@ -1244,7 +1202,7 @@ datasource.inputs.template = &#8216;*&#8217;</p>
                           <span class="s">&#39;task</span><span class="si">%03d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">task</span><span class="p">))</span>
     <span class="n">derivatives</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">derivatives</span>
     <span class="k">if</span> <span class="n">derivatives</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-       <span class="n">derivatives</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="n">derivatives</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="n">wf</span> <span class="o">=</span> <span class="n">analyze_openfmri_dataset</span><span class="p">(</span><span class="n">data_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">datasetdir</span><span class="p">),</span>
                                   <span class="n">subject</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">subject</span><span class="p">,</span>
                                   <span class="n">model_id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">model</span><span class="p">),</span>
@@ -1267,9 +1225,9 @@ datasource.inputs.template = &#8216;*&#8217;</p>
 </div>
 <div class="admonition-example-source-code admonition">
 <p class="first admonition-title">Example source code</p>
-<p class="last">You can download <a class="reference download internal" href="../../_downloads/fmri_ants_openfmri.py"><tt class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></tt></a>.
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/fmri_ants_openfmri.py"><code class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></code></a>.
 This same script is also included in the Nipype source distribution under the
-<tt class="file docutils literal"><span class="pre">examples</span></tt> directory.</p>
+<code class="file docutils literal"><span class="pre">examples</span></code> directory.</p>
 </div>
 </div>
 
@@ -1280,9 +1238,9 @@ This same script is also included in the Nipype source distribution under the
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

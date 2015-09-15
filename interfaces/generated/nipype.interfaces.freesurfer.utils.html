@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -190,7 +190,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -202,7 +202,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -225,9 +225,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -237,13 +237,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-freesurfer-utils">
 <h1>interfaces.freesurfer.utils<a class="headerlink" href="#interfaces-freesurfer-utils" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-freesurfer-utils-applymask"></span><div class="section" id="applymask">
 <span id="index-0"></span><h2>ApplyMask<a class="headerlink" href="#applymask" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L472">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L472">Link to code</a></p>
 <p>Wraps command <strong>mri_mask</strong></p>
 <p>Use Freesurfer&#8217;s mri_mask to apply a mask to an image.</p>
 <p>The mask file need not be binarized; it can be thresholded above a given
@@ -306,7 +306,7 @@ xfm_target: (an existing file name)
 <span class="target" id="nipype-interfaces-freesurfer-utils-extractmaincomponent"></span></div>
 <div class="section" id="extractmaincomponent">
 <span id="index-1"></span><h2>ExtractMainComponent<a class="headerlink" href="#extractmaincomponent" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L1175">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L1175">Link to code</a></p>
 <p>Wraps command <strong>mris_extract_main_component</strong></p>
 <p>Extract the main component of a tesselated surface</p>
 <div class="section" id="examples">
@@ -352,7 +352,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="mrimarchingcubes">
 <span id="index-2"></span><h2>MRIMarchingCubes<a class="headerlink" href="#mrimarchingcubes" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L1016">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L1016">Link to code</a></p>
 <p>Wraps command <strong>mri_mc</strong></p>
 <p>Uses Freesurfer&#8217;s mri_mc to create surfaces by tessellating a given input volume</p>
 <div class="section" id="example">
@@ -370,7 +370,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 in_file: (an existing file name)
         Input volume to tesselate voxels from.
         flag: %s, position: 1
-label_value: (an integer)
+label_value: (an integer (int or long))
         Label value which to tesselate from the input volume. (integer, if
         input is &quot;filled.mgz&quot; volume, 127 is rh, 255 is lh)
         flag: %d, position: 2
@@ -379,7 +379,8 @@ label_value: (an integer)
 args: (a string)
         Additional parameters to the command
         flag: %s
-connectivity_value: (an integer, nipype default value: 1)
+connectivity_value: (an integer (int or long), nipype default value:
+         1)
         Alter the marching cubes connectivity: 1=6+,2=18,3=6,4=26
         (default=1)
         flag: %d, position: -1
@@ -410,7 +411,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="mripretess">
 <span id="index-3"></span><h2>MRIPretess<a class="headerlink" href="#mripretess" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L951">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L951">Link to code</a></p>
 <p>Wraps command <strong>mri_pretess</strong></p>
 <p>Uses Freesurfer&#8217;s mri_pretess to prepare volumes to be tessellated.</p>
 <div class="section" id="description">
@@ -439,7 +440,8 @@ in_filled: (an existing file name)
 in_norm: (an existing file name)
         the normalized, brain-extracted T1w image. Usually norm.mgz
         flag: %s, position: -2
-label: (a string or an integer, nipype default value: wm)
+label: (a string or an integer (int or long), nipype default value:
+         wm)
         label to be picked up, can be a Freesurfer&#39;s string like &#39;wm&#39; or a
         label value (e.g. 127 for rh or 255 for lh)
         flag: %s, position: -3
@@ -486,7 +488,7 @@ test: (a boolean)
 </div>
 <div class="section" id="mritessellate">
 <span id="index-4"></span><h2>MRITessellate<a class="headerlink" href="#mritessellate" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L890">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L890">Link to code</a></p>
 <p>Wraps command <strong>mri_tessellate</strong></p>
 <p>Uses Freesurfer&#8217;s mri_tessellate to create surfaces by tessellating a given input volume</p>
 <div class="section" id="id2">
@@ -504,7 +506,7 @@ test: (a boolean)
 in_file: (an existing file name)
         Input volume to tesselate voxels from.
         flag: %s, position: -3
-label_value: (an integer)
+label_value: (an integer (int or long))
         Label value which to tesselate from the input volume. (integer, if
         input is &quot;filled.mgz&quot; volume, 127 is rh, 255 is lh)
         flag: %d, position: -2
@@ -546,7 +548,7 @@ use_real_RAS_coordinates: (a boolean)
 </div>
 <div class="section" id="mrisconvert">
 <span id="index-5"></span><h2>MRIsConvert<a class="headerlink" href="#mrisconvert" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L827">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L827">Link to code</a></p>
 <p>Wraps command <strong>mris_convert</strong></p>
 <p>Uses Freesurfer&#8217;s mris_convert to convert surface files to various formats</p>
 <div class="section" id="id3">
@@ -576,7 +578,7 @@ annot_file: (an existing file name)
 args: (a string)
         Additional parameters to the command
         flag: %s
-dataarray_num: (an integer)
+dataarray_num: (an integer (int or long))
         if input is gifti, &#39;num&#39; specifies which data array to use
         flag: --da_num %d
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -646,7 +648,7 @@ xyz_ascii: (a boolean)
 </div>
 <div class="section" id="makeaveragesubject">
 <span id="index-6"></span><h2>MakeAverageSubject<a class="headerlink" href="#makeaveragesubject" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L1143">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L1143">Link to code</a></p>
 <p>Wraps command <strong>make_average_subject</strong></p>
 <p>Make an average freesurfer subject</p>
 <div class="section" id="id4">
@@ -694,7 +696,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="sampletosurface">
 <span id="index-7"></span><h2>SampleToSurface<a class="headerlink" href="#sampletosurface" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L123">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L123">Link to code</a></p>
 <p>Wraps command <strong>mri_vol2surf</strong></p>
 <p>Sample a volume to the cortical surface using Freesurfer&#8217;s mri_vol2surf.</p>
 <p>You must supply a sampling method, range, and units.  You can project
@@ -705,7 +707,7 @@ or the average or maximum value found along the projection vector.</p>
 <p>By default, the surface will be saved as a vector with a length equal to the
 number of vertices on the target surface.  This is not a problem for Freesurfer
 programs, but if you intend to use the file with interfaces to another package,
-you must set the <tt class="docutils literal"><span class="pre">reshape</span></tt> input to True, which will factor the surface vector
+you must set the <code class="docutils literal"><span class="pre">reshape</span></code> input to True, which will factor the surface vector
 into a matrix with dimensions compatible with proper Nifti files.</p>
 <div class="section" id="id5">
 <h3>Examples<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
@@ -773,7 +775,7 @@ fix_tk_reg: (a boolean)
 float2int_method: (&#39;round&#39; or &#39;tkregister&#39;)
         method to convert reg matrix values (default is round)
         flag: --float2int %s
-frame: (an integer)
+frame: (an integer (int or long))
         save only one frame (0-based)
         flag: --frame %d
 hits_file: (a boolean or an existing file name)
@@ -785,7 +787,7 @@ hits_type: (&#39;cor&#39; or &#39;mgh&#39; or &#39;mgz&#39; or &#39;minc&#39; or
          &#39;niigz&#39;)
         hits file type
         flag: --srchit_type
-ico_order: (an integer)
+ico_order: (an integer (int or long))
         icosahedron order when target_subject is &#39;ico&#39;
         flag: --icoorder %d
         requires: target_subject
@@ -823,7 +825,7 @@ reshape: (a boolean)
         reshape surface vector to fit in non-mgh format
         flag: --reshape
         mutually_exclusive: no_reshape
-reshape_slices: (an integer)
+reshape_slices: (an integer (int or long))
         number of &#39;slices&#39; for reshaping
         flag: --rf %d
 sampling_range: (a float or a tuple of the form: (a float, a float, a
@@ -876,7 +878,7 @@ vox_file: (an existing file name)
 </div>
 <div class="section" id="smoothtessellation">
 <span id="index-8"></span><h2>SmoothTessellation<a class="headerlink" href="#smoothtessellation" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L1082">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L1082">Link to code</a></p>
 <p>Wraps command <strong>mris_smooth</strong></p>
 <p>This program smooths the tessellation of a surface using &#8216;mris_smooth&#8217;</p>
 <div class="admonition seealso">
@@ -904,8 +906,8 @@ in_file: (an existing file name)
 args: (a string)
         Additional parameters to the command
         flag: %s
-curvature_averaging_iterations: (an integer, nipype default value:
-         10)
+curvature_averaging_iterations: (an integer (int or long), nipype
+         default value: 10)
         Number of curvature averaging iterations (default=10)
         flag: -a %d, position: -1
 disable_estimates: (a boolean)
@@ -915,10 +917,10 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-gaussian_curvature_norm_steps: (an integer)
+gaussian_curvature_norm_steps: (an integer (int or long))
         Use Gaussian curvature smoothing
         flag: %d , position: 4
-gaussian_curvature_smoothing_steps: (an integer)
+gaussian_curvature_smoothing_steps: (an integer (int or long))
         Use Gaussian curvature smoothing
         flag: %d, position: 5
 ignore_exception: (a boolean, nipype default value: False)
@@ -936,10 +938,11 @@ out_curvature_file: (a file name)
 out_file: (a file name)
         output filename or True to generate one
         flag: %s, position: 2
-smoothing_iterations: (an integer, nipype default value: 10)
+smoothing_iterations: (an integer (int or long), nipype default
+         value: 10)
         Number of smoothing iterations (default=10)
         flag: -n %d, position: -2
-snapshot_writing_iterations: (an integer)
+snapshot_writing_iterations: (an integer (int or long))
         Write snapshot every &quot;n&quot; iterations
         flag: -w %d
 subjects_dir: (an existing directory name)
@@ -965,7 +968,7 @@ use_momentum: (a boolean)
 </div>
 <div class="section" id="surface2voltransform">
 <span id="index-9"></span><h2>Surface2VolTransform<a class="headerlink" href="#surface2voltransform" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L426">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L426">Link to code</a></p>
 <p>Wraps command <strong>mri_surf2vol</strong></p>
 <p>Use FreeSurfer mri_surf2vol to apply a transform.</p>
 <div class="section" id="id7">
@@ -1050,7 +1053,7 @@ vertexvol_file: (a file name)
 </div>
 <div class="section" id="surfacesmooth">
 <span id="index-10"></span><h2>SurfaceSmooth<a class="headerlink" href="#surfacesmooth" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L246">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L246">Link to code</a></p>
 <p>Wraps command <strong>mri_surf2surf</strong></p>
 <p>Smooth a surface image with mri_surf2surf.</p>
 <p>The surface is smoothed by an interative process of averaging the
@@ -1112,7 +1115,7 @@ out_file: (a file name)
 reshape: (a boolean)
         reshape surface vector to fit in non-mgh format
         flag: --reshape
-smooth_iters: (an integer)
+smooth_iters: (an integer (int or long))
         iterations of the smoothing process
         flag: --smooth %d
         mutually_exclusive: fwhm
@@ -1133,11 +1136,11 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="surfacesnapshots">
 <span id="index-11"></span><h2>SurfaceSnapshots<a class="headerlink" href="#surfacesnapshots" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L578">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L578">Link to code</a></p>
 <p>Wraps command <strong>tksurfer</strong></p>
 <p>Use Tksurfer to save pictures of the cortical surface.</p>
 <p>By default, this takes snapshots of the lateral, medial, ventral,
-and dorsal surfaces.  See the <tt class="docutils literal"><span class="pre">six_images</span></tt> option to add the
+and dorsal surfaces.  See the <code class="docutils literal"><span class="pre">six_images</span></code> option to add the
 anterior and posterior surfaces.</p>
 <p>You may also supply your own tcl script (see the Freesurfer wiki for
 information on scripting tksurfer). The screenshot stem is set as the
@@ -1288,7 +1291,7 @@ truncate_overlay: (a boolean)
 </div>
 <div class="section" id="surfacetransform">
 <span id="index-12"></span><h2>SurfaceTransform<a class="headerlink" href="#surfacetransform" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L331">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L331">Link to code</a></p>
 <p>Wraps command <strong>mri_surf2surf</strong></p>
 <p>Transform a surface file from one subject to another via a spherical registration.</p>
 <p>Both the source and target subject must reside in your Subjects Directory,
@@ -1342,7 +1345,7 @@ out_file: (a file name)
 reshape: (a boolean)
         reshape output surface to conform with Nifti
         flag: --reshape
-reshape_factor: (an integer)
+reshape_factor: (an integer (int or long))
         number of slices in reshaped image
         flag: --reshape-factor
 source_type: (&#39;cor&#39; or &#39;mgh&#39; or &#39;mgz&#39; or &#39;minc&#39; or &#39;analyze&#39; or
@@ -1378,7 +1381,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="tkregister2">
 <span id="index-13"></span><h2>Tkregister2<a class="headerlink" href="#tkregister2" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/utils.py#L1230">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/utils.py#L1230">Link to code</a></p>
 <p>Wraps command <strong>tkregister2</strong></p>
 <div class="section" id="id11">
 <h3>Examples<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
@@ -1486,9 +1489,9 @@ reg_file: (an existing file name)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -1,0 +1,899 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.io</a><ul>
+<li><a class="reference internal" href="#datafinder">DataFinder</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#datagrabber">DataGrabber</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#datasink">DataSink</a><ul>
+<li><a class="reference internal" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#freesurfersource">FreeSurferSource</a><ul>
+<li><a class="reference internal" href="#id3">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#iobase">IOBase</a></li>
+<li><a class="reference internal" href="#mysqlsink">MySQLSink</a><ul>
+<li><a class="reference internal" href="#id4">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sqlitesink">SQLiteSink</a><ul>
+<li><a class="reference internal" href="#id5">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#selectfiles">SelectFiles</a><ul>
+<li><a class="reference internal" href="#id6">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#xnatsink">XNATSink</a></li>
+<li><a class="reference internal" href="#xnatsource">XNATSource</a><ul>
+<li><a class="reference internal" href="#id7">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#add-traits"><code class="docutils literal"><span class="pre">add_traits()</span></code></a></li>
+<li><a class="reference internal" href="#copytree"><code class="docutils literal"><span class="pre">copytree()</span></code></a></li>
+<li><a class="reference internal" href="#push-file"><code class="docutils literal"><span class="pre">push_file()</span></code></a></li>
+<li><a class="reference internal" href="#quote-id"><code class="docutils literal"><span class="pre">quote_id()</span></code></a></li>
+<li><a class="reference internal" href="#unquote-id"><code class="docutils literal"><span class="pre">unquote_id()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-io">
+<h1>interfaces.io<a class="headerlink" href="#interfaces-io" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-io-datafinder"></span><div class="section" id="datafinder">
+<span id="index-0"></span><h2>DataFinder<a class="headerlink" href="#datafinder" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L724">Link to code</a></p>
+<p>Search for paths that match a given regular expression. Allows a less
+proscriptive approach to gathering input files compared to DataGrabber.
+Will recursively search any subdirectories by default. This can be limited
+with the min/max depth options.
+Matched paths are available in the output &#8216;out_paths&#8217;. Any named groups of
+captured text from the regular expression are also available as ouputs of
+the same name.</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">import</span> <span class="n">DataFinder</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">DataFinder</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">root_paths</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">match_regex</span> <span class="o">=</span> <span class="s">&#39;.+/(?P&lt;series_dir&gt;.+(qT1|ep2d_fid_T1).+)/(?P&lt;basename&gt;.+)\.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">result</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_paths</span> 
+<span class="go">[&#39;./027-ep2d_fid_T1_Gd4/acquisition.nii.gz&#39;,</span>
+<span class="go"> &#39;./018-ep2d_fid_T1_Gd2/acquisition.nii.gz&#39;,</span>
+<span class="go"> &#39;./016-ep2d_fid_T1_Gd1/acquisition.nii.gz&#39;,</span>
+<span class="go"> &#39;./013-ep2d_fid_T1_pre/acquisition.nii.gz&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">result</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">series_dir</span> 
+<span class="go">[&#39;027-ep2d_fid_T1_Gd4&#39;,</span>
+<span class="go"> &#39;018-ep2d_fid_T1_Gd2&#39;,</span>
+<span class="go"> &#39;016-ep2d_fid_T1_Gd1&#39;,</span>
+<span class="go"> &#39;013-ep2d_fid_T1_pre&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">result</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">basename</span> 
+<span class="go">[&#39;acquisition&#39;,</span>
+<span class="go"> &#39;acquisition&#39;,</span>
+<span class="go"> &#39;acquisition&#39;,</span>
+<span class="go"> &#39;acquisition&#39;]</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+root_paths: (a list of items which are any value or a string)
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+ignore_regexes: (a list of items which are any value)
+        List of regular expressions, if any match the path it will be
+        ignored.
+match_regex: (a string, nipype default value: (.+))
+        Regular expression for matching paths.
+max_depth: (an integer (int or long))
+        The maximum depth to search beneath the root_paths
+min_depth: (an integer (int or long))
+        The minimum depth to search beneath the root paths
+root_paths: (a list of items which are any value or a string)
+unpack_single: (a boolean, nipype default value: False)
+        Unpack single results from list
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-io-datagrabber"></span></div>
+</div>
+<div class="section" id="datagrabber">
+<span id="index-1"></span><h2>DataGrabber<a class="headerlink" href="#datagrabber" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L373">Link to code</a></p>
+<p>Generic datagrabber module that wraps around glob in an
+intelligent way for neuroimaging tasks to grab files</p>
+<div class="admonition attention">
+<p class="first admonition-title">Attention</p>
+<p class="last">Doesn&#8217;t support directories currently</p>
+</div>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">import</span> <span class="n">DataGrabber</span>
+</pre></div>
+</div>
+<p>Pick all files from current directory</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span> <span class="o">=</span> <span class="n">DataGrabber</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span>
+</pre></div>
+</div>
+<p>Pick file foo/foo.nii from current directory</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">.dcm&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span><span class="p">[</span><span class="s">&#39;outfiles&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;dicomdir&#39;</span><span class="p">,</span><span class="s">&#39;123456-1-1.dcm&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Same thing but with dynamically created fields</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span> <span class="o">=</span> <span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;arg1&#39;</span><span class="p">,</span><span class="s">&#39;arg2&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">arg1</span> <span class="o">=</span> <span class="s">&#39;foo&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">arg2</span> <span class="o">=</span> <span class="s">&#39;foo&#39;</span>
+</pre></div>
+</div>
+<p>however this latter form can be used with iterables and iterfield in a
+pipeline.</p>
+<p>Dynamically created, user-defined input and output fields</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span> <span class="o">=</span> <span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;sid&#39;</span><span class="p">],</span> <span class="n">outfields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;func&#39;</span><span class="p">,</span><span class="s">&#39;struct&#39;</span><span class="p">,</span><span class="s">&#39;ref&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span><span class="p">[</span><span class="s">&#39;func&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;sid&#39;</span><span class="p">,[</span><span class="s">&#39;f3&#39;</span><span class="p">,</span><span class="s">&#39;f5&#39;</span><span class="p">]]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span><span class="p">[</span><span class="s">&#39;struct&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;sid&#39;</span><span class="p">,[</span><span class="s">&#39;struct&#39;</span><span class="p">]]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span><span class="p">[</span><span class="s">&#39;ref&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;sid&#39;</span><span class="p">,</span><span class="s">&#39;ref&#39;</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="s">&#39;s1&#39;</span>
+</pre></div>
+</div>
+<p>Change the template only for output field struct. The rest use the
+general template</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">field_template</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">struct</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/struct.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span><span class="p">[</span><span class="s">&#39;struct&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;sid&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+sort_filelist: (a boolean)
+        Sort the filelist that matches the template
+template: (a string)
+        Layout used to get files. relative to base directory if defined
+
+[Optional]
+base_directory: (an existing directory name)
+        Path to the base directory consisting of subject data.
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+raise_on_empty: (a boolean, nipype default value: True)
+        Generate exception if list is empty for a given field
+sort_filelist: (a boolean)
+        Sort the filelist that matches the template
+template: (a string)
+        Layout used to get files. relative to base directory if defined
+template_args: (a dictionary with keys which are a string and with
+         values which are a list of items which are a list of items which
+         are any value)
+        Information to plug into template
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-io-datasink"></span></div>
+</div>
+<div class="section" id="datasink">
+<span id="index-2"></span><h2>DataSink<a class="headerlink" href="#datasink" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L154">Link to code</a></p>
+<p>Generic datasink module to store structured outputs</p>
+<p>Primarily for use within a workflow. This interface allows arbitrary
+creation of input attributes. The names of these attributes define the
+directory structure to create for storage of the files or directories.</p>
+<p>The attributes take the following form:</p>
+<p>string[[.[&#64;]]string[[.[&#64;]]string]] ...</p>
+<p>where parts between [] are optional.</p>
+<p>An attribute such as contrasts.&#64;con will create a &#8216;contrasts&#8217; directory
+to store the results linked to the attribute. If the &#64; is left out, such
+as in &#8216;contrasts.con&#8217;, a subdirectory &#8216;con&#8217; will be created under
+&#8216;contrasts&#8217;.</p>
+<p>the general form of the output is:</p>
+<div class="highlight-python"><div class="highlight"><pre>&#39;base_directory/container/parameterization/destloc/filename&#39;
+
+destloc = string[[.[@]]string[[.[@]]string]] and
+filename comesfrom the input to the connect statement.
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is not a thread-safe node because it can write to a common
+shared location. It will not complain when it overwrites a file.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>If both substitutions and regexp_substitutions are used, then
+substitutions are applied first followed by regexp_substitutions.</p>
+<p class="last">This interface <strong>cannot</strong> be used in a MapNode as the inputs are
+defined only when the connect statement is executed.</p>
+</div>
+<div class="section" id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">DataSink</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="s">&#39;results_dir&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">container</span> <span class="o">=</span> <span class="s">&#39;subject&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">structural</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">setattr</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="s">&#39;contrasts.@con&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;cont1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;cont2.nii&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">setattr</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="s">&#39;contrasts.alt&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;cont1a.nii&#39;</span><span class="p">,</span> <span class="s">&#39;cont2a.nii&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>To use DataSink in a MapNode, its inputs have to be defined at the
+time the interface is created.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">DataSink</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;contasts.@con&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="s">&#39;results_dir&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">container</span> <span class="o">=</span> <span class="s">&#39;subject&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">structural</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">setattr</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="s">&#39;contrasts.@con&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;cont1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;cont2.nii&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">setattr</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="s">&#39;contrasts.alt&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;cont1a.nii&#39;</span><span class="p">,</span> <span class="s">&#39;cont2a.nii&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+_outputs: (a dictionary with keys which are a string and with values
+         which are any value, nipype default value: {})
+base_directory: (a directory name)
+        Path to the base directory for storing data.
+container: (a string)
+        Folder within base directory in which to store output
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+parameterization: (a boolean, nipype default value: True)
+        store output in parametrized structure
+regexp_substitutions: (a tuple of the form: (a string, a string))
+        List of 2-tuples reflecting a pair of a Python regexp pattern and a
+        replacement string. Invoked after string `substitutions`
+remove_dest_dir: (a boolean, nipype default value: False)
+        remove dest directory when copying dirs
+strip_dir: (a directory name)
+        path to strip out of filename
+substitutions: (a tuple of the form: (a string, a string))
+        List of 2-tuples reflecting string to substitute and string to
+        replace it with
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file
+        datasink output
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-io-freesurfersource"></span></div>
+</div>
+<div class="section" id="freesurfersource">
+<span id="index-3"></span><h2>FreeSurferSource<a class="headerlink" href="#freesurfersource" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L939">Link to code</a></p>
+<p>Generates freesurfer subject info from their directories</p>
+<div class="section" id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">import</span> <span class="n">FreeSurferSource</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fs</span> <span class="o">=</span> <span class="n">FreeSurferSource</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c">#fs.inputs.subjects_dir = &#39;.&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="s">&#39;PWS04&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fs</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">hemi</span> <span class="o">=</span> <span class="s">&#39;lh&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+subject_id: (a string)
+        Subject name for whom to retrieve data
+subjects_dir: (a directory name)
+        Freesurfer subjects directory.
+
+[Optional]
+hemi: (&#39;both&#39; or &#39;lh&#39; or &#39;rh&#39;, nipype default value: both)
+        Selects hemisphere specific outputs
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+subject_id: (a string)
+        Subject name for whom to retrieve data
+subjects_dir: (a directory name)
+        Freesurfer subjects directory.
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>BA_stats: (an existing file name)
+        Brodmann Area statistics files
+T1: (an existing file name)
+        Intensity normalized whole-head volume
+annot: (an existing file name)
+        Surface annotation files
+aparc_a2009s_stats: (an existing file name)
+        Aparc a2009s parcellation statistics files
+aparc_aseg: (an existing file name)
+        Aparc parcellation projected into aseg volume
+aparc_stats: (an existing file name)
+        Aparc parcellation statistics files
+aseg: (an existing file name)
+        Volumetric map of regions from automatic segmentation
+aseg_stats: (an existing file name)
+        Automated segmentation statistics file
+brain: (an existing file name)
+        Intensity normalized brain-only volume
+brainmask: (an existing file name)
+        Skull-stripped (brain-only) volume
+curv: (an existing file name)
+        Maps of surface curvature
+curv_stats: (an existing file name)
+        Curvature statistics files
+entorhinal_exvivo_stats: (an existing file name)
+        Entorhinal exvivo statistics files
+filled: (an existing file name)
+        Subcortical mass volume
+inflated: (an existing file name)
+        Inflated surface meshes
+label: (an existing file name)
+        Volume and surface label files
+norm: (an existing file name)
+        Normalized skull-stripped volume
+nu: (an existing file name)
+        Non-uniformity corrected whole-head volume
+orig: (an existing file name)
+        Base image conformed to Freesurfer space
+pial: (an existing file name)
+        Gray matter/pia mater surface meshes
+rawavg: (an existing file name)
+        Volume formed by averaging input images
+ribbon: (an existing file name)
+        Volumetric maps of cortical ribbons
+smoothwm: (an existing file name)
+        Smoothed original surface meshes
+sphere: (an existing file name)
+        Spherical surface meshes
+sphere_reg: (an existing file name)
+        Spherical registration file
+sulc: (an existing file name)
+        Surface maps of sulcal depth
+thickness: (an existing file name)
+        Surface maps of cortical thickness
+volume: (an existing file name)
+        Surface maps of cortical volume
+white: (an existing file name)
+        White/gray matter surface meshes
+wm: (an existing file name)
+        Segmented white-matter volume
+wmparc: (an existing file name)
+        Aparc parcellation projected into subcortical white matter
+wmparc_stats: (an existing file name)
+        White matter parcellation statistics file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-io-iobase"></span></div>
+</div>
+<div class="section" id="iobase">
+<span id="index-4"></span><h2>IOBase<a class="headerlink" href="#iobase" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L101">Link to code</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-io-mysqlsink"></span></div>
+<div class="section" id="mysqlsink">
+<span id="index-5"></span><h2>MySQLSink<a class="headerlink" href="#mysqlsink" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L1497">Link to code</a></p>
+<p>Very simple frontend for storing values into MySQL database.</p>
+<div class="section" id="id4">
+<h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span> <span class="o">=</span> <span class="n">MySQLSink</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;some_measurement&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">database_name</span> <span class="o">=</span> <span class="s">&#39;my_database&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="s">&#39;experiment_results&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s">&#39;root&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="s">&#39;secret&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="s">&#39;s1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">some_measurement</span> <span class="o">=</span> <span class="mf">11.4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+config: (a file name)
+        MySQL Options File (same format as my.cnf)
+        mutually_exclusive: host
+database_name: (a string)
+        Otherwise known as the schema name
+host: (a string, nipype default value: localhost)
+        mutually_exclusive: config
+        requires: username, password
+table_name: (a string)
+
+[Optional]
+config: (a file name)
+        MySQL Options File (same format as my.cnf)
+        mutually_exclusive: host
+database_name: (a string)
+        Otherwise known as the schema name
+host: (a string, nipype default value: localhost)
+        mutually_exclusive: config
+        requires: username, password
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+password: (a string)
+table_name: (a string)
+username: (a string)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-io-sqlitesink"></span></div>
+</div>
+<div class="section" id="sqlitesink">
+<span id="index-6"></span><h2>SQLiteSink<a class="headerlink" href="#sqlitesink" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L1441">Link to code</a></p>
+<p>Very simple frontend for storing values into SQLite database.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This is not a thread-safe node because it can write to a common
+shared location. It will not complain when it overwrites a file.</p>
+</div>
+<div class="section" id="id5">
+<h3>Examples<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span> <span class="o">=</span> <span class="n">SQLiteSink</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;some_measurement&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">database_file</span> <span class="o">=</span> <span class="s">&#39;my_database.db&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="s">&#39;experiment_results&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="s">&#39;s1&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">some_measurement</span> <span class="o">=</span> <span class="mf">11.4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sql</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+database_file: (an existing file name)
+table_name: (a string)
+
+[Optional]
+database_file: (an existing file name)
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+table_name: (a string)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-io-selectfiles"></span></div>
+</div>
+<div class="section" id="selectfiles">
+<span id="index-7"></span><h2>SelectFiles<a class="headerlink" href="#selectfiles" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L576">Link to code</a></p>
+<p>Flexibly collect data from disk to feed into workflows.</p>
+<p>This interface uses the {}-based string formatting syntax to plug
+values (possibly known only at workflow execution time) into string
+templates and collect files from persistant storage. These templates
+can also be combined with glob wildcards. The field names in the
+formatting template (i.e. the terms in braces) will become inputs
+fields on the interface, and the keys in the templates dictionary
+will form the output fields.</p>
+<div class="section" id="id6">
+<h3>Examples<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">SelectFiles</span><span class="p">,</span> <span class="n">Node</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">templates</span><span class="o">=</span><span class="p">{</span><span class="s">&quot;T1&quot;</span><span class="p">:</span> <span class="s">&quot;{subject_id}/struct/T1.nii&quot;</span><span class="p">,</span>
+<span class="gp">... </span>           <span class="s">&quot;epi&quot;</span><span class="p">:</span> <span class="s">&quot;{subject_id}/func/f[0, 1].nii&quot;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">SelectFiles</span><span class="p">(</span><span class="n">templates</span><span class="p">),</span> <span class="s">&quot;selectfiles&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="s">&quot;subj1&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="go">{&#39;T1&#39;: &lt;undefined&gt;, &#39;epi&#39;: &lt;undefined&gt;}</span>
+</pre></div>
+</div>
+<p>The same thing with dynamic grabbing of specific files:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">templates</span><span class="p">[</span><span class="s">&quot;epi&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;{subject_id}/func/f{run!s}.nii&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">SelectFiles</span><span class="p">(</span><span class="n">templates</span><span class="p">),</span> <span class="s">&quot;selectfiles&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="s">&quot;subj1&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+base_directory: (an existing directory name)
+        Root path common to templates.
+force_lists: (a boolean or a list of items which are a string, nipype
+         default value: False)
+        Whether to return outputs as a list even when only one file matches
+        the template. Either a boolean that applies to all output fields or
+        a list of output field names to coerce to a list
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+raise_on_empty: (a boolean, nipype default value: True)
+        Raise an exception if a template pattern matches no files.
+sort_filelist: (a boolean, nipype default value: True)
+        When matching mutliple files, return them in sorted order.
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-io-xnatsink"></span></div>
+</div>
+<div class="section" id="xnatsink">
+<span id="index-8"></span><h2>XNATSink<a class="headerlink" href="#xnatsink" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L1258">Link to code</a></p>
+<p>Generic datasink module that takes a directory containing a
+list of nifti files and provides a set of structured output
+fields.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+config: (a file name)
+        mutually_exclusive: server
+experiment_id: (a string)
+        Set to workflow name
+project_id: (a string)
+        Project in which to store the outputs
+server: (a string)
+        mutually_exclusive: config
+        requires: user, pwd
+subject_id: (a string)
+        Set to subject id
+
+[Optional]
+_outputs: (a dictionary with keys which are a string and with values
+         which are any value, nipype default value: {})
+assessor_id: (a string)
+        Option to customize ouputs representation in XNAT - assessor level
+        will be used with specified id
+        mutually_exclusive: reconstruction_id
+cache_dir: (a directory name)
+config: (a file name)
+        mutually_exclusive: server
+experiment_id: (a string)
+        Set to workflow name
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+project_id: (a string)
+        Project in which to store the outputs
+pwd: (a string)
+reconstruction_id: (a string)
+        Option to customize ouputs representation in XNAT - reconstruction
+        level will be used with specified id
+        mutually_exclusive: assessor_id
+server: (a string)
+        mutually_exclusive: config
+        requires: user, pwd
+share: (a boolean, nipype default value: False)
+        Option to share the subjects from the original projectinstead of
+        creating new ones when possible - the created experiments are then
+        shared back to the original project
+subject_id: (a string)
+        Set to subject id
+user: (a string)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-io-xnatsource"></span></div>
+<div class="section" id="xnatsource">
+<span id="index-9"></span><h2>XNATSource<a class="headerlink" href="#xnatsource" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L1023">Link to code</a></p>
+<p>Generic XNATSource module that wraps around the pyxnat module in
+an intelligent way for neuroimaging tasks to grab files and data
+from an XNAT server.</p>
+<div class="section" id="id7">
+<h3>Examples<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">import</span> <span class="n">XNATSource</span>
+</pre></div>
+</div>
+<p>Pick all files from current directory</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span> <span class="o">=</span> <span class="n">XNATSource</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;*&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span> <span class="o">=</span> <span class="n">XNATSource</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;project&#39;</span><span class="p">,</span><span class="s">&#39;subject&#39;</span><span class="p">,</span><span class="s">&#39;experiment&#39;</span><span class="p">,</span><span class="s">&#39;assessor&#39;</span><span class="p">,</span><span class="s">&#39;inout&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">query_template</span> <span class="o">=</span> <span class="s">&#39;/projects/</span><span class="si">%s</span><span class="s">/subjects/</span><span class="si">%s</span><span class="s">/experiments/</span><span class="si">%s</span><span class="s">&#39;</span>                    <span class="s">&#39;/assessors/</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">_resources/files&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="s">&#39;IMAGEN&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject</span> <span class="o">=</span> <span class="s">&#39;IMAGEN_000000001274&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">experiment</span> <span class="o">=</span> <span class="s">&#39;*SessionA*&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">assessor</span> <span class="o">=</span> <span class="s">&#39;*ADNI_MPRAGE_nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inout</span> <span class="o">=</span> <span class="s">&#39;out&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span> <span class="o">=</span> <span class="n">XNATSource</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;sid&#39;</span><span class="p">],</span><span class="n">outfields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;struct&#39;</span><span class="p">,</span><span class="s">&#39;func&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">query_template</span> <span class="o">=</span> <span class="s">&#39;/projects/IMAGEN/subjects/</span><span class="si">%s</span><span class="s">/experiments/*SessionA*&#39;</span>                    <span class="s">&#39;/assessors/*</span><span class="si">%s</span><span class="s">_nii/out_resources/files&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">query_template_args</span><span class="p">[</span><span class="s">&#39;struct&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;sid&#39;</span><span class="p">,</span><span class="s">&#39;ADNI_MPRAGE&#39;</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">query_template_args</span><span class="p">[</span><span class="s">&#39;func&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;sid&#39;</span><span class="p">,</span><span class="s">&#39;EPI_faces&#39;</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sid</span> <span class="o">=</span> <span class="s">&#39;IMAGEN_000000001274&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+config: (a file name)
+        mutually_exclusive: server
+query_template: (a string)
+        Layout used to get files. Relative to base directory if defined
+server: (a string)
+        mutually_exclusive: config
+        requires: user, pwd
+
+[Optional]
+cache_dir: (a directory name)
+        Cache directory
+config: (a file name)
+        mutually_exclusive: server
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+pwd: (a string)
+query_template: (a string)
+        Layout used to get files. Relative to base directory if defined
+query_template_args: (a dictionary with keys which are a string and
+         with values which are a list of items which are a list of items
+         which are any value, nipype default value: {&#39;outfiles&#39;: []})
+        Information to plug into template
+server: (a string)
+        mutually_exclusive: config
+        requires: user, pwd
+user: (a string)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="module-nipype.interfaces.io"></span></div>
+</div>
+<div class="section" id="add-traits">
+<span id="nipype-interfaces-io-add-traits"></span><h2><code class="xref py py-func docutils literal"><span class="pre">add_traits()</span></code><a class="headerlink" href="#add-traits" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L83">Link to code</a></p>
+<p>Add traits to a traited class.</p>
+<p>All traits are set to Undefined by default</p>
+</div>
+<div class="section" id="copytree">
+<span id="nipype-interfaces-io-copytree"></span><h2><code class="xref py py-func docutils literal"><span class="pre">copytree()</span></code><a class="headerlink" href="#copytree" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L48">Link to code</a></p>
+<p>Recursively copy a directory tree using
+nipype.utils.filemanip.copyfile()</p>
+<p>This is not a thread-safe routine. However, in the case of creating new
+directories, it checks to see if a particular directory has already been
+created by another process.</p>
+</div>
+<div class="section" id="push-file">
+<span id="nipype-interfaces-io-push-file"></span><h2><code class="xref py py-func docutils literal"><span class="pre">push_file()</span></code><a class="headerlink" href="#push-file" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L1350">Link to code</a></p>
+</div>
+<div class="section" id="quote-id">
+<span id="nipype-interfaces-io-quote-id"></span><h2><code class="xref py py-func docutils literal"><span class="pre">quote_id()</span></code><a class="headerlink" href="#quote-id" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L1342">Link to code</a></p>
+</div>
+<div class="section" id="unquote-id">
+<span id="nipype-interfaces-io-unquote-id"></span><h2><code class="xref py py-func docutils literal"><span class="pre">unquote_id()</span></code><a class="headerlink" href="#unquote-id" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/io.py#L1346">Link to code</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

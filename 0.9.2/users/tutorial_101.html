@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../index.html">
+            <img src="../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../index.html">Home</a> ·
+<a class="navbar" href="../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../documentation.html">Documentation</a> ·
+<a class="navbar" href="../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Pipeline 101</a><ul>
+<li><a class="reference internal" href="#my-first-pipeline">My first pipeline</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pipeline-101">
+<span id="tutorial-101"></span><h1>Pipeline 101<a class="headerlink" href="#pipeline-101" title="Permalink to this headline">¶</a></h1>
+<p>A workflow or pipeline is built by connecting processes or nodes to each
+other. In the context of nipype, every interface can be treated as a pipeline
+node having defined inputs and outputs. Creating a workflow then is a matter
+of connecting appropriate outputs to inputs. Currently, workflows are limited
+to being directional and cannot have any loops, thereby creating an ordering to
+data flow. The following nipype component architecture might help understanding
+some of the tutorials presented here.</p>
+<a class="reference internal image-reference" href="../_images/componentarchitecture.png"><img alt="../_images/componentarchitecture.png" src="../_images/componentarchitecture.png" style="width: 600px;" /></a>
+<div class="section" id="my-first-pipeline">
+<h2>My first pipeline<a class="headerlink" href="#my-first-pipeline" title="Permalink to this headline">¶</a></h2>
+<p>Although the most trivial workflow consists of a single node, we will
+create a workflow with two nodes: a realign node that will send
+the realigned functional data to a smoothing node. It is important to note that
+setting up a workflow is separate from executing it.</p>
+<p><strong>1. Import appropriate modules</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.interfaces.spm</span> <span class="kn">as</span> <span class="nn">spm</span>         <span class="c"># the spm interfaces</span>
+<span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="kn">as</span> <span class="nn">pe</span>         <span class="c"># the workflow and node wrappers</span>
+</pre></div>
+</div>
+<p><strong>2. Define nodes</strong></p>
+<p>Here we take instances of interfaces and make them pipeline compatible by
+wrapping them with pipeline specific elements. To determine the inputs and outputs
+of a given interface, please see <a class="reference internal" href="interface_tutorial.html#interface-tutorial"><span>Tutorial : Interfaces</span></a>. Let&#8217;s
+start with defining a realign node using the interface
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Realign</span></code></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">realigner</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Realign</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;realign&#39;</span><span class="p">)</span>
+<span class="n">realigner</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="s">&#39;somefuncrun.nii&#39;</span>
+<span class="n">realigner</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">register_to_mean</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>This would be equivalent to:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">realigner</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Realign</span><span class="p">(</span><span class="n">infile</span><span class="o">=</span><span class="s">&#39;somefuncrun.nii&#39;</span><span class="p">,</span>
+                                          <span class="n">register_to_mean</span> <span class="o">=</span> <span class="bp">True</span><span class="p">),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s">&#39;realign&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In Pythonic terms, this is saying that interface option in Node accepts
+an <em>instance</em> of an interface. The inputs to this interface can be set either
+later or while initializing the interface.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In the above example, &#8216;somefuncrun.nii&#8217; has to exist, otherwise the
+commands won&#8217;t work. A node will check if appropriate inputs are
+being supplied.</p>
+</div>
+<p>Similar to the realigner node, we now set up a smoothing node.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">smoother</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Smooth</span><span class="p">(</span><span class="n">fwhm</span><span class="o">=</span><span class="mi">6</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;smooth&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we have two nodes with their inputs defined. Note that we have not defined
+an input file for the smoothing node. This will be done by connecting the
+realigner to the smoother in step 5.</p>
+<p><strong>3. Creating and configuring a workflow</strong></p>
+<p>Here we create an instance of a workflow and indicate that it should operate in
+the current directory.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;preproc&#39;</span><span class="p">)</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+</pre></div>
+</div>
+<p><strong>4. Adding nodes to workflows (optional)</strong></p>
+<p>If nodes are going to be connected (see step 5), this step is not
+necessary. However, if you would like to run a node by itself without
+connecting it to any other node, then you need to add it to the
+workflow. For adding nodes, order of nodes is not important.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">add_nodes</span><span class="p">([</span><span class="n">smoother</span><span class="p">,</span> <span class="n">realigner</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>This results in a workflow containing two isolated nodes:</p>
+<img alt="../_images/smoothrealignunconnected.png" src="../_images/smoothrealignunconnected.png" />
+<p><strong>5. Connecting nodes to each other</strong></p>
+<p>We want to connect the output produced by realignment to the input of
+smoothing. This is done as follows.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">realigner</span><span class="p">,</span> <span class="s">&#39;realigned_files&#39;</span><span class="p">,</span> <span class="n">smoother</span><span class="p">,</span> <span class="s">&#39;in_files&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or alternatively, a more flexible notation can be used. Although not shown here,
+the following notation can be used to connect multiple outputs from one node to
+multiple inputs (see step 7 below).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">realigner</span><span class="p">,</span> <span class="n">smoother</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;realigned_files&#39;</span><span class="p">,</span> <span class="s">&#39;in_files&#39;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+<p>This results in a workflow containing two connected nodes:</p>
+<img alt="../_images/smoothrealignconnected.png" src="../_images/smoothrealignconnected.png" />
+<p><strong>6. Visualizing the workflow</strong></p>
+<p>The workflow is represented as a directed acyclic graph (DAG) and one
+can visualize this using the following command. In fact, the pictures
+above were generated using this.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">write_graph</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This creates two files graph.dot and graph_detailed.dot and if
+<a class="reference external" href="http://www.graphviz.org/">graphviz</a> is installed on your system it automatically converts it
+to png files. If graphviz is not installed you can take the dot files
+and load them in a graphviz visualizer elsewhere. You can specify how detailed
+the graph is going to be, by using &#8220;graph2use&#8221; argument which takes the following
+options:</p>
+<ul class="simple">
+<li>hierarchical - creates a graph showing all embedded workflows (default)</li>
+<li>orig - creates a top level graph without expanding internal workflow nodes</li>
+<li>flat - expands workflow nodes recursively</li>
+<li>exec - expands workflows to depict iterables (be careful - can generate really
+large graphs)</li>
+</ul>
+<p><strong>7. Extend it</strong></p>
+<p>Now that you have seen a basic pipeline let&#8217;s add another node to the
+above pipeline.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.algorithms.rapidart</span> <span class="kn">as</span> <span class="nn">ra</span>
+<span class="n">artdetect</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">ra</span><span class="o">.</span><span class="n">ArtifactDetect</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;artdetect&#39;</span><span class="p">)</span>
+<span class="n">artdetect</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_differences</span>  <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_norm</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">norm_threshold</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">zintensity_threshold</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">realigner</span><span class="p">,</span> <span class="n">artdetect</span><span class="p">,</span>
+                   <span class="p">[(</span><span class="s">&#39;realigned_files&#39;</span><span class="p">,</span> <span class="s">&#39;realigned_files&#39;</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s">&#39;realignment_parameters&#39;</span><span class="p">,</span><span class="s">&#39;realignment_parameters&#39;</span><span class="p">)]</span>
+                  <span class="p">)])</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>a) How an alternative form of connect was used to connect multiple
+output fields from the realign node to corresponding input
+fields of the artifact detection node.</p>
+<p class="last">b) The current visualization only shows connected input and
+output ports. It does not show all the parameters that you have
+set for a node.</p>
+</div>
+<p>This results in</p>
+<a class="reference internal image-reference" href="../_images/threecomponentpipe.png"><img alt="../_images/threecomponentpipe.png" src="../_images/threecomponentpipe.png" style="width: 650px;" /></a>
+<p><strong>8. Execute the workflow</strong></p>
+<p>Assuming that <strong>somefuncrun.nii</strong> is actually a file or you&#8217;ve
+replaced it with an appropriate one, you can run the pipeline with:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">workflow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This should create a folder called preproc in your current directory,
+inside which are three folders: realign, smooth and artdetect (the names
+of the nodes). The outputs of these routines are in these folders.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

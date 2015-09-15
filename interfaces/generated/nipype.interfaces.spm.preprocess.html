@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -185,7 +185,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -197,7 +197,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -220,9 +220,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -232,13 +232,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-spm-preprocess">
 <h1>interfaces.spm.preprocess<a class="headerlink" href="#interfaces-spm-preprocess" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-spm-preprocess-applydeformations"></span><div class="section" id="applydeformations">
 <span id="index-0"></span><h2>ApplyDeformations<a class="headerlink" href="#applydeformations" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L1328">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L1334">Link to code</a></p>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
 deformation_field: (an existing file name)
@@ -270,7 +270,7 @@ use_v8struct: (a boolean, nipype default value: True)
 <span class="target" id="nipype-interfaces-spm-preprocess-coregister"></span></div>
 <div class="section" id="coregister">
 <span id="index-1"></span><h2>Coregister<a class="headerlink" href="#coregister" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L302">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L299">Link to code</a></p>
 <p>Use spm_coreg for estimating cross-modality rigid body alignment</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=39">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=39</a></p>
 <div class="section" id="examples">
@@ -325,7 +325,8 @@ write_interp: (0 &lt;= an integer &lt;= 7)
         degree of b-spline used for interpolation
 write_mask: (a boolean)
         True/False mask output image
-write_wrap: (a list of from 3 to 3 items which are an integer)
+write_wrap: (a list of from 3 to 3 items which are an integer (int or
+         long))
         Check if interpolation should wrap in [x,y,z]
 </pre></div>
 </div>
@@ -341,7 +342,7 @@ coregistered_source: (a list of items which are an existing file
 </div>
 <div class="section" id="createwarped">
 <span id="index-2"></span><h2>CreateWarped<a class="headerlink" href="#createwarped" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L1269">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L1275">Link to code</a></p>
 <p>Apply a flow field estimated by DARTEL to create warped images</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=190">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=190</a></p>
 <div class="section" id="id1">
@@ -390,7 +391,7 @@ use_v8struct: (a boolean, nipype default value: True)
 </div>
 <div class="section" id="dartel">
 <span id="index-3"></span><h2>DARTEL<a class="headerlink" href="#dartel" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L1090">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L1096">Link to code</a></p>
 <p>Use spm DARTEL to create a template and flow fields</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=185">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=185</a></p>
 <div class="section" id="id2">
@@ -455,7 +456,7 @@ template_files: (a list of items which are an existing file name)
 </div>
 <div class="section" id="dartelnorm2mni">
 <span id="index-4"></span><h2>DARTELNorm2MNI<a class="headerlink" href="#dartelnorm2mni" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L1183">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L1189">Link to code</a></p>
 <p>Use spm DARTEL to normalize data to MNI space</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=188">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=188</a></p>
 <div class="section" id="id3">
@@ -514,7 +515,7 @@ normalized_files: (a list of items which are an existing file name)
 </div>
 <div class="section" id="newsegment">
 <span id="index-5"></span><h2>NewSegment<a class="headerlink" href="#newsegment" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L863">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L864">Link to code</a></p>
 <p>Use spm_preproc8 (New Segment) to separate structural images into different
 tissue classes. Supports multiple modalities.</p>
 <p>NOTE: This interface currently supports single channel input only</p>
@@ -568,9 +569,9 @@ paths: (a list of items which are a directory name)
 sampling_distance: (a float)
         Sampling distance on data for parameter estimation
 tissues: (a list of items which are a tuple of the form: (a tuple of
-         the form: (an existing file name, an integer), an integer, a tuple
-         of the form: (a boolean, a boolean), a tuple of the form: (a
-         boolean, a boolean)))
+         the form: (an existing file name, an integer (int or long)), an
+         integer (int or long), a tuple of the form: (a boolean, a boolean),
+         a tuple of the form: (a boolean, a boolean)))
         A list of tuples (one per tissue) with the following fields:
          - tissue probability map (4D), 1-based index to frame
          - number of gaussians
@@ -619,7 +620,7 @@ transformation_mat: (a list of items which are an existing file name)
 </div>
 <div class="section" id="normalize">
 <span id="index-6"></span><h2>Normalize<a class="headerlink" href="#normalize" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L431">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L428">Link to code</a></p>
 <p>use spm_normalise for warping an image to a template</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=203">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=203</a></p>
 <div class="section" id="id5">
@@ -660,7 +661,7 @@ matlab_cmd: (a string)
         matlab command to use
 mfile: (a boolean, nipype default value: True)
         Run m-code using m-file
-nonlinear_iterations: (an integer)
+nonlinear_iterations: (an integer (int or long))
         Number of iterations of nonlinear warping
 nonlinear_regularization: (a float)
         the amount of the regularization for the nonlinear part of the
@@ -690,7 +691,7 @@ write_preserve: (a boolean)
         True/False warped images are modulated
 write_voxel_sizes: (a list of from 3 to 3 items which are a float)
         3-element list
-write_wrap: (a list of items which are an integer)
+write_wrap: (a list of items which are an integer (int or long))
         Check if interpolation should wrap in [x,y,z]- list of bools
 </pre></div>
 </div>
@@ -708,10 +709,10 @@ normalized_source: (a list of items which are an existing file name)
 </div>
 <div class="section" id="normalize12">
 <span id="index-7"></span><h2>Normalize12<a class="headerlink" href="#normalize12" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L588">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L585">Link to code</a></p>
 <p>uses SPM12&#8217;s new Normalise routine for warping an image to a template.
 Spatial normalisation is now done via the segmentation routine (which was
-known as <tt class="docutils literal"><span class="pre">New</span> <span class="pre">Segment</span></tt> in SPM8). Note that the normalisation in SPM12
+known as <code class="docutils literal"><span class="pre">New</span> <span class="pre">Segment</span></code> in SPM8). Note that the normalisation in SPM12
 is done towards a file containing multiple tissue probability maps, which
 was not the cass in SPM8.</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=49">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=49</a></p>
@@ -797,7 +798,7 @@ normalized_image: (a list of items which are an existing file name)
 </div>
 <div class="section" id="realign">
 <span id="index-8"></span><h2>Realign<a class="headerlink" href="#realign" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L168">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L167">Link to code</a></p>
 <p>Use spm_realign for estimating within modality rigid body alignment</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=25">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=25</a></p>
 <div class="section" id="id7">
@@ -814,8 +815,6 @@ normalized_image: (a list of items which are an existing file name)
 in_files: (a list of items which are a list of items which are an
          existing file name or an existing file name)
         list of filenames to realign
-register_to_mean: (a boolean, nipype default value: True)
-        Indicate whether realignment is done to the mean image
 
 [Optional]
 fwhm: (a floating point number &gt;= 0.0)
@@ -838,6 +837,8 @@ paths: (a list of items which are a directory name)
         Paths to add to matlabpath
 quality: (0.0 &lt;= a floating point number &lt;= 1.0)
         0.1 = fast, 1.0 = precise
+register_to_mean: (a boolean)
+        Indicate whether realignment is done to the mean image
 separation: (a floating point number &gt;= 0.0)
         sampling separation in mm
 use_mcr: (a boolean)
@@ -846,7 +847,8 @@ use_v8struct: (a boolean, nipype default value: True)
         Generate SPM8 and higher compatible jobs
 weight_img: (an existing file name)
         filename of weighting image
-wrap: (a list of from 3 to 3 items which are an integer)
+wrap: (a list of from 3 to 3 items which are an integer (int or
+         long))
         Check if interpolation should wrap in [x,y,z]
 write_interp: (0 &lt;= an integer &lt;= 7)
         degree of b-spline used for interpolation
@@ -855,7 +857,8 @@ write_mask: (a boolean)
 write_which: (a list of items which are a value of type &#39;int&#39;, nipype
          default value: [2, 1])
         determines which images to reslice
-write_wrap: (a list of from 3 to 3 items which are an integer)
+write_wrap: (a list of from 3 to 3 items which are an integer (int or
+         long))
         Check if interpolation should wrap in [x,y,z]
 </pre></div>
 </div>
@@ -881,7 +884,7 @@ realignment_parameters: (a list of items which are an existing file
 </div>
 <div class="section" id="segment">
 <span id="index-9"></span><h2>Segment<a class="headerlink" href="#segment" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L754">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L751">Link to code</a></p>
 <p>use spm_segment to separate structural images into different
 tissue classes.</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=209">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=209</a></p>
@@ -920,7 +923,8 @@ csf_output_type: (a list of from 3 to 3 items which are a boolean)
          Native + Modulated Normalised: [True,False,True],
          Native + Modulated + Unmodulated: [True,True,True],
          Modulated + Unmodulated Normalised: [True,True,False]
-gaussians_per_class: (a list of items which are an integer)
+gaussians_per_class: (a list of items which are an integer (int or
+         long))
         num Gaussians capture intensity distribution
 gm_output_type: (a list of from 3 to 3 items which are a boolean)
         Options to produce grey matter images: c1*.img, wc1*.img and
@@ -1004,7 +1008,7 @@ transformation_mat: (an existing file name)
 </div>
 <div class="section" id="slicetiming">
 <span id="index-10"></span><h2>SliceTiming<a class="headerlink" href="#slicetiming" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L63">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L63">Link to code</a></p>
 <p>Use spm to perform slice timing correction.</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=19">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=19</a></p>
 <div class="section" id="id9">
@@ -1025,11 +1029,11 @@ transformation_mat: (an existing file name)
 in_files: (a list of items which are a list of items which are an
          existing file name or an existing file name)
         list of filenames to apply slice timing
-num_slices: (an integer)
+num_slices: (an integer (int or long))
         number of slices in a volume
-ref_slice: (an integer)
+ref_slice: (an integer (int or long))
         1-based Number of the reference slice
-slice_order: (a list of items which are an integer)
+slice_order: (a list of items which are an integer (int or long))
         1-based order in which slices are acquired
 time_acquisition: (a float)
         time of volume acquisition. usuallycalculated as TR-(TR/num_slices)
@@ -1064,7 +1068,7 @@ use_v8struct: (a boolean, nipype default value: True)
 </div>
 <div class="section" id="smooth">
 <span id="index-11"></span><h2>Smooth<a class="headerlink" href="#smooth" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L1004">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L1010">Link to code</a></p>
 <p>Use spm_smooth for 3D Gaussian smoothing of image volumes.</p>
 <p><a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=55">http://www.fil.ion.ucl.ac.uk/spm/doc/manual.pdf#page=55</a></p>
 <div class="section" id="id10">
@@ -1082,7 +1086,7 @@ in_files: (a list of items which are an existing file name)
         list of files to smooth
 
 [Optional]
-data_type: (an integer)
+data_type: (an integer (int or long))
         Data type of the output images
 fwhm: (a list of from 3 to 3 items which are a float or a float)
         3-list of fwhm for each dimension
@@ -1114,7 +1118,7 @@ use_v8struct: (a boolean, nipype default value: True)
 </div>
 <div class="section" id="vbmsegment">
 <span id="index-12"></span><h2>VBMSegment<a class="headerlink" href="#vbmsegment" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/spm/preprocess.py#L1494">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/spm/preprocess.py#L1500">Link to code</a></p>
 <p>Use VBM8 toolbox to separate structural images into different
 tissue classes.</p>
 <div class="section" id="example">
@@ -1147,7 +1151,8 @@ bias_fwhm: (30 or 40 or 50 or 60 or 70 or 80 or 90 or 100 or 110 or
 bias_regularization: (0 or 1e-05 or 0.0001 or 0.001 or 0.01 or 0.1 or
          1 or 10, nipype default value: 0.0001)
         no(0) - extremely heavy (10)
-cleanup_partitions: (an integer, nipype default value: 1)
+cleanup_partitions: (an integer (int or long), nipype default value:
+         1)
         0=None,1=light,2=thorough
 csf_dartel: (0 &lt;= an integer &lt;= 2, nipype default value: 0)
         0=None,1=rigid(SPM8 default),2=affine
@@ -1161,9 +1166,10 @@ deformation_field: (a tuple of the form: (a boolean, a boolean),
          nipype default value: (0, 0))
         forward and inverse field
 display_results: (a boolean, nipype default value: True)
-gaussians_per_class: (a tuple of the form: (an integer, an integer,
-         an integer, an integer, an integer, an integer), nipype default
-         value: (2, 2, 2, 3, 4, 2))
+gaussians_per_class: (a tuple of the form: (an integer (int or long),
+         an integer (int or long), an integer (int or long), an integer (int
+         or long), an integer (int or long), an integer (int or long)),
+         nipype default value: (2, 2, 2, 3, 4, 2))
         number of gaussians for each tissue class
 gm_dartel: (0 &lt;= an integer &lt;= 2, nipype default value: 0)
         0=None,1=rigid(SPM8 default),2=affine
@@ -1256,9 +1262,9 @@ transformation_mat: (a list of items which are an existing file name)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

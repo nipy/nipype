@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -165,7 +165,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -177,7 +177,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -200,9 +200,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -212,13 +212,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-freesurfer-model">
 <h1>interfaces.freesurfer.model<a class="headerlink" href="#interfaces-freesurfer-model" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-freesurfer-model-binarize"></span><div class="section" id="binarize">
 <span id="index-0"></span><h2>Binarize<a class="headerlink" href="#binarize" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/model.py#L403">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/model.py#L403">Link to code</a></p>
 <p>Wraps command <strong>mri_binarize</strong></p>
 <p>Use FreeSurfer mri_binarize to threshold an input volume</p>
 <div class="section" id="examples">
@@ -244,10 +244,10 @@ args: (a string)
 bin_col_num: (a boolean)
         set binarized voxel value to its column number
         flag: --bincol
-bin_val: (an integer)
+bin_val: (an integer (int or long))
         set vox within thresh to val (default is 1)
         flag: --binval %d
-bin_val_not: (an integer)
+bin_val_not: (an integer (int or long))
         set vox outside range to val (default is 0)
         flag: --binvalnot %d
 binary_file: (a file name)
@@ -256,20 +256,20 @@ binary_file: (a file name)
 count_file: (a boolean or a file name)
         save number of hits in ascii file (hits, ntotvox, pct)
         flag: --count %s
-dilate: (an integer)
+dilate: (an integer (int or long))
         niters: dilate binarization in 3D
         flag: --dilate %d
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-erode: (an integer)
+erode: (an integer (int or long))
         nerode: erode binarization in 3D (after any dilation)
         flag: --erode  %d
-erode2d: (an integer)
+erode2d: (an integer (int or long))
         nerode2d: erode binarization in 2D (after any 3D erosion)
         flag: --erode2d %d
-frame_no: (an integer)
+frame_no: (an integer (int or long))
         use 0-based frame of input (default is 0)
         flag: --frame %s
 ignore_exception: (a boolean, nipype default value: False)
@@ -284,7 +284,7 @@ mask_file: (an existing file name)
 mask_thresh: (a float)
         set thresh for mask
         flag: --mask-thresh %f
-match: (a list of items which are an integer)
+match: (a list of items which are an integer (int or long))
         match instead of threshold
         flag: --match %d...
 max: (a float)
@@ -341,7 +341,7 @@ count_file: (a file name)
 </div>
 <div class="section" id="concatenate">
 <span id="index-1"></span><h2>Concatenate<a class="headerlink" href="#concatenate" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/model.py#L506">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/model.py#L506">Link to code</a></p>
 <p>Wraps command <strong>mri_concat</strong></p>
 <p>Use Freesurfer mri_concat to combine several input volumes
 into one output volume.  Can concatenate by frames, or compute
@@ -379,7 +379,7 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-gmean: (an integer)
+gmean: (an integer (int or long))
         create matrix to average Ng groups, Nper=Ntot/Ng
         flag: --gmean %d
 ignore_exception: (a boolean, nipype default value: False)
@@ -439,7 +439,7 @@ vote: (a boolean)
 </div>
 <div class="section" id="glmfit">
 <span id="index-2"></span><h2>GLMFit<a class="headerlink" href="#glmfit" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/model.py#L256">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/model.py#L256">Link to code</a></p>
 <p>Wraps command <strong>mri_glmfit</strong></p>
 <p>Use FreeSurfer&#8217;s mri_glmfit to specify and estimate a general linear model.</p>
 <div class="section" id="id2">
@@ -491,7 +491,7 @@ design: (an existing file name)
         design matrix file
         flag: --X %s
         mutually_exclusive: fsgd, design, one_sample
-diag: (an integer)
+diag: (an integer (int or long))
         Gdiag_no : set diagnositc level
 diag_cluster: (a boolean)
         save sig volume and exit from first sim loop
@@ -500,7 +500,7 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-fixed_fx_dof: (an integer)
+fixed_fx_dof: (an integer (int or long))
         dof for fixed effects analysis
         flag: --ffxdof %d
         mutually_exclusive: fixed_fx_dof_file
@@ -563,7 +563,7 @@ pca: (a boolean)
 per_voxel_reg: (a list of items which are an existing file name)
         per-voxel regressors
         flag: --pvr %s...
-profile: (an integer)
+profile: (an integer (int or long))
         niters : test speed
         flag: --profile %d
 prune: (a boolean)
@@ -573,7 +573,7 @@ prune_thresh: (a float)
         prune threshold. Default is FLT_MIN
         flag: --prune_thr %f
         mutually_exclusive: noprune
-resynth_test: (an integer)
+resynth_test: (an integer (int or long))
         test GLM by resynthsis
         flag: --resynthtest %d
 save_cond: (a boolean)
@@ -588,10 +588,11 @@ save_res_corr_mtx: (a boolean)
 save_residual: (a boolean)
         save residual error (eres)
         flag: --eres-save
-seed: (an integer)
+seed: (an integer (int or long))
         used for synthesizing noise
         flag: --seed %d
-self_reg: (a tuple of the form: (an integer, an integer, an integer))
+self_reg: (a tuple of the form: (an integer (int or long), an integer
+         (int or long), an integer (int or long)))
         self-regressor from index col row slice
         flag: --selfreg %d %d %d
 sim_done_file: (a file name)
@@ -601,7 +602,7 @@ sim_sign: (&#39;abs&#39; or &#39;pos&#39; or &#39;neg&#39;)
         abs, pos, or neg
         flag: --sim-sign %s
 simulation: (a tuple of the form: (&#39;perm&#39; or &#39;mc-full&#39; or &#39;mc-z&#39;, an
-         integer, a float, a string))
+         integer (int or long), a float, a string))
         nulltype nsim thresh csdbasename
         flag: --sim %s %d %f %s
 subject_id: (a string)
@@ -627,7 +628,8 @@ uniform: (a tuple of the form: (a float, a float))
 var_fwhm: (a floating point number &gt;= 0.0)
         smooth variance by fwhm
         flag: --var-fwhm %f
-vox_dump: (a tuple of the form: (an integer, an integer, an integer))
+vox_dump: (a tuple of the form: (an integer (int or long), an integer
+         (int or long), an integer (int or long)))
         dump voxel GLM and exit
         flag: --voxdump %d %d %d
 weight_file: (an existing file name)
@@ -688,7 +690,7 @@ svd_stats_file: (a file name)
 </div>
 <div class="section" id="label2vol">
 <span id="index-3"></span><h2>Label2Vol<a class="headerlink" href="#label2vol" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/model.py#L739">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/model.py#L739">Link to code</a></p>
 <p>Wraps command <strong>mri_label2vol</strong></p>
 <p>Make a binary volume from a Freesurfer label</p>
 <div class="section" id="id3">
@@ -796,7 +798,7 @@ vol_label_file: (a file name)
 </div>
 <div class="section" id="mrispreproc">
 <span id="index-4"></span><h2>MRISPreproc<a class="headerlink" href="#mrispreproc" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/model.py#L78">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/model.py#L78">Link to code</a></p>
 <p>Wraps command <strong>mris_preproc</strong></p>
 <p>Use FreeSurfer mris_preproc to prepare a group of contrasts for
 a second level analysis</p>
@@ -843,11 +845,11 @@ fwhm_source: (a float)
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-num_iters: (an integer)
+num_iters: (an integer (int or long))
         niters : smooth by niters on the target surface
         flag: --niters %d
         mutually_exclusive: fwhm
-num_iters_source: (an integer)
+num_iters_source: (an integer (int or long))
         niters : smooth by niters on the source surface
         flag: --niterssrc %d
         mutually_exclusive: fwhm_source
@@ -907,7 +909,7 @@ vol_measure_file: (a list of items which are a tuple of the form: (an
 </div>
 <div class="section" id="ms-lda">
 <span id="index-5"></span><h2>MS_LDA<a class="headerlink" href="#ms-lda" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/model.py#L811">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/model.py#L811">Link to code</a></p>
 <p>Wraps command <strong>mri_ms_LDA</strong></p>
 <p>Perform LDA reduction on the intensity space of an arbitrary # of FLASH images</p>
 <div class="section" id="id5">
@@ -925,7 +927,8 @@ vol_measure_file: (a list of items which are a tuple of the form: (an
 images: (a list of items which are an existing file name)
         list of input FLASH images
         flag: %s, position: -1
-lda_labels: (a list of from 2 to 2 items which are an integer)
+lda_labels: (a list of from 2 to 2 items which are an integer (int or
+         long))
         pair of class labels to optimize
         flag: -lda %s
 vol_synth_file: (a file name)
@@ -955,7 +958,7 @@ label_file: (a file name)
 mask_file: (a file name)
         filename of the brain mask volume
         flag: -mask %s
-shift: (an integer)
+shift: (an integer (int or long))
         shift all values equal to the given value to zero
         flag: -shift %d
 subjects_dir: (an existing directory name)
@@ -978,7 +981,7 @@ weight_file: (an existing file name)
 </div>
 <div class="section" id="onesamplettest">
 <span id="index-6"></span><h2>OneSampleTTest<a class="headerlink" href="#onesamplettest" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/model.py#L335">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/model.py#L335">Link to code</a></p>
 <p>Wraps command <strong>mri_glmfit</strong></p>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
@@ -1020,7 +1023,7 @@ design: (an existing file name)
         design matrix file
         flag: --X %s
         mutually_exclusive: fsgd, design, one_sample
-diag: (an integer)
+diag: (an integer (int or long))
         Gdiag_no : set diagnositc level
 diag_cluster: (a boolean)
         save sig volume and exit from first sim loop
@@ -1029,7 +1032,7 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-fixed_fx_dof: (an integer)
+fixed_fx_dof: (an integer (int or long))
         dof for fixed effects analysis
         flag: --ffxdof %d
         mutually_exclusive: fixed_fx_dof_file
@@ -1092,7 +1095,7 @@ pca: (a boolean)
 per_voxel_reg: (a list of items which are an existing file name)
         per-voxel regressors
         flag: --pvr %s...
-profile: (an integer)
+profile: (an integer (int or long))
         niters : test speed
         flag: --profile %d
 prune: (a boolean)
@@ -1102,7 +1105,7 @@ prune_thresh: (a float)
         prune threshold. Default is FLT_MIN
         flag: --prune_thr %f
         mutually_exclusive: noprune
-resynth_test: (an integer)
+resynth_test: (an integer (int or long))
         test GLM by resynthsis
         flag: --resynthtest %d
 save_cond: (a boolean)
@@ -1117,10 +1120,11 @@ save_res_corr_mtx: (a boolean)
 save_residual: (a boolean)
         save residual error (eres)
         flag: --eres-save
-seed: (an integer)
+seed: (an integer (int or long))
         used for synthesizing noise
         flag: --seed %d
-self_reg: (a tuple of the form: (an integer, an integer, an integer))
+self_reg: (a tuple of the form: (an integer (int or long), an integer
+         (int or long), an integer (int or long)))
         self-regressor from index col row slice
         flag: --selfreg %d %d %d
 sim_done_file: (a file name)
@@ -1130,7 +1134,7 @@ sim_sign: (&#39;abs&#39; or &#39;pos&#39; or &#39;neg&#39;)
         abs, pos, or neg
         flag: --sim-sign %s
 simulation: (a tuple of the form: (&#39;perm&#39; or &#39;mc-full&#39; or &#39;mc-z&#39;, an
-         integer, a float, a string))
+         integer (int or long), a float, a string))
         nulltype nsim thresh csdbasename
         flag: --sim %s %d %f %s
 subject_id: (a string)
@@ -1156,7 +1160,8 @@ uniform: (a tuple of the form: (a float, a float))
 var_fwhm: (a floating point number &gt;= 0.0)
         smooth variance by fwhm
         flag: --var-fwhm %f
-vox_dump: (a tuple of the form: (an integer, an integer, an integer))
+vox_dump: (a tuple of the form: (an integer (int or long), an integer
+         (int or long), an integer (int or long)))
         dump voxel GLM and exit
         flag: --voxdump %d %d %d
 weight_file: (an existing file name)
@@ -1216,7 +1221,7 @@ svd_stats_file: (a file name)
 <span class="target" id="nipype-interfaces-freesurfer-model-segstats"></span></div>
 <div class="section" id="segstats">
 <span id="index-7"></span><h2>SegStats<a class="headerlink" href="#segstats" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/model.py#L614">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/model.py#L614">Link to code</a></p>
 <p>Wraps command <strong>mri_segstats</strong></p>
 <p>Use FreeSurfer mri_segstats for ROI analysis</p>
 <div class="section" id="id6">
@@ -1291,10 +1296,10 @@ etiv_only: (&#39;etiv&#39; or &#39;old-etiv&#39; or &#39;--%s-only&#39;)
 exclude_ctx_gm_wm: (a boolean)
         exclude cortical gray and white matter
         flag: --excl-ctxgmwm
-exclude_id: (an integer)
+exclude_id: (an integer (int or long))
         Exclude seg id from report
         flag: --excludeid %d
-frame: (an integer)
+frame: (an integer (int or long))
         Report stats on nth frame of input volume
         flag: --frame %d
 gca_color_table: (an existing file name)
@@ -1308,13 +1313,13 @@ ignore_exception: (a boolean, nipype default value: False)
 in_file: (an existing file name)
         Use the segmentation to report stats on this volume
         flag: --i %s
-mask_erode: (an integer)
+mask_erode: (an integer (int or long))
         Erode mask by some amount
         flag: --maskerode %d
 mask_file: (an existing file name)
         Mask volume (same size as seg
         flag: --mask %s
-mask_frame: (an integer)
+mask_frame: (an integer (int or long))
         Mask with this (0 based) frame of the mask volume
         requires: mask_file
 mask_invert: (a boolean)
@@ -1349,7 +1354,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-vox: (a list of items which are an integer)
+vox: (a list of items which are an integer (int or long))
         Replace seg with all 0s except at C R S (three int inputs)
         flag: --vox %s
 wm_vol_from_surf: (a boolean)
@@ -1379,9 +1384,9 @@ summary_file: (an existing file name)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

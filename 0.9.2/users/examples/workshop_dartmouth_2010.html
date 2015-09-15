@@ -1,0 +1,484 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Workshop: Dartmouth College 2010</a><ul>
+<li><a class="reference internal" href="#using-interfaces">Using interfaces</a></li>
+<li><a class="reference internal" href="#simple-workflow">Simple workflow</a></li>
+<li><a class="reference internal" href="#another-workflow">Another workflow</a></li>
+<li><a class="reference internal" href="#reusing-workflows">Reusing workflows</a></li>
+<li><a class="reference internal" href="#visualizing-workflows-1">Visualizing workflows 1</a></li>
+<li><a class="reference internal" href="#datasink">Datasink</a></li>
+<li><a class="reference internal" href="#datagrabber">Datagrabber</a></li>
+<li><a class="reference internal" href="#iterables">Iterables</a></li>
+<li><a class="reference internal" href="#visualizing-workflows-2">Visualizing workflows 2</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="workshop-dartmouth-college-2010">
+<span id="example-workshop-dartmouth-2010"></span><h1>Workshop: Dartmouth College 2010<a class="headerlink" href="#workshop-dartmouth-college-2010" title="Permalink to this headline">¶</a></h1>
+<p>First lets go to the directory with the data we&#8217;ll be working on and start the interactive python interpreter
+(with some nipype specific configuration). Note that nipype does not need to be run through ipython - it is
+just much nicer to do interactive work in it.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span class="nb">cd</span> <span class="nv">$TDPATH</span>
+ipython -p nipype
+</pre></div>
+</div>
+<p>For every neuroimaging procedure supported by nipype there exists a wrapper - a small piece of code managing
+the underlying software (FSL, SPM, AFNI etc.). We call those interfaces. They are standarised so we can hook them up
+together. Lets have a look at some of them.</p>
+<div class="highlight-ipython"><div class="highlight"><pre>In [1]: import nipype.interfaces.fsl as fsl
+
+In [2]: fsl.BET.help()
+Inputs
+------
+
+Mandatory:
+ in_file: input file to skull strip
+
+Optional:
+ args: Additional parameters to the command
+ center: center of gravity in voxels
+ environ: Environment variables (default={})
+ frac: fractional intensity threshold
+ functional: apply to 4D fMRI data
+  mutually exclusive: functional, reduce_bias
+ mask: create binary mask image
+ mesh: generate a vtk mesh brain surface
+ no_output: Don&#39;t generate segmented output
+ out_file: name of output skull stripped image
+ outline: create surface outline image
+ output_type: FSL output type
+ radius: head radius
+ reduce_bias: bias field and neck cleanup
+  mutually exclusive: functional, reduce_bias
+ skull: create skull image
+ threshold: apply thresholding to segmented brain image and mask
+ vertical_gradient: vertical gradient in fractional intensity threshold (-1, 1)
+
+Outputs
+-------
+mask_file: path/name of binary brain mask (if generated)
+meshfile: path/name of vtk mesh file (if generated)
+out_file: path/name of skullstripped file
+outline_file: path/name of outline file (if generated)
+
+In [3]: import nipype.interfaces.freesurfer as fs
+
+In [4]: fs.Smooth.help()
+Inputs
+------
+
+Mandatory:
+ in_file: source volume
+ num_iters: number of iterations instead of fwhm
+  mutually exclusive: surface_fwhm
+ reg_file: registers volume to surface anatomical
+ surface_fwhm: surface FWHM in mm
+  mutually exclusive: num_iters
+  requires: reg_file
+
+Optional:
+ args: Additional parameters to the command
+ environ: Environment variables (default={})
+ proj_frac: project frac of thickness a long surface normal
+  mutually exclusive: proj_frac_avg
+ proj_frac_avg: average a long normal min max delta
+  mutually exclusive: proj_frac
+ smoothed_file: output volume
+ subjects_dir: subjects directory
+ vol_fwhm: volumesmoothing outside of surface
+
+Outputs
+-------
+args: Additional parameters to the command
+environ: Environment variables
+smoothed_file: smoothed input volume
+subjects_dir: subjects directory
+</pre></div>
+</div>
+<p>You can read about all of the interfaces implemented in nipype at our online documentation at <a class="reference external" href="http://nipy.sourceforge.net/nipype/documentation.html#documentation">http://nipy.sourceforge.net/nipype/documentation.html#documentation</a> .
+Check it out now.</p>
+<div class="section" id="using-interfaces">
+<h2>Using interfaces<a class="headerlink" href="#using-interfaces" title="Permalink to this headline">¶</a></h2>
+<p>Having interfaces allows us to use third party software (like FSL BET) as function. Look how simple it is.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s">&#39;data/s1/struct.nii&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">result</span>
+</pre></div>
+</div>
+<p>Running a single program is not much of a breakthrough. Lets run motion correction followed by smoothing
+(isotropic - in other words not using SUSAN). Notice that in the first line we are setting the output data type
+for all FSL interfaces.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fsl</span><span class="o">.</span><span class="n">FSLCommand</span><span class="o">.</span><span class="n">set_default_output_type</span><span class="p">(</span><span class="s">&#39;NIFTI_GZ&#39;</span><span class="p">)</span>
+<span class="n">result1</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">MCFLIRT</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s">&#39;data/s1/f3.nii&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="n">result2</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Smooth</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s">&#39;f3_mcf.nii.gz&#39;</span><span class="p">,</span> <span class="n">fwhm</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="simple-workflow">
+<h2>Simple workflow<a class="headerlink" href="#simple-workflow" title="Permalink to this headline">¶</a></h2>
+<p>In the previous example we knew that fsl.MCFLIRT will produce a file called f3_mcf.nii.gz and we have hard coded
+this as an input to fsl.Smooth. This is quite limited, but luckily nipype supports joining interfaces in pipelines.
+This way output of one interface will be used as an input of another without having to hard code anything. Before
+connecting Interfaces we need to put them into (separate) Nodes and give them unique names. This way every interface will
+process data in a separate folder.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="kn">as</span> <span class="nn">pe</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">motion_correct</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fsl</span><span class="o">.</span><span class="n">MCFLIRT</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;data/s1/f3.nii&#39;</span><span class="p">)),</span>
+                         <span class="n">name</span><span class="o">=</span><span class="s">&quot;motion_correct&quot;</span><span class="p">)</span>
+<span class="n">smooth</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fsl</span><span class="o">.</span><span class="n">Smooth</span><span class="p">(</span><span class="n">fwhm</span><span class="o">=</span><span class="mi">6</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;smooth&quot;</span><span class="p">)</span>
+
+<span class="n">motion_correct_and_smooth</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;motion_correct_and_smooth&quot;</span><span class="p">)</span>
+<span class="n">motion_correct_and_smooth</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span> <span class="c"># define where will be the root folder for the workflow</span>
+<span class="n">motion_correct_and_smooth</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+                                   <span class="p">(</span><span class="n">motion_correct</span><span class="p">,</span> <span class="n">smooth</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)])</span>
+                                   <span class="p">])</span>
+<span class="c"># we are connecting &#39;out_file&#39; output of motion_correct to &#39;in_file&#39; input of smooth</span>
+<span class="n">motion_correct_and_smooth</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="another-workflow">
+<h2>Another workflow<a class="headerlink" href="#another-workflow" title="Permalink to this headline">¶</a></h2>
+<p>Another example of a simple workflow (calculate the mean of fMRI signal and subtract it).
+This time we&#8217;ll be assigning inputs after defining the workflow.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">calc_mean</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fsl</span><span class="o">.</span><span class="n">ImageMaths</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;calc_mean&quot;</span><span class="p">)</span>
+<span class="n">calc_mean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">op_string</span> <span class="o">=</span> <span class="s">&quot;-Tmean&quot;</span>
+<span class="n">subtract</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fsl</span><span class="o">.</span><span class="n">ImageMaths</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;subtract&quot;</span><span class="p">)</span>
+<span class="n">subtract</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">op_string</span> <span class="o">=</span> <span class="s">&quot;-sub&quot;</span>
+
+<span class="n">demean</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;demean&quot;</span><span class="p">)</span>
+<span class="n">demean</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+<span class="n">demean</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+                <span class="p">(</span><span class="n">calc_mean</span><span class="p">,</span> <span class="n">subtract</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="s">&#39;in_file2&#39;</span><span class="p">)])</span>
+                <span class="p">])</span>
+
+<span class="n">demean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">calc_mean</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;data/s1/f3.nii&#39;</span><span class="p">)</span>
+<span class="n">demean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subtract</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;data/s1/f3.nii&#39;</span><span class="p">)</span>
+<span class="n">demean</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="reusing-workflows">
+<h2>Reusing workflows<a class="headerlink" href="#reusing-workflows" title="Permalink to this headline">¶</a></h2>
+<p>The beauty of the workflows is that they are reusable. We can just import a workflow made by someone
+else and feed it with our data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">fmri_fsl</span> <span class="kn">import</span> <span class="n">preproc</span>
+<span class="n">preproc</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+<span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;data/s1/f3.nii&#39;</span><span class="p">)</span>
+<span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">struct</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;data/s1/struct.nii&#39;</span><span class="p">)</span>
+<span class="n">preproc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>... and we can run it again and it won&#8217;t actually rerun anything because none of
+the parameters have changed.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">preproc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>... and we can change a parameter and run it again. Only the dependent nodes
+are rerun and that too only if the input state has changed.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">meanfuncmask</span><span class="o">.</span><span class="n">frac</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">preproc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="visualizing-workflows-1">
+<h2>Visualizing workflows 1<a class="headerlink" href="#visualizing-workflows-1" title="Permalink to this headline">¶</a></h2>
+<p>So what did we run in this precanned workflow</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">preproc</span><span class="o">.</span><span class="n">write_graph</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="datasink">
+<h2>Datasink<a class="headerlink" href="#datasink" title="Permalink to this headline">¶</a></h2>
+<p>Datasink is a special interface for copying and arranging results.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">as</span> <span class="nn">nio</span>
+
+<span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;data/s1/f3.nii&#39;</span><span class="p">)</span>
+<span class="n">preproc</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">struct</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;data/s1/struct.nii&#39;</span><span class="p">)</span>
+<span class="n">datasink</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataSink</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;sinker&#39;</span><span class="p">)</span>
+<span class="n">preprocess</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;preprocout&#39;</span><span class="p">)</span>
+<span class="n">preprocess</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+<span class="n">preprocess</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+                    <span class="p">(</span><span class="n">preproc</span><span class="p">,</span> <span class="n">datasink</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;meanfunc2.out_file&#39;</span><span class="p">,</span> <span class="s">&#39;meanfunc&#39;</span><span class="p">),</span>
+                                         <span class="p">(</span><span class="s">&#39;maskfunc3.out_file&#39;</span><span class="p">,</span> <span class="s">&#39;funcruns&#39;</span><span class="p">)])</span>
+                    <span class="p">])</span>
+<span class="n">preprocess</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="datagrabber">
+<h2>Datagrabber<a class="headerlink" href="#datagrabber" title="Permalink to this headline">¶</a></h2>
+<p>Datagrabber is (surprise, surprise) an interface for collecting files from hard drive. It is very flexible and
+supports almost any file organisation of your data you can imagine.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">datasource1</span> <span class="o">=</span> <span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">()</span>
+<span class="n">datasource1</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;data/s1/f3.nii&#39;</span>
+<span class="n">datasource1</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">datasource1</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">results</span><span class="o">.</span><span class="n">outputs</span>
+
+<span class="n">datasource2</span> <span class="o">=</span> <span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">()</span>
+<span class="n">datasource2</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;data/s*/f*.nii&#39;</span>
+<span class="n">datasource2</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">datasource2</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">results</span><span class="o">.</span><span class="n">outputs</span>
+
+<span class="n">datasource3</span> <span class="o">=</span> <span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;run&#39;</span><span class="p">])</span>
+<span class="n">datasource3</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;data/s1/f</span><span class="si">%d</span><span class="s">.nii&#39;</span>
+<span class="n">datasource3</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">datasource3</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">datasource3</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">results</span><span class="o">.</span><span class="n">outputs</span>
+
+<span class="n">datasource4</span> <span class="o">=</span> <span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;run&#39;</span><span class="p">])</span>
+<span class="n">datasource4</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;data/</span><span class="si">%s</span><span class="s">/f</span><span class="si">%d</span><span class="s">.nii&#39;</span>
+<span class="n">datasource4</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">datasource4</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">run</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span>
+<span class="n">datasource4</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;s1&#39;</span><span class="p">,</span> <span class="s">&#39;s3&#39;</span><span class="p">]</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">datasource4</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">results</span><span class="o">.</span><span class="n">outputs</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="iterables">
+<h2>Iterables<a class="headerlink" href="#iterables" title="Permalink to this headline">¶</a></h2>
+<p>Iterables is a special field of the Node class that enables to iterate all workfloes/nodes connected to it over
+some parameters. Here we&#8217;ll use it to iterate over two subjects.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.interfaces.utility</span> <span class="kn">as</span> <span class="nn">util</span>
+<span class="n">infosource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">]),</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s">&quot;infosource&quot;</span><span class="p">)</span>
+<span class="n">infosource</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;s1&#39;</span><span class="p">,</span> <span class="s">&#39;s3&#39;</span><span class="p">])</span>
+
+<span class="n">datasource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">],</span> <span class="n">outfields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;func&#39;</span><span class="p">,</span> <span class="s">&#39;struct&#39;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;datasource&quot;</span><span class="p">)</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">.nii&#39;</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;data&#39;</span><span class="p">)</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;f3&#39;</span><span class="p">]],</span> <span class="n">struct</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;struct&#39;</span><span class="p">]])</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="n">my_workflow</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;my_workflow&quot;</span><span class="p">)</span>
+<span class="n">my_workflow</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+
+<span class="n">my_workflow</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">infosource</span><span class="p">,</span> <span class="n">datasource</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)]),</span>
+                     <span class="p">(</span><span class="n">datasource</span><span class="p">,</span> <span class="n">preproc</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;func&#39;</span><span class="p">,</span> <span class="s">&#39;inputspec.func&#39;</span><span class="p">),</span>
+                                          <span class="p">(</span><span class="s">&#39;struct&#39;</span><span class="p">,</span> <span class="s">&#39;inputspec.struct&#39;</span><span class="p">)])])</span>
+<span class="n">my_workflow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>and we can change a node attribute and run it again</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">smoothnode</span> <span class="o">=</span> <span class="n">my_workflow</span><span class="o">.</span><span class="n">get_node</span><span class="p">(</span><span class="s">&#39;preproc.smooth&#39;</span><span class="p">)</span>
+<span class="k">assert</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">smoothnode</span><span class="p">)</span><span class="o">==</span><span class="s">&#39;preproc.smooth&#39;</span><span class="p">)</span>
+<span class="n">smoothnode</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;fwhm&#39;</span><span class="p">,</span> <span class="p">[</span><span class="mf">5.</span><span class="p">,</span><span class="mf">10.</span><span class="p">])</span>
+<span class="n">my_workflow</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="visualizing-workflows-2">
+<h2>Visualizing workflows 2<a class="headerlink" href="#visualizing-workflows-2" title="Permalink to this headline">¶</a></h2>
+<p>In the case of nested workflows, we might want to look at expanded forms of the workflow.</p>
+<div class="admonition-example-source-code admonition">
+<p class="first admonition-title">Example source code</p>
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/workshop_dartmouth_2010.py"><code class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></code></a>.
+This same script is also included in the Nipype source distribution under the
+<code class="file docutils literal"><span class="pre">examples</span></code> directory.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -168,7 +168,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -180,7 +180,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -203,9 +203,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -215,13 +215,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-fsl-epi">
 <h1>interfaces.fsl.epi<a class="headerlink" href="#interfaces-fsl-epi" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-fsl-epi-applytopup"></span><div class="section" id="applytopup">
 <span id="index-0"></span><h2>ApplyTOPUP<a class="headerlink" href="#applytopup" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L347">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/epi.py#L347">Link to code</a></p>
 <p>Wraps command <strong>applytopup</strong></p>
 <p>Interface for FSL topup, a tool for estimating and correcting
 susceptibility induced distortions.
@@ -250,7 +250,7 @@ encoding_file: (an existing file name)
 in_files: (a list of items which are an existing file name)
         name of 4D file with images
         flag: --imain=%s
-in_index: (a list of items which are an integer)
+in_index: (a list of items which are an integer (int or long))
         comma separated list of indicies into --datain of the input image
         (to be corrected)
         flag: --inindex=%s
@@ -303,13 +303,13 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="epidewarp">
 <span id="index-1"></span><h2>EPIDeWarp<a class="headerlink" href="#epidewarp" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L733">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/epi.py#L735">Link to code</a></p>
 <p>Wraps command <strong>epidewarp.fsl</strong></p>
 <p>Wraps the unwarping script <a class="reference external" href="http://surfer.nmr.mgh.harvard.edu/fswiki/epidewarp.fsl">epidewarp.fsl</a>.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">deprecated in FSL, please use
-<tt class="xref py py-func docutils literal"><span class="pre">nipype.workflows.dmri.preprocess.epi.sdc_fmb()</span></tt> instead.</p>
+<code class="xref py py-func docutils literal"><span class="pre">nipype.workflows.dmri.preprocess.epi.sdc_fmb()</span></code> instead.</p>
 </div>
 <div class="section" id="id1">
 <h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
@@ -368,7 +368,7 @@ nocleanup: (a boolean, nipype default value: True)
 output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
          &#39;NIFTI&#39;)
         FSL output type
-sigma: (an integer, nipype default value: 2)
+sigma: (an integer (int or long), nipype default value: 2)
         2D spatial gaussing smoothing stdev (default = 2mm)
         flag: --sigma %s
 tediff: (a float, nipype default value: 2.46)
@@ -401,7 +401,7 @@ vsm_file: (a file name)
 </div>
 <div class="section" id="eddy">
 <span id="index-2"></span><h2>Eddy<a class="headerlink" href="#eddy" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L440">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/epi.py#L440">Link to code</a></p>
 <p>Wraps command <strong>eddy</strong></p>
 <p>Interface for FSL eddy, a tool for estimating and correcting eddy
 currents induced distortions. <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/Eddy/UsersGuide">User guide</a> and
@@ -470,10 +470,10 @@ in_topup_movpar: (an existing file name)
 method: (&#39;jac&#39; or &#39;lsr&#39;)
         Final resampling method (jacobian/least squares)
         flag: --resamp=%s
-niter: (an integer)
+niter: (an integer (int or long))
         Number of iterations
         flag: --niter=%s
-num_threads: (an integer, nipype default value: 1)
+num_threads: (an integer (int or long), nipype default value: 1)
         Number of openmp threads to use
 out_base: (a unicode string, nipype default value: eddy_corrected)
         basename for output (warped) image
@@ -505,12 +505,12 @@ out_parameter: (an existing file name)
 </div>
 <div class="section" id="eddycorrect">
 <span id="index-3"></span><h2>EddyCorrect<a class="headerlink" href="#eddycorrect" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L831">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/epi.py#L833">Link to code</a></p>
 <p>Wraps command <strong>eddy_correct</strong></p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">Deprecated in FSL. Please use
-<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.fsl.epi.Eddy</span></tt> instead</p>
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.fsl.epi.Eddy</span></code> instead</p>
 </div>
 <div class="section" id="example">
 <h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
@@ -526,7 +526,7 @@ out_parameter: (an existing file name)
 in_file: (an existing file name)
         4D input file
         flag: %s, position: 0
-ref_num: (an integer, nipype default value: 0)
+ref_num: (an integer (int or long), nipype default value: 0)
         reference number
         flag: %d, position: 2
 
@@ -562,7 +562,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="epireg">
 <span id="index-4"></span><h2>EpiReg<a class="headerlink" href="#epireg" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L622">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/epi.py#L622">Link to code</a></p>
 <p>Wraps command <strong>epi_reg</strong></p>
 <p>Runs FSL epi_reg script for simultaneous coregistration and fieldmap
 unwarping.</p>
@@ -627,7 +627,7 @@ no_fmapreg: (a boolean)
         do not perform registration of fmap to T1 (use if fmap already
         registered)
         flag: --nofmapreg
-out_base: (a string)
+out_base: (a string, nipype default value: epi2struct)
         output base name
         flag: --out=%s, position: -1
 output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
@@ -682,12 +682,12 @@ wmseg: (an existing file name)
 </div>
 <div class="section" id="preparefieldmap">
 <span id="index-5"></span><h2>PrepareFieldmap<a class="headerlink" href="#preparefieldmap" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L57">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/epi.py#L57">Link to code</a></p>
 <p>Wraps command <strong>fsl_prepare_fieldmap</strong></p>
 <p>Interface for the fsl_prepare_fieldmap script (FSL 5.0)</p>
 <p>Prepares a fieldmap suitable for FEAT from SIEMENS data - saves output in
-rad/s format (e.g. <tt class="docutils literal"><span class="pre">`fsl_prepare_fieldmap</span> <span class="pre">SIEMENS</span>
-<span class="pre">images_3_gre_field_mapping</span> <span class="pre">images_4_gre_field_mapping</span> <span class="pre">fmap_rads</span> <span class="pre">2.65`</span></tt>).</p>
+rad/s format (e.g. <code class="docutils literal"><span class="pre">`fsl_prepare_fieldmap</span> <span class="pre">SIEMENS</span>
+<span class="pre">images_3_gre_field_mapping</span> <span class="pre">images_4_gre_field_mapping</span> <span class="pre">fmap_rads</span> <span class="pre">2.65`</span></code>).</p>
 <div class="section" id="id4">
 <h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">PrepareFieldmap</span>
@@ -751,7 +751,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="sigloss">
 <span id="index-6"></span><h2>SigLoss<a class="headerlink" href="#sigloss" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L527">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/epi.py#L527">Link to code</a></p>
 <p>Wraps command <strong>sigloss</strong></p>
 <p>Estimates signal loss from a field map (in rad/s)</p>
 <div class="section" id="id5">
@@ -813,14 +813,13 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="topup">
 <span id="index-7"></span><h2>TOPUP<a class="headerlink" href="#topup" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/epi.py#L219">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/epi.py#L219">Link to code</a></p>
 <p>Wraps command <strong>topup</strong></p>
 <p>Interface for FSL topup, a tool for estimating and correcting
 susceptibility induced distortions. See FSL documentation for
 <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/TOPUP">reference</a>,
 <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/topup/ExampleTopupFollowedByApplytopup">usage examples</a>,
-and <a href="#id7"><span class="problematic" id="id8">`exemplary config files
-&lt;https://github.com/ahheckel/FSL-scripts/blob/master/rsc/fsl/fsl4/topup/b02b0.cnf`_</span></a>.</p>
+and <a class="reference external" href="https://github.com/ahheckel/FSL-scripts/blob/master/rsc/fsl/fsl4/topup/b02b0.cnf">exemplary config files</a>.</p>
 <div class="section" id="id6">
 <h3>Examples<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">TOPUP</span>
@@ -876,7 +875,7 @@ ignore_exception: (a boolean, nipype default value: False)
 interp: (&#39;spline&#39; or &#39;linear&#39;)
         Image interpolation model, linear or spline.
         flag: --interp=%s
-max_iter: (an integer)
+max_iter: (an integer (int or long))
         max # of non-linear iterations
         flag: --miter=%d
 minmet: (0 or 1)
@@ -920,7 +919,7 @@ regrid: (1 or 0)
 scale: (0 or 1)
         If set (=1), the images are individually scaled to a common mean
         flag: --scale=%d
-splineorder: (an integer)
+splineorder: (an integer (int or long))
         order of spline, 2-&gt;Qadratic spline, 3-&gt;Cubic spline
         flag: --splineorder=%d
 ssqlambda: (1 or 0)
@@ -930,7 +929,7 @@ ssqlambda: (1 or 0)
         than they would without weighting. This reduces the risk of finding
         a local minimum.
         flag: --ssqlambda=%d
-subsamp: (an integer)
+subsamp: (an integer (int or long))
         sub-sampling scheme
         flag: --subsamp=%d
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -969,9 +968,9 @@ out_movpar: (an existing file name)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

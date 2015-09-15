@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,13 +114,13 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">pipeline.engine</a><ul>
-<li><a class="reference internal" href="#module-pipeline-engine">Module: <tt class="docutils literal"><span class="pre">pipeline.engine</span></tt></a></li>
+<li><a class="reference internal" href="#module-pipeline-engine">Module: <code class="docutils literal"><span class="pre">pipeline.engine</span></code></a></li>
 <li><a class="reference internal" href="#classes">Classes</a><ul>
-<li><a class="reference internal" href="#joinnode"><tt class="docutils literal"><span class="pre">JoinNode</span></tt></a></li>
-<li><a class="reference internal" href="#mapnode"><tt class="docutils literal"><span class="pre">MapNode</span></tt></a></li>
-<li><a class="reference internal" href="#node"><tt class="docutils literal"><span class="pre">Node</span></tt></a></li>
-<li><a class="reference internal" href="#workflow"><tt class="docutils literal"><span class="pre">Workflow</span></tt></a></li>
-<li><a class="reference internal" href="#workflowbase"><tt class="docutils literal"><span class="pre">WorkflowBase</span></tt></a></li>
+<li><a class="reference internal" href="#joinnode"><code class="docutils literal"><span class="pre">JoinNode</span></code></a></li>
+<li><a class="reference internal" href="#mapnode"><code class="docutils literal"><span class="pre">MapNode</span></code></a></li>
+<li><a class="reference internal" href="#node"><code class="docutils literal"><span class="pre">Node</span></code></a></li>
+<li><a class="reference internal" href="#workflow"><code class="docutils literal"><span class="pre">Workflow</span></code></a></li>
+<li><a class="reference internal" href="#workflowbase"><code class="docutils literal"><span class="pre">WorkflowBase</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#function">Function</a></li>
@@ -146,7 +146,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -158,7 +158,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -181,9 +181,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -193,13 +193,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="pipeline-engine">
 <h1>pipeline.engine<a class="headerlink" href="#pipeline-engine" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-pipeline-engine">
-<h2>Module: <tt class="xref py py-mod docutils literal"><span class="pre">pipeline.engine</span></tt><a class="headerlink" href="#module-pipeline-engine" title="Permalink to this headline">¶</a></h2>
-<p>Inheritance diagram for <tt class="docutils literal"><span class="pre">nipype.pipeline.engine</span></tt>:</p>
+<h2>Module: <code class="xref py py-mod docutils literal"><span class="pre">pipeline.engine</span></code><a class="headerlink" href="#module-pipeline-engine" title="Permalink to this headline">¶</a></h2>
+<p>Inheritance diagram for <code class="docutils literal"><span class="pre">nipype.pipeline.engine</span></code>:</p>
 <p class="graphviz">
 <img src="../../_images/inheritance-e723902fa724ccb7cb8382830c1c3ad9a56e786a.png" alt="Inheritance diagram of nipype.pipeline.engine" usemap="#inheritancefc668476a8" class="inheritance"/>
 <map id="inheritancefc668476a8" name="inheritancefc668476a8">
@@ -222,11 +222,11 @@
 <div class="section" id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="joinnode">
-<h3><a class="reference internal" href="#nipype.pipeline.engine.JoinNode" title="nipype.pipeline.engine.JoinNode"><tt class="xref py py-class docutils literal"><span class="pre">JoinNode</span></tt></a><a class="headerlink" href="#joinnode" title="Permalink to this headline">¶</a></h3>
+<h3><a class="reference internal" href="#nipype.pipeline.engine.JoinNode" title="nipype.pipeline.engine.JoinNode"><code class="xref py py-class docutils literal"><span class="pre">JoinNode</span></code></a><a class="headerlink" href="#joinnode" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nipype.pipeline.engine.JoinNode">
-<em class="property">class </em><tt class="descclassname">nipype.pipeline.engine.</tt><tt class="descname">JoinNode</tt><big>(</big><em>interface</em>, <em>name</em>, <em>joinsource</em>, <em>joinfield=None</em>, <em>unique=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#nipype.pipeline.engine.Node" title="nipype.pipeline.engine.Node"><tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Node</span></tt></a></p>
+<em class="property">class </em><code class="descclassname">nipype.pipeline.engine.</code><code class="descname">JoinNode</code><span class="sig-paren">(</span><em>interface</em>, <em>name</em>, <em>joinsource</em>, <em>joinfield=None</em>, <em>unique=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nipype.pipeline.engine.Node" title="nipype.pipeline.engine.Node"><code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Node</span></code></a></p>
 <p>Wraps interface objects that join inputs into a list.</p>
 <p class="rubric">Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="kn">as</span> <span class="nn">pe</span>
@@ -258,44 +258,44 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.clone" title="nipype.pipeline.engine.JoinNode.clone"><tt class="xref py py-obj docutils literal"><span class="pre">clone</span></tt></a>(name)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.clone" title="nipype.pipeline.engine.JoinNode.clone"><code class="xref py py-obj docutils literal"><span class="pre">clone</span></code></a>(name)</td>
 <td>Clone a workflowbase object</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.get_output" title="nipype.pipeline.engine.JoinNode.get_output"><tt class="xref py py-obj docutils literal"><span class="pre">get_output</span></tt></a>(parameter)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.get_output" title="nipype.pipeline.engine.JoinNode.get_output"><code class="xref py py-obj docutils literal"><span class="pre">get_output</span></code></a>(parameter)</td>
 <td>Retrieve a particular output of the node</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.hash_exists" title="nipype.pipeline.engine.JoinNode.hash_exists"><tt class="xref py py-obj docutils literal"><span class="pre">hash_exists</span></tt></a>([updatehash])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.hash_exists" title="nipype.pipeline.engine.JoinNode.hash_exists"><code class="xref py py-obj docutils literal"><span class="pre">hash_exists</span></code></a>([updatehash])</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.help" title="nipype.pipeline.engine.JoinNode.help"><tt class="xref py py-obj docutils literal"><span class="pre">help</span></tt></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.help" title="nipype.pipeline.engine.JoinNode.help"><code class="xref py py-obj docutils literal"><span class="pre">help</span></code></a>()</td>
 <td>Print interface help</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.load" title="nipype.pipeline.engine.JoinNode.load"><tt class="xref py py-obj docutils literal"><span class="pre">load</span></tt></a>(filename)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.load" title="nipype.pipeline.engine.JoinNode.load"><code class="xref py py-obj docutils literal"><span class="pre">load</span></code></a>(filename)</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.output_dir" title="nipype.pipeline.engine.JoinNode.output_dir"><tt class="xref py py-obj docutils literal"><span class="pre">output_dir</span></tt></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.output_dir" title="nipype.pipeline.engine.JoinNode.output_dir"><code class="xref py py-obj docutils literal"><span class="pre">output_dir</span></code></a>()</td>
 <td>Return the location of the output directory for the node</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.run" title="nipype.pipeline.engine.JoinNode.run"><tt class="xref py py-obj docutils literal"><span class="pre">run</span></tt></a>([updatehash])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.run" title="nipype.pipeline.engine.JoinNode.run"><code class="xref py py-obj docutils literal"><span class="pre">run</span></code></a>([updatehash])</td>
 <td>Execute the node in its directory.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.save" title="nipype.pipeline.engine.JoinNode.save"><tt class="xref py py-obj docutils literal"><span class="pre">save</span></tt></a>([filename])</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.save" title="nipype.pipeline.engine.JoinNode.save"><code class="xref py py-obj docutils literal"><span class="pre">save</span></code></a>([filename])</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.set_input" title="nipype.pipeline.engine.JoinNode.set_input"><tt class="xref py py-obj docutils literal"><span class="pre">set_input</span></tt></a>(parameter,&nbsp;val)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.set_input" title="nipype.pipeline.engine.JoinNode.set_input"><code class="xref py py-obj docutils literal"><span class="pre">set_input</span></code></a>(parameter,&nbsp;val)</td>
 <td>Set interface input value</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.update" title="nipype.pipeline.engine.JoinNode.update"><tt class="xref py py-obj docutils literal"><span class="pre">update</span></tt></a>(**opts)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.update" title="nipype.pipeline.engine.JoinNode.update"><code class="xref py py-obj docutils literal"><span class="pre">update</span></code></a>(**opts)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.write_report" title="nipype.pipeline.engine.JoinNode.write_report"><tt class="xref py py-obj docutils literal"><span class="pre">write_report</span></tt></a>([report_type,&nbsp;cwd])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.JoinNode.write_report" title="nipype.pipeline.engine.JoinNode.write_report"><code class="xref py py-obj docutils literal"><span class="pre">write_report</span></code></a>([report_type,&nbsp;cwd])</td>
 <td></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="nipype.pipeline.engine.JoinNode.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>interface</em>, <em>name</em>, <em>joinsource</em>, <em>joinfield=None</em>, <em>unique=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>interface</em>, <em>name</em>, <em>joinsource</em>, <em>joinfield=None</em>, <em>unique=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -327,7 +327,7 @@ The default is all of the join node input fields.</p>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.JoinNode.clone">
-<tt class="descname">clone</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.clone" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clone</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.clone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clone a workflowbase object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -345,75 +345,75 @@ The default is all of the join node input fields.</p>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.JoinNode.fullname">
-<tt class="descname">fullname</tt><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.fullname" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fullname</code><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.fullname" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.JoinNode.get_output">
-<tt class="descname">get_output</tt><big>(</big><em>parameter</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.get_output" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_output</code><span class="sig-paren">(</span><em>parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.get_output" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieve a particular output of the node</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.JoinNode.hash_exists">
-<tt class="descname">hash_exists</tt><big>(</big><em>updatehash=False</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.hash_exists" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hash_exists</code><span class="sig-paren">(</span><em>updatehash=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.hash_exists" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.JoinNode.help">
-<tt class="descname">help</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.help" title="Permalink to this definition">¶</a></dt>
+<code class="descname">help</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.help" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print interface help</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.JoinNode.inputs">
-<tt class="descname">inputs</tt><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.inputs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">inputs</code><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.inputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>The JoinNode inputs include the join field overrides.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.JoinNode.interface">
-<tt class="descname">interface</tt><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.interface" title="Permalink to this definition">¶</a></dt>
+<code class="descname">interface</code><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.interface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the underlying interface object</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.JoinNode.joinfield">
-<tt class="descname">joinfield</tt><em class="property"> = None</em><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.joinfield" title="Permalink to this definition">¶</a></dt>
+<code class="descname">joinfield</code><em class="property"> = None</em><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.joinfield" title="Permalink to this definition">¶</a></dt>
 <dd><p>the fields to join</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.JoinNode.joinsource">
-<tt class="descname">joinsource</tt><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.joinsource" title="Permalink to this definition">¶</a></dt>
+<code class="descname">joinsource</code><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.joinsource" title="Permalink to this definition">¶</a></dt>
 <dd><p>the join predecessor iterable node</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.JoinNode.load">
-<tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.load" title="Permalink to this definition">¶</a></dt>
+<code class="descname">load</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.load" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.JoinNode.output_dir">
-<tt class="descname">output_dir</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.output_dir" title="Permalink to this definition">¶</a></dt>
+<code class="descname">output_dir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.output_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the location of the output directory for the node</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.JoinNode.outputs">
-<tt class="descname">outputs</tt><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.outputs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">outputs</code><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.outputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the output fields of the underlying interface</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.JoinNode.result">
-<tt class="descname">result</tt><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.result" title="Permalink to this definition">¶</a></dt>
+<code class="descname">result</code><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.result" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.JoinNode.run">
-<tt class="descname">run</tt><big>(</big><em>updatehash=False</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>updatehash=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute the node in its directory.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -431,34 +431,34 @@ The default is all of the join node input fields.</p>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.JoinNode.save">
-<tt class="descname">save</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.save" title="Permalink to this definition">¶</a></dt>
+<code class="descname">save</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.save" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.JoinNode.set_input">
-<tt class="descname">set_input</tt><big>(</big><em>parameter</em>, <em>val</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.set_input" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_input</code><span class="sig-paren">(</span><em>parameter</em>, <em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.set_input" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set interface input value</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.JoinNode.update">
-<tt class="descname">update</tt><big>(</big><em>**opts</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.update" title="Permalink to this definition">¶</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>**opts</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.update" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.JoinNode.write_report">
-<tt class="descname">write_report</tt><big>(</big><em>report_type=None</em>, <em>cwd=None</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.write_report" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_report</code><span class="sig-paren">(</span><em>report_type=None</em>, <em>cwd=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.JoinNode.write_report" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </div>
 <div class="section" id="mapnode">
-<h3><a class="reference internal" href="#nipype.pipeline.engine.MapNode" title="nipype.pipeline.engine.MapNode"><tt class="xref py py-class docutils literal"><span class="pre">MapNode</span></tt></a><a class="headerlink" href="#mapnode" title="Permalink to this headline">¶</a></h3>
+<h3><a class="reference internal" href="#nipype.pipeline.engine.MapNode" title="nipype.pipeline.engine.MapNode"><code class="xref py py-class docutils literal"><span class="pre">MapNode</span></code></a><a class="headerlink" href="#mapnode" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nipype.pipeline.engine.MapNode">
-<em class="property">class </em><tt class="descclassname">nipype.pipeline.engine.</tt><tt class="descname">MapNode</tt><big>(</big><em>interface</em>, <em>iterfield</em>, <em>name</em>, <em>serial=False</em>, <em>nested=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#nipype.pipeline.engine.Node" title="nipype.pipeline.engine.Node"><tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Node</span></tt></a></p>
+<em class="property">class </em><code class="descclassname">nipype.pipeline.engine.</code><code class="descname">MapNode</code><span class="sig-paren">(</span><em>interface</em>, <em>iterfield</em>, <em>name</em>, <em>serial=False</em>, <em>nested=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nipype.pipeline.engine.Node" title="nipype.pipeline.engine.Node"><code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Node</span></code></a></p>
 <p>Wraps interface objects that need to be iterated on a list of inputs.</p>
 <p class="rubric">Examples</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">MapNode</span>
@@ -477,50 +477,50 @@ The default is all of the join node input fields.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.clone" title="nipype.pipeline.engine.MapNode.clone"><tt class="xref py py-obj docutils literal"><span class="pre">clone</span></tt></a>(name)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.clone" title="nipype.pipeline.engine.MapNode.clone"><code class="xref py py-obj docutils literal"><span class="pre">clone</span></code></a>(name)</td>
 <td>Clone a workflowbase object</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.get_output" title="nipype.pipeline.engine.MapNode.get_output"><tt class="xref py py-obj docutils literal"><span class="pre">get_output</span></tt></a>(parameter)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.get_output" title="nipype.pipeline.engine.MapNode.get_output"><code class="xref py py-obj docutils literal"><span class="pre">get_output</span></code></a>(parameter)</td>
 <td>Retrieve a particular output of the node</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.get_subnodes" title="nipype.pipeline.engine.MapNode.get_subnodes"><tt class="xref py py-obj docutils literal"><span class="pre">get_subnodes</span></tt></a>()</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.get_subnodes" title="nipype.pipeline.engine.MapNode.get_subnodes"><code class="xref py py-obj docutils literal"><span class="pre">get_subnodes</span></code></a>()</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.hash_exists" title="nipype.pipeline.engine.MapNode.hash_exists"><tt class="xref py py-obj docutils literal"><span class="pre">hash_exists</span></tt></a>([updatehash])</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.hash_exists" title="nipype.pipeline.engine.MapNode.hash_exists"><code class="xref py py-obj docutils literal"><span class="pre">hash_exists</span></code></a>([updatehash])</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.help" title="nipype.pipeline.engine.MapNode.help"><tt class="xref py py-obj docutils literal"><span class="pre">help</span></tt></a>()</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.help" title="nipype.pipeline.engine.MapNode.help"><code class="xref py py-obj docutils literal"><span class="pre">help</span></code></a>()</td>
 <td>Print interface help</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.load" title="nipype.pipeline.engine.MapNode.load"><tt class="xref py py-obj docutils literal"><span class="pre">load</span></tt></a>(filename)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.load" title="nipype.pipeline.engine.MapNode.load"><code class="xref py py-obj docutils literal"><span class="pre">load</span></code></a>(filename)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.num_subnodes" title="nipype.pipeline.engine.MapNode.num_subnodes"><tt class="xref py py-obj docutils literal"><span class="pre">num_subnodes</span></tt></a>()</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.num_subnodes" title="nipype.pipeline.engine.MapNode.num_subnodes"><code class="xref py py-obj docutils literal"><span class="pre">num_subnodes</span></code></a>()</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.output_dir" title="nipype.pipeline.engine.MapNode.output_dir"><tt class="xref py py-obj docutils literal"><span class="pre">output_dir</span></tt></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.output_dir" title="nipype.pipeline.engine.MapNode.output_dir"><code class="xref py py-obj docutils literal"><span class="pre">output_dir</span></code></a>()</td>
 <td>Return the location of the output directory for the node</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.run" title="nipype.pipeline.engine.MapNode.run"><tt class="xref py py-obj docutils literal"><span class="pre">run</span></tt></a>([updatehash])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.run" title="nipype.pipeline.engine.MapNode.run"><code class="xref py py-obj docutils literal"><span class="pre">run</span></code></a>([updatehash])</td>
 <td>Execute the node in its directory.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.save" title="nipype.pipeline.engine.MapNode.save"><tt class="xref py py-obj docutils literal"><span class="pre">save</span></tt></a>([filename])</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.save" title="nipype.pipeline.engine.MapNode.save"><code class="xref py py-obj docutils literal"><span class="pre">save</span></code></a>([filename])</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.set_input" title="nipype.pipeline.engine.MapNode.set_input"><tt class="xref py py-obj docutils literal"><span class="pre">set_input</span></tt></a>(parameter,&nbsp;val)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.set_input" title="nipype.pipeline.engine.MapNode.set_input"><code class="xref py py-obj docutils literal"><span class="pre">set_input</span></code></a>(parameter,&nbsp;val)</td>
 <td>Set interface input value or nodewrapper attribute</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.update" title="nipype.pipeline.engine.MapNode.update"><tt class="xref py py-obj docutils literal"><span class="pre">update</span></tt></a>(**opts)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.update" title="nipype.pipeline.engine.MapNode.update"><code class="xref py py-obj docutils literal"><span class="pre">update</span></code></a>(**opts)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.write_report" title="nipype.pipeline.engine.MapNode.write_report"><tt class="xref py py-obj docutils literal"><span class="pre">write_report</span></tt></a>([report_type,&nbsp;cwd])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.MapNode.write_report" title="nipype.pipeline.engine.MapNode.write_report"><code class="xref py py-obj docutils literal"><span class="pre">write_report</span></code></a>([report_type,&nbsp;cwd])</td>
 <td></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>interface</em>, <em>iterfield</em>, <em>name</em>, <em>serial=False</em>, <em>nested=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>interface</em>, <em>iterfield</em>, <em>name</em>, <em>serial=False</em>, <em>nested=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -558,7 +558,7 @@ nested list structure of the outputs will be resored</p>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.clone">
-<tt class="descname">clone</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.clone" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clone</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.clone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clone a workflowbase object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -576,71 +576,71 @@ nested list structure of the outputs will be resored</p>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.MapNode.fullname">
-<tt class="descname">fullname</tt><a class="headerlink" href="#nipype.pipeline.engine.MapNode.fullname" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fullname</code><a class="headerlink" href="#nipype.pipeline.engine.MapNode.fullname" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.get_output">
-<tt class="descname">get_output</tt><big>(</big><em>parameter</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.get_output" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_output</code><span class="sig-paren">(</span><em>parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.get_output" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieve a particular output of the node</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.get_subnodes">
-<tt class="descname">get_subnodes</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.get_subnodes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_subnodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.get_subnodes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.hash_exists">
-<tt class="descname">hash_exists</tt><big>(</big><em>updatehash=False</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.hash_exists" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hash_exists</code><span class="sig-paren">(</span><em>updatehash=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.hash_exists" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.help">
-<tt class="descname">help</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.help" title="Permalink to this definition">¶</a></dt>
+<code class="descname">help</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.help" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print interface help</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.MapNode.inputs">
-<tt class="descname">inputs</tt><a class="headerlink" href="#nipype.pipeline.engine.MapNode.inputs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">inputs</code><a class="headerlink" href="#nipype.pipeline.engine.MapNode.inputs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.MapNode.interface">
-<tt class="descname">interface</tt><a class="headerlink" href="#nipype.pipeline.engine.MapNode.interface" title="Permalink to this definition">¶</a></dt>
+<code class="descname">interface</code><a class="headerlink" href="#nipype.pipeline.engine.MapNode.interface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the underlying interface object</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.load">
-<tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.load" title="Permalink to this definition">¶</a></dt>
+<code class="descname">load</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.load" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.num_subnodes">
-<tt class="descname">num_subnodes</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.num_subnodes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">num_subnodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.num_subnodes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.output_dir">
-<tt class="descname">output_dir</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.output_dir" title="Permalink to this definition">¶</a></dt>
+<code class="descname">output_dir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.output_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the location of the output directory for the node</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.MapNode.outputs">
-<tt class="descname">outputs</tt><a class="headerlink" href="#nipype.pipeline.engine.MapNode.outputs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">outputs</code><a class="headerlink" href="#nipype.pipeline.engine.MapNode.outputs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.MapNode.result">
-<tt class="descname">result</tt><a class="headerlink" href="#nipype.pipeline.engine.MapNode.result" title="Permalink to this definition">¶</a></dt>
+<code class="descname">result</code><a class="headerlink" href="#nipype.pipeline.engine.MapNode.result" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.run">
-<tt class="descname">run</tt><big>(</big><em>updatehash=False</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>updatehash=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute the node in its directory.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -658,35 +658,35 @@ nested list structure of the outputs will be resored</p>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.save">
-<tt class="descname">save</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.save" title="Permalink to this definition">¶</a></dt>
+<code class="descname">save</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.save" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.set_input">
-<tt class="descname">set_input</tt><big>(</big><em>parameter</em>, <em>val</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.set_input" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_input</code><span class="sig-paren">(</span><em>parameter</em>, <em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.set_input" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set interface input value or nodewrapper attribute</p>
 <p>Priority goes to interface.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.update">
-<tt class="descname">update</tt><big>(</big><em>**opts</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.update" title="Permalink to this definition">¶</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>**opts</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.update" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.MapNode.write_report">
-<tt class="descname">write_report</tt><big>(</big><em>report_type=None</em>, <em>cwd=None</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.MapNode.write_report" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_report</code><span class="sig-paren">(</span><em>report_type=None</em>, <em>cwd=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.MapNode.write_report" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </div>
 <div class="section" id="node">
-<h3><a class="reference internal" href="#nipype.pipeline.engine.Node" title="nipype.pipeline.engine.Node"><tt class="xref py py-class docutils literal"><span class="pre">Node</span></tt></a><a class="headerlink" href="#node" title="Permalink to this headline">¶</a></h3>
+<h3><a class="reference internal" href="#nipype.pipeline.engine.Node" title="nipype.pipeline.engine.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a><a class="headerlink" href="#node" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nipype.pipeline.engine.Node">
-<em class="property">class </em><tt class="descclassname">nipype.pipeline.engine.</tt><tt class="descname">Node</tt><big>(</big><em>interface</em>, <em>name</em>, <em>iterables=None</em>, <em>itersource=None</em>, <em>synchronize=False</em>, <em>overwrite=None</em>, <em>needed_outputs=None</em>, <em>run_without_submitting=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#nipype.pipeline.engine.WorkflowBase" title="nipype.pipeline.engine.WorkflowBase"><tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.WorkflowBase</span></tt></a></p>
+<em class="property">class </em><code class="descclassname">nipype.pipeline.engine.</code><code class="descname">Node</code><span class="sig-paren">(</span><em>interface</em>, <em>name</em>, <em>iterables=None</em>, <em>itersource=None</em>, <em>synchronize=False</em>, <em>overwrite=None</em>, <em>needed_outputs=None</em>, <em>run_without_submitting=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nipype.pipeline.engine.WorkflowBase" title="nipype.pipeline.engine.WorkflowBase"><code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.WorkflowBase</span></code></a></p>
 <p>Wraps interface objects for use in pipeline</p>
 <p>A Node creates a sandbox-like directory for executing the underlying
 interface. It will copy or link inputs into this directory to ensure that
@@ -709,44 +709,44 @@ re-executed.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.clone" title="nipype.pipeline.engine.Node.clone"><tt class="xref py py-obj docutils literal"><span class="pre">clone</span></tt></a>(name)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.clone" title="nipype.pipeline.engine.Node.clone"><code class="xref py py-obj docutils literal"><span class="pre">clone</span></code></a>(name)</td>
 <td>Clone a workflowbase object</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.get_output" title="nipype.pipeline.engine.Node.get_output"><tt class="xref py py-obj docutils literal"><span class="pre">get_output</span></tt></a>(parameter)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.get_output" title="nipype.pipeline.engine.Node.get_output"><code class="xref py py-obj docutils literal"><span class="pre">get_output</span></code></a>(parameter)</td>
 <td>Retrieve a particular output of the node</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.hash_exists" title="nipype.pipeline.engine.Node.hash_exists"><tt class="xref py py-obj docutils literal"><span class="pre">hash_exists</span></tt></a>([updatehash])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.hash_exists" title="nipype.pipeline.engine.Node.hash_exists"><code class="xref py py-obj docutils literal"><span class="pre">hash_exists</span></code></a>([updatehash])</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.help" title="nipype.pipeline.engine.Node.help"><tt class="xref py py-obj docutils literal"><span class="pre">help</span></tt></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.help" title="nipype.pipeline.engine.Node.help"><code class="xref py py-obj docutils literal"><span class="pre">help</span></code></a>()</td>
 <td>Print interface help</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.load" title="nipype.pipeline.engine.Node.load"><tt class="xref py py-obj docutils literal"><span class="pre">load</span></tt></a>(filename)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.load" title="nipype.pipeline.engine.Node.load"><code class="xref py py-obj docutils literal"><span class="pre">load</span></code></a>(filename)</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.output_dir" title="nipype.pipeline.engine.Node.output_dir"><tt class="xref py py-obj docutils literal"><span class="pre">output_dir</span></tt></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.output_dir" title="nipype.pipeline.engine.Node.output_dir"><code class="xref py py-obj docutils literal"><span class="pre">output_dir</span></code></a>()</td>
 <td>Return the location of the output directory for the node</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.run" title="nipype.pipeline.engine.Node.run"><tt class="xref py py-obj docutils literal"><span class="pre">run</span></tt></a>([updatehash])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.run" title="nipype.pipeline.engine.Node.run"><code class="xref py py-obj docutils literal"><span class="pre">run</span></code></a>([updatehash])</td>
 <td>Execute the node in its directory.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.save" title="nipype.pipeline.engine.Node.save"><tt class="xref py py-obj docutils literal"><span class="pre">save</span></tt></a>([filename])</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.save" title="nipype.pipeline.engine.Node.save"><code class="xref py py-obj docutils literal"><span class="pre">save</span></code></a>([filename])</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.set_input" title="nipype.pipeline.engine.Node.set_input"><tt class="xref py py-obj docutils literal"><span class="pre">set_input</span></tt></a>(parameter,&nbsp;val)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.set_input" title="nipype.pipeline.engine.Node.set_input"><code class="xref py py-obj docutils literal"><span class="pre">set_input</span></code></a>(parameter,&nbsp;val)</td>
 <td>Set interface input value</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.update" title="nipype.pipeline.engine.Node.update"><tt class="xref py py-obj docutils literal"><span class="pre">update</span></tt></a>(**opts)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.update" title="nipype.pipeline.engine.Node.update"><code class="xref py py-obj docutils literal"><span class="pre">update</span></code></a>(**opts)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.write_report" title="nipype.pipeline.engine.Node.write_report"><tt class="xref py py-obj docutils literal"><span class="pre">write_report</span></tt></a>([report_type,&nbsp;cwd])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Node.write_report" title="nipype.pipeline.engine.Node.write_report"><code class="xref py py-obj docutils literal"><span class="pre">write_report</span></code></a>([report_type,&nbsp;cwd])</td>
 <td></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="nipype.pipeline.engine.Node.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>interface</em>, <em>name</em>, <em>iterables=None</em>, <em>itersource=None</em>, <em>synchronize=False</em>, <em>overwrite=None</em>, <em>needed_outputs=None</em>, <em>run_without_submitting=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>interface</em>, <em>name</em>, <em>iterables=None</em>, <em>itersource=None</em>, <em>synchronize=False</em>, <em>overwrite=None</em>, <em>needed_outputs=None</em>, <em>run_without_submitting=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -764,31 +764,30 @@ re-executed.</p>
 <div><p>Input field and list to iterate using the pipeline engine
 for example to iterate over different frac values in fsl.Bet()
 for a single field the input can be a tuple, otherwise a list
-of tuples
-node.iterables = (&#8216;frac&#8217;,[0.5,0.6,0.7])
-node.iterables = [(&#8216;fwhm&#8217;,[2,4]),(&#8216;fieldx&#8217;,[0.5,0.6,0.7])]</p>
+of tuples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">node</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;frac&#39;</span><span class="p">,[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">])</span>
+<span class="n">node</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;fwhm&#39;</span><span class="p">,[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">]),(</span><span class="s">&#39;fieldx&#39;</span><span class="p">,[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.6</span><span class="p">,</span><span class="mf">0.7</span><span class="p">])]</span>
+</pre></div>
+</div>
 <p>If this node has an itersource, then the iterables values
 is a dictionary which maps an iterable source field value
-to the target iterables field values, e.g.:
-inputspec.iterables = (&#8216;images&#8217;,[&#8216;img1.nii&#8217;, &#8216;img2.nii&#8217;]])
-node.itersource = (&#8216;inputspec&#8217;, [&#8216;frac&#8217;])
-node.iterables = (&#8216;frac&#8217;, {&#8216;img1.nii&#8217;: [0.5, 0.6],</p>
-<blockquote>
-<div><p>img2.nii&#8217;: [0.6, 0.7]})</p>
-</div></blockquote>
+to the target iterables field values, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>inputspec.iterables = (&#39;images&#39;,[&#39;img1.nii&#39;, &#39;img2.nii&#39;]])
+node.itersource = (&#39;inputspec&#39;, [&#39;frac&#39;])
+node.iterables = (&#39;frac&#39;, {&#39;img1.nii&#39;: [0.5, 0.6],
+                           &#39;img2.nii&#39;: [0.6, 0.7]})
+</pre></div>
+</div>
 <p>If this node&#8217;s synchronize flag is set, then an alternate
 form of the iterables is a [fields, values] list, where
 fields is the list of iterated fields and values is the
-list of value tuples for the given fields, e.g.:
-node.synchronize = True
-node.iterables = [(&#8216;frac&#8217;, &#8216;threshold&#8217;),</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>[(0.5, True),</dt>
-<dd><p class="first last">(0.6, False)]]</p>
-</dd>
-</dl>
-</div></blockquote>
+list of value tuples for the given fields, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">node</span><span class="o">.</span><span class="n">synchronize</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">node</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">[(</span><span class="s">&#39;frac&#39;</span><span class="p">,</span> <span class="s">&#39;threshold&#39;</span><span class="p">),</span>
+                  <span class="p">[(</span><span class="mf">0.5</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span>
+                   <span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="bp">False</span><span class="p">)]]</span>
+</pre></div>
+</div>
 </div></blockquote>
 <p><strong>itersource: tuple</strong> :</p>
 <blockquote>
@@ -832,7 +831,7 @@ multiprocessing pool</p>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Node.clone">
-<tt class="descname">clone</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node.clone" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clone</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node.clone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clone a workflowbase object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -850,63 +849,63 @@ multiprocessing pool</p>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.Node.fullname">
-<tt class="descname">fullname</tt><a class="headerlink" href="#nipype.pipeline.engine.Node.fullname" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fullname</code><a class="headerlink" href="#nipype.pipeline.engine.Node.fullname" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Node.get_output">
-<tt class="descname">get_output</tt><big>(</big><em>parameter</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node.get_output" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_output</code><span class="sig-paren">(</span><em>parameter</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node.get_output" title="Permalink to this definition">¶</a></dt>
 <dd><p>Retrieve a particular output of the node</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Node.hash_exists">
-<tt class="descname">hash_exists</tt><big>(</big><em>updatehash=False</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node.hash_exists" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hash_exists</code><span class="sig-paren">(</span><em>updatehash=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node.hash_exists" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Node.help">
-<tt class="descname">help</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node.help" title="Permalink to this definition">¶</a></dt>
+<code class="descname">help</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node.help" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print interface help</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.Node.inputs">
-<tt class="descname">inputs</tt><a class="headerlink" href="#nipype.pipeline.engine.Node.inputs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">inputs</code><a class="headerlink" href="#nipype.pipeline.engine.Node.inputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the inputs of the underlying interface</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.Node.interface">
-<tt class="descname">interface</tt><a class="headerlink" href="#nipype.pipeline.engine.Node.interface" title="Permalink to this definition">¶</a></dt>
+<code class="descname">interface</code><a class="headerlink" href="#nipype.pipeline.engine.Node.interface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the underlying interface object</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Node.load">
-<tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node.load" title="Permalink to this definition">¶</a></dt>
+<code class="descname">load</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node.load" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Node.output_dir">
-<tt class="descname">output_dir</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node.output_dir" title="Permalink to this definition">¶</a></dt>
+<code class="descname">output_dir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node.output_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the location of the output directory for the node</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.Node.outputs">
-<tt class="descname">outputs</tt><a class="headerlink" href="#nipype.pipeline.engine.Node.outputs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">outputs</code><a class="headerlink" href="#nipype.pipeline.engine.Node.outputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the output fields of the underlying interface</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.Node.result">
-<tt class="descname">result</tt><a class="headerlink" href="#nipype.pipeline.engine.Node.result" title="Permalink to this definition">¶</a></dt>
+<code class="descname">result</code><a class="headerlink" href="#nipype.pipeline.engine.Node.result" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Node.run">
-<tt class="descname">run</tt><big>(</big><em>updatehash=False</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node.run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>updatehash=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute the node in its directory.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -924,34 +923,34 @@ multiprocessing pool</p>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Node.save">
-<tt class="descname">save</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node.save" title="Permalink to this definition">¶</a></dt>
+<code class="descname">save</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node.save" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Node.set_input">
-<tt class="descname">set_input</tt><big>(</big><em>parameter</em>, <em>val</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node.set_input" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_input</code><span class="sig-paren">(</span><em>parameter</em>, <em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node.set_input" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set interface input value</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Node.update">
-<tt class="descname">update</tt><big>(</big><em>**opts</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node.update" title="Permalink to this definition">¶</a></dt>
+<code class="descname">update</code><span class="sig-paren">(</span><em>**opts</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node.update" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Node.write_report">
-<tt class="descname">write_report</tt><big>(</big><em>report_type=None</em>, <em>cwd=None</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Node.write_report" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_report</code><span class="sig-paren">(</span><em>report_type=None</em>, <em>cwd=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Node.write_report" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </div>
 <div class="section" id="workflow">
-<h3><a class="reference internal" href="#nipype.pipeline.engine.Workflow" title="nipype.pipeline.engine.Workflow"><tt class="xref py py-class docutils literal"><span class="pre">Workflow</span></tt></a><a class="headerlink" href="#workflow" title="Permalink to this headline">¶</a></h3>
+<h3><a class="reference internal" href="#nipype.pipeline.engine.Workflow" title="nipype.pipeline.engine.Workflow"><code class="xref py py-class docutils literal"><span class="pre">Workflow</span></code></a><a class="headerlink" href="#workflow" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nipype.pipeline.engine.Workflow">
-<em class="property">class </em><tt class="descclassname">nipype.pipeline.engine.</tt><tt class="descname">Workflow</tt><big>(</big><em>name</em>, <em>base_dir=None</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#nipype.pipeline.engine.WorkflowBase" title="nipype.pipeline.engine.WorkflowBase"><tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.WorkflowBase</span></tt></a></p>
+<em class="property">class </em><code class="descclassname">nipype.pipeline.engine.</code><code class="descname">Workflow</code><span class="sig-paren">(</span><em>name</em>, <em>base_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#nipype.pipeline.engine.WorkflowBase" title="nipype.pipeline.engine.WorkflowBase"><code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.WorkflowBase</span></code></a></p>
 <p>Controls the setup and execution of a pipeline of processes.</p>
 <p class="rubric">Methods</p>
 <table border="1" class="longtable docutils">
@@ -960,50 +959,50 @@ multiprocessing pool</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.add_nodes" title="nipype.pipeline.engine.Workflow.add_nodes"><tt class="xref py py-obj docutils literal"><span class="pre">add_nodes</span></tt></a>(nodes)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.add_nodes" title="nipype.pipeline.engine.Workflow.add_nodes"><code class="xref py py-obj docutils literal"><span class="pre">add_nodes</span></code></a>(nodes)</td>
 <td>Add nodes to a workflow</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.clone" title="nipype.pipeline.engine.Workflow.clone"><tt class="xref py py-obj docutils literal"><span class="pre">clone</span></tt></a>(name)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.clone" title="nipype.pipeline.engine.Workflow.clone"><code class="xref py py-obj docutils literal"><span class="pre">clone</span></code></a>(name)</td>
 <td>Clone a workflow</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.connect" title="nipype.pipeline.engine.Workflow.connect"><tt class="xref py py-obj docutils literal"><span class="pre">connect</span></tt></a>(*args,&nbsp;**kwargs)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.connect" title="nipype.pipeline.engine.Workflow.connect"><code class="xref py py-obj docutils literal"><span class="pre">connect</span></code></a>(*args,&nbsp;**kwargs)</td>
 <td>Connect nodes in the pipeline.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.disconnect" title="nipype.pipeline.engine.Workflow.disconnect"><tt class="xref py py-obj docutils literal"><span class="pre">disconnect</span></tt></a>(*args)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.disconnect" title="nipype.pipeline.engine.Workflow.disconnect"><code class="xref py py-obj docutils literal"><span class="pre">disconnect</span></code></a>(*args)</td>
 <td>Disconnect two nodes</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.export" title="nipype.pipeline.engine.Workflow.export"><tt class="xref py py-obj docutils literal"><span class="pre">export</span></tt></a>([filename,&nbsp;prefix,&nbsp;format,&nbsp;...])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.export" title="nipype.pipeline.engine.Workflow.export"><code class="xref py py-obj docutils literal"><span class="pre">export</span></code></a>([filename,&nbsp;prefix,&nbsp;format,&nbsp;...])</td>
 <td>Export object into a different format</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.get_node" title="nipype.pipeline.engine.Workflow.get_node"><tt class="xref py py-obj docutils literal"><span class="pre">get_node</span></tt></a>(name)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.get_node" title="nipype.pipeline.engine.Workflow.get_node"><code class="xref py py-obj docutils literal"><span class="pre">get_node</span></code></a>(name)</td>
 <td>Return an internal node by name</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.list_node_names" title="nipype.pipeline.engine.Workflow.list_node_names"><tt class="xref py py-obj docutils literal"><span class="pre">list_node_names</span></tt></a>()</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.list_node_names" title="nipype.pipeline.engine.Workflow.list_node_names"><code class="xref py py-obj docutils literal"><span class="pre">list_node_names</span></code></a>()</td>
 <td>List names of all nodes in a workflow</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.load" title="nipype.pipeline.engine.Workflow.load"><tt class="xref py py-obj docutils literal"><span class="pre">load</span></tt></a>(filename)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.load" title="nipype.pipeline.engine.Workflow.load"><code class="xref py py-obj docutils literal"><span class="pre">load</span></code></a>(filename)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.remove_nodes" title="nipype.pipeline.engine.Workflow.remove_nodes"><tt class="xref py py-obj docutils literal"><span class="pre">remove_nodes</span></tt></a>(nodes)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.remove_nodes" title="nipype.pipeline.engine.Workflow.remove_nodes"><code class="xref py py-obj docutils literal"><span class="pre">remove_nodes</span></code></a>(nodes)</td>
 <td>Remove nodes from a workflow</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.run" title="nipype.pipeline.engine.Workflow.run"><tt class="xref py py-obj docutils literal"><span class="pre">run</span></tt></a>([plugin,&nbsp;plugin_args,&nbsp;updatehash])</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.run" title="nipype.pipeline.engine.Workflow.run"><code class="xref py py-obj docutils literal"><span class="pre">run</span></code></a>([plugin,&nbsp;plugin_args,&nbsp;updatehash])</td>
 <td>Execute the workflow</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.save" title="nipype.pipeline.engine.Workflow.save"><tt class="xref py py-obj docutils literal"><span class="pre">save</span></tt></a>([filename])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.save" title="nipype.pipeline.engine.Workflow.save"><code class="xref py py-obj docutils literal"><span class="pre">save</span></code></a>([filename])</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.write_graph" title="nipype.pipeline.engine.Workflow.write_graph"><tt class="xref py py-obj docutils literal"><span class="pre">write_graph</span></tt></a>([dotfilename,&nbsp;graph2use,&nbsp;...])</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.write_graph" title="nipype.pipeline.engine.Workflow.write_graph"><code class="xref py py-obj docutils literal"><span class="pre">write_graph</span></code></a>([dotfilename,&nbsp;graph2use,&nbsp;...])</td>
 <td>Generates a graphviz dot file and a png file</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.write_hierarchical_dotfile" title="nipype.pipeline.engine.Workflow.write_hierarchical_dotfile"><tt class="xref py py-obj docutils literal"><span class="pre">write_hierarchical_dotfile</span></tt></a>([dotfilename,&nbsp;...])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.Workflow.write_hierarchical_dotfile" title="nipype.pipeline.engine.Workflow.write_hierarchical_dotfile"><code class="xref py py-obj docutils literal"><span class="pre">write_hierarchical_dotfile</span></code></a>([dotfilename,&nbsp;...])</td>
 <td></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>name</em>, <em>base_dir=None</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name</em>, <em>base_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a workflow object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1025,7 +1024,7 @@ multiprocessing pool</p>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.add_nodes">
-<tt class="descname">add_nodes</tt><big>(</big><em>nodes</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.add_nodes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_nodes</code><span class="sig-paren">(</span><em>nodes</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.add_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add nodes to a workflow</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1043,7 +1042,7 @@ multiprocessing pool</p>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.clone">
-<tt class="descname">clone</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.clone" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clone</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.clone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clone a workflow</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -1066,7 +1065,7 @@ _init_runtime_fields.</p>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.connect">
-<tt class="descname">connect</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.connect" title="Permalink to this definition">¶</a></dt>
+<code class="descname">connect</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.connect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connect nodes in the pipeline.</p>
 <p>This routine also checks if inputs and outputs are actually provided by
 the nodes that are being connected.</p>
@@ -1115,14 +1114,14 @@ and execute it remotely
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.disconnect">
-<tt class="descname">disconnect</tt><big>(</big><em>*args</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.disconnect" title="Permalink to this definition">¶</a></dt>
+<code class="descname">disconnect</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.disconnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Disconnect two nodes</p>
 <p>See the docstring for connect for format.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.export">
-<tt class="descname">export</tt><big>(</big><em>filename=None</em>, <em>prefix='output'</em>, <em>format='python'</em>, <em>include_config=False</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.export" title="Permalink to this definition">¶</a></dt>
+<code class="descname">export</code><span class="sig-paren">(</span><em>filename=None</em>, <em>prefix='output'</em>, <em>format='python'</em>, <em>include_config=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.export" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export object into a different format</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1152,39 +1151,39 @@ and execute it remotely
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.Workflow.fullname">
-<tt class="descname">fullname</tt><a class="headerlink" href="#nipype.pipeline.engine.Workflow.fullname" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fullname</code><a class="headerlink" href="#nipype.pipeline.engine.Workflow.fullname" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.get_node">
-<tt class="descname">get_node</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.get_node" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_node</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.get_node" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return an internal node by name</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.Workflow.inputs">
-<tt class="descname">inputs</tt><a class="headerlink" href="#nipype.pipeline.engine.Workflow.inputs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">inputs</code><a class="headerlink" href="#nipype.pipeline.engine.Workflow.inputs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.list_node_names">
-<tt class="descname">list_node_names</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.list_node_names" title="Permalink to this definition">¶</a></dt>
+<code class="descname">list_node_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.list_node_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>List names of all nodes in a workflow</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.load">
-<tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.load" title="Permalink to this definition">¶</a></dt>
+<code class="descname">load</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.load" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.Workflow.outputs">
-<tt class="descname">outputs</tt><a class="headerlink" href="#nipype.pipeline.engine.Workflow.outputs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">outputs</code><a class="headerlink" href="#nipype.pipeline.engine.Workflow.outputs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.remove_nodes">
-<tt class="descname">remove_nodes</tt><big>(</big><em>nodes</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.remove_nodes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">remove_nodes</code><span class="sig-paren">(</span><em>nodes</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.remove_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove nodes from a workflow</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1202,7 +1201,7 @@ and execute it remotely
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.run">
-<tt class="descname">run</tt><big>(</big><em>plugin=None</em>, <em>plugin_args=None</em>, <em>updatehash=False</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>plugin=None</em>, <em>plugin_args=None</em>, <em>updatehash=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute the workflow</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1225,12 +1224,12 @@ execution.</p>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.save">
-<tt class="descname">save</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.save" title="Permalink to this definition">¶</a></dt>
+<code class="descname">save</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.save" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.write_graph">
-<tt class="descname">write_graph</tt><big>(</big><em>dotfilename='graph.dot'</em>, <em>graph2use='hierarchical'</em>, <em>format='png'</em>, <em>simple_form=True</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.write_graph" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_graph</code><span class="sig-paren">(</span><em>dotfilename='graph.dot'</em>, <em>graph2use='hierarchical'</em>, <em>format='png'</em>, <em>simple_form=True</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.write_graph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a graphviz dot file and a png file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1262,18 +1261,18 @@ False.</p>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.Workflow.write_hierarchical_dotfile">
-<tt class="descname">write_hierarchical_dotfile</tt><big>(</big><em>dotfilename=None</em>, <em>colored=False</em>, <em>simple_form=True</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.Workflow.write_hierarchical_dotfile" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_hierarchical_dotfile</code><span class="sig-paren">(</span><em>dotfilename=None</em>, <em>colored=False</em>, <em>simple_form=True</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.Workflow.write_hierarchical_dotfile" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </div>
 <div class="section" id="workflowbase">
-<h3><a class="reference internal" href="#nipype.pipeline.engine.WorkflowBase" title="nipype.pipeline.engine.WorkflowBase"><tt class="xref py py-class docutils literal"><span class="pre">WorkflowBase</span></tt></a><a class="headerlink" href="#workflowbase" title="Permalink to this headline">¶</a></h3>
+<h3><a class="reference internal" href="#nipype.pipeline.engine.WorkflowBase" title="nipype.pipeline.engine.WorkflowBase"><code class="xref py py-class docutils literal"><span class="pre">WorkflowBase</span></code></a><a class="headerlink" href="#workflowbase" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nipype.pipeline.engine.WorkflowBase">
-<em class="property">class </em><tt class="descclassname">nipype.pipeline.engine.</tt><tt class="descname">WorkflowBase</tt><big>(</big><em>name=None</em>, <em>base_dir=None</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<em class="property">class </em><code class="descclassname">nipype.pipeline.engine.</code><code class="descname">WorkflowBase</code><span class="sig-paren">(</span><em>name=None</em>, <em>base_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Defines common attributes and functions for workflows and nodes.</p>
 <p class="rubric">Methods</p>
 <table border="1" class="longtable docutils">
@@ -1282,20 +1281,20 @@ False.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.WorkflowBase.clone" title="nipype.pipeline.engine.WorkflowBase.clone"><tt class="xref py py-obj docutils literal"><span class="pre">clone</span></tt></a>(name)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.WorkflowBase.clone" title="nipype.pipeline.engine.WorkflowBase.clone"><code class="xref py py-obj docutils literal"><span class="pre">clone</span></code></a>(name)</td>
 <td>Clone a workflowbase object</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.WorkflowBase.load" title="nipype.pipeline.engine.WorkflowBase.load"><tt class="xref py py-obj docutils literal"><span class="pre">load</span></tt></a>(filename)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.pipeline.engine.WorkflowBase.load" title="nipype.pipeline.engine.WorkflowBase.load"><code class="xref py py-obj docutils literal"><span class="pre">load</span></code></a>(filename)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.WorkflowBase.save" title="nipype.pipeline.engine.WorkflowBase.save"><tt class="xref py py-obj docutils literal"><span class="pre">save</span></tt></a>([filename])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.pipeline.engine.WorkflowBase.save" title="nipype.pipeline.engine.WorkflowBase.save"><code class="xref py py-obj docutils literal"><span class="pre">save</span></code></a>([filename])</td>
 <td></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="nipype.pipeline.engine.WorkflowBase.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>name=None</em>, <em>base_dir=None</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>name=None</em>, <em>base_dir=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize base parameters of a workflow or node</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1319,7 +1318,7 @@ default=None, which results in the use of mkdtemp</p>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.WorkflowBase.clone">
-<tt class="descname">clone</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.clone" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clone</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.clone" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clone a workflowbase object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1337,27 +1336,27 @@ default=None, which results in the use of mkdtemp</p>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.WorkflowBase.fullname">
-<tt class="descname">fullname</tt><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.fullname" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fullname</code><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.fullname" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.WorkflowBase.inputs">
-<tt class="descname">inputs</tt><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.inputs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">inputs</code><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.inputs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.WorkflowBase.load">
-<tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.load" title="Permalink to this definition">¶</a></dt>
+<code class="descname">load</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.load" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.pipeline.engine.WorkflowBase.outputs">
-<tt class="descname">outputs</tt><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.outputs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">outputs</code><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.outputs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.pipeline.engine.WorkflowBase.save">
-<tt class="descname">save</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.save" title="Permalink to this definition">¶</a></dt>
+<code class="descname">save</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.WorkflowBase.save" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1368,7 +1367,7 @@ default=None, which results in the use of mkdtemp</p>
 <h2>Function<a class="headerlink" href="#function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="nipype.pipeline.engine.format_node">
-<tt class="descclassname">nipype.pipeline.engine.</tt><tt class="descname">format_node</tt><big>(</big><em>node</em>, <em>format='python'</em>, <em>include_config=False</em><big>)</big><a class="headerlink" href="#nipype.pipeline.engine.format_node" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">nipype.pipeline.engine.</code><code class="descname">format_node</code><span class="sig-paren">(</span><em>node</em>, <em>format='python'</em>, <em>include_config=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.pipeline.engine.format_node" title="Permalink to this definition">¶</a></dt>
 <dd><p>Format a node in a given output syntax.</p>
 </dd></dl>
 
@@ -1382,9 +1381,9 @@ default=None, which results in the use of mkdtemp</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

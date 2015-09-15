@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,7 +114,7 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">workflows.dmri.camino.diffusion</a><ul>
-<li><a class="reference internal" href="#create-camino-dti-pipeline"><tt class="docutils literal"><span class="pre">create_camino_dti_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-camino-dti-pipeline"><code class="docutils literal"><span class="pre">create_camino_dti_pipeline()</span></code></a><ul>
 <li><a class="reference internal" href="#example">Example</a></li>
 <li><a class="reference internal" href="#graph">Graph</a></li>
 </ul>
@@ -141,7 +141,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -153,7 +153,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -176,9 +176,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -188,13 +188,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-nipype.workflows.dmri.camino.diffusion">
 <span id="workflows-dmri-camino-diffusion"></span><h1>workflows.dmri.camino.diffusion<a class="headerlink" href="#module-nipype.workflows.dmri.camino.diffusion" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="create-camino-dti-pipeline">
-<span id="nipype-workflows-dmri-camino-diffusion-create-camino-dti-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_camino_dti_pipeline()</span></tt><a class="headerlink" href="#create-camino-dti-pipeline" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/camino/diffusion.py#L9">Link to code</a></p>
+<span id="nipype-workflows-dmri-camino-diffusion-create-camino-dti-pipeline"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_camino_dti_pipeline()</span></code><a class="headerlink" href="#create-camino-dti-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/camino/diffusion.py#L9">Link to code</a></p>
 <p>Creates a pipeline that does the same diffusion processing as in the
 <a class="reference internal" href="../../users/examples/dmri_camino_dti.html"><em>dMRI: Camino, DTI</em></a> example script. Given a diffusion-weighted image,
 b-values, and b-vectors, the workflow will return the tractography
@@ -227,7 +227,7 @@ computed from diffusion tensors and from PICo probabilistic tractography.</p>
 <div class="section" id="graph">
 <h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-8de843cc48de9692dae68773489fa7b483f6d4f3.png" alt="digraph dtiproc{
+<img src="../../_images/graphviz-0b861d1504ba1c77a5a4edee863947bbcb518e87.png" alt="digraph dtiproc{
 
   label=&quot;dtiproc&quot;;
 
@@ -247,27 +247,23 @@ computed from diffusion tensors and from PICo probabilistic tractography.</p>
 
     dtiproc_tractography_fsl2scheme[label=&quot;fsl2scheme (camino)&quot;];
 
+    dtiproc_tractography_dtlutgen[label=&quot;dtlutgen (camino)&quot;];
+
     dtiproc_tractography_dtifit[label=&quot;dtifit (camino)&quot;];
 
     dtiproc_tractography_trace[label=&quot;trace (camino)&quot;];
 
-    dtiproc_tractography_analyzeheader_trace[label=&quot;analyzeheader_trace (camino)&quot;];
-
-    dtiproc_tractography_trackdt[label=&quot;trackdt (camino)&quot;];
+    dtiproc_tractography_dteig[label=&quot;dteig (camino)&quot;];
 
     dtiproc_tractography_fa[label=&quot;fa (camino)&quot;];
 
     dtiproc_tractography_analyzeheader_fa[label=&quot;analyzeheader_fa (camino)&quot;];
 
-    dtiproc_tractography_fa2nii[label=&quot;fa2nii (misc)&quot;];
-
-    dtiproc_tractography_dteig[label=&quot;dteig (camino)&quot;];
+    dtiproc_tractography_trackdt[label=&quot;trackdt (camino)&quot;];
 
     dtiproc_tractography_cam2trk_dt[label=&quot;cam2trk_dt (camino2trackvis)&quot;];
 
-    dtiproc_tractography_trace2nii[label=&quot;trace2nii (misc)&quot;];
-
-    dtiproc_tractography_dtlutgen[label=&quot;dtlutgen (camino)&quot;];
+    dtiproc_tractography_fa2nii[label=&quot;fa2nii (misc)&quot;];
 
     dtiproc_tractography_picopdfs[label=&quot;picopdfs (camino)&quot;];
 
@@ -275,15 +271,9 @@ computed from diffusion tensors and from PICo probabilistic tractography.</p>
 
     dtiproc_tractography_cam2trk_pico[label=&quot;cam2trk_pico (camino2trackvis)&quot;];
 
-    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_cam2trk_dt;
+    dtiproc_tractography_analyzeheader_trace[label=&quot;analyzeheader_trace (camino)&quot;];
 
-    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_cam2trk_dt;
-
-    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_image2voxel;
-
-    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_analyzeheader_trace;
-
-    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_analyzeheader_trace;
+    dtiproc_tractography_trace2nii[label=&quot;trace2nii (misc)&quot;];
 
     dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_analyzeheader_fa;
 
@@ -291,35 +281,47 @@ computed from diffusion tensors and from PICo probabilistic tractography.</p>
 
     dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_bet;
 
-    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_cam2trk_pico;
+    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_image2voxel;
 
-    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_cam2trk_pico;
+    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_analyzeheader_trace;
 
-    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_fsl2scheme;
-
-    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_fsl2scheme;
-
-    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_fa2nii;
+    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_analyzeheader_trace;
 
     dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_trace2nii;
 
-    dtiproc_tractography_bet -&gt; dtiproc_tractography_trackpico;
+    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_cam2trk_dt;
+
+    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_cam2trk_dt;
+
+    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_fa2nii;
+
+    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_fsl2scheme;
+
+    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_fsl2scheme;
+
+    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_cam2trk_pico;
+
+    dtiproc_tractography_inputnode1 -&gt; dtiproc_tractography_cam2trk_pico;
 
     dtiproc_tractography_bet -&gt; dtiproc_tractography_trackdt;
 
+    dtiproc_tractography_bet -&gt; dtiproc_tractography_trackpico;
+
     dtiproc_tractography_image2voxel -&gt; dtiproc_tractography_dtifit;
+
+    dtiproc_tractography_fsl2scheme -&gt; dtiproc_tractography_dtifit;
 
     dtiproc_tractography_fsl2scheme -&gt; dtiproc_tractography_dtlutgen;
 
-    dtiproc_tractography_fsl2scheme -&gt; dtiproc_tractography_dtifit;
+    dtiproc_tractography_dtlutgen -&gt; dtiproc_tractography_picopdfs;
+
+    dtiproc_tractography_dtifit -&gt; dtiproc_tractography_trackdt;
+
+    dtiproc_tractography_dtifit -&gt; dtiproc_tractography_trace;
 
     dtiproc_tractography_dtifit -&gt; dtiproc_tractography_picopdfs;
 
     dtiproc_tractography_dtifit -&gt; dtiproc_tractography_dteig;
-
-    dtiproc_tractography_dtifit -&gt; dtiproc_tractography_trace;
-
-    dtiproc_tractography_dtifit -&gt; dtiproc_tractography_trackdt;
 
     dtiproc_tractography_dtifit -&gt; dtiproc_tractography_fa;
 
@@ -327,29 +329,21 @@ computed from diffusion tensors and from PICo probabilistic tractography.</p>
 
     dtiproc_tractography_trace -&gt; dtiproc_tractography_trace2nii;
 
-    dtiproc_tractography_analyzeheader_trace -&gt; dtiproc_tractography_trace2nii;
-
-    dtiproc_tractography_trackdt -&gt; dtiproc_tractography_cam2trk_dt;
+    dtiproc_tractography_fa -&gt; dtiproc_tractography_fa2nii;
 
     dtiproc_tractography_fa -&gt; dtiproc_tractography_analyzeheader_fa;
 
-    dtiproc_tractography_fa -&gt; dtiproc_tractography_fa2nii;
-
     dtiproc_tractography_analyzeheader_fa -&gt; dtiproc_tractography_fa2nii;
 
-    dtiproc_tractography_dtlutgen -&gt; dtiproc_tractography_picopdfs;
+    dtiproc_tractography_trackdt -&gt; dtiproc_tractography_cam2trk_dt;
 
     dtiproc_tractography_picopdfs -&gt; dtiproc_tractography_trackpico;
 
     dtiproc_tractography_trackpico -&gt; dtiproc_tractography_cam2trk_pico;
 
+    dtiproc_tractography_analyzeheader_trace -&gt; dtiproc_tractography_trace2nii;
+
   }
-
-  dtiproc_inputnode -&gt; dtiproc_tractography_inputnode1;
-
-  dtiproc_inputnode -&gt; dtiproc_tractography_inputnode1;
-
-  dtiproc_inputnode -&gt; dtiproc_tractography_inputnode1;
 
   dtiproc_tractography_cam2trk_dt -&gt; dtiproc_outputnode;
 
@@ -360,6 +354,12 @@ computed from diffusion tensors and from PICo probabilistic tractography.</p>
   dtiproc_tractography_trace2nii -&gt; dtiproc_outputnode;
 
   dtiproc_tractography_dtifit -&gt; dtiproc_outputnode;
+
+  dtiproc_inputnode -&gt; dtiproc_tractography_inputnode1;
+
+  dtiproc_inputnode -&gt; dtiproc_tractography_inputnode1;
+
+  dtiproc_inputnode -&gt; dtiproc_tractography_inputnode1;
 
 }" />
 </p>
@@ -374,9 +374,9 @@ computed from diffusion tensors and from PICo probabilistic tractography.</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

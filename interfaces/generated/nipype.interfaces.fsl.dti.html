@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -181,7 +181,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -193,7 +193,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -216,9 +216,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -228,29 +228,28 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-fsl-dti">
 <h1>interfaces.fsl.dti<a class="headerlink" href="#interfaces-fsl-dti" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-fsl-dti-bedpostx"></span><div class="section" id="bedpostx">
 <span id="index-0"></span><h2>BEDPOSTX<a class="headerlink" href="#bedpostx" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L639">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L662">Link to code</a></p>
 <p>Wraps command <strong>bedpostx</strong></p>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
 bvals: (an existing file name)
         b values file
-        flag: --bvals=%s
 bvecs: (an existing file name)
         b vectors file
-        flag: --bvecs=%s
 dwi: (an existing file name)
         diffusion weighted image data file
-        flag: --data=%s
 mask: (an existing file name)
-        brain binary mask file (i.e. from BET)
-        flag: --mask=%s
-out_dir: (a directory name, nipype default value: .)
+        bet binary mask file
+n_fibres: (an integer &gt;= 1, nipype default value: 1)
+        Maximum number of fibres to fit in each voxel
+        flag: -n %d
+out_dir: (a directory name, nipype default value: bedpostx)
         output directory
         flag: %s, position: 1
 
@@ -264,7 +263,7 @@ args: (a string)
         flag: %s
 burn_in: (an integer &gt;= 0)
         Total num of jumps at start of MCMC to be discarded
-        flag: --burnin=%d
+        flag: -b %d
 burn_in_no_ard: (an integer &gt;= 0)
         num of burnin jumps before the ard is imposed
         flag: --burninnoard=%d
@@ -290,27 +289,24 @@ force_dir: (a boolean, nipype default value: True)
         use the actual directory name given (do not add + to make a new
         directory)
         flag: --forcedir
-fudge: (an integer)
+fudge: (an integer (int or long))
         ARD fudge factor
-        flag: --fudge=%d
+        flag: -w %d
 gradnonlin: (a boolean)
         consider gradient nonlinearities, default off
         flag: -g
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-logdir: (a directory name, nipype default value: .)
+logdir: (a directory name)
         flag: --logdir=%s
 model: (1 or 2)
         use monoexponential (1, default, required for single-shell) or
         multiexponential (2, multi-shell) model
-        flag: --model=%d
-n_fibres: (an integer &gt;= 1)
-        Maximum number of fibres to fit in each voxel
-        flag: --nfibres=%d
-n_jumps: (an integer)
+        flag: -model %d
+n_jumps: (an integer (int or long))
         Num of jumps to be made by MCMC
-        flag: --njumps=%d
+        flag: -j %d
 no_ard: (a boolean)
         Turn ARD off on all fibres
         flag: --noard
@@ -331,8 +327,8 @@ rician: (a boolean)
         flag: --rician
 sample_every: (an integer &gt;= 0)
         Num of jumps for each sample (MCMC)
-        flag: --sampleevery=%d
-seed: (an integer)
+        flag: -s %d
+seed: (an integer (int or long))
         seed for pseudo random number generator
         flag: --seed=%d
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -347,46 +343,32 @@ use_gpu: (a boolean)
 </pre></div>
 </div>
 <p>Outputs:</p>
-<div class="highlight-python"><div class="highlight"><pre>d_stdsamples: (a file name)
-        Std of samples from the distribution d
-dsamples: (a file name)
-        Samples from the distribution on diffusivity d
-dyads: (a list of items which are a file name)
+<div class="highlight-python"><div class="highlight"><pre>dyads: (a list of items which are an existing file name)
         Mean of PDD distribution in vector form.
-dyads_disp: (a list of items which are a file name)
-        Uncertainty on the estimated fiber orientation
-fsamples: (a list of items which are a file name)
-        Samples from the distribution on f anisotropy
-mean_S0samples: (a file name)
+dyads_dispersion: (a list of items which are an existing file name)
+        Dispersion
+mean_S0samples: (an existing file name)
         Mean of distribution on T2wbaseline signal intensity S0
-mean_d_stdsamples: (a file name)
+mean_dsamples: (an existing file name)
         Mean of distribution on diffusivity d
-mean_dsamples: (a file name)
-        Mean of distribution on diffusivity d
-mean_fsamples: (a list of items which are a file name)
+mean_fsamples: (a list of items which are an existing file name)
         Mean of distribution on f anisotropy
-mean_phsamples: (a list of items which are a file name)
+mean_phsamples: (a list of items which are an existing file name)
         Mean of distribution on phi
-mean_tausamples: (a file name)
-        Mean of distribution on tau samples (only with rician noise)
-mean_thsamples: (a list of items which are a file name)
+mean_thsamples: (a list of items which are an existing file name)
         Mean of distribution on theta
-merged_fsamples: (a list of items which are a file name)
-        Samples from the distribution on anisotropic volume fraction.
-merged_phsamples: (a list of items which are a file name)
+merged_fsamples: (a list of items which are an existing file name)
+        Samples from the distribution on anisotropic volume fraction
+merged_phsamples: (a list of items which are an existing file name)
         Samples from the distribution on phi
-merged_thsamples: (a list of items which are a file name)
+merged_thsamples: (a list of items which are an existing file name)
         Samples from the distribution on theta
-phsamples: (a list of items which are a file name)
-        phi samples, per fiber
-thsamples: (a list of items which are a file name)
-        theta samples, per fiber
 </pre></div>
 </div>
 <span class="target" id="nipype-interfaces-fsl-dti-bedpostx4"></span></div>
 <div class="section" id="bedpostx4">
 <span id="index-1"></span><h2>BEDPOSTX4<a class="headerlink" href="#bedpostx4" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L534">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L557">Link to code</a></p>
 <p>Wraps command <strong>bedpostx</strong></p>
 <p>bedpostx has an old interface, implemented here</p>
 <div class="section" id="example">
@@ -425,21 +407,21 @@ burn_in: (an integer &gt;= 0)
 burn_in_no_ard: (an integer &gt;= 0)
         num of burnin jumps before the ard is imposed
         flag: --burninnoard=%d
-burn_period: (an integer)
+burn_period: (an integer (int or long))
         burnin period
         flag: -b %d
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-fibres: (an integer)
+fibres: (an integer (int or long))
         number of fibres per voxel
         flag: -n %d
 force_dir: (a boolean, nipype default value: True)
         use the actual directory name given - i.e. do not add + to make a
         new directory
         flag: --forcedir
-fudge: (an integer)
+fudge: (an integer (int or long))
         ARD fudge factor
         flag: --fudge=%d
 gradnonlin: (an existing file name)
@@ -447,7 +429,7 @@ gradnonlin: (an existing file name)
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-jumps: (an integer)
+jumps: (an integer (int or long))
         number of jumps
         flag: -j %d
 logdir: (a directory name, nipype default value: logdir)
@@ -485,10 +467,10 @@ output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#
 sample_every: (an integer &gt;= 0)
         Num of jumps for each sample (MCMC)
         flag: --sampleevery=%d
-sampling: (an integer)
+sampling: (an integer (int or long))
         sample every
         flag: -s %d
-seed: (an integer)
+seed: (an integer (int or long))
         seed for pseudo random number generator
         flag: --seed=%d
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -533,7 +515,7 @@ xfms_directory: (an existing directory name)
 </div>
 <div class="section" id="bedpostx5">
 <span id="index-2"></span><h2>BEDPOSTX5<a class="headerlink" href="#bedpostx5" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L267">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L291">Link to code</a></p>
 <p>Wraps command <strong>bedpostx</strong></p>
 <p>BEDPOSTX stands for Bayesian Estimation of Diffusion Parameters Obtained
 using Sampling Techniques. The X stands for modelling Crossing Fibres.
@@ -544,7 +526,7 @@ carried out within bedpostx see this <a class="reference external" href="http://
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Consider using
-<tt class="xref py py-func docutils literal"><span class="pre">nipype.workflows.fsl.dmri.create_bedpostx_pipeline()</span></tt> instead.</p>
+<code class="xref py py-func docutils literal"><span class="pre">nipype.workflows.fsl.dmri.create_bedpostx_pipeline()</span></code> instead.</p>
 </div>
 <div class="section" id="id1">
 <h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
@@ -552,24 +534,23 @@ carried out within bedpostx see this <a class="reference external" href="http://
 <span class="gp">&gt;&gt;&gt; </span><span class="n">bedp</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">BEDPOSTX5</span><span class="p">(</span><span class="n">bvecs</span><span class="o">=</span><span class="s">&#39;bvecs&#39;</span><span class="p">,</span> <span class="n">bvals</span><span class="o">=</span><span class="s">&#39;bvals&#39;</span><span class="p">,</span> <span class="n">dwi</span><span class="o">=</span><span class="s">&#39;diffusion.nii&#39;</span><span class="p">,</span>
 <span class="gp">... </span>                    <span class="n">mask</span><span class="o">=</span><span class="s">&#39;mask.nii&#39;</span><span class="p">,</span> <span class="n">n_fibres</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">bedp</span><span class="o">.</span><span class="n">cmdline</span>
-<span class="go">&#39;bedpostx . --bvals=bvals --bvecs=bvecs --data=diffusion.nii --forcedir --logdir=. --mask=mask.nii --nfibres=1&#39;</span>
+<span class="go">&#39;bedpostx bedpostx --forcedir -n 1&#39;</span>
 </pre></div>
 </div>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
 bvals: (an existing file name)
         b values file
-        flag: --bvals=%s
 bvecs: (an existing file name)
         b vectors file
-        flag: --bvecs=%s
 dwi: (an existing file name)
         diffusion weighted image data file
-        flag: --data=%s
 mask: (an existing file name)
-        brain binary mask file (i.e. from BET)
-        flag: --mask=%s
-out_dir: (a directory name, nipype default value: .)
+        bet binary mask file
+n_fibres: (an integer &gt;= 1, nipype default value: 1)
+        Maximum number of fibres to fit in each voxel
+        flag: -n %d
+out_dir: (a directory name, nipype default value: bedpostx)
         output directory
         flag: %s, position: 1
 
@@ -583,7 +564,7 @@ args: (a string)
         flag: %s
 burn_in: (an integer &gt;= 0)
         Total num of jumps at start of MCMC to be discarded
-        flag: --burnin=%d
+        flag: -b %d
 burn_in_no_ard: (an integer &gt;= 0)
         num of burnin jumps before the ard is imposed
         flag: --burninnoard=%d
@@ -609,27 +590,24 @@ force_dir: (a boolean, nipype default value: True)
         use the actual directory name given (do not add + to make a new
         directory)
         flag: --forcedir
-fudge: (an integer)
+fudge: (an integer (int or long))
         ARD fudge factor
-        flag: --fudge=%d
+        flag: -w %d
 gradnonlin: (a boolean)
         consider gradient nonlinearities, default off
         flag: -g
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-logdir: (a directory name, nipype default value: .)
+logdir: (a directory name)
         flag: --logdir=%s
 model: (1 or 2)
         use monoexponential (1, default, required for single-shell) or
         multiexponential (2, multi-shell) model
-        flag: --model=%d
-n_fibres: (an integer &gt;= 1)
-        Maximum number of fibres to fit in each voxel
-        flag: --nfibres=%d
-n_jumps: (an integer)
+        flag: -model %d
+n_jumps: (an integer (int or long))
         Num of jumps to be made by MCMC
-        flag: --njumps=%d
+        flag: -j %d
 no_ard: (a boolean)
         Turn ARD off on all fibres
         flag: --noard
@@ -650,8 +628,8 @@ rician: (a boolean)
         flag: --rician
 sample_every: (an integer &gt;= 0)
         Num of jumps for each sample (MCMC)
-        flag: --sampleevery=%d
-seed: (an integer)
+        flag: -s %d
+seed: (an integer (int or long))
         seed for pseudo random number generator
         flag: --seed=%d
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -666,47 +644,33 @@ use_gpu: (a boolean)
 </pre></div>
 </div>
 <p>Outputs:</p>
-<div class="highlight-python"><div class="highlight"><pre>d_stdsamples: (a file name)
-        Std of samples from the distribution d
-dsamples: (a file name)
-        Samples from the distribution on diffusivity d
-dyads: (a list of items which are a file name)
+<div class="highlight-python"><div class="highlight"><pre>dyads: (a list of items which are an existing file name)
         Mean of PDD distribution in vector form.
-dyads_disp: (a list of items which are a file name)
-        Uncertainty on the estimated fiber orientation
-fsamples: (a list of items which are a file name)
-        Samples from the distribution on f anisotropy
-mean_S0samples: (a file name)
+dyads_dispersion: (a list of items which are an existing file name)
+        Dispersion
+mean_S0samples: (an existing file name)
         Mean of distribution on T2wbaseline signal intensity S0
-mean_d_stdsamples: (a file name)
+mean_dsamples: (an existing file name)
         Mean of distribution on diffusivity d
-mean_dsamples: (a file name)
-        Mean of distribution on diffusivity d
-mean_fsamples: (a list of items which are a file name)
+mean_fsamples: (a list of items which are an existing file name)
         Mean of distribution on f anisotropy
-mean_phsamples: (a list of items which are a file name)
+mean_phsamples: (a list of items which are an existing file name)
         Mean of distribution on phi
-mean_tausamples: (a file name)
-        Mean of distribution on tau samples (only with rician noise)
-mean_thsamples: (a list of items which are a file name)
+mean_thsamples: (a list of items which are an existing file name)
         Mean of distribution on theta
-merged_fsamples: (a list of items which are a file name)
-        Samples from the distribution on anisotropic volume fraction.
-merged_phsamples: (a list of items which are a file name)
+merged_fsamples: (a list of items which are an existing file name)
+        Samples from the distribution on anisotropic volume fraction
+merged_phsamples: (a list of items which are an existing file name)
         Samples from the distribution on phi
-merged_thsamples: (a list of items which are a file name)
+merged_thsamples: (a list of items which are an existing file name)
         Samples from the distribution on theta
-phsamples: (a list of items which are a file name)
-        phi samples, per fiber
-thsamples: (a list of items which are a file name)
-        theta samples, per fiber
 </pre></div>
 </div>
 <span class="target" id="nipype-interfaces-fsl-dti-dtifit"></span></div>
 </div>
 <div class="section" id="dtifit">
 <span id="index-3"></span><h2>DTIFit<a class="headerlink" href="#dtifit" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L70">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L70">Link to code</a></p>
 <p>Wraps command <strong>dtifit</strong></p>
 <p>Use FSL  dtifit command for fitting a diffusion tensor model at each
 voxel</p>
@@ -761,22 +725,22 @@ ignore_exception: (a boolean, nipype default value: False)
 little_bit: (a boolean)
         only process small area of brain
         flag: --littlebit
-max_x: (an integer)
+max_x: (an integer (int or long))
         max x
         flag: -X %d
-max_y: (an integer)
+max_y: (an integer (int or long))
         max y
         flag: -Y %d
-max_z: (an integer)
+max_z: (an integer (int or long))
         max z
         flag: -Z %d
-min_x: (an integer)
+min_x: (an integer (int or long))
         min x
         flag: -x %d
-min_y: (an integer)
+min_y: (an integer (int or long))
         min y
         flag: -y %d
-min_z: (an integer)
+min_z: (an integer (int or long))
         min z
         flag: -z %d
 output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
@@ -823,7 +787,7 @@ tensor: (an existing file name)
 </div>
 <div class="section" id="distancemap">
 <span id="index-4"></span><h2>DistanceMap<a class="headerlink" href="#distancemap" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L1231">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L1254">Link to code</a></p>
 <p>Wraps command <strong>distancemap</strong></p>
 <p>Use FSL&#8217;s distancemap to generate a map of the distance to the nearest nonzero voxel.</p>
 <div class="section" id="id3">
@@ -883,7 +847,7 @@ local_max_file: (a file name)
 </div>
 <div class="section" id="findthebiggest">
 <span id="index-5"></span><h2>FindTheBiggest<a class="headerlink" href="#findthebiggest" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L1075">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L1098">Link to code</a></p>
 <p>Wraps command <strong>find_the_biggest</strong></p>
 <p>Use FSL find_the_biggest for performing hard segmentation on
 the outputs of connectivity-based thresholding in probtrack.
@@ -937,7 +901,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="makedyadicvectors">
 <span id="index-6"></span><h2>MakeDyadicVectors<a class="headerlink" href="#makedyadicvectors" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L1296">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L1319">Link to code</a></p>
 <p>Wraps command <strong>make_dyadic_vectors</strong></p>
 <p>Create vector volume representing mean principal diffusion direction
 and its uncertainty (dispersion)</p>
@@ -984,7 +948,7 @@ dyads: (an existing file name)
 <span class="target" id="nipype-interfaces-fsl-dti-probtrackx"></span></div>
 <div class="section" id="probtrackx">
 <span id="index-7"></span><h2>ProbTrackX<a class="headerlink" href="#probtrackx" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L737">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L760">Link to code</a></p>
 <p>Wraps command <strong>probtrackx</strong></p>
 <p>Use FSL  probtrackx for tractography on bedpostx results</p>
 <div class="section" id="examples">
@@ -1004,7 +968,7 @@ mask: (an existing file name)
 phsamples: (a list of items which are an existing file name)
 seed: (an existing file name or a list of items which are an existing
          file name or a list of items which are a list of from 3 to 3 items
-         which are an integer)
+         which are an integer (int or long))
         seed volume(s), or voxel(s)or freesurfer label file
         flag: --seed=%s
 thsamples: (a list of items which are an existing file name)
@@ -1029,7 +993,7 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-fibst: (an integer)
+fibst: (an integer (int or long))
         force a starting fibre for tracking - default=1, i.e. first fibre
         orientation. Only works if randfib==0
         flag: --fibst=%d
@@ -1061,10 +1025,10 @@ mode: (&#39;simple&#39; or &#39;two_mask_symm&#39; or &#39;seedmask&#39;)
         options: simple (single seed voxel), seedmask (mask of seed voxels),
         twomask_symm (two bet binary masks)
         flag: --mode=%s
-n_samples: (an integer, nipype default value: 5000)
+n_samples: (an integer (int or long), nipype default value: 5000)
         number of samples - default=5000
         flag: --nsamples=%d
-n_steps: (an integer)
+n_steps: (an integer (int or long))
         number of steps per sample - default=2000
         flag: --nsteps=%d
 network: (a boolean)
@@ -1155,7 +1119,7 @@ way_total: (an existing file name)
 </div>
 <div class="section" id="probtrackx2">
 <span id="index-8"></span><h2>ProbTrackX2<a class="headerlink" href="#probtrackx2" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L898">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L921">Link to code</a></p>
 <p>Wraps command <strong>probtrackx2</strong></p>
 <p>Use FSL  probtrackx2 for tractography on bedpostx results</p>
 <div class="section" id="id5">
@@ -1183,7 +1147,7 @@ mask: (an existing file name)
 phsamples: (a list of items which are an existing file name)
 seed: (an existing file name or a list of items which are an existing
          file name or a list of items which are a list of from 3 to 3 items
-         which are an integer)
+         which are an integer (int or long))
         seed volume(s), or voxel(s)or freesurfer label file
         flag: --seed=%s
 thsamples: (a list of items which are an existing file name)
@@ -1219,7 +1183,7 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-fibst: (an integer)
+fibst: (an integer (int or long))
         force a starting fibre for tracking - default=1, i.e. first fibre
         orientation. Only works if randfib==0
         flag: --fibst=%d
@@ -1251,10 +1215,10 @@ meshspace: (&#39;caret&#39; or &#39;freesurfer&#39; or &#39;first&#39; or &#39;v
 mod_euler: (a boolean)
         use modified euler streamlining
         flag: --modeuler
-n_samples: (an integer, nipype default value: 5000)
+n_samples: (an integer (int or long), nipype default value: 5000)
         number of samples - default=5000
         flag: --nsamples=%d
-n_steps: (an integer)
+n_steps: (an integer (int or long))
         number of steps per sample - default=2000
         flag: --nsteps=%d
 network: (a boolean)
@@ -1393,7 +1357,7 @@ way_total: (an existing file name)
 </div>
 <div class="section" id="projthresh">
 <span id="index-9"></span><h2>ProjThresh<a class="headerlink" href="#projthresh" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L1032">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L1055">Link to code</a></p>
 <p>Wraps command <strong>proj_thresh</strong></p>
 <p>Use FSL proj_thresh for thresholding some outputs of probtrack
 For complete details, see the FDT Documentation
@@ -1412,7 +1376,7 @@ For complete details, see the FDT Documentation
 in_files: (a list of items which are an existing file name)
         a list of input volumes
         flag: %s, position: 0
-threshold: (an integer)
+threshold: (an integer (int or long))
         threshold indicating minimum number of seed voxels entering this
         mask region
         flag: %d, position: 1
@@ -1446,14 +1410,14 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="tractskeleton">
 <span id="index-10"></span><h2>TractSkeleton<a class="headerlink" href="#tractskeleton" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L1143">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L1166">Link to code</a></p>
 <p>Wraps command <strong>tbss_skeleton</strong></p>
 <p>Use FSL&#8217;s tbss_skeleton to skeletonise an FA image or project arbitrary values onto a skeleton.</p>
 <p>There are two ways to use this interface.  To create a skeleton from an FA image, just
-supply the <tt class="docutils literal"><span class="pre">in_file</span></tt> and set <tt class="docutils literal"><span class="pre">skeleton_file</span></tt> to True (or specify a skeleton filename.
-To project values onto a skeleton, you must set <tt class="docutils literal"><span class="pre">project_data</span></tt> to True, and then also
-supply values for <tt class="docutils literal"><span class="pre">threshold</span></tt>, <tt class="docutils literal"><span class="pre">distance_map</span></tt>, and <tt class="docutils literal"><span class="pre">data_file</span></tt>. The <tt class="docutils literal"><span class="pre">search_mask_file</span></tt>
-and <tt class="docutils literal"><span class="pre">use_cingulum_mask</span></tt> inputs are also used in data projection, but <tt class="docutils literal"><span class="pre">use_cingulum_mask</span></tt>
+supply the <code class="docutils literal"><span class="pre">in_file</span></code> and set <code class="docutils literal"><span class="pre">skeleton_file</span></code> to True (or specify a skeleton filename.
+To project values onto a skeleton, you must set <code class="docutils literal"><span class="pre">project_data</span></code> to True, and then also
+supply values for <code class="docutils literal"><span class="pre">threshold</span></code>, <code class="docutils literal"><span class="pre">distance_map</span></code>, and <code class="docutils literal"><span class="pre">data_file</span></code>. The <code class="docutils literal"><span class="pre">search_mask_file</span></code>
+and <code class="docutils literal"><span class="pre">use_cingulum_mask</span></code> inputs are also used in data projection, but <code class="docutils literal"><span class="pre">use_cingulum_mask</span></code>
 is set to True by default.  This mask controls where the projection algorithm searches
 within a circular space around a tract, rather than in a single perpindicular direction.</p>
 <div class="section" id="id7">
@@ -1529,7 +1493,7 @@ skeleton_file: (a file name)
 </div>
 <div class="section" id="vecreg">
 <span id="index-11"></span><h2>VecReg<a class="headerlink" href="#vecreg" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L973">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L996">Link to code</a></p>
 <p>Wraps command <strong>vecreg</strong></p>
 <p>Use FSL vecreg for registering vector data
 For complete details, see the FDT Documentation
@@ -1608,7 +1572,7 @@ warp_field: (an existing file name)
 </div>
 <div class="section" id="xfibres">
 <span id="index-12"></span><h2>XFibres<a class="headerlink" href="#xfibres" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L635">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L658">Link to code</a></p>
 <p>Wraps command <strong>xfibres</strong></p>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
@@ -1624,6 +1588,9 @@ dwi: (an existing file name)
 mask: (an existing file name)
         brain binary mask file (i.e. from BET)
         flag: --mask=%s
+n_fibres: (an integer &gt;= 1, nipype default value: 1)
+        Maximum number of fibres to fit in each voxel
+        flag: --nfibres=%d
 
 [Optional]
 all_ard: (a boolean)
@@ -1661,7 +1628,7 @@ force_dir: (a boolean, nipype default value: True)
         use the actual directory name given (do not add + to make a new
         directory)
         flag: --forcedir
-fudge: (an integer)
+fudge: (an integer (int or long))
         ARD fudge factor
         flag: --fudge=%d
 gradnonlin: (an existing file name)
@@ -1676,10 +1643,7 @@ model: (1 or 2)
         use monoexponential (1, default, required for single-shell) or
         multiexponential (2, multi-shell) model
         flag: --model=%d
-n_fibres: (an integer &gt;= 1)
-        Maximum number of fibres to fit in each voxel
-        flag: --nfibres=%d
-n_jumps: (an integer)
+n_jumps: (an integer (int or long))
         Num of jumps to be made by MCMC
         flag: --njumps=%d
 no_ard: (a boolean)
@@ -1703,7 +1667,7 @@ rician: (a boolean)
 sample_every: (an integer &gt;= 0)
         Num of jumps for each sample (MCMC)
         flag: --sampleevery=%d
-seed: (an integer)
+seed: (an integer (int or long))
         seed for pseudo random number generator
         flag: --seed=%d
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -1716,39 +1680,33 @@ update_proposal_every: (an integer &gt;= 1)
 </pre></div>
 </div>
 <p>Outputs:</p>
-<div class="highlight-python"><div class="highlight"><pre>d_stdsamples: (a file name)
-        Std of samples from the distribution d
-dsamples: (a file name)
-        Samples from the distribution on diffusivity d
-dyads: (a list of items which are a file name)
+<div class="highlight-python"><div class="highlight"><pre>dyads: (a list of items which are an existing file name)
         Mean of PDD distribution in vector form.
-fsamples: (a list of items which are a file name)
+fsamples: (a list of items which are an existing file name)
         Samples from the distribution on f anisotropy
-mean_S0samples: (a file name)
+mean_S0samples: (an existing file name)
         Mean of distribution on T2wbaseline signal intensity S0
-mean_d_stdsamples: (a file name)
+mean_dsamples: (an existing file name)
         Mean of distribution on diffusivity d
-mean_dsamples: (a file name)
-        Mean of distribution on diffusivity d
-mean_fsamples: (a list of items which are a file name)
+mean_fsamples: (a list of items which are an existing file name)
         Mean of distribution on f anisotropy
-mean_tausamples: (a file name)
+mean_tausamples: (an existing file name)
         Mean of distribution on tau samples (only with rician noise)
-phsamples: (a list of items which are a file name)
+phsamples: (a list of items which are an existing file name)
         phi samples, per fiber
-thsamples: (a list of items which are a file name)
+thsamples: (a list of items which are an existing file name)
         theta samples, per fiber
 </pre></div>
 </div>
 <span class="target" id="nipype-interfaces-fsl-dti-xfibres4"></span></div>
 <div class="section" id="xfibres4">
 <span id="index-13"></span><h2>XFibres4<a class="headerlink" href="#xfibres4" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L435">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L458">Link to code</a></p>
 <p>Wraps command <strong>xfibres</strong></p>
 <p>Perform model parameters estimation for local (voxelwise) diffusion
 parameters</p>
 <div class="deprecated">
-<p><span class="versionmodified">Deprecated since version 0.9.2: </span>Use <tt class="xref py py-class docutils literal"><span class="pre">XFibres5</span></tt> instead.</p>
+<p><span class="versionmodified">Deprecated since version 0.9.2: </span>Use <code class="xref py py-class docutils literal"><span class="pre">XFibres5</span></code> instead.</p>
 </div>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
@@ -1783,7 +1741,7 @@ force_dir: (a boolean, nipype default value: True)
         use the actual directory name given - i.e. do not add + to make a
         new directory
         flag: --forcedir
-fudge: (an integer)
+fudge: (an integer (int or long))
         ARD fudge factor
         flag: --fudge=%d
 gradnonlin: (an existing file name)
@@ -1793,7 +1751,7 @@ ignore_exception: (a boolean, nipype default value: False)
         interface fails to run
 logdir: (a directory name, nipype default value: logdir)
         flag: --logdir=%s
-model: (an integer)
+model: (an integer (int or long))
         Which model to use. 1=mono-exponential (default and required for
         single shell). 2=continous exponential (for multi-shell experiments)
         flag: --model=%d
@@ -1821,7 +1779,7 @@ output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#
 sample_every: (an integer &gt;= 0)
         Num of jumps for each sample (MCMC)
         flag: --sampleevery=%d
-seed: (an integer)
+seed: (an integer (int or long))
         seed for pseudo random number generator
         flag: --seed=%d
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -1853,7 +1811,7 @@ thsamples: (a list of items which are an existing file name)
 <span class="target" id="nipype-interfaces-fsl-dti-xfibres5"></span></div>
 <div class="section" id="xfibres5">
 <span id="index-14"></span><h2>XFibres5<a class="headerlink" href="#xfibres5" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/dti.py#L376">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/dti.py#L399">Link to code</a></p>
 <p>Wraps command <strong>xfibres</strong></p>
 <p>Perform model parameters estimation for local (voxelwise) diffusion
 parameters</p>
@@ -1871,6 +1829,9 @@ dwi: (an existing file name)
 mask: (an existing file name)
         brain binary mask file (i.e. from BET)
         flag: --mask=%s
+n_fibres: (an integer &gt;= 1, nipype default value: 1)
+        Maximum number of fibres to fit in each voxel
+        flag: --nfibres=%d
 
 [Optional]
 all_ard: (a boolean)
@@ -1908,7 +1869,7 @@ force_dir: (a boolean, nipype default value: True)
         use the actual directory name given (do not add + to make a new
         directory)
         flag: --forcedir
-fudge: (an integer)
+fudge: (an integer (int or long))
         ARD fudge factor
         flag: --fudge=%d
 gradnonlin: (an existing file name)
@@ -1923,10 +1884,7 @@ model: (1 or 2)
         use monoexponential (1, default, required for single-shell) or
         multiexponential (2, multi-shell) model
         flag: --model=%d
-n_fibres: (an integer &gt;= 1)
-        Maximum number of fibres to fit in each voxel
-        flag: --nfibres=%d
-n_jumps: (an integer)
+n_jumps: (an integer (int or long))
         Num of jumps to be made by MCMC
         flag: --njumps=%d
 no_ard: (a boolean)
@@ -1950,7 +1908,7 @@ rician: (a boolean)
 sample_every: (an integer &gt;= 0)
         Num of jumps for each sample (MCMC)
         flag: --sampleevery=%d
-seed: (an integer)
+seed: (an integer (int or long))
         seed for pseudo random number generator
         flag: --seed=%d
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -1963,27 +1921,21 @@ update_proposal_every: (an integer &gt;= 1)
 </pre></div>
 </div>
 <p>Outputs:</p>
-<div class="highlight-python"><div class="highlight"><pre>d_stdsamples: (a file name)
-        Std of samples from the distribution d
-dsamples: (a file name)
-        Samples from the distribution on diffusivity d
-dyads: (a list of items which are a file name)
+<div class="highlight-python"><div class="highlight"><pre>dyads: (a list of items which are an existing file name)
         Mean of PDD distribution in vector form.
-fsamples: (a list of items which are a file name)
+fsamples: (a list of items which are an existing file name)
         Samples from the distribution on f anisotropy
-mean_S0samples: (a file name)
+mean_S0samples: (an existing file name)
         Mean of distribution on T2wbaseline signal intensity S0
-mean_d_stdsamples: (a file name)
+mean_dsamples: (an existing file name)
         Mean of distribution on diffusivity d
-mean_dsamples: (a file name)
-        Mean of distribution on diffusivity d
-mean_fsamples: (a list of items which are a file name)
+mean_fsamples: (a list of items which are an existing file name)
         Mean of distribution on f anisotropy
-mean_tausamples: (a file name)
+mean_tausamples: (an existing file name)
         Mean of distribution on tau samples (only with rician noise)
-phsamples: (a list of items which are a file name)
+phsamples: (a list of items which are an existing file name)
         phi samples, per fiber
-thsamples: (a list of items which are a file name)
+thsamples: (a list of items which are an existing file name)
         theta samples, per fiber
 </pre></div>
 </div>
@@ -1997,9 +1949,9 @@ thsamples: (a list of items which are a file name)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

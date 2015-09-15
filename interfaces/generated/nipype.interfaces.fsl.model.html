@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -181,7 +181,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -193,7 +193,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -216,9 +216,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -228,13 +228,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-fsl-model">
 <h1>interfaces.fsl.model<a class="headerlink" href="#interfaces-fsl-model" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-fsl-model-cluster"></span><div class="section" id="cluster">
 <span id="index-0"></span><h2>Cluster<a class="headerlink" href="#cluster" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L1630">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L1630">Link to code</a></p>
 <p>Wraps command <strong>cluster</strong></p>
 <p>Uses FSL cluster to perform clustering on statistical output</p>
 <div class="section" id="examples">
@@ -260,7 +260,7 @@ threshold: (a float)
 args: (a string)
         Additional parameters to the command
         flag: %s
-connectivity: (an integer)
+connectivity: (an integer (int or long))
         the connectivity of voxels (default 26)
         flag: --connectivity=%d
 cope_file: (a file name)
@@ -285,7 +285,7 @@ minclustersize: (a boolean)
         flag: --minclustersize
 no_table: (a boolean)
         suppresses printing of the table info
-num_maxima: (an integer)
+num_maxima: (an integer (int or long))
         no of local maxima to report
         flag: --num=%d
 out_index_file: (a boolean or a file name)
@@ -331,7 +331,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         output, `file` - writes output to file, `none` - output is ignored
 use_mm: (a boolean)
         use mm, not voxel, coordinates
-volume: (an integer)
+volume: (an integer (int or long))
         number of voxels in the mask
         flag: --volume=%d
 warpfield_file: (a file name)
@@ -366,7 +366,7 @@ threshold_file: (a file name)
 </div>
 <div class="section" id="contrastmgr">
 <span id="index-1"></span><h2>ContrastMgr<a class="headerlink" href="#contrastmgr" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L1006">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L1006">Link to code</a></p>
 <p>Wraps command <strong>contrast_mgr</strong></p>
 <p>Use FSL contrast_mgr command to evaluate contrasts</p>
 <p>In interface mode this file assumes that all the required inputs are in the
@@ -435,7 +435,7 @@ zstats: (a list of items which are an existing file name)
 <span class="target" id="nipype-interfaces-fsl-model-feat"></span></div>
 <div class="section" id="feat">
 <span id="index-2"></span><h2>FEAT<a class="headerlink" href="#feat" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L378">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L378">Link to code</a></p>
 <p>Wraps command <strong>feat</strong></p>
 <p>Uses FSL feat to calculate first level stats</p>
 <p>Inputs:</p>
@@ -471,7 +471,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-fsl-model-featmodel"></span></div>
 <div class="section" id="featmodel">
 <span id="index-3"></span><h2>FEATModel<a class="headerlink" href="#featmodel" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L433">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L433">Link to code</a></p>
 <p>Wraps command <strong>feat_model</strong></p>
 <p>Uses FSL feat_model to generate design.mat files</p>
 <p>Inputs:</p>
@@ -519,7 +519,7 @@ fcon_file: (a file name)
 <span class="target" id="nipype-interfaces-fsl-model-featregister"></span></div>
 <div class="section" id="featregister">
 <span id="index-4"></span><h2>FEATRegister<a class="headerlink" href="#featregister" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L763">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L763">Link to code</a></p>
 <p>Register feat directories to a specific standard</p>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
@@ -532,7 +532,7 @@ reg_image: (an existing file name)
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-reg_dof: (an integer, nipype default value: 12)
+reg_dof: (an integer (int or long), nipype default value: 12)
         registration degrees of freedom
 </pre></div>
 </div>
@@ -544,7 +544,7 @@ reg_dof: (an integer, nipype default value: 12)
 <span class="target" id="nipype-interfaces-fsl-model-filmgls"></span></div>
 <div class="section" id="filmgls">
 <span id="index-5"></span><h2>FILMGLS<a class="headerlink" href="#filmgls" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L611">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L611">Link to code</a></p>
 <p>Wraps command <strong>film_gls</strong></p>
 <p>Use FSL film_gls command to fit a design matrix to voxel timeseries</p>
 <div class="section" id="id1">
@@ -555,7 +555,7 @@ reg_dof: (an integer, nipype default value: 12)
 <span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">fgls</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s">&#39;in_file&#39;</span><span class="p">,</span> <span class="s">&#39;design_file&#39;</span><span class="p">,</span> <span class="s">&#39;thresh&#39;</span><span class="p">,</span> <span class="n">rn</span><span class="o">=</span><span class="s">&#39;stats&#39;</span><span class="p">)</span> 
 </pre></div>
 </div>
-<p>Assign options through the <tt class="docutils literal"><span class="pre">inputs</span></tt> attribute:</p>
+<p>Assign options through the <code class="docutils literal"><span class="pre">inputs</span></code> attribute:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fgls</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FILMGLS</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fgls</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fgls</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">design_file</span> <span class="o">=</span> <span class="s">&#39;design.mat&#39;</span>
@@ -614,13 +614,13 @@ full_data: (a boolean)
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-mask_size: (an integer)
+mask_size: (an integer (int or long))
         susan mask size
         flag: --ms=%d
 mode: (&#39;volumetric&#39; or &#39;surface&#39;)
         Type of analysis to be done
         flag: --mode=%s
-multitaper_product: (an integer)
+multitaper_product: (an integer (int or long))
         multitapering with slepian tapers and num is the time-bandwidth
         product
         flag: --mt=%d
@@ -651,7 +651,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 threshold: (a float, nipype default value: 0.0)
         threshold
         flag: --thr=%f, position: -1
-tukey_window: (an integer)
+tukey_window: (an integer (int or long))
         tukey window size to estimate autocorr
         flag: --tukey=%d
         mutually_exclusive: autocorr_estimate_only, fit_armodel,
@@ -694,7 +694,7 @@ zstats: (a list of items which are an existing file name)
 </div>
 <div class="section" id="flameo">
 <span id="index-6"></span><h2>FLAMEO<a class="headerlink" href="#flameo" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L866">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L866">Link to code</a></p>
 <p>Wraps command <strong>flameo</strong></p>
 <p>Use FSL flameo command to perform higher level model fits</p>
 <div class="section" id="id2">
@@ -732,7 +732,7 @@ t_con_file: (an existing file name)
 args: (a string)
         Additional parameters to the command
         flag: %s
-burnin: (an integer)
+burnin: (an integer (int or long))
         number of jumps at start of mcmc to be discarded
         flag: --burnin=%d
 dof_var_cope_file: (an existing file name)
@@ -756,23 +756,23 @@ infer_outliers: (a boolean)
         flag: --inferoutliers
 log_dir: (a directory name, nipype default value: stats)
         flag: --ld=%s
-n_jumps: (an integer)
+n_jumps: (an integer (int or long))
         number of jumps made by mcmc
         flag: --njumps=%d
 no_pe_outputs: (a boolean)
         do not output pe files
         flag: --nopeoutput
-outlier_iter: (an integer)
+outlier_iter: (an integer (int or long))
         Number of max iterations to use when inferring outliers. Default is
         12.
         flag: --ioni=%d
 output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
          &#39;NIFTI&#39;)
         FSL output type
-sample_every: (an integer)
+sample_every: (an integer (int or long))
         number of jumps for each sample
         flag: --sampleevery=%d
-sigma_dofs: (an integer)
+sigma_dofs: (an integer (int or long))
         sigma (in mm) to use for Gaussian smoothing the DOFs in FLAME 2.
         Default is 1mm, -1 indicates no smoothing
         flag: --sigma_dofs=%d
@@ -817,7 +817,7 @@ zstats: (a list of items which are an existing file name)
 </div>
 <div class="section" id="glm">
 <span id="index-7"></span><h2>GLM<a class="headerlink" href="#glm" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L1905">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L1905">Link to code</a></p>
 <p>Wraps command <strong>fsl_glm</strong></p>
 <p>FSL GLM:</p>
 <div class="section" id="example">
@@ -856,7 +856,7 @@ des_norm: (a boolean)
         switch on normalization of the design matrix columns to unit std
         deviation
         flag: --des_norm
-dof: (an integer)
+dof: (an integer (int or long))
         set degrees of freedom explicitly
         flag: --dof=%d
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -950,7 +950,7 @@ out_z: (a list of items which are an existing file name)
 </div>
 <div class="section" id="l2model">
 <span id="index-8"></span><h2>L2Model<a class="headerlink" href="#l2model" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L1113">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L1113">Link to code</a></p>
 <p>Generate subject specific second level model</p>
 <div class="section" id="id3">
 <h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
@@ -982,7 +982,7 @@ design_mat: (an existing file name)
 </div>
 <div class="section" id="level1design">
 <span id="index-9"></span><h2>Level1Design<a class="headerlink" href="#level1design" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L98">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L98">Link to code</a></p>
 <p>Generate FEAT specific files</p>
 <div class="section" id="id4">
 <h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
@@ -1047,7 +1047,7 @@ fsf_files: (a list of items which are an existing file name)
 </div>
 <div class="section" id="melodic">
 <span id="index-10"></span><h2>MELODIC<a class="headerlink" href="#melodic" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L1466">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L1466">Link to code</a></p>
 <p>Wraps command <strong>melodic</strong></p>
 <p>Multivariate Exploratory Linear Optimised Decomposition into Independent Components</p>
 <div class="section" id="id5">
@@ -1098,7 +1098,7 @@ cov_weight: (a float)
         voxel-wise weights for the covariance matrix (e.g. segmentation
         information)
         flag: --covarweight=%f
-dim: (an integer)
+dim: (an integer (int or long))
         dimensionality reduction into #num dimensions(default: automatic
         estimation)
         flag: -d %d
@@ -1125,10 +1125,10 @@ log_power: (a boolean)
 mask: (an existing file name)
         file name of mask for thresholding
         flag: -m %s
-max_restart: (an integer)
+max_restart: (an integer (int or long))
         maximum number of restarts
         flag: --maxrestart=%d
-maxit: (an integer)
+maxit: (an integer (int or long))
         maximum number of iterations before restart
         flag: --maxit=%d
 mix: (an existing file name)
@@ -1149,7 +1149,7 @@ no_mm: (a boolean)
 non_linearity: (a string)
         nonlinearity: gauss, tanh, pow3, pow4
         flag: --nl=%s
-num_ICs: (an integer)
+num_ICs: (an integer (int or long))
         number of IC&#39;s to extract (for deflation approach)
         flag: -n %d
 out_all: (a boolean)
@@ -1182,7 +1182,7 @@ output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#
 pbsc: (a boolean)
         switch off conversion to percent BOLD signal change
         flag: --pbsc
-rem_cmp: (a list of items which are an integer)
+rem_cmp: (a list of items which are an integer (int or long))
         component numbers to remove
         flag: -f %d
 remove_deriv: (a boolean)
@@ -1239,7 +1239,7 @@ report_dir: (an existing directory name)
 </div>
 <div class="section" id="multipleregressdesign">
 <span id="index-11"></span><h2>MultipleRegressDesign<a class="headerlink" href="#multipleregressdesign" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L1212">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L1212">Link to code</a></p>
 <p>Generate multiple regression design</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -1273,7 +1273,7 @@ regressors: (a dictionary with keys which are a string and with
         dictionary containing named lists of regressors
 
 [Optional]
-groups: (a list of items which are an integer)
+groups: (a list of items which are an integer (int or long))
         list of group identifiers (defaults to single group)
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
@@ -1295,7 +1295,7 @@ design_mat: (an existing file name)
 </div>
 <div class="section" id="randomise">
 <span id="index-12"></span><h2>Randomise<a class="headerlink" href="#randomise" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L1764">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L1764">Link to code</a></p>
 <p>Wraps command <strong>randomise</strong></p>
 <p>XXX UNSTABLE DO NOT USE</p>
 <p>FSL Randomise: feeds the 4D projected FA data into GLM
@@ -1356,7 +1356,7 @@ ignore_exception: (a boolean, nipype default value: False)
 mask: (an existing file name)
         mask image
         flag: -m %s
-num_perm: (an integer)
+num_perm: (an integer (int or long))
         number of permutations (default 5000, set to 0 for exhaustive)
         flag: -n %d
 one_sample_group_mean: (a boolean)
@@ -1371,7 +1371,7 @@ p_vec_n_dist_files: (a boolean)
 raw_stats_imgs: (a boolean)
         output raw ( unpermuted ) statistic images
         flag: -R
-seed: (an integer)
+seed: (an integer (int or long))
         specific integer seed for random number generator
         flag: --seed=%d
 show_info_parallel_mode: (a boolean)
@@ -1402,7 +1402,7 @@ tfce_E: (a float)
 tfce_H: (a float)
         TFCE height parameter (default=2)
         flag: --tfce_H=%.2f
-var_smooth: (an integer)
+var_smooth: (an integer (int or long))
         use variance smoothing (std is in mm)
         flag: -v %d
 vox_p_values: (a boolean)
@@ -1434,7 +1434,7 @@ tstat_files: (a list of items which are an existing file name)
 </div>
 <div class="section" id="smm">
 <span id="index-13"></span><h2>SMM<a class="headerlink" href="#smm" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L1355">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L1355">Link to code</a></p>
 <p>Wraps command <strong>mm &#8211;ld=logdir</strong></p>
 <p>Spatial Mixture Modelling. For more detail on the spatial mixture modelling see
 Mixture Models with Adaptive Spatial Regularisation for Segmentation with an Application to FMRI Data;
@@ -1480,7 +1480,7 @@ null_p_map: (an existing file name)
 <span class="target" id="nipype-interfaces-fsl-model-smoothestimate"></span></div>
 <div class="section" id="smoothestimate">
 <span id="index-14"></span><h2>SmoothEstimate<a class="headerlink" href="#smoothestimate" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/model.py#L1531">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/model.py#L1531">Link to code</a></p>
 <p>Wraps command <strong>smoothest</strong></p>
 <p>Estimates the smoothness of an image</p>
 <div class="section" id="id8">
@@ -1494,7 +1494,7 @@ null_p_map: (an existing file name)
 </div>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
-dof: (an integer)
+dof: (an integer (int or long))
         number of degrees of freedom
         flag: --dof=%d
         mutually_exclusive: zstat_file
@@ -1535,7 +1535,7 @@ zstat_file: (an existing file name)
         smoothness estimate sqrt(det(Lambda))
 resels: (a float)
         number of resels
-volume: (an integer)
+volume: (an integer (int or long))
         number of voxels in mask
 </pre></div>
 </div>
@@ -1550,9 +1550,9 @@ volume: (an integer)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -1,0 +1,341 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../index.html">
+            <img src="../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../index.html">Home</a> ·
+<a class="navbar" href="../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../documentation.html">Documentation</a> ·
+<a class="navbar" href="../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The Function Interface</a><ul>
+<li><a class="reference internal" href="#a-simple-function-interface">A Simple Function Interface</a></li>
+<li><a class="reference internal" href="#using-external-packages">Using External Packages</a></li>
+<li><a class="reference internal" href="#hello-world-function-interface-in-a-workflow">Hello World - Function interface in a workflow</a></li>
+<li><a class="reference internal" href="#advanced-use">Advanced Use</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-function-interface">
+<span id="function-interface"></span><h1>The Function Interface<a class="headerlink" href="#the-function-interface" title="Permalink to this headline">¶</a></h1>
+<p>Most Nipype interfaces provide access to external programs, such as FSL
+binaries or SPM routines. However, a special interface,
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.utility.Function</span></code>,
+allows you to wrap arbitrary Python code in the Interface framework and
+seamlessly integrate it into your workflows.</p>
+<div class="section" id="a-simple-function-interface">
+<h2>A Simple Function Interface<a class="headerlink" href="#a-simple-function-interface" title="Permalink to this headline">¶</a></h2>
+<p>The most important component of a working Function interface is a Python
+function. There are several ways to associate a function with a Function
+interface, but the most common way will involve functions you code
+yourself as part of your Nipype scripts. Consider the following function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">add_two</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">val</span> <span class="o">+</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<p>This simple function takes a value, adds 2 to it, and returns that new value.</p>
+<p>Just as Nipype interfaces have inputs and outputs, Python functions have
+inputs, in the form of parameters or arguments, and outputs, in the form
+of their return values. When you define a Function interface object with
+an existing function, as in the case of <code class="docutils literal"><span class="pre">add_two()</span></code> above, you must pass the
+constructor information about the function&#8217;s inputs, its outputs, and the
+function itself.  For example,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">nipype.interfaces.utility</span> <span class="kn">import</span> <span class="n">Function</span>
+<span class="n">add_two_interface</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;val&quot;</span><span class="p">],</span>
+                             <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;out_val&quot;</span><span class="p">],</span>
+                             <span class="n">function</span><span class="o">=</span><span class="n">add_two</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then you can set the inputs and run just as you would with any other
+interface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">add_two_interface</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">val</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">add_two_interface</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">res</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">out_val</span>
+</pre></div>
+</div>
+<p>Which would print <code class="docutils literal"><span class="pre">4</span></code>.</p>
+<p>Note that, if you are working interactively, the Function interface is
+unable to use functions that are defined within your interpreter session.
+(Specifically, it can&#8217;t use functions that live in the <code class="docutils literal"><span class="pre">__main__</span></code> namespace).</p>
+</div>
+<div class="section" id="using-external-packages">
+<h2>Using External Packages<a class="headerlink" href="#using-external-packages" title="Permalink to this headline">¶</a></h2>
+<p>Chances are, you will want to write functions that do more complicated
+processing, particularly using the growing stack of Python packages
+geared towards neuroimaging, such as <a class="reference external" href="http://nipy.org/nibabel/">Nibabel</a>, <a class="reference external" href="http://nipy.org">Nipy</a>, or <a class="reference external" href="http://www.pymvpa.org">PyMVPA</a>.</p>
+<p>While this is completely possible (and, indeed, an intended use of the
+Function interface), it does come with one important constraint. The
+function code you write is executed in a standalone environment,
+which means that any external functions or classes you use have to
+be imported within the function itself:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_n_trs</span><span class="p">(</span><span class="n">in_file</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">nibabel</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">nibabel</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">in_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Without explicitly importing Nibabel in the body of the function, this
+would fail.</p>
+<p>Alternatively, it is possible to provide a list of strings corresponding
+to the imports needed to execute a function as a parameter of the <cite>Function</cite>
+constructor. This allows for the use of external functions that do not
+import all external definitions inside the function body.</p>
+</div>
+<div class="section" id="hello-world-function-interface-in-a-workflow">
+<h2>Hello World - Function interface in a workflow<a class="headerlink" href="#hello-world-function-interface-in-a-workflow" title="Permalink to this headline">¶</a></h2>
+<p>Contributed by: Hänel Nikolaus Valentin</p>
+<p>The following snippet of code demonstrates the use of the function interface in
+the context of a workflow. Note the use of <code class="docutils literal"><span class="pre">import</span> <span class="pre">os</span></code> within the function as
+well as returning the absolute path from the Hello function. The <cite>import</cite> inside
+is necessary because functions are coded as strings and do not have to be on the
+PYTHONPATH. However any function called by this function has to be available on
+the PYTHONPATH. The <cite>absolute path</cite> is necessary because all workflow nodes are
+executed in their own directory and therefore there is no way of determining
+that the input file came from a different directory:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="kn">as</span> <span class="nn">pe</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.utility</span> <span class="kn">import</span> <span class="n">Function</span>
+
+<span class="k">def</span> <span class="nf">Hello</span><span class="p">():</span>
+   <span class="kn">import</span> <span class="nn">os</span>
+   <span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
+   <span class="n">iflogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;interface&#39;</span><span class="p">)</span>
+   <span class="n">message</span> <span class="o">=</span> <span class="s">&quot;Hello &quot;</span>
+   <span class="n">file_name</span> <span class="o">=</span>  <span class="s">&#39;hello.txt&#39;</span>
+   <span class="n">iflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+   <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+       <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+   <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">World</span><span class="p">(</span><span class="n">in_file</span><span class="p">):</span>
+   <span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">logging</span>
+   <span class="n">iflogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;interface&#39;</span><span class="p">)</span>
+   <span class="n">message</span> <span class="o">=</span> <span class="s">&quot;World!&quot;</span>
+   <span class="n">iflogger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+   <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">in_file</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+       <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+<span class="n">hello</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;hello&#39;</span><span class="p">,</span>
+               <span class="n">interface</span><span class="o">=</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[],</span>
+                                  <span class="n">output_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;out_file&#39;</span><span class="p">],</span>
+                                  <span class="n">function</span><span class="o">=</span><span class="n">Hello</span><span class="p">))</span>
+<span class="n">world</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;world&#39;</span><span class="p">,</span>
+               <span class="n">interface</span><span class="o">=</span><span class="n">Function</span><span class="p">(</span><span class="n">input_names</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span>
+                                  <span class="n">output_names</span><span class="o">=</span><span class="p">[],</span>
+                                  <span class="n">function</span><span class="o">=</span><span class="n">World</span><span class="p">))</span>
+
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;nipype_demo&#39;</span><span class="p">)</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">hello</span><span class="p">,</span> <span class="n">world</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)])])</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="n">pipeline</span><span class="o">.</span><span class="n">write_graph</span><span class="p">(</span><span class="n">graph2use</span><span class="o">=</span><span class="s">&#39;flat&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="advanced-use">
+<h2>Advanced Use<a class="headerlink" href="#advanced-use" title="Permalink to this headline">¶</a></h2>
+<p>To use an existing function object (as we have been doing so far) with a Function
+interface, it must be passed to the constructor. However, it is also possible
+to dynamically set how a Function interface will process its inputs using the
+special <code class="docutils literal"><span class="pre">function_str</span></code> input.</p>
+<p>This input takes not a function object, but actually a single string that can
+be parsed to define a function. In the equivalent case to our example above,
+the string would be</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">add_two_str</span> <span class="o">=</span> <span class="s">&quot;def add_two(val):</span><span class="se">\n</span><span class="s">    return val + 2</span><span class="se">\n</span><span class="s">&quot;</span>
+</pre></div>
+</div>
+<p>Unlike when using a function object, this input can be set like any other,
+meaning that you could write a function that outputs different function
+strings depending on some run-time contingencies, and connect that output
+the the <code class="docutils literal"><span class="pre">function_str</span></code> input of a downstream Function interface.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

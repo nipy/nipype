@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -129,7 +129,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../install.html">Download</a></td>
@@ -141,7 +141,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -164,9 +164,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -176,7 +176,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="rsfmri-ants-fs-fsl-nipy-acompcor">
 <span id="example-rsfmri-vol-surface-preprocessing-nipy"></span><h1>rsfMRI: ANTS, FS, FSL, NiPy, aCompCor<a class="headerlink" href="#rsfmri-ants-fs-fsl-nipy-acompcor" title="Permalink to this headline">¶</a></h1>
@@ -212,391 +212,381 @@ available from:</p>
 <li><a class="reference external" href="http://mindboggle.info/data/atlases/jointfusion/OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm_v2.nii.gz">Joint Fusion Atlas</a></li>
 <li><a class="reference external" href="http://mindboggle.info/data/templates/ants/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz">MNI template</a></li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre>import os
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">os</span>
 
-from nipype.interfaces.base import CommandLine
-CommandLine.set_default_terminal_output(&#39;allatonce&#39;)
+<span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="n">CommandLine</span>
+<span class="n">CommandLine</span><span class="o">.</span><span class="n">set_default_terminal_output</span><span class="p">(</span><span class="s">&#39;allatonce&#39;</span><span class="p">)</span>
 
-from dcmstack.extract import default_extractor
-from dicom import read_file
+<span class="kn">from</span> <span class="nn">dcmstack.extract</span> <span class="kn">import</span> <span class="n">default_extractor</span>
+<span class="kn">from</span> <span class="nn">dicom</span> <span class="kn">import</span> <span class="n">read_file</span>
 
-from nipype.interfaces import (fsl, Function, ants, freesurfer,nipy)
-from nipype.interfaces.c3 import C3dAffineTool
+<span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="p">(</span><span class="n">fsl</span><span class="p">,</span> <span class="n">Function</span><span class="p">,</span> <span class="n">ants</span><span class="p">,</span> <span class="n">freesurfer</span><span class="p">,</span><span class="n">nipy</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.c3</span> <span class="kn">import</span> <span class="n">C3dAffineTool</span>
 
-fsl.FSLCommand.set_default_output_type(&#39;NIFTI_GZ&#39;)
+<span class="n">fsl</span><span class="o">.</span><span class="n">FSLCommand</span><span class="o">.</span><span class="n">set_default_output_type</span><span class="p">(</span><span class="s">&#39;NIFTI_GZ&#39;</span><span class="p">)</span>
 
-from nipype import Workflow, Node, MapNode
+<span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">Node</span><span class="p">,</span> <span class="n">MapNode</span>
 
-from nipype.algorithms.rapidart import ArtifactDetect
-from nipype.algorithms.misc import TSNR
-from nipype.interfaces.utility import Rename, Merge, IdentityInterface
-from nipype.utils.filemanip import filename_to_list
-from nipype.interfaces.io import DataSink, FreeSurferSource
-import nipype.interfaces.freesurfer as fs
+<span class="kn">from</span> <span class="nn">nipype.algorithms.rapidart</span> <span class="kn">import</span> <span class="n">ArtifactDetect</span>
+<span class="kn">from</span> <span class="nn">nipype.algorithms.misc</span> <span class="kn">import</span> <span class="n">TSNR</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.utility</span> <span class="kn">import</span> <span class="n">Rename</span><span class="p">,</span> <span class="n">Merge</span><span class="p">,</span> <span class="n">IdentityInterface</span>
+<span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="n">filename_to_list</span>
+<span class="kn">from</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">import</span> <span class="n">DataSink</span><span class="p">,</span> <span class="n">FreeSurferSource</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.freesurfer</span> <span class="kn">as</span> <span class="nn">fs</span>
 
-import numpy as np
-import scipy as sp
-import nibabel as nb
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="kn">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">nibabel</span> <span class="kn">as</span> <span class="nn">nb</span>
 
-imports = [&#39;import os&#39;,
-           &#39;import nibabel as nb&#39;,
-           &#39;import numpy as np&#39;,
-           &#39;import scipy as sp&#39;,
-           &#39;from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename&#39;,
-           &#39;from scipy.special import legendre&#39;
-           ]
-
-
-def get_info(dicom_files):
-    &quot;&quot;&quot;Given a Siemens dicom file return metadata
-
-    Returns
-    -------
-    RepetitionTime
-    Slice Acquisition Times
-    Spacing between slices
-    &quot;&quot;&quot;
-    meta = default_extractor(read_file(filename_to_list(dicom_files)[0],
-                                       stop_before_pixels=True,
-                                       force=True))
-    return (meta[&#39;RepetitionTime&#39;]/1000., meta[&#39;CsaImage.MosaicRefAcqTimes&#39;],
-            meta[&#39;SpacingBetweenSlices&#39;])
+<span class="n">imports</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;import os&#39;</span><span class="p">,</span>
+           <span class="s">&#39;import nibabel as nb&#39;</span><span class="p">,</span>
+           <span class="s">&#39;import numpy as np&#39;</span><span class="p">,</span>
+           <span class="s">&#39;import scipy as sp&#39;</span><span class="p">,</span>
+           <span class="s">&#39;from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename&#39;</span><span class="p">,</span>
+           <span class="s">&#39;from scipy.special import legendre&#39;</span>
+           <span class="p">]</span>
 
 
-def median(in_files):
-    &quot;&quot;&quot;Computes an average of the median of each realigned timeseries
+<span class="k">def</span> <span class="nf">get_info</span><span class="p">(</span><span class="n">dicom_files</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given a Siemens dicom file return metadata</span>
 
-    Parameters
-    ----------
-
-    in_files: one or more realigned Nifti 4D time series
-
-    Returns
-    -------
-
-    out_file: a 3D Nifti file
-    &quot;&quot;&quot;
-    average = None
-    for idx, filename in enumerate(filename_to_list(in_files)):
-        img = nb.load(filename)
-        data = np.median(img.get_data(), axis=3)
-        if average is None:
-            average = data
-        else:
-            average = average + data
-    median_img = nb.Nifti1Image(average/float(idx + 1),
-                                img.get_affine(), img.get_header())
-    filename = os.path.join(os.getcwd(), &#39;median.nii.gz&#39;)
-    median_img.to_filename(filename)
-    return filename
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RepetitionTime</span>
+<span class="sd">    Slice Acquisition Times</span>
+<span class="sd">    Spacing between slices</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="n">default_extractor</span><span class="p">(</span><span class="n">read_file</span><span class="p">(</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">dicom_files</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                                       <span class="n">stop_before_pixels</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                       <span class="n">force</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">meta</span><span class="p">[</span><span class="s">&#39;RepetitionTime&#39;</span><span class="p">]</span><span class="o">/</span><span class="mf">1000.</span><span class="p">,</span> <span class="n">meta</span><span class="p">[</span><span class="s">&#39;CsaImage.MosaicRefAcqTimes&#39;</span><span class="p">],</span>
+            <span class="n">meta</span><span class="p">[</span><span class="s">&#39;SpacingBetweenSlices&#39;</span><span class="p">])</span>
 
 
-def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
-    &quot;&quot;&quot;Bandpass filter the input files
+<span class="k">def</span> <span class="nf">median</span><span class="p">(</span><span class="n">in_files</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes an average of the median of each realigned timeseries</span>
 
-    Parameters
-    ----------
-    files: list of 4d nifti files
-    lowpass_freq: cutoff frequency for the low pass filter (in Hz)
-    highpass_freq: cutoff frequency for the high pass filter (in Hz)
-    fs: sampling rate (in Hz)
-    &quot;&quot;&quot;
-    out_files = []
-    for filename in filename_to_list(files):
-        path, name, ext = split_filename(filename)
-        out_file = os.path.join(os.getcwd(), name + &#39;_bp&#39; + ext)
-        img = nb.load(filename)
-        timepoints = img.shape[-1]
-        F = np.zeros((timepoints))
-        lowidx = timepoints/2 + 1
-        if lowpass_freq &gt; 0:
-            lowidx = np.round(float(lowpass_freq) / fs * timepoints)
-        highidx = 0
-        if highpass_freq &gt; 0:
-            highidx = np.round(float(highpass_freq) / fs * timepoints)
-        F[highidx:lowidx] = 1
-        F = ((F + F[::-1]) &gt; 0).astype(int)
-        data = img.get_data()
-        if np.all(F == 1):
-            filtered_data = data
-        else:
-            filtered_data = np.real(np.fft.ifftn(np.fft.fftn(data) * F))
-        img_out = nb.Nifti1Image(filtered_data, img.get_affine(),
-                                 img.get_header())
-        img_out.to_filename(out_file)
-        out_files.append(out_file)
-    return list_to_filename(out_files)
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    in_files: one or more realigned Nifti 4D time series</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    out_file: a 3D Nifti file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">average</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">filename</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">in_files</span><span class="p">)):</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">get_data</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">average</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">average</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">average</span> <span class="o">=</span> <span class="n">average</span> <span class="o">+</span> <span class="n">data</span>
+    <span class="n">median_img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span><span class="n">average</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                                <span class="n">img</span><span class="o">.</span><span class="n">get_affine</span><span class="p">(),</span> <span class="n">img</span><span class="o">.</span><span class="n">get_header</span><span class="p">())</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s">&#39;median.nii.gz&#39;</span><span class="p">)</span>
+    <span class="n">median_img</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">filename</span>
 
 
-def motion_regressors(motion_params, order=0, derivatives=1):
-    &quot;&quot;&quot;Compute motion regressors upto given order and derivative
+<span class="k">def</span> <span class="nf">bandpass_filter</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">lowpass_freq</span><span class="p">,</span> <span class="n">highpass_freq</span><span class="p">,</span> <span class="n">fs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Bandpass filter the input files</span>
 
-    motion + d(motion)/dt + d2(motion)/dt2 (linear + quadratic)
-    &quot;&quot;&quot;
-    out_files = []
-    for idx, filename in enumerate(filename_to_list(motion_params)):
-        params = np.genfromtxt(filename)
-        out_params = params
-        for d in range(1, derivatives + 1):
-            cparams = np.vstack((np.repeat(params[0, :][None, :], d, axis=0),
-                                 params))
-            out_params = np.hstack((out_params, np.diff(cparams, d, axis=0)))
-        out_params2 = out_params
-        for i in range(2, order + 1):
-            out_params2 = np.hstack((out_params2, np.power(out_params, i)))
-        filename = os.path.join(os.getcwd(), &quot;motion_regressor%02d.txt&quot; % idx)
-        np.savetxt(filename, out_params2, fmt=&quot;%.10f&quot;)
-        out_files.append(filename)
-    return out_files
-
-
-def build_filter1(motion_params, comp_norm, outliers, detrend_poly=None):
-    &quot;&quot;&quot;Builds a regressor set comprisong motion parameters, composite norm and
-    outliers
-
-    The outliers are added as a single time point column for each outlier
-
-
-    Parameters
-    ----------
-
-    motion_params: a text file containing motion parameters and its derivatives
-    comp_norm: a text file containing the composite norm
-    outliers: a text file containing 0-based outlier indices
-    detrend_poly: number of polynomials to add to detrend
-
-    Returns
-    -------
-    components_file: a text file containing all the regressors
-    &quot;&quot;&quot;
-    out_files = []
-    for idx, filename in enumerate(filename_to_list(motion_params)):
-        params = np.genfromtxt(filename)
-        norm_val = np.genfromtxt(filename_to_list(comp_norm)[idx])
-        out_params = np.hstack((params, norm_val[:, None]))
-        try:
-            outlier_val = np.genfromtxt(filename_to_list(outliers)[idx])
-        except IOError:
-            outlier_val = np.empty((0))
-        for index in np.atleast_1d(outlier_val):
-            outlier_vector = np.zeros((out_params.shape[0], 1))
-            outlier_vector[index] = 1
-            out_params = np.hstack((out_params, outlier_vector))
-        if detrend_poly:
-            timepoints = out_params.shape[0]
-            X = np.empty((timepoints, 0))
-            for i in range(detrend_poly):
-                X = np.hstack((X, legendre(
-                    i + 1)(np.linspace(-1, 1, timepoints))[:, None]))
-            out_params = np.hstack((out_params, X))
-        filename = os.path.join(os.getcwd(), &quot;filter_regressor%02d.txt&quot; % idx)
-        np.savetxt(filename, out_params, fmt=&quot;%.10f&quot;)
-        out_files.append(filename)
-    return out_files
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    files: list of 4d nifti files</span>
+<span class="sd">    lowpass_freq: cutoff frequency for the low pass filter (in Hz)</span>
+<span class="sd">    highpass_freq: cutoff frequency for the high pass filter (in Hz)</span>
+<span class="sd">    fs: sampling rate (in Hz)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filename_to_list</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&#39;_bp&#39;</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">timepoints</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">timepoints</span><span class="p">))</span>
+        <span class="n">lowidx</span> <span class="o">=</span> <span class="n">timepoints</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">lowpass_freq</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">lowidx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lowpass_freq</span><span class="p">)</span> <span class="o">/</span> <span class="n">fs</span> <span class="o">*</span> <span class="n">timepoints</span><span class="p">)</span>
+        <span class="n">highidx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">highpass_freq</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">highidx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">highpass_freq</span><span class="p">)</span> <span class="o">/</span> <span class="n">fs</span> <span class="o">*</span> <span class="n">timepoints</span><span class="p">)</span>
+        <span class="n">F</span><span class="p">[</span><span class="n">highidx</span><span class="p">:</span><span class="n">lowidx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="p">((</span><span class="n">F</span> <span class="o">+</span> <span class="n">F</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">F</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">filtered_data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filtered_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftn</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftn</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">*</span> <span class="n">F</span><span class="p">))</span>
+        <span class="n">img_out</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">img</span><span class="o">.</span><span class="n">get_affine</span><span class="p">(),</span>
+                                 <span class="n">img</span><span class="o">.</span><span class="n">get_header</span><span class="p">())</span>
+        <span class="n">img_out</span><span class="o">.</span><span class="n">to_filename</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+        <span class="n">out_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">list_to_filename</span><span class="p">(</span><span class="n">out_files</span><span class="p">)</span>
 
 
-def extract_noise_components(realigned_file, mask_file, num_components=5,
-                             extra_regressors=None):
-    &quot;&quot;&quot;Derive components most reflective of physiological noise
+<span class="k">def</span> <span class="nf">motion_regressors</span><span class="p">(</span><span class="n">motion_params</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">derivatives</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Compute motion regressors upto given order and derivative</span>
 
-    Parameters
-    ----------
-    realigned_file: a 4D Nifti file containing realigned volumes
-    mask_file: a 3D Nifti file containing white matter + ventricular masks
-    num_components: number of components to use for noise decomposition
-    extra_regressors: additional regressors to add
-
-    Returns
-    -------
-    components_file: a text file containing the noise components
-    &quot;&quot;&quot;
-    imgseries = nb.load(realigned_file)
-    components = None
-    for filename in filename_to_list(mask_file):
-        mask = nb.load(filename).get_data()
-        if len(np.nonzero(mask &gt; 0)[0]) == 0:
-            continue
-        voxel_timecourses = imgseries.get_data()[mask &gt; 0]
-        voxel_timecourses[np.isnan(np.sum(voxel_timecourses, axis=1)), :] = 0
-        # remove mean and normalize by variance
-        # voxel_timecourses.shape == [nvoxels, time]
-        X = voxel_timecourses.T
-        stdX = np.std(X, axis=0)
-        stdX[stdX == 0] = 1.
-        stdX[np.isnan(stdX)] = 1.
-        stdX[np.isinf(stdX)] = 1.
-        X = (X - np.mean(X, axis=0))/stdX
-        u, _, _ = sp.linalg.svd(X, full_matrices=False)
-        if components is None:
-            components = u[:, :num_components]
-        else:
-            components = np.hstack((components, u[:, :num_components]))
-    if extra_regressors:
-        regressors = np.genfromtxt(extra_regressors)
-        components = np.hstack((components, regressors))
-    components_file = os.path.join(os.getcwd(), &#39;noise_components.txt&#39;)
-    np.savetxt(components_file, components, fmt=&quot;%.10f&quot;)
-    return components_file
+<span class="sd">    motion + d(motion)/dt + d2(motion)/dt2 (linear + quadratic)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">filename</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">motion_params</span><span class="p">)):</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">out_params</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">derivatives</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">cparams</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:][</span><span class="bp">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                                 <span class="n">params</span><span class="p">))</span>
+            <span class="n">out_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">out_params</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">cparams</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)))</span>
+        <span class="n">out_params2</span> <span class="o">=</span> <span class="n">out_params</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">order</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">out_params2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">out_params2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">out_params</span><span class="p">,</span> <span class="n">i</span><span class="p">)))</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s">&quot;motion_regressor</span><span class="si">%02d</span><span class="s">.txt&quot;</span> <span class="o">%</span> <span class="n">idx</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">out_params2</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s">&quot;</span><span class="si">%.10f</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="n">out_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_files</span>
 
 
-def rename(in_files, suffix=None):
-    from nipype.utils.filemanip import (filename_to_list, split_filename,
-                                        list_to_filename)
-    out_files = []
-    for idx, filename in enumerate(filename_to_list(in_files)):
-        _, name, ext = split_filename(filename)
-        if suffix is None:
-            out_files.append(name + (&#39;_%03d&#39; % idx) + ext)
-        else:
-            out_files.append(name + suffix + ext)
-    return list_to_filename(out_files)
+<span class="k">def</span> <span class="nf">build_filter1</span><span class="p">(</span><span class="n">motion_params</span><span class="p">,</span> <span class="n">comp_norm</span><span class="p">,</span> <span class="n">outliers</span><span class="p">,</span> <span class="n">detrend_poly</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Builds a regressor set comprisong motion parameters, composite norm and</span>
+<span class="sd">    outliers</span>
+
+<span class="sd">    The outliers are added as a single time point column for each outlier</span>
 
 
-def get_aparc_aseg(files):
-    &quot;&quot;&quot;Return the aparc+aseg.mgz file&quot;&quot;&quot;
-    for name in files:
-        if &#39;aparc+aseg.mgz&#39; in name:
-            return name
-    raise ValueError(&#39;aparc+aseg.mgz not found&#39;)
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    motion_params: a text file containing motion parameters and its derivatives</span>
+<span class="sd">    comp_norm: a text file containing the composite norm</span>
+<span class="sd">    outliers: a text file containing 0-based outlier indices</span>
+<span class="sd">    detrend_poly: number of polynomials to add to detrend</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    components_file: a text file containing all the regressors</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">filename</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">motion_params</span><span class="p">)):</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">norm_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">comp_norm</span><span class="p">)[</span><span class="n">idx</span><span class="p">])</span>
+        <span class="n">out_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">params</span><span class="p">,</span> <span class="n">norm_val</span><span class="p">[:,</span> <span class="bp">None</span><span class="p">]))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">outlier_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">outliers</span><span class="p">)[</span><span class="n">idx</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">outlier_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">outlier_val</span><span class="p">):</span>
+            <span class="n">outlier_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">out_params</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">outlier_vector</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">out_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">out_params</span><span class="p">,</span> <span class="n">outlier_vector</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">detrend_poly</span><span class="p">:</span>
+            <span class="n">timepoints</span> <span class="o">=</span> <span class="n">out_params</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">timepoints</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">detrend_poly</span><span class="p">):</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">X</span><span class="p">,</span> <span class="n">legendre</span><span class="p">(</span>
+                    <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timepoints</span><span class="p">))[:,</span> <span class="bp">None</span><span class="p">]))</span>
+            <span class="n">out_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">out_params</span><span class="p">,</span> <span class="n">X</span><span class="p">))</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s">&quot;filter_regressor</span><span class="si">%02d</span><span class="s">.txt&quot;</span> <span class="o">%</span> <span class="n">idx</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">out_params</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s">&quot;</span><span class="si">%.10f</span><span class="s">&quot;</span><span class="p">)</span>
+        <span class="n">out_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_files</span>
 
 
-def extract_subrois(timeseries_file, label_file, indices):
-    &quot;&quot;&quot;Extract voxel time courses for each subcortical roi index
+<span class="k">def</span> <span class="nf">extract_noise_components</span><span class="p">(</span><span class="n">realigned_file</span><span class="p">,</span> <span class="n">mask_file</span><span class="p">,</span> <span class="n">num_components</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                             <span class="n">extra_regressors</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Derive components most reflective of physiological noise</span>
 
-    Parameters
-    ----------
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    realigned_file: a 4D Nifti file containing realigned volumes</span>
+<span class="sd">    mask_file: a 3D Nifti file containing white matter + ventricular masks</span>
+<span class="sd">    num_components: number of components to use for noise decomposition</span>
+<span class="sd">    extra_regressors: additional regressors to add</span>
 
-    timeseries_file: a 4D Nifti file
-    label_file: a 3D file containing rois in the same space/size of the 4D file
-    indices: a list of indices for ROIs to extract.
-
-    Returns
-    -------
-    out_file: a text file containing time courses for each voxel of each roi
-        The first four columns are: freesurfer index, i, j, k positions in the
-        label file
-    &quot;&quot;&quot;
-    img = nb.load(timeseries_file)
-    data = img.get_data()
-    roiimg = nb.load(label_file)
-    rois = roiimg.get_data()
-    prefix = split_filename(timeseries_file)[1]
-    out_ts_file = os.path.join(os.getcwd(), &#39;%s_subcortical_ts.txt&#39; % prefix)
-    with open(out_ts_file, &#39;wt&#39;) as fp:
-        for fsindex in indices:
-            ijk = np.nonzero(rois == fsindex)
-            ts = data[ijk]
-            for i0, row in enumerate(ts):
-                fp.write(&#39;%d,%d,%d,%d,&#39; % (fsindex, ijk[0][i0],
-                                           ijk[1][i0], ijk[2][i0]) +
-                         &#39;,&#39;.join([&#39;%.10f&#39; % val for val in row]) + &#39;\n&#39;)
-    return out_ts_file
-
-
-def combine_hemi(left, right):
-    &quot;&quot;&quot;Combine left and right hemisphere time series into a single text file
-    &quot;&quot;&quot;
-    lh_data = nb.load(left).get_data()
-    rh_data = nb.load(right).get_data()
-
-    indices = np.vstack((1000000 + np.arange(0, lh_data.shape[0])[:, None],
-                         2000000 + np.arange(0, rh_data.shape[0])[:, None]))
-    all_data = np.hstack((indices, np.vstack((lh_data.squeeze(),
-                                              rh_data.squeeze()))))
-    filename = left.split(&#39;.&#39;)[1] + &#39;_combined.txt&#39;
-    np.savetxt(filename, all_data,
-               fmt=&#39;,&#39;.join([&#39;%d&#39;] + [&#39;%.10f&#39;] * (all_data.shape[1] - 1)))
-    return os.path.abspath(filename)
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    components_file: a text file containing the noise components</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">imgseries</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">realigned_file</span><span class="p">)</span>
+    <span class="n">components</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filename_to_list</span><span class="p">(</span><span class="n">mask_file</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">mask</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">voxel_timecourses</span> <span class="o">=</span> <span class="n">imgseries</span><span class="o">.</span><span class="n">get_data</span><span class="p">()[</span><span class="n">mask</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">voxel_timecourses</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">voxel_timecourses</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c"># remove mean and normalize by variance</span>
+        <span class="c"># voxel_timecourses.shape == [nvoxels, time]</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">voxel_timecourses</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">stdX</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">stdX</span><span class="p">[</span><span class="n">stdX</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">stdX</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">stdX</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">stdX</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">stdX</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">1.</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">/</span><span class="n">stdX</span>
+        <span class="n">u</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">components</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="n">u</span><span class="p">[:,</span> <span class="p">:</span><span class="n">num_components</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">components</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">components</span><span class="p">,</span> <span class="n">u</span><span class="p">[:,</span> <span class="p">:</span><span class="n">num_components</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">extra_regressors</span><span class="p">:</span>
+        <span class="n">regressors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">extra_regressors</span><span class="p">)</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">components</span><span class="p">,</span> <span class="n">regressors</span><span class="p">))</span>
+    <span class="n">components_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s">&#39;noise_components.txt&#39;</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">components_file</span><span class="p">,</span> <span class="n">components</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s">&quot;</span><span class="si">%.10f</span><span class="s">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">components_file</span>
 
 
-def create_reg_workflow(name=&#39;registration&#39;):
-    &quot;&quot;&quot;Create a FEAT preprocessing workflow together with freesurfer
+<span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="n">in_files</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">nipype.utils.filemanip</span> <span class="kn">import</span> <span class="p">(</span><span class="n">filename_to_list</span><span class="p">,</span> <span class="n">split_filename</span><span class="p">,</span>
+                                        <span class="n">list_to_filename</span><span class="p">)</span>
+    <span class="n">out_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">filename</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filename_to_list</span><span class="p">(</span><span class="n">in_files</span><span class="p">)):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">suffix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">out_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="p">(</span><span class="s">&#39;_</span><span class="si">%03d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">idx</span><span class="p">)</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="n">suffix</span> <span class="o">+</span> <span class="n">ext</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">list_to_filename</span><span class="p">(</span><span class="n">out_files</span><span class="p">)</span>
 
-    Parameters
-    ----------
 
-    ::
+<span class="k">def</span> <span class="nf">get_aparc_aseg</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the aparc+aseg.mgz file&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&#39;aparc+aseg.mgz&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">name</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;aparc+aseg.mgz not found&#39;</span><span class="p">)</span>
 
-        name : name of workflow (default: &#39;registration&#39;)
 
-    Inputs::
+<span class="k">def</span> <span class="nf">extract_subrois</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">,</span> <span class="n">label_file</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extract voxel time courses for each subcortical roi index</span>
 
-        inputspec.source_files : files (filename or list of filenames to register)
-        inputspec.mean_image : reference image to use
-        inputspec.anatomical_image : anatomical image to coregister to
-        inputspec.target_image : registration target
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 
-    Outputs::
+<span class="sd">    timeseries_file: a 4D Nifti file</span>
+<span class="sd">    label_file: a 3D file containing rois in the same space/size of the 4D file</span>
+<span class="sd">    indices: a list of indices for ROIs to extract.</span>
 
-        outputspec.func2anat_transform : FLIRT transform
-        outputspec.anat2target_transform : FLIRT+FNIRT transform
-        outputspec.transformed_files : transformed files in target space
-        outputspec.transformed_mean : mean image in target space
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    out_file: a text file containing time courses for each voxel of each roi</span>
+<span class="sd">        The first four columns are: freesurfer index, i, j, k positions in the</span>
+<span class="sd">        label file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">roiimg</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">label_file</span><span class="p">)</span>
+    <span class="n">rois</span> <span class="o">=</span> <span class="n">roiimg</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="n">split_filename</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">out_ts_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_subcortical_ts.txt&#39;</span> <span class="o">%</span> <span class="n">prefix</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_ts_file</span><span class="p">,</span> <span class="s">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">fsindex</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+            <span class="n">ijk</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">rois</span> <span class="o">==</span> <span class="n">fsindex</span><span class="p">)</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">ijk</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i0</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ts</span><span class="p">):</span>
+                <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%d</span><span class="s">,</span><span class="si">%d</span><span class="s">,</span><span class="si">%d</span><span class="s">,</span><span class="si">%d</span><span class="s">,&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fsindex</span><span class="p">,</span> <span class="n">ijk</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i0</span><span class="p">],</span>
+                                           <span class="n">ijk</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i0</span><span class="p">],</span> <span class="n">ijk</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">i0</span><span class="p">])</span> <span class="o">+</span>
+                         <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%.10f</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">val</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">row</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_ts_file</span>
 
-    Example
-    -------
+
+<span class="k">def</span> <span class="nf">combine_hemi</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Combine left and right hemisphere time series into a single text file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lh_data</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">left</span><span class="p">)</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+    <span class="n">rh_data</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">right</span><span class="p">)</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="mi">1000000</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">lh_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])[:,</span> <span class="bp">None</span><span class="p">],</span>
+                         <span class="mi">2000000</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">rh_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])[:,</span> <span class="bp">None</span><span class="p">]))</span>
+    <span class="n">all_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">indices</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">lh_data</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span>
+                                              <span class="n">rh_data</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()))))</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">left</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;_combined.txt&#39;</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">all_data</span><span class="p">,</span>
+               <span class="n">fmt</span><span class="o">=</span><span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s">&#39;</span><span class="si">%d</span><span class="s">&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s">&#39;</span><span class="si">%.10f</span><span class="s">&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">all_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">create_reg_workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;registration&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a FEAT preprocessing workflow together with freesurfer</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">        name : name of workflow (default: &#39;registration&#39;)</span>
+
+<span class="sd">    Inputs::</span>
+
+<span class="sd">        inputspec.source_files : files (filename or list of filenames to register)</span>
+<span class="sd">        inputspec.mean_image : reference image to use</span>
+<span class="sd">        inputspec.anatomical_image : anatomical image to coregister to</span>
+<span class="sd">        inputspec.target_image : registration target</span>
+
+<span class="sd">    Outputs::</span>
+
+<span class="sd">        outputspec.func2anat_transform : FLIRT transform</span>
+<span class="sd">        outputspec.anat2target_transform : FLIRT+FNIRT transform</span>
+<span class="sd">        outputspec.transformed_files : transformed files in target space</span>
+<span class="sd">        outputspec.transformed_mean : mean image in target space</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">register</span> <span class="o">=</span> <span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">inputnode</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;source_files&#39;</span><span class="p">,</span>
+                                                         <span class="s">&#39;mean_image&#39;</span><span class="p">,</span>
+                                                         <span class="s">&#39;subject_id&#39;</span><span class="p">,</span>
+                                                         <span class="s">&#39;subjects_dir&#39;</span><span class="p">,</span>
+                                                         <span class="s">&#39;target_image&#39;</span><span class="p">]),</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s">&#39;inputspec&#39;</span><span class="p">)</span>
+
+    <span class="n">outputnode</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;func2anat_transform&#39;</span><span class="p">,</span>
+                                                          <span class="s">&#39;out_reg_file&#39;</span><span class="p">,</span>
+                                                          <span class="s">&#39;anat2target_transform&#39;</span><span class="p">,</span>
+                                                          <span class="s">&#39;transforms&#39;</span><span class="p">,</span>
+                                                          <span class="s">&#39;transformed_mean&#39;</span><span class="p">,</span>
+                                                          <span class="s">&#39;segmentation_files&#39;</span><span class="p">,</span>
+                                                          <span class="s">&#39;anat2target&#39;</span><span class="p">,</span>
+                                                          <span class="s">&#39;aparc&#39;</span><span class="p">,</span>
+                                                          <span class="s">&#39;min_cost_file&#39;</span>
+                                                          <span class="p">]),</span>
+                      <span class="n">name</span><span class="o">=</span><span class="s">&#39;outputspec&#39;</span><span class="p">)</span>
+
+    <span class="c"># Get the subject&#39;s freesurfer source directory</span>
+    <span class="n">fssource</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">FreeSurferSource</span><span class="p">(),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s">&#39;fssource&#39;</span><span class="p">)</span>
+    <span class="n">fssource</span><span class="o">.</span><span class="n">run_without_submitting</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">fssource</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)</span>
+    <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;subjects_dir&#39;</span><span class="p">,</span> <span class="n">fssource</span><span class="p">,</span> <span class="s">&#39;subjects_dir&#39;</span><span class="p">)</span>
+
+    <span class="n">convert</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">MRIConvert</span><span class="p">(</span><span class="n">out_type</span><span class="o">=</span><span class="s">&#39;nii&#39;</span><span class="p">),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&quot;convert&quot;</span><span class="p">)</span>
+    <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fssource</span><span class="p">,</span> <span class="s">&#39;T1&#39;</span><span class="p">,</span> <span class="n">convert</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+
+    <span class="c"># Coregister the median to the surface</span>
+    <span class="n">bbregister</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">BBRegister</span><span class="p">(),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s">&#39;bbregister&#39;</span><span class="p">)</span>
+    <span class="n">bbregister</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="s">&#39;fsl&#39;</span>
+    <span class="n">bbregister</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">contrast_type</span> <span class="o">=</span> <span class="s">&#39;t2&#39;</span>
+    <span class="n">bbregister</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_fsl_file</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">bbregister</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">epi_mask</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)</span>
+    <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;source_file&#39;</span><span class="p">)</span>
+    <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;subjects_dir&#39;</span><span class="p">,</span> <span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;subjects_dir&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>register = Workflow(name=name)
-inputnode = Node(interface=IdentityInterface(fields=[&#8216;source_files&#8217;,</p>
-<blockquote>
-<div><blockquote>
-<div>&#8216;mean_image&#8217;,
-&#8216;subject_id&#8217;,
-&#8216;subjects_dir&#8217;,
-&#8216;target_image&#8217;]),</div></blockquote>
-<p>name=&#8217;inputspec&#8217;)</p>
-</div></blockquote>
-<dl class="docutils">
-<dt>outputnode = Node(interface=IdentityInterface(fields=[&#8216;func2anat_transform&#8217;,</dt>
-<dd><blockquote class="first">
-<div>&#8216;out_reg_file&#8217;,
-&#8216;anat2target_transform&#8217;,
-&#8216;transforms&#8217;,
-&#8216;transformed_mean&#8217;,
-&#8216;segmentation_files&#8217;,
-&#8216;anat2target&#8217;,
-&#8216;aparc&#8217;,
-&#8216;min_cost_file&#8217;
-]),</div></blockquote>
-<p class="last">name=&#8217;outputspec&#8217;)</p>
-</dd>
-</dl>
-<p># Get the subject&#8217;s freesurfer source directory
-fssource = Node(FreeSurferSource(),</p>
-<blockquote>
-<div>name=&#8217;fssource&#8217;)</div></blockquote>
-<p>fssource.run_without_submitting = True
-register.connect(inputnode, &#8216;subject_id&#8217;, fssource, &#8216;subject_id&#8217;)
-register.connect(inputnode, &#8216;subjects_dir&#8217;, fssource, &#8216;subjects_dir&#8217;)
-convert = Node(freesurfer.MRIConvert(out_type=&#8217;nii&#8217;),</p>
-<blockquote>
-<div>name=&#8221;convert&#8221;)</div></blockquote>
-<p>register.connect(fssource, &#8216;T1&#8217;, convert, &#8216;in_file&#8217;)
-# Coregister the median to the surface
-bbregister = Node(freesurfer.BBRegister(),</p>
-<blockquote>
-<div>name=&#8217;bbregister&#8217;)</div></blockquote>
-<p>bbregister.inputs.init = &#8216;fsl&#8217;
-bbregister.inputs.contrast_type = &#8216;t2&#8217;
-bbregister.inputs.out_fsl_file = True
-bbregister.inputs.epi_mask = True
-register.connect(inputnode, &#8216;subject_id&#8217;, bbregister, &#8216;subject_id&#8217;)
-register.connect(inputnode, &#8216;mean_image&#8217;, bbregister, &#8216;source_file&#8217;)
-register.connect(inputnode, &#8216;subjects_dir&#8217;, bbregister, &#8216;subjects_dir&#8217;)</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd><p class="first">Estimate the tissue classes from the anatomical image. But use aparc+aseg&#8217;s brain mask
-&#8220;&#8221;&#8220;</p>
-<p>binarize = Node(fs.Binarize(min=0.5, out_type=&#8221;nii.gz&#8221;, dilate=1), name=&#8221;binarize_aparc&#8221;)
-register.connect(fssource, (&#8220;aparc_aseg&#8221;, get_aparc_aseg), binarize, &#8220;in_file&#8221;)
-stripper = Node(fsl.ApplyMask(), name =&#8217;stripper&#8217;)
-register.connect(binarize, &#8220;binary_file&#8221;, stripper, &#8220;mask_file&#8221;)
-register.connect(convert, &#8216;out_file&#8217;, stripper, &#8216;in_file&#8217;)</p>
-<p class="last">fast = Node(fsl.FAST(), name=&#8217;fast&#8217;)
-register.connect(stripper, &#8216;out_file&#8217;, fast, &#8216;in_files&#8217;)</p>
-</dd>
-</dl>
+<p>Estimate the tissue classes from the anatomical image. But use aparc+aseg&#8217;s brain mask</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">binarize</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">fs</span><span class="o">.</span><span class="n">Binarize</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">out_type</span><span class="o">=</span><span class="s">&quot;nii.gz&quot;</span><span class="p">,</span> <span class="n">dilate</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;binarize_aparc&quot;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fssource</span><span class="p">,</span> <span class="p">(</span><span class="s">&quot;aparc_aseg&quot;</span><span class="p">,</span> <span class="n">get_aparc_aseg</span><span class="p">),</span> <span class="n">binarize</span><span class="p">,</span> <span class="s">&quot;in_file&quot;</span><span class="p">)</span>
+<span class="n">stripper</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">ApplyMask</span><span class="p">(),</span> <span class="n">name</span> <span class="o">=</span><span class="s">&#39;stripper&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">binarize</span><span class="p">,</span> <span class="s">&quot;binary_file&quot;</span><span class="p">,</span> <span class="n">stripper</span><span class="p">,</span> <span class="s">&quot;mask_file&quot;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">convert</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">stripper</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+
+<span class="n">fast</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">FAST</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;fast&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">stripper</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">fast</span><span class="p">,</span> <span class="s">&#39;in_files&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Binarize the segmentation</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">binarize</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">fsl</span><span class="o">.</span><span class="n">ImageMaths</span><span class="p">(</span><span class="n">op_string</span><span class="o">=</span><span class="s">&#39;-nan -thr 0.9 -ero -bin&#39;</span><span class="p">),</span>
                    <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span>
@@ -605,40 +595,27 @@ register.connect(stripper, &#8216;out_file&#8217;, fast, &#8216;in_files&#8217;)
 </pre></div>
 </div>
 <p>Apply inverse transform to take segmentations to functional space</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd><dl class="first docutils">
-<dt>applyxfm = MapNode(freesurfer.ApplyVolTransform(inverse=True,</dt>
-<dd><blockquote class="first">
-<div>interp=&#8217;nearest&#8217;),</div></blockquote>
-<p class="last">iterfield=[&#8216;target_file&#8217;],
-name=&#8217;inverse_transform&#8217;)</p>
-</dd>
-</dl>
-<p class="last">register.connect(inputnode, &#8216;subjects_dir&#8217;, applyxfm, &#8216;subjects_dir&#8217;)
-register.connect(bbregister, &#8216;out_reg_file&#8217;, applyxfm, &#8216;reg_file&#8217;)
-register.connect(binarize, &#8216;out_file&#8217;, applyxfm, &#8216;target_file&#8217;)
-register.connect(inputnode, &#8216;mean_image&#8217;, applyxfm, &#8216;source_file&#8217;)</p>
-</dd>
-</dl>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">applyxfm</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">ApplyVolTransform</span><span class="p">(</span><span class="n">inverse</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                                <span class="n">interp</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">),</span>
+                   <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;target_file&#39;</span><span class="p">],</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s">&#39;inverse_transform&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;subjects_dir&#39;</span><span class="p">,</span> <span class="n">applyxfm</span><span class="p">,</span> <span class="s">&#39;subjects_dir&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;out_reg_file&#39;</span><span class="p">,</span> <span class="n">applyxfm</span><span class="p">,</span> <span class="s">&#39;reg_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">binarize</span><span class="p">,</span> <span class="s">&#39;out_file&#39;</span><span class="p">,</span> <span class="n">applyxfm</span><span class="p">,</span> <span class="s">&#39;target_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="n">applyxfm</span><span class="p">,</span> <span class="s">&#39;source_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Apply inverse transform to aparc file</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd><dl class="first docutils">
-<dt>aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,</dt>
-<dd><blockquote class="first">
-<div>interp=&#8217;nearest&#8217;),</div></blockquote>
-<p class="last">name=&#8217;aparc_inverse_transform&#8217;)</p>
-</dd>
-</dl>
-<p>register.connect(inputnode, &#8216;subjects_dir&#8217;, aparcxfm, &#8216;subjects_dir&#8217;)
-register.connect(bbregister, &#8216;out_reg_file&#8217;, aparcxfm, &#8216;reg_file&#8217;)
-register.connect(fssource, (&#8216;aparc_aseg&#8217;, get_aparc_aseg),</p>
-<blockquote>
-<div>aparcxfm, &#8216;target_file&#8217;)</div></blockquote>
-<p class="last">register.connect(inputnode, &#8216;mean_image&#8217;, aparcxfm, &#8216;source_file&#8217;)</p>
-</dd>
-</dl>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">aparcxfm</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">freesurfer</span><span class="o">.</span><span class="n">ApplyVolTransform</span><span class="p">(</span><span class="n">inverse</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                             <span class="n">interp</span><span class="o">=</span><span class="s">&#39;nearest&#39;</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="s">&#39;aparc_inverse_transform&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;subjects_dir&#39;</span><span class="p">,</span> <span class="n">aparcxfm</span><span class="p">,</span> <span class="s">&#39;subjects_dir&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bbregister</span><span class="p">,</span> <span class="s">&#39;out_reg_file&#39;</span><span class="p">,</span> <span class="n">aparcxfm</span><span class="p">,</span> <span class="s">&#39;reg_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">fssource</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;aparc_aseg&#39;</span><span class="p">,</span> <span class="n">get_aparc_aseg</span><span class="p">),</span>
+                 <span class="n">aparcxfm</span><span class="p">,</span> <span class="s">&#39;target_file&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="n">aparcxfm</span><span class="p">,</span> <span class="s">&#39;source_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Convert the BBRegister transformation to ANTS ITK format</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">convert2itk</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">C3dAffineTool</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;convert2itk&#39;</span><span class="p">)</span>
 <span class="n">convert2itk</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fsl2ras</span> <span class="o">=</span> <span class="bp">True</span>
@@ -677,7 +654,7 @@ All parameters are set using the example from:
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">use_histogram_matching</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_lower_quantile</span> <span class="o">=</span> <span class="mf">0.005</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_upper_quantile</span> <span class="o">=</span> <span class="mf">0.995</span>
-<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;--float&#39;</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">float</span> <span class="o">=</span> <span class="bp">True</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_warped_image</span> <span class="o">=</span> <span class="s">&#39;output_warped_image.nii.gz&#39;</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="n">reg</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;sbatch_args&#39;</span><span class="p">:</span> <span class="s">&#39;-c</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="mi">4</span><span class="p">}</span>
@@ -686,29 +663,26 @@ All parameters are set using the example from:
 </pre></div>
 </div>
 <p>Concatenate the affine and ants transforms into a list</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">pickfirst</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-<span class="n">merge</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in2&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;mergexfm&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">merge</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in2&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;mergexfm&#39;</span><span class="p">)</span>
 <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">convert2itk</span><span class="p">,</span> <span class="s">&#39;itk_transform&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in2&#39;</span><span class="p">)</span>
-<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;composite_transform&#39;</span><span class="p">,</span> <span class="n">pickfirst</span><span class="p">),</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="s">&#39;composite_transform&#39;</span><span class="p">,</span> <span class="n">merge</span><span class="p">,</span> <span class="s">&#39;in1&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Transform the mean image. First to anatomical and then to target</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd><p class="first">warpmean = Node(ants.ApplyTransforms(), name=&#8217;warpmean&#8217;)
-warpmean.inputs.input_image_type = 3
-warpmean.inputs.interpolation = &#8216;Linear&#8217;
-warpmean.inputs.invert_transform_flags = [False, False]
-warpmean.inputs.terminal_output = &#8216;file&#8217;
-warpmean.inputs.args = &#8216;&#8211;float&#8217;
-warpmean.inputs.num_threads = 4
-warpmean.plugin_args = {&#8216;sbatch_args&#8217;: &#8216;-c%d&#8217; % 4}</p>
-<p class="last">register.connect(inputnode,&#8217;target_image&#8217;, warpmean,&#8217;reference_image&#8217;)
-register.connect(inputnode, &#8216;mean_image&#8217;, warpmean, &#8216;input_image&#8217;)
-register.connect(merge, &#8216;out&#8217;, warpmean, &#8216;transforms&#8217;)</p>
-</dd>
-</dl>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">warpmean</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">ants</span><span class="o">.</span><span class="n">ApplyTransforms</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;warpmean&#39;</span><span class="p">)</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">input_image_type</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">interpolation</span> <span class="o">=</span> <span class="s">&#39;Linear&#39;</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">invert_transform_flags</span> <span class="o">=</span> <span class="p">[</span><span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">terminal_output</span> <span class="o">=</span> <span class="s">&#39;file&#39;</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="s">&#39;--float&#39;</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">num_threads</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">warpmean</span><span class="o">.</span><span class="n">plugin_args</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;sbatch_args&#39;</span><span class="p">:</span> <span class="s">&#39;-c</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="mi">4</span><span class="p">}</span>
+
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span><span class="s">&#39;target_image&#39;</span><span class="p">,</span> <span class="n">warpmean</span><span class="p">,</span><span class="s">&#39;reference_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">inputnode</span><span class="p">,</span> <span class="s">&#39;mean_image&#39;</span><span class="p">,</span> <span class="n">warpmean</span><span class="p">,</span> <span class="s">&#39;input_image&#39;</span><span class="p">)</span>
+<span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">merge</span><span class="p">,</span> <span class="s">&#39;out&#39;</span><span class="p">,</span> <span class="n">warpmean</span><span class="p">,</span> <span class="s">&#39;transforms&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 <p>Assign all the output files</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="s">&#39;warped_image&#39;</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;anat2target&#39;</span><span class="p">)</span>
 <span class="n">register</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">warpmean</span><span class="p">,</span> <span class="s">&#39;output_image&#39;</span><span class="p">,</span> <span class="n">outputnode</span><span class="p">,</span> <span class="s">&#39;transformed_mean&#39;</span><span class="p">)</span>
@@ -777,27 +751,22 @@ register.connect(merge, &#8216;out&#8217;, warpmean, &#8216;transforms&#8217;)</
 </pre></div>
 </div>
 <p>Segment and Register</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd>registration = create_reg_workflow(name=&#8217;registration&#8217;)
-wf.connect(calc_median, &#8216;median_file&#8217;, registration, &#8216;inputspec.mean_image&#8217;)
-registration.inputs.inputspec.subject_id = subject_id
-registration.inputs.inputspec.subjects_dir = subjects_dir
-registration.inputs.inputspec.target_image = target_file</dd>
-</dl>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">registration</span> <span class="o">=</span> <span class="n">create_reg_workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;registration&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">calc_median</span><span class="p">,</span> <span class="s">&#39;median_file&#39;</span><span class="p">,</span> <span class="n">registration</span><span class="p">,</span> <span class="s">&#39;inputspec.mean_image&#39;</span><span class="p">)</span>
+<span class="n">registration</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">subject_id</span> <span class="o">=</span> <span class="n">subject_id</span>
+<span class="n">registration</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">subjects_dir</span> <span class="o">=</span> <span class="n">subjects_dir</span>
+<span class="n">registration</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputspec</span><span class="o">.</span><span class="n">target_image</span> <span class="o">=</span> <span class="n">target_file</span>
+</pre></div>
+</div>
 <p>Quantify TSNR in each freesurfer ROI</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd><dl class="first docutils">
-<dt>get_roi_tsnr = MapNode(fs.SegStats(default_color_table=True),</dt>
-<dd>iterfield=[&#8216;in_file&#8217;], name=&#8217;get_aparc_tsnr&#8217;)</dd>
-</dl>
-<p class="last">get_roi_tsnr.inputs.avgwf_txt_file = True
-wf.connect(tsnr, &#8216;tsnr_file&#8217;, get_roi_tsnr, &#8216;in_file&#8217;)
-wf.connect(registration, &#8216;outputspec.aparc&#8217;, get_roi_tsnr, &#8216;segmentation_file&#8217;)</p>
-</dd>
-</dl>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.algorithms.rapidart</span></tt> to determine which of the
+<div class="highlight-python"><div class="highlight"><pre><span class="n">get_roi_tsnr</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">fs</span><span class="o">.</span><span class="n">SegStats</span><span class="p">(</span><span class="n">default_color_table</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+                       <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;in_file&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;get_aparc_tsnr&#39;</span><span class="p">)</span>
+<span class="n">get_roi_tsnr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">avgwf_txt_file</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">tsnr</span><span class="p">,</span> <span class="s">&#39;tsnr_file&#39;</span><span class="p">,</span> <span class="n">get_roi_tsnr</span><span class="p">,</span> <span class="s">&#39;in_file&#39;</span><span class="p">)</span>
+<span class="n">wf</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">registration</span><span class="p">,</span> <span class="s">&#39;outputspec.aparc&#39;</span><span class="p">,</span> <span class="n">get_roi_tsnr</span><span class="p">,</span> <span class="s">&#39;segmentation_file&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.algorithms.rapidart</span></code> to determine which of the
 images in the functional series are outliers based on deviations in
 intensity or movement.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">art</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">ArtifactDetect</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;art&quot;</span><span class="p">)</span>
@@ -908,7 +877,7 @@ voxel sizes.</p>
 </pre></div>
 </div>
 <p>Smooth the functional data using
-<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.fsl.IsotropicSmooth</span></tt>.</p>
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.fsl.IsotropicSmooth</span></code>.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">smooth</span> <span class="o">=</span> <span class="n">MapNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fsl</span><span class="o">.</span><span class="n">IsotropicSmooth</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;smooth&quot;</span><span class="p">,</span> <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;in_file&quot;</span><span class="p">])</span>
 <span class="n">smooth</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="n">vol_fwhm</span>
 
@@ -1205,9 +1174,9 @@ voxel sizes.</p>
 </div>
 <div class="admonition-example-source-code admonition">
 <p class="first admonition-title">Example source code</p>
-<p class="last">You can download <a class="reference download internal" href="../../_downloads/rsfmri_vol_surface_preprocessing_nipy.py"><tt class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></tt></a>.
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/rsfmri_vol_surface_preprocessing_nipy.py"><code class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></code></a>.
 This same script is also included in the Nipype source distribution under the
-<tt class="file docutils literal"><span class="pre">examples</span></tt> directory.</p>
+<code class="file docutils literal"><span class="pre">examples</span></code> directory.</p>
 </div>
 </div>
 
@@ -1218,9 +1187,9 @@ This same script is also included in the Nipype source distribution under the
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

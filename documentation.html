@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -129,7 +129,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="users/install.html">Download</a></td>
@@ -141,7 +141,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -164,9 +164,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -176,7 +176,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="documentation">
 <span id="id1"></span><h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
@@ -184,13 +184,13 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Release:</th><td class="field-body">1.0.0dev</td>
+<tr class="field-odd field"><th class="field-name">Release:</th><td class="field-body">0.11.0</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Date:</th><td class="field-body">June 11, 2015, 09:02 PDT</td>
+<tr class="field-even field"><th class="field-name">Date:</th><td class="field-body">September 15, 2015, 15:38 PDT</td>
 </tr>
 </tbody>
 </table>
-<p>Previous versions:  <a class="reference external" href="http://nipy.org/nipype/0.9.2">0.9.2</a> <a class="reference external" href="http://nipy.org/nipype/0.8">0.8</a></p>
+<p>Previous versions:  <a class="reference external" href="http://nipy.org/nipype/0.10.0">0.10.0</a> <a class="reference external" href="http://nipy.org/nipype/0.9.2">0.9.2</a></p>
 <div class="doc2 container">
 <div class="admonition-guides admonition">
 <p class="first admonition-title">Guides</p>
@@ -370,6 +370,7 @@
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.diffusion_toolkit.odf.html">interfaces.diffusion_toolkit.odf</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.diffusion_toolkit.postproc.html">interfaces.diffusion_toolkit.postproc</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.dipy.preprocess.html">interfaces.dipy.preprocess</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.dipy.simulate.html">interfaces.dipy.simulate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.dipy.tensors.html">interfaces.dipy.tensors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.dipy.tracks.html">interfaces.dipy.tracks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.dynamic_slicer.html">interfaces.dynamic_slicer</a></li>
@@ -392,10 +393,37 @@
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.mrtrix.preprocess.html">interfaces.mrtrix.preprocess</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.mrtrix.tensors.html">interfaces.mrtrix.tensors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.mrtrix.tracking.html">interfaces.mrtrix.tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.mrtrix3.base.html">interfaces.mrtrix3.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.mrtrix3.connectivity.html">interfaces.mrtrix3.connectivity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.mrtrix3.preprocess.html">interfaces.mrtrix3.preprocess</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.mrtrix3.reconst.html">interfaces.mrtrix3.reconst</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.mrtrix3.tracking.html">interfaces.mrtrix3.tracking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.mrtrix3.utils.html">interfaces.mrtrix3.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.nipy.model.html">interfaces.nipy.model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.nipy.preprocess.html">interfaces.nipy.preprocess</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.nipy.utils.html">interfaces.nipy.utils</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.nitime.analysis.html">interfaces.nitime.analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.brains.classify.html">interfaces.semtools.brains.classify</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.brains.segmentation.html">interfaces.semtools.brains.segmentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.brains.utilities.html">interfaces.semtools.brains.utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.converters.html">interfaces.semtools.converters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.diffusion.diffusion.html">interfaces.semtools.diffusion.diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.diffusion.gtract.html">interfaces.semtools.diffusion.gtract</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.diffusion.maxcurvature.html">interfaces.semtools.diffusion.maxcurvature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.diffusion.tractography.commandlineonly.html">interfaces.semtools.diffusion.tractography.commandlineonly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.diffusion.tractography.fiberprocess.html">interfaces.semtools.diffusion.tractography.fiberprocess</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.diffusion.tractography.fibertrack.html">interfaces.semtools.diffusion.tractography.fibertrack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.diffusion.tractography.ukftractography.html">interfaces.semtools.diffusion.tractography.ukftractography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.featurecreator.html">interfaces.semtools.featurecreator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.filtering.denoising.html">interfaces.semtools.filtering.denoising</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.filtering.featuredetection.html">interfaces.semtools.filtering.featuredetection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.legacy.registration.html">interfaces.semtools.legacy.registration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.registration.brainsfit.html">interfaces.semtools.registration.brainsfit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.registration.brainsresample.html">interfaces.semtools.registration.brainsresample</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.registration.brainsresize.html">interfaces.semtools.registration.brainsresize</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.registration.specialized.html">interfaces.semtools.registration.specialized</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.segmentation.specialized.html">interfaces.semtools.segmentation.specialized</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.semtools.utilities.brains.html">interfaces.semtools.utilities.brains</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.slicer.base.html">interfaces.slicer.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.slicer.converters.html">interfaces.slicer.converters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="interfaces/generated/nipype.interfaces.slicer.diffusion.diffusion.html">interfaces.slicer.diffusion.diffusion</a></li>
@@ -445,9 +473,9 @@
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -204,7 +204,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -216,7 +216,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -239,9 +239,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -251,13 +251,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-camino-dti">
 <h1>interfaces.camino.dti<a class="headerlink" href="#interfaces-camino-dti" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-camino-dti-computeeigensystem"></span><div class="section" id="computeeigensystem">
 <span id="index-0"></span><h2>ComputeEigensystem<a class="headerlink" href="#computeeigensystem" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L997">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L995">Link to code</a></p>
 <p>Wraps command <strong>dteig</strong></p>
 <p>Computes the eigensystem from tensor fitted data.</p>
 <p>Reads diffusion tensor (single, two-tensor, three-tensor or multitensor) data from the
@@ -303,7 +303,7 @@ inputmodel: (&#39;dt&#39; or &#39;multitensor&#39;)
         Possible model types are: &quot;dt&quot; (diffusion-tensor data) and
         &quot;multitensor&quot;
         flag: -inputmodel %s
-maxcomponents: (an integer)
+maxcomponents: (an integer (int or long))
         The maximum number of tensor components in a voxel of the input
         data.
         flag: -maxcomponents %d
@@ -330,7 +330,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="computefractionalanisotropy">
 <span id="index-1"></span><h2>ComputeFractionalAnisotropy<a class="headerlink" href="#computefractionalanisotropy" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L879">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L877">Link to code</a></p>
 <p>Wraps command <strong>fa</strong></p>
 <p>Computes the fractional anisotropy of tensors.</p>
 <p>Reads diffusion tensor (single, two-tensor or three-tensor) data from the standard input,
@@ -403,7 +403,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="computemeandiffusivity">
 <span id="index-2"></span><h2>ComputeMeanDiffusivity<a class="headerlink" href="#computemeandiffusivity" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L826">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L824">Link to code</a></p>
 <p>Wraps command <strong>md</strong></p>
 <p>Computes the mean diffusivity (trace/3) from diffusion tensors.</p>
 <div class="section" id="id2">
@@ -471,7 +471,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="computetensortrace">
 <span id="index-3"></span><h2>ComputeTensorTrace<a class="headerlink" href="#computetensortrace" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L938">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L936">Link to code</a></p>
 <p>Wraps command <strong>trd</strong></p>
 <p>Computes the trace of tensors.</p>
 <p>Reads diffusion tensor (single, two-tensor or three-tensor) data from the standard input,
@@ -545,7 +545,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="dtifit">
 <span id="index-4"></span><h2>DTIFit<a class="headerlink" href="#dtifit" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L34">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L34">Link to code</a></p>
 <p>Wraps command <strong>dtfit</strong></p>
 <p>Reads diffusion MRI data, acquired using the acquisition scheme detailed in the scheme file, from the data file.</p>
 <p>Use non-linear fitting instead of the default linear regression to the log measurements.
@@ -611,7 +611,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="dtlutgen">
 <span id="index-5"></span><h2>DTLUTGen<a class="headerlink" href="#dtlutgen" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L299">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L297">Link to code</a></p>
 <p>Wraps command <strong>dtlutgen</strong></p>
 <p>Calibrates the PDFs for PICo probabilistic tractography.</p>
 <p>This program needs to be run once for every acquisition scheme.
@@ -657,7 +657,7 @@ frange: (a list of from 2 to 2 items which are a float)
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-inversion: (an integer)
+inversion: (an integer (int or long))
         Index of the inversion to use. The default is 1 (linear single
         tensor inversion).
         flag: -inversion %d
@@ -671,7 +671,7 @@ lrange: (a list of from 2 to 2 items which are a float)
         flag: -lrange %s, position: 1
 out_file: (a file name)
         flag: &gt; %s, position: -1
-samples: (an integer)
+samples: (an integer (int or long))
         The number of synthetic measurements to generate at each point in
         the LUT. The default is 2000.
         flag: -samples %d
@@ -709,33 +709,29 @@ watson: (a boolean)
 </div>
 <div class="section" id="dtmetric">
 <span id="index-6"></span><h2>DTMetric<a class="headerlink" href="#dtmetric" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L104">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L104">Link to code</a></p>
 <p>Wraps command <strong>dtshape</strong></p>
 <p>Computes tensor metric statistics based on the eigenvalues l1 &gt;= l2 &gt;= l3
 typically obtained from ComputeEigensystem.</p>
 <p>The full list of statistics is:</p>
 <blockquote>
-<div><p>&lt;cl&gt; = (l1 - l2) / l1 , a measure of linearity
-&lt;cp&gt; = (l2 - l3) / l1 , a measure of planarity
-&lt;cs&gt; = l3 / l1 , a measure of isotropy</p>
-<blockquote>
-<div>with: cl + cp + cs = 1</div></blockquote>
-<p>&lt;l1&gt; = first eigenvalue
-&lt;l2&gt; = second eigenvalue
-&lt;l3&gt; = third eigenvalue</p>
-<p>&lt;tr&gt; = l1 + l2 + l3
-&lt;md&gt; = tr / 3
-&lt;rd&gt; = (l2 + l3) / 2
-&lt;fa&gt; = fractional anisotropy. (Basser et al, J Magn Reson B 1996)
-&lt;ra&gt; = relative anisotropy (Basser et al, J Magn Reson B 1996)</p>
-<dl class="docutils">
-<dt>&lt;2dfa&gt; = 2D FA of the two minor eigenvalues l2 and l3</dt>
-<dd><dl class="first last docutils">
-<dt>i.e. sqrt( 2 * [(l2 - &lt;l&gt;)^2 + (l3 - &lt;l&gt;)^2] / (l2^2 + l3^2) )</dt>
-<dd>with: &lt;l&gt; = (l2 + l3) / 2</dd>
-</dl>
-</dd>
-</dl>
+<div><ul class="simple">
+<li>&lt;cl&gt; = (l1 - l2) / l1 , a measure of linearity</li>
+<li>&lt;cp&gt; = (l2 - l3) / l1 , a measure of planarity</li>
+<li>&lt;cs&gt; = l3 / l1 , a measure of isotropy
+with: cl + cp + cs = 1</li>
+<li>&lt;l1&gt; = first eigenvalue</li>
+<li>&lt;l2&gt; = second eigenvalue</li>
+<li>&lt;l3&gt; = third eigenvalue</li>
+<li>&lt;tr&gt; = l1 + l2 + l3</li>
+<li>&lt;md&gt; = tr / 3</li>
+<li>&lt;rd&gt; = (l2 + l3) / 2</li>
+<li>&lt;fa&gt; = fractional anisotropy. (Basser et al, J Magn Reson B 1996)</li>
+<li>&lt;ra&gt; = relative anisotropy (Basser et al, J Magn Reson B 1996)</li>
+<li>&lt;2dfa&gt; = 2D FA of the two minor eigenvalues l2 and l3
+i.e. sqrt( 2 * [(l2 - &lt;l&gt;)^2 + (l3 - &lt;l&gt;)^2] / (l2^2 + l3^2) )
+with: &lt;l&gt; = (l2 + l3) / 2</li>
+</ul>
 </div></blockquote>
 <div class="section" id="id6">
 <h3>Example<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
@@ -807,7 +803,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="modelfit">
 <span id="index-7"></span><h2>ModelFit<a class="headerlink" href="#modelfit" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L222">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L220">Link to code</a></p>
 <p>Wraps command <strong>modelfit</strong></p>
 <p>Fits models of the spin-displacement density to diffusion MRI measurements.</p>
 <p>This is an interface to various model fitting routines for diffusion MRI data that
@@ -966,7 +962,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="picopdfs">
 <span id="index-8"></span><h2>PicoPDFs<a class="headerlink" href="#picopdfs" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L368">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L366">Link to code</a></p>
 <p>Wraps command <strong>picopdfs</strong></p>
 <p>Constructs a spherical PDF in each voxel for probabilistic tractography.</p>
 <div class="section" id="id8">
@@ -1012,13 +1008,13 @@ inputmodel: (&#39;dt&#39; or &#39;multitensor&#39; or &#39;pds&#39;, nipype defa
          dt)
         input model type
         flag: -inputmodel %s, position: 2
-maxcomponents: (an integer)
+maxcomponents: (an integer (int or long))
         The maximum number of tensor components in a voxel (default 2) for
         multitensor data.Currently, only the default is supported, but
         future releases may allow the input of three-tensor data using this
         option.
         flag: -maxcomponents %d
-numpds: (an integer)
+numpds: (an integer (int or long))
         The maximum number of PDs in a voxel (default 3) for PD data.This
         option determines the size of the input and output voxels.This means
         that the data file may be large enough to accomodate three or more
@@ -1050,7 +1046,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="track">
 <span id="index-9"></span><h2>Track<a class="headerlink" href="#track" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L529">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L527">Link to code</a></p>
 <p>Wraps command <strong>track</strong></p>
 <p>Performs tractography using one of the following models:
 dt&#8217;, &#8216;multitensor&#8217;, &#8216;pds&#8217;, &#8216;pico&#8217;, &#8216;bootstrap&#8217;, &#8216;ballstick&#8217;, &#8216;bayesdirac&#8217;</p>
@@ -1093,7 +1089,8 @@ curvethresh: (a float)
         the length of a voxel. If the angle is greater than this, then the
         streamline terminates.
         flag: -curvethresh %f
-data_dims: (a list of from 3 to 3 items which are an integer)
+data_dims: (a list of from 3 to 3 items which are an integer (int or
+         long))
         data dimensions in voxels
         flag: -datadims %s
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -1141,13 +1138,13 @@ ipthresh: (a float)
         more than 80 degrees. Set this to -1.0 to disable curvature checking
         completely.
         flag: -ipthresh %f
-maxcomponents: (an integer)
+maxcomponents: (an integer (int or long))
         The maximum number of tensor components in a voxel. This determines
         the size of the input file and does not say anything about the voxel
         classification. The default is 2 if the input model is multitensor
         and 1 if the input model is dt.
         flag: -maxcomponents %d
-numpds: (an integer)
+numpds: (an integer (int or long))
         The maximum number of PDs in a voxel for input models sfpeak and
         pico. The default is 3 for input model sfpeak and 1 for input model
         pico. This option determines the size of the voxels in the input
@@ -1201,7 +1198,7 @@ voxel_dims: (a list of from 3 to 3 items which are a float)
 </div>
 <div class="section" id="trackballstick">
 <span id="index-10"></span><h2>TrackBallStick<a class="headerlink" href="#trackballstick" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L747">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L745">Link to code</a></p>
 <p>Wraps command <strong>track</strong></p>
 <p>Performs streamline tractography using ball-stick fitted data</p>
 <div class="section" id="id10">
@@ -1242,7 +1239,8 @@ curvethresh: (a float)
         the length of a voxel. If the angle is greater than this, then the
         streamline terminates.
         flag: -curvethresh %f
-data_dims: (a list of from 3 to 3 items which are an integer)
+data_dims: (a list of from 3 to 3 items which are an integer (int or
+         long))
         data dimensions in voxels
         flag: -datadims %s
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -1290,13 +1288,13 @@ ipthresh: (a float)
         more than 80 degrees. Set this to -1.0 to disable curvature checking
         completely.
         flag: -ipthresh %f
-maxcomponents: (an integer)
+maxcomponents: (an integer (int or long))
         The maximum number of tensor components in a voxel. This determines
         the size of the input file and does not say anything about the voxel
         classification. The default is 2 if the input model is multitensor
         and 1 if the input model is dt.
         flag: -maxcomponents %d
-numpds: (an integer)
+numpds: (an integer (int or long))
         The maximum number of PDs in a voxel for input models sfpeak and
         pico. The default is 3 for input model sfpeak and 1 for input model
         pico. This option determines the size of the voxels in the input
@@ -1350,7 +1348,7 @@ voxel_dims: (a list of from 3 to 3 items which are a float)
 </div>
 <div class="section" id="trackbayesdirac">
 <span id="index-11"></span><h2>TrackBayesDirac<a class="headerlink" href="#trackbayesdirac" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L726">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L724">Link to code</a></p>
 <p>Wraps command <strong>track</strong></p>
 <p>Performs streamline tractography using a Bayesian tracking with Dirac priors</p>
 <div class="section" id="id11">
@@ -1405,7 +1403,8 @@ curvethresh: (a float)
         the length of a voxel. If the angle is greater than this, then the
         streamline terminates.
         flag: -curvethresh %f
-data_dims: (a list of from 3 to 3 items which are an integer)
+data_dims: (a list of from 3 to 3 items which are an integer (int or
+         long))
         data dimensions in voxels
         flag: -datadims %s
 datamodel: (&#39;cylsymmdt&#39; or &#39;ballstick&#39;)
@@ -1467,17 +1466,17 @@ ipthresh: (a float)
         more than 80 degrees. Set this to -1.0 to disable curvature checking
         completely.
         flag: -ipthresh %f
-iterations: (an integer)
+iterations: (an integer (int or long))
         Number of streamlines to generate at each seed point. The default is
         5000.
         flag: -iterations %d
-maxcomponents: (an integer)
+maxcomponents: (an integer (int or long))
         The maximum number of tensor components in a voxel. This determines
         the size of the input file and does not say anything about the voxel
         classification. The default is 2 if the input model is multitensor
         and 1 if the input model is dt.
         flag: -maxcomponents %d
-numpds: (an integer)
+numpds: (an integer (int or long))
         The maximum number of PDs in a voxel for input models sfpeak and
         pico. The default is 3 for input model sfpeak and 1 for input model
         pico. This option determines the size of the voxels in the input
@@ -1497,7 +1496,7 @@ pdf: (&#39;bingham&#39; or &#39;watson&#39; or &#39;acg&#39;)
         Specifies the model for PICo priors (not the curvature priors). The
         default is &quot;bingham&quot;.
         flag: -pdf %s
-pointset: (an integer)
+pointset: (an integer (int or long))
         Index to the point set to use for Bayesian likelihood calculation.
         The index specifies a set of evenly distributed points on the unit
         sphere, where each point x defines two possible step directions (x
@@ -1544,7 +1543,7 @@ voxel_dims: (a list of from 3 to 3 items which are a float)
 </div>
 <div class="section" id="trackbedpostxdeter">
 <span id="index-12"></span><h2>TrackBedpostxDeter<a class="headerlink" href="#trackbedpostxdeter" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L625">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L623">Link to code</a></p>
 <p>Wraps command <strong>track</strong></p>
 <p>Data from FSL&#8217;s bedpostx can be imported into Camino for deterministic tracking.
 (Use TrackBedpostxProba for bedpostx probabilistic tractography.)</p>
@@ -1596,7 +1595,8 @@ curvethresh: (a float)
         the length of a voxel. If the angle is greater than this, then the
         streamline terminates.
         flag: -curvethresh %f
-data_dims: (a list of from 3 to 3 items which are an integer)
+data_dims: (a list of from 3 to 3 items which are an integer (int or
+         long))
         data dimensions in voxels
         flag: -datadims %s
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -1644,7 +1644,7 @@ ipthresh: (a float)
         more than 80 degrees. Set this to -1.0 to disable curvature checking
         completely.
         flag: -ipthresh %f
-maxcomponents: (an integer)
+maxcomponents: (an integer (int or long))
         The maximum number of tensor components in a voxel. This determines
         the size of the input file and does not say anything about the voxel
         classification. The default is 2 if the input model is multitensor
@@ -1654,7 +1654,7 @@ min_vol_frac: (a float)
         Zeros out compartments in bedpostx data with a mean volume fraction
         f of less than min_vol_frac. The default is 0.01.
         flag: -bedpostxminf %d
-numpds: (an integer)
+numpds: (an integer (int or long))
         The maximum number of PDs in a voxel for input models sfpeak and
         pico. The default is 3 for input model sfpeak and 1 for input model
         pico. This option determines the size of the voxels in the input
@@ -1708,7 +1708,7 @@ voxel_dims: (a list of from 3 to 3 items which are a float)
 </div>
 <div class="section" id="trackbedpostxproba">
 <span id="index-13"></span><h2>TrackBedpostxProba<a class="headerlink" href="#trackbedpostxproba" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L668">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L666">Link to code</a></p>
 <p>Wraps command <strong>track</strong></p>
 <p>Data from FSL&#8217;s bedpostx can be imported into Camino for probabilistic tracking.
 (Use TrackBedpostxDeter for bedpostx deterministic tractography.)</p>
@@ -1765,7 +1765,8 @@ curvethresh: (a float)
         the length of a voxel. If the angle is greater than this, then the
         streamline terminates.
         flag: -curvethresh %f
-data_dims: (a list of from 3 to 3 items which are an integer)
+data_dims: (a list of from 3 to 3 items which are an integer (int or
+         long))
         data dimensions in voxels
         flag: -datadims %s
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -1813,11 +1814,11 @@ ipthresh: (a float)
         more than 80 degrees. Set this to -1.0 to disable curvature checking
         completely.
         flag: -ipthresh %f
-iterations: (an integer)
+iterations: (an integer (int or long))
         Number of streamlines to generate at each seed point. The default is
         1.
         flag: -iterations %d
-maxcomponents: (an integer)
+maxcomponents: (an integer (int or long))
         The maximum number of tensor components in a voxel. This determines
         the size of the input file and does not say anything about the voxel
         classification. The default is 2 if the input model is multitensor
@@ -1827,7 +1828,7 @@ min_vol_frac: (a float)
         Zeros out compartments in bedpostx data with a mean volume fraction
         f of less than min_vol_frac. The default is 0.01.
         flag: -bedpostxminf %d
-numpds: (an integer)
+numpds: (an integer (int or long))
         The maximum number of PDs in a voxel for input models sfpeak and
         pico. The default is 3 for input model sfpeak and 1 for input model
         pico. This option determines the size of the voxels in the input
@@ -1881,7 +1882,7 @@ voxel_dims: (a list of from 3 to 3 items which are a float)
 </div>
 <div class="section" id="trackbootstrap">
 <span id="index-14"></span><h2>TrackBootstrap<a class="headerlink" href="#trackbootstrap" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L776">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L774">Link to code</a></p>
 <p>Wraps command <strong>track</strong></p>
 <p>Performs bootstrap streamline tractography using mulitple scans of the same subject</p>
 <div class="section" id="id14">
@@ -1936,7 +1937,8 @@ curvethresh: (a float)
         the length of a voxel. If the angle is greater than this, then the
         streamline terminates.
         flag: -curvethresh %f
-data_dims: (a list of from 3 to 3 items which are an integer)
+data_dims: (a list of from 3 to 3 items which are an integer (int or
+         long))
         data dimensions in voxels
         flag: -datadims %s
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -1975,7 +1977,7 @@ interpolator: (&#39;nn&#39; or &#39;prob_nn&#39; or &#39;linear&#39;)
         that voxel.- LINEAR: Linear interpolation of the vector field
         containing the principal directions at each point.
         flag: -interpolator %s
-inversion: (an integer)
+inversion: (an integer (int or long))
         Tensor reconstruction algorithm for repetition bootstrapping.
         Default is 1 (linear reconstruction, single tensor).
         flag: -inversion %s
@@ -1988,16 +1990,16 @@ ipthresh: (a float)
         more than 80 degrees. Set this to -1.0 to disable curvature checking
         completely.
         flag: -ipthresh %f
-iterations: (an integer)
+iterations: (an integer (int or long))
         Number of streamlines to generate at each seed point.
         flag: -iterations %d
-maxcomponents: (an integer)
+maxcomponents: (an integer (int or long))
         The maximum number of tensor components in a voxel. This determines
         the size of the input file and does not say anything about the voxel
         classification. The default is 2 if the input model is multitensor
         and 1 if the input model is dt.
         flag: -maxcomponents %d
-numpds: (an integer)
+numpds: (an integer (int or long))
         The maximum number of PDs in a voxel for input models sfpeak and
         pico. The default is 3 for input model sfpeak and 1 for input model
         pico. This option determines the size of the voxels in the input
@@ -2051,7 +2053,7 @@ voxel_dims: (a list of from 3 to 3 items which are a float)
 </div>
 <div class="section" id="trackdt">
 <span id="index-15"></span><h2>TrackDT<a class="headerlink" href="#trackdt" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L573">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L571">Link to code</a></p>
 <p>Wraps command <strong>track</strong></p>
 <p>Performs streamline tractography using tensor data</p>
 <div class="section" id="id15">
@@ -2092,7 +2094,8 @@ curvethresh: (a float)
         the length of a voxel. If the angle is greater than this, then the
         streamline terminates.
         flag: -curvethresh %f
-data_dims: (a list of from 3 to 3 items which are an integer)
+data_dims: (a list of from 3 to 3 items which are an integer (int or
+         long))
         data dimensions in voxels
         flag: -datadims %s
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -2140,13 +2143,13 @@ ipthresh: (a float)
         more than 80 degrees. Set this to -1.0 to disable curvature checking
         completely.
         flag: -ipthresh %f
-maxcomponents: (an integer)
+maxcomponents: (an integer (int or long))
         The maximum number of tensor components in a voxel. This determines
         the size of the input file and does not say anything about the voxel
         classification. The default is 2 if the input model is multitensor
         and 1 if the input model is dt.
         flag: -maxcomponents %d
-numpds: (an integer)
+numpds: (an integer (int or long))
         The maximum number of PDs in a voxel for input models sfpeak and
         pico. The default is 3 for input model sfpeak and 1 for input model
         pico. This option determines the size of the voxels in the input
@@ -2200,7 +2203,7 @@ voxel_dims: (a list of from 3 to 3 items which are a float)
 </div>
 <div class="section" id="trackpico">
 <span id="index-16"></span><h2>TrackPICo<a class="headerlink" href="#trackpico" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/dti.py#L596">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/dti.py#L594">Link to code</a></p>
 <p>Wraps command <strong>track</strong></p>
 <p>Performs streamline tractography using the Probabilistic Index of Connectivity (PICo) algorithm</p>
 <div class="section" id="id16">
@@ -2241,7 +2244,8 @@ curvethresh: (a float)
         the length of a voxel. If the angle is greater than this, then the
         streamline terminates.
         flag: -curvethresh %f
-data_dims: (a list of from 3 to 3 items which are an integer)
+data_dims: (a list of from 3 to 3 items which are an integer (int or
+         long))
         data dimensions in voxels
         flag: -datadims %s
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -2289,17 +2293,17 @@ ipthresh: (a float)
         more than 80 degrees. Set this to -1.0 to disable curvature checking
         completely.
         flag: -ipthresh %f
-iterations: (an integer)
+iterations: (an integer (int or long))
         Number of streamlines to generate at each seed point. The default is
         5000.
         flag: -iterations %d
-maxcomponents: (an integer)
+maxcomponents: (an integer (int or long))
         The maximum number of tensor components in a voxel. This determines
         the size of the input file and does not say anything about the voxel
         classification. The default is 2 if the input model is multitensor
         and 1 if the input model is dt.
         flag: -maxcomponents %d
-numpds: (an integer)
+numpds: (an integer (int or long))
         The maximum number of PDs in a voxel for input models sfpeak and
         pico. The default is 3 for input model sfpeak and 1 for input model
         pico. This option determines the size of the voxels in the input
@@ -2363,9 +2367,9 @@ voxel_dims: (a list of from 3 to 3 items which are a float)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

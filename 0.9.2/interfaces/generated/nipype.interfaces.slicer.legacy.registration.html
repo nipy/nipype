@@ -1,0 +1,779 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.slicer.legacy.registration</a><ul>
+<li><a class="reference internal" href="#affineregistration">AffineRegistration</a></li>
+<li><a class="reference internal" href="#bsplinedeformableregistration">BSplineDeformableRegistration</a></li>
+<li><a class="reference internal" href="#expertautomatedregistration">ExpertAutomatedRegistration</a></li>
+<li><a class="reference internal" href="#linearregistration">LinearRegistration</a></li>
+<li><a class="reference internal" href="#multiresolutionaffineregistration">MultiResolutionAffineRegistration</a></li>
+<li><a class="reference internal" href="#rigidregistration">RigidRegistration</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-slicer-legacy-registration">
+<h1>interfaces.slicer.legacy.registration<a class="headerlink" href="#interfaces-slicer-legacy-registration" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-slicer-legacy-registration-affineregistration"></span><div class="section" id="affineregistration">
+<span id="index-0"></span><h2>AffineRegistration<a class="headerlink" href="#affineregistration" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/slicer/legacy/registration.py#L73">Link to code</a></p>
+<p>Wraps command <a href="#id1"><span class="problematic" id="id2">**</span></a>AffineRegistration **</p>
+<p>title: Affine Registration</p>
+<p>category: Legacy.Registration</p>
+<p>description: Registers two images together using an affine transform and mutual information. This module is often used to align images of different subjects or images of the same subject from different modalities.</p>
+<p>This module can smooth images prior to registration to mitigate noise and improve convergence. Many of the registration parameters require a working knowledge of the algorithm although the default parameters are sufficient for many registration tasks.</p>
+<p>version: 0.1.0.$Revision: 19608 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/AffineRegistration">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/AffineRegistration</a></p>
+<p>contributor: Daniel Blezek (GE)</p>
+<p>acknowledgements: This module was developed by Daniel Blezek while at GE Research with contributions from Jim Miller.</p>
+<p>This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+FixedImageFileName: (an existing file name)
+        Fixed image to which to register
+MovingImageFileName: (an existing file name)
+        Moving image
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fixedsmoothingfactor: (an integer (int or long))
+        Amount of smoothing applied to fixed image prior to registration.
+        Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
+        input data if there is considerable amounts of noise or the noise
+        pattern in the fixed and moving images is very different.
+histogrambins: (an integer (int or long))
+        Number of histogram bins to use for Mattes Mutual Information.
+        Reduce the number of bins if a registration fails. If the number of
+        bins is too large, the estimated PDFs will be a field of impulses
+        and will inhibit reliable registration estimation.
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+initialtransform: (an existing file name)
+        Initial transform for aligning the fixed and moving image. Maps
+        positions in the fixed coordinate frame to positions in the moving
+        coordinate frame. Optional.
+iterations: (an integer (int or long))
+        Number of iterations
+movingsmoothingfactor: (an integer (int or long))
+        Amount of smoothing applied to moving image prior to registration.
+        Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
+        input data if there is considerable amounts of noise or the noise
+        pattern in the fixed and moving images is very different.
+outputtransform: (a boolean or a file name)
+        Transform calculated that aligns the fixed and moving image. Maps
+        positions in the fixed coordinate frame to the moving coordinate
+        frame. Optional (specify an output transform or an output volume or
+        both).
+resampledmovingfilename: (a boolean or a file name)
+        Resampled moving image to the fixed image coordinate frame. Optional
+        (specify an output transform or an output volume or both).
+spatialsamples: (an integer (int or long))
+        Number of spatial samples to use in estimating Mattes Mutual
+        Information. Larger values yield more accurate PDFs and improved
+        registration quality.
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+translationscale: (a float)
+        Relative scale of translations to rotations, i.e. a value of 100
+        means 10mm = 1 degree. (Actual scale used is
+        1/(TranslationScale^2)). This parameter is used to &#39;weight&#39; or
+        &#39;standardized&#39; the transform parameters and their effect on the
+        registration objective function.
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputtransform: (an existing file name)
+        Transform calculated that aligns the fixed and moving image. Maps
+        positions in the fixed coordinate frame to the moving coordinate
+        frame. Optional (specify an output transform or an output volume or
+        both).
+resampledmovingfilename: (an existing file name)
+        Resampled moving image to the fixed image coordinate frame. Optional
+        (specify an output transform or an output volume or both).
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-legacy-registration-bsplinedeformableregistration"></span></div>
+<div class="section" id="bsplinedeformableregistration">
+<span id="index-1"></span><h2>BSplineDeformableRegistration<a class="headerlink" href="#bsplinedeformableregistration" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/slicer/legacy/registration.py#L31">Link to code</a></p>
+<p>Wraps command <a href="#id3"><span class="problematic" id="id4">**</span></a>BSplineDeformableRegistration **</p>
+<p>title: BSpline Deformable Registration</p>
+<p>category: Legacy.Registration</p>
+<p>description: Registers two images together using BSpline transform and mutual information.</p>
+<p>version: 0.1.0.$Revision: 19608 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/BSplineDeformableRegistration">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/BSplineDeformableRegistration</a></p>
+<p>contributor: Bill Lorensen (GE)</p>
+<p>acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+FixedImageFileName: (an existing file name)
+        Fixed image to which to register
+MovingImageFileName: (an existing file name)
+        Moving image
+args: (a string)
+        Additional parameters to the command
+constrain: (a boolean)
+        Constrain the deformation to the amount specified in Maximum
+        Deformation
+default: (an integer (int or long))
+        Default pixel value used if resampling a pixel outside of the
+        volume.
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+gridSize: (an integer (int or long))
+        Number of grid points on interior of the fixed image. Larger grid
+        sizes allow for finer registrations.
+histogrambins: (an integer (int or long))
+        Number of histogram bins to use for Mattes Mutual Information.
+        Reduce the number of bins if a deformable registration fails. If the
+        number of bins is too large, the estimated PDFs will be a field of
+        impulses and will inhibit reliable registration estimation.
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+initialtransform: (an existing file name)
+        Initial transform for aligning the fixed and moving image. Maps
+        positions in the fixed coordinate frame to positions in the moving
+        coordinate frame. This transform should be an affine or rigid
+        transform. It is used an a bulk transform for the BSpline. Optional.
+iterations: (an integer (int or long))
+        Number of iterations
+maximumDeformation: (a float)
+        If Constrain Deformation is checked, limit the deformation to this
+        amount.
+outputtransform: (a boolean or a file name)
+        Transform calculated that aligns the fixed and moving image. Maps
+        positions from the fixed coordinate frame to the moving coordinate
+        frame. Optional (specify an output transform or an output volume or
+        both).
+outputwarp: (a boolean or a file name)
+        Vector field that applies an equivalent warp as the BSpline. Maps
+        positions from the fixed coordinate frame to the moving coordinate
+        frame. Optional.
+resampledmovingfilename: (a boolean or a file name)
+        Resampled moving image to fixed image coordinate frame. Optional
+        (specify an output transform or an output volume or both).
+spatialsamples: (an integer (int or long))
+        Number of spatial samples to use in estimating Mattes Mutual
+        Information. Larger values yield more accurate PDFs and improved
+        registration quality.
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputtransform: (an existing file name)
+        Transform calculated that aligns the fixed and moving image. Maps
+        positions from the fixed coordinate frame to the moving coordinate
+        frame. Optional (specify an output transform or an output volume or
+        both).
+outputwarp: (an existing file name)
+        Vector field that applies an equivalent warp as the BSpline. Maps
+        positions from the fixed coordinate frame to the moving coordinate
+        frame. Optional.
+resampledmovingfilename: (an existing file name)
+        Resampled moving image to fixed image coordinate frame. Optional
+        (specify an output transform or an output volume or both).
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-legacy-registration-expertautomatedregistration"></span></div>
+<div class="section" id="expertautomatedregistration">
+<span id="index-2"></span><h2>ExpertAutomatedRegistration<a class="headerlink" href="#expertautomatedregistration" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/slicer/legacy/registration.py#L277">Link to code</a></p>
+<p>Wraps command <a href="#id5"><span class="problematic" id="id6">**</span></a>ExpertAutomatedRegistration **</p>
+<p>title: Expert Automated Registration</p>
+<p>category: Legacy.Registration</p>
+<p>description: Provides rigid, affine, and BSpline registration methods via a simple GUI</p>
+<p>version: 0.1.0.$Revision: 2104 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http://www.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ExpertAutomatedRegistration">http://www.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/ExpertAutomatedRegistration</a></p>
+<p>contributor: Stephen R Aylward (Kitware), Casey B Goodlett (Kitware)</p>
+<p>acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+affineMaxIterations: (an integer (int or long))
+        Maximum number of affine optimization iterations
+affineSamplingRatio: (a float)
+        Portion of the image to use in computing the metric during affine
+        registration
+args: (a string)
+        Additional parameters to the command
+bsplineMaxIterations: (an integer (int or long))
+        Maximum number of bspline optimization iterations
+bsplineSamplingRatio: (a float)
+        Portion of the image to use in computing the metric during BSpline
+        registration
+controlPointSpacing: (an integer (int or long))
+        Number of pixels between control points
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+expectedOffset: (a float)
+        Expected misalignment after initialization
+expectedRotation: (a float)
+        Expected misalignment after initialization
+expectedScale: (a float)
+        Expected misalignment after initialization
+expectedSkew: (a float)
+        Expected misalignment after initialization
+fixedImage: (an existing file name)
+        Image which defines the space into which the moving image is
+        registered
+fixedImageMask: (an existing file name)
+        Image which defines a mask for the fixed image
+fixedLandmarks: (a list of from 3 to 3 items which are a float)
+        Ordered list of landmarks in the fixed image
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+initialization: (&#39;None&#39; or &#39;Landmarks&#39; or &#39;ImageCenters&#39; or
+         &#39;CentersOfMass&#39; or &#39;SecondMoments&#39;)
+        Method to prime the registration process
+interpolation: (&#39;NearestNeighbor&#39; or &#39;Linear&#39; or &#39;BSpline&#39;)
+        Method for interpolation within the optimization process
+loadTransform: (an existing file name)
+        Load a transform that is immediately applied to the moving image
+metric: (&#39;MattesMI&#39; or &#39;NormCorr&#39; or &#39;MeanSqrd&#39;)
+        Method to quantify image match
+minimizeMemory: (a boolean)
+        Reduce the amount of memory required at the cost of increased
+        computation time
+movingImage: (an existing file name)
+        The transform goes from the fixed image&#39;s space into the moving
+        image&#39;s space
+movingLandmarks: (a list of from 3 to 3 items which are a float)
+        Ordered list of landmarks in the moving image
+numberOfThreads: (an integer (int or long))
+        Number of CPU threads to use
+randomNumberSeed: (an integer (int or long))
+        Seed to generate a consistent random number sequence
+registration: (&#39;None&#39; or &#39;Initial&#39; or &#39;Rigid&#39; or &#39;Affine&#39; or
+         &#39;BSpline&#39; or &#39;PipelineRigid&#39; or &#39;PipelineAffine&#39; or
+         &#39;PipelineBSpline&#39;)
+        Method for the registration process
+resampledImage: (a boolean or a file name)
+        Registration results
+rigidMaxIterations: (an integer (int or long))
+        Maximum number of rigid optimization iterations
+rigidSamplingRatio: (a float)
+        Portion of the image to use in computing the metric during rigid
+        registration
+sampleFromOverlap: (a boolean)
+        Limit metric evaluation to the fixed image region overlapped by the
+        moving image
+saveTransform: (a boolean or a file name)
+        Save the transform that results from registration
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+verbosityLevel: (&#39;Silent&#39; or &#39;Standard&#39; or &#39;Verbose&#39;)
+        Level of detail of reporting progress
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>resampledImage: (an existing file name)
+        Registration results
+saveTransform: (an existing file name)
+        Save the transform that results from registration
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-legacy-registration-linearregistration"></span></div>
+<div class="section" id="linearregistration">
+<span id="index-3"></span><h2>LinearRegistration<a class="headerlink" href="#linearregistration" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/slicer/legacy/registration.py#L218">Link to code</a></p>
+<p>Wraps command <a href="#id7"><span class="problematic" id="id8">**</span></a>LinearRegistration **</p>
+<p>title: Linear Registration</p>
+<p>category: Legacy.Registration</p>
+<p>description: Registers two images together using a rigid transform and mutual information.</p>
+<p>version: 0.1.0.$Revision: 19608 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/LinearRegistration">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/LinearRegistration</a></p>
+<p>contributor: Daniel Blezek (GE)</p>
+<p>acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+FixedImageFileName: (an existing file name)
+        Fixed image to which to register
+MovingImageFileName: (an existing file name)
+        Moving image
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fixedsmoothingfactor: (an integer (int or long))
+        Amount of smoothing applied to fixed image prior to registration.
+        Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
+        input data if there is considerable amounts of noise or the noise
+        pattern in the fixed and moving images is very different.
+histogrambins: (an integer (int or long))
+        Number of histogram bins to use for Mattes Mutual Information.
+        Reduce the number of bins if a registration fails. If the number of
+        bins is too large, the estimated PDFs will be a field of impulses
+        and will inhibit reliable registration estimation.
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+initialtransform: (an existing file name)
+        Initial transform for aligning the fixed and moving image. Maps
+        positions in the fixed coordinate frame to positions in the moving
+        coordinate frame. Optional.
+iterations: (an integer (int or long))
+        Comma separated list of iterations. Must have the same number of
+        elements as the learning rate.
+learningrate: (a float)
+        Comma separated list of learning rates. Learning rate is a scale
+        factor on the gradient of the registration objective function
+        (gradient with respect to the parameters of the transformation) used
+        to update the parameters of the transformation during optimization.
+        Smaller values cause the optimizer to take smaller steps through the
+        parameter space. Larger values are typically used early in the
+        registration process to take large jumps in parameter space followed
+        by smaller values to home in on the optimum value of the
+        registration objective function. Default is: 0.01, 0.005, 0.0005,
+        0.0002. Must have the same number of elements as iterations.
+movingsmoothingfactor: (an integer (int or long))
+        Amount of smoothing applied to moving image prior to registration.
+        Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
+        input data if there is considerable amounts of noise or the noise
+        pattern in the fixed and moving images is very different.
+outputtransform: (a boolean or a file name)
+        Transform calculated that aligns the fixed and moving image. Maps
+        positions in the fixed coordinate frame to the moving coordinate
+        frame. Optional (specify an output transform or an output volume or
+        both).
+resampledmovingfilename: (a boolean or a file name)
+        Resampled moving image to the fixed image coordinate frame. Optional
+        (specify an output transform or an output volume or both).
+spatialsamples: (an integer (int or long))
+        Number of spatial samples to use in estimating Mattes Mutual
+        Information. Larger values yield more accurate PDFs and improved
+        registration quality.
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+translationscale: (a float)
+        Relative scale of translations to rotations, i.e. a value of 100
+        means 10mm = 1 degree. (Actual scale used 1/(TranslationScale^2)).
+        This parameter is used to &#39;weight&#39; or &#39;standardized&#39; the transform
+        parameters and their effect on the registration objective function.
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputtransform: (an existing file name)
+        Transform calculated that aligns the fixed and moving image. Maps
+        positions in the fixed coordinate frame to the moving coordinate
+        frame. Optional (specify an output transform or an output volume or
+        both).
+resampledmovingfilename: (an existing file name)
+        Resampled moving image to the fixed image coordinate frame. Optional
+        (specify an output transform or an output volume or both).
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-legacy-registration-multiresolutionaffineregistration"></span></div>
+<div class="section" id="multiresolutionaffineregistration">
+<span id="index-4"></span><h2>MultiResolutionAffineRegistration<a class="headerlink" href="#multiresolutionaffineregistration" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/slicer/legacy/registration.py#L121">Link to code</a></p>
+<p>Wraps command <a href="#id9"><span class="problematic" id="id10">**</span></a>MultiResolutionAffineRegistration **</p>
+<p>title: Robust Multiresolution Affine Registration</p>
+<p>category: Legacy.Registration</p>
+<p>description: Provides affine registration using multiple resolution levels and decomposed affine transforms.</p>
+<p>version: 0.1.0.$Revision: 2104 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http://www.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/MultiResolutionAffineRegistration">http://www.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/MultiResolutionAffineRegistration</a></p>
+<p>contributor: Casey B Goodlett (Utah)</p>
+<p>acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fixedImage: (an existing file name)
+        Image which defines the space into which the moving image is
+        registered
+fixedImageMask: (an existing file name)
+        Label image which defines a mask of interest for the fixed image
+fixedImageROI: (a list of items which are any value)
+        Label image which defines a ROI of interest for the fixed image
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+metricTolerance: (a float)
+movingImage: (an existing file name)
+        The transform goes from the fixed image&#39;s space into the moving
+        image&#39;s space
+numIterations: (an integer (int or long))
+        Number of iterations to run at each resolution level.
+numLineIterations: (an integer (int or long))
+        Number of iterations to run at each resolution level.
+resampledImage: (a boolean or a file name)
+        Registration results
+saveTransform: (a boolean or a file name)
+        Save the output transform from the registration
+stepSize: (a float)
+        The maximum step size of the optimizer in voxels
+stepTolerance: (a float)
+        The maximum step size of the optimizer in voxels
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>resampledImage: (an existing file name)
+        Registration results
+saveTransform: (an existing file name)
+        Save the output transform from the registration
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-slicer-legacy-registration-rigidregistration"></span></div>
+<div class="section" id="rigidregistration">
+<span id="index-5"></span><h2>RigidRegistration<a class="headerlink" href="#rigidregistration" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/slicer/legacy/registration.py#L165">Link to code</a></p>
+<p>Wraps command <a href="#id11"><span class="problematic" id="id12">**</span></a>RigidRegistration **</p>
+<p>title: Rigid Registration</p>
+<p>category: Legacy.Registration</p>
+<p>description: Registers two images together using a rigid transform and mutual information.</p>
+<p>This module was originally distributed as &#8220;Linear registration&#8221; but has been renamed to eliminate confusion with the &#8220;Affine registration&#8221; module.</p>
+<p>This module is often used to align images of different subjects or images of the same subject from different modalities.</p>
+<p>This module can smooth images prior to registration to mitigate noise and improve convergence. Many of the registration parameters require a working knowledge of the algorithm although the default parameters are sufficient for many registration tasks.</p>
+<p>version: 0.1.0.$Revision: 19608 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/RigidRegistration">http://wiki.slicer.org/slicerWiki/index.php/Documentation/4.1/Modules/RigidRegistration</a></p>
+<p>contributor: Daniel Blezek (GE)</p>
+<p>acknowledgements: This module was developed by Daniel Blezek while at GE Research with contributions from Jim Miller.</p>
+<p>This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+FixedImageFileName: (an existing file name)
+        Fixed image to which to register
+MovingImageFileName: (an existing file name)
+        Moving image
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fixedsmoothingfactor: (an integer (int or long))
+        Amount of smoothing applied to fixed image prior to registration.
+        Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
+        input data if there is considerable amounts of noise or the noise
+        pattern in the fixed and moving images is very different.
+histogrambins: (an integer (int or long))
+        Number of histogram bins to use for Mattes Mutual Information.
+        Reduce the number of bins if a registration fails. If the number of
+        bins is too large, the estimated PDFs will be a field of impulses
+        and will inhibit reliable registration estimation.
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+initialtransform: (an existing file name)
+        Initial transform for aligning the fixed and moving image. Maps
+        positions in the fixed coordinate frame to positions in the moving
+        coordinate frame. Optional.
+iterations: (an integer (int or long))
+        Comma separated list of iterations. Must have the same number of
+        elements as the learning rate.
+learningrate: (a float)
+        Comma separated list of learning rates. Learning rate is a scale
+        factor on the gradient of the registration objective function
+        (gradient with respect to the parameters of the transformation) used
+        to update the parameters of the transformation during optimization.
+        Smaller values cause the optimizer to take smaller steps through the
+        parameter space. Larger values are typically used early in the
+        registration process to take large jumps in parameter space followed
+        by smaller values to home in on the optimum value of the
+        registration objective function. Default is: 0.01, 0.005, 0.0005,
+        0.0002. Must have the same number of elements as iterations.
+movingsmoothingfactor: (an integer (int or long))
+        Amount of smoothing applied to moving image prior to registration.
+        Default is 0 (none). Range is 0-5 (unitless). Consider smoothing the
+        input data if there is considerable amounts of noise or the noise
+        pattern in the fixed and moving images is very different.
+outputtransform: (a boolean or a file name)
+        Transform calculated that aligns the fixed and moving image. Maps
+        positions in the fixed coordinate frame to the moving coordinate
+        frame. Optional (specify an output transform or an output volume or
+        both).
+resampledmovingfilename: (a boolean or a file name)
+        Resampled moving image to the fixed image coordinate frame. Optional
+        (specify an output transform or an output volume or both).
+spatialsamples: (an integer (int or long))
+        Number of spatial samples to use in estimating Mattes Mutual
+        Information. Larger values yield more accurate PDFs and improved
+        registration quality.
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+testingmode: (a boolean)
+        Enable testing mode. Input transform will be used to construct
+        floating image. The floating image will be ignored if passed.
+translationscale: (a float)
+        Relative scale of translations to rotations, i.e. a value of 100
+        means 10mm = 1 degree. (Actual scale used 1/(TranslationScale^2)).
+        This parameter is used to &#39;weight&#39; or &#39;standardized&#39; the transform
+        parameters and their effect on the registration objective function.
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputtransform: (an existing file name)
+        Transform calculated that aligns the fixed and moving image. Maps
+        positions in the fixed coordinate frame to the moving coordinate
+        frame. Optional (specify an output transform or an output volume or
+        both).
+resampledmovingfilename: (an existing file name)
+        Resampled moving image to the fixed image coordinate frame. Optional
+        (specify an output transform or an output volume or both).
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

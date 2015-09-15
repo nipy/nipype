@@ -1,0 +1,447 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.10.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dMRI: DTI - MRtrix, FSL</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a><ul>
+<li><a class="reference internal" href="#diffusion-processing-nodes">Diffusion processing nodes</a></li>
+<li><a class="reference internal" href="#creating-the-workflow">Creating the workflow</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dmri-dti-mrtrix-fsl">
+<span id="example-dmri-mrtrix-dti"></span><h1>dMRI: DTI - MRtrix, FSL<a class="headerlink" href="#dmri-dti-mrtrix-fsl" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>This script, dmri_mrtrix_dti.py, demonstrates the ability to perform advanced diffusion analysis
+in a Nipype pipeline.</p>
+<blockquote>
+<div>python dmri_mrtrix_dti.py</div></blockquote>
+<p>We perform this analysis using the FSL course data, which can be acquired from here:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz">http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz</a></li>
+</ul>
+</div></blockquote>
+<p>Import necessary modules from nipype.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.interfaces.io</span> <span class="kn">as</span> <span class="nn">nio</span>           <span class="c"># Data i/o</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.utility</span> <span class="kn">as</span> <span class="nn">util</span>     <span class="c"># utility</span>
+<span class="kn">import</span> <span class="nn">nipype.pipeline.engine</span> <span class="kn">as</span> <span class="nn">pe</span>          <span class="c"># pypeline engine</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.mrtrix</span> <span class="kn">as</span> <span class="nn">mrtrix</span>   <span class="c">#&lt;---- The important new part!</span>
+<span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="kn">import</span> <span class="nn">nipype.algorithms.misc</span> <span class="kn">as</span> <span class="nn">misc</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">os.path</span> <span class="kn">as</span> <span class="nn">op</span>                     <span class="c"># system functions</span>
+
+<span class="n">fsl</span><span class="o">.</span><span class="n">FSLCommand</span><span class="o">.</span><span class="n">set_default_output_type</span><span class="p">(</span><span class="s">&#39;NIFTI&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This needs to point to the fdt folder you can find after extracting</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz">http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz</a></li>
+</ul>
+</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">data_dir</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">curdir</span><span class="p">,</span><span class="s">&#39;exdata/&#39;</span><span class="p">))</span>
+<span class="n">subject_list</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;subj1&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Use infosource node to loop through the subject list and define the input files.
+For our purposes, these are the diffusion-weighted MR image, b vectors, and b values.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">infosource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;infosource&quot;</span><span class="p">)</span>
+<span class="n">infosource</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subject_list</span><span class="p">)</span>
+
+<span class="n">info</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dwi</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">]],</span>
+            <span class="n">bvecs</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;bvecs&#39;</span><span class="p">]],</span>
+            <span class="n">bvals</span><span class="o">=</span><span class="p">[[</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span><span class="s">&#39;bvals&#39;</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>Use datasource node to perform the actual data grabbing.
+Templates for the associated images are used to obtain the correct images.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">datasource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">],</span>
+                                               <span class="n">outfields</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                     <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;datasource&#39;</span><span class="p">)</span>
+
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&quot;</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">base_directory</span> <span class="o">=</span> <span class="n">data_dir</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">field_template</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">dwi</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">.nii.gz&#39;</span><span class="p">)</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">template_args</span> <span class="o">=</span> <span class="n">info</span>
+<span class="n">datasource</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sort_filelist</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>An inputnode is used to pass the data obtained by the data grabber to the actual processing functions</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">inputnode</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">IdentityInterface</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s">&quot;dwi&quot;</span><span class="p">,</span> <span class="s">&quot;bvecs&quot;</span><span class="p">,</span> <span class="s">&quot;bvals&quot;</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;inputnode&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="diffusion-processing-nodes">
+<h3>Diffusion processing nodes<a class="headerlink" href="#diffusion-processing-nodes" title="Permalink to this headline">¶</a></h3>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt>dmri_connectivity_advanced.py</dt>
+<dd>Tutorial with further detail on using MRtrix tractography for connectivity analysis</dd>
+<dt><a class="reference external" href="http://www.brain.org.au/software/mrtrix/index.html">http://www.brain.org.au/software/mrtrix/index.html</a></dt>
+<dd>MRtrix&#8217;s online documentation</dd>
+</dl>
+</div>
+<p>b-values and b-vectors stored in FSL&#8217;s format are converted into a single encoding file for MRTrix.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">fsl2mrtrix</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">FSL2MRTrix</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;fsl2mrtrix&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Tensors are fitted to each voxel in the diffusion-weighted image and from these three maps are created:</dt>
+<dd><ul class="first last simple">
+<li>Major eigenvector in each voxel</li>
+<li>Apparent diffusion coefficient</li>
+<li>Fractional anisotropy</li>
+</ul>
+</dd>
+</dl>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gunzip</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">misc</span><span class="o">.</span><span class="n">Gunzip</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;gunzip&#39;</span><span class="p">)</span>
+<span class="n">dwi2tensor</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">DWI2Tensor</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;dwi2tensor&#39;</span><span class="p">)</span>
+<span class="n">tensor2vector</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">Tensor2Vector</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;tensor2vector&#39;</span><span class="p">)</span>
+<span class="n">tensor2adc</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">Tensor2ApparentDiffusion</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;tensor2adc&#39;</span><span class="p">)</span>
+<span class="n">tensor2fa</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">Tensor2FractionalAnisotropy</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;tensor2fa&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These nodes are used to create a rough brain mask from the b0 image.
+The b0 image is extracted from the original diffusion-weighted image,
+put through a simple thresholding routine, and smoothed using a 3x3 median filter.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">MRconvert</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">MRConvert</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;MRconvert&#39;</span><span class="p">)</span>
+<span class="n">MRconvert</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">extract_at_axis</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">MRconvert</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">extract_at_coordinate</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">threshold_b0</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">Threshold</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;threshold_b0&#39;</span><span class="p">)</span>
+<span class="n">median3d</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">MedianFilter3D</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;median3d&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The brain mask is also used to help identify single-fiber voxels.
+This is done by passing the brain mask through two erosion steps,
+multiplying the remaining mask with the fractional anisotropy map, and
+thresholding the result to obtain some highly anisotropic within-brain voxels.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">erode_mask_firstpass</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">Erode</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;erode_mask_firstpass&#39;</span><span class="p">)</span>
+<span class="n">erode_mask_secondpass</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">Erode</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;erode_mask_secondpass&#39;</span><span class="p">)</span>
+<span class="n">MRmultiply</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">MRMultiply</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;MRmultiply&#39;</span><span class="p">)</span>
+<span class="n">MRmult_merge</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">Merge</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;MRmultiply_merge&quot;</span><span class="p">)</span>
+<span class="n">threshold_FA</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">Threshold</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;threshold_FA&#39;</span><span class="p">)</span>
+<span class="n">threshold_FA</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">absolute_threshold_value</span> <span class="o">=</span> <span class="mf">0.7</span>
+</pre></div>
+</div>
+<p>For whole-brain tracking we also require a broad white-matter seed mask.
+This is created by generating a white matter mask, given a brainmask, and
+thresholding it at a reasonably high level.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">bet</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">(</span><span class="n">mask</span> <span class="o">=</span> <span class="bp">True</span><span class="p">),</span> <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;bet_b0&#39;</span><span class="p">)</span>
+<span class="n">gen_WM_mask</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">GenerateWhiteMatterMask</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;gen_WM_mask&#39;</span><span class="p">)</span>
+<span class="n">threshold_wmmask</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">Threshold</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;threshold_wmmask&#39;</span><span class="p">)</span>
+<span class="n">threshold_wmmask</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">absolute_threshold_value</span> <span class="o">=</span> <span class="mf">0.4</span>
+</pre></div>
+</div>
+<p>The spherical deconvolution step depends on the estimate of the response function
+in the highly anisotropic voxels we obtained above.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">For damaged or pathological brains one should take care to lower the maximum harmonic order of these steps.</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">estimateresponse</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">EstimateResponseForSH</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;estimateresponse&#39;</span><span class="p">)</span>
+<span class="n">estimateresponse</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">maximum_harmonic_order</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">csdeconv</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">ConstrainedSphericalDeconvolution</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;csdeconv&#39;</span><span class="p">)</span>
+<span class="n">csdeconv</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">maximum_harmonic_order</span> <span class="o">=</span> <span class="mi">6</span>
+</pre></div>
+</div>
+<p>Finally, we track probabilistically using the orientation distribution functions obtained earlier.
+The tracts are then used to generate a tract-density image, and they are also converted to TrackVis format.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">probCSDstreamtrack</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">ProbabilisticSphericallyDeconvolutedStreamlineTrack</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;probCSDstreamtrack&#39;</span><span class="p">)</span>
+<span class="n">probCSDstreamtrack</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inputmodel</span> <span class="o">=</span> <span class="s">&#39;SD_PROB&#39;</span>
+<span class="n">probCSDstreamtrack</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">maximum_number_of_tracks</span> <span class="o">=</span> <span class="mi">150000</span>
+<span class="n">tracks2prob</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">Tracks2Prob</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;tracks2prob&#39;</span><span class="p">)</span>
+<span class="n">tracks2prob</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">colour</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">tck2trk</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">mrtrix</span><span class="o">.</span><span class="n">MRTrix2TrackVis</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;tck2trk&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-the-workflow">
+<h3>Creating the workflow<a class="headerlink" href="#creating-the-workflow" title="Permalink to this headline">¶</a></h3>
+<p>In this section we connect the nodes for the diffusion processing.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;tractography&#39;</span><span class="p">)</span>
+
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">fsl2mrtrix</span><span class="p">,</span> <span class="p">[(</span><span class="s">&quot;bvecs&quot;</span><span class="p">,</span> <span class="s">&quot;bvec_file&quot;</span><span class="p">),</span>
+                                                                                              <span class="p">(</span><span class="s">&quot;bvals&quot;</span><span class="p">,</span> <span class="s">&quot;bval_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">inputnode</span><span class="p">,</span> <span class="n">gunzip</span><span class="p">,[(</span><span class="s">&quot;dwi&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">gunzip</span><span class="p">,</span> <span class="n">dwi2tensor</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">fsl2mrtrix</span><span class="p">,</span> <span class="n">dwi2tensor</span><span class="p">,[(</span><span class="s">&quot;encoding_file&quot;</span><span class="p">,</span><span class="s">&quot;encoding_file&quot;</span><span class="p">)])])</span>
+
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">dwi2tensor</span><span class="p">,</span> <span class="n">tensor2vector</span><span class="p">,[[</span><span class="s">&#39;tensor&#39;</span><span class="p">,</span><span class="s">&#39;in_file&#39;</span><span class="p">]]),</span>
+                                         <span class="p">(</span><span class="n">dwi2tensor</span><span class="p">,</span> <span class="n">tensor2adc</span><span class="p">,[[</span><span class="s">&#39;tensor&#39;</span><span class="p">,</span><span class="s">&#39;in_file&#39;</span><span class="p">]]),</span>
+                                         <span class="p">(</span><span class="n">dwi2tensor</span><span class="p">,</span> <span class="n">tensor2fa</span><span class="p">,[[</span><span class="s">&#39;tensor&#39;</span><span class="p">,</span><span class="s">&#39;in_file&#39;</span><span class="p">]]),</span>
+                                        <span class="p">])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">tensor2fa</span><span class="p">,</span> <span class="n">MRmult_merge</span><span class="p">,[(</span><span class="s">&quot;FA&quot;</span><span class="p">,</span><span class="s">&quot;in1&quot;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+<p>This block creates the rough brain mask to be multiplied, mulitplies it with the
+fractional anisotropy image, and thresholds it to get the single-fiber voxels.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">gunzip</span><span class="p">,</span> <span class="n">MRconvert</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">MRconvert</span><span class="p">,</span> <span class="n">threshold_b0</span><span class="p">,[(</span><span class="s">&quot;converted&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">threshold_b0</span><span class="p">,</span> <span class="n">median3d</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">median3d</span><span class="p">,</span> <span class="n">erode_mask_firstpass</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">erode_mask_firstpass</span><span class="p">,</span> <span class="n">erode_mask_secondpass</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">erode_mask_secondpass</span><span class="p">,</span> <span class="n">MRmult_merge</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;in2&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">MRmult_merge</span><span class="p">,</span> <span class="n">MRmultiply</span><span class="p">,[(</span><span class="s">&quot;out&quot;</span><span class="p">,</span><span class="s">&quot;in_files&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">MRmultiply</span><span class="p">,</span> <span class="n">threshold_FA</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+<p>Here the thresholded white matter mask is created for seeding the tractography.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">gunzip</span><span class="p">,</span> <span class="n">bet</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">gunzip</span><span class="p">,</span> <span class="n">gen_WM_mask</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">bet</span><span class="p">,</span> <span class="n">gen_WM_mask</span><span class="p">,[(</span><span class="s">&quot;mask_file&quot;</span><span class="p">,</span><span class="s">&quot;binary_mask&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">fsl2mrtrix</span><span class="p">,</span> <span class="n">gen_WM_mask</span><span class="p">,[(</span><span class="s">&quot;encoding_file&quot;</span><span class="p">,</span><span class="s">&quot;encoding_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">gen_WM_mask</span><span class="p">,</span> <span class="n">threshold_wmmask</span><span class="p">,[(</span><span class="s">&quot;WMprobabilitymap&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+<p>Next we estimate the fiber response distribution.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">gunzip</span><span class="p">,</span> <span class="n">estimateresponse</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">fsl2mrtrix</span><span class="p">,</span> <span class="n">estimateresponse</span><span class="p">,[(</span><span class="s">&quot;encoding_file&quot;</span><span class="p">,</span><span class="s">&quot;encoding_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">threshold_FA</span><span class="p">,</span> <span class="n">estimateresponse</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;mask_image&quot;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+<p>Run constrained spherical deconvolution.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">gunzip</span><span class="p">,</span> <span class="n">csdeconv</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">gen_WM_mask</span><span class="p">,</span> <span class="n">csdeconv</span><span class="p">,[(</span><span class="s">&quot;WMprobabilitymap&quot;</span><span class="p">,</span><span class="s">&quot;mask_image&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">estimateresponse</span><span class="p">,</span> <span class="n">csdeconv</span><span class="p">,[(</span><span class="s">&quot;response&quot;</span><span class="p">,</span><span class="s">&quot;response_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">fsl2mrtrix</span><span class="p">,</span> <span class="n">csdeconv</span><span class="p">,[(</span><span class="s">&quot;encoding_file&quot;</span><span class="p">,</span><span class="s">&quot;encoding_file&quot;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+<p>Connect the tractography and compute the tract density image.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">threshold_wmmask</span><span class="p">,</span> <span class="n">probCSDstreamtrack</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;seed_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">csdeconv</span><span class="p">,</span> <span class="n">probCSDstreamtrack</span><span class="p">,[(</span><span class="s">&quot;spherical_harmonics_image&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">probCSDstreamtrack</span><span class="p">,</span> <span class="n">tracks2prob</span><span class="p">,[(</span><span class="s">&quot;tracked&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">gunzip</span><span class="p">,</span> <span class="n">tracks2prob</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;template_file&quot;</span><span class="p">)])])</span>
+
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">gunzip</span><span class="p">,</span> <span class="n">tck2trk</span><span class="p">,[(</span><span class="s">&quot;out_file&quot;</span><span class="p">,</span><span class="s">&quot;image_file&quot;</span><span class="p">)])])</span>
+<span class="n">tractography</span><span class="o">.</span><span class="n">connect</span><span class="p">([(</span><span class="n">probCSDstreamtrack</span><span class="p">,</span> <span class="n">tck2trk</span><span class="p">,[(</span><span class="s">&quot;tracked&quot;</span><span class="p">,</span><span class="s">&quot;in_file&quot;</span><span class="p">)])])</span>
+</pre></div>
+</div>
+<p>Finally, we create another higher-level workflow to connect our tractography workflow with the info and datagrabbing nodes
+declared at the beginning. Our tutorial is now extensible to any arbitrary number of subjects by simply adding
+their names to the subject list and their data to the proper folders.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dwiproc</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;dwiproc&quot;</span><span class="p">)</span>
+<span class="n">dwiproc</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;dmri_mrtrix_dti&#39;</span><span class="p">)</span>
+<span class="n">dwiproc</span><span class="o">.</span><span class="n">connect</span><span class="p">([</span>
+                    <span class="p">(</span><span class="n">infosource</span><span class="p">,</span><span class="n">datasource</span><span class="p">,[(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="s">&#39;subject_id&#39;</span><span class="p">)]),</span>
+                    <span class="p">(</span><span class="n">datasource</span><span class="p">,</span><span class="n">tractography</span><span class="p">,[(</span><span class="s">&#39;dwi&#39;</span><span class="p">,</span><span class="s">&#39;inputnode.dwi&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s">&#39;bvals&#39;</span><span class="p">,</span><span class="s">&#39;inputnode.bvals&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s">&#39;bvecs&#39;</span><span class="p">,</span><span class="s">&#39;inputnode.bvecs&#39;</span><span class="p">)</span>
+                                               <span class="p">])</span>
+                <span class="p">])</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">dwiproc</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">dwiproc</span><span class="o">.</span><span class="n">write_graph</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition-example-source-code admonition">
+<p class="first admonition-title">Example source code</p>
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/dmri_mrtrix_dti.py"><code class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></code></a>.
+This same script is also included in the Nipype source distribution under the
+<code class="file docutils literal"><span class="pre">examples</span></code> directory.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -118,11 +118,11 @@
 <li><a class="reference internal" href="#example">Example</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-annot-label"><tt class="docutils literal"><span class="pre">create_annot_label()</span></tt></a></li>
-<li><a class="reference internal" href="#create-roi"><tt class="docutils literal"><span class="pre">create_roi()</span></tt></a></li>
-<li><a class="reference internal" href="#create-wm-mask"><tt class="docutils literal"><span class="pre">create_wm_mask()</span></tt></a></li>
-<li><a class="reference internal" href="#crop-and-move-datasets"><tt class="docutils literal"><span class="pre">crop_and_move_datasets()</span></tt></a></li>
-<li><a class="reference internal" href="#extract"><tt class="docutils literal"><span class="pre">extract()</span></tt></a></li>
+<li><a class="reference internal" href="#create-annot-label"><code class="docutils literal"><span class="pre">create_annot_label()</span></code></a></li>
+<li><a class="reference internal" href="#create-roi"><code class="docutils literal"><span class="pre">create_roi()</span></code></a></li>
+<li><a class="reference internal" href="#create-wm-mask"><code class="docutils literal"><span class="pre">create_wm_mask()</span></code></a></li>
+<li><a class="reference internal" href="#crop-and-move-datasets"><code class="docutils literal"><span class="pre">crop_and_move_datasets()</span></code></a></li>
+<li><a class="reference internal" href="#extract"><code class="docutils literal"><span class="pre">extract()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -145,7 +145,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -157,7 +157,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -180,9 +180,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -192,13 +192,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-cmtk-parcellation">
 <h1>interfaces.cmtk.parcellation<a class="headerlink" href="#interfaces-cmtk-parcellation" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-cmtk-parcellation-parcellate"></span><div class="section" id="parcellate">
 <span id="index-0"></span><h2>Parcellate<a class="headerlink" href="#parcellate" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/parcellation.py#L545">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/parcellation.py#L545">Link to code</a></p>
 <p>Subdivides segmented ROI file into smaller subregions</p>
 <p>This interface implements the same procedure as in the ConnectomeMapper&#8217;s
 parcellation stage (cmp/stages/parcellation/maskcreation.py) for a single
@@ -261,26 +261,26 @@ white_matter_mask_file: (an existing file name)
 <span class="target" id="module-nipype.interfaces.cmtk.parcellation"></span></div>
 </div>
 <div class="section" id="create-annot-label">
-<span id="nipype-interfaces-cmtk-parcellation-create-annot-label"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_annot_label()</span></tt><a class="headerlink" href="#create-annot-label" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/parcellation.py#L37">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-parcellation-create-annot-label"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_annot_label()</span></code><a class="headerlink" href="#create-annot-label" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/parcellation.py#L37">Link to code</a></p>
 </div>
 <div class="section" id="create-roi">
-<span id="nipype-interfaces-cmtk-parcellation-create-roi"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_roi()</span></tt><a class="headerlink" href="#create-roi" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/parcellation.py#L169">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-parcellation-create-roi"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_roi()</span></code><a class="headerlink" href="#create-roi" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/parcellation.py#L169">Link to code</a></p>
 <p>Creates the ROI_%s.nii.gz files using the given parcellation information
 from networks. Iteratively create volume.</p>
 </div>
 <div class="section" id="create-wm-mask">
-<span id="nipype-interfaces-cmtk-parcellation-create-wm-mask"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_wm_mask()</span></tt><a class="headerlink" href="#create-wm-mask" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/parcellation.py#L301">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-parcellation-create-wm-mask"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_wm_mask()</span></code><a class="headerlink" href="#create-wm-mask" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/parcellation.py#L301">Link to code</a></p>
 </div>
 <div class="section" id="crop-and-move-datasets">
-<span id="nipype-interfaces-cmtk-parcellation-crop-and-move-datasets"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">crop_and_move_datasets()</span></tt><a class="headerlink" href="#crop-and-move-datasets" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/parcellation.py#L443">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-parcellation-crop-and-move-datasets"></span><h2><code class="xref py py-func docutils literal"><span class="pre">crop_and_move_datasets()</span></code><a class="headerlink" href="#crop-and-move-datasets" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/parcellation.py#L443">Link to code</a></p>
 </div>
 <div class="section" id="extract">
-<span id="nipype-interfaces-cmtk-parcellation-extract"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">extract()</span></tt><a class="headerlink" href="#extract" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/cmtk/parcellation.py#L479">Link to code</a></p>
+<span id="nipype-interfaces-cmtk-parcellation-extract"></span><h2><code class="xref py py-func docutils literal"><span class="pre">extract()</span></code><a class="headerlink" href="#extract" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/cmtk/parcellation.py#L479">Link to code</a></p>
 <p>Extract voxel neighbourhood
 Parameters
 ~~~~~~~~~~
@@ -301,9 +301,9 @@ R: the neighbourhood of the specified point in Z</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

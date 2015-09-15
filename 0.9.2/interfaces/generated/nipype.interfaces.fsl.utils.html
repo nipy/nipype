@@ -1,0 +1,1646 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.9.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.fsl.utils</a><ul>
+<li><a class="reference internal" href="#avscale">AvScale</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#complex">Complex</a></li>
+<li><a class="reference internal" href="#convertxfm">ConvertXFM</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#extractroi">ExtractROI</a><ul>
+<li><a class="reference internal" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#filterregressor">FilterRegressor</a></li>
+<li><a class="reference internal" href="#imagemaths">ImageMaths</a><ul>
+<li><a class="reference internal" href="#id3">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#imagemeants">ImageMeants</a></li>
+<li><a class="reference internal" href="#imagestats">ImageStats</a><ul>
+<li><a class="reference internal" href="#id5">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#invwarp">InvWarp</a><ul>
+<li><a class="reference internal" href="#id6">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#merge">Merge</a><ul>
+<li><a class="reference internal" href="#id7">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#overlay">Overlay</a><ul>
+<li><a class="reference internal" href="#id8">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#plotmotionparams">PlotMotionParams</a><ul>
+<li><a class="reference internal" href="#id9">Examples</a></li>
+<li><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#plottimeseries">PlotTimeSeries</a><ul>
+<li><a class="reference internal" href="#id10">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#powerspectrum">PowerSpectrum</a><ul>
+<li><a class="reference internal" href="#id11">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#reorient2std">Reorient2Std</a><ul>
+<li><a class="reference internal" href="#id12">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sigloss">SigLoss</a><ul>
+<li><a class="reference internal" href="#id13">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#slicer">Slicer</a><ul>
+<li><a class="reference internal" href="#id14">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#smooth">Smooth</a></li>
+<li><a class="reference internal" href="#split">Split</a></li>
+<li><a class="reference internal" href="#swapdimensions">SwapDimensions</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.9.2</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://groups.google.com/group/nipy-user">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li>Info: <a href="http://nipy.org/software/license/index.html">License</a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-fsl-utils">
+<h1>interfaces.fsl.utils<a class="headerlink" href="#interfaces-fsl-utils" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-fsl-utils-avscale"></span><div class="section" id="avscale">
+<span id="index-0"></span><h2>AvScale<a class="headerlink" href="#avscale" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L540">Link to code</a></p>
+<p>Wraps command <strong>avscale</strong></p>
+<p>Use FSL avscale command to extract info from mat file output of FLIRT</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<p>avscale = AvScale()
+avscale.inputs.mat_file = &#8216;flirt.mat&#8217;
+res = avscale.run()  # doctest: +SKIP</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mat_file: (an existing file name)
+        mat file to read
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>average_scaling
+        Average Scaling
+backward_half_transform
+        Backwards Half Transform
+determinant
+        Determinant
+forward_half_transform
+        Forward Half Transform
+left_right_orientation_preserved: (a boolean)
+        True if LR orientation preserved
+rotation_translation_matrix
+        Rotation and Translation Matrix
+scales
+        Scales (x,y,z)
+skews
+        Skews
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-complex"></span></div>
+</div>
+<div class="section" id="complex">
+<span id="index-1"></span><h2>Complex<a class="headerlink" href="#complex" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L1390">Link to code</a></p>
+<p>Wraps command <strong>fslcomplex</strong></p>
+<p>fslcomplex is a tool for converting complex data
+Examples
+~~~~~~~~
+&gt;&gt;&gt; cplx = Complex()
+&gt;&gt;&gt; cplx.inputs.complex_in_file = &#8220;complex.nii&#8221;
+&gt;&gt;&gt; cplx.real_polar = True
+&gt;&gt;&gt; res = cplx.run() # doctest: +SKIP</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+complex_cartesian: (a boolean)
+        mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
+         complex_polar, complex_split, complex_merge
+complex_in_file: (an existing file name)
+complex_in_file2: (an existing file name)
+complex_merge: (a boolean)
+        mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
+         complex_polar, complex_split, complex_merge, start_vol, end_vol
+complex_out_file: (a file name)
+        mutually_exclusive: complex_out_file, magnitude_out_file,
+         phase_out_file, real_out_file, imaginary_out_file, real_polar,
+         real_cartesian
+complex_polar: (a boolean)
+        mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
+         complex_polar, complex_split, complex_merge
+complex_split: (a boolean)
+        mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
+         complex_polar, complex_split, complex_merge
+end_vol: (an integer (int or long))
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+imaginary_in_file: (an existing file name)
+imaginary_out_file: (a file name)
+        mutually_exclusive: complex_out_file, magnitude_out_file,
+         phase_out_file, real_polar, complex_cartesian, complex_polar,
+         complex_split, complex_merge
+magnitude_in_file: (an existing file name)
+magnitude_out_file: (a file name)
+        mutually_exclusive: complex_out_file, real_out_file,
+         imaginary_out_file, real_cartesian, complex_cartesian,
+         complex_polar, complex_split, complex_merge
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+phase_in_file: (an existing file name)
+phase_out_file: (a file name)
+        mutually_exclusive: complex_out_file, real_out_file,
+         imaginary_out_file, real_cartesian, complex_cartesian,
+         complex_polar, complex_split, complex_merge
+real_cartesian: (a boolean)
+        mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
+         complex_polar, complex_split, complex_merge
+real_in_file: (an existing file name)
+real_out_file: (a file name)
+        mutually_exclusive: complex_out_file, magnitude_out_file,
+         phase_out_file, real_polar, complex_cartesian, complex_polar,
+         complex_split, complex_merge
+real_polar: (a boolean)
+        mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
+         complex_polar, complex_split, complex_merge
+start_vol: (an integer (int or long))
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>complex_out_file: (a file name)
+imaginary_out_file: (a file name)
+magnitude_out_file: (a file name)
+phase_out_file: (a file name)
+real_out_file: (a file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-convertxfm"></span></div>
+<div class="section" id="convertxfm">
+<span id="index-2"></span><h2>ConvertXFM<a class="headerlink" href="#convertxfm" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L1021">Link to code</a></p>
+<p>Wraps command <strong>convert_xfm</strong></p>
+<p>Use the FSL utility convert_xfm to modify FLIRT transformation matrices.</p>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">invt</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">ConvertXFM</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">invt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&quot;flirt.mat&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">invt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">invert_xfm</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">invt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;flirt_inv.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">invt</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;convert_xfm -omat flirt_inv.mat -inverse flirt.mat&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input transformation matrix
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+concat_xfm: (a boolean)
+        write joint transformation of two input matrices
+        mutually_exclusive: invert_xfm, concat_xfm, fix_scale_skew
+        requires: in_file2
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fix_scale_skew: (a boolean)
+        use secondary matrix to fix scale and skew
+        mutually_exclusive: invert_xfm, concat_xfm, fix_scale_skew
+        requires: in_file2
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input transformation matrix
+in_file2: (an existing file name)
+        second input matrix (for use with fix_scale_skew or concat_xfm
+invert_xfm: (a boolean)
+        invert input transformation
+        mutually_exclusive: invert_xfm, concat_xfm, fix_scale_skew
+out_file: (a file name)
+        final transformation matrix
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output transformation matrix
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-extractroi"></span></div>
+</div>
+<div class="section" id="extractroi">
+<span id="index-3"></span><h2>ExtractROI<a class="headerlink" href="#extractroi" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L213">Link to code</a></p>
+<p>Wraps command <strong>fslroi</strong></p>
+<p>Uses FSL Fslroi command to extract region of interest (ROI)
+from an image.</p>
+<p>You can a) take a 3D ROI from a 3D data set (or if it is 4D, the
+same ROI is taken from each time point and a new 4D data set is
+created), b) extract just some time points from a 4D data set, or
+c) control time and space limits to the ROI.  Note that the
+arguments are minimum index and size (not maximum index).  So to
+extract voxels 10 to 12 inclusive you would specify 10 and 3 (not
+10 and 12).</p>
+<div class="section" id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">ExtractROI</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">anatfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fslroi</span> <span class="o">=</span> <span class="n">ExtractROI</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="n">anatfile</span><span class="p">,</span> <span class="n">roi_file</span><span class="o">=</span><span class="s">&#39;bar.nii&#39;</span><span class="p">,</span> <span class="n">t_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="gp">... </span>                    <span class="n">t_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fslroi</span><span class="o">.</span><span class="n">cmdline</span> <span class="o">==</span> <span class="s">&#39;fslroi </span><span class="si">%s</span><span class="s"> bar.nii 0 1&#39;</span> <span class="o">%</span> <span class="n">anatfile</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+crop_list: (a list of items which are a tuple of the form: (an
+         integer (int or long), an integer (int or long)))
+        list of two tuples specifying crop options
+        mutually_exclusive: x_min, x_size, y_min, y_size, z_min, z_size,
+         t_min, t_size
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input file
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+roi_file: (a file name)
+        output file
+t_min: (an integer (int or long))
+t_size: (an integer (int or long))
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+x_min: (an integer (int or long))
+x_size: (an integer (int or long))
+y_min: (an integer (int or long))
+y_size: (an integer (int or long))
+z_min: (an integer (int or long))
+z_size: (an integer (int or long))
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>roi_file: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-filterregressor"></span></div>
+</div>
+<div class="section" id="filterregressor">
+<span id="index-4"></span><h2>FilterRegressor<a class="headerlink" href="#filterregressor" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L410">Link to code</a></p>
+<p>Wraps command <strong>fsl_regfilt</strong></p>
+<p>Data de-noising by regressing out part of a design matrix</p>
+<p>Uses simple OLS regression on 4D images</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+design_file: (an existing file name)
+        name of the matrix with time courses (e.g. GLM design or MELODIC
+        mixing matrix)
+filter_all: (a boolean)
+        use all columns in the design file in denoising
+        mutually_exclusive: filter_columns
+filter_columns: (a list of items which are an integer (int or long))
+        (1-based) column indices to filter out of the data
+        mutually_exclusive: filter_all
+in_file: (an existing file name)
+        input file name (4D image)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+design_file: (an existing file name)
+        name of the matrix with time courses (e.g. GLM design or MELODIC
+        mixing matrix)
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+filter_all: (a boolean)
+        use all columns in the design file in denoising
+        mutually_exclusive: filter_columns
+filter_columns: (a list of items which are an integer (int or long))
+        (1-based) column indices to filter out of the data
+        mutually_exclusive: filter_all
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input file name (4D image)
+mask: (an existing file name)
+        mask image file name
+out_file: (a file name)
+        output file name for the filtered data
+out_vnscales: (a boolean)
+        output scaling factors for variance normalization
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+var_norm: (a boolean)
+        perform variance-normalization on data
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        output file name for the filtered data
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-imagemaths"></span></div>
+<div class="section" id="imagemaths">
+<span id="index-5"></span><h2>ImageMaths<a class="headerlink" href="#imagemaths" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L338">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use FSL fslmaths command to allow mathematical manipulation of images</p>
+<p><a class="reference external" href="http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils">FSL info</a></p>
+<div class="section" id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">anatfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">maths</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">ImageMaths</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="n">anatfile</span><span class="p">,</span> <span class="n">op_string</span><span class="o">=</span> <span class="s">&#39;-add 5&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                       <span class="n">out_file</span><span class="o">=</span><span class="s">&#39;foo_maths.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">maths</span><span class="o">.</span><span class="n">cmdline</span> <span class="o">==</span> <span class="s">&#39;fslmaths </span><span class="si">%s</span><span class="s"> -add 5 foo_maths.nii&#39;</span> <span class="o">%</span> <span class="n">anatfile</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+in_file2: (an existing file name)
+op_string: (a string)
+        string defining the operation, i. e. -add
+out_data_type: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;float&#39; or &#39;double&#39; or
+         &#39;input&#39;)
+        output datatype, one of (char, short, int, float, double, input)
+out_file: (a file name)
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+suffix: (a string)
+        out_file suffix
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-imagemeants"></span></div>
+</div>
+<div class="section" id="imagemeants">
+<span id="index-6"></span><h2>ImageMeants<a class="headerlink" href="#imagemeants" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L63">Link to code</a></p>
+<p>Wraps command <strong>fslmeants</strong></p>
+<p>Use fslmeants for printing the average timeseries (intensities) to
+the screen (or saves to a file). The average is taken over all voxels in
+the mask (or all voxels in the image if no mask is specified)</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file for computing the average timeseries
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+eig: (a boolean)
+        calculate Eigenvariate(s) instead of mean (output will have 0 mean)
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input file for computing the average timeseries
+mask: (an existing file name)
+        input 3D mask
+nobin: (a boolean)
+        do not binarise the mask for calculation of Eigenvariates
+order: (an integer (int or long), nipype default value: 1)
+        select number of Eigenvariates
+out_file: (a file name)
+        name of output text matrix
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+show_all: (a boolean)
+        show all voxel time series (within mask) instead of averaging
+spatial_coord: (a list of items which are an integer (int or long))
+        &lt;x y z&gt; requested spatial coordinate (instead of mask)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+transpose: (a boolean)
+        output results in transpose format (one row per voxel/mean)
+use_mm: (a boolean)
+        use mm instead of voxel coordinates (for -c option)
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        path/name of output text matrix
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-imagestats"></span></div>
+<div class="section" id="imagestats">
+<span id="index-7"></span><h2>ImageStats<a class="headerlink" href="#imagestats" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L465">Link to code</a></p>
+<p>Wraps command <strong>fslstats</strong></p>
+<p>Use FSL fslstats command to calculate stats from images</p>
+<p><a class="reference external" href="http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils">FSL info</a></p>
+<div class="section" id="id5">
+<h3>Examples<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">ImageStats</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">funcfile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span> <span class="o">=</span> <span class="n">ImageStats</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="n">funcfile</span><span class="p">,</span> <span class="n">op_string</span><span class="o">=</span> <span class="s">&#39;-M&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span><span class="o">.</span><span class="n">cmdline</span> <span class="o">==</span> <span class="s">&#39;fslstats </span><span class="si">%s</span><span class="s"> -M&#39;</span><span class="o">%</span><span class="n">funcfile</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to generate stats of
+op_string: (a string)
+        string defining the operation, options are applied in order, e.g. -M
+        -l 10 -M will report the non-zero mean, apply a threshold and then
+        report the new nonzero mean
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input file to generate stats of
+mask_file: (an existing file name)
+        mask file used for option -k %s
+op_string: (a string)
+        string defining the operation, options are applied in order, e.g. -M
+        -l 10 -M will report the non-zero mean, apply a threshold and then
+        report the new nonzero mean
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+split_4d: (a boolean)
+        give a separate output line for each 3D volume of a 4D timeseries
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_stat
+        stats output
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-invwarp"></span></div>
+</div>
+<div class="section" id="invwarp">
+<span id="index-8"></span><h2>InvWarp<a class="headerlink" href="#invwarp" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L1311">Link to code</a></p>
+<p>Wraps command <strong>invwarp</strong></p>
+<p>Use FSL Invwarp to inverse a FNIRT warp</p>
+<div class="section" id="id6">
+<h3>Examples<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">InvWarp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">invwarp</span> <span class="o">=</span> <span class="n">InvWarp</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">invwarp</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">warp</span> <span class="o">=</span> <span class="s">&quot;struct2mni.nii&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">invwarp</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="s">&quot;anatomical.nii&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">invwarp</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;invwarp --out=struct2mni_inverse.nii.gz --ref=anatomical.nii --warp=struct2mni.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">invwarp</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+reference: (an existing file name)
+        Name of a file in target space. Note that the target space is now
+        different from the target space that was used to create the --warp
+        file. It would typically be the file that was specified with the
+        --in argument when running fnirt.
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+warp: (an existing file name)
+        Name of file containing warp-coefficients/fields. This would
+        typically be the output from the --cout switch of fnirt (but can
+        also use fields, like the output from --fout).
+
+[Optional]
+absolute: (a boolean)
+        If set it indicates that the warps in --warp should be interpreted
+        as absolute, provided that it is not created by fnirt (which always
+        uses relative warps). If set it also indicates that the output --out
+        should be absolute.
+        mutually_exclusive: relative
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inverse_warp: (a file name)
+        Name of output file, containing warps that are the &quot;reverse&quot; of
+        those in --warp. This will be a field-file (rather than a file of
+        spline coefficients), and it will have any affine component included
+        as part of the displacements.
+jacobian_max: (a float)
+        Maximum acceptable Jacobian value for constraint (default 100.0)
+jacobian_min: (a float)
+        Minimum acceptable Jacobian value for constraint (default 0.01)
+niter: (an integer (int or long))
+        Determines how many iterations of the gradient-descent search that
+        should be run.
+noconstraint: (a boolean)
+        Do not apply Jacobian constraint
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+reference: (an existing file name)
+        Name of a file in target space. Note that the target space is now
+        different from the target space that was used to create the --warp
+        file. It would typically be the file that was specified with the
+        --in argument when running fnirt.
+regularise: (a float)
+        Regularisation strength (deafult=1.0).
+relative: (a boolean)
+        If set it indicates that the warps in --warp should be interpreted
+        as relative. I.e. the values in --warp are displacements from the
+        coordinates in the --ref space. If set it also indicates that the
+        output --out should be relative.
+        mutually_exclusive: absolute
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+warp: (an existing file name)
+        Name of file containing warp-coefficients/fields. This would
+        typically be the output from the --cout switch of fnirt (but can
+        also use fields, like the output from --fout).
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inverse_warp: (an existing file name)
+        Name of output file, containing warps that are the &quot;reverse&quot; of
+        those in --warp.
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-merge"></span></div>
+</div>
+<div class="section" id="merge">
+<span id="index-9"></span><h2>Merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L149">Link to code</a></p>
+<p>Wraps command <strong>fslmerge</strong></p>
+<p>Use fslmerge to concatenate images</p>
+<p>Images can be concatenated across time, x, y, or z dimensions. Across the
+time (t) dimension the TR is set by default to 1 sec.</p>
+<p>Note: to set the TR to a different value, specify &#8216;t&#8217; for dimension and
+specify the TR value in seconds for the tr input. The dimension will be
+automatically updated to &#8216;tr&#8217;.</p>
+<div class="section" id="id7">
+<h3>Examples<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">import</span> <span class="n">Merge</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merger</span> <span class="o">=</span> <span class="n">Merge</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merger</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;functional2.nii&#39;</span><span class="p">,</span> <span class="s">&#39;functional3.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merger</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="s">&#39;t&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merger</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&#39;NIFTI_GZ&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merger</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;fslmerge -t functional2_merged.nii.gz functional2.nii functional3.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merger</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">tr</span> <span class="o">=</span> <span class="mf">2.25</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">merger</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;fslmerge -tr functional2_merged.nii.gz functional2.nii functional3.nii 2.25&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+dimension: (&#39;t&#39; or &#39;x&#39; or &#39;y&#39; or &#39;z&#39; or &#39;a&#39;)
+        dimension along which to merge, optionally set tr input when
+        dimension is t
+in_files: (a list of items which are an existing file name)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+dimension: (&#39;t&#39; or &#39;x&#39; or &#39;y&#39; or &#39;z&#39; or &#39;a&#39;)
+        dimension along which to merge, optionally set tr input when
+        dimension is t
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_files: (a list of items which are an existing file name)
+merged_file: (a file name)
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+tr: (a float)
+        use to specify TR in seconds (default is 1.00 sec), overrides
+        dimension and sets it to tr
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>merged_file: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-overlay"></span></div>
+</div>
+<div class="section" id="overlay">
+<span id="index-10"></span><h2>Overlay<a class="headerlink" href="#overlay" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L632">Link to code</a></p>
+<p>Wraps command <strong>overlay</strong></p>
+<dl class="docutils">
+<dt>Use FSL&#8217;s overlay command to combine background and statistical images</dt>
+<dd>into one volume</dd>
+</dl>
+<div class="section" id="id8">
+<h3>Examples<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">combine</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Overlay</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">combine</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">background_image</span> <span class="o">=</span> <span class="s">&#39;mean_func.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">combine</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">auto_thresh_bg</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">combine</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">stat_image</span> <span class="o">=</span> <span class="s">&#39;zstat1.nii.gz&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">combine</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">stat_thresh</span> <span class="o">=</span> <span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">combine</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">show_negative_stats</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">combine</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+auto_thresh_bg: (a boolean)
+        automatically threhsold the background image
+        mutually_exclusive: auto_thresh_bg, full_bg_range, bg_thresh
+background_image: (an existing file name)
+        image to use as background
+bg_thresh: (a tuple of the form: (a float, a float))
+        min and max values for background intensity
+        mutually_exclusive: auto_thresh_bg, full_bg_range, bg_thresh
+full_bg_range: (a boolean)
+        use full range of background image
+        mutually_exclusive: auto_thresh_bg, full_bg_range, bg_thresh
+stat_image: (an existing file name)
+        statistical image to overlay in color
+stat_thresh: (a tuple of the form: (a float, a float))
+        min and max values for the statistical overlay
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+auto_thresh_bg: (a boolean)
+        automatically threhsold the background image
+        mutually_exclusive: auto_thresh_bg, full_bg_range, bg_thresh
+background_image: (an existing file name)
+        image to use as background
+bg_thresh: (a tuple of the form: (a float, a float))
+        min and max values for background intensity
+        mutually_exclusive: auto_thresh_bg, full_bg_range, bg_thresh
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+full_bg_range: (a boolean)
+        use full range of background image
+        mutually_exclusive: auto_thresh_bg, full_bg_range, bg_thresh
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        combined image volume
+out_type: (&#39;float&#39; or &#39;int&#39;, nipype default value: float)
+        write output with float or int
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+show_negative_stats: (a boolean)
+        display negative statistics in overlay
+        mutually_exclusive: stat_image2
+stat_image: (an existing file name)
+        statistical image to overlay in color
+stat_image2: (an existing file name)
+        second statistical image to overlay in color
+        mutually_exclusive: show_negative_stats
+stat_thresh: (a tuple of the form: (a float, a float))
+        min and max values for the statistical overlay
+stat_thresh2: (a tuple of the form: (a float, a float))
+        min and max values for second statistical overlay
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+transparency: (a boolean, nipype default value: True)
+        make overlay colors semi-transparent
+use_checkerboard: (a boolean)
+        use checkerboard mask for overlay
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        combined image volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-plotmotionparams"></span></div>
+</div>
+<div class="section" id="plotmotionparams">
+<span id="index-11"></span><h2>PlotMotionParams<a class="headerlink" href="#plotmotionparams" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L913">Link to code</a></p>
+<p>Wraps command <strong>fsl_tsplot</strong></p>
+<p>Use fsl_tsplot to plot the estimated motion parameters from a realignment
+program.</p>
+<div class="section" id="id9">
+<h3>Examples<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plotter</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">PlotMotionParams</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plotter</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.par&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plotter</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_source</span> <span class="o">=</span> <span class="s">&#39;fsl&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plotter</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">plot_type</span> <span class="o">=</span> <span class="s">&#39;rotations&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+</div>
+<div class="section" id="notes">
+<h3>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h3>
+<p>The &#8216;in_source&#8217; attribute determines the order of columns that are expected
+in the source file.  FSL prints motion parameters in the order rotations,
+translations, while SPM prints them in the opposite order.  This interface
+should be able to plot timecourses of motion parameters generated from other
+sources as long as they fall under one of these two patterns.  For more
+flexibilty, see the <code class="xref py py-class docutils literal"><span class="pre">fsl.PlotTimeSeries</span></code> interface.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name or a list of items which are an
+         existing file name)
+        file with motion parameters
+in_source: (&#39;spm&#39; or &#39;fsl&#39;)
+        which program generated the motion parameter file - fsl, spm
+plot_type: (&#39;rotations&#39; or &#39;translations&#39; or &#39;displacement&#39;)
+        which motion type to plot - rotations, translations, displacement
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name or a list of items which are an
+         existing file name)
+        file with motion parameters
+in_source: (&#39;spm&#39; or &#39;fsl&#39;)
+        which program generated the motion parameter file - fsl, spm
+out_file: (a file name)
+        image to write
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+plot_size: (a tuple of the form: (an integer (int or long), an
+         integer (int or long)))
+        plot image height and width
+plot_type: (&#39;rotations&#39; or &#39;translations&#39; or &#39;displacement&#39;)
+        which motion type to plot - rotations, translations, displacement
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image to write
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-plottimeseries"></span></div>
+</div>
+<div class="section" id="plottimeseries">
+<span id="index-12"></span><h2>PlotTimeSeries<a class="headerlink" href="#plottimeseries" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L832">Link to code</a></p>
+<p>Wraps command <strong>fsl_tsplot</strong></p>
+<p>Use fsl_tsplot to create images of time course plots.</p>
+<div class="section" id="id10">
+<h3>Examples<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plotter</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">PlotTimeSeries</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plotter</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.par&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plotter</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s">&#39;Functional timeseries&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plotter</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;run1&#39;</span><span class="p">,</span> <span class="s">&#39;run2&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plotter</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name or a list of items which are an
+         existing file name)
+        file or list of files with columns of timecourse information
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name or a list of items which are an
+         existing file name)
+        file or list of files with columns of timecourse information
+labels: (a string or a list of items which are a string)
+        label or list of labels
+legend_file: (an existing file name)
+        legend file
+out_file: (a file name)
+        image to write
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+plot_finish: (an integer (int or long))
+        final column from in-file to plot
+        mutually_exclusive: plot_range
+plot_range: (a tuple of the form: (an integer (int or long), an
+         integer (int or long)))
+        first and last columns from the in-file to plot
+        mutually_exclusive: plot_start, plot_finish
+plot_size: (a tuple of the form: (an integer (int or long), an
+         integer (int or long)))
+        plot image height and width
+plot_start: (an integer (int or long))
+        first column from in-file to plot
+        mutually_exclusive: plot_range
+sci_notation: (a boolean)
+        switch on scientific notation
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+title: (a string)
+        plot title
+x_precision: (an integer (int or long))
+        precision of x-axis labels
+x_units: (an integer (int or long), nipype default value: 1)
+        scaling units for x-axis (between 1 and length of in file)
+y_max: (a float)
+        maximum y value
+        mutually_exclusive: y_range
+y_min: (a float)
+        minumum y value
+        mutually_exclusive: y_range
+y_range: (a tuple of the form: (a float, a float))
+        min and max y axis values
+        mutually_exclusive: y_min, y_max
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image to write
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-powerspectrum"></span></div>
+</div>
+<div class="section" id="powerspectrum">
+<span id="index-13"></span><h2>PowerSpectrum<a class="headerlink" href="#powerspectrum" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L1131">Link to code</a></p>
+<p>Wraps command <strong>fslpspec</strong></p>
+<p>Use FSL PowerSpectrum command for power spectrum estimation.</p>
+<div class="section" id="id11">
+<h3>Examples<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pspec</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">PowerSpectrum</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pspec</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;functional.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">pspec</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input 4D file to estimate the power spectrum
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input 4D file to estimate the power spectrum
+out_file: (a file name)
+        name of output 4D file for power spectrum
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        path/name of the output 4D power spectrum file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-reorient2std"></span></div>
+</div>
+<div class="section" id="reorient2std">
+<span id="index-14"></span><h2>Reorient2Std<a class="headerlink" href="#reorient2std" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L1224">Link to code</a></p>
+<p>Wraps command <strong>fslreorient2std</strong></p>
+<p>fslreorient2std is a tool for reorienting the image to match the
+approximate orientation of the standard template images (MNI152).</p>
+<div class="section" id="id12">
+<h3>Examples<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">reorient</span> <span class="o">=</span> <span class="n">Reorient2Std</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reorient</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&quot;functional.nii&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">reorient</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+out_file: (a file name)
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-sigloss"></span></div>
+</div>
+<div class="section" id="sigloss">
+<span id="index-15"></span><h2>SigLoss<a class="headerlink" href="#sigloss" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L1186">Link to code</a></p>
+<p>Wraps command <strong>sigloss</strong></p>
+<p>Estimates signal loss from a field map (in rad/s)</p>
+<div class="section" id="id13">
+<h3>Examples<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sigloss</span> <span class="o">=</span> <span class="n">SigLoss</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigloss</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&quot;phase.nii&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigloss</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">echo_time</span> <span class="o">=</span> <span class="mf">0.03</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">sigloss</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        b0 fieldmap file
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+echo_time: (a float)
+        echo time in seconds
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        b0 fieldmap file
+mask_file: (an existing file name)
+        brain mask file
+out_file: (a file name)
+        output signal loss estimate file
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+slice_direction: (&#39;x&#39; or &#39;y&#39; or &#39;z&#39;)
+        slicing direction
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        signal loss estimate file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-slicer"></span></div>
+</div>
+<div class="section" id="slicer">
+<span id="index-16"></span><h2>Slicer<a class="headerlink" href="#slicer" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L744">Link to code</a></p>
+<p>Wraps command <strong>slicer</strong></p>
+<p>Use FSL&#8217;s slicer command to output a png image from a volume.</p>
+<div class="section" id="id14">
+<h3>Examples<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">example_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">slice</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">Slicer</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">slice</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="n">example_data</span><span class="p">(</span><span class="s">&#39;functional.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">slice</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">all_axial</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">slice</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">image_width</span> <span class="o">=</span> <span class="mi">750</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="nb">slice</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input volume
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+all_axial: (a boolean)
+        output all axial slices into one picture
+        mutually_exclusive: single_slice, middle_slices, all_axial,
+         sample_axial
+        requires: image_width
+args: (a string)
+        Additional parameters to the command
+colour_map: (an existing file name)
+        use different colour map from that stored in nifti header
+dither_edges: (a boolean)
+        produce semi-transparaent (dithered) edges
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+image_edges: (an existing file name)
+        volume to display edge overlay for (useful for checking registration
+image_width: (an integer (int or long))
+        max picture width
+in_file: (an existing file name)
+        input volume
+intensity_range: (a tuple of the form: (a float, a float))
+        min and max intensities to display
+label_slices: (a boolean, nipype default value: True)
+        display slice number
+middle_slices: (a boolean)
+        output picture of mid-sagital, axial, and coronal slices
+        mutually_exclusive: single_slice, middle_slices, all_axial,
+         sample_axial
+nearest_neighbour: (a boolean)
+        use nearest neighbour interpolation for output
+out_file: (a file name)
+        picture to write
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+sample_axial: (an integer (int or long))
+        output every n axial slices into one picture
+        mutually_exclusive: single_slice, middle_slices, all_axial,
+         sample_axial
+        requires: image_width
+scaling: (a float)
+        image scale
+show_orientation: (a boolean, nipype default value: True)
+        label left-right orientation
+single_slice: (&#39;x&#39; or &#39;y&#39; or &#39;z&#39;)
+        output picture of single slice in the x, y, or z plane
+        mutually_exclusive: single_slice, middle_slices, all_axial,
+         sample_axial
+        requires: slice_number
+slice_number: (an integer (int or long))
+        slice number to save in picture
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+threshold_edges: (a float)
+        use threshold for edges
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        picture to write
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-smooth"></span></div>
+</div>
+<div class="section" id="smooth">
+<span id="index-17"></span><h2>Smooth<a class="headerlink" href="#smooth" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L102">Link to code</a></p>
+<p>Wraps command <strong>fslmaths</strong></p>
+<p>Use fslmaths to smooth the image</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+fwhm: (a float)
+in_file: (an existing file name)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fwhm: (a float)
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+smoothed_file: (a file name)
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>smoothed_file: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-split"></span></div>
+<div class="section" id="split">
+<span id="index-18"></span><h2>Split<a class="headerlink" href="#split" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L288">Link to code</a></p>
+<p>Wraps command <strong>fslsplit</strong></p>
+<p>Uses FSL Fslsplit command to separate a volume into images in
+time, x, y or z dimension.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+dimension: (&#39;t&#39; or &#39;x&#39; or &#39;y&#39; or &#39;z&#39;)
+        dimension along which the file will be split
+in_file: (an existing file name)
+        input filename
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+dimension: (&#39;t&#39; or &#39;x&#39; or &#39;y&#39; or &#39;z&#39;)
+        dimension along which the file will be split
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input filename
+out_base_name: (a string)
+        outputs prefix
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_files: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-swapdimensions"></span></div>
+<div class="section" id="swapdimensions">
+<span id="index-19"></span><h2>SwapDimensions<a class="headerlink" href="#swapdimensions" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/fsl/utils.py#L1089">Link to code</a></p>
+<p>Wraps command <strong>fslswapdim</strong></p>
+<p>Use fslswapdim to alter the orientation of an image.</p>
+<p>This interface accepts a three-tuple corresponding to the new
+orientation.  You may either provide dimension ids in the form of
+(-)x, (-)y, or (-z), or nifti-syle dimension codes (RL, LR, AP, PA, IS, SI).</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input image
+new_dims: (a tuple of the form: (&#39;x&#39; or &#39;-x&#39; or &#39;y&#39; or &#39;-y&#39; or &#39;z&#39; or
+         &#39;-z&#39; or &#39;RL&#39; or &#39;LR&#39; or &#39;AP&#39; or &#39;PA&#39; or &#39;IS&#39; or &#39;SI&#39;, &#39;x&#39; or &#39;-x&#39;
+         or &#39;y&#39; or &#39;-y&#39; or &#39;z&#39; or &#39;-z&#39; or &#39;RL&#39; or &#39;LR&#39; or &#39;AP&#39; or &#39;PA&#39; or
+         &#39;IS&#39; or &#39;SI&#39;, &#39;x&#39; or &#39;-x&#39; or &#39;y&#39; or &#39;-y&#39; or &#39;z&#39; or &#39;-z&#39; or &#39;RL&#39; or
+         &#39;LR&#39; or &#39;AP&#39; or &#39;PA&#39; or &#39;IS&#39; or &#39;SI&#39;))
+        3-tuple of new dimension order
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        input image
+new_dims: (a tuple of the form: (&#39;x&#39; or &#39;-x&#39; or &#39;y&#39; or &#39;-y&#39; or &#39;z&#39; or
+         &#39;-z&#39; or &#39;RL&#39; or &#39;LR&#39; or &#39;AP&#39; or &#39;PA&#39; or &#39;IS&#39; or &#39;SI&#39;, &#39;x&#39; or &#39;-x&#39;
+         or &#39;y&#39; or &#39;-y&#39; or &#39;z&#39; or &#39;-z&#39; or &#39;RL&#39; or &#39;LR&#39; or &#39;AP&#39; or &#39;PA&#39; or
+         &#39;IS&#39; or &#39;SI&#39;, &#39;x&#39; or &#39;-x&#39; or &#39;y&#39; or &#39;-y&#39; or &#39;z&#39; or &#39;-z&#39; or &#39;RL&#39; or
+         &#39;LR&#39; or &#39;AP&#39; or &#39;PA&#39; or &#39;IS&#39; or &#39;SI&#39;))
+        3-tuple of new dimension order
+out_file: (a file name)
+        image to write
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image with new dimensions
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-13, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

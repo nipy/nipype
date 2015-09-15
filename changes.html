@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,7 +114,7 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Changes in Nipype</a><ul>
-<li><a class="reference internal" href="#next-release">Next release</a></li>
+<li><a class="reference internal" href="#release-0-11-0-september-15-2015">Release 0.11.0 (September 15, 2015)</a></li>
 <li><a class="reference internal" href="#release-0-10-0-october-10-2014">Release 0.10.0 (October 10, 2014)</a></li>
 <li><a class="reference internal" href="#release-0-9-2-january-31-2014">Release 0.9.2 (January 31, 2014)</a></li>
 <li><a class="reference internal" href="#release-0-9-1-december-25-2013">Release 0.9.1 (December 25, 2013)</a></li>
@@ -154,7 +154,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="users/install.html">Download</a></td>
@@ -166,7 +166,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -189,9 +189,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -201,13 +201,71 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="changes-in-nipype">
 <span id="changes"></span><h1>Changes in Nipype<a class="headerlink" href="#changes-in-nipype" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="next-release">
-<h2>Next release<a class="headerlink" href="#next-release" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="release-0-11-0-september-15-2015">
+<h2>Release 0.11.0 (September 15, 2015)<a class="headerlink" href="#release-0-11-0-september-15-2015" title="Permalink to this headline">¶</a></h2>
 <ul>
+<li><p class="first">API: Change how hash values are computed (<a class="reference external" href="https://github.com/nipy/nipype/pull/1174">https://github.com/nipy/nipype/pull/1174</a>)</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: New algorithm: mesh.WarpPoints applies displacements fields to point sets</dt>
+<dd><p class="first last">(<a class="reference external" href="https://github.com/nipy/nipype/pull/889">https://github.com/nipy/nipype/pull/889</a>).</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: New interfaces for MRTrix3 (<a class="reference external" href="https://github.com/nipy/nipype/pull/1126">https://github.com/nipy/nipype/pull/1126</a>)</p>
+</li>
+<li><p class="first">ENH: New option in afni.3dRefit - zdel, ydel, zdel etc. (<a class="reference external" href="https://github.com/nipy/nipype/pull/1079">https://github.com/nipy/nipype/pull/1079</a>)</p>
+</li>
+<li><p class="first">FIX: ants.Registration composite transform outputs are no longer returned as lists (<a class="reference external" href="https://github.com/nipy/nipype/pull/1183">https://github.com/nipy/nipype/pull/1183</a>)</p>
+</li>
+<li><dl class="first docutils">
+<dt>BUG: ANTs Registration interface failed with multi-modal inputs</dt>
+<dd><p class="first last">(<a class="reference external" href="https://github.com/nipy/nipype/pull/1176">https://github.com/nipy/nipype/pull/1176</a>) (<a class="reference external" href="https://github.com/nipy/nipype/issues/1175">https://github.com/nipy/nipype/issues/1175</a>)</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: dipy.TrackDensityMap interface now accepts a reference image (<a class="reference external" href="https://github.com/nipy/nipype/pull/1091">https://github.com/nipy/nipype/pull/1091</a>)</p>
+</li>
+<li><p class="first">FIX: Bug in XFibres5 (<a class="reference external" href="https://github.com/nipy/nipype/pull/1168">https://github.com/nipy/nipype/pull/1168</a>)</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Attempt to use hard links for data sink.</dt>
+<dd><p class="first last">(<a class="reference external" href="https://github.com/nipy/nipype/pull/1161">https://github.com/nipy/nipype/pull/1161</a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>FIX: Updates to SGE Plugins</dt>
+<dd><p class="first last">(<a class="reference external" href="https://github.com/nipy/nipype/pull/1129">https://github.com/nipy/nipype/pull/1129</a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Add ants JointFusion() node with testing</dt>
+<dd><p class="first last">(<a class="reference external" href="https://github.com/nipy/nipype/pull/1160">https://github.com/nipy/nipype/pull/1160</a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Add &#8211;float option for antsRegistration calls</dt>
+<dd><p class="first last">(<a class="reference external" href="https://github.com/nipy/nipype/pull/1159">https://github.com/nipy/nipype/pull/1159</a>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Added interface to simulate DWIs using the multi-tensor model</dt>
+<dd><p class="first last">(<a class="reference external" href="https://github.com/nipy/nipype/pull/1085">https://github.com/nipy/nipype/pull/1085</a>)</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">ENH: New interface for FSL fslcpgeom utility (<a class="reference external" href="https://github.com/nipy/nipype/pull/1152">https://github.com/nipy/nipype/pull/1152</a>)</p>
+</li>
+<li><p class="first">ENH: Added SLURMGraph plugin for submitting jobs to SLURM with dependencies (<a class="reference external" href="https://github.com/nipy/nipype/pull/1136">https://github.com/nipy/nipype/pull/1136</a>)</p>
+</li>
 <li><dl class="first docutils">
 <dt>FIX: Enable absolute path definitions in DCMStack (<a class="reference external" href="https://github.com/nipy/nipype/pull/1089">https://github.com/nipy/nipype/pull/1089</a>,</dt>
 <dd><p class="first last">replaced by <a class="reference external" href="https://github.com/nipy/nipype/pull/1093">https://github.com/nipy/nipype/pull/1093</a>)</p>
@@ -236,6 +294,8 @@
 <dd><p class="first last">(<a class="reference external" href="https://github.com/nipy/nipype/pull/1019">https://github.com/nipy/nipype/pull/1019</a>)</p>
 </dd>
 </dl>
+</li>
+<li><p class="first">FIX: In the FSLXcommand _list_outputs function fixed for loop range (<a class="reference external" href="https://github.com/nipy/nipype/pull/1071">https://github.com/nipy/nipype/pull/1071</a>)</p>
 </li>
 <li><p class="first">ENH: Dropped support for now 7 years old Python 2.6 (<a class="reference external" href="https://github.com/nipy/nipype/pull/1069">https://github.com/nipy/nipype/pull/1069</a>)</p>
 </li>
@@ -327,6 +387,20 @@ curveinterval for angle threshold (<a class="reference external" href="https://g
 </li>
 <li><p class="first">FIX: Add QA output for TSNR to resting workflow (<a class="reference external" href="https://github.com/nipy/nipype/pull/1088">https://github.com/nipy/nipype/pull/1088</a>)</p>
 </li>
+<li><p class="first">FIX: Change N4BiasFieldCorrection to use short tag for dimensionality (backward compatible) (<a class="reference external" href="https://github.com/nipy/nipype/pull/1096">https://github.com/nipy/nipype/pull/1096</a>)</p>
+</li>
+<li><p class="first">ENH: Added -newgrid input to Warp in AFNI (3dWarp wrapper) (<a class="reference external" href="https://github.com/nipy/nipype/pull/1128">https://github.com/nipy/nipype/pull/1128</a>)</p>
+</li>
+<li><p class="first">FIX: Fixed AFNI Copy interface to use positional inputs as required (<a class="reference external" href="https://github.com/nipy/nipype/pull/1131">https://github.com/nipy/nipype/pull/1131</a>)</p>
+</li>
+<li><p class="first">ENH: Added a check in Dcm2nii to check if nipype created the config.ini file and remove if true (<a class="reference external" href="https://github.com/nipy/nipype/pull/1132">https://github.com/nipy/nipype/pull/1132</a>)</p>
+</li>
+<li><dl class="first docutils">
+<dt>ENH: Use a while loop to wait for Xvfb (up to a max wait time &#8220;xvfb_max_wait&#8221; in config file, default 10)</dt>
+<dd><p class="first last">(<a class="reference external" href="https://github.com/nipy/nipype/pull/1142">https://github.com/nipy/nipype/pull/1142</a>)</p>
+</dd>
+</dl>
+</li>
 </ul>
 </div>
 <div class="section" id="release-0-10-0-october-10-2014">
@@ -365,8 +439,8 @@ versions of BEDPOSTX: BEDPOSTXGPU, BEDPOSTX5GPU, and BEDPOSTX4GPU</p>
 </li>
 <li><dl class="first docutils">
 <dt>API: Interfaces to external packages are no longer available in the top-level</dt>
-<dd><p class="first last"><tt class="docutils literal"><span class="pre">nipype</span></tt> namespace, and must be imported directly (e.g.
-<tt class="docutils literal"><span class="pre">from</span> <span class="pre">nipype.interfaces</span> <span class="pre">import</span> <span class="pre">fsl</span></tt>).</p>
+<dd><p class="first last"><code class="docutils literal"><span class="pre">nipype</span></code> namespace, and must be imported directly (e.g.
+<code class="docutils literal"><span class="pre">from</span> <span class="pre">nipype.interfaces</span> <span class="pre">import</span> <span class="pre">fsl</span></code>).</p>
 </dd>
 </dl>
 </li>
@@ -1099,9 +1173,9 @@ DilateImage, ErodeImage, SpatialFilter, UnaryMaths, BinaryMaths, MultiImageMaths
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

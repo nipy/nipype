@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -185,7 +185,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -197,7 +197,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -220,9 +220,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -232,13 +232,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-freesurfer-preprocess">
 <h1>interfaces.freesurfer.preprocess<a class="headerlink" href="#interfaces-freesurfer-preprocess" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-freesurfer-preprocess-applyvoltransform"></span><div class="section" id="applyvoltransform">
 <span id="index-0"></span><h2>ApplyVolTransform<a class="headerlink" href="#applyvoltransform" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L976">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/preprocess.py#L982">Link to code</a></p>
 <p>Wraps command <strong>mri_vol2vol</strong></p>
 <p>Use FreeSurfer mri_vol2vol to apply a transform.</p>
 <div class="section" id="examples">
@@ -358,7 +358,7 @@ transformed_file: (a file name)
 </div>
 <div class="section" id="bbregister">
 <span id="index-1"></span><h2>BBRegister<a class="headerlink" href="#bbregister" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L842">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/preprocess.py#L848">Link to code</a></p>
 <p>Wraps command <strong>bbregister</strong></p>
 <p>Use FreeSurfer bbregister to register a volume to the Freesurfer anatomical.</p>
 <p>This program performs within-subject, cross-modal registration using a
@@ -416,7 +416,7 @@ out_fsl_file: (a boolean or a file name)
 out_reg_file: (a file name)
         output registration file
         flag: --reg %s
-reg_frame: (an integer)
+reg_frame: (an integer (int or long))
         0-based frame index for 4D source file
         flag: --frame %d
         mutually_exclusive: reg_middle_frame
@@ -453,7 +453,7 @@ registered_file: (a file name)
 </div>
 <div class="section" id="dicomconvert">
 <span id="index-2"></span><h2>DICOMConvert<a class="headerlink" href="#dicomconvert" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L439">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/preprocess.py#L445">Link to code</a></p>
 <p>Wraps command <strong>mri_convert</strong></p>
 <p>use fs mri_convert to convert dicom files</p>
 <div class="section" id="id2">
@@ -518,7 +518,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="fitmsparams">
 <span id="index-3"></span><h2>FitMSParams<a class="headerlink" href="#fitmsparams" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L1249">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/preprocess.py#L1255">Link to code</a></p>
 <p>Wraps command <strong>mri_ms_fitparms</strong></p>
 <p>Estimate tissue paramaters from a set of FLASH images.</p>
 <div class="section" id="id3">
@@ -545,7 +545,7 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-flip_list: (a list of items which are an integer)
+flip_list: (a list of items which are an integer (int or long))
         list of flip angles of the input files
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
@@ -561,7 +561,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-tr_list: (a list of items which are an integer)
+tr_list: (a list of items which are an integer (int or long))
         list of TRs of the input files (in msec)
 xfm_list: (a list of items which are an existing file name)
         list of transform files to apply to each FLASH image
@@ -580,7 +580,7 @@ t2star_image: (an existing file name)
 </div>
 <div class="section" id="mriconvert">
 <span id="index-4"></span><h2>MRIConvert<a class="headerlink" href="#mriconvert" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L325">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/preprocess.py#L331">Link to code</a></p>
 <p>Wraps command <strong>mri_convert</strong></p>
 <p>use fs mri_convert to manipulate files</p>
 <div class="admonition note">
@@ -631,24 +631,24 @@ conform_min: (a boolean)
 conform_size: (a float)
         conform to size_in_mm
         flag: --conform_size %s
-crop_center: (a tuple of the form: (an integer, an integer, an
-         integer))
+crop_center: (a tuple of the form: (an integer (int or long), an
+         integer (int or long), an integer (int or long)))
         &lt;x&gt; &lt;y&gt; &lt;z&gt; crop to 256 around center (x, y, z)
         flag: --crop %d %d %d
 crop_gdf: (a boolean)
         apply GDF cropping
         flag: --crop_gdf
-crop_size: (a tuple of the form: (an integer, an integer, an
-         integer))
+crop_size: (a tuple of the form: (an integer (int or long), an
+         integer (int or long), an integer (int or long)))
         &lt;dx&gt; &lt;dy&gt; &lt;dz&gt; crop to size &lt;dx, dy, dz&gt;
         flag: --cropsize %d %d %d
-cut_ends: (an integer)
+cut_ends: (an integer (int or long))
         remove ncut slices from the ends
         flag: --cutends %d
 devolve_transform: (a string)
         subject id
         flag: --devolvexfm %s
-drop_n: (an integer)
+drop_n: (an integer (int or long))
         drop the last n frames
         flag: --ndrop %d
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -661,11 +661,11 @@ fill_parcellation: (a boolean)
 force_ras: (a boolean)
         use default when orientation info absent
         flag: --force_ras_good
-frame: (an integer)
+frame: (an integer (int or long))
         keep only 0-based frame number
         flag: --frame %d
-frame_subsample: (a tuple of the form: (an integer, an integer, an
-         integer))
+frame_subsample: (a tuple of the form: (an integer (int or long), an
+         integer (int or long), an integer (int or long)))
         start delta end : frame subsampling (end = -1 for end)
         flag: --fsubsample %d %d %d
 fwhm: (a float)
@@ -680,7 +680,7 @@ in_center: (a list of at most 3 items which are a float)
 in_i_dir: (a tuple of the form: (a float, a float, a float))
         &lt;R direction&gt; &lt;A direction&gt; &lt;S direction&gt;
         flag: --in_i_direction %f %f %f
-in_i_size: (an integer)
+in_i_size: (an integer (int or long))
         input i size
         flag: --in_i_size %d
 in_info: (a boolean)
@@ -689,13 +689,13 @@ in_info: (a boolean)
 in_j_dir: (a tuple of the form: (a float, a float, a float))
         &lt;R direction&gt; &lt;A direction&gt; &lt;S direction&gt;
         flag: --in_j_direction %f %f %f
-in_j_size: (an integer)
+in_j_size: (an integer (int or long))
         input j size
         flag: --in_j_size %d
 in_k_dir: (a tuple of the form: (a float, a float, a float))
         &lt;R direction&gt; &lt;A direction&gt; &lt;S direction&gt;
         flag: --in_k_direction %f %f %f
-in_k_size: (an integer)
+in_k_size: (an integer (int or long))
         input k size
         flag: --in_k_size %d
 in_like: (an existing file name)
@@ -753,34 +753,34 @@ out_datatype: (&#39;uchar&#39; or &#39;short&#39; or &#39;int&#39; or &#39;float
 out_file: (a file name)
         output filename or True to generate one
         flag: --output_volume %s, position: -1
-out_i_count: (an integer)
+out_i_count: (an integer (int or long))
         some count ?? in i direction
         flag: --out_i_count %d
 out_i_dir: (a tuple of the form: (a float, a float, a float))
         &lt;R direction&gt; &lt;A direction&gt; &lt;S direction&gt;
         flag: --out_i_direction %f %f %f
-out_i_size: (an integer)
+out_i_size: (an integer (int or long))
         output i size
         flag: --out_i_size %d
 out_info: (a boolean)
         display output info
         flag: --out_info
-out_j_count: (an integer)
+out_j_count: (an integer (int or long))
         some count ?? in j direction
         flag: --out_j_count %d
 out_j_dir: (a tuple of the form: (a float, a float, a float))
         &lt;R direction&gt; &lt;A direction&gt; &lt;S direction&gt;
         flag: --out_j_direction %f %f %f
-out_j_size: (an integer)
+out_j_size: (an integer (int or long))
         output j size
         flag: --out_j_size %d
-out_k_count: (an integer)
+out_k_count: (an integer (int or long))
         some count ?? in k direction
         flag: --out_k_count %d
 out_k_dir: (a tuple of the form: (a float, a float, a float))
         &lt;R direction&gt; &lt;A direction&gt; &lt;S direction&gt;
         flag: --out_k_direction %f %f %f
-out_k_size: (an integer)
+out_k_size: (an integer (int or long))
         output k size
         flag: --out_k_size %d
 out_matrix: (a boolean)
@@ -813,7 +813,8 @@ parse_only: (a boolean)
 read_only: (a boolean)
         read the input volume
         flag: --read_only
-reorder: (a tuple of the form: (an integer, an integer, an integer))
+reorder: (a tuple of the form: (an integer (int or long), an integer
+         (int or long), an integer (int or long)))
         olddim1 olddim2 olddim3
         flag: --reorder %d %d %d
 resample_type: (&#39;interpolate&#39; or &#39;weighted&#39; or &#39;nearest&#39; or &#39;sinc&#39; or
@@ -826,13 +827,14 @@ reslice_like: (an existing file name)
 sdcm_list: (an existing file name)
         list of DICOM files for conversion
         flag: --sdcmlist %s
-skip_n: (an integer)
+skip_n: (an integer (int or long))
         skip the first n frames
         flag: --nskip %d
 slice_bias: (a float)
         apply half-cosine bias field
         flag: --slice-bias %f
-slice_crop: (a tuple of the form: (an integer, an integer))
+slice_crop: (a tuple of the form: (an integer (int or long), an
+         integer (int or long)))
         s_start s_end : keep slices s_start to s_end
         flag: --slice-crop %d %d
 slice_reverse: (a boolean)
@@ -855,6 +857,9 @@ subject_name: (a string)
         flag: --subject_name %s
 subjects_dir: (an existing directory name)
         subjects directory
+te: (an integer (int or long))
+        TE in msec
+        flag: -te %d
 template_info: (a boolean)
         dump info about template
 template_type: (&#39;cor&#39; or &#39;mgh&#39; or &#39;mgz&#39; or &#39;minc&#39; or &#39;analyze&#39; or
@@ -868,6 +873,12 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
+ti: (an integer (int or long))
+        TI in msec (note upper case flag)
+        flag: -ti %d
+tr: (an integer (int or long))
+        TR in msec
+        flag: -tr %d
 unwarp_gradient: (a boolean)
         unwarp gradient nonlinearity
         flag: --unwarp_gradient_nonlinearity
@@ -892,7 +903,7 @@ zero_outlines: (a boolean)
 </div>
 <div class="section" id="parsedicomdir">
 <span id="index-5"></span><h2>ParseDICOMDir<a class="headerlink" href="#parsedicomdir" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L49">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/preprocess.py#L49">Link to code</a></p>
 <p>Wraps command <strong>mri_parse_sdcmdir</strong></p>
 <p>Uses mri_parse_sdcmdir to get information from dicom directories</p>
 <div class="section" id="id5">
@@ -949,7 +960,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="reconall">
 <span id="index-6"></span><h2>ReconAll<a class="headerlink" href="#reconall" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L619">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/preprocess.py#L625">Link to code</a></p>
 <p>Wraps command <strong>recon-all</strong></p>
 <p>Uses recon-all to generate surfaces and parcellations of structural data
 from anatomical images of a subject.</p>
@@ -997,7 +1008,7 @@ hemi: (&#39;lh&#39; or &#39;rh&#39;)
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-openmp: (an integer)
+openmp: (an integer (int or long))
         Number of processors to use in parallel
         flag: -openmp %d
 subject_id: (a string, nipype default value: recon_all)
@@ -1088,7 +1099,7 @@ wmparc_stats: (a list of items which are an existing file name)
 </div>
 <div class="section" id="resample">
 <span id="index-7"></span><h2>Resample<a class="headerlink" href="#resample" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L553">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/preprocess.py#L559">Link to code</a></p>
 <p>Wraps command <strong>mri_convert</strong></p>
 <p>Use FreeSurfer mri_convert to up or down-sample image files</p>
 <div class="section" id="id7">
@@ -1142,7 +1153,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="robustregister">
 <span id="index-8"></span><h2>RobustRegister<a class="headerlink" href="#robustregister" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L1161">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/preprocess.py#L1167">Link to code</a></p>
 <p>Wraps command <strong>mri_robust_register</strong></p>
 <p>Perform intramodal linear registration (translation and rotation) using robust statistics.</p>
 <div class="section" id="id8">
@@ -1211,7 +1222,7 @@ half_targ_xfm: (a boolean or a file name)
 half_weights: (a boolean or a file name)
         write weights volume mapped to halfway space
         flag: --halfweights %s
-high_iterations: (an integer)
+high_iterations: (an integer (int or long))
         max # of times on highest resolution
         flag: --highit %d
 ignore_exception: (a boolean, nipype default value: False)
@@ -1235,7 +1246,7 @@ mask_source: (an existing file name)
 mask_target: (an existing file name)
         image to mask target volume with
         flag: --maskdst %s
-max_iterations: (an integer)
+max_iterations: (an integer (int or long))
         maximum # of times on each resolution
         flag: --maxit %d
 no_init: (a boolean)
@@ -1255,7 +1266,7 @@ registered_file: (a boolean or a file name)
         flag: --warp %s
 subjects_dir: (an existing directory name)
         subjects directory
-subsample_thresh: (an integer)
+subsample_thresh: (an integer (int or long))
         subsample if dimension is above threshold size
         flag: --subsample %d
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -1296,7 +1307,7 @@ weights_file: (a file name)
 </div>
 <div class="section" id="smooth">
 <span id="index-9"></span><h2>Smooth<a class="headerlink" href="#smooth" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L1050">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/preprocess.py#L1056">Link to code</a></p>
 <p>Wraps command <strong>mris_volsmooth</strong></p>
 <p>Use FreeSurfer mris_volsmooth to smooth a volume</p>
 <p>This function smoothes cortical regions on a surface and non-cortical
@@ -1376,7 +1387,7 @@ vol_fwhm: (a floating point number &gt;= 0.0)
 </div>
 <div class="section" id="synthesizeflash">
 <span id="index-10"></span><h2>SynthesizeFLASH<a class="headerlink" href="#synthesizeflash" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L1321">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/preprocess.py#L1327">Link to code</a></p>
 <p>Wraps command <strong>mri_synthesize</strong></p>
 <p>Synthesize a FLASH acquisition from T1 and proton density maps.</p>
 <div class="section" id="id10">
@@ -1442,7 +1453,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="unpacksdicomdir">
 <span id="index-11"></span><h2>UnpackSDICOMDir<a class="headerlink" href="#unpacksdicomdir" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/freesurfer/preprocess.py#L109">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/freesurfer/preprocess.py#L109">Link to code</a></p>
 <p>Wraps command <strong>unpacksdcmdir</strong></p>
 <p>Use unpacksdcmdir to convert dicom files</p>
 <p>Call unpacksdcmdir -help from the command line to see more information on
@@ -1465,8 +1476,8 @@ config: (an existing file name)
         specify unpacking rules in file
         flag: -cfg %s
         mutually_exclusive: run_info, config, seq_config
-run_info: (a tuple of the form: (an integer, a string, a string, a
-         string))
+run_info: (a tuple of the form: (an integer (int or long), a string,
+         a string, a string))
         runno subdir format name : spec unpacking rules on cmdline
         flag: -run %d %s %s %s
         mutually_exclusive: run_info, config, seq_config
@@ -1507,7 +1518,7 @@ output_dir: (a directory name)
 scan_only: (an existing file name)
         only scan the directory and put result in file
         flag: -scanonly %s
-spm_zeropad: (an integer)
+spm_zeropad: (an integer (int or long))
         set frame number zero padding width for SPM
         flag: -nspmzeropad %d
 subjects_dir: (an existing directory name)
@@ -1533,9 +1544,9 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

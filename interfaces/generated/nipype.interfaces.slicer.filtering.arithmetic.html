@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -141,7 +141,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -153,7 +153,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -176,9 +176,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -188,13 +188,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-slicer-filtering-arithmetic">
 <h1>interfaces.slicer.filtering.arithmetic<a class="headerlink" href="#interfaces-slicer-filtering-arithmetic" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-slicer-filtering-arithmetic-addscalarvolumes"></span><div class="section" id="addscalarvolumes">
 <span id="index-0"></span><h2>AddScalarVolumes<a class="headerlink" href="#addscalarvolumes" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/filtering/arithmetic.py#L123">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/filtering/arithmetic.py#L123">Link to code</a></p>
 <p>Wraps command <a href="#id1"><span class="problematic" id="id2">**</span></a>AddScalarVolumes **</p>
 <p>title: Add Scalar Volumes</p>
 <p>category: Filtering.Arithmetic</p>
@@ -244,7 +244,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-slicer-filtering-arithmetic-castscalarvolume"></span></div>
 <div class="section" id="castscalarvolume">
 <span id="index-1"></span><h2>CastScalarVolume<a class="headerlink" href="#castscalarvolume" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/filtering/arithmetic.py#L156">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/filtering/arithmetic.py#L156">Link to code</a></p>
 <p>Wraps command <a href="#id3"><span class="problematic" id="id4">**</span></a>CastScalarVolume **</p>
 <p>title: Cast Scalar Volume</p>
 <p>category: Filtering.Arithmetic</p>
@@ -293,7 +293,7 @@ type: (&#39;Char&#39; or &#39;UnsignedChar&#39; or &#39;Short&#39; or &#39;Unsig
 <span class="target" id="nipype-interfaces-slicer-filtering-arithmetic-maskscalarvolume"></span></div>
 <div class="section" id="maskscalarvolume">
 <span id="index-2"></span><h2>MaskScalarVolume<a class="headerlink" href="#maskscalarvolume" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/filtering/arithmetic.py#L55">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/filtering/arithmetic.py#L55">Link to code</a></p>
 <p>Wraps command <a href="#id5"><span class="problematic" id="id6">**</span></a>MaskScalarVolume **</p>
 <p>title: Mask Scalar Volume</p>
 <p>category: Filtering.Arithmetic</p>
@@ -325,10 +325,10 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-label: (an integer)
+label: (an integer (int or long))
         Label value in the Mask Volume to use as the mask
         flag: --label %d
-replace: (an integer)
+replace: (an integer (int or long))
         Value to use for the output volume outside of the mask
         flag: --replace %d
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -345,7 +345,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-slicer-filtering-arithmetic-multiplyscalarvolumes"></span></div>
 <div class="section" id="multiplyscalarvolumes">
 <span id="index-3"></span><h2>MultiplyScalarVolumes<a class="headerlink" href="#multiplyscalarvolumes" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/filtering/arithmetic.py#L20">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/filtering/arithmetic.py#L20">Link to code</a></p>
 <p>Wraps command <a href="#id7"><span class="problematic" id="id8">**</span></a>MultiplyScalarVolumes **</p>
 <p>title: Multiply Scalar Volumes</p>
 <p>category: Filtering.Arithmetic</p>
@@ -395,7 +395,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-slicer-filtering-arithmetic-subtractscalarvolumes"></span></div>
 <div class="section" id="subtractscalarvolumes">
 <span id="index-4"></span><h2>SubtractScalarVolumes<a class="headerlink" href="#subtractscalarvolumes" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/slicer/filtering/arithmetic.py#L89">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/slicer/filtering/arithmetic.py#L89">Link to code</a></p>
 <p>Wraps command <a href="#id9"><span class="problematic" id="id10">**</span></a>SubtractScalarVolumes **</p>
 <p>title: Subtract Scalar Volumes</p>
 <p>category: Filtering.Arithmetic</p>
@@ -452,9 +452,9 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -1,0 +1,1875 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.10.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.fsl.preprocess</a><ul>
+<li><a class="reference internal" href="#applywarp">ApplyWarp</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#applyxfm">ApplyXfm</a><ul>
+<li><a class="reference internal" href="#id1">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#bet">BET</a><ul>
+<li><a class="reference internal" href="#id2">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fast">FAST</a><ul>
+<li><a class="reference internal" href="#id3">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#first">FIRST</a><ul>
+<li><a class="reference internal" href="#id4">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#flirt">FLIRT</a><ul>
+<li><a class="reference internal" href="#id5">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fnirt">FNIRT</a><ul>
+<li><a class="reference internal" href="#id6">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#fugue">FUGUE</a><ul>
+<li><a class="reference internal" href="#id8">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#mcflirt">MCFLIRT</a><ul>
+<li><a class="reference internal" href="#id9">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#prelude">PRELUDE</a><ul>
+<li><a class="reference internal" href="#id10">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#susan">SUSAN</a><ul>
+<li><a class="reference internal" href="#id11">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#slicetimer">SliceTimer</a><ul>
+<li><a class="reference internal" href="#id12">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-fsl-preprocess">
+<h1>interfaces.fsl.preprocess<a class="headerlink" href="#interfaces-fsl-preprocess" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-fsl-preprocess-applywarp"></span><div class="section" id="applywarp">
+<span id="index-0"></span><h2>ApplyWarp<a class="headerlink" href="#applywarp" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/fsl/preprocess.py#L983">Link to code</a></p>
+<p>Wraps command <strong>applywarp</strong></p>
+<p>Use FSL&#8217;s applywarp to apply the results of a FNIRT registration</p>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">example_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aw</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">ApplyWarp</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aw</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="n">example_data</span><span class="p">(</span><span class="s">&#39;structural.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aw</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">ref_file</span> <span class="o">=</span> <span class="n">example_data</span><span class="p">(</span><span class="s">&#39;mni.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aw</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">field_file</span> <span class="o">=</span> <span class="s">&#39;my_coefficients_filed.nii&#39;</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">aw</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        image to be warped
+        flag: --in=%s, position: 0
+ref_file: (an existing file name)
+        reference image
+        flag: --ref=%s, position: 1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+abswarp: (a boolean)
+        treat warp field as absolute: x&#39; = w(x)
+        flag: --abs
+        mutually_exclusive: relwarp
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+datatype: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;float&#39; or &#39;double&#39;)
+        Force output data type [char short int float double].
+        flag: --datatype=%s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+field_file: (an existing file name)
+        file containing warp field
+        flag: --warp=%s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+interp: (&#39;nn&#39; or &#39;trilinear&#39; or &#39;sinc&#39; or &#39;spline&#39;)
+        interpolation method
+        flag: --interp=%s, position: -2
+mask_file: (an existing file name)
+        filename for mask image (in reference space)
+        flag: --mask=%s
+out_file: (a file name)
+        output filename
+        flag: --out=%s, position: 2
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+postmat: (an existing file name)
+        filename for post-transform (affine matrix)
+        flag: --postmat=%s
+premat: (an existing file name)
+        filename for pre-transform (affine matrix)
+        flag: --premat=%s
+relwarp: (a boolean)
+        treat warp field as relative: x&#39; = x + w(x)
+        flag: --rel, position: -1
+        mutually_exclusive: abswarp
+superlevel: (&#39;a&#39; or an integer (int or long))
+        level of intermediary supersampling, a for &#39;automatic&#39; or integer
+        level. Default = 2
+        flag: --superlevel=%s
+supersample: (a boolean)
+        intermediary supersampling of output, default is off
+        flag: --super
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        Warped output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-preprocess-applyxfm"></span></div>
+</div>
+<div class="section" id="applyxfm">
+<span id="index-1"></span><h2>ApplyXfm<a class="headerlink" href="#applyxfm" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/fsl/preprocess.py#L570">Link to code</a></p>
+<p>Wraps command <strong>flirt</strong></p>
+<p>Currently just a light wrapper around FLIRT,
+with no modifications</p>
+<p>ApplyXfm is used to apply an existing tranform to an image</p>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">example_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applyxfm</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">ApplyXfm</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applyxfm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="n">example_data</span><span class="p">(</span><span class="s">&#39;structural.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applyxfm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_matrix_file</span> <span class="o">=</span> <span class="n">example_data</span><span class="p">(</span><span class="s">&#39;trans.mat&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applyxfm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;newfile.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applyxfm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="n">example_data</span><span class="p">(</span><span class="s">&#39;mni.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">applyxfm</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">apply_xfm</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">applyxfm</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file
+        flag: -in %s, position: 0
+reference: (an existing file name)
+        reference file
+        flag: -ref %s, position: 1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+angle_rep: (&#39;quaternion&#39; or &#39;euler&#39;)
+        representation of rotation angles
+        flag: -anglerep %s
+apply_isoxfm: (a float)
+        as applyxfm but forces isotropic resampling
+        flag: -applyisoxfm %f
+        mutually_exclusive: apply_xfm
+apply_xfm: (a boolean, nipype default value: True)
+        apply transformation supplied by in_matrix_file
+        flag: -applyxfm
+        requires: in_matrix_file
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bbrslope: (a float)
+        value of bbr slope
+        flag: -bbrslope %f
+bbrtype: (&#39;signed&#39; or &#39;global_abs&#39; or &#39;local_abs&#39;)
+        type of bbr cost function: signed [default], global_abs, local_abs
+        flag: -bbrtype %s
+bgvalue: (a float)
+        use specified background value for points outside FOV
+        flag: -setbackground %f
+bins: (an integer (int or long))
+        number of histogram bins
+        flag: -bins %d
+coarse_search: (an integer (int or long))
+        coarse search delta angle
+        flag: -coarsesearch %d
+cost: (&#39;mutualinfo&#39; or &#39;corratio&#39; or &#39;normcorr&#39; or &#39;normmi&#39; or
+         &#39;leastsq&#39; or &#39;labeldiff&#39; or &#39;bbr&#39;)
+        cost function
+        flag: -cost %s
+cost_func: (&#39;mutualinfo&#39; or &#39;corratio&#39; or &#39;normcorr&#39; or &#39;normmi&#39; or
+         &#39;leastsq&#39; or &#39;labeldiff&#39; or &#39;bbr&#39;)
+        cost function
+        flag: -searchcost %s
+datatype: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;float&#39; or &#39;double&#39;)
+        force output data type
+        flag: -datatype %s
+display_init: (a boolean)
+        display initial matrix
+        flag: -displayinit
+dof: (an integer (int or long))
+        number of transform degrees of freedom
+        flag: -dof %d
+echospacing: (a float)
+        value of EPI echo spacing - units of seconds
+        flag: -echospacing %f
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fieldmap: (a file name)
+        fieldmap image in rads/s - must be already registered to the
+        reference image
+        flag: -fieldmap %s
+fieldmapmask: (a file name)
+        mask for fieldmap image
+        flag: -fieldmapmask %s
+fine_search: (an integer (int or long))
+        fine search delta angle
+        flag: -finesearch %d
+force_scaling: (a boolean)
+        force rescaling even for low-res images
+        flag: -forcescaling
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_matrix_file: (a file name)
+        input 4x4 affine matrix
+        flag: -init %s
+in_weight: (an existing file name)
+        File for input weighting volume
+        flag: -inweight %s
+interp: (&#39;trilinear&#39; or &#39;nearestneighbour&#39; or &#39;sinc&#39; or &#39;spline&#39;)
+        final interpolation method used in reslicing
+        flag: -interp %s
+min_sampling: (a float)
+        set minimum voxel dimension for sampling
+        flag: -minsampling %f
+no_clamp: (a boolean)
+        do not use intensity clamping
+        flag: -noclamp
+no_resample: (a boolean)
+        do not change input sampling
+        flag: -noresample
+no_resample_blur: (a boolean)
+        do not use blurring on downsampling
+        flag: -noresampblur
+no_search: (a boolean)
+        set all angular searches to ranges 0 to 0
+        flag: -nosearch
+out_file: (a file name)
+        registered output file
+        flag: -out %s, position: 2
+out_log: (a file name)
+        output log
+        requires: save_log
+out_matrix_file: (a file name)
+        output affine matrix in 4x4 asciii format
+        flag: -omat %s, position: 3
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+padding_size: (an integer (int or long))
+        for applyxfm: interpolates outside image by size
+        flag: -paddingsize %d
+pedir: (an integer (int or long))
+        phase encode direction of EPI - 1/2/3=x/y/z &amp; -1/-2/-3=-x/-y/-z
+        flag: -pedir %d
+ref_weight: (an existing file name)
+        File for reference weighting volume
+        flag: -refweight %s
+rigid2D: (a boolean)
+        use 2D rigid body mode - ignores dof
+        flag: -2D
+save_log: (a boolean)
+        save to log file
+schedule: (an existing file name)
+        replaces default schedule
+        flag: -schedule %s
+searchr_x: (a list of from 2 to 2 items which are an integer (int or
+         long))
+        search angles along x-axis, in degrees
+        flag: -searchrx %s
+searchr_y: (a list of from 2 to 2 items which are an integer (int or
+         long))
+        search angles along y-axis, in degrees
+        flag: -searchry %s
+searchr_z: (a list of from 2 to 2 items which are an integer (int or
+         long))
+        search angles along z-axis, in degrees
+        flag: -searchrz %s
+sinc_width: (an integer (int or long))
+        full-width in voxels
+        flag: -sincwidth %d
+sinc_window: (&#39;rectangular&#39; or &#39;hanning&#39; or &#39;blackman&#39;)
+        sinc window
+        flag: -sincwindow %s
+uses_qform: (a boolean)
+        initialize using sform or qform
+        flag: -usesqform
+verbose: (an integer (int or long))
+        verbose mode, 0 is least
+        flag: -verbose %d
+wm_seg: (a file name)
+        white matter segmentation volume needed by BBR cost function
+        flag: -wmseg %s
+wmcoords: (a file name)
+        white matter boundary coordinates for BBR cost function
+        flag: -wmcoords %s
+wmnorms: (a file name)
+        white matter boundary normals for BBR cost function
+        flag: -wmnorms %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        path/name of registered file (if generated)
+out_log: (a file name)
+        path/name of output log (if generated)
+out_matrix_file: (an existing file name)
+        path/name of calculated affine transform (if generated)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-preprocess-bet"></span></div>
+</div>
+<div class="section" id="bet">
+<span id="index-2"></span><h2>BET<a class="headerlink" href="#bet" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/fsl/preprocess.py#L117">Link to code</a></p>
+<p>Wraps command <strong>bet</strong></p>
+<p>Use FSL BET command for skull stripping.</p>
+<p>For complete details, see the <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/bet2/index.html">BET Documentation.</a></p>
+<div class="section" id="id2">
+<h3>Examples<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span>  <span class="n">example_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">btr</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">btr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="n">example_data</span><span class="p">(</span><span class="s">&#39;structural.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">btr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">frac</span> <span class="o">=</span> <span class="mf">0.7</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">btr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file to skull strip
+        flag: %s, position: 0
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+center: (a list of at most 3 items which are an integer (int or
+         long))
+        center of gravity in voxels
+        flag: -c %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+frac: (a float)
+        fractional intensity threshold
+        flag: -f %.2f
+functional: (a boolean)
+        apply to 4D fMRI data
+        flag: -F
+        mutually_exclusive: functional, reduce_bias, robust, padding,
+         remove_eyes, surfaces, t2_guided
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask: (a boolean)
+        create binary mask image
+        flag: -m
+mesh: (a boolean)
+        generate a vtk mesh brain surface
+        flag: -e
+no_output: (a boolean)
+        Don&#39;t generate segmented output
+        flag: -n
+out_file: (a file name)
+        name of output skull stripped image
+        flag: %s, position: 1
+outline: (a boolean)
+        create surface outline image
+        flag: -o
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+padding: (a boolean)
+        improve BET if FOV is very small in Z (by temporarily padding end
+        slices)
+        flag: -Z
+        mutually_exclusive: functional, reduce_bias, robust, padding,
+         remove_eyes, surfaces, t2_guided
+radius: (an integer (int or long))
+        head radius
+        flag: -r %d
+reduce_bias: (a boolean)
+        bias field and neck cleanup
+        flag: -B
+        mutually_exclusive: functional, reduce_bias, robust, padding,
+         remove_eyes, surfaces, t2_guided
+remove_eyes: (a boolean)
+        eye &amp; optic nerve cleanup (can be useful in SIENA)
+        flag: -S
+        mutually_exclusive: functional, reduce_bias, robust, padding,
+         remove_eyes, surfaces, t2_guided
+robust: (a boolean)
+        robust brain centre estimation (iterates BET several times)
+        flag: -R
+        mutually_exclusive: functional, reduce_bias, robust, padding,
+         remove_eyes, surfaces, t2_guided
+skull: (a boolean)
+        create skull image
+        flag: -s
+surfaces: (a boolean)
+        run bet2 and then betsurf to get additional skull and scalp surfaces
+        (includes registrations)
+        flag: -A
+        mutually_exclusive: functional, reduce_bias, robust, padding,
+         remove_eyes, surfaces, t2_guided
+t2_guided: (a file name)
+        as with creating surfaces, when also feeding in non-brain-extracted
+        T2 (includes registrations)
+        flag: -A2 %s
+        mutually_exclusive: functional, reduce_bias, robust, padding,
+         remove_eyes, surfaces, t2_guided
+threshold: (a boolean)
+        apply thresholding to segmented brain image and mask
+        flag: -t
+vertical_gradient: (a float)
+        vertical gradient in fractional intensity threshold (-1, 1)
+        flag: -g %.2f
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>inskull_mask_file: (a file name)
+        path/name of inskull mask (if generated)
+inskull_mesh_file: (a file name)
+        path/name of inskull mesh outline (if generated)
+mask_file: (a file name)
+        path/name of binary brain mask (if generated)
+meshfile: (a file name)
+        path/name of vtk mesh file (if generated)
+out_file: (a file name)
+        path/name of skullstripped file (if generated)
+outline_file: (a file name)
+        path/name of outline file (if generated)
+outskin_mask_file: (a file name)
+        path/name of outskin mask (if generated)
+outskin_mesh_file: (a file name)
+        path/name of outskin mesh outline (if generated)
+outskull_mask_file: (a file name)
+        path/name of outskull mask (if generated)
+outskull_mesh_file: (a file name)
+        path/name of outskull mesh outline (if generated)
+skull_mask_file: (a file name)
+        path/name of skull mask (if generated)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-preprocess-fast"></span></div>
+</div>
+<div class="section" id="fast">
+<span id="index-3"></span><h2>FAST<a class="headerlink" href="#fast" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/fsl/preprocess.py#L290">Link to code</a></p>
+<p>Wraps command <strong>fast</strong></p>
+<p>Use FSL FAST for segmenting and bias correction.</p>
+<p>For complete details, see the <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/fast4/index.html">FAST Documentation.</a></p>
+<div class="section" id="id3">
+<h3>Examples<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">example_data</span>
+</pre></div>
+</div>
+<p>Assign options through the <code class="docutils literal"><span class="pre">inputs</span></code> attribute:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fastr</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FAST</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fastr</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_files</span> <span class="o">=</span> <span class="n">example_data</span><span class="p">(</span><span class="s">&#39;structural.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span> <span class="o">=</span> <span class="n">fastr</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_files: (an existing file name)
+        image, or multi-channel set of images, to be segmented
+        flag: %s, position: -1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bias_iters: (1 &lt;= an integer &lt;= 10)
+        number of main-loop iterations during bias-field removal
+        flag: -I %d
+bias_lowpass: (4 &lt;= an integer &lt;= 40)
+        bias field smoothing extent (FWHM) in mm
+        flag: -l %d
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+hyper: (0.0 &lt;= a floating point number &lt;= 1.0)
+        segmentation spatial smoothness
+        flag: -H %.2f
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+img_type: (1 or 2 or 3)
+        int specifying type of image: (1 = T1, 2 = T2, 3 = PD)
+        flag: -t %d
+init_seg_smooth: (0.0001 &lt;= a floating point number &lt;= 0.1)
+        initial segmentation spatial smoothness (during bias field
+        estimation)
+        flag: -f %.3f
+init_transform: (an existing file name)
+        &lt;standard2input.mat&gt; initialise using priors
+        flag: -a %s
+iters_afterbias: (1 &lt;= an integer &lt;= 20)
+        number of main-loop iterations after bias-field removal
+        flag: -O %d
+manual_seg: (an existing file name)
+        Filename containing intensities
+        flag: -s %s
+mixel_smooth: (0.0 &lt;= a floating point number &lt;= 1.0)
+        spatial smoothness for mixeltype
+        flag: -R %.2f
+no_bias: (a boolean)
+        do not remove bias field
+        flag: -N
+no_pve: (a boolean)
+        turn off PVE (partial volume estimation)
+        flag: --nopve
+number_classes: (1 &lt;= an integer &lt;= 10)
+        number of tissue-type classes
+        flag: -n %d
+other_priors: (a list of from 3 to 3 items which are a file name)
+        alternative prior images
+        flag: -A %s
+out_basename: (a file name)
+        base name of output files
+        flag: -o %s
+output_biascorrected: (a boolean)
+        output restored image (bias-corrected image)
+        flag: -B
+output_biasfield: (a boolean)
+        output estimated bias field
+        flag: -b
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+probability_maps: (a boolean)
+        outputs individual probability maps
+        flag: -p
+segment_iters: (1 &lt;= an integer &lt;= 50)
+        number of segmentation-initialisation iterations
+        flag: -W %d
+segments: (a boolean)
+        outputs a separate binary image for each tissue type
+        flag: -g
+use_priors: (a boolean)
+        use priors throughout
+        flag: -P
+verbose: (a boolean)
+        switch on diagnostic messages
+        flag: -v
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>bias_field: (a file name)
+mixeltype: (a file name)
+        path/name of mixeltype volume file _mixeltype
+partial_volume_files: (a file name)
+partial_volume_map: (a file name)
+        path/name of partial volume file _pveseg
+probability_maps: (a file name)
+restored_image: (a file name)
+tissue_class_files: (a file name)
+tissue_class_map: (an existing file name)
+        path/name of binary segmented volume file one val for each class
+        _seg
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-preprocess-first"></span></div>
+</div>
+<div class="section" id="first">
+<span id="index-4"></span><h2>FIRST<a class="headerlink" href="#first" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/fsl/preprocess.py#L1522">Link to code</a></p>
+<p>Wraps command <strong>run_first_all</strong></p>
+<p>Use FSL&#8217;s run_first_all command to segment subcortical volumes</p>
+<p><a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/first/index.html">http://www.fmrib.ox.ac.uk/fsl/first/index.html</a></p>
+<div class="section" id="id4">
+<h3>Examples<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">first</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FIRST</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">first</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">first</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">out_file</span> <span class="o">=</span> <span class="s">&#39;segmented.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">first</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input data file
+        flag: -i %s, position: -2
+out_file: (a file name, nipype default value: segmented)
+        output data file
+        flag: -o %s, position: -1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+affine_file: (an existing file name)
+        Affine matrix to use (e.g. img2std.mat) (does not re-run
+        registration)
+        flag: -a %s, position: 6
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+brain_extracted: (a boolean)
+        Input structural image is already brain-extracted
+        flag: -b, position: 2
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+list_of_specific_structures: (a list of at least 1 items which are a
+         string)
+        Runs only on the specified structures (e.g. L_Hipp, R_HippL_Accu,
+        R_Accu, L_Amyg, R_AmygL_Caud, R_Caud, L_Pall, R_PallL_Puta, R_Puta,
+        L_Thal, R_Thal, BrStem
+        flag: -s %s, position: 5
+method: (&#39;auto&#39; or &#39;fast&#39; or &#39;none&#39;)
+        Method must be one of auto, fast, none, or it can be entered using
+        the &#39;method_as_numerical_threshold&#39; input
+        flag: -m, position: 4
+        mutually_exclusive: method_as_numerical_threshold
+method_as_numerical_threshold: (a float)
+        Specify a numerical threshold value or use the &#39;method&#39; input to
+        choose auto, fast, or none
+        flag: -m, position: 4
+no_cleanup: (a boolean)
+        Input structural image is already brain-extracted
+        flag: -d, position: 3
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+verbose: (a boolean)
+        Use verbose logging.
+        flag: -v, position: 1
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>bvars: (an existing file name)
+        bvars for each subcortical region
+original_segmentations: (an existing file name)
+        3D image file containing the segmented regions as integer values.
+        Uses CMA labelling
+segmentation_file: (an existing file name)
+        4D image file containing a single volume per segmented region
+vtk_surfaces: (an existing file name)
+        VTK format meshes for each subcortical region
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-preprocess-flirt"></span></div>
+</div>
+<div class="section" id="flirt">
+<span id="index-5"></span><h2>FLIRT<a class="headerlink" href="#flirt" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/fsl/preprocess.py#L521">Link to code</a></p>
+<p>Wraps command <strong>flirt</strong></p>
+<p>Use FSL FLIRT for coregistration.</p>
+<p>For complete details, see the <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/flirt/index.html">FLIRT Documentation.</a></p>
+<dl class="docutils">
+<dt>To print out the command line help, use:</dt>
+<dd>fsl.FLIRT().inputs_help()</dd>
+</dl>
+<div class="section" id="id5">
+<h3>Examples<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">example_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flt</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FLIRT</span><span class="p">(</span><span class="n">bins</span><span class="o">=</span><span class="mi">640</span><span class="p">,</span> <span class="n">cost_func</span><span class="o">=</span><span class="s">&#39;mutualinfo&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;structural.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="s">&#39;mni.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flt</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&quot;NIFTI_GZ&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flt</span><span class="o">.</span><span class="n">cmdline</span> 
+<span class="go">&#39;flirt -in structural.nii -ref mni.nii -out structural_flirt.nii.gz -omat structural_flirt.mat -bins 640 -searchcost mutualinfo&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">flt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input file
+        flag: -in %s, position: 0
+reference: (an existing file name)
+        reference file
+        flag: -ref %s, position: 1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+angle_rep: (&#39;quaternion&#39; or &#39;euler&#39;)
+        representation of rotation angles
+        flag: -anglerep %s
+apply_isoxfm: (a float)
+        as applyxfm but forces isotropic resampling
+        flag: -applyisoxfm %f
+        mutually_exclusive: apply_xfm
+apply_xfm: (a boolean)
+        apply transformation supplied by in_matrix_file
+        flag: -applyxfm
+        requires: in_matrix_file
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bbrslope: (a float)
+        value of bbr slope
+        flag: -bbrslope %f
+bbrtype: (&#39;signed&#39; or &#39;global_abs&#39; or &#39;local_abs&#39;)
+        type of bbr cost function: signed [default], global_abs, local_abs
+        flag: -bbrtype %s
+bgvalue: (a float)
+        use specified background value for points outside FOV
+        flag: -setbackground %f
+bins: (an integer (int or long))
+        number of histogram bins
+        flag: -bins %d
+coarse_search: (an integer (int or long))
+        coarse search delta angle
+        flag: -coarsesearch %d
+cost: (&#39;mutualinfo&#39; or &#39;corratio&#39; or &#39;normcorr&#39; or &#39;normmi&#39; or
+         &#39;leastsq&#39; or &#39;labeldiff&#39; or &#39;bbr&#39;)
+        cost function
+        flag: -cost %s
+cost_func: (&#39;mutualinfo&#39; or &#39;corratio&#39; or &#39;normcorr&#39; or &#39;normmi&#39; or
+         &#39;leastsq&#39; or &#39;labeldiff&#39; or &#39;bbr&#39;)
+        cost function
+        flag: -searchcost %s
+datatype: (&#39;char&#39; or &#39;short&#39; or &#39;int&#39; or &#39;float&#39; or &#39;double&#39;)
+        force output data type
+        flag: -datatype %s
+display_init: (a boolean)
+        display initial matrix
+        flag: -displayinit
+dof: (an integer (int or long))
+        number of transform degrees of freedom
+        flag: -dof %d
+echospacing: (a float)
+        value of EPI echo spacing - units of seconds
+        flag: -echospacing %f
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fieldmap: (a file name)
+        fieldmap image in rads/s - must be already registered to the
+        reference image
+        flag: -fieldmap %s
+fieldmapmask: (a file name)
+        mask for fieldmap image
+        flag: -fieldmapmask %s
+fine_search: (an integer (int or long))
+        fine search delta angle
+        flag: -finesearch %d
+force_scaling: (a boolean)
+        force rescaling even for low-res images
+        flag: -forcescaling
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_matrix_file: (a file name)
+        input 4x4 affine matrix
+        flag: -init %s
+in_weight: (an existing file name)
+        File for input weighting volume
+        flag: -inweight %s
+interp: (&#39;trilinear&#39; or &#39;nearestneighbour&#39; or &#39;sinc&#39; or &#39;spline&#39;)
+        final interpolation method used in reslicing
+        flag: -interp %s
+min_sampling: (a float)
+        set minimum voxel dimension for sampling
+        flag: -minsampling %f
+no_clamp: (a boolean)
+        do not use intensity clamping
+        flag: -noclamp
+no_resample: (a boolean)
+        do not change input sampling
+        flag: -noresample
+no_resample_blur: (a boolean)
+        do not use blurring on downsampling
+        flag: -noresampblur
+no_search: (a boolean)
+        set all angular searches to ranges 0 to 0
+        flag: -nosearch
+out_file: (a file name)
+        registered output file
+        flag: -out %s, position: 2
+out_log: (a file name)
+        output log
+        requires: save_log
+out_matrix_file: (a file name)
+        output affine matrix in 4x4 asciii format
+        flag: -omat %s, position: 3
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+padding_size: (an integer (int or long))
+        for applyxfm: interpolates outside image by size
+        flag: -paddingsize %d
+pedir: (an integer (int or long))
+        phase encode direction of EPI - 1/2/3=x/y/z &amp; -1/-2/-3=-x/-y/-z
+        flag: -pedir %d
+ref_weight: (an existing file name)
+        File for reference weighting volume
+        flag: -refweight %s
+rigid2D: (a boolean)
+        use 2D rigid body mode - ignores dof
+        flag: -2D
+save_log: (a boolean)
+        save to log file
+schedule: (an existing file name)
+        replaces default schedule
+        flag: -schedule %s
+searchr_x: (a list of from 2 to 2 items which are an integer (int or
+         long))
+        search angles along x-axis, in degrees
+        flag: -searchrx %s
+searchr_y: (a list of from 2 to 2 items which are an integer (int or
+         long))
+        search angles along y-axis, in degrees
+        flag: -searchry %s
+searchr_z: (a list of from 2 to 2 items which are an integer (int or
+         long))
+        search angles along z-axis, in degrees
+        flag: -searchrz %s
+sinc_width: (an integer (int or long))
+        full-width in voxels
+        flag: -sincwidth %d
+sinc_window: (&#39;rectangular&#39; or &#39;hanning&#39; or &#39;blackman&#39;)
+        sinc window
+        flag: -sincwindow %s
+uses_qform: (a boolean)
+        initialize using sform or qform
+        flag: -usesqform
+verbose: (an integer (int or long))
+        verbose mode, 0 is least
+        flag: -verbose %d
+wm_seg: (a file name)
+        white matter segmentation volume needed by BBR cost function
+        flag: -wmseg %s
+wmcoords: (a file name)
+        white matter boundary coordinates for BBR cost function
+        flag: -wmcoords %s
+wmnorms: (a file name)
+        white matter boundary normals for BBR cost function
+        flag: -wmnorms %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        path/name of registered file (if generated)
+out_log: (a file name)
+        path/name of output log (if generated)
+out_matrix_file: (an existing file name)
+        path/name of calculated affine transform (if generated)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-preprocess-fnirt"></span></div>
+</div>
+<div class="section" id="fnirt">
+<span id="index-6"></span><h2>FNIRT<a class="headerlink" href="#fnirt" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/fsl/preprocess.py#L851">Link to code</a></p>
+<p>Wraps command <strong>fnirt</strong></p>
+<p>Use FSL FNIRT for non-linear registration.</p>
+<div class="section" id="id6">
+<h3>Examples<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">example_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fnt</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FNIRT</span><span class="p">(</span><span class="n">affine_file</span><span class="o">=</span><span class="n">example_data</span><span class="p">(</span><span class="s">&#39;trans.mat&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">fnt</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ref_file</span><span class="o">=</span><span class="n">example_data</span><span class="p">(</span><span class="s">&#39;mni.nii&#39;</span><span class="p">,</span> <span class="n">in_file</span><span class="o">=</span><span class="n">example_data</span><span class="p">(</span><span class="s">&#39;structural.nii&#39;</span><span class="p">))</span> 
+</pre></div>
+</div>
+<p>T1 -&gt; Mni153</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fnirt_mprage</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">FNIRT</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fnirt_mprage</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_fwhm</span> <span class="o">=</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fnirt_mprage</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">subsampling_scheme</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Specify the resolution of the warps</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fnirt_mprage</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">warp_resolution</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">fnirt_mprage</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s">&#39;structural.nii&#39;</span><span class="p">,</span> <span class="n">ref_file</span><span class="o">=</span><span class="s">&#39;mni.nii&#39;</span><span class="p">,</span> <span class="n">warped_file</span><span class="o">=</span><span class="s">&#39;warped.nii&#39;</span><span class="p">,</span> <span class="n">fieldcoeff_file</span><span class="o">=</span><span class="s">&#39;fieldcoeff.nii&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can check the command line and confirm that it&#8217;s what we expect.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">fnirt_mprage</span><span class="o">.</span><span class="n">cmdline</span>  
+<span class="go">&#39;fnirt --cout=fieldcoeff.nii --in=structural.nii --infwhm=8,4,2,2 --ref=mni.nii --subsamp=4,2,1,1 --warpres=6,6,6 --iout=warped.nii&#39;</span>
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        name of input image
+        flag: --in=%s
+ref_file: (an existing file name)
+        name of reference image
+        flag: --ref=%s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+affine_file: (an existing file name)
+        name of file containing affine transform
+        flag: --aff=%s
+apply_inmask: (a list of items which are 0 or 1)
+        list of iterations to use input mask on (1 to use, 0 to skip)
+        flag: --applyinmask=%s
+        mutually_exclusive: skip_inmask
+apply_intensity_mapping: (a list of items which are 0 or 1)
+        List of subsampling levels to apply intensity mapping for (0 to
+        skip, 1 to apply)
+        flag: --estint=%s
+        mutually_exclusive: skip_intensity_mapping
+apply_refmask: (a list of items which are 0 or 1)
+        list of iterations to use reference mask on (1 to use, 0 to skip)
+        flag: --applyrefmask=%s
+        mutually_exclusive: skip_refmask
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bias_regularization_lambda: (a float)
+        Weight of regularisation for bias-field, default 10000
+        flag: --biaslambda=%f
+biasfield_resolution: (a tuple of the form: (an integer (int or
+         long), an integer (int or long), an integer (int or long)))
+        Resolution (in mm) of bias-field modelling local intensities,
+        default 50, 50, 50
+        flag: --biasres=%d,%d,%d
+config_file: (&#39;T1_2_MNI152_2mm&#39; or &#39;FA_2_FMRIB58_1mm&#39; or an existing
+         file name)
+        Name of config file specifying command line arguments
+        flag: --config=%s
+derive_from_ref: (a boolean)
+        If true, ref image is used to calculate derivatives. Default false
+        flag: --refderiv
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+field_file: (a boolean or a file name)
+        name of output file with field or true
+        flag: --fout=%s
+fieldcoeff_file: (a boolean or a file name)
+        name of output file with field coefficients or true
+        flag: --cout=%s
+hessian_precision: (&#39;double&#39; or &#39;float&#39;)
+        Precision for representing Hessian, double or float. Default double
+        flag: --numprec=%s
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_fwhm: (a list of items which are an integer (int or long))
+        FWHM (in mm) of gaussian smoothing kernel for input volume, default
+        [6, 4, 2, 2]
+        flag: --infwhm=%s
+in_intensitymap_file: (an existing file name)
+        name of file/files containing initial intensity mapingusually
+        generated by previos fnirt run
+        flag: --intin=%s
+inmask_file: (an existing file name)
+        name of file with mask in input image space
+        flag: --inmask=%s
+inmask_val: (a float)
+        Value to mask out in --in image. Default =0.0
+        flag: --impinval=%f
+intensity_mapping_model: (&#39;none&#39; or &#39;global_linear&#39; or
+         &#39;global_non_linearlocal_linear&#39; or &#39;global_non_linear_with_bias&#39; or
+         &#39;local_non_linear&#39;)
+        Model for intensity-mapping
+        flag: --intmod=%s
+intensity_mapping_order: (an integer (int or long))
+        Order of poynomial for mapping intensities, default 5
+        flag: --intorder=%d
+inwarp_file: (an existing file name)
+        name of file containing initial non-linear warps
+        flag: --inwarp=%s
+jacobian_file: (a boolean or a file name)
+        name of file for writing out the Jacobianof the field (for
+        diagnostic or VBM purposes)
+        flag: --jout=%s
+jacobian_range: (a tuple of the form: (a float, a float))
+        Allowed range of Jacobian determinants, default 0.01, 100.0
+        flag: --jacrange=%f,%f
+log_file: (a file name)
+        Name of log-file
+        flag: --logout=%s
+max_nonlin_iter: (a list of items which are an integer (int or long))
+        Max # of non-linear iterations list, default [5, 5, 5, 5]
+        flag: --miter=%s
+modulatedref_file: (a boolean or a file name)
+        name of file for writing out intensity modulated--ref (for
+        diagnostic purposes)
+        flag: --refout=%s
+out_intensitymap_file: (a boolean or a file name)
+        name of files for writing information pertaining to intensity
+        mapping
+        flag: --intout=%s
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+ref_fwhm: (a list of items which are an integer (int or long))
+        FWHM (in mm) of gaussian smoothing kernel for ref volume, default
+        [4, 2, 0, 0]
+        flag: --reffwhm=%s
+refmask_file: (an existing file name)
+        name of file with mask in reference space
+        flag: --refmask=%s
+refmask_val: (a float)
+        Value to mask out in --ref image. Default =0.0
+        flag: --imprefval=%f
+regularization_lambda: (a list of items which are a float)
+        Weight of regularisation, default depending on --ssqlambda and
+        --regmod switches. See user documetation.
+        flag: --lambda=%s
+regularization_model: (&#39;membrane_energy&#39; or &#39;bending_energy&#39;)
+        Model for regularisation of warp-field [membrane_energy
+        bending_energy], default bending_energy
+        flag: --regmod=%s
+skip_implicit_in_masking: (a boolean)
+        skip implicit masking based on valuein --in image. Default = 0
+        flag: --impinm=0
+skip_implicit_ref_masking: (a boolean)
+        skip implicit masking based on valuein --ref image. Default = 0
+        flag: --imprefm=0
+skip_inmask: (a boolean)
+        skip specified inmask if set, default false
+        flag: --applyinmask=0
+        mutually_exclusive: apply_inmask
+skip_intensity_mapping: (a boolean)
+        Skip estimate intensity-mapping default false
+        flag: --estint=0
+        mutually_exclusive: apply_intensity_mapping
+skip_lambda_ssq: (a boolean)
+        If true, lambda is not weighted by current ssq, default false
+        flag: --ssqlambda=0
+skip_refmask: (a boolean)
+        Skip specified refmask if set, default false
+        flag: --applyrefmask=0
+        mutually_exclusive: apply_refmask
+spline_order: (an integer (int or long))
+        Order of spline, 2-&gt;Qadratic spline, 3-&gt;Cubic spline. Default=3
+        flag: --splineorder=%d
+subsampling_scheme: (a list of items which are an integer (int or
+         long))
+        sub-sampling scheme, list, default [4, 2, 1, 1]
+        flag: --subsamp=%s
+warp_resolution: (a tuple of the form: (an integer (int or long), an
+         integer (int or long), an integer (int or long)))
+        (approximate) resolution (in mm) of warp basis in x-, y- and
+        z-direction, default 10, 10, 10
+        flag: --warpres=%d,%d,%d
+warped_file: (a file name)
+        name of output image
+        flag: --iout=%s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>field_file: (a file name)
+        file with warp field
+fieldcoeff_file: (an existing file name)
+        file with field coefficients
+jacobian_file: (a file name)
+        file containing Jacobian of the field
+log_file: (a file name)
+        Name of log-file
+modulatedref_file: (a file name)
+        file containing intensity modulated --ref
+out_intensitymap_file: (a file name)
+        file containing info pertaining to intensity mapping
+warped_file: (an existing file name)
+        warped image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-preprocess-fugue"></span></div>
+</div>
+<div class="section" id="fugue">
+<span id="index-7"></span><h2>FUGUE<a class="headerlink" href="#fugue" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/fsl/preprocess.py#L1242">Link to code</a></p>
+<p>Wraps command <strong>fugue</strong></p>
+<p><a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE">FUGUE</a> is, most generally, a set of tools for
+EPI distortion correction.</p>
+<dl class="docutils">
+<dt>Distortions may be corrected for</dt>
+<dd><ol class="first last arabic simple">
+<li>improving registration with non-distorted images (e.g. structurals), or</li>
+<li>dealing with motion-dependent changes.</li>
+</ol>
+</dd>
+</dl>
+<p>FUGUE is designed to deal only with the first case - improving registration.</p>
+<div class="section" id="id8">
+<h3>Examples<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<p>Unwarping an input image (shift map is known)</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl.preprocess</span> <span class="kn">import</span> <span class="n">FUGUE</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span> <span class="o">=</span> <span class="n">FUGUE</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;epi.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_file</span> <span class="o">=</span> <span class="s">&#39;epi_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">shift_in_file</span> <span class="o">=</span> <span class="s">&#39;vsm.nii&#39;</span>  <span class="c"># Previously computed with fugue as well</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">unwarp_direction</span> <span class="o">=</span> <span class="s">&#39;y&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&quot;NIFTI_GZ&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">cmdline</span> 
+</pre></div>
+</div>
+<p>&#8216;fugue &#8211;in=epi.nii &#8211;mask=epi_mask.nii &#8211;loadshift=vsm.nii &#8211;unwarpdir=y &#8211;unwarp=epi_unwarped.nii.gz&#8217;
+&gt;&gt;&gt; fugue.run() #doctest: +SKIP</p>
+<p>Warping an input image (shift map is known)</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl.preprocess</span> <span class="kn">import</span> <span class="n">FUGUE</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span> <span class="o">=</span> <span class="n">FUGUE</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;epi.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">forward_warping</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_file</span> <span class="o">=</span> <span class="s">&#39;epi_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">shift_in_file</span> <span class="o">=</span> <span class="s">&#39;vsm.nii&#39;</span>  <span class="c"># Previously computed with fugue as well</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">unwarp_direction</span> <span class="o">=</span> <span class="s">&#39;y&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&quot;NIFTI_GZ&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">cmdline</span> 
+</pre></div>
+</div>
+<p>&#8216;fugue &#8211;in=epi.nii &#8211;mask=epi_mask.nii &#8211;loadshift=vsm.nii &#8211;unwarpdir=y &#8211;warp=epi_warped.nii.gz&#8217;
+&gt;&gt;&gt; fugue.run() #doctest: +SKIP</p>
+<p>Computing the vsm (unwrapped phase map is known)</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.fsl.preprocess</span> <span class="kn">import</span> <span class="n">FUGUE</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span> <span class="o">=</span> <span class="n">FUGUE</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">phasemap_in_file</span> <span class="o">=</span> <span class="s">&#39;epi_phasediff.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">mask_file</span> <span class="o">=</span> <span class="s">&#39;epi_mask.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dwell_to_asym_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.77e-3</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.46e-3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">unwarp_direction</span> <span class="o">=</span> <span class="s">&#39;y&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">save_shift</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s">&quot;NIFTI_GZ&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fugue</span><span class="o">.</span><span class="n">cmdline</span> 
+</pre></div>
+</div>
+<p>&#8216;fugue &#8211;dwelltoasym=0.9390243902 &#8211;mask=epi_mask.nii &#8211;phasemap=epi_phasediff.nii &#8211;saveshift=epi_phasediff_vsm.nii.gz &#8211;unwarpdir=y&#8217;
+&gt;&gt;&gt; fugue.run() #doctest: +SKIP</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+asym_se_time: (a float)
+        set the fieldmap asymmetric spin echo time (sec)
+        flag: --asym=%.10f
+despike_2dfilter: (a boolean)
+        apply a 2D de-spiking filter
+        flag: --despike
+despike_threshold: (a float)
+        specify the threshold for de-spiking (default=3.0)
+        flag: --despikethreshold=%s
+dwell_time: (a float)
+        set the EPI dwell time per phase-encode line - same as echo spacing
+        - (sec)
+        flag: --dwell=%.10f
+dwell_to_asym_ratio: (a float)
+        set the dwell to asym time ratio
+        flag: --dwelltoasym=%.10f
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+fmap_in_file: (an existing file name)
+        filename for loading fieldmap (rad/s)
+        flag: --loadfmap=%s
+fmap_out_file: (a file name)
+        filename for saving fieldmap (rad/s)
+        flag: --savefmap=%s
+forward_warping: (a boolean, nipype default value: False)
+        apply forward warping instead of unwarping
+fourier_order: (an integer (int or long))
+        apply Fourier (sinusoidal) fitting of order N
+        flag: --fourier=%d
+icorr: (a boolean)
+        apply intensity correction to unwarping (pixel shift method only)
+        flag: --icorr
+        requires: shift_in_file
+icorr_only: (a boolean)
+        apply intensity correction only
+        flag: --icorronly
+        requires: unwarped_file
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+in_file: (an existing file name)
+        filename of input volume
+        flag: --in=%s
+mask_file: (an existing file name)
+        filename for loading valid mask
+        flag: --mask=%s
+median_2dfilter: (a boolean)
+        apply 2D median filtering
+        flag: --median
+no_extend: (a boolean)
+        do not apply rigid-body extrapolation to the fieldmap
+        flag: --noextend
+no_gap_fill: (a boolean)
+        do not apply gap-filling measure to the fieldmap
+        flag: --nofill
+nokspace: (a boolean)
+        do not use k-space forward warping
+        flag: --nokspace
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+pava: (a boolean)
+        apply monotonic enforcement via PAVA
+        flag: --pava
+phase_conjugate: (a boolean)
+        apply phase conjugate method of unwarping
+        flag: --phaseconj
+phasemap_in_file: (an existing file name)
+        filename for input phase image
+        flag: --phasemap=%s
+poly_order: (an integer (int or long))
+        apply polynomial fitting of order N
+        flag: --poly=%d
+save_fmap: (a boolean)
+        write field map volume
+        mutually_exclusive: save_unmasked_fmap
+save_shift: (a boolean)
+        write pixel shift volume
+        mutually_exclusive: save_unmasked_shift
+save_unmasked_fmap: (a boolean)
+        saves the unmasked fieldmap when using --savefmap
+        flag: --unmaskfmap
+        mutually_exclusive: save_fmap
+save_unmasked_shift: (a boolean)
+        saves the unmasked shiftmap when using --saveshift
+        flag: --unmaskshift
+        mutually_exclusive: save_shift
+shift_in_file: (an existing file name)
+        filename for reading pixel shift volume
+        flag: --loadshift=%s
+shift_out_file: (a file name)
+        filename for saving pixel shift volume
+        flag: --saveshift=%s
+smooth2d: (a float)
+        apply 2D Gaussian smoothing of sigma N (in mm)
+        flag: --smooth2=%.2f
+smooth3d: (a float)
+        apply 3D Gaussian smoothing of sigma N (in mm)
+        flag: --smooth3=%.2f
+unwarp_direction: (&#39;x&#39; or &#39;y&#39; or &#39;z&#39; or &#39;x-&#39; or &#39;y-&#39; or &#39;z-&#39;)
+        specifies direction of warping (default y)
+        flag: --unwarpdir=%s
+unwarped_file: (a file name)
+        apply unwarping and save as filename
+        flag: --unwarp=%s
+        mutually_exclusive: warped_file
+        requires: in_file
+warped_file: (a file name)
+        apply forward warping and save as filename
+        flag: --warp=%s
+        mutually_exclusive: unwarped_file
+        requires: in_file
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>fmap_out_file: (a file name)
+        fieldmap file
+shift_out_file: (a file name)
+        voxel shift map file
+unwarped_file: (a file name)
+        unwarped file
+warped_file: (a file name)
+        forward warped file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-preprocess-mcflirt"></span></div>
+</div>
+<div class="section" id="mcflirt">
+<span id="index-8"></span><h2>MCFLIRT<a class="headerlink" href="#mcflirt" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/fsl/preprocess.py#L647">Link to code</a></p>
+<p>Wraps command <strong>mcflirt</strong></p>
+<p>Use FSL MCFLIRT to do within-modality motion correction.</p>
+<p>For complete details, see the <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl/mcflirt/index.html">MCFLIRT Documentation.</a></p>
+<div class="section" id="id9">
+<h3>Examples<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">example_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mcflt</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">MCFLIRT</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="n">example_data</span><span class="p">(</span><span class="s">&#39;functional.nii&#39;</span><span class="p">),</span> <span class="n">cost</span><span class="o">=</span><span class="s">&#39;mutualinfo&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">mcflt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        timeseries to motion-correct
+        flag: -in %s, position: 0
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+bins: (an integer (int or long))
+        number of histogram bins
+        flag: -bins %d
+cost: (&#39;mutualinfo&#39; or &#39;woods&#39; or &#39;corratio&#39; or &#39;normcorr&#39; or
+         &#39;normmi&#39; or &#39;leastsquares&#39;)
+        cost function to optimize
+        flag: -cost %s
+dof: (an integer (int or long))
+        degrees of freedom for the transformation
+        flag: -dof %d
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+init: (an existing file name)
+        inital transformation matrix
+        flag: -init %s
+interpolation: (&#39;spline&#39; or &#39;nn&#39; or &#39;sinc&#39;)
+        interpolation method for transformation
+        flag: -%s_final
+mean_vol: (a boolean)
+        register to mean volume
+        flag: -meanvol
+out_file: (a file name)
+        file to write
+        flag: -out %s
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+ref_file: (an existing file name)
+        target image for motion correction
+        flag: -reffile %s
+ref_vol: (an integer (int or long))
+        volume to align frames to
+        flag: -refvol %d
+rotation: (an integer (int or long))
+        scaling factor for rotation tolerances
+        flag: -rotation %d
+save_mats: (a boolean)
+        save transformation matrices
+        flag: -mats
+save_plots: (a boolean)
+        save transformation parameters
+        flag: -plots
+save_rms: (a boolean)
+        save rms displacement parameters
+        flag: -rmsabs -rmsrel
+scaling: (a float)
+        scaling factor to use
+        flag: -scaling %.2f
+smooth: (a float)
+        smoothing factor for the cost function
+        flag: -smooth %.2f
+stages: (an integer (int or long))
+        stages (if 4, perform final search with sinc interpolation
+        flag: -stages %d
+stats_imgs: (a boolean)
+        produce variance and std. dev. images
+        flag: -stats
+use_contour: (a boolean)
+        run search on contour images
+        flag: -edge
+use_gradient: (a boolean)
+        run search on gradient images
+        flag: -gdt
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>mat_file: (an existing file name)
+        transformation matrices
+mean_img: (an existing file name)
+        mean timeseries image
+out_file: (an existing file name)
+        motion-corrected timeseries
+par_file: (an existing file name)
+        text-file with motion parameters
+rms_files: (an existing file name)
+        absolute and relative displacement parameters
+std_img: (an existing file name)
+        standard deviation image
+variance_img: (an existing file name)
+        variance image
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-preprocess-prelude"></span></div>
+</div>
+<div class="section" id="prelude">
+<span id="index-9"></span><h2>PRELUDE<a class="headerlink" href="#prelude" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/fsl/preprocess.py#L1441">Link to code</a></p>
+<p>Wraps command <strong>prelude</strong></p>
+<p>Use FSL prelude to do phase unwrapping</p>
+<div class="section" id="id10">
+<h3>Examples<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<p>Please insert examples for use of this command</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+complex_phase_file: (an existing file name)
+        complex phase input volume
+        flag: --complex=%s
+        mutually_exclusive: magnitude_file, phase_file
+magnitude_file: (an existing file name)
+        file containing magnitude image
+        flag: --abs=%s
+        mutually_exclusive: complex_phase_file
+phase_file: (an existing file name)
+        raw phase file
+        flag: --phase=%s
+        mutually_exclusive: complex_phase_file
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+end: (an integer (int or long))
+        final image number to process (default Inf)
+        flag: --end=%d
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+label_file: (a file name)
+        saving the area labels output
+        flag: --labels=%s
+labelprocess2d: (a boolean)
+        does label processing in 2D (slice at a time)
+        flag: --labelslices
+mask_file: (an existing file name)
+        filename of mask input volume
+        flag: --mask=%s
+num_partitions: (an integer (int or long))
+        number of phase partitions to use
+        flag: --numphasesplit=%d
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+process2d: (a boolean)
+        does all processing in 2D (slice at a time)
+        flag: --slices
+        mutually_exclusive: labelprocess2d
+process3d: (a boolean)
+        forces all processing to be full 3D
+        flag: --force3D
+        mutually_exclusive: labelprocess2d, process2d
+rawphase_file: (a file name)
+        saving the raw phase output
+        flag: --rawphase=%s
+removeramps: (a boolean)
+        remove phase ramps during unwrapping
+        flag: --removeramps
+savemask_file: (a file name)
+        saving the mask volume
+        flag: --savemask=%s
+start: (an integer (int or long))
+        first image number to process (default 0)
+        flag: --start=%d
+threshold: (a float)
+        intensity threshold for masking
+        flag: --thresh=%.10f
+unwrapped_phase_file: (a file name)
+        file containing unwrapepd phase
+        flag: --unwrap=%s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>unwrapped_phase_file: (an existing file name)
+        unwrapped phase file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-preprocess-susan"></span></div>
+</div>
+<div class="section" id="susan">
+<span id="index-10"></span><h2>SUSAN<a class="headerlink" href="#susan" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/fsl/preprocess.py#L1114">Link to code</a></p>
+<p>Wraps command <strong>susan</strong></p>
+<p>use FSL SUSAN to perform smoothing</p>
+<div class="section" id="id11">
+<h3>Examples<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">example_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">anatfile</span> 
+<span class="go">anatomical.nii </span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sus</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">SUSAN</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sus</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="n">example_data</span><span class="p">(</span><span class="s">&#39;structural.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sus</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">brightness_threshold</span> <span class="o">=</span> <span class="mf">2000.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sus</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fwhm</span> <span class="o">=</span> <span class="mf">8.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">sus</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+brightness_threshold: (a float)
+        brightness threshold and should be greater than noise level and less
+        than contrast of edges to be preserved.
+        flag: %.10f, position: 2
+fwhm: (a float)
+        fwhm of smoothing, in mm, gets converted using sqrt(8*log(2))
+        flag: %.10f, position: 3
+in_file: (an existing file name)
+        filename of input timeseries
+        flag: %s, position: 1
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+dimension: (3 or 2, nipype default value: 3)
+        within-plane (2) or fully 3D (3)
+        flag: %d, position: 4
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_file: (a file name)
+        output file name
+        flag: %s, position: -1
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+usans: (a list of at most 2 items which are a tuple of the form: (an
+         existing file name, a float), nipype default value: [])
+        determines whether the smoothing area (USAN) is to be found from
+        secondary images (0, 1 or 2). A negative value for any brightness
+        threshold will auto-set the threshold at 10% of the robust range
+use_median: (1 or 0, nipype default value: 1)
+        whether to use a local median filter in the cases where single-point
+        noise is detected
+        flag: %d, position: 5
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>smoothed_file: (an existing file name)
+        smoothed output file
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-preprocess-slicetimer"></span></div>
+</div>
+<div class="section" id="slicetimer">
+<span id="index-11"></span><h2>SliceTimer<a class="headerlink" href="#slicetimer" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/e63e055194d62d2bdc4665688261c03a42fd0025/nipype/interfaces/fsl/preprocess.py#L1050">Link to code</a></p>
+<p>Wraps command <strong>slicetimer</strong></p>
+<p>use FSL slicetimer to perform slice timing correction.</p>
+<div class="section" id="id12">
+<h3>Examples<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces</span> <span class="kn">import</span> <span class="n">fsl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.testing</span> <span class="kn">import</span> <span class="n">example_data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">st</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">SliceTimer</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">st</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="n">example_data</span><span class="p">(</span><span class="s">&#39;functional.nii&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">st</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">interleaved</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> 
+</pre></div>
+</div>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        filename of input timeseries
+        flag: --in=%s, position: 0
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal
+        immediately, `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+custom_order: (an existing file name)
+        filename of single-column custom interleave order file (first slice
+        is referred to as 1 not 0)
+        flag: --ocustom=%s
+custom_timings: (an existing file name)
+        slice timings, in fractions of TR, range 0:1 (default is 0.5 = no
+        shift)
+        flag: --tcustom=%s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+global_shift: (a float)
+        shift in fraction of TR, range 0:1 (default is 0.5 = no shift)
+        flag: --tglobal
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+index_dir: (a boolean)
+        slice indexing from top to bottom
+        flag: --down
+interleaved: (a boolean)
+        use interleaved acquisition
+        flag: --odd
+out_file: (a file name)
+        filename of output timeseries
+        flag: --out=%s
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+slice_direction: (1 or 2 or 3)
+        direction of slice acquisition (x=1, y=2, z=3) - default is z
+        flag: --direction=%d
+time_repetition: (a float)
+        Specify TR of data - default is 3s
+        flag: --repeat=%f
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>slice_time_corrected_file: (an existing file name)
+        slice time corrected file
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

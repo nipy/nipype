@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,12 +114,12 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">interfaces.matlab</a><ul>
-<li><a class="reference internal" href="#module-interfaces-matlab">Module: <tt class="docutils literal"><span class="pre">interfaces.matlab</span></tt></a></li>
+<li><a class="reference internal" href="#module-interfaces-matlab">Module: <code class="docutils literal"><span class="pre">interfaces.matlab</span></code></a></li>
 <li><a class="reference internal" href="#classes">Classes</a><ul>
-<li><a class="reference internal" href="#matlabcommand"><tt class="docutils literal"><span class="pre">MatlabCommand</span></tt></a><ul>
+<li><a class="reference internal" href="#matlabcommand"><code class="docutils literal"><span class="pre">MatlabCommand</span></code></a><ul>
 </ul>
 </li>
-<li><a class="reference internal" href="#matlabinputspec"><tt class="docutils literal"><span class="pre">MatlabInputSpec</span></tt></a></li>
+<li><a class="reference internal" href="#matlabinputspec"><code class="docutils literal"><span class="pre">MatlabInputSpec</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#function">Function</a></li>
@@ -145,7 +145,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -157,7 +157,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -180,9 +180,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -192,13 +192,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-matlab">
 <h1>interfaces.matlab<a class="headerlink" href="#interfaces-matlab" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-interfaces-matlab">
-<h2>Module: <tt class="xref py py-mod docutils literal"><span class="pre">interfaces.matlab</span></tt><a class="headerlink" href="#module-interfaces-matlab" title="Permalink to this headline">¶</a></h2>
-<p>Inheritance diagram for <tt class="docutils literal"><span class="pre">nipype.interfaces.matlab</span></tt>:</p>
+<h2>Module: <code class="xref py py-mod docutils literal"><span class="pre">interfaces.matlab</span></code><a class="headerlink" href="#module-interfaces-matlab" title="Permalink to this headline">¶</a></h2>
+<p>Inheritance diagram for <code class="docutils literal"><span class="pre">nipype.interfaces.matlab</span></code>:</p>
 <p class="graphviz">
 <img src="../../_images/inheritance-6e42b3f02b803ec67f40c6fdb54c74c4369b0550.png" alt="Inheritance diagram of nipype.interfaces.matlab" usemap="#inheritance9517efab27" class="inheritance"/>
 <map id="inheritance9517efab27" name="inheritance9517efab27">
@@ -219,11 +219,11 @@
 <div class="section" id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="matlabcommand">
-<h3><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand" title="nipype.interfaces.matlab.MatlabCommand"><tt class="xref py py-class docutils literal"><span class="pre">MatlabCommand</span></tt></a><a class="headerlink" href="#matlabcommand" title="Permalink to this headline">¶</a></h3>
+<h3><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand" title="nipype.interfaces.matlab.MatlabCommand"><code class="xref py py-class docutils literal"><span class="pre">MatlabCommand</span></code></a><a class="headerlink" href="#matlabcommand" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nipype.interfaces.matlab.MatlabCommand">
-<em class="property">class </em><tt class="descclassname">nipype.interfaces.matlab.</tt><tt class="descname">MatlabCommand</tt><big>(</big><em>matlab_cmd=None</em>, <em>**inputs</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nipype.interfaces.base.html#nipype.interfaces.base.CommandLine" title="nipype.interfaces.base.CommandLine"><tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.base.CommandLine</span></tt></a></p>
+<em class="property">class </em><code class="descclassname">nipype.interfaces.matlab.</code><code class="descname">MatlabCommand</code><span class="sig-paren">(</span><em>matlab_cmd=None</em>, <em>**inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="nipype.interfaces.base.html#nipype.interfaces.base.CommandLine" title="nipype.interfaces.base.CommandLine"><code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.base.CommandLine</span></code></a></p>
 <p>Interface that runs matlab code</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">nipype.interfaces.matlab</span> <span class="kn">as</span> <span class="nn">matlab</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mlab</span> <span class="o">=</span> <span class="n">matlab</span><span class="o">.</span><span class="n">MatlabCommand</span><span class="p">()</span>
@@ -238,7 +238,7 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.output_spec" title="nipype.interfaces.matlab.MatlabCommand.output_spec"><tt class="xref py py-obj docutils literal"><span class="pre">output_spec</span></tt></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.output_spec" title="nipype.interfaces.matlab.MatlabCommand.output_spec"><code class="xref py py-obj docutils literal"><span class="pre">output_spec</span></code></a></td>
 <td></td>
 </tr>
 </tbody>
@@ -250,98 +250,80 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.aggregate_outputs" title="nipype.interfaces.matlab.MatlabCommand.aggregate_outputs"><tt class="xref py py-obj docutils literal"><span class="pre">aggregate_outputs</span></tt></a>([runtime,&nbsp;needed_outputs])</td>
-<td>Collate expected outputs and check for existence</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.input_spec" title="nipype.interfaces.matlab.MatlabCommand.input_spec"><code class="xref py py-obj docutils literal"><span class="pre">input_spec</span></code></a></td>
+<td>alias of <a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec" title="nipype.interfaces.matlab.MatlabInputSpec"><code class="xref py py-class docutils literal"><span class="pre">MatlabInputSpec</span></code></a></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.help" title="nipype.interfaces.matlab.MatlabCommand.help"><tt class="xref py py-obj docutils literal"><span class="pre">help</span></tt></a>([returnhelp])</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.input_spec" title="nipype.interfaces.matlab.MatlabCommand.input_spec"><tt class="xref py py-obj docutils literal"><span class="pre">input_spec</span></tt></a></td>
-<td>alias of <a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec" title="nipype.interfaces.matlab.MatlabInputSpec"><tt class="xref py py-class docutils literal"><span class="pre">MatlabInputSpec</span></tt></a></td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.raise_exception" title="nipype.interfaces.matlab.MatlabCommand.raise_exception"><tt class="xref py py-obj docutils literal"><span class="pre">raise_exception</span></tt></a>(runtime)</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.run" title="nipype.interfaces.matlab.MatlabCommand.run"><tt class="xref py py-obj docutils literal"><span class="pre">run</span></tt></a>(**inputs)</td>
-<td>Execute this interface.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.set_default_matlab_cmd" title="nipype.interfaces.matlab.MatlabCommand.set_default_matlab_cmd"><tt class="xref py py-obj docutils literal"><span class="pre">set_default_matlab_cmd</span></tt></a>(matlab_cmd)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.set_default_matlab_cmd" title="nipype.interfaces.matlab.MatlabCommand.set_default_matlab_cmd"><code class="xref py py-obj docutils literal"><span class="pre">set_default_matlab_cmd</span></code></a>(matlab_cmd)</td>
 <td>Set the default MATLAB command line for MATLAB classes.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.set_default_mfile" title="nipype.interfaces.matlab.MatlabCommand.set_default_mfile"><tt class="xref py py-obj docutils literal"><span class="pre">set_default_mfile</span></tt></a>(mfile)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.set_default_mfile" title="nipype.interfaces.matlab.MatlabCommand.set_default_mfile"><code class="xref py py-obj docutils literal"><span class="pre">set_default_mfile</span></code></a>(mfile)</td>
 <td>Set the default MATLAB script file format for MATLAB classes.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.set_default_paths" title="nipype.interfaces.matlab.MatlabCommand.set_default_paths"><tt class="xref py py-obj docutils literal"><span class="pre">set_default_paths</span></tt></a>(paths)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.set_default_paths" title="nipype.interfaces.matlab.MatlabCommand.set_default_paths"><code class="xref py py-obj docutils literal"><span class="pre">set_default_paths</span></code></a>(paths)</td>
 <td>Set the default MATLAB paths for MATLAB classes.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.set_default_terminal_output" title="nipype.interfaces.matlab.MatlabCommand.set_default_terminal_output"><tt class="xref py py-obj docutils literal"><span class="pre">set_default_terminal_output</span></tt></a>(output_type)</td>
-<td>Set the default terminal output for CommandLine Interfaces.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabCommand.version_from_command" title="nipype.interfaces.matlab.MatlabCommand.version_from_command"><tt class="xref py py-obj docutils literal"><span class="pre">version_from_command</span></tt></a>([flag])</td>
-<td></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabCommand.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>matlab_cmd=None</em>, <em>**inputs</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>matlab_cmd=None</em>, <em>**inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>initializes interface to matlab
 (default &#8216;matlab -nodesktop -nosplash&#8217;)</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabCommand.aggregate_outputs">
-<tt class="descname">aggregate_outputs</tt><big>(</big><em>runtime=None</em>, <em>needed_outputs=None</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.aggregate_outputs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">aggregate_outputs</code><span class="sig-paren">(</span><em>runtime=None</em>, <em>needed_outputs=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.aggregate_outputs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Collate expected outputs and check for existence</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.interfaces.matlab.MatlabCommand.always_run">
-<tt class="descname">always_run</tt><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.always_run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">always_run</code><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.always_run" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.interfaces.matlab.MatlabCommand.can_resume">
-<tt class="descname">can_resume</tt><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.can_resume" title="Permalink to this definition">¶</a></dt>
+<code class="descname">can_resume</code><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.can_resume" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.interfaces.matlab.MatlabCommand.cmd">
-<tt class="descname">cmd</tt><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.cmd" title="Permalink to this definition">¶</a></dt>
+<code class="descname">cmd</code><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.cmd" title="Permalink to this definition">¶</a></dt>
 <dd><p>sets base command, immutable</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.interfaces.matlab.MatlabCommand.cmdline">
-<tt class="descname">cmdline</tt><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.cmdline" title="Permalink to this definition">¶</a></dt>
+<code class="descname">cmdline</code><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.cmdline" title="Permalink to this definition">¶</a></dt>
 <dd><p><cite>command</cite> plus any arguments (args)
 validates arguments and generates command line</p>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabCommand.help">
-<em class="property">classmethod </em><tt class="descname">help</tt><big>(</big><em>returnhelp=False</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.help" title="Permalink to this definition">¶</a></dt>
+<code class="descname">help</code><span class="sig-paren">(</span><em>returnhelp=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.help" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.interfaces.matlab.MatlabCommand.input_spec">
-<tt class="descname">input_spec</tt><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.input_spec" title="Permalink to this definition">¶</a></dt>
-<dd><p>alias of <a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec" title="nipype.interfaces.matlab.MatlabInputSpec"><tt class="xref py py-class docutils literal"><span class="pre">MatlabInputSpec</span></tt></a></p>
+<code class="descname">input_spec</code><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.input_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec" title="nipype.interfaces.matlab.MatlabInputSpec"><code class="xref py py-class docutils literal"><span class="pre">MatlabInputSpec</span></code></a></p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.interfaces.matlab.MatlabCommand.output_spec">
-<tt class="descname">output_spec</tt><em class="property"> = None</em><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.output_spec" title="Permalink to this definition">¶</a></dt>
+<code class="descname">output_spec</code><em class="property"> = None</em><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.output_spec" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabCommand.raise_exception">
-<tt class="descname">raise_exception</tt><big>(</big><em>runtime</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.raise_exception" title="Permalink to this definition">¶</a></dt>
+<code class="descname">raise_exception</code><span class="sig-paren">(</span><em>runtime</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.raise_exception" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabCommand.run">
-<tt class="descname">run</tt><big>(</big><em>**inputs</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.run" title="Permalink to this definition">¶</a></dt>
+<code class="descname">run</code><span class="sig-paren">(</span><em>**inputs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Execute this interface.</p>
 <p>This interface will not raise an exception if runtime.returncode is
 non-zero.</p>
@@ -362,7 +344,7 @@ non-zero.</p>
 
 <dl class="classmethod">
 <dt id="nipype.interfaces.matlab.MatlabCommand.set_default_matlab_cmd">
-<em class="property">classmethod </em><tt class="descname">set_default_matlab_cmd</tt><big>(</big><em>matlab_cmd</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.set_default_matlab_cmd" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">set_default_matlab_cmd</code><span class="sig-paren">(</span><em>matlab_cmd</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.set_default_matlab_cmd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the default MATLAB command line for MATLAB classes.</p>
 <p>This method is used to set values for all MATLAB
 subclasses.  However, setting this will not update the output
@@ -372,7 +354,7 @@ type for any existing instances.  For these, assign the
 
 <dl class="classmethod">
 <dt id="nipype.interfaces.matlab.MatlabCommand.set_default_mfile">
-<em class="property">classmethod </em><tt class="descname">set_default_mfile</tt><big>(</big><em>mfile</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.set_default_mfile" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">set_default_mfile</code><span class="sig-paren">(</span><em>mfile</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.set_default_mfile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the default MATLAB script file format for MATLAB classes.</p>
 <p>This method is used to set values for all MATLAB
 subclasses.  However, setting this will not update the output
@@ -382,7 +364,7 @@ type for any existing instances.  For these, assign the
 
 <dl class="classmethod">
 <dt id="nipype.interfaces.matlab.MatlabCommand.set_default_paths">
-<em class="property">classmethod </em><tt class="descname">set_default_paths</tt><big>(</big><em>paths</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.set_default_paths" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="descname">set_default_paths</code><span class="sig-paren">(</span><em>paths</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.set_default_paths" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the default MATLAB paths for MATLAB classes.</p>
 <p>This method is used to set values for all MATLAB
 subclasses.  However, setting this will not update the output
@@ -390,9 +372,9 @@ type for any existing instances.  For these, assign the
 &lt;instance&gt;.inputs.paths.</p>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabCommand.set_default_terminal_output">
-<em class="property">classmethod </em><tt class="descname">set_default_terminal_output</tt><big>(</big><em>output_type</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.set_default_terminal_output" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_default_terminal_output</code><span class="sig-paren">(</span><em>output_type</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.set_default_terminal_output" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the default terminal output for CommandLine Interfaces.</p>
 <p>This method is used to set default terminal output for
 CommandLine Interfaces.  However, setting this will not
@@ -402,23 +384,23 @@ assign the &lt;instance&gt;.inputs.terminal_output.</p>
 
 <dl class="attribute">
 <dt id="nipype.interfaces.matlab.MatlabCommand.version">
-<tt class="descname">version</tt><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.version" title="Permalink to this definition">¶</a></dt>
+<code class="descname">version</code><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.version" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabCommand.version_from_command">
-<tt class="descname">version_from_command</tt><big>(</big><em>flag='-v'</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.version_from_command" title="Permalink to this definition">¶</a></dt>
+<code class="descname">version_from_command</code><span class="sig-paren">(</span><em>flag='-v'</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabCommand.version_from_command" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </div>
 <div class="section" id="matlabinputspec">
-<h3><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec" title="nipype.interfaces.matlab.MatlabInputSpec"><tt class="xref py py-class docutils literal"><span class="pre">MatlabInputSpec</span></tt></a><a class="headerlink" href="#matlabinputspec" title="Permalink to this headline">¶</a></h3>
+<h3><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec" title="nipype.interfaces.matlab.MatlabInputSpec"><code class="xref py py-class docutils literal"><span class="pre">MatlabInputSpec</span></code></a><a class="headerlink" href="#matlabinputspec" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec">
-<em class="property">class </em><tt class="descclassname">nipype.interfaces.matlab.</tt><tt class="descname">MatlabInputSpec</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="nipype.interfaces.base.html#nipype.interfaces.base.CommandLineInputSpec" title="nipype.interfaces.base.CommandLineInputSpec"><tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.base.CommandLineInputSpec</span></tt></a></p>
+<em class="property">class </em><code class="descclassname">nipype.interfaces.matlab.</code><code class="descname">MatlabInputSpec</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="nipype.interfaces.base.html#nipype.interfaces.base.CommandLineInputSpec" title="nipype.interfaces.base.CommandLineInputSpec"><code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.base.CommandLineInputSpec</span></code></a></p>
 <p>Basic expected inputs to Matlab interface</p>
 <p class="rubric">Methods</p>
 <table border="1" class="longtable docutils">
@@ -427,167 +409,29 @@ assign the &lt;instance&gt;.inputs.terminal_output.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.add_class_trait" title="nipype.interfaces.matlab.MatlabInputSpec.add_class_trait"><tt class="xref py py-obj docutils literal"><span class="pre">add_class_trait</span></tt></a>(name,&nbsp;*trait)</td>
-<td>Adds a named trait attribute to this class.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.add_trait" title="nipype.interfaces.matlab.MatlabInputSpec.add_trait"><tt class="xref py py-obj docutils literal"><span class="pre">add_trait</span></tt></a>(name,&nbsp;*trait)</td>
-<td>Adds a trait attribute to this object.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.add_trait_category" title="nipype.interfaces.matlab.MatlabInputSpec.add_trait_category"><tt class="xref py py-obj docutils literal"><span class="pre">add_trait_category</span></tt></a>(category)</td>
-<td>Adds a trait category to a class.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.add_trait_listener" title="nipype.interfaces.matlab.MatlabInputSpec.add_trait_listener"><tt class="xref py py-obj docutils literal"><span class="pre">add_trait_listener</span></tt></a>(object[,&nbsp;prefix])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_items_event" title="nipype.interfaces.matlab.MatlabInputSpec.trait_items_event"><code class="xref py py-obj docutils literal"><span class="pre">trait_items_event</span></code></a>(event_trait,name,items_event)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.all_trait_names" title="nipype.interfaces.matlab.MatlabInputSpec.all_trait_names"><tt class="xref py py-obj docutils literal"><span class="pre">all_trait_names</span></tt></a>()</td>
-<td>Returns the list of all trait names, including implicitly defined traits.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.base_trait" title="nipype.interfaces.matlab.MatlabInputSpec.base_trait"><tt class="xref py py-obj docutils literal"><span class="pre">base_trait</span></tt></a>(name)</td>
-<td>Returns the base trait definition for a trait attribute.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.class_default_traits_view" title="nipype.interfaces.matlab.MatlabInputSpec.class_default_traits_view"><tt class="xref py py-obj docutils literal"><span class="pre">class_default_traits_view</span></tt></a>()</td>
-<td>Returns the name of the default traits view for the class.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.class_editable_traits" title="nipype.interfaces.matlab.MatlabInputSpec.class_editable_traits"><tt class="xref py py-obj docutils literal"><span class="pre">class_editable_traits</span></tt></a>()</td>
-<td>Returns an alphabetically sorted list of the names of non-event trait attributes associated with the current class.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.class_trait_names" title="nipype.interfaces.matlab.MatlabInputSpec.class_trait_names"><tt class="xref py py-obj docutils literal"><span class="pre">class_trait_names</span></tt></a>(**metadata)</td>
-<td>Returns a list of the names of all trait attributes whose definitions match the set of <em>metadata</em> criteria specified.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.class_trait_view" title="nipype.interfaces.matlab.MatlabInputSpec.class_trait_view"><tt class="xref py py-obj docutils literal"><span class="pre">class_trait_view</span></tt></a>([name,&nbsp;view_element])</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_property_changed" title="nipype.interfaces.matlab.MatlabInputSpec.trait_property_changed"><code class="xref py py-obj docutils literal"><span class="pre">trait_property_changed</span></code></a>(...)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.class_trait_view_elements" title="nipype.interfaces.matlab.MatlabInputSpec.class_trait_view_elements"><tt class="xref py py-obj docutils literal"><span class="pre">class_trait_view_elements</span></tt></a>()</td>
-<td>Returns the ViewElements object associated with the class.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.class_traits" title="nipype.interfaces.matlab.MatlabInputSpec.class_traits"><tt class="xref py py-obj docutils literal"><span class="pre">class_traits</span></tt></a>(**metadata)</td>
-<td>Returns a dictionary containing the definitions of all of the trait attributes of the class that match the set of <em>metadata</em> criteria.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.clone_traits" title="nipype.interfaces.matlab.MatlabInputSpec.clone_traits"><tt class="xref py py-obj docutils literal"><span class="pre">clone_traits</span></tt></a>([traits,&nbsp;memo,&nbsp;copy])</td>
-<td>Clones a new object from this one, optionally copying only a specified set of traits.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.configure_traits" title="nipype.interfaces.matlab.MatlabInputSpec.configure_traits"><tt class="xref py py-obj docutils literal"><span class="pre">configure_traits</span></tt></a>([filename,&nbsp;view,&nbsp;kind,&nbsp;...])</td>
-<td>Creates and displays a dialog box for editing values of trait attributes, as if it were a complete, self-contained GUI application.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.copy_traits" title="nipype.interfaces.matlab.MatlabInputSpec.copy_traits"><tt class="xref py py-obj docutils literal"><span class="pre">copy_traits</span></tt></a>(other[,&nbsp;traits,&nbsp;memo,&nbsp;copy])</td>
-<td>Copies another object&#8217;s trait attributes into this one.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.copyable_trait_names" title="nipype.interfaces.matlab.MatlabInputSpec.copyable_trait_names"><tt class="xref py py-obj docutils literal"><span class="pre">copyable_trait_names</span></tt></a>(**metadata)</td>
-<td>Returns the list of trait names to copy or clone by default.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.default_traits_view" title="nipype.interfaces.matlab.MatlabInputSpec.default_traits_view"><tt class="xref py py-obj docutils literal"><span class="pre">default_traits_view</span></tt></a>()</td>
-<td>Returns the name of the default traits view for the object&#8217;s class.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.edit_traits" title="nipype.interfaces.matlab.MatlabInputSpec.edit_traits"><tt class="xref py py-obj docutils literal"><span class="pre">edit_traits</span></tt></a>([view,&nbsp;parent,&nbsp;kind,&nbsp;context,&nbsp;...])</td>
-<td>Displays a user interface window for editing trait attribute values.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.editable_traits" title="nipype.interfaces.matlab.MatlabInputSpec.editable_traits"><tt class="xref py py-obj docutils literal"><span class="pre">editable_traits</span></tt></a>()</td>
-<td>Returns an alphabetically sorted list of the names of non-event trait attributes associated with the current object.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.get" title="nipype.interfaces.matlab.MatlabInputSpec.get"><tt class="xref py py-obj docutils literal"><span class="pre">get</span></tt></a>(**kwargs)</td>
-<td>Returns traited class as a dict</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.get_hashval" title="nipype.interfaces.matlab.MatlabInputSpec.get_hashval"><tt class="xref py py-obj docutils literal"><span class="pre">get_hashval</span></tt></a>([hash_method])</td>
-<td>Return a dictionary of our items with hashes for each file.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.get_traitsfree" title="nipype.interfaces.matlab.MatlabInputSpec.get_traitsfree"><tt class="xref py py-obj docutils literal"><span class="pre">get_traitsfree</span></tt></a>(**kwargs)</td>
-<td>Returns traited class as a dict</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.has_traits_interface" title="nipype.interfaces.matlab.MatlabInputSpec.has_traits_interface"><tt class="xref py py-obj docutils literal"><span class="pre">has_traits_interface</span></tt></a>(*interfaces)</td>
-<td>Returns whether the object implements a specified traits interface.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.items" title="nipype.interfaces.matlab.MatlabInputSpec.items"><tt class="xref py py-obj docutils literal"><span class="pre">items</span></tt></a>()</td>
-<td>Name, trait generator for user modifiable traits</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.on_trait_change" title="nipype.interfaces.matlab.MatlabInputSpec.on_trait_change"><tt class="xref py py-obj docutils literal"><span class="pre">on_trait_change</span></tt></a>(handler[,&nbsp;name,&nbsp;remove,&nbsp;...])</td>
-<td>Causes the object to invoke a handler whenever a trait attribute matching a specified pattern is modified, or removes the association.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.on_trait_event" title="nipype.interfaces.matlab.MatlabInputSpec.on_trait_event"><tt class="xref py py-obj docutils literal"><span class="pre">on_trait_event</span></tt></a>(handler[,&nbsp;name,&nbsp;remove,&nbsp;...])</td>
-<td>Causes the object to invoke a handler whenever a trait attribute matching a specified pattern is modified, or removes the association.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.print_traits" title="nipype.interfaces.matlab.MatlabInputSpec.print_traits"><tt class="xref py py-obj docutils literal"><span class="pre">print_traits</span></tt></a>([show_help])</td>
-<td>Prints the values of all explicitly-defined, non-event trait attributes on the current object, in an easily readable format.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.remove_trait" title="nipype.interfaces.matlab.MatlabInputSpec.remove_trait"><tt class="xref py py-obj docutils literal"><span class="pre">remove_trait</span></tt></a>(name)</td>
-<td>Removes a trait attribute from this object.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.remove_trait_listener" title="nipype.interfaces.matlab.MatlabInputSpec.remove_trait_listener"><tt class="xref py py-obj docutils literal"><span class="pre">remove_trait_listener</span></tt></a>(object[,&nbsp;prefix])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.traits_init" title="nipype.interfaces.matlab.MatlabInputSpec.traits_init"><code class="xref py py-obj docutils literal"><span class="pre">traits_init</span></code></a>()</td>
 <td></td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.reset_traits" title="nipype.interfaces.matlab.MatlabInputSpec.reset_traits"><tt class="xref py py-obj docutils literal"><span class="pre">reset_traits</span></tt></a>([traits])</td>
-<td>Resets some or all of an object&#8217;s trait attributes to their default values.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.set" title="nipype.interfaces.matlab.MatlabInputSpec.set"><tt class="xref py py-obj docutils literal"><span class="pre">set</span></tt></a>([trait_change_notify])</td>
-<td>Shortcut for setting object trait attributes.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.set_trait_dispatch_handler" title="nipype.interfaces.matlab.MatlabInputSpec.set_trait_dispatch_handler"><tt class="xref py py-obj docutils literal"><span class="pre">set_trait_dispatch_handler</span></tt></a>(name,&nbsp;klass[,&nbsp;...])</td>
-<td>Sets a trait notification dispatch handler.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.sync_trait" title="nipype.interfaces.matlab.MatlabInputSpec.sync_trait"><tt class="xref py py-obj docutils literal"><span class="pre">sync_trait</span></tt></a>(trait_name,&nbsp;object[,&nbsp;alias,&nbsp;...])</td>
-<td>Synchronizes the value of a trait attribute on this object with a trait attribute on another object.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait" title="nipype.interfaces.matlab.MatlabInputSpec.trait"><tt class="xref py py-obj docutils literal"><span class="pre">trait</span></tt></a>(name[,&nbsp;force,&nbsp;copy])</td>
-<td>Returns the trait definition for the <em>name</em> trait attribute.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_context" title="nipype.interfaces.matlab.MatlabInputSpec.trait_context"><tt class="xref py py-obj docutils literal"><span class="pre">trait_context</span></tt></a>()</td>
-<td>Returns the default context to use for editing or configuring traits.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_get" title="nipype.interfaces.matlab.MatlabInputSpec.trait_get"><tt class="xref py py-obj docutils literal"><span class="pre">trait_get</span></tt></a>(*names,&nbsp;**metadata)</td>
-<td>Shortcut for getting object trait attributes.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_items_event" title="nipype.interfaces.matlab.MatlabInputSpec.trait_items_event"><tt class="xref py py-obj docutils literal"><span class="pre">trait_items_event</span></tt></a>(event_trait,name,items_event)</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.traits_inited" title="nipype.interfaces.matlab.MatlabInputSpec.traits_inited"><code class="xref py py-obj docutils literal"><span class="pre">traits_inited</span></code></a>([True])</td>
 <td></td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_monitor" title="nipype.interfaces.matlab.MatlabInputSpec.trait_monitor"><tt class="xref py py-obj docutils literal"><span class="pre">trait_monitor</span></tt></a>(handler[,&nbsp;remove])</td>
-<td>Adds or removes the specified <em>handler</em> from the list of active monitors.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_names" title="nipype.interfaces.matlab.MatlabInputSpec.trait_names"><tt class="xref py py-obj docutils literal"><span class="pre">trait_names</span></tt></a>(**metadata)</td>
-<td>Returns a list of the names of all trait attributes whose definitions match the set of <em>metadata</em> criteria specified.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_property_changed" title="nipype.interfaces.matlab.MatlabInputSpec.trait_property_changed"><tt class="xref py py-obj docutils literal"><span class="pre">trait_property_changed</span></tt></a>(...)</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_set" title="nipype.interfaces.matlab.MatlabInputSpec.trait_set"><tt class="xref py py-obj docutils literal"><span class="pre">trait_set</span></tt></a>([trait_change_notify])</td>
-<td>Shortcut for setting object trait attributes.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_setq" title="nipype.interfaces.matlab.MatlabInputSpec.trait_setq"><tt class="xref py py-obj docutils literal"><span class="pre">trait_setq</span></tt></a>(**traits)</td>
-<td>Shortcut for setting object trait attributes.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_subclasses" title="nipype.interfaces.matlab.MatlabInputSpec.trait_subclasses"><tt class="xref py py-obj docutils literal"><span class="pre">trait_subclasses</span></tt></a>([all])</td>
-<td>Returns a list of the immediate (or all) subclasses of this class.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_view" title="nipype.interfaces.matlab.MatlabInputSpec.trait_view"><tt class="xref py py-obj docutils literal"><span class="pre">trait_view</span></tt></a>([name,&nbsp;view_element])</td>
-<td>Gets or sets a ViewElement associated with an object&#8217;s class.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_view_elements" title="nipype.interfaces.matlab.MatlabInputSpec.trait_view_elements"><tt class="xref py py-obj docutils literal"><span class="pre">trait_view_elements</span></tt></a>()</td>
-<td>Returns the ViewElements object associated with the object&#8217;s class.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_views" title="nipype.interfaces.matlab.MatlabInputSpec.trait_views"><tt class="xref py py-obj docutils literal"><span class="pre">trait_views</span></tt></a>([klass])</td>
-<td>Returns a list of the names of all view elements associated with the current object&#8217;s class.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.traits" title="nipype.interfaces.matlab.MatlabInputSpec.traits"><tt class="xref py py-obj docutils literal"><span class="pre">traits</span></tt></a>(**metadata)</td>
-<td>Returns a dictionary containing the definitions of all of the trait attributes of this object that match the set of <em>metadata</em> criteria.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.traits_init" title="nipype.interfaces.matlab.MatlabInputSpec.traits_init"><tt class="xref py py-obj docutils literal"><span class="pre">traits_init</span></tt></a>()</td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.traits_inited" title="nipype.interfaces.matlab.MatlabInputSpec.traits_inited"><tt class="xref py py-obj docutils literal"><span class="pre">traits_inited</span></tt></a>([True])</td>
-<td></td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.interfaces.matlab.MatlabInputSpec.validate_trait" title="nipype.interfaces.matlab.MatlabInputSpec.validate_trait"><tt class="xref py py-obj docutils literal"><span class="pre">validate_trait</span></tt></a>(name,&nbsp;value)</td>
-<td>Validates whether a value is legal for a trait.</td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize handlers and inputs</p>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.add_class_trait">
-<em class="property">classmethod </em><tt class="descname">add_class_trait</tt><big>(</big><em>name</em>, <em>*trait</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.add_class_trait" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_class_trait</code><span class="sig-paren">(</span><em>name</em>, <em>*trait</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.add_class_trait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a named trait attribute to this class.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -611,7 +455,7 @@ a list equivalent to an argument list for the Trait() function.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.add_trait">
-<tt class="descname">add_trait</tt><big>(</big><em>name</em>, <em>*trait</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.add_trait" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_trait</code><span class="sig-paren">(</span><em>name</em>, <em>*trait</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.add_trait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trait attribute to this object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -633,27 +477,27 @@ it is equivalent to passing the entire list of values to Trait().</p>
 </table>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.add_trait_category">
-<em class="property">classmethod </em><tt class="descname">add_trait_category</tt><big>(</big><em>category</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.add_trait_category" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_trait_category</code><span class="sig-paren">(</span><em>category</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.add_trait_category" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a trait category to a class.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.add_trait_listener">
-<tt class="descname">add_trait_listener</tt><big>(</big><em>object</em>, <em>prefix=''</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.add_trait_listener" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_trait_listener</code><span class="sig-paren">(</span><em>object</em>, <em>prefix=''</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.add_trait_listener" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.all_trait_names">
-<tt class="descname">all_trait_names</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.all_trait_names" title="Permalink to this definition">¶</a></dt>
+<code class="descname">all_trait_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.all_trait_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the list of all trait names, including implicitly defined
 traits.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.base_trait">
-<tt class="descname">base_trait</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.base_trait" title="Permalink to this definition">¶</a></dt>
+<code class="descname">base_trait</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.base_trait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the base trait definition for a trait attribute.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -669,22 +513,22 @@ traits.</p>
 </table>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.class_default_traits_view">
-<em class="property">classmethod </em><tt class="descname">class_default_traits_view</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.class_default_traits_view" title="Permalink to this definition">¶</a></dt>
+<code class="descname">class_default_traits_view</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.class_default_traits_view" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the name of the default traits view for the class.</p>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.class_editable_traits">
-<em class="property">classmethod </em><tt class="descname">class_editable_traits</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.class_editable_traits" title="Permalink to this definition">¶</a></dt>
+<code class="descname">class_editable_traits</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.class_editable_traits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an alphabetically sorted list of the names of non-event
 trait attributes associated with the current class.</p>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.class_trait_names">
-<em class="property">classmethod </em><tt class="descname">class_trait_names</tt><big>(</big><em>**metadata</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.class_trait_names" title="Permalink to this definition">¶</a></dt>
+<code class="descname">class_trait_names</code><span class="sig-paren">(</span><em>**metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.class_trait_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of the names of all trait attributes whose definitions
 match the set of <em>metadata</em> criteria specified.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -701,22 +545,22 @@ match the set of <em>metadata</em> criteria specified.</p>
 </table>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.class_trait_view">
-<em class="property">classmethod </em><tt class="descname">class_trait_view</tt><big>(</big><em>name=None</em>, <em>view_element=None</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.class_trait_view" title="Permalink to this definition">¶</a></dt>
+<code class="descname">class_trait_view</code><span class="sig-paren">(</span><em>name=None</em>, <em>view_element=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.class_trait_view" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.class_trait_view_elements">
-<em class="property">classmethod </em><tt class="descname">class_trait_view_elements</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.class_trait_view_elements" title="Permalink to this definition">¶</a></dt>
+<code class="descname">class_trait_view_elements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.class_trait_view_elements" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the ViewElements object associated with the class.</p>
 <p>The returned object can be used to access all the view elements
 associated with the class.</p>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.class_traits">
-<em class="property">classmethod </em><tt class="descname">class_traits</tt><big>(</big><em>**metadata</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.class_traits" title="Permalink to this definition">¶</a></dt>
+<code class="descname">class_traits</code><span class="sig-paren">(</span><em>**metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.class_traits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a dictionary containing the definitions of all of the trait
 attributes of the class that match the set of <em>metadata</em> criteria.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -735,7 +579,7 @@ attributes of the class that match the set of <em>metadata</em> criteria.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.clone_traits">
-<tt class="descname">clone_traits</tt><big>(</big><em>traits=None</em>, <em>memo=None</em>, <em>copy=None</em>, <em>**metadata</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.clone_traits" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clone_traits</code><span class="sig-paren">(</span><em>traits=None</em>, <em>memo=None</em>, <em>copy=None</em>, <em>**metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.clone_traits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clones a new object from this one, optionally copying only a
 specified set of traits.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -752,7 +596,7 @@ specified set of traits.</p>
 </div></blockquote>
 <p><strong>copy</strong> : str</p>
 <blockquote>
-<div><p>The type of copy <tt class="docutils literal"><span class="pre">deep</span></tt> or <tt class="docutils literal"><span class="pre">shallow</span></tt> to perform on any trait
+<div><p>The type of copy <code class="docutils literal"><span class="pre">deep</span></code> or <code class="docutils literal"><span class="pre">shallow</span></code> to perform on any trait
 that does not have explicit &#8216;copy&#8217; metadata. A value of None means
 &#8216;copy reference&#8217;.</p>
 </div></blockquote>
@@ -770,7 +614,7 @@ that does not have explicit &#8216;copy&#8217; metadata. A value of None means
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.configure_traits">
-<tt class="descname">configure_traits</tt><big>(</big><em>filename=None</em>, <em>view=None</em>, <em>kind=None</em>, <em>edit=True</em>, <em>context=None</em>, <em>handler=None</em>, <em>id=''</em>, <em>scrollable=None</em>, <em>**args</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.configure_traits" title="Permalink to this definition">¶</a></dt>
+<code class="descname">configure_traits</code><span class="sig-paren">(</span><em>filename=None</em>, <em>view=None</em>, <em>kind=None</em>, <em>edit=True</em>, <em>context=None</em>, <em>handler=None</em>, <em>id=''</em>, <em>scrollable=None</em>, <em>**args</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.configure_traits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates and displays a dialog box for editing values of trait
 attributes, as if it were a complete, self-contained GUI application.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -841,7 +685,7 @@ to display all of the items in the view at one time.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.copy_traits">
-<tt class="descname">copy_traits</tt><big>(</big><em>other</em>, <em>traits=None</em>, <em>memo=None</em>, <em>copy=None</em>, <em>**metadata</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.copy_traits" title="Permalink to this definition">¶</a></dt>
+<code class="descname">copy_traits</code><span class="sig-paren">(</span><em>other</em>, <em>traits=None</em>, <em>memo=None</em>, <em>copy=None</em>, <em>**metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.copy_traits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Copies another object&#8217;s trait attributes into this one.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -882,19 +726,19 @@ empty if all the attributes were successfully copied.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.copyable_trait_names">
-<tt class="descname">copyable_trait_names</tt><big>(</big><em>**metadata</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.copyable_trait_names" title="Permalink to this definition">¶</a></dt>
+<code class="descname">copyable_trait_names</code><span class="sig-paren">(</span><em>**metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.copyable_trait_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the list of trait names to copy or clone by default.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.default_traits_view">
-<tt class="descname">default_traits_view</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.default_traits_view" title="Permalink to this definition">¶</a></dt>
+<code class="descname">default_traits_view</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.default_traits_view" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the name of the default traits view for the object&#8217;s class.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.edit_traits">
-<tt class="descname">edit_traits</tt><big>(</big><em>view=None</em>, <em>parent=None</em>, <em>kind=None</em>, <em>context=None</em>, <em>handler=None</em>, <em>id=''</em>, <em>scrollable=None</em>, <em>**args</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.edit_traits" title="Permalink to this definition">¶</a></dt>
+<code class="descname">edit_traits</code><span class="sig-paren">(</span><em>view=None</em>, <em>parent=None</em>, <em>kind=None</em>, <em>context=None</em>, <em>handler=None</em>, <em>id=''</em>, <em>scrollable=None</em>, <em>**args</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.edit_traits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays a user interface window for editing trait attribute values.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -951,14 +795,14 @@ to display all of the items in the view at one time.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.editable_traits">
-<tt class="descname">editable_traits</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.editable_traits" title="Permalink to this definition">¶</a></dt>
+<code class="descname">editable_traits</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.editable_traits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns an alphabetically sorted list of the names of non-event
 trait attributes associated with the current object.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.get">
-<tt class="descname">get</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.get" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns traited class as a dict</p>
 <p>Augments the trait get function to return a dictionary without
 notification handles</p>
@@ -966,7 +810,7 @@ notification handles</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.get_hashval">
-<tt class="descname">get_hashval</tt><big>(</big><em>hash_method=None</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.get_hashval" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_hashval</code><span class="sig-paren">(</span><em>hash_method=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.get_hashval" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a dictionary of our items with hashes for each file.</p>
 <p>Searches through dictionary items and if an item is a file, it
 calculates the md5 hash of the file contents and stores the
@@ -995,7 +839,7 @@ with each file.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.get_traitsfree">
-<tt class="descname">get_traitsfree</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.get_traitsfree" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_traitsfree</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.get_traitsfree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns traited class as a dict</p>
 <p>Augments the trait get function to return a dictionary without
 any traits. The dictionary does not contain any attributes that
@@ -1004,7 +848,7 @@ were Undefined</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.has_traits_interface">
-<tt class="descname">has_traits_interface</tt><big>(</big><em>*interfaces</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.has_traits_interface" title="Permalink to this definition">¶</a></dt>
+<code class="descname">has_traits_interface</code><span class="sig-paren">(</span><em>*interfaces</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.has_traits_interface" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns whether the object implements a specified traits interface.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1022,13 +866,13 @@ were Undefined</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.items">
-<tt class="descname">items</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.items" title="Permalink to this definition">¶</a></dt>
+<code class="descname">items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.items" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name, trait generator for user modifiable traits</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.on_trait_change">
-<tt class="descname">on_trait_change</tt><big>(</big><em>handler</em>, <em>name=None</em>, <em>remove=False</em>, <em>dispatch='same'</em>, <em>priority=False</em>, <em>deferred=False</em>, <em>target=None</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.on_trait_change" title="Permalink to this definition">¶</a></dt>
+<code class="descname">on_trait_change</code><span class="sig-paren">(</span><em>handler</em>, <em>name=None</em>, <em>remove=False</em>, <em>dispatch='same'</em>, <em>priority=False</em>, <em>deferred=False</em>, <em>target=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.on_trait_change" title="Permalink to this definition">¶</a></dt>
 <dd><p>Causes the object to invoke a handler whenever a trait attribute
 matching a specified pattern is modified, or removes the association.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1067,19 +911,19 @@ Possible values are:</p>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">same</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">same</span></code></td>
 <td>Run notifications on the same thread as this one.</td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">ui</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">ui</span></code></td>
 <td>Run notifications on the UI thread. If the current
 thread is the UI thread, the notifications are executed
 immediately; otherwise, they are placed on the UI
 event queue.</td>
 </tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">fast_ui</span></tt></td>
-<td>Alias for <tt class="docutils literal"><span class="pre">ui</span></tt>.</td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">fast_ui</span></code></td>
+<td>Alias for <code class="docutils literal"><span class="pre">ui</span></code>.</td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">new</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">new</span></code></td>
 <td>Run notifications in a new thread.</td>
 </tr>
 </tbody>
@@ -1093,7 +937,7 @@ event queue.</td>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.on_trait_event">
-<tt class="descname">on_trait_event</tt><big>(</big><em>handler</em>, <em>name=None</em>, <em>remove=False</em>, <em>dispatch='same'</em>, <em>priority=False</em>, <em>deferred=False</em>, <em>target=None</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.on_trait_event" title="Permalink to this definition">¶</a></dt>
+<code class="descname">on_trait_event</code><span class="sig-paren">(</span><em>handler</em>, <em>name=None</em>, <em>remove=False</em>, <em>dispatch='same'</em>, <em>priority=False</em>, <em>deferred=False</em>, <em>target=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.on_trait_event" title="Permalink to this definition">¶</a></dt>
 <dd><p>Causes the object to invoke a handler whenever a trait attribute
 matching a specified pattern is modified, or removes the association.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1132,19 +976,19 @@ Possible values are:</p>
 </tr>
 </thead>
 <tbody valign="top">
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">same</span></tt></td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">same</span></code></td>
 <td>Run notifications on the same thread as this one.</td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">ui</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">ui</span></code></td>
 <td>Run notifications on the UI thread. If the current
 thread is the UI thread, the notifications are executed
 immediately; otherwise, they are placed on the UI
 event queue.</td>
 </tr>
-<tr class="row-even"><td><tt class="docutils literal"><span class="pre">fast_ui</span></tt></td>
-<td>Alias for <tt class="docutils literal"><span class="pre">ui</span></tt>.</td>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">fast_ui</span></code></td>
+<td>Alias for <code class="docutils literal"><span class="pre">ui</span></code>.</td>
 </tr>
-<tr class="row-odd"><td><tt class="docutils literal"><span class="pre">new</span></tt></td>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">new</span></code></td>
 <td>Run notifications in a new thread.</td>
 </tr>
 </tbody>
@@ -1158,7 +1002,7 @@ event queue.</td>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.print_traits">
-<tt class="descname">print_traits</tt><big>(</big><em>show_help=False</em>, <em>**metadata</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.print_traits" title="Permalink to this definition">¶</a></dt>
+<code class="descname">print_traits</code><span class="sig-paren">(</span><em>show_help=False</em>, <em>**metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.print_traits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints the values of all explicitly-defined, non-event trait
 attributes on the current object, in an easily readable format.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1177,15 +1021,21 @@ attributes on the current object, in an easily readable format.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.remove_trait">
-<tt class="descname">remove_trait</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.remove_trait" title="Permalink to this definition">¶</a></dt>
+<code class="descname">remove_trait</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.remove_trait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Removes a trait attribute from this object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>name</strong> : str</p>
-<blockquote class="last">
+<blockquote>
 <div><p>Name of the attribute to remove.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>result</strong> : bool</p>
+<blockquote class="last">
+<div><p>True if the trait was successfully removed.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1195,12 +1045,12 @@ attributes on the current object, in an easily readable format.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.remove_trait_listener">
-<tt class="descname">remove_trait_listener</tt><big>(</big><em>object</em>, <em>prefix=''</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.remove_trait_listener" title="Permalink to this definition">¶</a></dt>
+<code class="descname">remove_trait_listener</code><span class="sig-paren">(</span><em>object</em>, <em>prefix=''</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.remove_trait_listener" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.reset_traits">
-<tt class="descname">reset_traits</tt><big>(</big><em>traits=None</em>, <em>**metadata</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.reset_traits" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reset_traits</code><span class="sig-paren">(</span><em>traits=None</em>, <em>**metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.reset_traits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resets some or all of an object&#8217;s trait attributes to their default
 values.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1226,7 +1076,7 @@ empty if all the attributes were successfully reset.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.set">
-<tt class="descname">set</tt><big>(</big><em>trait_change_notify=True</em>, <em>**traits</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.set" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set</code><span class="sig-paren">(</span><em>trait_change_notify=True</em>, <em>**traits</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shortcut for setting object trait attributes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1255,15 +1105,15 @@ set</p>
 </table>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.set_trait_dispatch_handler">
-<em class="property">classmethod </em><tt class="descname">set_trait_dispatch_handler</tt><big>(</big><em>name</em>, <em>klass</em>, <em>override=False</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.set_trait_dispatch_handler" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_trait_dispatch_handler</code><span class="sig-paren">(</span><em>name</em>, <em>klass</em>, <em>override=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.set_trait_dispatch_handler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets a trait notification dispatch handler.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.sync_trait">
-<tt class="descname">sync_trait</tt><big>(</big><em>trait_name</em>, <em>object</em>, <em>alias=None</em>, <em>mutual=True</em>, <em>remove=False</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.sync_trait" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sync_trait</code><span class="sig-paren">(</span><em>trait_name</em>, <em>object</em>, <em>alias=None</em>, <em>mutual=True</em>, <em>remove=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.sync_trait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Synchronizes the value of a trait attribute on this object with a
 trait attribute on another object.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1301,7 +1151,7 @@ or removed (True or non-zero)</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait">
-<tt class="descname">trait</tt><big>(</big><em>name</em>, <em>force=False</em>, <em>copy=False</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait</code><span class="sig-paren">(</span><em>name</em>, <em>force=False</em>, <em>copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the trait definition for the <em>name</em> trait attribute.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1329,14 +1179,14 @@ copy.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait_context">
-<tt class="descname">trait_context</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_context" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait_context</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_context" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the default context to use for editing or configuring
 traits.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait_get">
-<tt class="descname">trait_get</tt><big>(</big><em>*names</em>, <em>**metadata</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_get" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait_get</code><span class="sig-paren">(</span><em>*names</em>, <em>**metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shortcut for getting object trait attributes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1361,12 +1211,12 @@ values are the corresponding trait values.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait_items_event">
-<tt class="descname">trait_items_event</tt><big>(</big><em>event_trait</em>, <em>name</em>, <em>items_event</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_items_event" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait_items_event</code><span class="sig-paren">(</span><em>event_trait</em>, <em>name</em>, <em>items_event</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_items_event" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait_monitor">
-<em class="property">classmethod </em><tt class="descname">trait_monitor</tt><big>(</big><em>handler</em>, <em>remove=False</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_monitor" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait_monitor</code><span class="sig-paren">(</span><em>handler</em>, <em>remove=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_monitor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds or removes the specified <em>handler</em> from the list of active
 monitors.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1390,7 +1240,7 @@ handler as a monitor for this class.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait_names">
-<tt class="descname">trait_names</tt><big>(</big><em>**metadata</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_names" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait_names</code><span class="sig-paren">(</span><em>**metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_names" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of the names of all trait attributes whose definitions
 match the set of <em>metadata</em> criteria specified.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1409,12 +1259,12 @@ match the set of <em>metadata</em> criteria specified.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait_property_changed">
-<tt class="descname">trait_property_changed</tt><big>(</big><em>name</em>, <em>old_value</em><span class="optional">[</span>, <em>new_value</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_property_changed" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait_property_changed</code><span class="sig-paren">(</span><em>name</em>, <em>old_value</em><span class="optional">[</span>, <em>new_value</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_property_changed" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait_set">
-<tt class="descname">trait_set</tt><big>(</big><em>trait_change_notify=True</em>, <em>**traits</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_set" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait_set</code><span class="sig-paren">(</span><em>trait_change_notify=True</em>, <em>**traits</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_set" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shortcut for setting object trait attributes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1445,7 +1295,7 @@ set</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait_setq">
-<tt class="descname">trait_setq</tt><big>(</big><em>**traits</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_setq" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait_setq</code><span class="sig-paren">(</span><em>**traits</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_setq" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shortcut for setting object trait attributes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1469,9 +1319,9 @@ assigned (see also: trait_set).</p>
 </table>
 </dd></dl>
 
-<dl class="classmethod">
+<dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait_subclasses">
-<em class="property">classmethod </em><tt class="descname">trait_subclasses</tt><big>(</big><em>all=False</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_subclasses" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait_subclasses</code><span class="sig-paren">(</span><em>all=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_subclasses" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of the immediate (or all) subclasses of this class.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1490,7 +1340,7 @@ False, only immediate subclasses are returned.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait_view">
-<tt class="descname">trait_view</tt><big>(</big><em>name=None</em>, <em>view_element=None</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_view" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait_view</code><span class="sig-paren">(</span><em>name=None</em>, <em>view_element=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_view" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets or sets a ViewElement associated with an object&#8217;s class.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1515,7 +1365,7 @@ False, only immediate subclasses are returned.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait_view_elements">
-<tt class="descname">trait_view_elements</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_view_elements" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait_view_elements</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_view_elements" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the ViewElements object associated with the object&#8217;s
 class.</p>
 <p>The returned object can be used to access all the view elements
@@ -1524,7 +1374,7 @@ associated with the class.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.trait_views">
-<tt class="descname">trait_views</tt><big>(</big><em>klass=None</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_views" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trait_views</code><span class="sig-paren">(</span><em>klass=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.trait_views" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of the names of all view elements associated with the
 current object&#8217;s class.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1551,7 +1401,7 @@ of this class. Possible values include:</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.traits">
-<tt class="descname">traits</tt><big>(</big><em>**metadata</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.traits" title="Permalink to this definition">¶</a></dt>
+<code class="descname">traits</code><span class="sig-paren">(</span><em>**metadata</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.traits" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a dictionary containing the definitions of all of the trait
 attributes of this object that match the set of <em>metadata</em> criteria.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1570,24 +1420,24 @@ attributes of this object that match the set of <em>metadata</em> criteria.</p>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.traits_init">
-<tt class="descname">traits_init</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.traits_init" title="Permalink to this definition">¶</a></dt>
+<code class="descname">traits_init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.traits_init" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.traits_inited">
-<tt class="descname">traits_inited</tt><big>(</big><span class="optional">[</span><em>True</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.traits_inited" title="Permalink to this definition">¶</a></dt>
+<code class="descname">traits_inited</code><span class="sig-paren">(</span><span class="optional">[</span><em>True</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.traits_inited" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.validate_trait">
-<tt class="descname">validate_trait</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.validate_trait" title="Permalink to this definition">¶</a></dt>
+<code class="descname">validate_trait</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.validate_trait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Validates whether a value is legal for a trait.</p>
 <p>Returns the validated value if it is valid.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="nipype.interfaces.matlab.MatlabInputSpec.wrappers">
-<tt class="descname">wrappers</tt><em class="property"> = {'new': &lt;class 'traits.trait_notifiers.NewTraitChangeNotifyWrapper'&gt;, 'ui': &lt;class 'traits.trait_notifiers.FastUITraitChangeNotifyWrapper'&gt;, 'extended': &lt;class 'traits.trait_notifiers.ExtendedTraitChangeNotifyWrapper'&gt;, 'fast_ui': &lt;class 'traits.trait_notifiers.FastUITraitChangeNotifyWrapper'&gt;, 'same': &lt;class 'traits.trait_notifiers.TraitChangeNotifyWrapper'&gt;}</em><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.wrappers" title="Permalink to this definition">¶</a></dt>
+<code class="descname">wrappers</code><em class="property"> = {'new': &lt;class 'traits.trait_notifiers.NewTraitChangeNotifyWrapper'&gt;, 'ui': &lt;class 'traits.trait_notifiers.FastUITraitChangeNotifyWrapper'&gt;, 'extended': &lt;class 'traits.trait_notifiers.ExtendedTraitChangeNotifyWrapper'&gt;, 'fast_ui': &lt;class 'traits.trait_notifiers.FastUITraitChangeNotifyWrapper'&gt;, 'same': &lt;class 'traits.trait_notifiers.TraitChangeNotifyWrapper'&gt;}</em><a class="headerlink" href="#nipype.interfaces.matlab.MatlabInputSpec.wrappers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1598,7 +1448,7 @@ attributes of this object that match the set of <em>metadata</em> criteria.</p>
 <h2>Function<a class="headerlink" href="#function" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="nipype.interfaces.matlab.get_matlab_command">
-<tt class="descclassname">nipype.interfaces.matlab.</tt><tt class="descname">get_matlab_command</tt><big>(</big><big>)</big><a class="headerlink" href="#nipype.interfaces.matlab.get_matlab_command" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">nipype.interfaces.matlab.</code><code class="descname">get_matlab_command</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nipype.interfaces.matlab.get_matlab_command" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -1611,9 +1461,9 @@ attributes of this object that match the set of <em>metadata</em> criteria.</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

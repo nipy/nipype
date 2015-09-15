@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -162,7 +162,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -174,7 +174,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -197,9 +197,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -209,13 +209,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-camino-convert">
 <h1>interfaces.camino.convert<a class="headerlink" href="#interfaces-camino-convert" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-camino-convert-analyzeheader"></span><div class="section" id="analyzeheader">
 <span id="index-0"></span><h2>AnalyzeHeader<a class="headerlink" href="#analyzeheader" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/convert.py#L579">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/convert.py#L579">Link to code</a></p>
 <p>Wraps command <strong>analyzeheader</strong></p>
 <p>Create or read an Analyze 7.5 header file.</p>
 <p>Analyze image header, provides support for the most common header fields.
@@ -253,11 +253,13 @@ in_file: (an existing file name)
 args: (a string)
         Additional parameters to the command
         flag: %s
-centre: (a list of from 3 to 3 items which are an integer)
+centre: (a list of from 3 to 3 items which are an integer (int or
+         long))
         Voxel specifying origin of Talairach coordinate system for SPM,
         default [0 0 0].
         flag: -centre %s
-data_dims: (a list of from 3 to 3 items which are an integer)
+data_dims: (a list of from 3 to 3 items which are an integer (int or
+         long))
         data dimensions in voxels
         flag: -datadims %s
 description: (a string)
@@ -268,7 +270,8 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
          {})
         Environment variables
-greylevels: (a list of from 2 to 2 items which are an integer)
+greylevels: (a list of from 2 to 2 items which are an integer (int or
+         long))
         Minimum and maximum greylevels. Stored as shorts in the header.
         flag: -gl %s
 ignore_exception: (a boolean, nipype default value: False)
@@ -286,10 +289,10 @@ networkbyteorder: (a boolean)
         Write header in network byte order (big-endian). This is the default
         for new headers.
         flag: -networkbyteorder
-nimages: (an integer)
+nimages: (an integer (int or long))
         Number of images in the img file. Default 1.
         flag: -nimages %d
-offset: (an integer)
+offset: (an integer (int or long))
         According to the Analyze 7.5 standard, this is the byte offset in
         the .img file at which voxels start. This value can be negative to
         specify that the absolute value is applied for every image in the
@@ -297,7 +300,8 @@ offset: (an integer)
         flag: -offset %d
 out_file: (a file name)
         flag: &gt; %s, position: -1
-picoseed: (a list of from 3 to 3 items which are an integer)
+picoseed: (a list of from 3 to 3 items which are an integer (int or
+         long))
         Voxel specifying the seed (for PICo maps), default [0 0 0].
         flag: -picoseed %s
 printbigendian: (an existing file name)
@@ -348,7 +352,7 @@ voxel_dims: (a list of from 3 to 3 items which are a float)
 </div>
 <div class="section" id="dt2nifti">
 <span id="index-1"></span><h2>DT2NIfTI<a class="headerlink" href="#dt2nifti" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/convert.py#L366">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/convert.py#L366">Link to code</a></p>
 <p>Wraps command <strong>dt2nii</strong></p>
 <p>Converts camino tensor data to NIfTI format</p>
 <p>Reads Camino diffusion tensors, and converts them to NIFTI format as three .nii files.</p>
@@ -393,7 +397,7 @@ lns0: (an existing file name)
 <span class="target" id="nipype-interfaces-camino-convert-image2voxel"></span></div>
 <div class="section" id="image2voxel">
 <span id="index-2"></span><h2>Image2Voxel<a class="headerlink" href="#image2voxel" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/convert.py#L36">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/convert.py#L36">Link to code</a></p>
 <p>Wraps command <strong>image2voxel</strong></p>
 <p>Converts Analyze / NIFTI / MHA files to voxel order.</p>
 <p>Converts scanner-order data in a supported image format to voxel-order data.
@@ -446,7 +450,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="niftidt2camino">
 <span id="index-3"></span><h2>NIfTIDT2Camino<a class="headerlink" href="#niftidt2camino" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/convert.py#L431">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/convert.py#L431">Link to code</a></p>
 <p>Wraps command <strong>niftidt2camino</strong></p>
 <p>Converts NIFTI-1 diffusion tensors to Camino format. The program reads the
 NIFTI header but does not apply any spatial transformations to the data. The
@@ -524,7 +528,7 @@ uppertriangular: (a boolean)
 <span class="target" id="nipype-interfaces-camino-convert-procstreamlines"></span></div>
 <div class="section" id="procstreamlines">
 <span id="index-4"></span><h2>ProcStreamlines<a class="headerlink" href="#procstreamlines" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/convert.py#L247">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/convert.py#L247">Link to code</a></p>
 <p>Wraps command <strong>procstreamlines</strong></p>
 <p>Process streamline data</p>
 <dl class="docutils">
@@ -555,10 +559,12 @@ allowmultitargets: (a boolean)
 args: (a string)
         Additional parameters to the command
         flag: %s
-datadims: (a list of from 3 to 3 items which are an integer)
+datadims: (a list of from 3 to 3 items which are an integer (int or
+         long))
         data dimensions in voxels
         flag: -datadims %s
-directional: (a list of from 3 to 3 items which are an integer)
+directional: (a list of from 3 to 3 items which are an integer (int
+         or long))
         Splits the streamlines at the seed point and computes separate
         connection probabilities for each segment. Streamline segments are
         grouped according to their dot product with the vector (X, Y, Z).
@@ -599,16 +605,16 @@ iterations: (a float)
         default is 1 if the output is streamlines, and 5000 if the output is
         connection probability images.
         flag: -iterations %d
-maxtractlength: (an integer)
+maxtractlength: (an integer (int or long))
         maximum length of tracts
         flag: -maxtractlength %d
-maxtractpoints: (an integer)
+maxtractpoints: (an integer (int or long))
         maximum number of tract points
         flag: -maxtractpoints %d
-mintractlength: (an integer)
+mintractlength: (an integer (int or long))
         minimum length of tracts
         flag: -mintractlength %d
-mintractpoints: (an integer)
+mintractpoints: (an integer (int or long))
         minimum number of tract points
         flag: -mintractpoints %d
 noresample: (a boolean)
@@ -641,7 +647,7 @@ outputsc: (a boolean)
 outputtracts: (a boolean)
         Output streamlines in raw binary format.
         flag: -outputtracts
-regionindex: (an integer)
+regionindex: (an integer (int or long))
         index of specific region to process
         flag: -regionindex %d
 resamplestepsize: (a float)
@@ -659,10 +665,12 @@ resamplestepsize: (a float)
 seedfile: (a file name)
         Image Containing Seed Points
         flag: -seedfile %s
-seedpointmm: (a list of from 3 to 3 items which are an integer)
+seedpointmm: (a list of from 3 to 3 items which are an integer (int
+         or long))
         The coordinates of a single seed point for tractography in mm
         flag: -seedpointmm %s
-seedpointvox: (a list of from 3 to 3 items which are an integer)
+seedpointvox: (a list of from 3 to 3 items which are an integer (int
+         or long))
         The coordinates of a single seed point for tractography in voxels
         flag: -seedpointvox %s
 targetfile: (a file name)
@@ -680,7 +688,8 @@ truncateloops: (a boolean)
         After the streamline leaves the waypoint, it is truncated upon a
         second entry to the waypoint.
         flag: -truncateloops
-voxeldims: (a list of from 3 to 3 items which are an integer)
+voxeldims: (a list of from 3 to 3 items which are an integer (int or
+         long))
         voxel dimensions in mm
         flag: -voxeldims %s
 waypointfile: (a file name)
@@ -700,12 +709,12 @@ proc: (an existing file name)
 </div>
 <div class="section" id="shredder">
 <span id="index-5"></span><h2>Shredder<a class="headerlink" href="#shredder" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/convert.py#L631">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/convert.py#L631">Link to code</a></p>
 <p>Wraps command <strong>shredder</strong></p>
 <p>Extracts periodic chunks from a data stream.</p>
 <p>Shredder makes an initial offset of offset bytes. It then reads and outputs
 chunksize bytes, skips space bytes, and repeats until there is no more input.</p>
-<p>If  the  chunksize  is  negative, chunks of size <a href="#id5"><span class="problematic" id="id6">|chunksize|</span></a> are read and the
+<p>If  the  chunksize  is  negative, chunks of size chunksize are read and the
 byte ordering of each chunk is reversed. The whole chunk will be reversed, so
 the chunk must be the same size as the data type, otherwise the order of the
 values in the chunk, as well as their endianness, will be reversed.</p>
@@ -730,7 +739,7 @@ in_file: (an existing file name)
 args: (a string)
         Additional parameters to the command
         flag: %s
-chunksize: (an integer)
+chunksize: (an integer (int or long))
         reads and outputs a chunk of chunksize bytes
         flag: %d, position: 2
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -740,12 +749,12 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-offset: (an integer)
+offset: (an integer (int or long))
         initial offset of offset bytes
         flag: %d, position: 1
 out_file: (a file name)
         flag: &gt; %s, position: -1
-space: (an integer)
+space: (an integer (int or long))
         skips space bytes
         flag: %d, position: 3
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -763,7 +772,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="tractshredder">
 <span id="index-6"></span><h2>TractShredder<a class="headerlink" href="#tractshredder" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/convert.py#L314">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/convert.py#L314">Link to code</a></p>
 <p>Wraps command <strong>tractshredder</strong></p>
 <p>Extracts bunches of streamlines.</p>
 <p>tractshredder works in a similar way to shredder, but processes streamlines instead of scalar data.
@@ -791,7 +800,7 @@ in_file: (an existing file name)
 args: (a string)
         Additional parameters to the command
         flag: %s
-bunchsize: (an integer)
+bunchsize: (an integer (int or long))
         reads and outputs a group of bunchsize tracts
         flag: %d, position: 2
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
@@ -801,12 +810,12 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-offset: (an integer)
+offset: (an integer (int or long))
         initial offset of offset tracts
         flag: %d, position: 1
 out_file: (a file name)
         flag: &gt; %s, position: -1
-space: (an integer)
+space: (an integer (int or long))
         skips space tracts
         flag: %d, position: 3
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -824,7 +833,7 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <div class="section" id="vtkstreamlines">
 <span id="index-7"></span><h2>VtkStreamlines<a class="headerlink" href="#vtkstreamlines" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/camino/convert.py#L147">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/camino/convert.py#L147">Link to code</a></p>
 <p>Wraps command <strong>vtkstreamlines</strong></p>
 <p>Use vtkstreamlines to convert raw or voxel format streamlines to VTK polydata</p>
 <div class="section" id="id4">
@@ -882,7 +891,8 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-voxeldims: (a list of from 3 to 3 items which are an integer)
+voxeldims: (a list of from 3 to 3 items which are an integer (int or
+         long))
         voxel dimensions in mm
         flag: -voxeldims %s, position: 4
 </pre></div>
@@ -903,9 +913,9 @@ voxeldims: (a list of from 3 to 3 items which are an integer)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

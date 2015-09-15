@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,10 +114,10 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">caching.memory</a><ul>
-<li><a class="reference internal" href="#module-caching-memory">Module: <tt class="docutils literal"><span class="pre">caching.memory</span></tt></a></li>
+<li><a class="reference internal" href="#module-caching-memory">Module: <code class="docutils literal"><span class="pre">caching.memory</span></code></a></li>
 <li><a class="reference internal" href="#classes">Classes</a><ul>
-<li><a class="reference internal" href="#memory"><tt class="docutils literal"><span class="pre">Memory</span></tt></a></li>
-<li><a class="reference internal" href="#pipefunc"><tt class="docutils literal"><span class="pre">PipeFunc</span></tt></a></li>
+<li><a class="reference internal" href="#memory"><code class="docutils literal"><span class="pre">Memory</span></code></a></li>
+<li><a class="reference internal" href="#pipefunc"><code class="docutils literal"><span class="pre">PipeFunc</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
@@ -143,7 +143,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -155,7 +155,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -178,9 +178,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -190,13 +190,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="caching-memory">
 <h1>caching.memory<a class="headerlink" href="#caching-memory" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-caching-memory">
-<h2>Module: <tt class="xref py py-mod docutils literal"><span class="pre">caching.memory</span></tt><a class="headerlink" href="#module-caching-memory" title="Permalink to this headline">¶</a></h2>
-<p>Inheritance diagram for <tt class="docutils literal"><span class="pre">nipype.caching.memory</span></tt>:</p>
+<h2>Module: <code class="xref py py-mod docutils literal"><span class="pre">caching.memory</span></code><a class="headerlink" href="#module-caching-memory" title="Permalink to this headline">¶</a></h2>
+<p>Inheritance diagram for <code class="docutils literal"><span class="pre">nipype.caching.memory</span></code>:</p>
 <p class="graphviz">
 <img src="../../_images/inheritance-0d893a543de2b7cfa69b9e90c1d0546099188023.png" alt="Inheritance diagram of nipype.caching.memory" usemap="#inheritance582f9fe300" class="inheritance"/>
 <map id="inheritance582f9fe300" name="inheritance582f9fe300">
@@ -216,11 +216,11 @@ name-steps pipeline: getting back scope in command-line based programming.</p>
 <div class="section" id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="memory">
-<h3><a class="reference internal" href="#nipype.caching.memory.Memory" title="nipype.caching.memory.Memory"><tt class="xref py py-class docutils literal"><span class="pre">Memory</span></tt></a><a class="headerlink" href="#memory" title="Permalink to this headline">¶</a></h3>
+<h3><a class="reference internal" href="#nipype.caching.memory.Memory" title="nipype.caching.memory.Memory"><code class="xref py py-class docutils literal"><span class="pre">Memory</span></code></a><a class="headerlink" href="#memory" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nipype.caching.memory.Memory">
-<em class="property">class </em><tt class="descclassname">nipype.caching.memory.</tt><tt class="descname">Memory</tt><big>(</big><em>base_dir</em><big>)</big><a class="headerlink" href="#nipype.caching.memory.Memory" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<em class="property">class </em><code class="descclassname">nipype.caching.memory.</code><code class="descname">Memory</code><span class="sig-paren">(</span><em>base_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.caching.memory.Memory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Memory context to provide caching for interfaces</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -241,25 +241,25 @@ name-steps pipeline: getting back scope in command-line based programming.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.caching.memory.Memory.cache" title="nipype.caching.memory.Memory.cache"><tt class="xref py py-obj docutils literal"><span class="pre">cache</span></tt></a>(interface)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.caching.memory.Memory.cache" title="nipype.caching.memory.Memory.cache"><code class="xref py py-obj docutils literal"><span class="pre">cache</span></code></a>(interface)</td>
 <td>Returns a callable that caches the output of an interface</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#nipype.caching.memory.Memory.clear_previous_runs" title="nipype.caching.memory.Memory.clear_previous_runs"><tt class="xref py py-obj docutils literal"><span class="pre">clear_previous_runs</span></tt></a>([warn])</td>
+<tr class="row-even"><td><a class="reference internal" href="#nipype.caching.memory.Memory.clear_previous_runs" title="nipype.caching.memory.Memory.clear_previous_runs"><code class="xref py py-obj docutils literal"><span class="pre">clear_previous_runs</span></code></a>([warn])</td>
 <td>Remove all the cache that where not used in the latest run of the memory object: i.e.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#nipype.caching.memory.Memory.clear_previous_runs" title="nipype.caching.memory.Memory.clear_previous_runs"><tt class="xref py py-obj docutils literal"><span class="pre">clear_previous_runs</span></tt></a>([warn])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#nipype.caching.memory.Memory.clear_previous_runs" title="nipype.caching.memory.Memory.clear_previous_runs"><code class="xref py py-obj docutils literal"><span class="pre">clear_previous_runs</span></code></a>([warn])</td>
 <td>Remove all the cache that where not used in the latest run of the memory object: i.e.</td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="nipype.caching.memory.Memory.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>base_dir</em><big>)</big><a class="headerlink" href="#nipype.caching.memory.Memory.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>base_dir</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.caching.memory.Memory.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="nipype.caching.memory.Memory.cache">
-<tt class="descname">cache</tt><big>(</big><em>interface</em><big>)</big><a class="headerlink" href="#nipype.caching.memory.Memory.cache" title="Permalink to this definition">¶</a></dt>
+<code class="descname">cache</code><span class="sig-paren">(</span><em>interface</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.caching.memory.Memory.cache" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a callable that caches the output of an interface</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -307,7 +307,7 @@ should be merged.</p>
 
 <dl class="method">
 <dt id="nipype.caching.memory.Memory.clear_previous_runs">
-<tt class="descname">clear_previous_runs</tt><big>(</big><em>warn=True</em><big>)</big><a class="headerlink" href="#nipype.caching.memory.Memory.clear_previous_runs" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clear_previous_runs</code><span class="sig-paren">(</span><em>warn=True</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.caching.memory.Memory.clear_previous_runs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove all the cache that where not used in the latest run of
 the memory object: i.e. since the corresponding Python object
 was created.</p>
@@ -328,7 +328,7 @@ removed</p>
 
 <dl class="method">
 <dt id="nipype.caching.memory.Memory.clear_runs_since">
-<tt class="descname">clear_runs_since</tt><big>(</big><em>day=None</em>, <em>month=None</em>, <em>year=None</em>, <em>warn=True</em><big>)</big><a class="headerlink" href="#nipype.caching.memory.Memory.clear_runs_since" title="Permalink to this definition">¶</a></dt>
+<code class="descname">clear_runs_since</code><span class="sig-paren">(</span><em>day=None</em>, <em>month=None</em>, <em>year=None</em>, <em>warn=True</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.caching.memory.Memory.clear_runs_since" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove all the cache that where not used since the given date</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -355,11 +355,11 @@ removed</p>
 
 </div>
 <div class="section" id="pipefunc">
-<h3><a class="reference internal" href="../../users/caching_tutorial.html#nipype.caching.memory.PipeFunc" title="nipype.caching.memory.PipeFunc"><tt class="xref py py-class docutils literal"><span class="pre">PipeFunc</span></tt></a><a class="headerlink" href="#pipefunc" title="Permalink to this headline">¶</a></h3>
+<h3><a class="reference internal" href="../../users/caching_tutorial.html#nipype.caching.memory.PipeFunc" title="nipype.caching.memory.PipeFunc"><code class="xref py py-class docutils literal"><span class="pre">PipeFunc</span></code></a><a class="headerlink" href="#pipefunc" title="Permalink to this headline">¶</a></h3>
 <dl class="class">
 <dt id="nipype.caching.memory.PipeFunc">
-<em class="property">class </em><tt class="descclassname">nipype.caching.memory.</tt><tt class="descname">PipeFunc</tt><big>(</big><em>interface</em>, <em>base_dir</em>, <em>callback=None</em><big>)</big><a class="headerlink" href="#nipype.caching.memory.PipeFunc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<em class="property">class </em><code class="descclassname">nipype.caching.memory.</code><code class="descname">PipeFunc</code><span class="sig-paren">(</span><em>interface</em>, <em>base_dir</em>, <em>callback=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.caching.memory.PipeFunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Callable interface to nipype.interface objects</p>
 <p>Use this to wrap nipype.interface object and call them
 specifying their input with keyword arguments:</p>
@@ -374,14 +374,14 @@ specifying their input with keyword arguments:</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><tt class="xref py py-obj docutils literal"><span class="pre">__call__</span></tt>(**kwargs)</td>
+<tr class="row-odd"><td><code class="xref py py-obj docutils literal"><span class="pre">__call__</span></code>(**kwargs)</td>
 <td></td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
 <dt id="nipype.caching.memory.PipeFunc.__init__">
-<tt class="descname">__init__</tt><big>(</big><em>interface</em>, <em>base_dir</em>, <em>callback=None</em><big>)</big><a class="headerlink" href="#nipype.caching.memory.PipeFunc.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>interface</em>, <em>base_dir</em>, <em>callback=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.caching.memory.PipeFunc.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -414,12 +414,12 @@ is called.</p>
 <h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="nipype.caching.memory.read_log">
-<tt class="descclassname">nipype.caching.memory.</tt><tt class="descname">read_log</tt><big>(</big><em>filename</em>, <em>run_dict=None</em><big>)</big><a class="headerlink" href="#nipype.caching.memory.read_log" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">nipype.caching.memory.</code><code class="descname">read_log</code><span class="sig-paren">(</span><em>filename</em>, <em>run_dict=None</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.caching.memory.read_log" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="nipype.caching.memory.rm_all_but">
-<tt class="descclassname">nipype.caching.memory.</tt><tt class="descname">rm_all_but</tt><big>(</big><em>base_dir</em>, <em>dirs_to_keep</em>, <em>warn=False</em><big>)</big><a class="headerlink" href="#nipype.caching.memory.rm_all_but" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">nipype.caching.memory.</code><code class="descname">rm_all_but</code><span class="sig-paren">(</span><em>base_dir</em>, <em>dirs_to_keep</em>, <em>warn=False</em><span class="sig-paren">)</span><a class="headerlink" href="#nipype.caching.memory.rm_all_but" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove all the sub-directories of base_dir, but those listed</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -449,9 +449,9 @@ is called.</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -1,0 +1,197 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+workflows.dmri.connectivity.nx
+==============================
+
+
+.. module:: nipype.workflows.dmri.connectivity.nx
+
+
+.. _nipype.workflows.dmri.connectivity.nx.create_cmats_to_csv_pipeline:
+
+:func:`create_cmats_to_csv_pipeline`
+------------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/dmri/connectivity/nx.py#L97>`__
+
+
+
+Creates a workflow to convert the outputs from CreateMatrix into a single
+comma-separated value text file. An extra column / field is also added to the
+text file. Typically, the user would connect the subject name to this field.
+
+Example
+~~~~~~~
+
+>>> from nipype.workflows.dmri.connectivity.nx import create_cmats_to_csv_pipeline
+>>> csv = create_cmats_to_csv_pipeline("cmats_to_csv", "subject_id")
+>>> csv.inputs.inputnode.extra_field = 'subj1'
+>>> csv.inputs.inputnode.matlab_matrix_files = ['subj1_cmatrix.mat', 'subj1_mean_fiber_length.mat', 'subj1_median_fiber_length.mat', 'subj1_fiber_length_std.mat']
+>>> csv.run()                 # doctest: +SKIP
+
+Inputs::
+
+    inputnode.extra_field
+    inputnode.matlab_matrix_files
+
+Outputs::
+
+    outputnode.csv_file
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph cmats_to_csv{
+
+	  label="cmats_to_csv";
+
+	  cmats_to_csv_inputnode[label="inputnode (utility)"];
+
+	  cmats_to_csv_Matlab2CSV[label="Matlab2CSV (misc)"];
+
+	  cmats_to_csv_MergeCSVFiles[label="MergeCSVFiles (misc)"];
+
+	  cmats_to_csv_outputnode[label="outputnode (utility)"];
+
+	  cmats_to_csv_inputnode -> cmats_to_csv_MergeCSVFiles;
+
+	  cmats_to_csv_inputnode -> cmats_to_csv_Matlab2CSV;
+
+	  cmats_to_csv_Matlab2CSV -> cmats_to_csv_MergeCSVFiles;
+
+	  cmats_to_csv_MergeCSVFiles -> cmats_to_csv_outputnode;
+
+	}
+
+
+.. _nipype.workflows.dmri.connectivity.nx.create_networkx_pipeline:
+
+:func:`create_networkx_pipeline`
+--------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/dmri/connectivity/nx.py#L18>`__
+
+
+
+Creates a workflow to calculate various graph measures (via NetworkX) on
+an input network. The output measures are then converted to comma-separated value
+text files, and an extra column / field is also added. Typically, the user would
+connect the subject name to this field.
+
+Example
+~~~~~~~
+
+>>> from nipype.workflows.dmri.connectivity.nx import create_networkx_pipeline
+>>> nx = create_networkx_pipeline("networkx", "subject_id")
+>>> nx.inputs.inputnode.extra_field = 'subj1'
+>>> nx.inputs.inputnode.network_file = 'subj1.pck'
+>>> nx.run()                 # doctest: +SKIP
+
+Inputs::
+
+    inputnode.extra_field
+    inputnode.network_file
+
+Outputs::
+
+    outputnode.network_files
+    outputnode.csv_files
+    outputnode.matlab_files
+
+
+Graph
+~~~~~
+
+.. graphviz::
+
+	digraph networkx{
+
+	  label="networkx";
+
+	  networkx_inputnode[label="inputnode (utility)"];
+
+	  networkx_NetworkXMetrics[label="NetworkXMetrics (cmtk)"];
+
+	  networkx_Matlab2CSV_node[label="Matlab2CSV_node (misc)"];
+
+	  networkx_MergeCSVFiles_node[label="MergeCSVFiles_node (misc)"];
+
+	  networkx_mergeNetworks[label="mergeNetworks (utility)"];
+
+	  networkx_Matlab2CSV_global[label="Matlab2CSV_global (misc)"];
+
+	  networkx_MergeCSVFiles_global[label="MergeCSVFiles_global (misc)"];
+
+	  networkx_mergeCSVs[label="mergeCSVs (utility)"];
+
+	  networkx_outputnode[label="outputnode (utility)"];
+
+	  networkx_inputnode -> networkx_MergeCSVFiles_global;
+
+	  networkx_inputnode -> networkx_MergeCSVFiles_global;
+
+	  networkx_inputnode -> networkx_NetworkXMetrics;
+
+	  networkx_inputnode -> networkx_mergeNetworks;
+
+	  networkx_inputnode -> networkx_MergeCSVFiles_node;
+
+	  networkx_inputnode -> networkx_MergeCSVFiles_node;
+
+	  networkx_inputnode -> networkx_MergeCSVFiles_node;
+
+	  networkx_NetworkXMetrics -> networkx_Matlab2CSV_global;
+
+	  networkx_NetworkXMetrics -> networkx_outputnode;
+
+	  networkx_NetworkXMetrics -> networkx_Matlab2CSV_node;
+
+	  networkx_NetworkXMetrics -> networkx_mergeNetworks;
+
+	  networkx_Matlab2CSV_node -> networkx_MergeCSVFiles_node;
+
+	  networkx_MergeCSVFiles_node -> networkx_outputnode;
+
+	  networkx_MergeCSVFiles_node -> networkx_mergeCSVs;
+
+	  networkx_mergeNetworks -> networkx_outputnode;
+
+	  networkx_Matlab2CSV_global -> networkx_MergeCSVFiles_global;
+
+	  networkx_Matlab2CSV_global -> networkx_MergeCSVFiles_global;
+
+	  networkx_MergeCSVFiles_global -> networkx_outputnode;
+
+	  networkx_MergeCSVFiles_global -> networkx_mergeCSVs;
+
+	  networkx_mergeCSVs -> networkx_outputnode;
+
+	}
+
+
+.. _nipype.workflows.dmri.connectivity.nx.add_global_to_filename:
+
+:func:`add_global_to_filename`
+------------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/dmri/connectivity/nx.py#L8>`__
+
+
+
+
+
+
+.. _nipype.workflows.dmri.connectivity.nx.add_nodal_to_filename:
+
+:func:`add_nodal_to_filename`
+-----------------------------
+
+`Link to code <http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/workflows/dmri/connectivity/nx.py#L13>`__
+
+
+
+
+

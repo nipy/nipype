@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -130,6 +130,7 @@
 <li><a class="reference internal" href="#id4">Examples</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#copygeom">CopyGeom</a></li>
 <li><a class="reference internal" href="#extractroi">ExtractROI</a><ul>
 <li><a class="reference internal" href="#id5">Examples</a></li>
 </ul>
@@ -152,6 +153,7 @@
 <li><a class="reference internal" href="#id10">Examples</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#motionoutliers">MotionOutliers</a></li>
 <li><a class="reference internal" href="#overlay">Overlay</a><ul>
 <li><a class="reference internal" href="#id11">Examples</a></li>
 </ul>
@@ -173,6 +175,7 @@
 <li><a class="reference internal" href="#id15">Examples</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#robustfov">RobustFOV</a></li>
 <li><a class="reference internal" href="#sigloss">SigLoss</a><ul>
 <li><a class="reference internal" href="#id16">Examples</a></li>
 </ul>
@@ -218,7 +221,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -230,7 +233,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -253,9 +256,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -265,13 +268,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-fsl-utils">
 <h1>interfaces.fsl.utils<a class="headerlink" href="#interfaces-fsl-utils" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-fsl-utils-avscale"></span><div class="section" id="avscale">
 <span id="index-0"></span><h2>AvScale<a class="headerlink" href="#avscale" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L554">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L597">Link to code</a></p>
 <p>Wraps command <strong>avscale</strong></p>
 <p>Use FSL avscale command to extract info from mat file output of FLIRT</p>
 <div class="section" id="examples">
@@ -330,7 +333,7 @@ skews: (any value)
 </div>
 <div class="section" id="complex">
 <span id="index-1"></span><h2>Complex<a class="headerlink" href="#complex" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1434">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L1477">Link to code</a></p>
 <p>Wraps command <strong>fslcomplex</strong></p>
 <p>fslcomplex is a tool for converting complex data</p>
 <div class="section" id="id1">
@@ -373,7 +376,7 @@ complex_split: (a boolean)
         flag: -complexsplit, position: 1
         mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
          complex_polar, complex_split, complex_merge
-end_vol: (an integer)
+end_vol: (an integer (int or long))
         flag: %d, position: -1
 environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          with values which are a value of type &#39;str&#39;, nipype default value:
@@ -421,7 +424,7 @@ real_polar: (a boolean)
         flag: -realpolar, position: 1
         mutually_exclusive: real_polar, real_cartesian, complex_cartesian,
          complex_polar, complex_split, complex_merge
-start_vol: (an integer)
+start_vol: (an integer (int or long))
         flag: %d, position: -2
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
         Control terminal output: `stream` - displays to terminal immediately
@@ -441,7 +444,7 @@ real_out_file: (a file name)
 </div>
 <div class="section" id="convertwarp">
 <span id="index-2"></span><h2>ConvertWarp<a class="headerlink" href="#convertwarp" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1698">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L1741">Link to code</a></p>
 <p>Wraps command <strong>convertwarp</strong></p>
 <p>Use FSL <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fnirt/warp_utils.html">convertwarp</a>
 for combining multiple transforms into one.</p>
@@ -568,7 +571,7 @@ warp2: (an existing file name)
 </div>
 <div class="section" id="convertxfm">
 <span id="index-3"></span><h2>ConvertXFM<a class="headerlink" href="#convertxfm" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1050">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L1093">Link to code</a></p>
 <p>Wraps command <strong>convert_xfm</strong></p>
 <p>Use the FSL utility convert_xfm to modify FLIRT transformation matrices.</p>
 <div class="section" id="id4">
@@ -633,11 +636,59 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         output transformation matrix
 </pre></div>
 </div>
-<span class="target" id="nipype-interfaces-fsl-utils-extractroi"></span></div>
+<span class="target" id="nipype-interfaces-fsl-utils-copygeom"></span></div>
 </div>
+<div class="section" id="copygeom">
+<span id="index-4"></span><h2>CopyGeom<a class="headerlink" href="#copygeom" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L46">Link to code</a></p>
+<p>Wraps command <strong>fslcpgeom</strong></p>
+<p>Use fslcpgeom to copy the header geometry information to another image.
+Copy certain parts of the header information (image dimensions, voxel dimensions,
+voxel dimensions units string, image orientation/origin or qform/sform info)
+from one image to another. Note that only copies from Analyze to Analyze
+or Nifti to Nifti will work properly. Copying from different files will result
+in loss of information or potentially incorrect settings.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+dest_file: (an existing file name)
+        destination image
+        flag: %s, position: 1
+in_file: (an existing file name)
+        source image
+        flag: %s, position: 0
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_dims: (a boolean)
+        Do not copy image dimensions
+        flag: -d, position: -1
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+        image with new geometry header
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-extractroi"></span></div>
 <div class="section" id="extractroi">
-<span id="index-4"></span><h2>ExtractROI<a class="headerlink" href="#extractroi" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L217">Link to code</a></p>
+<span id="index-5"></span><h2>ExtractROI<a class="headerlink" href="#extractroi" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L260">Link to code</a></p>
 <p>Wraps command <strong>fslroi</strong></p>
 <p>Uses FSL Fslroi command to extract region of interest (ROI)
 from an image.</p>
@@ -669,7 +720,7 @@ args: (a string)
         Additional parameters to the command
         flag: %s
 crop_list: (a list of items which are a tuple of the form: (an
-         integer, an integer))
+         integer (int or long), an integer (int or long)))
         list of two tuples specifying crop options
         flag: %s, position: 2
         mutually_exclusive: x_min, x_size, y_min, y_size, z_min, z_size,
@@ -687,25 +738,25 @@ output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#
 roi_file: (a file name)
         output file
         flag: %s, position: 1
-t_min: (an integer)
+t_min: (an integer (int or long))
         flag: %d, position: 8
-t_size: (an integer)
+t_size: (an integer (int or long))
         flag: %d, position: 9
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
         Control terminal output: `stream` - displays to terminal immediately
         (default), `allatonce` - waits till command is finished to display
         output, `file` - writes output to file, `none` - output is ignored
-x_min: (an integer)
+x_min: (an integer (int or long))
         flag: %d, position: 2
-x_size: (an integer)
+x_size: (an integer (int or long))
         flag: %d, position: 3
-y_min: (an integer)
+y_min: (an integer (int or long))
         flag: %d, position: 4
-y_size: (an integer)
+y_size: (an integer (int or long))
         flag: %d, position: 5
-z_min: (an integer)
+z_min: (an integer (int or long))
         flag: %d, position: 6
-z_size: (an integer)
+z_size: (an integer (int or long))
         flag: %d, position: 7
 </pre></div>
 </div>
@@ -716,8 +767,8 @@ z_size: (an integer)
 <span class="target" id="nipype-interfaces-fsl-utils-filterregressor"></span></div>
 </div>
 <div class="section" id="filterregressor">
-<span id="index-5"></span><h2>FilterRegressor<a class="headerlink" href="#filterregressor" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L422">Link to code</a></p>
+<span id="index-6"></span><h2>FilterRegressor<a class="headerlink" href="#filterregressor" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L465">Link to code</a></p>
 <p>Wraps command <strong>fsl_regfilt</strong></p>
 <p>Data de-noising by regressing out part of a design matrix</p>
 <p>Uses simple OLS regression on 4D images</p>
@@ -731,7 +782,7 @@ filter_all: (a boolean)
         use all columns in the design file in denoising
         flag: -f &#39;%s&#39;, position: 4
         mutually_exclusive: filter_columns
-filter_columns: (a list of items which are an integer)
+filter_columns: (a list of items which are an integer (int or long))
         (1-based) column indices to filter out of the data
         flag: -f &#39;%s&#39;, position: 4
         mutually_exclusive: filter_all
@@ -778,8 +829,8 @@ var_norm: (a boolean)
 </div>
 <span class="target" id="nipype-interfaces-fsl-utils-imagemaths"></span></div>
 <div class="section" id="imagemaths">
-<span id="index-6"></span><h2>ImageMaths<a class="headerlink" href="#imagemaths" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L348">Link to code</a></p>
+<span id="index-7"></span><h2>ImageMaths<a class="headerlink" href="#imagemaths" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L391">Link to code</a></p>
 <p>Wraps command <strong>fslmaths</strong></p>
 <p>Use FSL fslmaths command to allow mathematical manipulation of images
 <a class="reference external" href="http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils">FSL info</a></p>
@@ -838,8 +889,8 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-fsl-utils-imagemeants"></span></div>
 </div>
 <div class="section" id="imagemeants">
-<span id="index-7"></span><h2>ImageMeants<a class="headerlink" href="#imagemeants" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L64">Link to code</a></p>
+<span id="index-8"></span><h2>ImageMeants<a class="headerlink" href="#imagemeants" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L107">Link to code</a></p>
 <p>Wraps command <strong>fslmeants</strong></p>
 <p>Use fslmeants for printing the average timeseries (intensities) to
 the screen (or saves to a file). The average is taken over all voxels in
@@ -870,7 +921,7 @@ mask: (an existing file name)
 nobin: (a boolean)
         do not binarise the mask for calculation of Eigenvariates
         flag: --no_bin
-order: (an integer, nipype default value: 1)
+order: (an integer (int or long), nipype default value: 1)
         select number of Eigenvariates
         flag: --order=%d
 out_file: (a file name)
@@ -882,7 +933,7 @@ output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#
 show_all: (a boolean)
         show all voxel time series (within mask) instead of averaging
         flag: --showall
-spatial_coord: (a list of items which are an integer)
+spatial_coord: (a list of items which are an integer (int or long))
         &lt;x y z&gt; requested spatial coordinate (instead of mask)
         flag: -c %s
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -904,8 +955,8 @@ use_mm: (a boolean)
 </div>
 <span class="target" id="nipype-interfaces-fsl-utils-imagestats"></span></div>
 <div class="section" id="imagestats">
-<span id="index-8"></span><h2>ImageStats<a class="headerlink" href="#imagestats" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L477">Link to code</a></p>
+<span id="index-9"></span><h2>ImageStats<a class="headerlink" href="#imagestats" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L520">Link to code</a></p>
 <p>Wraps command <strong>fslstats</strong></p>
 <p>Use FSL fslstats command to calculate stats from images
 <a class="reference external" href="http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils">FSL info</a></p>
@@ -962,8 +1013,8 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-fsl-utils-invwarp"></span></div>
 </div>
 <div class="section" id="invwarp">
-<span id="index-9"></span><h2>InvWarp<a class="headerlink" href="#invwarp" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1350">Link to code</a></p>
+<span id="index-10"></span><h2>InvWarp<a class="headerlink" href="#invwarp" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L1393">Link to code</a></p>
 <p>Wraps command <strong>invwarp</strong></p>
 <p>Use FSL Invwarp to invert a FNIRT warp</p>
 <div class="section" id="id9">
@@ -1022,7 +1073,7 @@ jacobian_max: (a float)
 jacobian_min: (a float)
         Minimum acceptable Jacobian value for constraint (default 0.01)
         flag: --jmin=%f
-niter: (an integer)
+niter: (an integer (int or long))
         Determines how many iterations of the gradient-descent search that
         should be run.
         flag: --niter=%d
@@ -1057,8 +1108,8 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-fsl-utils-merge"></span></div>
 </div>
 <div class="section" id="merge">
-<span id="index-10"></span><h2>Merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L150">Link to code</a></p>
+<span id="index-11"></span><h2>Merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L193">Link to code</a></p>
 <p>Wraps command <strong>fslmerge</strong></p>
 <p>Use fslmerge to concatenate images</p>
 <p>Images can be concatenated across time, x, y, or z dimensions. Across the
@@ -1119,11 +1170,86 @@ tr: (a float)
 <div class="highlight-python"><div class="highlight"><pre>merged_file: (an existing file name)
 </pre></div>
 </div>
-<span class="target" id="nipype-interfaces-fsl-utils-overlay"></span></div>
+<span class="target" id="nipype-interfaces-fsl-utils-motionoutliers"></span></div>
 </div>
+<div class="section" id="motionoutliers">
+<span id="index-12"></span><h2>MotionOutliers<a class="headerlink" href="#motionoutliers" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L2009">Link to code</a></p>
+<p>Wraps command <strong>fsl_motion_outliers</strong></p>
+<p>Use FSL fsl_motion_outliers`http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSLMotionOutliers`_ to find outliers in timeseries (4d) data.
+Examples
+~~~~~~~~
+&gt;&gt;&gt; from nipype.interfaces.fsl import MotionOutliers
+&gt;&gt;&gt; mo = MotionOutliers()
+&gt;&gt;&gt; mo.inputs.in_file = &#8220;epi.nii&#8221;
+&gt;&gt;&gt; mo.cmdline # doctest: +ELLIPSIS
+&#8216;fsl_motion_outliers -i epi.nii -o epi_outliers.txt -p epi_metrics.png -s epi_metrics.txt&#8217;
+&gt;&gt;&gt; res = mo.run() # doctest: +SKIP</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        unfiltered 4D image
+        flag: -i %s
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+dummy: (an integer (int or long))
+        number of dummy scans to delete (before running anything and
+        creating EVs)
+        flag: --dummy=%d
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+mask: (an existing file name)
+        mask image for calculating metric
+        flag: -m %s
+metric: (&#39;refrms&#39; or &#39;dvars&#39; or &#39;refmse&#39; or &#39;fd&#39; or &#39;fdrms&#39;)
+        metrics: refrms - RMS intensity difference to reference volume as
+        metric [default metric],refmse - Mean Square Error version of refrms
+        (used in original version of fsl_motion_outliers) dvars - DVARS fd -
+        frame displacement fdrms - FD with RMS matrix calculation
+        flag: --%s
+no_motion_correction: (a boolean)
+        do not run motion correction (assumed already done)
+        flag: --nomoco
+out_file: (a file name)
+        output outlier file name
+        flag: -o %s
+out_metric_plot: (a file name)
+        output metric values plot (DVARS etc.) file name
+        flag: -p %s
+out_metric_values: (a file name)
+        output metric values (DVARS etc.) file name
+        flag: -s %s
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+threshold: (a float)
+        specify absolute threshold value (otherwise use box-plot cutoff =
+        P75 + 1.5*IQR)
+        flag: --thresh=%g
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
+out_metric_plot: (an existing file name)
+out_metric_values: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-overlay"></span></div>
 <div class="section" id="overlay">
-<span id="index-11"></span><h2>Overlay<a class="headerlink" href="#overlay" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L648">Link to code</a></p>
+<span id="index-13"></span><h2>Overlay<a class="headerlink" href="#overlay" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L691">Link to code</a></p>
 <p>Wraps command <strong>overlay</strong></p>
 <dl class="docutils">
 <dt>Use FSL&#8217;s overlay command to combine background and statistical images</dt>
@@ -1216,8 +1342,8 @@ use_checkerboard: (a boolean)
 <span class="target" id="nipype-interfaces-fsl-utils-plotmotionparams"></span></div>
 </div>
 <div class="section" id="plotmotionparams">
-<span id="index-12"></span><h2>PlotMotionParams<a class="headerlink" href="#plotmotionparams" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L937">Link to code</a></p>
+<span id="index-14"></span><h2>PlotMotionParams<a class="headerlink" href="#plotmotionparams" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L980">Link to code</a></p>
 <p>Wraps command <strong>fsl_tsplot</strong></p>
 <p>Use fsl_tsplot to plot the estimated motion parameters from a realignment
 program.</p>
@@ -1239,7 +1365,7 @@ in the source file.  FSL prints motion parameters in the order rotations,
 translations, while SPM prints them in the opposite order.  This interface
 should be able to plot timecourses of motion parameters generated from other
 sources as long as they fall under one of these two patterns.  For more
-flexibilty, see the <tt class="xref py py-class docutils literal"><span class="pre">fsl.PlotTimeSeries</span></tt> interface.</p>
+flexibilty, see the <code class="xref py py-class docutils literal"><span class="pre">fsl.PlotTimeSeries</span></code> interface.</p>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
 in_file: (an existing file name or a list of items which are an
@@ -1269,7 +1395,8 @@ out_file: (a file name)
 output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
          &#39;NIFTI&#39;)
         FSL output type
-plot_size: (a tuple of the form: (an integer, an integer))
+plot_size: (a tuple of the form: (an integer (int or long), an
+         integer (int or long)))
         plot image height and width
         flag: %s
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -1286,8 +1413,8 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-fsl-utils-plottimeseries"></span></div>
 </div>
 <div class="section" id="plottimeseries">
-<span id="index-13"></span><h2>PlotTimeSeries<a class="headerlink" href="#plottimeseries" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L854">Link to code</a></p>
+<span id="index-15"></span><h2>PlotTimeSeries<a class="headerlink" href="#plottimeseries" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L897">Link to code</a></p>
 <p>Wraps command <strong>fsl_tsplot</strong></p>
 <p>Use fsl_tsplot to create images of time course plots.</p>
 <div class="section" id="id13">
@@ -1330,18 +1457,20 @@ out_file: (a file name)
 output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
          &#39;NIFTI&#39;)
         FSL output type
-plot_finish: (an integer)
+plot_finish: (an integer (int or long))
         final column from in-file to plot
         flag: --finish=%d
         mutually_exclusive: plot_range
-plot_range: (a tuple of the form: (an integer, an integer))
+plot_range: (a tuple of the form: (an integer (int or long), an
+         integer (int or long)))
         first and last columns from the in-file to plot
         flag: %s
         mutually_exclusive: plot_start, plot_finish
-plot_size: (a tuple of the form: (an integer, an integer))
+plot_size: (a tuple of the form: (an integer (int or long), an
+         integer (int or long)))
         plot image height and width
         flag: %s
-plot_start: (an integer)
+plot_start: (an integer (int or long))
         first column from in-file to plot
         flag: --start=%d
         mutually_exclusive: plot_range
@@ -1355,10 +1484,10 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 title: (a string)
         plot title
         flag: %s
-x_precision: (an integer)
+x_precision: (an integer (int or long))
         precision of x-axis labels
         flag: --precision=%d
-x_units: (an integer, nipype default value: 1)
+x_units: (an integer (int or long), nipype default value: 1)
         scaling units for x-axis (between 1 and length of in file)
         flag: -u %d
 y_max: (a float)
@@ -1383,8 +1512,8 @@ y_range: (a tuple of the form: (a float, a float))
 <span class="target" id="nipype-interfaces-fsl-utils-powerspectrum"></span></div>
 </div>
 <div class="section" id="powerspectrum">
-<span id="index-14"></span><h2>PowerSpectrum<a class="headerlink" href="#powerspectrum" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1163">Link to code</a></p>
+<span id="index-16"></span><h2>PowerSpectrum<a class="headerlink" href="#powerspectrum" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L1206">Link to code</a></p>
 <p>Wraps command <strong>fslpspec</strong></p>
 <p>Use FSL PowerSpectrum command for power spectrum estimation.</p>
 <div class="section" id="id14">
@@ -1432,8 +1561,8 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-fsl-utils-reorient2std"></span></div>
 </div>
 <div class="section" id="reorient2std">
-<span id="index-15"></span><h2>Reorient2Std<a class="headerlink" href="#reorient2std" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1261">Link to code</a></p>
+<span id="index-17"></span><h2>Reorient2Std<a class="headerlink" href="#reorient2std" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L1304">Link to code</a></p>
 <p>Wraps command <strong>fslreorient2std</strong></p>
 <p>fslreorient2std is a tool for reorienting the image to match the
 approximate orientation of the standard template images (MNI152).</p>
@@ -1475,11 +1604,50 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <div class="highlight-python"><div class="highlight"><pre>out_file: (an existing file name)
 </pre></div>
 </div>
-<span class="target" id="nipype-interfaces-fsl-utils-sigloss"></span></div>
+<span class="target" id="nipype-interfaces-fsl-utils-robustfov"></span></div>
 </div>
+<div class="section" id="robustfov">
+<span id="index-18"></span><h2>RobustFOV<a class="headerlink" href="#robustfov" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L72">Link to code</a></p>
+<p>Wraps command <strong>robustfov</strong></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+in_file: (an existing file name)
+        input filename
+        flag: -i %s, position: 0
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+out_roi: (a file name)
+        ROI volume output name
+        flag: -r %s
+output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
+         &#39;NIFTI&#39;)
+        FSL output type
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>out_roi: (an existing file name)
+        ROI volume output name
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-fsl-utils-sigloss"></span></div>
 <div class="section" id="sigloss">
-<span id="index-16"></span><h2>SigLoss<a class="headerlink" href="#sigloss" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1220">Link to code</a></p>
+<span id="index-19"></span><h2>SigLoss<a class="headerlink" href="#sigloss" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L1263">Link to code</a></p>
 <p>Wraps command <strong>sigloss</strong></p>
 <p>Estimates signal loss from a field map (in rad/s)</p>
 <div class="section" id="id16">
@@ -1536,8 +1704,8 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 <span class="target" id="nipype-interfaces-fsl-utils-slicer"></span></div>
 </div>
 <div class="section" id="slicer">
-<span id="index-17"></span><h2>Slicer<a class="headerlink" href="#slicer" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L763">Link to code</a></p>
+<span id="index-20"></span><h2>Slicer<a class="headerlink" href="#slicer" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L806">Link to code</a></p>
 <p>Wraps command <strong>slicer</strong></p>
 <p>Use FSL&#8217;s slicer command to output a png image from a volume.</p>
 <div class="section" id="id17">
@@ -1583,7 +1751,7 @@ ignore_exception: (a boolean, nipype default value: False)
 image_edges: (an existing file name)
         volume to display edge overlay for (useful for checking registration
         flag: %s, position: 2
-image_width: (an integer)
+image_width: (an integer (int or long))
         max picture width
         flag: %d, position: -2
 intensity_range: (a tuple of the form: (a float, a float))
@@ -1606,7 +1774,7 @@ out_file: (a file name)
 output_type: (&#39;NIFTI_PAIR&#39; or &#39;NIFTI_PAIR_GZ&#39; or &#39;NIFTI_GZ&#39; or
          &#39;NIFTI&#39;)
         FSL output type
-sample_axial: (an integer)
+sample_axial: (an integer (int or long))
         output every n axial slices into one picture
         flag: -S %d, position: 10
         mutually_exclusive: single_slice, middle_slices, all_axial,
@@ -1624,7 +1792,7 @@ single_slice: (&#39;x&#39; or &#39;y&#39; or &#39;z&#39;)
         mutually_exclusive: single_slice, middle_slices, all_axial,
          sample_axial
         requires: slice_number
-slice_number: (an integer)
+slice_number: (an integer (int or long))
         slice number to save in picture
         flag: -%d, position: 11
 terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
@@ -1644,8 +1812,8 @@ threshold_edges: (a float)
 <span class="target" id="nipype-interfaces-fsl-utils-smooth"></span></div>
 </div>
 <div class="section" id="smooth">
-<span id="index-18"></span><h2>Smooth<a class="headerlink" href="#smooth" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L103">Link to code</a></p>
+<span id="index-21"></span><h2>Smooth<a class="headerlink" href="#smooth" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L146">Link to code</a></p>
 <p>Wraps command <strong>fslmaths</strong></p>
 <p>Use fslmaths to smooth the image</p>
 <p>Inputs:</p>
@@ -1683,8 +1851,8 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <span class="target" id="nipype-interfaces-fsl-utils-split"></span></div>
 <div class="section" id="split">
-<span id="index-19"></span><h2>Split<a class="headerlink" href="#split" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L297">Link to code</a></p>
+<span id="index-22"></span><h2>Split<a class="headerlink" href="#split" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L340">Link to code</a></p>
 <p>Wraps command <strong>fslsplit</strong></p>
 <p>Uses FSL Fslsplit command to separate a volume into images in
 time, x, y or z dimension.</p>
@@ -1726,8 +1894,8 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <span class="target" id="nipype-interfaces-fsl-utils-swapdimensions"></span></div>
 <div class="section" id="swapdimensions">
-<span id="index-20"></span><h2>SwapDimensions<a class="headerlink" href="#swapdimensions" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1121">Link to code</a></p>
+<span id="index-23"></span><h2>SwapDimensions<a class="headerlink" href="#swapdimensions" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L1164">Link to code</a></p>
 <p>Wraps command <strong>fslswapdim</strong></p>
 <p>Use fslswapdim to alter the orientation of an image.</p>
 <p>This interface accepts a three-tuple corresponding to the new
@@ -1776,8 +1944,8 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
 </div>
 <span class="target" id="nipype-interfaces-fsl-utils-warppoints"></span></div>
 <div class="section" id="warppoints">
-<span id="index-21"></span><h2>WarpPoints<a class="headerlink" href="#warppoints" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1752">Link to code</a></p>
+<span id="index-24"></span><h2>WarpPoints<a class="headerlink" href="#warppoints" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L1795">Link to code</a></p>
 <p>Wraps command <strong>img2imgcoord</strong></p>
 <p>Use FSL <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html">img2imgcoord</a>
 to transform point sets. Accepts plain text files and vtk files.</p>
@@ -1854,8 +2022,8 @@ xfm_file: (an existing file name)
 <span class="target" id="nipype-interfaces-fsl-utils-warppointstostd"></span></div>
 </div>
 <div class="section" id="warppointstostd">
-<span id="index-22"></span><h2>WarpPointsToStd<a class="headerlink" href="#warppointstostd" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1911">Link to code</a></p>
+<span id="index-25"></span><h2>WarpPointsToStd<a class="headerlink" href="#warppointstostd" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L1954">Link to code</a></p>
 <p>Wraps command <strong>img2stdcoord</strong></p>
 <p>Use FSL <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html">img2stdcoord</a>
 to transform point sets to standard space coordinates. Accepts plain text files and
@@ -1937,8 +2105,8 @@ xfm_file: (an existing file name)
 <span class="target" id="nipype-interfaces-fsl-utils-warputils"></span></div>
 </div>
 <div class="section" id="warputils">
-<span id="index-23"></span><h2>WarpUtils<a class="headerlink" href="#warputils" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/fsl/utils.py#L1566">Link to code</a></p>
+<span id="index-26"></span><h2>WarpUtils<a class="headerlink" href="#warputils" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/fsl/utils.py#L1609">Link to code</a></p>
 <p>Wraps command <strong>fnirtfileutils</strong></p>
 <p>Use FSL <a class="reference external" href="http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fnirt/warp_utils.html">fnirtfileutils</a>
 to convert field-&gt;coefficients, coefficients-&gt;field, coefficients-&gt;other_coefficients etc</p>
@@ -1983,8 +2151,8 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
-knot_space: (a tuple of the form: (an integer, an integer, an
-         integer))
+knot_space: (a tuple of the form: (an integer (int or long), an
+         integer (int or long), an integer (int or long)))
         Alternative (to --warpres) specification of the resolution of the
         output spline-field.
         flag: --knotspace=%d,%d,%d
@@ -2048,9 +2216,9 @@ out_jacobian: (a file name)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

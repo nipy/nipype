@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -140,7 +140,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="install.html">Download</a></td>
@@ -152,7 +152,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -175,9 +175,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -187,7 +187,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="tutorial-interfaces">
 <span id="interface-tutorial"></span><h1>Tutorial : Interfaces<a class="headerlink" href="#tutorial-interfaces" title="Permalink to this headline">¶</a></h1>
@@ -196,9 +196,9 @@
 <p>The nipype interface modules provide a Python interface to external
 packages like <a class="reference external" href="http://www.fmrib.ox.ac.uk/fsl">FSL</a> and <a class="reference external" href="http://www.fil.ion.ucl.ac.uk/spm">SPM</a>.  Within the module are a series of Python
 classes which wrap specific package functionality.  For example, in
-the fsl module, the class <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.fsl.Bet</span></tt> wraps the
-<tt class="docutils literal"><span class="pre">bet</span></tt> command-line tool.  Using the command-line tool, one would
-specify options using flags like <tt class="docutils literal"><span class="pre">-o</span></tt>, <tt class="docutils literal"><span class="pre">-m</span></tt>, <tt class="docutils literal"><span class="pre">-f</span> <span class="pre">&lt;f&gt;</span></tt>, etc...
+the fsl module, the class <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.fsl.Bet</span></code> wraps the
+<code class="docutils literal"><span class="pre">bet</span></code> command-line tool.  Using the command-line tool, one would
+specify options using flags like <code class="docutils literal"><span class="pre">-o</span></code>, <code class="docutils literal"><span class="pre">-m</span></code>, <code class="docutils literal"><span class="pre">-f</span> <span class="pre">&lt;f&gt;</span></code>, etc...
 However, in nipype, options are assigned to Python attributes and can
 be specified in the following ways:</p>
 <p>Options can be assigned when you first create an interface object:</p>
@@ -207,7 +207,7 @@ be specified in the following ways:</p>
 <span class="n">result</span> <span class="o">=</span> <span class="n">mybet</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Options can be assigned through the <tt class="docutils literal"><span class="pre">inputs</span></tt> attribute:</p>
+<p>Options can be assigned through the <code class="docutils literal"><span class="pre">inputs</span></code> attribute:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
 <span class="n">mybet</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">()</span>
 <span class="n">mybet</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">in_file</span> <span class="o">=</span> <span class="s">&#39;foo.nii&#39;</span>
@@ -215,7 +215,7 @@ be specified in the following ways:</p>
 <span class="n">result</span> <span class="o">=</span> <span class="n">mybet</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Options can be assigned when calling the <tt class="docutils literal"><span class="pre">run</span></tt> method:</p>
+<p>Options can be assigned when calling the <code class="docutils literal"><span class="pre">run</span></code> method:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nipype.interfaces.fsl</span> <span class="kn">as</span> <span class="nn">fsl</span>
 <span class="n">mybet</span> <span class="o">=</span> <span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="p">()</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">mybet</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">in_file</span><span class="o">=</span><span class="s">&#39;foo.nii&#39;</span><span class="p">,</span> <span class="n">out_file</span><span class="o">=</span><span class="s">&#39;bar.nii&#39;</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -277,7 +277,7 @@ documentation and examples.</p>
 <span class="go">Definition:  spm.Realign(self, **inputs)</span>
 </pre></div>
 </div>
-<p>All of the nipype.interfaces classes have an <tt class="docutils literal"><span class="pre">help</span></tt> method
+<p>All of the nipype.interfaces classes have an <code class="docutils literal"><span class="pre">help</span></code> method
 which provides information on each of the options one can assign.</p>
 <div class="highlight-ipython"><div class="highlight"><pre><span class="gp">In [6]: </span><span class="n">fsl</span><span class="o">.</span><span class="n">BET</span><span class="o">.</span><span class="n">help</span><span class="p">()</span>
 <span class="go">Inputs</span>
@@ -345,9 +345,9 @@ which provides information on each of the options one can assign.</p>
 <span class="ne">realignment_parameters</span>: Estimated translation and rotation parameters
 </pre></div>
 </div>
-<p>Our <a class="reference internal" href="../interfaces/index.html#interface-index"><em>Interfaces and Algorithms</em></a> documentation provides html versions of our
+<p>Our <a class="reference internal" href="../interfaces/index.html#interface-index"><span>Interfaces and Algorithms</span></a> documentation provides html versions of our
 docstrings and includes links to the specific package
-documentation. For instance, the <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.fsl.Bet</span></tt>
+documentation. For instance, the <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.fsl.Bet</span></code>
 docstring has a direct link to the online BET Documentation.</p>
 </div>
 <div class="section" id="fsl-interface-example">
@@ -382,9 +382,9 @@ docstring has a direct link to the online BET Documentation.</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

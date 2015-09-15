@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -143,7 +143,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="install.html">Download</a></td>
@@ -155,7 +155,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -178,9 +178,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -190,7 +190,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="model-specification-for-first-level-fmri-analysis">
 <span id="model-spec"></span><h1>Model Specification for First Level fMRI Analysis<a class="headerlink" href="#model-specification-for-first-level-fmri-analysis" title="Permalink to this headline">¶</a></h1>
@@ -198,10 +198,10 @@
 specialized subclasses for package specific extensions.</p>
 <div class="section" id="general-purpose-model-specification">
 <h2>General purpose model specification<a class="headerlink" href="#general-purpose-model-specification" title="Permalink to this headline">¶</a></h2>
-<p>The <tt class="xref py py-class docutils literal"><span class="pre">SpecifyModel</span></tt> provides a generic mechanism for model
+<p>The <code class="xref py py-class docutils literal"><span class="pre">SpecifyModel</span></code> provides a generic mechanism for model
 specification. A mandatory input called subject_info provides paradigm
 specification for each run corresponding to a subject. This has to be in
-the form of a <tt class="xref py py-class docutils literal"><span class="pre">Bunch</span></tt> or a list of Bunch objects (one for each
+the form of a <code class="xref py py-class docutils literal"><span class="pre">Bunch</span></code> or a list of Bunch objects (one for each
 run). Each Bunch object contains the following attribules.</p>
 <div class="section" id="required-for-most-designs">
 <h3>Required for most designs<a class="headerlink" href="#required-for-most-designs" title="Permalink to this headline">¶</a></h3>
@@ -311,7 +311,7 @@ speaking rate for the events specified earlier:</p>
                                     <span class="n">pmod</span> <span class="o">=</span> <span class="n">pmod</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><tt class="xref py py-class docutils literal"><span class="pre">SpecifySPMModel</span></tt> also allows specifying additional components.
+<p><code class="xref py py-class docutils literal"><span class="pre">SpecifySPMModel</span></code> also allows specifying additional components.
 If you have a study with multiple runs, you can choose to concatenate
 conditions from different runs. by setting the input
 option <strong>concatenate_runs</strong> to True. You can also choose to set the
@@ -319,7 +319,7 @@ output options for this class to be in terms of &#8216;scans&#8217;.</p>
 </div>
 <div class="section" id="sparse-model-specification">
 <h2>Sparse model specification<a class="headerlink" href="#sparse-model-specification" title="Permalink to this headline">¶</a></h2>
-<p>In addition to standard models, <tt class="xref py py-class docutils literal"><span class="pre">SpecifySparseModel</span></tt> allows model
+<p>In addition to standard models, <code class="xref py py-class docutils literal"><span class="pre">SpecifySparseModel</span></code> allows model
 generation for sparse and sparse-clustered acquisition experiments.
 Details of the model generation and utility are provided in <a class="reference external" href="http://dl.dropbox.com/u/363467/OHBM2009_HRF.pdf">Ghosh et
 al. (2009) OHBM 2009.</a></p>
@@ -333,9 +333,9 @@ al. (2009) OHBM 2009.</a></p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

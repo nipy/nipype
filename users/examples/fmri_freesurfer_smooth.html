@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -157,7 +157,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../install.html">Download</a></td>
@@ -169,7 +169,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -192,9 +192,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -204,7 +204,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="fmri-surface-smooth-freesurfer-spm">
 <span id="example-fmri-freesurfer-smooth"></span><h1>fMRI: surface smooth - FreeSurfer, SPM<a class="headerlink" href="#fmri-surface-smooth-freesurfer-spm" title="Permalink to this headline">¶</a></h1>
@@ -270,13 +270,13 @@ node.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">preproc</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;preproc&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Realign</span></tt> for motion correction
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Realign</span></code> for motion correction
 and register all images to the mean image.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">realign</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Realign</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;realign&quot;</span><span class="p">)</span>
 <span class="n">realign</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">register_to_mean</span> <span class="o">=</span> <span class="bp">True</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.algorithms.rapidart</span></tt> to determine which of the
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.algorithms.rapidart</span></code> to determine which of the
 images in the functional series are outliers based on deviations in
 intensity or movement.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">art</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">ra</span><span class="o">.</span><span class="n">ArtifactDetect</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;art&quot;</span><span class="p">)</span>
@@ -288,26 +288,26 @@ intensity or movement.</p>
 <span class="n">art</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">parameter_source</span>     <span class="o">=</span> <span class="s">&#39;SPM&#39;</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.BBRegister</span></tt> to coregister the mean
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.BBRegister</span></code> to coregister the mean
 functional image generated by realign to the subjects&#8217; surfaces.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">surfregister</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">BBRegister</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;surfregister&#39;</span><span class="p">)</span>
 <span class="n">surfregister</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="s">&#39;fsl&#39;</span>
 <span class="n">surfregister</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">contrast_type</span> <span class="o">=</span> <span class="s">&#39;t2&#39;</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.FreeSurferSource</span></tt> to retrieve various image
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.FreeSurferSource</span></code> to retrieve various image
 files that are automatically generated by the recon-all process.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">FreeSurferSource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">FreeSurferSource</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;fssource&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.ApplyVolTransform</span></tt> to convert the
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.ApplyVolTransform</span></code> to convert the
 brainmask generated by freesurfer into the realigned functional space.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">ApplyVolTransform</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">ApplyVolTransform</span><span class="p">(),</span>
                             <span class="n">name</span><span class="o">=</span><span class="s">&#39;applyreg&#39;</span><span class="p">)</span>
 <span class="n">ApplyVolTransform</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">inverse</span> <span class="o">=</span> <span class="bp">True</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.Binarize</span></tt> to extract a binary brain
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.Binarize</span></code> to extract a binary brain
 mask.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">Threshold</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">Binarize</span><span class="p">(),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;threshold&#39;</span><span class="p">)</span>
 <span class="n">Threshold</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="mi">10</span>
@@ -316,8 +316,8 @@ mask.</p>
 </div>
 <p>Two different types of functional data smoothing are performed in this
 workflow. The volume smoothing option performs a standard SPM smoothin. using
-<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Smooth</span></tt>. In addition, we use a smoothing routine
-from freesurfer (<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.Binarize</span></tt>) to project the
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Smooth</span></code>. In addition, we use a smoothing routine
+from freesurfer (<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.Binarize</span></code>) to project the
 functional data from the volume to the subjects&#8217; surface, smooth it on the
 surface and fit it back into the volume forming the cortical ribbon. The
 projection uses the average value along a &#8220;cortical column&#8221;. In addition to the
@@ -357,24 +357,24 @@ for surface-based analysis and visualization.</p>
 </pre></div>
 </div>
 <p>Generate SPM-specific design information using
-<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.SpecifyModel</span></tt>.</p>
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.SpecifyModel</span></code>.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">modelspec</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">SpecifySPMModel</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span> <span class="s">&quot;modelspec&quot;</span><span class="p">)</span>
 <span class="n">modelspec</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">concatenate_runs</span>        <span class="o">=</span> <span class="bp">True</span>
 </pre></div>
 </div>
 <p>Generate a first level SPM.mat file for analysis
-<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Level1Design</span></tt>.</p>
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Level1Design</span></code>.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">level1design</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Level1Design</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span> <span class="s">&quot;level1design&quot;</span><span class="p">)</span>
 <span class="n">level1design</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">bases</span>              <span class="o">=</span> <span class="p">{</span><span class="s">&#39;hrf&#39;</span><span class="p">:{</span><span class="s">&#39;derivs&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]}}</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.EstimateModel</span></tt> to determine the
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.EstimateModel</span></code> to determine the
 parameters of the model.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">level1estimate</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">EstimateModel</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;level1estimate&quot;</span><span class="p">)</span>
 <span class="n">level1estimate</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">estimation_method</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;Classical&#39;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.EstimateContrast</span></tt> to estimate the
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.EstimateContrast</span></code> to estimate the
 first level contrasts specified in a few steps above.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">contrastestimate</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span> <span class="o">=</span> <span class="n">spm</span><span class="o">.</span><span class="n">EstimateContrast</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&quot;contrastestimate&quot;</span><span class="p">)</span>
 
@@ -401,7 +401,7 @@ we normalize the contrast images to MNI space.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">volnorm</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;volnormconimages&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.MRIConvert</span></tt> to convert the brainmask,
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.MRIConvert</span></code> to convert the brainmask,
 an mgz file and the contrast images (nifti-1 img/hdr pairs), to single volume
 nifti images.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">convert</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">MRIConvert</span><span class="p">(</span><span class="n">out_type</span><span class="o">=</span><span class="s">&#39;nii&#39;</span><span class="p">),</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;convert2nii&#39;</span><span class="p">)</span>
@@ -410,7 +410,7 @@ nifti images.</p>
                       <span class="n">name</span><span class="o">=</span><span class="s">&#39;convertimg2nii&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Segment</span></tt> to segment the structural image and
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Segment</span></code> to segment the structural image and
 generate the transformation file to MNI space.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
@@ -420,14 +420,14 @@ the head in the structural image.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">segment</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Segment</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;segment&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.ApplyVolTransform</span></tt> to convert contrast
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.freesurfer.ApplyVolTransform</span></code> to convert contrast
 images into freesurfer space.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">normwreg</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">MapNode</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">fs</span><span class="o">.</span><span class="n">ApplyVolTransform</span><span class="p">(),</span>
                       <span class="n">iterfield</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;source_file&#39;</span><span class="p">],</span>
                       <span class="n">name</span><span class="o">=</span><span class="s">&#39;applyreg2con&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Use <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Normalize</span></tt> to normalize the contrast images
+<p>Use <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.Normalize</span></code> to normalize the contrast images
 to MNI space</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">normalize</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">spm</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">jobtype</span><span class="o">=</span><span class="s">&#39;write&#39;</span><span class="p">),</span>
                     <span class="n">name</span><span class="o">=</span><span class="s">&#39;norm2mni&#39;</span><span class="p">)</span>
@@ -503,14 +503,14 @@ information for the functional runs and the contrasts to be evaluated.</p>
 <div class="section" id="data-specific-components">
 <h3>Data specific components<a class="headerlink" href="#data-specific-components" title="Permalink to this headline">¶</a></h3>
 <p>The nipype tutorial contains data for two subjects.  Subject data
-is in two subdirectories, <tt class="docutils literal"><span class="pre">s1</span></tt> and <tt class="docutils literal"><span class="pre">s2</span></tt>.  Each subject directory
+is in two subdirectories, <code class="docutils literal"><span class="pre">s1</span></code> and <code class="docutils literal"><span class="pre">s2</span></code>.  Each subject directory
 contains four functional volumes: f3.nii, f5.nii, f7.nii, f10.nii. And
 one anatomical volume named struct.nii.</p>
-<p>Below we set some variables to inform the <tt class="docutils literal"><span class="pre">datasource</span></tt> about the
+<p>Below we set some variables to inform the <code class="docutils literal"><span class="pre">datasource</span></code> about the
 layout of our data.  We specify the location of the data, the subject
 sub-directories and a dictionary that maps each run to a mnemonic (or
-field) for the run type (<tt class="docutils literal"><span class="pre">struct</span></tt> or <tt class="docutils literal"><span class="pre">func</span></tt>).  These fields become
-the output fields of the <tt class="docutils literal"><span class="pre">datasource</span></tt> node in the pipeline.</p>
+field) for the run type (<code class="docutils literal"><span class="pre">struct</span></code> or <code class="docutils literal"><span class="pre">func</span></code>).  These fields become
+the output fields of the <code class="docutils literal"><span class="pre">datasource</span></code> node in the pipeline.</p>
 <p>In the example below, run &#8216;f3&#8217; is of type &#8216;func&#8217; and gets mapped to a
 nifti filename through a template &#8216;%s.nii&#8217;. So &#8216;f3&#8217; would become
 &#8216;f3.nii&#8217;.</p>
@@ -527,17 +527,17 @@ nifti filename through a template &#8216;%s.nii&#8217;. So &#8216;f3&#8217; woul
 </div>
 <p>Here we set up iteration over all the subjects. The following line
 is a particular example of the flexibility of the system.  The
-<tt class="docutils literal"><span class="pre">datasource</span></tt> attribute <tt class="docutils literal"><span class="pre">iterables</span></tt> tells the pipeline engine that
+<code class="docutils literal"><span class="pre">datasource</span></code> attribute <code class="docutils literal"><span class="pre">iterables</span></code> tells the pipeline engine that
 it should repeat the analysis on each of the items in the
-<tt class="docutils literal"><span class="pre">subject_list</span></tt>. In the current example, the entire first level
+<code class="docutils literal"><span class="pre">subject_list</span></code>. In the current example, the entire first level
 preprocessing and estimation will be repeated for each subject
 contained in subject_list.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">infosource</span><span class="o">.</span><span class="n">iterables</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;subject_id&#39;</span><span class="p">,</span> <span class="n">subject_list</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Now we create a <tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.DataGrabber</span></tt> object and
+<p>Now we create a <code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.io.DataGrabber</span></code> object and
 fill in the information from above about the layout of our data.  The
-<tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.NodeWrapper</span></tt> module wraps the interface object
+<code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.NodeWrapper</span></code> module wraps the interface object
 and provides additional housekeeping and pipeline specific
 functionality.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">datasource</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">interface</span><span class="o">=</span><span class="n">nio</span><span class="o">.</span><span class="n">DataGrabber</span><span class="p">(</span><span class="n">infields</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;subject_id&#39;</span><span class="p">],</span>
@@ -563,7 +563,7 @@ functionality.</p>
 <h3>Experimental paradigm specific components<a class="headerlink" href="#experimental-paradigm-specific-components" title="Permalink to this headline">¶</a></h3>
 <p>Here we create a function that returns subject-specific information
 about the experimental paradigm. This is used by the
-<tt class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.SpecifyModel</span></tt> to create the information
+<code class="xref py py-class docutils literal"><span class="pre">nipype.interfaces.spm.SpecifyModel</span></code> to create the information
 necessary to generate an SPM design matrix. In this tutorial, the same
 paradigm was used for every participant.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">subjectinfo</span><span class="p">(</span><span class="n">subject_id</span><span class="p">):</span>
@@ -625,7 +625,7 @@ volume-based analysis.</p>
 describe the parameters used for each function. In this section we
 setup the connections between the nodes such that appropriate outputs
 from nodes are piped into appropriate inputs of other nodes.</p>
-<p>Use the <tt class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Workfow</span></tt> to create a
+<p>Use the <code class="xref py py-class docutils literal"><span class="pre">nipype.pipeline.engine.Workfow</span></code> to create a
 graph-based execution pipeline for first level analysis.</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">level1</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">Workflow</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;level1&quot;</span><span class="p">)</span>
 <span class="n">level1</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s">&#39;volsurf_tutorial/workingdir&#39;</span><span class="p">)</span>
@@ -740,9 +740,9 @@ that visually represents the workflow.</p>
 </div>
 <div class="admonition-example-source-code admonition">
 <p class="first admonition-title">Example source code</p>
-<p class="last">You can download <a class="reference download internal" href="../../_downloads/fmri_freesurfer_smooth.py"><tt class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></tt></a>.
+<p class="last">You can download <a class="reference download internal" href="../../_downloads/fmri_freesurfer_smooth.py"><code class="xref download docutils literal"><span class="pre">the</span> <span class="pre">full</span> <span class="pre">source</span> <span class="pre">code</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">example</span></code></a>.
 This same script is also included in the Nipype source distribution under the
-<tt class="file docutils literal"><span class="pre">examples</span></tt> directory.</p>
+<code class="file docutils literal"><span class="pre">examples</span></code> directory.</p>
 </div>
 </div>
 </div>
@@ -755,9 +755,9 @@ This same script is also included in the Nipype source distribution under the
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

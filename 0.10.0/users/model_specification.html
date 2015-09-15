@@ -1,0 +1,346 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.10.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../index.html">
+            <img src="../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../index.html">Home</a> ·
+<a class="navbar" href="../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../documentation.html">Documentation</a> ·
+<a class="navbar" href="../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Model Specification for First Level fMRI Analysis</a><ul>
+<li><a class="reference internal" href="#general-purpose-model-specification">General purpose model specification</a><ul>
+<li><a class="reference internal" href="#required-for-most-designs">Required for most designs</a></li>
+<li><a class="reference internal" href="#optional">Optional</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#spm-specific-attributes">SPM specific attributes</a></li>
+<li><a class="reference internal" href="#sparse-model-specification">Sparse model specification</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="model-specification-for-first-level-fmri-analysis">
+<span id="model-spec"></span><h1>Model Specification for First Level fMRI Analysis<a class="headerlink" href="#model-specification-for-first-level-fmri-analysis" title="Permalink to this headline">¶</a></h1>
+<p>Nipype provides a general purpose model specification mechanism with
+specialized subclasses for package specific extensions.</p>
+<div class="section" id="general-purpose-model-specification">
+<h2>General purpose model specification<a class="headerlink" href="#general-purpose-model-specification" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="xref py py-class docutils literal"><span class="pre">SpecifyModel</span></code> provides a generic mechanism for model
+specification. A mandatory input called subject_info provides paradigm
+specification for each run corresponding to a subject. This has to be in
+the form of a <code class="xref py py-class docutils literal"><span class="pre">Bunch</span></code> or a list of Bunch objects (one for each
+run). Each Bunch object contains the following attribules.</p>
+<div class="section" id="required-for-most-designs">
+<h3>Required for most designs<a class="headerlink" href="#required-for-most-designs" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">conditions : list of names</p>
+</li>
+<li><p class="first">onsets : lists of onsets corresponding to each condition</p>
+</li>
+<li><dl class="first docutils">
+<dt>durations <span class="classifier-delimiter">:</span> <span class="classifier">lists of durations corresponding to each condition. Should be</span></dt>
+<dd><p class="first last">left to a single 0 if all events are being modelled as impulses.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="optional">
+<h3>Optional<a class="headerlink" href="#optional" title="Permalink to this headline">¶</a></h3>
+<ul>
+<li><p class="first">regressor_names : list of names corresponding to each column. Should be None if  automatically assigned.</p>
+</li>
+<li><p class="first">regressors : list of lists. values for each regressor - must correspond to the number of volumes in the functional run</p>
+</li>
+<li><dl class="first docutils">
+<dt>amplitudes <span class="classifier-delimiter">:</span> <span class="classifier">lists of amplitudes for each event. This will be ignored by</span></dt>
+<dd><p class="first last">SPM&#8217;s Level1Design.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The following two (tmod, pmod) will be ignored by any
+Level1Design class other than SPM:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>tmod <span class="classifier-delimiter">:</span> <span class="classifier">lists of conditions that should be temporally modulated. Should</span></dt>
+<dd><p class="first last">default to None if not being used.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>pmod <span class="classifier-delimiter">:</span> <span class="classifier">list of Bunch corresponding to conditions</span></dt>
+<dd><ul class="first last simple">
+<li>name : name of parametric modulator</li>
+<li>param : values of the modulator</li>
+<li>poly : degree of modulation</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>An example Bunch definition:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">nipype.interfaces.base</span> <span class="kn">import</span> <span class="n">Bunch</span>
+<span class="n">condnames</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Tapping&#39;</span><span class="p">,</span> <span class="s">&#39;Speaking&#39;</span><span class="p">,</span> <span class="s">&#39;Yawning&#39;</span><span class="p">]</span>
+<span class="n">event_onsets</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">80</span><span class="p">],</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">70</span><span class="p">]]</span>
+<span class="n">durations</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">]]</span>
+
+<span class="n">subject_info</span> <span class="o">=</span> <span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="n">condnames</span><span class="p">,</span>
+                                   <span class="n">onsets</span> <span class="o">=</span> <span class="n">event_onsets</span><span class="p">,</span>
+                                   <span class="n">durations</span> <span class="o">=</span> <span class="n">durations</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Alternatively, you can provide condition, onset, duration and amplitude
+information through event files. The event files have to be in 1,2 or 3
+column format with the columns corresponding to Onsets, Durations and
+Amplitudes and they have to have the name event_name.run&lt;anything else&gt;
+e.g.: Words.run001.txt. The event_name part will be used to create the
+condition names. Words.run001.txt may look like:</p>
+<div class="highlight-python"><div class="highlight"><pre># Word Onsets Durations
+ 0   10
+ 20   10
+ ...
+</pre></div>
+</div>
+<p>or with amplitudes:</p>
+<div class="highlight-python"><div class="highlight"><pre># Word Onsets Durations Amplitudes
+0    10     1
+20   10    1
+...
+</pre></div>
+</div>
+<p>Together with this information, one needs to specify:</p>
+<ul class="simple">
+<li>whether the durations and event onsets are specified in terms of scan volumes
+or secs.</li>
+<li>the high-pass filter cutoff,</li>
+<li>the repetition time per scan</li>
+<li>functional data files corresponding to each run.</li>
+</ul>
+<p>Optionally you can specify realignment parameters, outlier indices.
+Outlier files should contain a list of numbers, one per row indicating
+which scans should not be included in the analysis. The numbers are
+0-based.</p>
+</div>
+</div>
+<div class="section" id="spm-specific-attributes">
+<h2>SPM specific attributes<a class="headerlink" href="#spm-specific-attributes" title="Permalink to this headline">¶</a></h2>
+<p>in addition to the generic specification options, several SPM specific
+options can be provided. In particular, the subject_info function can
+provide temporal and parametric modulators in the Bunch attributes tmod
+and pmod. The following example adds a linear parametric modulator for
+speaking rate for the events specified earlier:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pmod</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="n">Bunch</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;Rate&#39;</span><span class="p">],</span> <span class="n">param</span><span class="o">=</span><span class="p">[[</span><span class="o">.</span><span class="mi">300</span><span class="p">,</span> <span class="o">.</span><span class="mi">500</span><span class="p">,</span> <span class="o">.</span><span class="mi">600</span><span class="p">]],</span>
+                                     <span class="n">poly</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="bp">None</span><span class="p">]</span>
+<span class="n">subject_info</span> <span class="o">=</span> <span class="n">Bunch</span><span class="p">(</span><span class="n">conditions</span><span class="o">=</span><span class="n">condnames</span><span class="p">,</span>
+                                    <span class="n">onsets</span> <span class="o">=</span> <span class="n">event_onsets</span><span class="p">,</span>
+                                    <span class="n">durations</span> <span class="o">=</span> <span class="n">durations</span><span class="p">,</span>
+                                    <span class="n">pmod</span> <span class="o">=</span> <span class="n">pmod</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="xref py py-class docutils literal"><span class="pre">SpecifySPMModel</span></code> also allows specifying additional components.
+If you have a study with multiple runs, you can choose to concatenate
+conditions from different runs. by setting the input
+option <strong>concatenate_runs</strong> to True. You can also choose to set the
+output options for this class to be in terms of &#8216;scans&#8217;.</p>
+</div>
+<div class="section" id="sparse-model-specification">
+<h2>Sparse model specification<a class="headerlink" href="#sparse-model-specification" title="Permalink to this headline">¶</a></h2>
+<p>In addition to standard models, <code class="xref py py-class docutils literal"><span class="pre">SpecifySparseModel</span></code> allows model
+generation for sparse and sparse-clustered acquisition experiments.
+Details of the model generation and utility are provided in <a class="reference external" href="http://dl.dropbox.com/u/363467/OHBM2009_HRF.pdf">Ghosh et
+al. (2009) OHBM 2009.</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-14, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

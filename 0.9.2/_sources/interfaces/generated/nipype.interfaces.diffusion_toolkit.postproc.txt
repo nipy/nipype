@@ -1,0 +1,55 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+interfaces.diffusion_toolkit.postproc
+=====================================
+
+
+.. _nipype.interfaces.diffusion_toolkit.postproc.SplineFilter:
+
+
+.. index:: SplineFilter
+
+SplineFilter
+------------
+
+`Link to code <http://github.com/nipy/nipype/tree/162f65d96e1a5fb8a17652701558718aa773f086/nipype/interfaces/diffusion_toolkit/postproc.py#L26>`__
+
+Wraps command **spline_filter**
+
+
+Inputs::
+
+        [Mandatory]
+        step_length: (a float)
+                in the unit of minimum voxel size
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        track_file: (an existing file name)
+                file containing tracks to be filtered
+
+        [Optional]
+        args: (a string)
+                Additional parameters to the command
+        environ: (a dictionary with keys which are a value of type 'str' and
+                 with values which are a value of type 'str', nipype default value:
+                 {})
+                Environment variables
+        ignore_exception: (a boolean, nipype default value: False)
+                Print an error message instead of throwing an exception in case the
+                interface fails to run
+        output_file: (a file name, nipype default value: spline_tracks.trk)
+                target file for smoothed tracks
+        step_length: (a float)
+                in the unit of minimum voxel size
+        terminal_output: ('stream' or 'allatonce' or 'file' or 'none')
+                Control terminal output: `stream` - displays to terminal
+                immediately, `allatonce` - waits till command is finished to display
+                output, `file` - writes output to file, `none` - output is ignored
+        track_file: (an existing file name)
+                file containing tracks to be filtered
+
+Outputs::
+
+        smoothed_track_file: (an existing file name)

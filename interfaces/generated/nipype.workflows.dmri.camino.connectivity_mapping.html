@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,7 +114,7 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">workflows.dmri.camino.connectivity_mapping</a><ul>
-<li><a class="reference internal" href="#create-connectivity-pipeline"><tt class="docutils literal"><span class="pre">create_connectivity_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-connectivity-pipeline"><code class="docutils literal"><span class="pre">create_connectivity_pipeline()</span></code></a><ul>
 <li><a class="reference internal" href="#example">Example</a></li>
 <li><a class="reference internal" href="#graph">Graph</a></li>
 </ul>
@@ -141,7 +141,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -153,7 +153,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -176,9 +176,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -188,15 +188,15 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-nipype.workflows.dmri.camino.connectivity_mapping">
 <span id="workflows-dmri-camino-connectivity-mapping"></span><h1>workflows.dmri.camino.connectivity_mapping<a class="headerlink" href="#module-nipype.workflows.dmri.camino.connectivity_mapping" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="create-connectivity-pipeline">
-<span id="nipype-workflows-dmri-camino-connectivity-mapping-create-connectivity-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_connectivity_pipeline()</span></tt><a class="headerlink" href="#create-connectivity-pipeline" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/camino/connectivity_mapping.py#L15">Link to code</a></p>
+<span id="nipype-workflows-dmri-camino-connectivity-mapping-create-connectivity-pipeline"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_connectivity_pipeline()</span></code><a class="headerlink" href="#create-connectivity-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/camino/connectivity_mapping.py#L15">Link to code</a></p>
 <p>Creates a pipeline that does the same connectivity processing as in the
-<a class="reference internal" href="../../users/examples/dmri_connectivity.html#example-dmri-connectivity"><em>dMRI: Connectivity - Camino, CMTK, FreeSurfer</em></a> example script. Given a subject id (and completed Freesurfer reconstruction)
+<a class="reference internal" href="../../users/examples/dmri_connectivity.html#example-dmri-connectivity"><span>dMRI: Connectivity - Camino, CMTK, FreeSurfer</span></a> example script. Given a subject id (and completed Freesurfer reconstruction)
 diffusion-weighted image, b-values, and b-vectors, the workflow will return the subject&#8217;s connectome
 as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="reference external" href="http://www.cmtk.org">http://www.cmtk.org</a>).</p>
 <div class="section" id="example">
@@ -235,7 +235,7 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 <div class="section" id="graph">
 <h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-283acd61b05b4ef324a9065c3b72442faea0d5b4.png" alt="digraph connectivity{
+<img src="../../_images/graphviz-cc304154b8750b772a01ecbbb30217ef23e160cd.png" alt="digraph connectivity{
 
   label=&quot;connectivity&quot;;
 
@@ -249,73 +249,47 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_inputnode_within[label=&quot;inputnode_within (utility)&quot;];
 
-    connectivity_mapping_image2voxel[label=&quot;image2voxel (camino)&quot;];
-
-    connectivity_mapping_bet_b0[label=&quot;bet_b0 (fsl)&quot;];
-
     connectivity_mapping_fsl2scheme[label=&quot;fsl2scheme (camino)&quot;];
 
+    connectivity_mapping_fssourceLH[label=&quot;fssourceLH (io)&quot;];
+
+    connectivity_mapping_mris_convertLHsphere[label=&quot;mris_convertLHsphere (freesurfer)&quot;];
+
+    connectivity_mapping_mris_convertLHwhite[label=&quot;mris_convertLHwhite (freesurfer)&quot;];
+
+    connectivity_mapping_mris_convertLH[label=&quot;mris_convertLH (freesurfer)&quot;];
+
+    connectivity_mapping_fssource[label=&quot;fssource (io)&quot;];
+
+    connectivity_mapping_dtlutgen[label=&quot;dtlutgen (camino)&quot;];
+
+    connectivity_mapping_mri_convert_AparcAseg[label=&quot;mri_convert_AparcAseg (freesurfer)&quot;];
+
+    connectivity_mapping_mri_convert_Brain[label=&quot;mri_convert_Brain (freesurfer)&quot;];
+
     connectivity_mapping_fssourceRH[label=&quot;fssourceRH (io)&quot;];
-
-    connectivity_mapping_mris_convertRH[label=&quot;mris_convertRH (freesurfer)&quot;];
-
-    connectivity_mapping_mris_convertRHlabels[label=&quot;mris_convertRHlabels (freesurfer)&quot;];
 
     connectivity_mapping_mris_convertRHsphere[label=&quot;mris_convertRHsphere (freesurfer)&quot;];
 
     connectivity_mapping_mris_convertRHinflated[label=&quot;mris_convertRHinflated (freesurfer)&quot;];
 
+    connectivity_mapping_mris_convertRH[label=&quot;mris_convertRH (freesurfer)&quot;];
+
     connectivity_mapping_mris_convertRHwhite[label=&quot;mris_convertRHwhite (freesurfer)&quot;];
-
-    connectivity_mapping_dtlutgen[label=&quot;dtlutgen (camino)&quot;];
-
-    connectivity_mapping_fssourceLH[label=&quot;fssourceLH (io)&quot;];
-
-    connectivity_mapping_mris_convertLHwhite[label=&quot;mris_convertLHwhite (freesurfer)&quot;];
-
-    connectivity_mapping_mris_convertLHlabels[label=&quot;mris_convertLHlabels (freesurfer)&quot;];
-
-    connectivity_mapping_mris_convertLHsphere[label=&quot;mris_convertLHsphere (freesurfer)&quot;];
-
-    connectivity_mapping_mris_convertLHinflated[label=&quot;mris_convertLHinflated (freesurfer)&quot;];
-
-    connectivity_mapping_GiftiLabels[label=&quot;GiftiLabels (utility)&quot;];
-
-    connectivity_mapping_mris_convertLH[label=&quot;mris_convertLH (freesurfer)&quot;];
-
-    connectivity_mapping_GiftiSurfaces[label=&quot;GiftiSurfaces (utility)&quot;];
-
-    connectivity_mapping_fssource[label=&quot;fssource (io)&quot;];
-
-    connectivity_mapping_mri_convert_Brain[label=&quot;mri_convert_Brain (freesurfer)&quot;];
-
-    connectivity_mapping_mri_convert_AparcAseg[label=&quot;mri_convert_AparcAseg (freesurfer)&quot;];
 
     connectivity_mapping_ROIGen_structspace[label=&quot;ROIGen_structspace (cmtk)&quot;];
 
-    connectivity_mapping_coregister[label=&quot;coregister (fsl)&quot;];
-
-    connectivity_mapping_convertxfm[label=&quot;convertxfm (fsl)&quot;];
-
-    connectivity_mapping_inverse[label=&quot;inverse (fsl)&quot;];
-
-    connectivity_mapping_inverse_AparcAseg[label=&quot;inverse_AparcAseg (fsl)&quot;];
+    connectivity_mapping_image2voxel[label=&quot;image2voxel (camino)&quot;];
 
     connectivity_mapping_dtifit[label=&quot;dtifit (camino)&quot;];
+
+    connectivity_mapping_dteig[label=&quot;dteig (camino)&quot;];
+
+    connectivity_mapping_picopdfs[label=&quot;picopdfs (camino)&quot;];
 
     connectivity_mapping_trace[label=&quot;trace (camino)&quot;];
 
     connectivity_mapping_analyzeheader_trace[label=&quot;analyzeheader_trace (camino)&quot;];
-
-    connectivity_mapping_trace2nii[label=&quot;trace2nii (misc)&quot;];
-
-    connectivity_mapping_picopdfs[label=&quot;picopdfs (camino)&quot;];
-
-    connectivity_mapping_track[label=&quot;track (camino)&quot;];
-
-    connectivity_mapping_vtkstreamlines[label=&quot;vtkstreamlines (camino)&quot;];
-
-    connectivity_mapping_dteig[label=&quot;dteig (camino)&quot;];
 
     connectivity_mapping_fa[label=&quot;fa (camino)&quot;];
 
@@ -323,15 +297,41 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_fa2nii[label=&quot;fa2nii (misc)&quot;];
 
+    connectivity_mapping_bet_b0[label=&quot;bet_b0 (fsl)&quot;];
+
+    connectivity_mapping_track[label=&quot;track (camino)&quot;];
+
     connectivity_mapping_camino2trackvis[label=&quot;camino2trackvis (camino2trackvis)&quot;];
 
     connectivity_mapping_trk2camino[label=&quot;trk2camino (camino2trackvis)&quot;];
 
+    connectivity_mapping_trace2nii[label=&quot;trace2nii (misc)&quot;];
+
+    connectivity_mapping_vtkstreamlines[label=&quot;vtkstreamlines (camino)&quot;];
+
+    connectivity_mapping_coregister[label=&quot;coregister (fsl)&quot;];
+
+    connectivity_mapping_convertxfm[label=&quot;convertxfm (fsl)&quot;];
+
+    connectivity_mapping_inverse_AparcAseg[label=&quot;inverse_AparcAseg (fsl)&quot;];
+
+    connectivity_mapping_inverse[label=&quot;inverse (fsl)&quot;];
+
+    connectivity_mapping_mris_convertLHinflated[label=&quot;mris_convertLHinflated (freesurfer)&quot;];
+
+    connectivity_mapping_GiftiSurfaces[label=&quot;GiftiSurfaces (utility)&quot;];
+
+    connectivity_mapping_mris_convertRHlabels[label=&quot;mris_convertRHlabels (freesurfer)&quot;];
+
+    connectivity_mapping_CreateNodes[label=&quot;CreateNodes (cmtk)&quot;];
+
+    connectivity_mapping_mris_convertLHlabels[label=&quot;mris_convertLHlabels (freesurfer)&quot;];
+
+    connectivity_mapping_GiftiLabels[label=&quot;GiftiLabels (utility)&quot;];
+
     connectivity_mapping_ROIGen[label=&quot;ROIGen (cmtk)&quot;];
 
     connectivity_mapping_NiftiVolumes[label=&quot;NiftiVolumes (utility)&quot;];
-
-    connectivity_mapping_CreateNodes[label=&quot;CreateNodes (cmtk)&quot;];
 
     connectivity_mapping_CreateMatrix[label=&quot;CreateMatrix (cmtk)&quot;];
 
@@ -339,21 +339,7 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_CFFConverter[label=&quot;CFFConverter (cmtk)&quot;];
 
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_bet_b0;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_bet_b0;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fsl2scheme;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fsl2scheme;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceLH;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceLH;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_camino2trackvis;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_camino2trackvis;
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_image2voxel;
 
     connectivity_mapping_inputnode_within -&gt; connectivity_mapping_CreateNodes;
 
@@ -363,69 +349,47 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fa2nii;
 
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceRH;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceRH;
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_NiftiVolumes;
 
     connectivity_mapping_inputnode_within -&gt; connectivity_mapping_CreateMatrix;
 
     connectivity_mapping_inputnode_within -&gt; connectivity_mapping_CreateMatrix;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fsl2scheme;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fsl2scheme;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceRH;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceRH;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceLH;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_fssourceLH;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_camino2trackvis;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_camino2trackvis;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_analyzeheader_fa;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_analyzeheader_fa;
 
     connectivity_mapping_inputnode_within -&gt; connectivity_mapping_trace2nii;
 
     connectivity_mapping_inputnode_within -&gt; connectivity_mapping_CFFConverter;
 
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_analyzeheader_trace;
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_bet_b0;
+
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_bet_b0;
 
     connectivity_mapping_inputnode_within -&gt; connectivity_mapping_analyzeheader_trace;
 
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_NiftiVolumes;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_image2voxel;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_analyzeheader_fa;
-
-    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_analyzeheader_fa;
-
-    connectivity_mapping_image2voxel -&gt; connectivity_mapping_dtifit;
-
-    connectivity_mapping_bet_b0 -&gt; connectivity_mapping_track;
-
-    connectivity_mapping_bet_b0 -&gt; connectivity_mapping_inverse_AparcAseg;
-
-    connectivity_mapping_bet_b0 -&gt; connectivity_mapping_coregister;
-
-    connectivity_mapping_bet_b0 -&gt; connectivity_mapping_inverse;
+    connectivity_mapping_inputnode_within -&gt; connectivity_mapping_analyzeheader_trace;
 
     connectivity_mapping_fsl2scheme -&gt; connectivity_mapping_dtifit;
 
     connectivity_mapping_fsl2scheme -&gt; connectivity_mapping_dtlutgen;
-
-    connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRH;
-
-    connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRHlabels;
-
-    connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRHlabels;
-
-    connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRHsphere;
-
-    connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRHinflated;
-
-    connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRHwhite;
-
-    connectivity_mapping_mris_convertRH -&gt; connectivity_mapping_GiftiSurfaces;
-
-    connectivity_mapping_mris_convertRHlabels -&gt; connectivity_mapping_GiftiLabels;
-
-    connectivity_mapping_mris_convertRHsphere -&gt; connectivity_mapping_GiftiSurfaces;
-
-    connectivity_mapping_mris_convertRHinflated -&gt; connectivity_mapping_GiftiSurfaces;
-
-    connectivity_mapping_mris_convertRHwhite -&gt; connectivity_mapping_GiftiSurfaces;
-
-    connectivity_mapping_dtlutgen -&gt; connectivity_mapping_picopdfs;
-
-    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHwhite;
 
     connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHlabels;
 
@@ -435,53 +399,65 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHsphere;
 
+    connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHwhite;
+
     connectivity_mapping_fssourceLH -&gt; connectivity_mapping_mris_convertLHinflated;
-
-    connectivity_mapping_mris_convertLHwhite -&gt; connectivity_mapping_GiftiSurfaces;
-
-    connectivity_mapping_mris_convertLHlabels -&gt; connectivity_mapping_GiftiLabels;
 
     connectivity_mapping_mris_convertLHsphere -&gt; connectivity_mapping_GiftiSurfaces;
 
-    connectivity_mapping_mris_convertLHinflated -&gt; connectivity_mapping_GiftiSurfaces;
-
-    connectivity_mapping_GiftiLabels -&gt; connectivity_mapping_CFFConverter;
+    connectivity_mapping_mris_convertLHwhite -&gt; connectivity_mapping_GiftiSurfaces;
 
     connectivity_mapping_mris_convertLH -&gt; connectivity_mapping_GiftiSurfaces;
 
-    connectivity_mapping_GiftiSurfaces -&gt; connectivity_mapping_CFFConverter;
+    connectivity_mapping_fssource -&gt; connectivity_mapping_mri_convert_AparcAseg;
 
     connectivity_mapping_fssource -&gt; connectivity_mapping_mri_convert_Brain;
 
-    connectivity_mapping_fssource -&gt; connectivity_mapping_mri_convert_AparcAseg;
-
-    connectivity_mapping_mri_convert_Brain -&gt; connectivity_mapping_NiftiVolumes;
-
-    connectivity_mapping_mri_convert_Brain -&gt; connectivity_mapping_coregister;
-
-    connectivity_mapping_mri_convert_Brain -&gt; connectivity_mapping_inverse;
+    connectivity_mapping_dtlutgen -&gt; connectivity_mapping_picopdfs;
 
     connectivity_mapping_mri_convert_AparcAseg -&gt; connectivity_mapping_inverse_AparcAseg;
 
     connectivity_mapping_mri_convert_AparcAseg -&gt; connectivity_mapping_ROIGen_structspace;
 
+    connectivity_mapping_mri_convert_Brain -&gt; connectivity_mapping_coregister;
+
+    connectivity_mapping_mri_convert_Brain -&gt; connectivity_mapping_inverse;
+
+    connectivity_mapping_mri_convert_Brain -&gt; connectivity_mapping_NiftiVolumes;
+
+    connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRHlabels;
+
+    connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRHlabels;
+
+    connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRHsphere;
+
+    connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRHinflated;
+
+    connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRH;
+
+    connectivity_mapping_fssourceRH -&gt; connectivity_mapping_mris_convertRHwhite;
+
+    connectivity_mapping_mris_convertRHsphere -&gt; connectivity_mapping_GiftiSurfaces;
+
+    connectivity_mapping_mris_convertRHinflated -&gt; connectivity_mapping_GiftiSurfaces;
+
+    connectivity_mapping_mris_convertRH -&gt; connectivity_mapping_GiftiSurfaces;
+
+    connectivity_mapping_mris_convertRHwhite -&gt; connectivity_mapping_GiftiSurfaces;
+
     connectivity_mapping_ROIGen_structspace -&gt; connectivity_mapping_CreateNodes;
 
-    connectivity_mapping_coregister -&gt; connectivity_mapping_convertxfm;
-
-    connectivity_mapping_convertxfm -&gt; connectivity_mapping_inverse;
-
-    connectivity_mapping_convertxfm -&gt; connectivity_mapping_inverse_AparcAseg;
-
-    connectivity_mapping_inverse_AparcAseg -&gt; connectivity_mapping_ROIGen;
-
-    connectivity_mapping_dtifit -&gt; connectivity_mapping_trace;
-
-    connectivity_mapping_dtifit -&gt; connectivity_mapping_picopdfs;
+    connectivity_mapping_image2voxel -&gt; connectivity_mapping_dtifit;
 
     connectivity_mapping_dtifit -&gt; connectivity_mapping_dteig;
 
+    connectivity_mapping_dtifit -&gt; connectivity_mapping_picopdfs;
+
+    connectivity_mapping_dtifit -&gt; connectivity_mapping_trace;
+
     connectivity_mapping_dtifit -&gt; connectivity_mapping_fa;
+
+    connectivity_mapping_picopdfs -&gt; connectivity_mapping_track;
 
     connectivity_mapping_trace -&gt; connectivity_mapping_analyzeheader_trace;
 
@@ -489,31 +465,55 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
 
     connectivity_mapping_analyzeheader_trace -&gt; connectivity_mapping_trace2nii;
 
-    connectivity_mapping_picopdfs -&gt; connectivity_mapping_track;
-
-    connectivity_mapping_track -&gt; connectivity_mapping_camino2trackvis;
-
-    connectivity_mapping_track -&gt; connectivity_mapping_vtkstreamlines;
-
     connectivity_mapping_fa -&gt; connectivity_mapping_fa2nii;
 
     connectivity_mapping_fa -&gt; connectivity_mapping_analyzeheader_fa;
 
     connectivity_mapping_analyzeheader_fa -&gt; connectivity_mapping_fa2nii;
 
-    connectivity_mapping_camino2trackvis -&gt; connectivity_mapping_CreateMatrix;
+    connectivity_mapping_bet_b0 -&gt; connectivity_mapping_coregister;
 
-    connectivity_mapping_camino2trackvis -&gt; connectivity_mapping_trk2camino;
+    connectivity_mapping_bet_b0 -&gt; connectivity_mapping_inverse_AparcAseg;
+
+    connectivity_mapping_bet_b0 -&gt; connectivity_mapping_inverse;
+
+    connectivity_mapping_bet_b0 -&gt; connectivity_mapping_track;
+
+    connectivity_mapping_track -&gt; connectivity_mapping_camino2trackvis;
+
+    connectivity_mapping_track -&gt; connectivity_mapping_vtkstreamlines;
 
     connectivity_mapping_camino2trackvis -&gt; connectivity_mapping_CFFConverter;
 
-    connectivity_mapping_ROIGen -&gt; connectivity_mapping_CreateMatrix;
+    connectivity_mapping_camino2trackvis -&gt; connectivity_mapping_trk2camino;
+
+    connectivity_mapping_camino2trackvis -&gt; connectivity_mapping_CreateMatrix;
+
+    connectivity_mapping_coregister -&gt; connectivity_mapping_convertxfm;
+
+    connectivity_mapping_convertxfm -&gt; connectivity_mapping_inverse_AparcAseg;
+
+    connectivity_mapping_convertxfm -&gt; connectivity_mapping_inverse;
+
+    connectivity_mapping_inverse_AparcAseg -&gt; connectivity_mapping_ROIGen;
+
+    connectivity_mapping_mris_convertLHinflated -&gt; connectivity_mapping_GiftiSurfaces;
+
+    connectivity_mapping_GiftiSurfaces -&gt; connectivity_mapping_CFFConverter;
+
+    connectivity_mapping_mris_convertRHlabels -&gt; connectivity_mapping_GiftiLabels;
+
+    connectivity_mapping_CreateNodes -&gt; connectivity_mapping_CreateMatrix;
+
+    connectivity_mapping_mris_convertLHlabels -&gt; connectivity_mapping_GiftiLabels;
+
+    connectivity_mapping_GiftiLabels -&gt; connectivity_mapping_CFFConverter;
 
     connectivity_mapping_ROIGen -&gt; connectivity_mapping_NiftiVolumes;
 
-    connectivity_mapping_NiftiVolumes -&gt; connectivity_mapping_CFFConverter;
+    connectivity_mapping_ROIGen -&gt; connectivity_mapping_CreateMatrix;
 
-    connectivity_mapping_CreateNodes -&gt; connectivity_mapping_CreateMatrix;
+    connectivity_mapping_NiftiVolumes -&gt; connectivity_mapping_CFFConverter;
 
     connectivity_mapping_CreateMatrix -&gt; connectivity_mapping_FiberDataArrays;
 
@@ -576,9 +576,9 @@ as a Connectome File Format (CFF) file for use in Connectome Viewer (<a class="r
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

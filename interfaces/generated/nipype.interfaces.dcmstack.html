@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -127,8 +127,8 @@
 <li><a class="reference internal" href="#mergenifti">MergeNifti</a></li>
 <li><a class="reference internal" href="#niftigeneratorbase">NiftiGeneratorBase</a></li>
 <li><a class="reference internal" href="#splitnifti">SplitNifti</a></li>
-<li><a class="reference internal" href="#make-key-func"><tt class="docutils literal"><span class="pre">make_key_func()</span></tt></a></li>
-<li><a class="reference internal" href="#sanitize-path-comp"><tt class="docutils literal"><span class="pre">sanitize_path_comp()</span></tt></a></li>
+<li><a class="reference internal" href="#make-key-func"><code class="docutils literal"><span class="pre">make_key_func()</span></code></a></li>
+<li><a class="reference internal" href="#sanitize-path-comp"><code class="docutils literal"><span class="pre">sanitize_path_comp()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -151,7 +151,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -163,7 +163,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -186,9 +186,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -198,13 +198,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-dcmstack">
 <h1>interfaces.dcmstack<a class="headerlink" href="#interfaces-dcmstack" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-dcmstack-copymeta"></span><div class="section" id="copymeta">
 <span id="index-0"></span><h2>CopyMeta<a class="headerlink" href="#copymeta" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dcmstack.py#L288">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/dcmstack.py#L288">Link to code</a></p>
 <p>Copy meta data from one Nifti file to another. Useful for preserving
 meta data after some processing steps.</p>
 <p>Inputs:</p>
@@ -227,7 +227,7 @@ include_classes: (a list of items which are any value)
 <span class="target" id="nipype-interfaces-dcmstack-dcmstack"></span></div>
 <div class="section" id="dcmstack">
 <span id="index-1"></span><h2>DcmStack<a class="headerlink" href="#dcmstack" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dcmstack.py#L116">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/dcmstack.py#L116">Link to code</a></p>
 <p>Create one Nifti file from a set of DICOM files. Can optionally embed
 meta data.</p>
 <div class="section" id="example">
@@ -271,7 +271,7 @@ out_path: (a directory name)
 </div>
 <div class="section" id="groupandstack">
 <span id="index-2"></span><h2>GroupAndStack<a class="headerlink" href="#groupandstack" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dcmstack.py#L176">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/dcmstack.py#L176">Link to code</a></p>
 <p>Create (potentially) multiple Nifti files for a set of DICOM files.</p>
 <p>Inputs:</p>
 <div class="highlight-python"><div class="highlight"><pre>[Mandatory]
@@ -304,7 +304,7 @@ out_path: (a directory name)
 <span class="target" id="nipype-interfaces-dcmstack-lookupmeta"></span></div>
 <div class="section" id="lookupmeta">
 <span id="index-3"></span><h2>LookupMeta<a class="headerlink" href="#lookupmeta" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dcmstack.py#L217">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/dcmstack.py#L217">Link to code</a></p>
 <p>Lookup meta data values from a Nifti with embedded meta data.</p>
 <div class="section" id="id1">
 <h3>Example<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
@@ -339,7 +339,7 @@ meta_keys: (a list of items which are any value or a dictionary with
 </div>
 <div class="section" id="mergenifti">
 <span id="index-4"></span><h2>MergeNifti<a class="headerlink" href="#mergenifti" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dcmstack.py#L355">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/dcmstack.py#L355">Link to code</a></p>
 <p>Merge multiple Nifti files into one. Merges together meta data
 extensions as well.</p>
 <p>Inputs:</p>
@@ -348,7 +348,7 @@ in_files: (a list of items which are any value)
         List of Nifti files to merge
 
 [Optional]
-merge_dim: (an integer)
+merge_dim: (an integer (int or long))
         Dimension to merge along. If not specified, the last singular or
         non-existant dimension is used.
 out_ext: (a string, nipype default value: .nii.gz)
@@ -370,7 +370,7 @@ sort_order: (a string or a list of items which are any value)
 <span class="target" id="nipype-interfaces-dcmstack-niftigeneratorbase"></span></div>
 <div class="section" id="niftigeneratorbase">
 <span id="index-5"></span><h2>NiftiGeneratorBase<a class="headerlink" href="#niftigeneratorbase" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dcmstack.py#L57">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/dcmstack.py#L57">Link to code</a></p>
 <p>Base class for interfaces that produce Nifti files, potentially with
 embedded meta data.</p>
 <p>Inputs:</p>
@@ -389,7 +389,7 @@ ignore_exception: (a boolean, nipype default value: False)
 <span class="target" id="nipype-interfaces-dcmstack-splitnifti"></span></div>
 <div class="section" id="splitnifti">
 <span id="index-6"></span><h2>SplitNifti<a class="headerlink" href="#splitnifti" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dcmstack.py#L400">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/dcmstack.py#L400">Link to code</a></p>
 <p>Split one Nifti file into many along the specified dimension. Each
 result has an updated meta data extension as well.</p>
 <p>Inputs:</p>
@@ -405,7 +405,7 @@ out_format: (a string)
         filename(s)
 out_path: (a directory name)
         output path, current working directory if not set
-split_dim: (an integer)
+split_dim: (an integer (int or long))
         Dimension to split along. If not specified, the last dimension is
         used.
 </pre></div>
@@ -417,12 +417,12 @@ split_dim: (an integer)
 </div>
 <span class="target" id="module-nipype.interfaces.dcmstack"></span></div>
 <div class="section" id="make-key-func">
-<span id="nipype-interfaces-dcmstack-make-key-func"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">make_key_func()</span></tt><a class="headerlink" href="#make-key-func" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dcmstack.py#L347">Link to code</a></p>
+<span id="nipype-interfaces-dcmstack-make-key-func"></span><h2><code class="xref py py-func docutils literal"><span class="pre">make_key_func()</span></code><a class="headerlink" href="#make-key-func" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/dcmstack.py#L347">Link to code</a></p>
 </div>
 <div class="section" id="sanitize-path-comp">
-<span id="nipype-interfaces-dcmstack-sanitize-path-comp"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">sanitize_path_comp()</span></tt><a class="headerlink" href="#sanitize-path-comp" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/dcmstack.py#L39">Link to code</a></p>
+<span id="nipype-interfaces-dcmstack-sanitize-path-comp"></span><h2><code class="xref py py-func docutils literal"><span class="pre">sanitize_path_comp()</span></code><a class="headerlink" href="#sanitize-path-comp" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/dcmstack.py#L39">Link to code</a></p>
 </div>
 </div>
 
@@ -433,9 +433,9 @@ split_dim: (an integer)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,7 +114,7 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">workflows.dmri.mrtrix.diffusion</a><ul>
-<li><a class="reference internal" href="#create-mrtrix-dti-pipeline"><tt class="docutils literal"><span class="pre">create_mrtrix_dti_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-mrtrix-dti-pipeline"><code class="docutils literal"><span class="pre">create_mrtrix_dti_pipeline()</span></code></a><ul>
 <li><a class="reference internal" href="#example">Example</a></li>
 <li><a class="reference internal" href="#graph">Graph</a></li>
 </ul>
@@ -141,7 +141,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -153,7 +153,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -176,9 +176,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -188,13 +188,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-nipype.workflows.dmri.mrtrix.diffusion">
 <span id="workflows-dmri-mrtrix-diffusion"></span><h1>workflows.dmri.mrtrix.diffusion<a class="headerlink" href="#module-nipype.workflows.dmri.mrtrix.diffusion" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="create-mrtrix-dti-pipeline">
-<span id="nipype-workflows-dmri-mrtrix-diffusion-create-mrtrix-dti-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_mrtrix_dti_pipeline()</span></tt><a class="headerlink" href="#create-mrtrix-dti-pipeline" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/mrtrix/diffusion.py#L6">Link to code</a></p>
+<span id="nipype-workflows-dmri-mrtrix-diffusion-create-mrtrix-dti-pipeline"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_mrtrix_dti_pipeline()</span></code><a class="headerlink" href="#create-mrtrix-dti-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/mrtrix/diffusion.py#L6">Link to code</a></p>
 <p>Creates a pipeline that does the same diffusion processing as in the
 <a class="reference internal" href="../../users/examples/dmri_mrtrix_dti.html"><em>dMRI: DTI - MRtrix, FSL</em></a> example script. Given a diffusion-weighted image,
 b-values, and b-vectors, the workflow will return the tractography
@@ -226,7 +226,7 @@ computed from spherical deconvolution and probabilistic streamline tractography<
 <div class="section" id="graph">
 <h3>Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-f5e5ec2c22d967743df435ae06a24625944dc65b.png" alt="digraph dtiproc{
+<img src="../../_images/graphviz-d613db40523909bf9c48b428b3223a56af925469.png" alt="digraph dtiproc{
 
   label=&quot;dtiproc&quot;;
 
@@ -234,25 +234,25 @@ computed from spherical deconvolution and probabilistic streamline tractography<
 
   dtiproc_MRconvert[label=&quot;MRconvert (mrtrix)&quot;];
 
-  dtiproc_bet[label=&quot;bet (fsl)&quot;];
+  dtiproc_threshold_b0[label=&quot;threshold_b0 (mrtrix)&quot;];
 
   dtiproc_fsl2mrtrix[label=&quot;fsl2mrtrix (mrtrix)&quot;];
+
+  dtiproc_bet[label=&quot;bet (fsl)&quot;];
 
   dtiproc_gen_WM_mask[label=&quot;gen_WM_mask (mrtrix)&quot;];
 
   dtiproc_threshold_wmmask[label=&quot;threshold_wmmask (mrtrix)&quot;];
 
+  dtiproc_median3D[label=&quot;median3D (mrtrix)&quot;];
+
   dtiproc_dwi2tensor[label=&quot;dwi2tensor (mrtrix)&quot;];
 
   dtiproc_tensor2adc[label=&quot;tensor2adc (mrtrix)&quot;];
 
-  dtiproc_tensor2fa[label=&quot;tensor2fa (mrtrix)&quot;];
-
-  dtiproc_threshold_b0[label=&quot;threshold_b0 (mrtrix)&quot;];
-
   dtiproc_tensor2vector[label=&quot;tensor2vector (mrtrix)&quot;];
 
-  dtiproc_median3D[label=&quot;median3D (mrtrix)&quot;];
+  dtiproc_tensor2fa[label=&quot;tensor2fa (mrtrix)&quot;];
 
   dtiproc_erode_mask_firstpass[label=&quot;erode_mask_firstpass (mrtrix)&quot;];
 
@@ -270,63 +270,63 @@ computed from spherical deconvolution and probabilistic streamline tractography<
 
   dtiproc_CSDstreamtrack[label=&quot;CSDstreamtrack (mrtrix)&quot;];
 
-  dtiproc_tracks2prob[label=&quot;tracks2prob (mrtrix)&quot;];
-
   dtiproc_tck2trk[label=&quot;tck2trk (mrtrix)&quot;];
+
+  dtiproc_tracks2prob[label=&quot;tracks2prob (mrtrix)&quot;];
 
   dtiproc_outputnode[label=&quot;outputnode (utility)&quot;];
 
-  dtiproc_inputnode -&gt; dtiproc_bet;
-
-  dtiproc_inputnode -&gt; dtiproc_estimateresponse;
-
-  dtiproc_inputnode -&gt; dtiproc_tck2trk;
-
-  dtiproc_inputnode -&gt; dtiproc_tracks2prob;
-
   dtiproc_inputnode -&gt; dtiproc_fsl2mrtrix;
 
   dtiproc_inputnode -&gt; dtiproc_fsl2mrtrix;
-
-  dtiproc_inputnode -&gt; dtiproc_dwi2tensor;
-
-  dtiproc_inputnode -&gt; dtiproc_MRconvert;
 
   dtiproc_inputnode -&gt; dtiproc_gen_WM_mask;
 
+  dtiproc_inputnode -&gt; dtiproc_tck2trk;
+
+  dtiproc_inputnode -&gt; dtiproc_dwi2tensor;
+
+  dtiproc_inputnode -&gt; dtiproc_estimateresponse;
+
+  dtiproc_inputnode -&gt; dtiproc_tracks2prob;
+
   dtiproc_inputnode -&gt; dtiproc_csdeconv;
+
+  dtiproc_inputnode -&gt; dtiproc_MRconvert;
+
+  dtiproc_inputnode -&gt; dtiproc_bet;
 
   dtiproc_MRconvert -&gt; dtiproc_threshold_b0;
 
-  dtiproc_bet -&gt; dtiproc_gen_WM_mask;
-
-  dtiproc_fsl2mrtrix -&gt; dtiproc_gen_WM_mask;
-
-  dtiproc_fsl2mrtrix -&gt; dtiproc_csdeconv;
+  dtiproc_threshold_b0 -&gt; dtiproc_median3D;
 
   dtiproc_fsl2mrtrix -&gt; dtiproc_dwi2tensor;
 
+  dtiproc_fsl2mrtrix -&gt; dtiproc_csdeconv;
+
+  dtiproc_fsl2mrtrix -&gt; dtiproc_gen_WM_mask;
+
   dtiproc_fsl2mrtrix -&gt; dtiproc_estimateresponse;
 
-  dtiproc_gen_WM_mask -&gt; dtiproc_threshold_wmmask;
+  dtiproc_bet -&gt; dtiproc_gen_WM_mask;
 
   dtiproc_gen_WM_mask -&gt; dtiproc_csdeconv;
 
+  dtiproc_gen_WM_mask -&gt; dtiproc_threshold_wmmask;
+
   dtiproc_threshold_wmmask -&gt; dtiproc_CSDstreamtrack;
 
-  dtiproc_dwi2tensor -&gt; dtiproc_tensor2vector;
+  dtiproc_median3D -&gt; dtiproc_erode_mask_firstpass;
 
   dtiproc_dwi2tensor -&gt; dtiproc_tensor2adc;
+
+  dtiproc_dwi2tensor -&gt; dtiproc_tensor2vector;
 
   dtiproc_dwi2tensor -&gt; dtiproc_tensor2fa;
 
   dtiproc_tensor2fa -&gt; dtiproc_MRmultiply_merge;
 
   dtiproc_tensor2fa -&gt; dtiproc_outputnode;
-
-  dtiproc_threshold_b0 -&gt; dtiproc_median3D;
-
-  dtiproc_median3D -&gt; dtiproc_erode_mask_firstpass;
 
   dtiproc_erode_mask_firstpass -&gt; dtiproc_erode_mask_secondpass;
 
@@ -344,15 +344,15 @@ computed from spherical deconvolution and probabilistic streamline tractography<
 
   dtiproc_csdeconv -&gt; dtiproc_outputnode;
 
-  dtiproc_CSDstreamtrack -&gt; dtiproc_outputnode;
+  dtiproc_CSDstreamtrack -&gt; dtiproc_tck2trk;
 
   dtiproc_CSDstreamtrack -&gt; dtiproc_tracks2prob;
 
-  dtiproc_CSDstreamtrack -&gt; dtiproc_tck2trk;
-
-  dtiproc_tracks2prob -&gt; dtiproc_outputnode;
+  dtiproc_CSDstreamtrack -&gt; dtiproc_outputnode;
 
   dtiproc_tck2trk -&gt; dtiproc_outputnode;
+
+  dtiproc_tracks2prob -&gt; dtiproc_outputnode;
 
 }" />
 </p>
@@ -367,9 +367,9 @@ computed from spherical deconvolution and probabilistic streamline tractography<
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -114,18 +114,18 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">workflows.dmri.connectivity.nx</a><ul>
-<li><a class="reference internal" href="#create-cmats-to-csv-pipeline"><tt class="docutils literal"><span class="pre">create_cmats_to_csv_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-cmats-to-csv-pipeline"><code class="docutils literal"><span class="pre">create_cmats_to_csv_pipeline()</span></code></a><ul>
 <li><a class="reference internal" href="#example">Example</a></li>
 <li><a class="reference internal" href="#graph">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#create-networkx-pipeline"><tt class="docutils literal"><span class="pre">create_networkx_pipeline()</span></tt></a><ul>
+<li><a class="reference internal" href="#create-networkx-pipeline"><code class="docutils literal"><span class="pre">create_networkx_pipeline()</span></code></a><ul>
 <li><a class="reference internal" href="#id1">Example</a></li>
 <li><a class="reference internal" href="#id2">Graph</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#add-global-to-filename"><tt class="docutils literal"><span class="pre">add_global_to_filename()</span></tt></a></li>
-<li><a class="reference internal" href="#add-nodal-to-filename"><tt class="docutils literal"><span class="pre">add_nodal_to_filename()</span></tt></a></li>
+<li><a class="reference internal" href="#add-global-to-filename"><code class="docutils literal"><span class="pre">add_global_to_filename()</span></code></a></li>
+<li><a class="reference internal" href="#add-nodal-to-filename"><code class="docutils literal"><span class="pre">add_nodal_to_filename()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -148,7 +148,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -160,7 +160,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -183,9 +183,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -195,13 +195,13 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="module-nipype.workflows.dmri.connectivity.nx">
 <span id="workflows-dmri-connectivity-nx"></span><h1>workflows.dmri.connectivity.nx<a class="headerlink" href="#module-nipype.workflows.dmri.connectivity.nx" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="create-cmats-to-csv-pipeline">
-<span id="nipype-workflows-dmri-connectivity-nx-create-cmats-to-csv-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_cmats_to_csv_pipeline()</span></tt><a class="headerlink" href="#create-cmats-to-csv-pipeline" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/connectivity/nx.py#L97">Link to code</a></p>
+<span id="nipype-workflows-dmri-connectivity-nx-create-cmats-to-csv-pipeline"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_cmats_to_csv_pipeline()</span></code><a class="headerlink" href="#create-cmats-to-csv-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/connectivity/nx.py#L97">Link to code</a></p>
 <p>Creates a workflow to convert the outputs from CreateMatrix into a single
 comma-separated value text file. An extra column / field is also added to the
 text file. Typically, the user would connect the subject name to this field.</p>
@@ -252,8 +252,8 @@ text file. Typically, the user would connect the subject name to this field.</p>
 </div>
 </div>
 <div class="section" id="create-networkx-pipeline">
-<span id="nipype-workflows-dmri-connectivity-nx-create-networkx-pipeline"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">create_networkx_pipeline()</span></tt><a class="headerlink" href="#create-networkx-pipeline" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/connectivity/nx.py#L18">Link to code</a></p>
+<span id="nipype-workflows-dmri-connectivity-nx-create-networkx-pipeline"></span><h2><code class="xref py py-func docutils literal"><span class="pre">create_networkx_pipeline()</span></code><a class="headerlink" href="#create-networkx-pipeline" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/connectivity/nx.py#L18">Link to code</a></p>
 <p>Creates a workflow to calculate various graph measures (via NetworkX) on
 an input network. The output measures are then converted to comma-separated value
 text files, and an extra column / field is also added. Typically, the user would
@@ -282,7 +282,7 @@ connect the subject name to this field.</p>
 <div class="section" id="id2">
 <h3>Graph<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <p class="graphviz">
-<img src="../../_images/graphviz-cd78866c2fec8ad7a4111926a539df5c426f2829.png" alt="digraph networkx{
+<img src="../../_images/graphviz-409e48b8bc71f67265af522c5c531b2dd9837148.png" alt="digraph networkx{
 
   label=&quot;networkx&quot;;
 
@@ -290,71 +290,71 @@ connect the subject name to this field.</p>
 
   networkx_NetworkXMetrics[label=&quot;NetworkXMetrics (cmtk)&quot;];
 
-  networkx_mergeNetworks[label=&quot;mergeNetworks (utility)&quot;];
+  networkx_Matlab2CSV_global[label=&quot;Matlab2CSV_global (misc)&quot;];
+
+  networkx_MergeCSVFiles_global[label=&quot;MergeCSVFiles_global (misc)&quot;];
 
   networkx_Matlab2CSV_node[label=&quot;Matlab2CSV_node (misc)&quot;];
 
   networkx_MergeCSVFiles_node[label=&quot;MergeCSVFiles_node (misc)&quot;];
 
-  networkx_Matlab2CSV_global[label=&quot;Matlab2CSV_global (misc)&quot;];
-
-  networkx_MergeCSVFiles_global[label=&quot;MergeCSVFiles_global (misc)&quot;];
-
   networkx_mergeCSVs[label=&quot;mergeCSVs (utility)&quot;];
 
+  networkx_mergeNetworks[label=&quot;mergeNetworks (utility)&quot;];
+
   networkx_outputnode[label=&quot;outputnode (utility)&quot;];
-
-  networkx_inputnode -&gt; networkx_MergeCSVFiles_node;
-
-  networkx_inputnode -&gt; networkx_MergeCSVFiles_node;
-
-  networkx_inputnode -&gt; networkx_MergeCSVFiles_node;
 
   networkx_inputnode -&gt; networkx_mergeNetworks;
 
   networkx_inputnode -&gt; networkx_NetworkXMetrics;
 
-  networkx_inputnode -&gt; networkx_MergeCSVFiles_global;
+  networkx_inputnode -&gt; networkx_MergeCSVFiles_node;
+
+  networkx_inputnode -&gt; networkx_MergeCSVFiles_node;
+
+  networkx_inputnode -&gt; networkx_MergeCSVFiles_node;
 
   networkx_inputnode -&gt; networkx_MergeCSVFiles_global;
 
-  networkx_NetworkXMetrics -&gt; networkx_Matlab2CSV_node;
-
-  networkx_NetworkXMetrics -&gt; networkx_outputnode;
-
-  networkx_NetworkXMetrics -&gt; networkx_mergeNetworks;
+  networkx_inputnode -&gt; networkx_MergeCSVFiles_global;
 
   networkx_NetworkXMetrics -&gt; networkx_Matlab2CSV_global;
 
-  networkx_mergeNetworks -&gt; networkx_outputnode;
+  networkx_NetworkXMetrics -&gt; networkx_outputnode;
 
-  networkx_Matlab2CSV_node -&gt; networkx_MergeCSVFiles_node;
+  networkx_NetworkXMetrics -&gt; networkx_Matlab2CSV_node;
 
-  networkx_MergeCSVFiles_node -&gt; networkx_mergeCSVs;
-
-  networkx_MergeCSVFiles_node -&gt; networkx_outputnode;
+  networkx_NetworkXMetrics -&gt; networkx_mergeNetworks;
 
   networkx_Matlab2CSV_global -&gt; networkx_MergeCSVFiles_global;
 
   networkx_Matlab2CSV_global -&gt; networkx_MergeCSVFiles_global;
-
-  networkx_MergeCSVFiles_global -&gt; networkx_mergeCSVs;
 
   networkx_MergeCSVFiles_global -&gt; networkx_outputnode;
 
+  networkx_MergeCSVFiles_global -&gt; networkx_mergeCSVs;
+
+  networkx_Matlab2CSV_node -&gt; networkx_MergeCSVFiles_node;
+
+  networkx_MergeCSVFiles_node -&gt; networkx_outputnode;
+
+  networkx_MergeCSVFiles_node -&gt; networkx_mergeCSVs;
+
   networkx_mergeCSVs -&gt; networkx_outputnode;
+
+  networkx_mergeNetworks -&gt; networkx_outputnode;
 
 }" />
 </p>
 </div>
 </div>
 <div class="section" id="add-global-to-filename">
-<span id="nipype-workflows-dmri-connectivity-nx-add-global-to-filename"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">add_global_to_filename()</span></tt><a class="headerlink" href="#add-global-to-filename" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/connectivity/nx.py#L8">Link to code</a></p>
+<span id="nipype-workflows-dmri-connectivity-nx-add-global-to-filename"></span><h2><code class="xref py py-func docutils literal"><span class="pre">add_global_to_filename()</span></code><a class="headerlink" href="#add-global-to-filename" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/connectivity/nx.py#L8">Link to code</a></p>
 </div>
 <div class="section" id="add-nodal-to-filename">
-<span id="nipype-workflows-dmri-connectivity-nx-add-nodal-to-filename"></span><h2><tt class="xref py py-func docutils literal"><span class="pre">add_nodal_to_filename()</span></tt><a class="headerlink" href="#add-nodal-to-filename" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/workflows/dmri/connectivity/nx.py#L13">Link to code</a></p>
+<span id="nipype-workflows-dmri-connectivity-nx-add-nodal-to-filename"></span><h2><code class="xref py py-func docutils literal"><span class="pre">add_nodal_to_filename()</span></code><a class="headerlink" href="#add-nodal-to-filename" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/workflows/dmri/connectivity/nx.py#L13">Link to code</a></p>
 </div>
 </div>
 
@@ -365,9 +365,9 @@ connect the subject name to this field.</p>
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

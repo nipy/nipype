@@ -1,0 +1,1518 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Neuroimaging in Python - Pipelines and Interfaces &mdash; nipy pipeline and interfaces package</title>
+    
+    <link rel="stylesheet" href="../../_static/nipype.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.11.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="../../about.html" />
+    <link rel="top" title="nipy pipeline and interfaces package" href="../../index.html" />
+ 
+<meta name="keywords" content="nipype, neuroimaging, pipeline, workflow, parallel, python, neuroscience">
+<script type="text/javascript">
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-339450-7', 'nipy.org/nipype');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<div class="header-wrapper">
+    <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+            <a href="../../index.html">
+            <img src="../../_static/nipype-banner-bg.png" alt="NIPY logo"  border="0" />
+        <div style="margin-top: 1em;
+                border-top: 1px solid #AAA;
+                border-bottom: 1px solid #AAA;
+                border-radius: 5px;
+                padding: 3px 1em;">
+            <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />
+<style type="text/css">
+    a.navbar {
+    color: ;
+    letter-spacing: .05em;
+    font-weight: bold;
+        }
+</style>
+
+<a class="navbar" href="../../index.html">Home</a> ·
+<a class="navbar" href="../../quickstart.html">Quickstart</a> ·
+<a class="navbar" href="../../documentation.html">Documentation</a> ·
+<a class="navbar" href="../../about.html">Citation</a> ·
+<a class="navbar" href="http://nipy.org">NiPy</a>
+
+        </div>
+    </div>
+</div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<style type="text/css">
+    input.gsc-input {
+        border-color: #BCCDF0;
+    }
+    input.gsc-search-button {
+        border-color: #666666;
+        background-color: #CECECE;
+        padding: 0;
+    }
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+    div.sphinxsidebar input[type="text"] {
+        width: 100%;
+    }
+    div.sphinxsidebar input[type="submit"] {
+        width: 100%;
+    }
+</style>
+
+<div class="sidebarblock">
+    <div id="cse-search-form">Loading</div>
+
+    <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+        google.load('search', '1', {language : 'en'});
+        google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl(
+                    '010960497803984932957:u8pmqf7fdoq');
+
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.enableSearchboxOnly("../../searchresults.html");
+            customSearchControl.draw('cse-search-form', options);
+        }, true);
+    </script>
+</div>
+
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">interfaces.semtools.utilities.brains</a><ul>
+<li><a class="reference internal" href="#brainsalignmsp">BRAINSAlignMSP</a></li>
+<li><a class="reference internal" href="#brainsclipinferior">BRAINSClipInferior</a></li>
+<li><a class="reference internal" href="#brainsconstellationmodeler">BRAINSConstellationModeler</a></li>
+<li><a class="reference internal" href="#brainseyedetector">BRAINSEyeDetector</a></li>
+<li><a class="reference internal" href="#brainsinitializedcontrolpoints">BRAINSInitializedControlPoints</a></li>
+<li><a class="reference internal" href="#brainslandmarkinitializer">BRAINSLandmarkInitializer</a></li>
+<li><a class="reference internal" href="#brainslinearmodelerepca">BRAINSLinearModelerEPCA</a></li>
+<li><a class="reference internal" href="#brainslmktransform">BRAINSLmkTransform</a></li>
+<li><a class="reference internal" href="#brainsmush">BRAINSMush</a></li>
+<li><a class="reference internal" href="#brainssnapshotwriter">BRAINSSnapShotWriter</a></li>
+<li><a class="reference internal" href="#brainstransformconvert">BRAINSTransformConvert</a></li>
+<li><a class="reference internal" href="#brainstrimforegroundindirection">BRAINSTrimForegroundInDirection</a></li>
+<li><a class="reference internal" href="#cleanupoverlaplabels">CleanUpOverlapLabels</a></li>
+<li><a class="reference internal" href="#findcenterofbrain">FindCenterOfBrain</a></li>
+<li><a class="reference internal" href="#generatelabelmapfromprobabilitymap">GenerateLabelMapFromProbabilityMap</a></li>
+<li><a class="reference internal" href="#imageregionplotter">ImageRegionPlotter</a></li>
+<li><a class="reference internal" href="#jointhistogram">JointHistogram</a></li>
+<li><a class="reference internal" href="#shufflevectorsmodule">ShuffleVectorsModule</a></li>
+<li><a class="reference internal" href="#fcsv-to-hdf5">fcsv_to_hdf5</a></li>
+<li><a class="reference internal" href="#insertmidacpcpoint">insertMidACPCpoint</a></li>
+<li><a class="reference internal" href="#landmarksconstellationaligner">landmarksConstellationAligner</a></li>
+<li><a class="reference internal" href="#landmarksconstellationweights">landmarksConstellationWeights</a></li>
+</ul>
+</li>
+</ul>
+
+<style type="text/css">
+    div.sphinxsidebar .tile {
+        border: 1px solid #D1DDE2;
+        border-radius: 10px;
+        background-color: #E1E8EC;
+        padding-left: 0.5em;
+        margin: 1em 0;
+    }
+</style>
+<div class="sidebarblock">
+    <h3>Versions</h3>
+
+    <div class="tile">
+        <table style="width: 100%;">
+            <tr style="font-weight: bold;">
+                <td align="left">Release</td><td align="right">Devel</td>
+            </tr>
+            <tr>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
+            </tr>
+            <tr>
+                <td align="left"><a href="../../users/install.html">Download</a></td>
+                <td align="right"><a href="https://github.com/nipy/nipype">Github</a></td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="buttons">
+        <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
+            <script type="text/javascript"
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
+            </script>
+        </div><!-- use -->
+        <g:plusone size="medium" annotation="none"></g:plusone>
+        <div class="clear"></div>
+    </div><!-- buttons container -->
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+        var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+        po.src = 'https://apis.google.com/js/plusone.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+</script>
+
+<h3>Links</h3>
+
+<ul>
+    <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
+    <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
+    <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
+</ul>
+
+
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="interfaces-semtools-utilities-brains">
+<h1>interfaces.semtools.utilities.brains<a class="headerlink" href="#interfaces-semtools-utilities-brains" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-brainsalignmsp"></span><div class="section" id="brainsalignmsp">
+<span id="index-0"></span><h2>BRAINSAlignMSP<a class="headerlink" href="#brainsalignmsp" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L482">Link to code</a></p>
+<p>Wraps command ** BRAINSAlignMSP **</p>
+<p>title: Align Mid Saggital Brain (BRAINS)</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Resample an image into ACPC alignement ACPCDetect</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+BackgroundFillValue: (a string)
+        Fill the background of image with specified short int value. Enter
+        number or use BIGNEG for a large negative number.
+        flag: --BackgroundFillValue %s
+OutputresampleMSP: (a boolean or a file name)
+        , The image to be output.,
+        flag: --OutputresampleMSP %s
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        , The Image to be resampled,
+        flag: --inputVolume %s
+interpolationMode: (&#39;NearestNeighbor&#39; or &#39;Linear&#39; or
+         &#39;ResampleInPlace&#39; or &#39;BSpline&#39; or &#39;WindowedSinc&#39; or &#39;Hamming&#39; or
+         &#39;Cosine&#39; or &#39;Welch&#39; or &#39;Lanczos&#39; or &#39;Blackman&#39;)
+        Type of interpolation to be used when applying transform to moving
+        volume. Options are Linear, ResampleInPlace, NearestNeighbor,
+        BSpline, or WindowedSinc
+        flag: --interpolationMode %s
+mspQualityLevel: (an integer (int or long))
+        , Flag cotrols how agressive the MSP is estimated. 0=quick estimate
+        (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22
+        seconds), 3=best estimate (58 seconds).,
+        flag: --mspQualityLevel %d
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+rescaleIntensities: (a boolean)
+        , Flag to turn on rescaling image intensities on input.,
+        flag: --rescaleIntensities
+rescaleIntensitiesOutputRange: (a list of items which are an integer
+         (int or long))
+        , This pair of integers gives the lower and upper bounds on the
+        signal portion of the output image. Out-of-field voxels are taken
+        from BackgroundFillValue.,
+        flag: --rescaleIntensitiesOutputRange %s
+resultsDir: (a boolean or a directory name)
+        , The directory for the results to be written.,
+        flag: --resultsDir %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+trimRescaledIntensities: (a float)
+        , Turn on clipping the rescaled image one-tailed on input. Units of
+        standard deviations above the mean. Very large values are very
+        permissive. Non-positive value turns clipping off. Defaults to
+        removing 0.00001 of a normal tail above the mean.,
+        flag: --trimRescaledIntensities %f
+verbose: (a boolean)
+        , Show more verbose output,
+        flag: --verbose
+writedebuggingImagesLevel: (an integer (int or long))
+        , This flag controls if debugging images are produced. By default
+        value of 0 is no images. Anything greater than zero will be
+        increasing level of debugging images.,
+        flag: --writedebuggingImagesLevel %d
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>OutputresampleMSP: (an existing file name)
+        , The image to be output.,
+resultsDir: (an existing directory name)
+        , The directory for the results to be written.,
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-brainsclipinferior"></span></div>
+<div class="section" id="brainsclipinferior">
+<span id="index-1"></span><h2>BRAINSClipInferior<a class="headerlink" href="#brainsclipinferior" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L410">Link to code</a></p>
+<p>Wraps command ** BRAINSClipInferior **</p>
+<p>title: Clip Inferior of Center of Brain (BRAINS)</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: This program will read the inputVolume as a short int image, write the BackgroundFillValue everywhere inferior to the lower bound, and write the resulting clipped short int image in the outputVolume.</p>
+<p>version: 1.0</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+BackgroundFillValue: (a string)
+        Fill the background of image with specified short int value. Enter
+        number or use BIGNEG for a large negative number.
+        flag: --BackgroundFillValue %s
+acLowerBound: (a float)
+        , When the input image to the output image, replace the image with
+        the BackgroundFillValue everywhere below the plane This Far in
+        physical units (millimeters) below (inferior to) the AC point
+        (assumed to be the voxel field middle.) The oversize default was
+        chosen to have no effect. Based on visualizing a thousand masks in
+        the IPIG study, we recommend a limit no smaller than 80.0 mm.,
+        flag: --acLowerBound %f
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        Input image to make a clipped short int copy from.
+        flag: --inputVolume %s
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+outputVolume: (a boolean or a file name)
+        Output image, a short int copy of the upper portion of the input
+        image, filled with BackgroundFillValue.
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Output image, a short int copy of the upper portion of the input
+        image, filled with BackgroundFillValue.
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-brainsconstellationmodeler"></span></div>
+<div class="section" id="brainsconstellationmodeler">
+<span id="index-2"></span><h2>BRAINSConstellationModeler<a class="headerlink" href="#brainsconstellationmodeler" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L33">Link to code</a></p>
+<p>Wraps command ** BRAINSConstellationModeler **</p>
+<p>title: Generate Landmarks Model (BRAINS)</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Train up a model for BRAINSConstellationDetector</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+BackgroundFillValue: (a string)
+        Fill the background of image with specified short int value. Enter
+        number or use BIGNEG for a large negative number.
+        flag: --BackgroundFillValue %s
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputTrainingList: (an existing file name)
+        , Setup file, giving all parameters for training up a template model
+        for each landmark.,
+        flag: --inputTrainingList %s
+mspQualityLevel: (an integer (int or long))
+        , Flag cotrols how agressive the MSP is estimated. 0=quick estimate
+        (9 seconds), 1=normal estimate (11 seconds), 2=great estimate (22
+        seconds), 3=best estimate (58 seconds).,
+        flag: --mspQualityLevel %d
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+optimizedLandmarksFilenameExtender: (a string)
+        , If the trainingList is (indexFullPathName) and contains landmark
+        data filenames [path]/[filename].fcsv , make the optimized landmarks
+        filenames out of [path]/[filename](thisExtender) and the optimized
+        version of the input trainingList out of
+        (indexFullPathName)(thisExtender) , when you rewrite all the
+        landmarks according to the saveOptimizedLandmarks flag.,
+        flag: --optimizedLandmarksFilenameExtender %s
+outputModel: (a boolean or a file name)
+        , The full filename of the output model file.,
+        flag: --outputModel %s
+rescaleIntensities: (a boolean)
+        , Flag to turn on rescaling image intensities on input.,
+        flag: --rescaleIntensities
+rescaleIntensitiesOutputRange: (a list of items which are an integer
+         (int or long))
+        , This pair of integers gives the lower and upper bounds on the
+        signal portion of the output image. Out-of-field voxels are taken
+        from BackgroundFillValue.,
+        flag: --rescaleIntensitiesOutputRange %s
+resultsDir: (a boolean or a directory name)
+        , The directory for the results to be written.,
+        flag: --resultsDir %s
+saveOptimizedLandmarks: (a boolean)
+        , Flag to make a new subject-specific landmark definition file in
+        the same format produced by Slicer3 with the optimized landmark (the
+        detected RP, AC, and PC) in it. Useful to tighten the variances in
+        the ConstellationModeler.,
+        flag: --saveOptimizedLandmarks
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+trimRescaledIntensities: (a float)
+        , Turn on clipping the rescaled image one-tailed on input. Units of
+        standard deviations above the mean. Very large values are very
+        permissive. Non-positive value turns clipping off. Defaults to
+        removing 0.00001 of a normal tail above the mean.,
+        flag: --trimRescaledIntensities %f
+verbose: (a boolean)
+        , Show more verbose output,
+        flag: --verbose
+writedebuggingImagesLevel: (an integer (int or long))
+        , This flag controls if debugging images are produced. By default
+        value of 0 is no images. Anything greater than zero will be
+        increasing level of debugging images.,
+        flag: --writedebuggingImagesLevel %d
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputModel: (an existing file name)
+        , The full filename of the output model file.,
+resultsDir: (an existing directory name)
+        , The directory for the results to be written.,
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-brainseyedetector"></span></div>
+<div class="section" id="brainseyedetector">
+<span id="index-3"></span><h2>BRAINSEyeDetector<a class="headerlink" href="#brainseyedetector" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L280">Link to code</a></p>
+<p>Wraps command ** BRAINSEyeDetector **</p>
+<p>title: Eye Detector (BRAINS)</p>
+<p>category: Utilities.BRAINS</p>
+<p>version: 1.0</p>
+<p>documentation-url: <a class="reference external" href="http://www.nitrc.org/projects/brainscdetector/">http://www.nitrc.org/projects/brainscdetector/</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+debugDir: (a string)
+        A place for debug information
+        flag: --debugDir %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        The input volume
+        flag: --inputVolume %s
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+outputVolume: (a boolean or a file name)
+        The output volume
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        The output volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-brainsinitializedcontrolpoints"></span></div>
+<div class="section" id="brainsinitializedcontrolpoints">
+<span id="index-4"></span><h2>BRAINSInitializedControlPoints<a class="headerlink" href="#brainsinitializedcontrolpoints" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L342">Link to code</a></p>
+<p>Wraps command ** BRAINSInitializedControlPoints **</p>
+<p>title: Initialized Control Points (BRAINS)</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Outputs bspline control points as landmarks</p>
+<p>version: 0.1.0.$Revision: 916 $(alpha)</p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Mark Scully</p>
+<p>acknowledgements: This work is part of the National Alliance for Medical Image Computing (NAMIC), funded by the National Institutes of Health through the NIH Roadmap for Medical Research, Grant U54 EB005149.  Additional support for Mark Scully and Hans Johnson at the University of Iowa.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        Input Volume
+        flag: --inputVolume %s
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+outputLandmarksFile: (a string)
+        Output filename
+        flag: --outputLandmarksFile %s
+outputVolume: (a boolean or a file name)
+        Output Volume
+        flag: --outputVolume %s
+permuteOrder: (a list of items which are an integer (int or long))
+        The permutation order for the images. The default is 0,1,2 (i.e. no
+        permutation)
+        flag: --permuteOrder %s
+splineGridSize: (a list of items which are an integer (int or long))
+        The number of subdivisions of the BSpline Grid to be centered on the
+        image space. Each dimension must have at least 3 subdivisions for
+        the BSpline to be correctly computed.
+        flag: --splineGridSize %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Output Volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-brainslandmarkinitializer"></span></div>
+<div class="section" id="brainslandmarkinitializer">
+<span id="index-5"></span><h2>BRAINSLandmarkInitializer<a class="headerlink" href="#brainslandmarkinitializer" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L510">Link to code</a></p>
+<p>Wraps command ** BRAINSLandmarkInitializer **</p>
+<p>title: BRAINSLandmarkInitializer</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Create transformation file (<a href="#id1"><span class="problematic" id="id2">*</span></a>mat) from a pair of landmarks (<a href="#id3"><span class="problematic" id="id4">*</span></a>fcsv) files.</p>
+<p>version: 1.0</p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Eunyoung Regina Kim</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputFixedLandmarkFilename: (an existing file name)
+        input fixed landmark. *.fcsv
+        flag: --inputFixedLandmarkFilename %s
+inputMovingLandmarkFilename: (an existing file name)
+        input moving landmark. *.fcsv
+        flag: --inputMovingLandmarkFilename %s
+inputWeightFilename: (an existing file name)
+        Input weight file name for landmarks. Higher weighted landmark will
+        be considered more heavily. Weights are propotional, that is the
+        magnitude of weights will be normalized by its minimum and maximum
+        value.
+        flag: --inputWeightFilename %s
+outputTransformFilename: (a boolean or a file name)
+        output transform file name (ex: ./outputTransform.mat)
+        flag: --outputTransformFilename %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputTransformFilename: (an existing file name)
+        output transform file name (ex: ./outputTransform.mat)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-brainslinearmodelerepca"></span></div>
+<div class="section" id="brainslinearmodelerepca">
+<span id="index-6"></span><h2>BRAINSLinearModelerEPCA<a class="headerlink" href="#brainslinearmodelerepca" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L308">Link to code</a></p>
+<p>Wraps command ** BRAINSLinearModelerEPCA **</p>
+<p>title: Landmark Linear Modeler (BRAINS)</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Training linear model using EPCA. Implementation based on my MS thesis, &#8220;A METHOD FOR AUTOMATED LANDMARK CONSTELLATION DETECTION USING EVOLUTIONARY PRINCIPAL COMPONENTS AND STATISTICAL SHAPE MODELS&#8221;</p>
+<p>version: 1.0</p>
+<p>documentation-url: <a class="reference external" href="http://www.nitrc.org/projects/brainscdetector/">http://www.nitrc.org/projects/brainscdetector/</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputTrainingList: (an existing file name)
+        Input Training Landmark List Filename,
+        flag: --inputTrainingList %s
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-brainslmktransform"></span></div>
+<div class="section" id="brainslmktransform">
+<span id="index-7"></span><h2>BRAINSLmkTransform<a class="headerlink" href="#brainslmktransform" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L129">Link to code</a></p>
+<p>Wraps command ** BRAINSLmkTransform **</p>
+<p>title: Landmark Transform (BRAINS)</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: This utility program estimates the affine transform to align the fixed landmarks to the moving landmarks, and then generate the resampled moving image to the same physical space as that of the reference image.</p>
+<p>version: 1.0</p>
+<p>documentation-url: <a class="reference external" href="http://www.nitrc.org/projects/brainscdetector/">http://www.nitrc.org/projects/brainscdetector/</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputFixedLandmarks: (an existing file name)
+        Input Fixed Landmark list file in fcsv,
+        flag: --inputFixedLandmarks %s
+inputMovingLandmarks: (an existing file name)
+        Input Moving Landmark list file in fcsv,
+        flag: --inputMovingLandmarks %s
+inputMovingVolume: (an existing file name)
+        The filename of input moving volume
+        flag: --inputMovingVolume %s
+inputReferenceVolume: (an existing file name)
+        The filename of the reference volume
+        flag: --inputReferenceVolume %s
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+outputAffineTransform: (a boolean or a file name)
+        The filename for the estimated affine transform,
+        flag: --outputAffineTransform %s
+outputResampledVolume: (a boolean or a file name)
+        The filename of the output resampled volume
+        flag: --outputResampledVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputAffineTransform: (an existing file name)
+        The filename for the estimated affine transform,
+outputResampledVolume: (an existing file name)
+        The filename of the output resampled volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-brainsmush"></span></div>
+<div class="section" id="brainsmush">
+<span id="index-8"></span><h2>BRAINSMush<a class="headerlink" href="#brainsmush" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L175">Link to code</a></p>
+<p>Wraps command ** BRAINSMush **</p>
+<p>title: Brain Extraction from T1/T2 image (BRAINS)</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: This program: 1) generates a weighted mixture image optimizing the mean and variance and 2) produces a mask of the brain volume</p>
+<p>version: 0.1.0.$Revision: 1.4 $(alpha)</p>
+<p>documentation-url: <a class="reference external" href="http:://mri.radiology.uiowa.edu">http:://mri.radiology.uiowa.edu</a></p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: This tool is a modification by Steven Dunn of a program developed by Greg Harris and Ron Pierson.</p>
+<p>acknowledgements: This work was developed by the University of Iowa Departments of Radiology and Psychiatry. This software was supported in part of NIH/NINDS award NS050568.</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+boundingBoxSize: (a list of items which are an integer (int or long))
+        Size of the cubic bounding box mask used when no brain mask is
+        present
+        flag: --boundingBoxSize %s
+boundingBoxStart: (a list of items which are an integer (int or
+         long))
+        XYZ point-coordinate for the start of the cubic bounding box mask
+        used when no brain mask is present
+        flag: --boundingBoxStart %s
+desiredMean: (a float)
+        Desired mean within the mask for weighted sum of both images.
+        flag: --desiredMean %f
+desiredVariance: (a float)
+        Desired variance within the mask for weighted sum of both images.
+        flag: --desiredVariance %f
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputFirstVolume: (an existing file name)
+        Input image (1) for mixture optimization
+        flag: --inputFirstVolume %s
+inputMaskVolume: (an existing file name)
+        Input label image for mixture optimization
+        flag: --inputMaskVolume %s
+inputSecondVolume: (an existing file name)
+        Input image (2) for mixture optimization
+        flag: --inputSecondVolume %s
+lowerThresholdFactor: (a float)
+        Lower threshold factor for defining the brain mask
+        flag: --lowerThresholdFactor %f
+lowerThresholdFactorPre: (a float)
+        Lower threshold factor for finding an initial brain mask
+        flag: --lowerThresholdFactorPre %f
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+outputMask: (a boolean or a file name)
+        The brain volume mask generated from the MUSH image
+        flag: --outputMask %s
+outputVolume: (a boolean or a file name)
+        The MUSH image produced from the T1 and T2 weighted images
+        flag: --outputVolume %s
+outputWeightsFile: (a boolean or a file name)
+        Output Weights File
+        flag: --outputWeightsFile %s
+seed: (a list of items which are an integer (int or long))
+        Seed Point for Brain Region Filling
+        flag: --seed %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+upperThresholdFactor: (a float)
+        Upper threshold factor for defining the brain mask
+        flag: --upperThresholdFactor %f
+upperThresholdFactorPre: (a float)
+        Upper threshold factor for finding an initial brain mask
+        flag: --upperThresholdFactorPre %f
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputMask: (an existing file name)
+        The brain volume mask generated from the MUSH image
+outputVolume: (an existing file name)
+        The MUSH image produced from the T1 and T2 weighted images
+outputWeightsFile: (an existing file name)
+        Output Weights File
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-brainssnapshotwriter"></span></div>
+<div class="section" id="brainssnapshotwriter">
+<span id="index-9"></span><h2>BRAINSSnapShotWriter<a class="headerlink" href="#brainssnapshotwriter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L575">Link to code</a></p>
+<p>Wraps command ** BRAINSSnapShotWriter **</p>
+<p>title: BRAINSSnapShotWriter</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Create 2D snapshot of input images. Mask images are color-coded</p>
+<p>version: 1.0</p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Eunyoung Regina Kim</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputBinaryVolumes: (a list of items which are an existing file name)
+        Input mask (binary) volume list to be extracted as 2D image.
+        Multiple input is possible.
+        flag: --inputBinaryVolumes %s...
+inputPlaneDirection: (a list of items which are an integer (int or
+         long))
+        Plane to display. In general, 0=saggital, 1=coronal, and 2=axial
+        plane.
+        flag: --inputPlaneDirection %s
+inputSliceToExtractInIndex: (a list of items which are an integer
+         (int or long))
+        2D slice number of input images. For size of 256*256*256 image, 128
+        is usually used.
+        flag: --inputSliceToExtractInIndex %s
+inputSliceToExtractInPercent: (a list of items which are an integer
+         (int or long))
+        2D slice number of input images. Percentage input from 0%-100%. (ex.
+        --inputSliceToExtractInPercent 50,50,50
+        flag: --inputSliceToExtractInPercent %s
+inputSliceToExtractInPhysicalPoint: (a list of items which are a
+         float)
+        2D slice number of input images. For autoWorkUp output, which AC-PC
+        aligned, 0,0,0 will be the center.
+        flag: --inputSliceToExtractInPhysicalPoint %s
+inputVolumes: (a list of items which are an existing file name)
+        Input image volume list to be extracted as 2D image. Multiple input
+        is possible. At least one input is required.
+        flag: --inputVolumes %s...
+outputFilename: (a boolean or a file name)
+        2D file name of input images. Required.
+        flag: --outputFilename %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputFilename: (an existing file name)
+        2D file name of input images. Required.
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-brainstransformconvert"></span></div>
+<div class="section" id="brainstransformconvert">
+<span id="index-10"></span><h2>BRAINSTransformConvert<a class="headerlink" href="#brainstransformconvert" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L216">Link to code</a></p>
+<p>Wraps command ** BRAINSTransformConvert **</p>
+<p>title: BRAINS Transform Convert</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Convert ITK transforms to higher order transforms</p>
+<p>version: 1.0</p>
+<p>documentation-url: A utility to convert between transform file formats.</p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Hans J. Johnson,Kent Williams, Ali Ghayoor</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+displacementVolume: (a boolean or a file name)
+        flag: --displacementVolume %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputTransform: (an existing file name)
+        flag: --inputTransform %s
+outputPrecisionType: (&#39;double&#39; or &#39;float&#39;)
+        Precision type of the output transform. It can be either single
+        precision or double precision
+        flag: --outputPrecisionType %s
+outputTransform: (a boolean or a file name)
+        flag: --outputTransform %s
+outputTransformType: (&#39;Affine&#39; or &#39;VersorRigid&#39; or &#39;ScaleVersor&#39; or
+         &#39;ScaleSkewVersor&#39; or &#39;DisplacementField&#39; or &#39;Same&#39;)
+        The target transformation type. Must be conversion-compatible with
+        the input transform type
+        flag: --outputTransformType %s
+referenceVolume: (an existing file name)
+        flag: --referenceVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>displacementVolume: (an existing file name)
+outputTransform: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-brainstrimforegroundindirection"></span></div>
+<div class="section" id="brainstrimforegroundindirection">
+<span id="index-11"></span><h2>BRAINSTrimForegroundInDirection<a class="headerlink" href="#brainstrimforegroundindirection" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L93">Link to code</a></p>
+<p>Wraps command ** BRAINSTrimForegroundInDirection **</p>
+<p>title: Trim Foreground In Direction (BRAINS)</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: This program will trim off the neck and also air-filling noise from the inputImage.</p>
+<p>version: 0.1</p>
+<p>documentation-url: <a class="reference external" href="http://www.nitrc.org/projects/art/">http://www.nitrc.org/projects/art/</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+BackgroundFillValue: (a string)
+        Fill the background of image with specified short int value. Enter
+        number or use BIGNEG for a large negative number.
+        flag: --BackgroundFillValue %s
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+closingSize: (an integer (int or long))
+        , This is a parameter to FindLargestForegroundFilledMask,
+        flag: --closingSize %d
+directionCode: (an integer (int or long))
+        , This flag chooses which dimension to compare. The sign lets you
+        flip direction.,
+        flag: --directionCode %d
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+headSizeLimit: (a float)
+        , Use this to vary from the command line our search for how much
+        upper tissue is head for the center-of-mass calculation. Units are
+        CCs, not cubic millimeters.,
+        flag: --headSizeLimit %f
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolume: (an existing file name)
+        Input image to trim off the neck (and also air-filling noise.)
+        flag: --inputVolume %s
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+otsuPercentileThreshold: (a float)
+        , This is a parameter to FindLargestForegroundFilledMask, which is
+        employed to trim off air-filling noise.,
+        flag: --otsuPercentileThreshold %f
+outputVolume: (a boolean or a file name)
+        Output image with neck and air-filling noise trimmed isotropic image
+        with AC at center of image.
+        flag: --outputVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVolume: (an existing file name)
+        Output image with neck and air-filling noise trimmed isotropic image
+        with AC at center of image.
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-cleanupoverlaplabels"></span></div>
+<div class="section" id="cleanupoverlaplabels">
+<span id="index-12"></span><h2>CleanUpOverlapLabels<a class="headerlink" href="#cleanupoverlaplabels" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L376">Link to code</a></p>
+<p>Wraps command ** CleanUpOverlapLabels **</p>
+<p>title: Clean Up Overla Labels</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Take a series of input binary images and clean up for those overlapped area. Binary volumes given first always wins out</p>
+<p>version: 0.1.0</p>
+<p>contributor: Eun Young Kim</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputBinaryVolumes: (a list of items which are an existing file name)
+        The list of binary images to be checked and cleaned up. Order is
+        important. Binary volume given first always wins out.
+        flag: --inputBinaryVolumes %s...
+outputBinaryVolumes: (a boolean or a list of items which are a file
+         name)
+        The output label map images, with integer values in it. Each label
+        value specified in the inputLabels is combined into this output
+        label map volume
+        flag: --outputBinaryVolumes %s...
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputBinaryVolumes: (a list of items which are an existing file
+         name)
+        The output label map images, with integer values in it. Each label
+        value specified in the inputLabels is combined into this output
+        label map volume
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-findcenterofbrain"></span></div>
+<div class="section" id="findcenterofbrain">
+<span id="index-13"></span><h2>FindCenterOfBrain<a class="headerlink" href="#findcenterofbrain" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L761">Link to code</a></p>
+<p>Wraps command ** FindCenterOfBrain **</p>
+<p>title: Center Of Brain (BRAINS)</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Finds the center point of a brain</p>
+<p>version: 3.0.0</p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Hans J. Johnson, hans-johnson -at- uiowa.edu, <a class="reference external" href="http://wwww.psychiatry.uiowa.edu">http://wwww.psychiatry.uiowa.edu</a></p>
+<p>acknowledgements: Hans Johnson(1,3,4); Kent Williams(1);  (1=University of Iowa Department of Psychiatry, 3=University of Iowa Department of Biomedical Engineering, 4=University of Iowa Department of Electrical and Computer Engineering</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+axis: (an integer (int or long))
+        flag: --axis %d
+backgroundValue: (an integer (int or long))
+        flag: --backgroundValue %d
+clippedImageMask: (a boolean or a file name)
+        flag: --clippedImageMask %s
+closingSize: (an integer (int or long))
+        flag: --closingSize %d
+debugAfterGridComputationsForegroundImage: (a boolean or a file name)
+        flag: --debugAfterGridComputationsForegroundImage %s
+debugClippedImageMask: (a boolean or a file name)
+        flag: --debugClippedImageMask %s
+debugDistanceImage: (a boolean or a file name)
+        flag: --debugDistanceImage %s
+debugGridImage: (a boolean or a file name)
+        flag: --debugGridImage %s
+debugTrimmedImage: (a boolean or a file name)
+        flag: --debugTrimmedImage %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+generateDebugImages: (a boolean)
+        flag: --generateDebugImages
+headSizeEstimate: (a float)
+        flag: --headSizeEstimate %f
+headSizeLimit: (a float)
+        flag: --headSizeLimit %f
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+imageMask: (an existing file name)
+        flag: --imageMask %s
+inputVolume: (an existing file name)
+        The image in which to find the center.
+        flag: --inputVolume %s
+maximize: (a boolean)
+        flag: --maximize
+otsuPercentileThreshold: (a float)
+        flag: --otsuPercentileThreshold %f
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>clippedImageMask: (an existing file name)
+debugAfterGridComputationsForegroundImage: (an existing file name)
+debugClippedImageMask: (an existing file name)
+debugDistanceImage: (an existing file name)
+debugGridImage: (an existing file name)
+debugTrimmedImage: (an existing file name)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-generatelabelmapfromprobabilitymap"></span></div>
+<div class="section" id="generatelabelmapfromprobabilitymap">
+<span id="index-14"></span><h2>GenerateLabelMapFromProbabilityMap<a class="headerlink" href="#generatelabelmapfromprobabilitymap" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L439">Link to code</a></p>
+<p>Wraps command ** GenerateLabelMapFromProbabilityMap **</p>
+<p>title: Label Map from Probability Images</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Given a list of probability maps for labels, create a discrete label map where only the highest probability region is used for the labeling.</p>
+<p>version: 0.1</p>
+<p>contributor: University of Iowa Department of Psychiatry, <a class="reference external" href="http:://www.psychiatry.uiowa.edu">http:://www.psychiatry.uiowa.edu</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVolumes: (a list of items which are an existing file name)
+        The Input probaiblity images to be computed for lable maps
+        flag: --inputVolumes %s...
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+outputLabelVolume: (a boolean or a file name)
+        The Input binary image for region of interest
+        flag: --outputLabelVolume %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputLabelVolume: (an existing file name)
+        The Input binary image for region of interest
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-imageregionplotter"></span></div>
+<div class="section" id="imageregionplotter">
+<span id="index-15"></span><h2>ImageRegionPlotter<a class="headerlink" href="#imageregionplotter" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L681">Link to code</a></p>
+<p>Wraps command ** ImageRegionPlotter **</p>
+<p>title: Write Out Image Intensities</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: For Analysis</p>
+<p>version: 0.1</p>
+<p>contributor: University of Iowa Department of Psychiatry, <a class="reference external" href="http:://www.psychiatry.uiowa.edu">http:://www.psychiatry.uiowa.edu</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputBinaryROIVolume: (an existing file name)
+        The Input binary image for region of interest
+        flag: --inputBinaryROIVolume %s
+inputLabelVolume: (an existing file name)
+        The Label Image
+        flag: --inputLabelVolume %s
+inputVolume1: (an existing file name)
+        The Input image to be computed for statistics
+        flag: --inputVolume1 %s
+inputVolume2: (an existing file name)
+        The Input image to be computed for statistics
+        flag: --inputVolume2 %s
+numberOfHistogramBins: (an integer (int or long))
+         the number of histogram levels
+        flag: --numberOfHistogramBins %d
+outputJointHistogramData: (a string)
+         output data file name
+        flag: --outputJointHistogramData %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+useIntensityForHistogram: (a boolean)
+         Create Intensity Joint Histogram instead of Quantile Joint
+        Histogram
+        flag: --useIntensityForHistogram
+useROIAUTO: (a boolean)
+         Use ROIAUTO to compute region of interest. This cannot be used with
+        inputLabelVolume
+        flag: --useROIAUTO
+verbose: (a boolean)
+         print debugging information,
+        flag: --verbose
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-jointhistogram"></span></div>
+<div class="section" id="jointhistogram">
+<span id="index-16"></span><h2>JointHistogram<a class="headerlink" href="#jointhistogram" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L611">Link to code</a></p>
+<p>Wraps command ** JointHistogram **</p>
+<p>title: Write Out Image Intensities</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: For Analysis</p>
+<p>version: 0.1</p>
+<p>contributor: University of Iowa Department of Psychiatry, <a class="reference external" href="http:://www.psychiatry.uiowa.edu">http:://www.psychiatry.uiowa.edu</a></p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputMaskVolumeInXAxis: (an existing file name)
+        Input mask volume for inputVolumeInXAxis. Histogram will be computed
+        just for the masked region
+        flag: --inputMaskVolumeInXAxis %s
+inputMaskVolumeInYAxis: (an existing file name)
+        Input mask volume for inputVolumeInYAxis. Histogram will be computed
+        just for the masked region
+        flag: --inputMaskVolumeInYAxis %s
+inputVolumeInXAxis: (an existing file name)
+        The Input image to be computed for statistics
+        flag: --inputVolumeInXAxis %s
+inputVolumeInYAxis: (an existing file name)
+        The Input image to be computed for statistics
+        flag: --inputVolumeInYAxis %s
+outputJointHistogramImage: (a string)
+         output joint histogram image file name. Histogram is usually 2D
+        image.
+        flag: --outputJointHistogramImage %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+verbose: (a boolean)
+         print debugging information,
+        flag: --verbose
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">None</span>
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-shufflevectorsmodule"></span></div>
+<div class="section" id="shufflevectorsmodule">
+<span id="index-17"></span><h2>ShuffleVectorsModule<a class="headerlink" href="#shufflevectorsmodule" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L642">Link to code</a></p>
+<p>Wraps command ** ShuffleVectorsModule **</p>
+<p>title: ShuffleVectors</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Automatic Segmentation using neural networks</p>
+<p>version: 1.0</p>
+<p>license: <a class="reference external" href="https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt">https://www.nitrc.org/svn/brains/BuildScripts/trunk/License.txt</a></p>
+<p>contributor: Hans Johnson</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputVectorFileBaseName: (an existing file name)
+        input vector file name prefix. Usually end with .txt and header file
+        has prost fix of .txt.hdr
+        flag: --inputVectorFileBaseName %s
+outputVectorFileBaseName: (a boolean or a file name)
+        output vector file name prefix. Usually end with .txt and header
+        file has prost fix of .txt.hdr
+        flag: --outputVectorFileBaseName %s
+resampleProportion: (a float)
+        downsample size of 1 will be the same size as the input images,
+        downsample size of 3 will throw 2/3 the vectors away.
+        flag: --resampleProportion %f
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputVectorFileBaseName: (an existing file name)
+        output vector file name prefix. Usually end with .txt and header
+        file has prost fix of .txt.hdr
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-fcsv-to-hdf5"></span></div>
+<div class="section" id="fcsv-to-hdf5">
+<span id="index-18"></span><h2>fcsv_to_hdf5<a class="headerlink" href="#fcsv-to-hdf5" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L716">Link to code</a></p>
+<p>Wraps command ** fcsv_to_hdf5 **</p>
+<p>title: fcsv_to_hdf5 (BRAINS)</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Convert a collection of fcsv files to a HDF5 format file</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+landmarkGlobPattern: (a string)
+        Glob pattern to select fcsv files
+        flag: --landmarkGlobPattern %s
+landmarkTypesList: (an existing file name)
+        , file containing list of landmark types,
+        flag: --landmarkTypesList %s
+landmarksInformationFile: (a boolean or a file name)
+        , name of HDF5 file to write matrices into,
+        flag: --landmarksInformationFile %s
+modelFile: (a boolean or a file name)
+        , name of HDF5 file containing BRAINSConstellationDetector Model
+        file (LLSMatrices, LLSMeans and LLSSearchRadii),
+        flag: --modelFile %s
+numberOfThreads: (an integer (int or long))
+        Explicitly specify the maximum number of threads to use.
+        flag: --numberOfThreads %d
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+versionID: (a string)
+        , Current version ID. It should be match with the version of BCD
+        that will be using the output model file,
+        flag: --versionID %s
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>landmarksInformationFile: (an existing file name)
+        , name of HDF5 file to write matrices into,
+modelFile: (an existing file name)
+        , name of HDF5 file containing BRAINSConstellationDetector Model
+        file (LLSMatrices, LLSMeans and LLSSearchRadii),
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-insertmidacpcpoint"></span></div>
+<div class="section" id="insertmidacpcpoint">
+<span id="index-19"></span><h2>insertMidACPCpoint<a class="headerlink" href="#insertmidacpcpoint" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L542">Link to code</a></p>
+<p>Wraps command ** insertMidACPCpoint **</p>
+<p>title: MidACPC Landmark Insertion</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: This program gets a landmark fcsv file and adds a new landmark as the midpoint between AC and PC points to the output landmark fcsv file</p>
+<p>contributor: Ali Ghayoor</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputLandmarkFile: (an existing file name)
+        Input landmark file (.fcsv)
+        flag: --inputLandmarkFile %s
+outputLandmarkFile: (a boolean or a file name)
+        Output landmark file (.fcsv)
+        flag: --outputLandmarkFile %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputLandmarkFile: (an existing file name)
+        Output landmark file (.fcsv)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-landmarksconstellationaligner"></span></div>
+<div class="section" id="landmarksconstellationaligner">
+<span id="index-20"></span><h2>landmarksConstellationAligner<a class="headerlink" href="#landmarksconstellationaligner" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L250">Link to code</a></p>
+<p>Wraps command ** landmarksConstellationAligner **</p>
+<p>title: MidACPC Landmark Insertion</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: This program converts the original landmark files to the acpc-aligned landmark files</p>
+<p>contributor: Ali Ghayoor</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputLandmarksPaired: (an existing file name)
+        Input landmark file (.fcsv)
+        flag: --inputLandmarksPaired %s
+outputLandmarksPaired: (a boolean or a file name)
+        Output landmark file (.fcsv)
+        flag: --outputLandmarksPaired %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputLandmarksPaired: (an existing file name)
+        Output landmark file (.fcsv)
+</pre></div>
+</div>
+<span class="target" id="nipype-interfaces-semtools-utilities-brains-landmarksconstellationweights"></span></div>
+<div class="section" id="landmarksconstellationweights">
+<span id="index-21"></span><h2>landmarksConstellationWeights<a class="headerlink" href="#landmarksconstellationweights" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/semtools/utilities/brains.py#L61">Link to code</a></p>
+<p>Wraps command ** landmarksConstellationWeights **</p>
+<p>title: Generate Landmarks Weights (BRAINS)</p>
+<p>category: Utilities.BRAINS</p>
+<p>description: Train up a list of Weights for the Landmarks in BRAINSConstellationDetector</p>
+<p>Inputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>[Mandatory]
+
+[Optional]
+LLSModel: (an existing file name)
+        Linear least squares model filename in HD5 format
+        flag: --LLSModel %s
+args: (a string)
+        Additional parameters to the command
+        flag: %s
+environ: (a dictionary with keys which are a value of type &#39;str&#39; and
+         with values which are a value of type &#39;str&#39;, nipype default value:
+         {})
+        Environment variables
+ignore_exception: (a boolean, nipype default value: False)
+        Print an error message instead of throwing an exception in case the
+        interface fails to run
+inputTemplateModel: (an existing file name)
+        User-specified template model.,
+        flag: --inputTemplateModel %s
+inputTrainingList: (an existing file name)
+        , Setup file, giving all parameters for training up a Weight list
+        for landmark.,
+        flag: --inputTrainingList %s
+outputWeightsList: (a boolean or a file name)
+        , The filename of a csv file which is a list of landmarks and their
+        corresponding weights.,
+        flag: --outputWeightsList %s
+terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &#39;none&#39;)
+        Control terminal output: `stream` - displays to terminal immediately
+        (default), `allatonce` - waits till command is finished to display
+        output, `file` - writes output to file, `none` - output is ignored
+</pre></div>
+</div>
+<p>Outputs:</p>
+<div class="highlight-python"><div class="highlight"><pre>outputWeightsList: (an existing file name)
+        , The filename of a csv file which is a list of landmarks and their
+        corresponding weights.,
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+<div class="footer">This page uses <a href="http://analytics.google.com/">
+Google Analytics</a> to collect statistics. You can disable it by blocking
+the JavaScript coming from www.google-analytics.com.
+</div>
+
+  </body>
+</html>

@@ -10,7 +10,7 @@ Modifying inputs to pipeline nodes
 Two nodes can be connected as shown below.
 
 .. testcode::
-   
+
     workflow.connect(realigner, 'realigned_files', smoother, 'infile')
 
 The connection mechanism allows for a function to be evaluated on the
@@ -19,11 +19,11 @@ have its result be sent to the input field ('infile') of the
 destination node (smoother).
 
 .. testcode::
-   
+
    def reverse_order(inlist):
        inlist.reverse()
        return inlist
-   
+
    workflow.connect(realigner, ('realigned_files', reverse_order),
                     smoother, 'infile')
 
@@ -31,10 +31,10 @@ This can be extended to provide additional arguments to the
 function. For example:
 
 .. testcode::
-   
+
    def reorder(inlist, order):
       return [inlist[item] for item in order]
-   
+
    workflow.connect(realigner, ('realigned_files', reorder, [2, 3, 0, 1]),
                     smoother, 'infile')
 
@@ -72,7 +72,7 @@ Debugging
 
 When a crash happens while running a pipeline, a crashdump is stored in
 the pipeline's working directory unless the config option 'crashdumpdir'
-has been set (see :ref:config_options). 
+has been set (see :ref:config_options).
 
 The crashdump is a compressed numpy file that stores a dictionary
 containing three fields:

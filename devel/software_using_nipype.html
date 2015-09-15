@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -125,6 +125,7 @@
 <li><a class="reference internal" href="#mia">MIA</a></li>
 <li><a class="reference internal" href="#mindboggle">Mindboggle</a></li>
 <li><a class="reference internal" href="#openfmri">OpenfMRI</a></li>
+<li><a class="reference internal" href="#serial-functional-diffusion-mapping-sfdm">serial functional Diffusion Mapping (sfDM)</a></li>
 <li><a class="reference internal" href="#the-stanford-cni-mrs-library-smal">The Stanford CNI MRS Library (SMAL)</a></li>
 <li><a class="reference internal" href="#tract-querier">tract_querier</a></li>
 </ul>
@@ -149,7 +150,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../users/install.html">Download</a></td>
@@ -161,7 +162,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -184,9 +185,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -196,7 +197,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="software-using-nipype">
 <span id="id1"></span><h1>Software using Nipype<a class="headerlink" href="#software-using-nipype" title="Permalink to this headline">¶</a></h1>
@@ -244,6 +245,10 @@
 <h2>OpenfMRI<a class="headerlink" href="#openfmri" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://openfmri.org/">OpenfMRI</a> is a repository for task based fMRI datasets. It uses Nipype for automated analysis of the deposited data.</p>
 </div>
+<div class="section" id="serial-functional-diffusion-mapping-sfdm">
+<h2>serial functional Diffusion Mapping (sfDM)<a class="headerlink" href="#serial-functional-diffusion-mapping-sfdm" title="Permalink to this headline">¶</a></h2>
+<p>&#8216;sfDM &lt;<a class="reference external" href="http://github.com/PIRCImagingTools/sfDM">http://github.com/PIRCImagingTools/sfDM</a>&gt;&#8217;_ is a software package for looking at changes in diffusion profiles of different tissue types across time. It uses Nipype to process the data.</p>
+</div>
 <div class="section" id="the-stanford-cni-mrs-library-smal">
 <h2>The Stanford CNI MRS Library (SMAL)<a class="headerlink" href="#the-stanford-cni-mrs-library-smal" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="http://cni.github.io/MRS/doc/_build/html/index.html">SMAL</a> is a library providing algorithms and methods to read and analyze data from Magnetic Resonance Spectroscopy (MRS) experiments. It provides an API for fitting models of the spectral line-widths of several different molecular species, and quantify their relative abundance in human brain tissue. SMAL uses Nipype Workflows and Interfaces.</p>
@@ -261,9 +266,9 @@
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking

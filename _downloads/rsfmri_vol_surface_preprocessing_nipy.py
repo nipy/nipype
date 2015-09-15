@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 """
 ====================================
@@ -348,8 +347,6 @@ def create_reg_workflow(name='registration'):
     Parameters
     ----------
 
-    ::
-
         name : name of workflow (default: 'registration')
 
     Inputs::
@@ -365,10 +362,6 @@ def create_reg_workflow(name='registration'):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
-
-    Example
-    -------
-
     """
 
     register = Workflow(name=name)
@@ -439,6 +432,7 @@ def create_reg_workflow(name='registration'):
     """
     Apply inverse transform to take segmentations to functional space
     """
+
     applyxfm = MapNode(freesurfer.ApplyVolTransform(inverse=True,
                                                     interp='nearest'),
                        iterfield=['target_file'],
@@ -451,6 +445,7 @@ def create_reg_workflow(name='registration'):
     """
     Apply inverse transform to aparc file
     """
+
     aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,
                                                  interp='nearest'),
                     name='aparc_inverse_transform')
@@ -503,7 +498,7 @@ def create_reg_workflow(name='registration'):
     reg.inputs.use_histogram_matching = [False] * 2 + [True]
     reg.inputs.winsorize_lower_quantile = 0.005
     reg.inputs.winsorize_upper_quantile = 0.995
-    reg.inputs.args = '--float'
+    reg.inputs.float = True
     reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
     reg.inputs.num_threads = 4
     reg.plugin_args = {'sbatch_args': '-c%d' % 4}
@@ -515,16 +510,15 @@ def create_reg_workflow(name='registration'):
     Concatenate the affine and ants transforms into a list
     """
 
-    pickfirst = lambda x: x[0]
-
     merge = Node(Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
-    register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
+    register.connect(reg, 'composite_transform', merge, 'in1')
 
 
     """
     Transform the mean image. First to anatomical and then to target
     """
+
     warpmean = Node(ants.ApplyTransforms(), name='warpmean')
     warpmean.inputs.input_image_type = 3
     warpmean.inputs.interpolation = 'Linear'
@@ -614,6 +608,7 @@ def create_workflow(files,
 
     """Segment and Register
     """
+
     registration = create_reg_workflow(name='registration')
     wf.connect(calc_median, 'median_file', registration, 'inputspec.mean_image')
     registration.inputs.inputspec.subject_id = subject_id
@@ -622,6 +617,7 @@ def create_workflow(files,
 
     """Quantify TSNR in each freesurfer ROI
     """
+
     get_roi_tsnr = MapNode(fs.SegStats(default_color_table=True),
                            iterfield=['in_file'], name='get_aparc_tsnr')
     get_roi_tsnr.inputs.avgwf_txt_file = True
@@ -956,7 +952,6 @@ def create_workflow(files,
 """
 Creates the full workflow including getting information from dicom files
 """
-
 
 def create_resting_workflow(args, name=None):
     TR = args.TR

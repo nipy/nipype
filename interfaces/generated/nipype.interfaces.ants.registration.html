@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '1.0.0dev',
+        VERSION:     '0.11.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -38,7 +38,7 @@
 </script>
 
   </head>
-  <body>
+  <body role="document">
 <div class="header-wrapper">
     <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
             <a href="../../index.html">
@@ -67,7 +67,7 @@
     </div>
 </div>
 
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <style type="text/css">
     input.gsc-input {
@@ -140,7 +140,7 @@
                 <td align="left">Release</td><td align="right">Devel</td>
             </tr>
             <tr>
-                <td align="left">0.10.0</td><td align="right">1.0-dev</td>
+                <td align="left">0.11.0</td><td align="right">0.11.0</td>
             </tr>
             <tr>
                 <td align="left"><a href="../../users/install.html">Download</a></td>
@@ -152,7 +152,7 @@
     <div id="buttons">
         <div id="ohloh-use" style="margin-right: 25px; margin-top: -2px; float: left;">
             <script type="text/javascript"
-                    src="http://www.ohloh.net/p/480871/widgets/project_users_logo.js">
+                    src="https://www.openhub.net/p/480871/widgets/project_users_logo.js">
             </script>
         </div><!-- use -->
         <g:plusone size="medium" annotation="none"></g:plusone>
@@ -175,9 +175,9 @@
     <li>Docs: <a href="http://nipy.org/nipype">Stable</a> · <a href="http://www.mit.edu/~satra/nipype-nightly/">Nightly</a></li>
     <li>Code: <a href="http://github.com/nipy/nipype">Github</a> · <a href="http://github.com/nipy/nipype/issues">Bugs-Requests</a></li>
     <li>Forum: <a href="http://neurostars.org/t/nipype">User</a> · <a href="http://projects.scipy.org/mailman/listinfo/nipy-devel">Developer</a></li>
-    <li><a href="http://nipy.org/software/license/index.html"><img src="https://pypip.in/license/nipype/badge.png" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
+    <li><a href="http://nipy.org/software/license/index.html"><img src="https://img.shields.io/pypi/l/nipype.svg" alt="License"></a> · <a href="http://nipy.org/about/funding.html">Funding</a></li>
     <li><a href="https://travis-ci.org/nipy/nipype"><img src="https://travis-ci.org/nipy/nipype.png?branch=master" alt="travis"></a> · <a href='https://coveralls.io/r/nipy/nipype'><img src='https://coveralls.io/repos/nipy/nipype/badge.png' alt='Coverage Status' /></a></li>
-    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://pypip.in/download/nipype/badge.png" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://pypip.in/py_versions/nipype/badge.png' alt='Python Versions' /></a></li>
+    <li><a href="https://pypi.python.org/pypi/nipype/"><img src="https://img.shields.io/pypi/dm/nipype.svg" alt="Downloads"></a> · <a href='https://pypi.python.org/pypi/nipype/'><img src='https://img.shields.io/pypi/pyversions/nipype.svg' alt='Python Versions' /></a></li>
 </ul>
 
 
@@ -187,21 +187,21 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="interfaces-ants-registration">
 <h1>interfaces.ants.registration<a class="headerlink" href="#interfaces-ants-registration" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="nipype-interfaces-ants-registration-registration"></span><div class="section" id="registration">
 <span id="index-0"></span><h2>Registration<a class="headerlink" href="#registration" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://github.com/nipy/nipype/tree/3444b7588a1dea15675dc8a4f5be5f8b753adbd8/nipype/interfaces/ants/registration.py#L342">Link to code</a></p>
+<p><a class="reference external" href="http://github.com/nipy/nipype/tree/f9c98ba/nipype/interfaces/ants/registration.py#L377">Link to code</a></p>
 <p>Wraps command <strong>antsRegistration</strong></p>
 <div class="section" id="examples">
 <h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">copy</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">nipype.interfaces.ants</span> <span class="kn">import</span> <span class="n">Registration</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span> <span class="o">=</span> <span class="n">Registration</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fixed_image</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;fixed1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;fixed2.nii&#39;</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving_image</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;moving1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;moving2.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fixed_image</span> <span class="o">=</span> <span class="s">&#39;fixed1.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving_image</span> <span class="o">=</span> <span class="s">&#39;moving1.nii&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">output_transform_prefix</span> <span class="o">=</span> <span class="s">&quot;output_&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">initial_moving_transform</span> <span class="o">=</span> <span class="s">&#39;trans.mat&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">invert_initial_moving_transform</span> <span class="o">=</span> <span class="bp">True</span>
@@ -211,6 +211,7 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">dimension</span> <span class="o">=</span> <span class="mi">3</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">write_composite_transform</span> <span class="o">=</span> <span class="bp">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">collapse_output_transforms</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">initialize_transforms_per_stage</span> <span class="o">=</span> <span class="bp">False</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Mattes&#39;</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric_weight</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span> <span class="c"># Default (value ignored currently by ANTs)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">radius_or_number_of_bins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span>
@@ -229,29 +230,44 @@
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">reg1</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg1</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_lower_quantile</span> <span class="o">=</span> <span class="mf">0.025</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg1</span><span class="o">.</span><span class="n">cmdline</span>
-<span class="go">&#39;antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1&#39;</span>
+<span class="go">&#39;antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg1</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>  
 </pre></div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">reg2</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg2</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_upper_quantile</span> <span class="o">=</span> <span class="mf">0.975</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg2</span><span class="o">.</span><span class="n">cmdline</span>
-<span class="go">&#39;antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1&#39;</span>
+<span class="go">&#39;antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1&#39;</span>
 </pre></div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">reg3</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg3</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_lower_quantile</span> <span class="o">=</span> <span class="mf">0.025</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg3</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">winsorize_upper_quantile</span> <span class="o">=</span> <span class="mf">0.975</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg3</span><span class="o">.</span><span class="n">cmdline</span>
-<span class="go">&#39;antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1&#39;</span>
+<span class="go">&#39;antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">reg3a</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg3a</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">float</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg3a</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;antsRegistration --collapse-output-transforms 0 --dimensionality 3 --float 1 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">reg3b</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg3b</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">float</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg3b</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;antsRegistration --collapse-output-transforms 0 --dimensionality 3 --float 0 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1&#39;</span>
 </pre></div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Test collapse transforms flag</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg4</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">save_state</span> <span class="o">=</span> <span class="s">&#39;trans.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">restore_state</span> <span class="o">=</span> <span class="s">&#39;trans.mat&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg4</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">initialize_transforms_per_stage</span> <span class="o">=</span> <span class="bp">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg4</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">collapse_output_transforms</span> <span class="o">=</span> <span class="bp">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">outputs</span> <span class="o">=</span> <span class="n">reg4</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">outputs</span> 
-<span class="go">{&#39;reverse_invert_flags&#39;: [], &#39;inverse_composite_transform&#39;: [&#39;.../nipype/testing/data/output_InverseComposite.h5&#39;], &#39;warped_image&#39;: &#39;.../nipype/testing/data/output_warped_image.nii.gz&#39;, &#39;inverse_warped_image&#39;: &lt;undefined&gt;, &#39;forward_invert_flags&#39;: [], &#39;reverse_transforms&#39;: [], &#39;composite_transform&#39;: [&#39;.../nipype/testing/data/output_Composite.h5&#39;], &#39;forward_transforms&#39;: []}</span>
+<span class="go">{&#39;reverse_invert_flags&#39;: [], &#39;inverse_composite_transform&#39;: &#39;.../nipype/testing/data/output_InverseComposite.h5&#39;, &#39;warped_image&#39;: &#39;.../nipype/testing/data/output_warped_image.nii.gz&#39;, &#39;inverse_warped_image&#39;: &lt;undefined&gt;, &#39;forward_invert_flags&#39;: [], &#39;reverse_transforms&#39;: [], &#39;save_state&#39;: &lt;undefined&gt;, &#39;composite_transform&#39;: &#39;.../nipype/testing/data/output_Composite.h5&#39;, &#39;forward_transforms&#39;: []}</span>
 </pre></div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Test collapse transforms flag</span>
@@ -259,19 +275,29 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg4b</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">write_composite_transform</span> <span class="o">=</span> <span class="bp">False</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">outputs</span> <span class="o">=</span> <span class="n">reg4b</span><span class="o">.</span><span class="n">_list_outputs</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">outputs</span> 
-<span class="go">{&#39;reverse_invert_flags&#39;: [True, False], &#39;inverse_composite_transform&#39;: &lt;undefined&gt;, &#39;warped_image&#39;: &#39;.../nipype/testing/data/output_warped_image.nii.gz&#39;, &#39;inverse_warped_image&#39;: &lt;undefined&gt;, &#39;forward_invert_flags&#39;: [False, False], &#39;reverse_transforms&#39;: [&#39;.../nipype/testing/data/output_0GenericAffine.mat&#39;, &#39;.../nipype/testing/data/output_1InverseWarp.nii.gz&#39;], &#39;composite_transform&#39;: &lt;undefined&gt;, &#39;forward_transforms&#39;: [&#39;.../nipype/testing/data/output_0GenericAffine.mat&#39;, &#39;.../nipype/testing/data/output_1Warp.nii.gz&#39;]}</span>
+<span class="go">{&#39;reverse_invert_flags&#39;: [True, False], &#39;inverse_composite_transform&#39;: &lt;undefined&gt;, &#39;warped_image&#39;: &#39;.../nipype/testing/data/output_warped_image.nii.gz&#39;, &#39;inverse_warped_image&#39;: &lt;undefined&gt;, &#39;forward_invert_flags&#39;: [False, False], &#39;reverse_transforms&#39;: [&#39;.../nipype/testing/data/output_0GenericAffine.mat&#39;, &#39;.../nipype/testing/data/output_1InverseWarp.nii.gz&#39;], &#39;save_state&#39;: &lt;undefined&gt;, &#39;composite_transform&#39;: &lt;undefined&gt;, &#39;forward_transforms&#39;: [&#39;.../nipype/testing/data/output_0GenericAffine.mat&#39;, &#39;.../nipype/testing/data/output_1Warp.nii.gz&#39;]}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg4b</span><span class="o">.</span><span class="n">aggregate_outputs</span><span class="p">()</span> 
 </pre></div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Test multiple metrics per stage</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg5</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">reg5</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;CC&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;CC&#39;</span><span class="p">,</span> <span class="s">&#39;Mattes&#39;</span><span class="p">]]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">reg5</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric_weight</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="o">.</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">reg5</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">radius_or_number_of_bins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="p">[</span><span class="mi">32</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg5</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fixed_image</span> <span class="o">=</span> <span class="s">&#39;fixed1.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg5</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving_image</span> <span class="o">=</span> <span class="s">&#39;moving1.nii&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg5</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Mattes&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;Mattes&#39;</span><span class="p">,</span> <span class="s">&#39;CC&#39;</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg5</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">metric_weight</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span><span class="o">.</span><span class="mi">5</span><span class="p">]]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg5</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">radius_or_number_of_bins</span> <span class="o">=</span> <span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg5</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sampling_strategy</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Random&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">]</span> <span class="c"># use default strategy in second stage</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg5</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">sampling_percentage</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">]]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">reg5</span><span class="o">.</span><span class="n">cmdline</span>
-<span class="go">&#39;antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric CC[ fixed1.nii, moving1.nii, 1, 4, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1&#39;</span>
+<span class="go">&#39;antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># Test multiple inputs</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg6</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">reg5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg6</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">fixed_image</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;fixed1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;fixed2.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg6</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">moving_image</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;moving1.nii&#39;</span><span class="p">,</span> <span class="s">&#39;moving2.nii&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg6</span><span class="o">.</span><span class="n">cmdline</span>
+<span class="go">&#39;antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric CC[ fixed2.nii, moving2.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1   --write-composite-transform 1&#39;</span>
 </pre></div>
 </div>
 <p>Inputs:</p>
@@ -293,7 +319,7 @@ moving_image: (a list of items which are an existing file name)
         image to apply transformation to (generally a coregistered
         functional)
 shrink_factors: (a list of items which are a list of items which are
-         an integer)
+         an integer (int or long))
 smoothing_sigmas: (a list of items which are a list of items which
          are a float)
 transforms: (a list of items which are &#39;Rigid&#39; or &#39;Affine&#39; or
@@ -316,7 +342,7 @@ convergence_threshold: (a list of at least 1 items which are a float,
          nipype default value: [1e-06])
         requires: number_of_iterations
 convergence_window_size: (a list of at least 1 items which are an
-         integer, nipype default value: [10])
+         integer (int or long), nipype default value: [10])
         requires: convergence_threshold
 dimension: (3 or 2, nipype default value: 3)
         image dimension (2 or 3)
@@ -326,8 +352,11 @@ environ: (a dictionary with keys which are a value of type &#39;str&#39; and
          {})
         Environment variables
 fixed_image_mask: (an existing file name)
-        mask used to limit registration region
+        mask used to limit metric sampling region of the fixed image
         flag: %s
+float: (a boolean)
+        Use float instead of double for computations.
+        flag: --float %d
 ignore_exception: (a boolean, nipype default value: False)
         Print an error message instead of throwing an exception in case the
         interface fails to run
@@ -338,6 +367,15 @@ initial_moving_transform_com: (0 or 1 or 2)
         Use center of mass for moving transform
         flag: %s
         mutually_exclusive: initial_moving_transform
+initialize_transforms_per_stage: (a boolean, nipype default value:
+         False)
+        Initialize linear transforms from the previous stage. By enabling
+        this option, the current linear stage transform is directly
+        intialized from the previous stages linear transform; this allows
+        multiple linear stages to be run where each stage directly updates
+        the estimated linear transform from the previous stage. (e.g.
+        Translation -&gt; Rigid -&gt; Affine).
+        flag: --initialize-transforms-per-stage %d
 interpolation: (&#39;Linear&#39; or &#39;NearestNeighbor&#39; or &#39;CosineWindowedSinc&#39;
          or &#39;WelchWindowedSinc&#39; or &#39;HammingWindowedSinc&#39; or
          &#39;LanczosWindowedSinc&#39; or &#39;BSpline&#39;, nipype default value: Linear)
@@ -354,24 +392,30 @@ metric_weight_item_trait: (a float)
 metric_weight_stage_trait: (a float or a list of items which are a
          float)
 moving_image_mask: (an existing file name)
+        mask used to limit metric sampling region of the moving image
         requires: fixed_image_mask
-num_threads: (an integer, nipype default value: 1)
+num_threads: (an integer (int or long), nipype default value: 1)
         Number of ITK threads to use
 number_of_iterations: (a list of items which are a list of items
-         which are an integer)
+         which are an integer (int or long))
 output_inverse_warped_image: (a boolean or a file name)
         requires: output_warped_image
 output_transform_prefix: (a string, nipype default value: transform)
         flag: %s
 output_warped_image: (a boolean or a file name)
-radius_bins_item_trait: (an integer)
-radius_bins_stage_trait: (an integer or a list of items which are an
-         integer)
-radius_or_number_of_bins: (a list of items which are an integer or a
-         list of items which are an integer, nipype default value: [5])
+radius_bins_item_trait: (an integer (int or long))
+radius_bins_stage_trait: (an integer (int or long) or a list of items
+         which are an integer (int or long))
+radius_or_number_of_bins: (a list of items which are an integer (int
+         or long) or a list of items which are an integer (int or long),
+         nipype default value: [5])
         the number of bins in each stage for the MI and Mattes metric, the
         radius for other metrics
         requires: metric_weight
+restore_state: (an existing file name)
+        Filename for restoring the internal restorable state of the
+        registration
+        flag: --restore-state %s
 sampling_percentage: (a list of items which are 0.0 &lt;= a floating
          point number &lt;= 1.0 or None or a list of items which are 0.0 &lt;= a
          floating point number &lt;= 1.0 or None)
@@ -392,6 +436,10 @@ sampling_strategy_item_trait: (&#39;None&#39; or &#39;Regular&#39; or &#39;Rando
 sampling_strategy_stage_trait: (&#39;None&#39; or &#39;Regular&#39; or &#39;Random&#39; or
          None or a list of items which are &#39;None&#39; or &#39;Regular&#39; or &#39;Random&#39;
          or None)
+save_state: (a file name)
+        Filename for saving the internal restorable state of the
+        registration
+        flag: --save-state %s
 sigma_units: (a list of items which are &#39;mm&#39; or &#39;vox&#39;)
         units for smoothing sigmas
         requires: smoothing_sigmas
@@ -401,8 +449,8 @@ terminal_output: (&#39;stream&#39; or &#39;allatonce&#39; or &#39;file&#39; or &
         output, `file` - writes output to file, `none` - output is ignored
 transform_parameters: (a list of items which are a float or a tuple
          of the form: (a float) or a tuple of the form: (a float, a float, a
-         float) or a tuple of the form: (a float, an integer, an integer, an
-         integer))
+         float) or a tuple of the form: (a float, an integer (int or long),
+         an integer (int or long), an integer (int or long)))
 use_estimate_learning_rate_once: (a list of items which are a
          boolean)
 use_histogram_matching: (a boolean or a list of items which are a
@@ -420,15 +468,13 @@ write_composite_transform: (a boolean, nipype default value: False)
 </pre></div>
 </div>
 <p>Outputs:</p>
-<div class="highlight-python"><div class="highlight"><pre>composite_transform: (a list of items which are an existing file
-         name)
+<div class="highlight-python"><div class="highlight"><pre>composite_transform: (an existing file name)
         Composite transform file
 forward_invert_flags: (a list of items which are a boolean)
         List of flags corresponding to the forward transforms
 forward_transforms: (a list of items which are an existing file name)
         List of output transforms for forward registration
-inverse_composite_transform: (a list of items which are an existing
-         file name)
+inverse_composite_transform: (an existing file name)
         Inverse composite transform file
 inverse_warped_image: (a file name)
         Outputs the inverse of the warped image
@@ -436,6 +482,8 @@ reverse_invert_flags: (a list of items which are a boolean)
         List of flags corresponding to the reverse transforms
 reverse_transforms: (a list of items which are an existing file name)
         List of output transforms for reverse registration
+save_state: (a file name)
+        The saved registration state to be restored
 warped_image: (a file name)
         Outputs warped image
 </pre></div>
@@ -451,9 +499,9 @@ warped_image: (a file name)
       <div class="clearer"></div>
     </div>
 
-    <div class="footer">
-        &copy; Copyright 2009-14, Neuroimaging in Python team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2009-15, Neuroimaging in Python team.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
