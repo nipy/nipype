@@ -10,7 +10,7 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 _version_major = 0
 _version_minor = 11
 _version_micro = 0
-_version_extra = ''
+_version_extra = '' # switch to -dev for non release
 
 def get_nipype_gitversion():
     """Nipype version as reported by the last commit in git
@@ -41,13 +41,13 @@ def get_nipype_gitversion():
         ver = o.strip().split('-')[-1]
     return ver
 
-if 'dev' in _version_extra:
+if '-dev' in _version_extra:
     gitversion = get_nipype_gitversion()
     if gitversion:
-        _version_extra = gitversion + '.dev'
+        _version_extra = '-' + gitversion + '.dev'
 
 # Format expected by setup.py and doc/source/conf.py: string of form "X.Y.Z"
-__version__ = "%s.%s.%s-%s" % (_version_major,
+__version__ = "%s.%s.%s%s" % (_version_major,
                               _version_minor,
                               _version_micro,
                               _version_extra)
