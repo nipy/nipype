@@ -43,11 +43,7 @@ This would be equivalent to:
 .. testcode::
    
    realigner = pe.Node(interface=spm.Realign(infile=os.abspath('somefuncrun.nii'),
-<<<<<<< HEAD
                                              register_to_mean = True),
-=======
-                                             register_to_mean = True), 
->>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
                        name='realign')
 
 In Pythonic terms, this is saying that interface option in Node accepts

@@ -21,7 +21,6 @@ Example 2
 +++++++++
 
 By subclassing :class:`nipype.interfaces.matlab.MatlabCommand` for your main class, and :class:`nipype.interfaces.matlab.MatlabInputSpec` for your input spec, you gain access to some useful MATLAB hooks
-<<<<<<< HEAD
 
 .. literalinclude:: matlab_example2.py
 
@@ -30,13 +29,4 @@ By subclassing :class:`nipype.interfaces.matlab.MatlabCommand` for your main cla
   You can download :download:`the source code of this example <matlab_example2.py>`.
 
 .. include:: ../links_names.txt
-=======
 
-.. literalinclude:: matlab_example2.py
-
-.. admonition:: Example source code
-
-  You can download :download:`the source code of this example <matlab_example2.py>`.
->>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
-
-.. include:: ../links_names.txt
