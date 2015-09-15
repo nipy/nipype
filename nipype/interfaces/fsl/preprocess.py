@@ -561,6 +561,13 @@ class FLIRT(FSLCommand):
         skip.append('save_log')
         return super(FLIRT, self)._parse_inputs(skip=skip)
 
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = self._filename_from_source('out_file')
+        if not self.inputs.apply_xfm:
+            outputs['out_matrix_file'] = self._filename_from_source('out_matrix_file')
+        return outputs
+
 
 class ApplyXfmInputSpec(FLIRTInputSpec):
     apply_xfm = traits.Bool(
