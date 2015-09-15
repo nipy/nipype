@@ -1145,24 +1145,24 @@ class Node(WorkflowBase):
             for example to iterate over different frac values in fsl.Bet()
             for a single field the input can be a tuple, otherwise a list
             of tuples ::
-            
+
                 node.iterables = ('frac',[0.5,0.6,0.7])
                 node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
-    
+
             If this node has an itersource, then the iterables values
             is a dictionary which maps an iterable source field value
             to the target iterables field values, e.g.: ::
-            
+
                 inputspec.iterables = ('images',['img1.nii', 'img2.nii']])
                 node.itersource = ('inputspec', ['frac'])
                 node.iterables = ('frac', {'img1.nii': [0.5, 0.6],
                                            'img2.nii': [0.6, 0.7]})
-        
+
             If this node's synchronize flag is set, then an alternate
             form of the iterables is a [fields, values] list, where
             fields is the list of iterated fields and values is the
             list of value tuples for the given fields, e.g.: ::
-            
+
                 node.synchronize = True
                 node.iterables = [('frac', 'threshold'),
                                   [(0.5, True),
@@ -1471,7 +1471,7 @@ class Node(WorkflowBase):
             sorted_outputs = sorted(self.needed_outputs)
             hashobject.update(str(sorted_outputs))
             hashvalue = hashobject.hexdigest()
-            hashed_inputs['needed_outputs'] = sorted_outputs
+            hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
 
     def _save_hashfile(self, hashfile, hashed_inputs):
@@ -2136,7 +2136,7 @@ class MapNode(Node):
             sorted_outputs = sorted(self.needed_outputs)
             hashobject.update(str(sorted_outputs))
             hashvalue = hashobject.hexdigest()
-            hashed_inputs['needed_outputs'] = sorted_outputs
+            hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
 
     @property

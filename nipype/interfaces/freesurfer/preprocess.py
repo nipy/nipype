@@ -212,6 +212,12 @@ class MRIConvertInputSpec(FSTraitedSpec):
                           desc='dont rescale values for COR')
     no_change = traits.Bool(argstr='--nochange',
                            desc="don't change type of input to that of template")
+    tr = traits.Int(argstr='-tr %d',
+                    desc='TR in msec')
+    te = traits.Int(argstr='-te %d',
+                    desc='TE in msec')
+    ti = traits.Int(argstr='-ti %d',
+                    desc='TI in msec (note upper case flag)')
     autoalign_matrix = File(exists=True, argstr='--autoalign %s',
                         desc='text file with autoalign matrix')
     unwarp_gradient = traits.Bool(argstr='--unwarp_gradient_nonlinearity',

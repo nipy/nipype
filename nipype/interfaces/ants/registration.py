@@ -7,11 +7,10 @@
    >>> os.chdir(datadir)
 """
 
-from ..base import (TraitedSpec, File, traits)
+from ..base import (TraitedSpec, File, traits, InputMultiPath)
 from .base import ANTSCommand, ANTSCommandInputSpec
 import os
-from nipype.interfaces.base import InputMultiPath
-from nipype.interfaces.traits_extension import isdefined
+from ..traits_extension import isdefined
 import numpy as np
 
 
@@ -26,6 +25,26 @@ class ANTSInputSpec(ANTSCommandInputSpec):
                                   desc=('image to apply transformation to (generally a coregistered '
                                         'functional)'))
 
+#    Not all metrics are appropriate for all modalities. Also, not all metrics
+#    are efficeint or appropriate at all resolution levels, Some metrics perform
+#    well for gross global registraiton, but do poorly for small changes (i.e.
+#    Mattes), and some metrics do well for small changes but don't work well for
+#    gross level changes (i.e. 'CC').
+#
+#    This is a two stage registration. in the first stage
+#      [ 'Mattes', .................]
+#         ^^^^^^ <- First stage
+#    Do a unimodal registration of the first elements of the fixed/moving input
+#    list use the"CC" as the metric.
+#
+#    In the second stage
+#      [ ....., ['Mattes','CC'] ]
+#               ^^^^^^^^^^^^^^^ <- Second stage
+#    Do a multi-modal registration where the first elements of fixed/moving
+#    input list use 'CC' metric and that is added to 'Mattes' metric result of
+#    the second elements of the fixed/moving input.
+#
+#    Cost = Sum_i ( metricweight[i] Metric_i ( fixedimage[i], movingimage[i]) )
     metric = traits.List(traits.Enum('CC', 'MI', 'SMI', 'PR', 'SSD',
                          'MSQ', 'PSE'), mandatory=True, desc='')
 
@@ -189,8 +208,8 @@ class ANTS(ANTSCommand):
             self.inputs.output_transform_prefix + 'Warp.nii.gz')
         outputs['inverse_warp_transform'] = os.path.abspath(
             self.inputs.output_transform_prefix + 'InverseWarp.nii.gz')
-        #outputs['metaheader'] = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.mhd')
-        #outputs['metaheader_raw'] = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.raw')
+        # outputs['metaheader'] = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.mhd')
+        # outputs['metaheader_raw'] = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.raw')
         return outputs
 
 
@@ -265,13 +284,11 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     interpolation = traits.Enum(
         'Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
         'HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline',
-        # 'MultiLabel',
-        # 'Gaussian',
-        # 'BSpline',
-        argstr='%s', usedefault=True)
         # MultiLabel[<sigma=imageSpacing>,<alpha=4.0>]
         # Gaussian[<sigma=imageSpacing>,<alpha=1.0>]
         # BSpline[<order=3>]
+        argstr='%s', usedefault=True)
+
     write_composite_transform = traits.Bool(
         argstr='--write-composite-transform %d',
         default=False, usedefault=True, desc='')
@@ -351,10 +368,8 @@ class RegistrationOutputSpec(TraitedSpec):
     ), desc='List of flags corresponding to the forward transforms')
     reverse_invert_flags = traits.List(traits.Bool(
     ), desc='List of flags corresponding to the reverse transforms')
-    composite_transform = traits.List(
-        File(exists=True), desc='Composite transform file')
-    inverse_composite_transform = traits.List(
-        File(exists=True), desc='Inverse composite transform file')
+    composite_transform = File(exists=True, desc='Composite transform file')
+    inverse_composite_transform = File(exists=True, desc='Inverse composite transform file')
     warped_image = File(desc="Outputs warped image")
     inverse_warped_image = File(desc="Outputs the inverse of the warped image")
     save_state = File(desc="The saved registration state to be restored")
@@ -428,7 +443,7 @@ class Registration(ANTSCommand):
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
     >>> print outputs #doctest: +ELLIPSIS
-    {'reverse_invert_flags': [], 'inverse_composite_transform': ['.../nipype/testing/data/output_InverseComposite.h5'], 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [], 'reverse_transforms': [], 'save_state': <undefined>, 'composite_transform': ['.../nipype/testing/data/output_Composite.h5'], 'forward_transforms': []}
+    {'reverse_invert_flags': [], 'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5', 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [], 'reverse_transforms': [], 'save_state': <undefined>, 'composite_transform': '.../nipype/testing/data/output_Composite.h5', 'forward_transforms': []}
 
     >>> # Test collapse transforms flag
     >>> reg4b = copy.deepcopy(reg4)
@@ -440,13 +455,22 @@ class Registration(ANTSCommand):
 
     >>> # Test multiple metrics per stage
     >>> reg5 = copy.deepcopy(reg)
-    >>> reg5.inputs.metric = ['CC', ['CC', 'Mattes']]
-    >>> reg5.inputs.metric_weight = [1, [.5]*2]
-    >>> reg5.inputs.radius_or_number_of_bins = [4, [32]*2]
+    >>> reg5.inputs.fixed_image = 'fixed1.nii'
+    >>> reg5.inputs.moving_image = 'moving1.nii'
+    >>> reg5.inputs.metric = ['Mattes', ['Mattes', 'CC']]
+    >>> reg5.inputs.metric_weight = [1, [.5,.5]]
+    >>> reg5.inputs.radius_or_number_of_bins = [32, [32, 4] ]
     >>> reg5.inputs.sampling_strategy = ['Random', None] # use default strategy in second stage
     >>> reg5.inputs.sampling_percentage = [0.05, [0.05, 0.10]]
     >>> reg5.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] --metric CC[ fixed1.nii, moving1.nii, 1, 4, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+
+    >>> # Test multiple inputs
+    >>> reg6 = copy.deepcopy(reg5)
+    >>> reg6.inputs.fixed_image = ['fixed1.nii', 'fixed2.nii']
+    >>> reg6.inputs.moving_image = ['moving1.nii', 'moving2.nii']
+    >>> reg6.cmdline
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric CC[ fixed2.nii, moving2.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1   --write-composite-transform 1'
     """
     DEF_SAMPLING_STRATEGY = 'None'
     """The default sampling strategy argument."""
@@ -466,14 +490,12 @@ class Registration(ANTSCommand):
         ----------
         index: the stage index
         """
-        # The common fixed image.
-        fixed = self.inputs.fixed_image[0]
-        # The common moving image.
-        moving = self.inputs.moving_image[0]
         # The metric name input for the current stage.
         name_input = self.inputs.metric[index]
         # The stage-specific input dictionary.
         stage_inputs = dict(
+            fixed_image=self.inputs.fixed_image[0],
+            moving_image=self.inputs.moving_image[0],
             metric=name_input,
             weight=self.inputs.metric_weight[index],
             radius_or_bins=self.inputs.radius_or_number_of_bins[index],
@@ -499,19 +521,32 @@ class Registration(ANTSCommand):
         if isinstance(name_input, list):
             items = stage_inputs.items()
             indexes = range(0, len(name_input))
-            # dict-comprehension only works with python 2.7 and up
-            #specs = [{k: v[i] for k, v in items} for i in indexes]
-            specs = [dict([(k, v[i]) for k, v in items]) for i in indexes]
+            specs = list()
+            for i in indexes:
+                temp = dict([(k, v[i]) for k, v in items])
+                if len(self.inputs.fixed_image) == 1:
+                    temp["fixed_image"] = self.inputs.fixed_image[0]
+                else:
+                    temp["fixed_image"] = self.inputs.fixed_image[i]
+
+                if len(self.inputs.moving_image) == 1:
+                    temp["moving_image"] = self.inputs.moving_image[0]
+                else:
+                    temp["moving_image"] = self.inputs.moving_image[i]
+
+                specs.append( temp )
         else:
             specs = [stage_inputs]
 
         # Format the --metric command line metric arguments, one per
         # specification.
-        return [self._formatMetricArgument(fixed, moving, **spec) for spec in specs]
+        return [self._formatMetricArgument(**spec) for spec in specs]
 
-    def _formatMetricArgument(self, fixed, moving, **kwargs):
+    def _formatMetricArgument(self, **kwargs):
         retval = '%s[ %s, %s, %g, %d' % (kwargs['metric'],
-                                         fixed, moving, kwargs['weight'],
+                                         kwargs['fixed_image'],
+                                         kwargs['moving_image'],
+                                         kwargs['weight'],
                                          kwargs['radius_or_bins'])
 
         # The optional sampling strategy.
@@ -579,7 +614,7 @@ class Registration(ANTSCommand):
         output_filename = None
         if not inverse:
             if isdefined(self.inputs.output_warped_image) and \
-                self.inputs.output_warped_image:
+                    self.inputs.output_warped_image:
                 output_filename = self.inputs.output_warped_image
                 if isinstance(output_filename, bool):
                     output_filename = '%s_Warped.nii.gz' % self.inputs.output_transform_prefix
@@ -588,7 +623,7 @@ class Registration(ANTSCommand):
             return output_filename
         inv_output_filename = None
         if isdefined(self.inputs.output_inverse_warped_image) and \
-            self.inputs.output_inverse_warped_image:
+                self.inputs.output_inverse_warped_image:
             inv_output_filename = self.inputs.output_inverse_warped_image
             if isinstance(inv_output_filename, bool):
                 inv_output_filename = '%s_InverseWarped.nii.gz' % self.inputs.output_transform_prefix
@@ -663,7 +698,7 @@ class Registration(ANTSCommand):
                 return self._formatWinsorizeImageIntensities()
             return ''  # Must return something for argstr!
         # This feature was removed from recent versions of antsRegistration due to corrupt outputs.
-        #elif opt == 'collapse_linear_transforms_to_fixed_image_header':
+        # elif opt == 'collapse_linear_transforms_to_fixed_image_header':
         #    return self._formatCollapseLinearTransformsToFixedImageHeader()
         return super(Registration, self)._format_arg(opt, spec, val)
 
@@ -702,12 +737,11 @@ class Registration(ANTSCommand):
 
         if self.inputs.write_composite_transform:
             fileName = self.inputs.output_transform_prefix + 'Composite.h5'
-            outputs['composite_transform'] = [os.path.abspath(fileName)]
+            outputs['composite_transform'] = os.path.abspath(fileName)
             fileName = self.inputs.output_transform_prefix + \
                 'InverseComposite.h5'
-            outputs['inverse_composite_transform'] = [
-                os.path.abspath(fileName)]
-        else: # If composite transforms are written, then individuals are not written (as of 2014-10-26
+            outputs['inverse_composite_transform'] = os.path.abspath(fileName)
+        else:  # If composite transforms are written, then individuals are not written (as of 2014-10-26
             if not self.inputs.collapse_output_transforms:
                 transformCount = 0
                 if isdefined(self.inputs.initial_moving_transform):

@@ -88,7 +88,7 @@ def test_TraitedSpec():
     specfunc = lambda x : spec(hoo=x)
     yield assert_raises, nib.traits.TraitError, specfunc, 1
     infields = spec(foo=1)
-    hashval = ({'foo': 1, 'goo': '0.0000000000'}, 'cb03be1c3182ff941eecea6440c910f0')
+    hashval = ([('foo', 1), ('goo', '0.0000000000')], 'e89433b8c9141aa0fda2f8f4d662c047')
     yield assert_equal, infields.get_hashval(), hashval
     #yield assert_equal, infields.hashval[1], hashval[1]
     yield assert_equal, infields.__repr__(), '\nfoo = 1\ngoo = 0.0\n'
@@ -314,7 +314,7 @@ def test_TraitedSpec_withFile():
         doo = nib.traits.List(nib.File(exists=True))
     infields = spec2(moo=tmp_infile, doo=[tmp_infile])
     hashval = infields.get_hashval(hash_method='content')
-    yield assert_equal, hashval[1], '8c227fb727c32e00cd816c31d8fea9b9'
+    yield assert_equal, hashval[1], 'a00e9ee24f5bfa9545a515b7a759886b'
     teardown_file(tmpd)
 
 @skipif(checknose)
@@ -329,7 +329,7 @@ def test_TraitedSpec_withNoFileHashing():
         doo = nib.traits.List(nib.File(exists=True))
     infields = spec2(moo=nme, doo=[tmp_infile])
     hashval = infields.get_hashval(hash_method='content')
-    yield assert_equal, hashval[1], '642c326a05add933e9cdc333ce2d0ac2'
+    yield assert_equal, hashval[1], '8da4669ff5d72f670a46ea3e7a203215'
 
     class spec3(nib.TraitedSpec):
         moo = nib.File(exists=True, name_source="doo")

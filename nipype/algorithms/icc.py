@@ -79,7 +79,7 @@ def ICC_rep_anova(Y):
     measures in columns
 
     One Sample Repeated measure ANOVA
-                       
+
     Y = XB + E with X = [FaTor / Subjects]
     '''
 

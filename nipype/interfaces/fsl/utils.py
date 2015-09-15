@@ -1980,3 +1980,45 @@ class WarpPointsToStd(WarpPoints):
     input_spec = WarpPointsToStdInputSpec
     output_spec = WarpPointsOutputSpec
     _cmd = 'img2stdcoord'
+
+
+class MotionOutliersInputSpec(FSLCommandInputSpec):
+    in_file = File(exists=True, mandatory=True, desc="unfiltered 4D image", argstr="-i %s")
+    out_file = File(argstr="-o %s", name_source='in_file', name_template='%s_outliers.txt',
+                    keep_extension=True, desc='output outlier file name', hash_files=False)
+    mask = File(exists=True, argstr="-m %s", desc="mask image for calculating metric")
+    metric = traits.Enum('refrms', ['refrms', 'dvars', 'refmse', 'fd', 'fdrms'], argstr="--%s", desc="metrics: refrms - RMS intensity difference to reference volume as metric [default metric],\
+refmse - Mean Square Error version of refrms (used in original version of fsl_motion_outliers) \
+dvars - DVARS \
+fd - frame displacement \
+fdrms - FD with RMS matrix calculation")
+    threshold = traits.Float(argstr="--thresh=%g", desc="specify absolute threshold value (otherwise use box-plot cutoff = P75 + 1.5*IQR)")
+    no_motion_correction = traits.Bool(argstr="--nomoco", desc="do not run motion correction (assumed already done)")
+    dummy = traits.Int(argstr="--dummy=%d", desc='number of dummy scans to delete (before running anything and creating EVs)')
+    out_metric_values = File(argstr="-s %s", name_source='in_file', name_template='%s_metrics.txt',
+                             keep_extension=True, desc='output metric values (DVARS etc.) file name', hash_files=False)
+    out_metric_plot = File(argstr="-p %s", name_source='in_file', name_template='%s_metrics.png',
+                             keep_extension=True, desc='output metric values plot (DVARS etc.) file name', hash_files=False)
+
+class MotionOutliersOutputSpec(TraitedSpec):
+    out_file = File(exists=True)
+    out_metric_values = File(exists=True)
+    out_metric_plot = File(exists=True)
+
+
+class MotionOutliers(FSLCommand):
+    """
+    Use FSL fsl_motion_outliers`http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSLMotionOutliers`_ to find outliers in timeseries (4d) data.
+    Examples
+    --------
+    >>> from nipype.interfaces.fsl import MotionOutliers
+    >>> mo = MotionOutliers()
+    >>> mo.inputs.in_file = "epi.nii"
+    >>> mo.cmdline # doctest: +ELLIPSIS
+    'fsl_motion_outliers -i epi.nii -o epi_outliers.txt -p epi_metrics.png -s epi_metrics.txt'
+    >>> res = mo.run() # doctest: +SKIP
+    """
+
+    input_spec = MotionOutliersInputSpec
+    output_spec = MotionOutliersOutputSpec
+    _cmd = 'fsl_motion_outliers'

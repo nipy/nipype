@@ -42,7 +42,9 @@ deploy:
   provider: pypi
   user: satra
   password:
-    secure: ZaN6Y4hfybPMi1rW3Qe03irCe/3GU4J4BJsjG+tClVN5Fjc3FCJaYU0k4wNd9q2kMjuRDv1efA9BN/5QasJS32oqs6wHvxzIWA18ucel4BBnAAkuviC1vqi/8Hk/DGB6e1gnmZ1Nv58zVLfn0MwlOKmsGDtvGQWc+HbaV2fS5NA=
+    secure: OCO0FXb4f+pH4Uw7zWCIRp3qOJ1t7rhky4K8MjNU8tyVCJgd6O/Bv8GJgceS0LktPodlAAjB8SxAhTORPAQZ1D/44PJYy3NQIisvej1zjLpaA9TEGfl6W7MqhDpRyMHW+cnSi/n84SAmdr+Z4vOxScDHdwr13EPmGyOIlHMAGnE=
   on:
     tags: true
+    repo: nipy/nipype
     branch: master
+  distributions: "sdist bdist_wheel"

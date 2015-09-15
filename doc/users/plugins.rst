@@ -205,7 +205,7 @@ DAGMan
 ~~~~~~
 
 With its DAGMan_ component HTCondor_ (previously Condor) allows for submitting
-entire graphs of dependent jobs at once (similar to SGEGraph_ and SLURMGraph_). 
+entire graphs of dependent jobs at once (similar to SGEGraph_ and SLURMGraph_).
 With the ``CondorDAGMan`` plug-in Nipype can utilize this functionality to
 submit complete workflows directly and in a single step.  Consequently, and
 in contrast to other plug-ins, workflow execution returns almost

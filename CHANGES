@@ -1,6 +1,15 @@
 Next release
 ============
 
+* API: Change how hash values are computed (https://github.com/nipy/nipype/pull/1174)
+* ENH: New algorithm: mesh.WarpPoints applies displacements fields to point sets
+       (https://github.com/nipy/nipype/pull/889).
+* ENH: New interfaces for MRTrix3 (https://github.com/nipy/nipype/pull/1126)
+* ENH: New option in afni.3dRefit - zdel, ydel, zdel etc. (https://github.com/nipy/nipype/pull/1079)
+* FIX: ants.Registration composite transform outputs are no longer returned as lists (https://github.com/nipy/nipype/pull/1183)
+* BUG: ANTs Registration interface failed with multi-modal inputs
+    (https://github.com/nipy/nipype/pull/1176) (https://github.com/nipy/nipype/issues/1175)
+* ENH: dipy.TrackDensityMap interface now accepts a reference image (https://github.com/nipy/nipype/pull/1091)
 * FIX: Bug in XFibres5 (https://github.com/nipy/nipype/pull/1168)
 * ENH: Attempt to use hard links for data sink.
     (https://github.com/nipy/nipype/pull/1161)
