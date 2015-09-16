@@ -11,37 +11,26 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 
 '''
 
-
 import numpy as np
 from numpy import linalg as nla
 import os.path as op
 from ..external import six
-
 from .. import logging
-
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
 from warnings import warn
 
-
 have_tvtk = False
-
 try:
+    import os
+    os.environ['ETS_TOOLKIT'] = 'null'
     from tvtk.api import tvtk
     have_tvtk = True
 except ImportError:
-    raise ImportError('Interface requires tvtk')
-
-try:
-    from enthought.etsconfig.api import ETSConfig
-    ETSConfig.toolkit = 'null'
-except ImportError:
-    iflogger.warn(('ETS toolkit could not be imported'))
-except ValueError:
-    iflogger.warn(('ETS toolkit could not be set to null'))
+    pass
 
 if have_tvtk:
-    tvtk.tvtk_classes.vtk_version import vtk_build_version
+    from tvtk.tvtk_classes.vtk_version import vtk_build_version
     vtk_major = int(vtk_build_version[0])
 
 iflogger = logging.getLogger('interface')
