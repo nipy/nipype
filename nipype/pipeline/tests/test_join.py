@@ -13,6 +13,27 @@ from nipype.testing import (assert_equal, assert_true)
 import nipype.interfaces.base as nib
 import nipype.pipeline.engine as pe
 from nipype.interfaces.utility import IdentityInterface
+from nipype.interfaces.base import traits, File
+
+class PickFirstSpec(nib.TraitedSpec):
+    in_files = traits.List(File(exists=True), argstr="%s", position=2,
+                           mandatory=True)
+
+class PickFirstOutSpec(nib.TraitedSpec):
+    output1 = File(exists=True)
+
+class PickFirst(nib.BaseInterface):
+    input_spec = PickFirstSpec
+    output_spec = PickFirstOutSpec
+
+    def _run_interface(self, runtime):
+        runtime.returncode = 0
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['output1'] = self.inputs.in_files[0]
+        return outputs
 
 
 class IncrementInputSpec(nib.TraitedSpec):
@@ -525,6 +546,32 @@ def test_itersource_two_join_nodes():
     # nodes plus the summary join node.
     assert_equal(len(result.nodes()), 15,
                  "The number of expanded nodes is incorrect.")
+
+    os.chdir(cwd)
+    rmtree(wd)
+
+def test_set_join_node_file_input():
+    """Test collecting join inputs to a set."""
+    cwd = os.getcwd()
+    wd = mkdtemp()
+    os.chdir(wd)
+    open('test.nii', 'w+').close()
+    open('test2.nii', 'w+').close()
+
+    # Make the workflow.
+    wf = pe.Workflow(name='test')
+    # the iterated input node
+    inputspec = pe.Node(IdentityInterface(fields=['n']), name='inputspec')
+    inputspec.iterables = [('n', [os.path.join(wd, 'test.nii'), os.path.join(wd, 'test2.nii')])]
+    # a pre-join node in the iterated path
+    pre_join1 = pe.Node(IdentityInterface(fields=['n']), name='pre_join1')
+    wf.connect(inputspec, 'n', pre_join1, 'n')
+    # the set join node
+    join = pe.JoinNode(PickFirst(), joinsource='inputspec',
+        joinfield='in_files', name='join')
+    wf.connect(pre_join1, 'n', join, 'in_files')
+
+    wf.run()
 
     os.chdir(cwd)
     rmtree(wd)

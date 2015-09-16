@@ -14,6 +14,7 @@ was written to work with FSL version 4.1.4.
 import os
 import os.path as op
 import warnings
+import glob
 
 import numpy as np
 
@@ -1255,7 +1256,7 @@ class FUGUE(FSLCommand):
     --------
 
 
-    Unwarping an input image (shift map is known) ::
+    Unwarping an input image (shift map is known)
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
@@ -1269,7 +1270,7 @@ class FUGUE(FSLCommand):
     >>> fugue.run() #doctest: +SKIP
 
 
-    Warping an input image (shift map is known) ::
+    Warping an input image (shift map is known)
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
@@ -1284,7 +1285,7 @@ class FUGUE(FSLCommand):
     >>> fugue.run() #doctest: +SKIP
 
 
-    Computing the vsm (unwrapped phase map is known) ::
+    Computing the vsm (unwrapped phase map is known)
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
@@ -1475,52 +1476,59 @@ class PRELUDE(FSLCommand):
 
 
 class FIRSTInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, mandatory=True, position=-2, copyfile=False,
-                  argstr='-i %s',
-                  desc='input data file')
-    out_file = File('segmented', usedefault=True, mandatory=True, position=-1,
-                  argstr='-o %s',
-                  desc='output data file', hash_files=False)
+    in_file = File(
+        exists=True, mandatory=True, position=-2, copyfile=False,
+        argstr='-i %s', desc='input data file')
+    out_file = File(
+        'segmented', usedefault=True, mandatory=True, position=-1,
+        argstr='-o %s', desc='output data file', hash_files=False)
     verbose = traits.Bool(argstr='-v', position=1,
-        desc="Use verbose logging.")
-    brain_extracted = traits.Bool(argstr='-b', position=2,
+                          desc="Use verbose logging.")
+    brain_extracted = traits.Bool(
+        argstr='-b', position=2,
         desc="Input structural image is already brain-extracted")
-    no_cleanup = traits.Bool(argstr='-d', position=3,
+    no_cleanup = traits.Bool(
+        argstr='-d', position=3,
         desc="Input structural image is already brain-extracted")
-    method = traits.Enum('auto', 'fast', 'none',
-                         xor=['method_as_numerical_threshold'],
-                         argstr='-m', position=4,
+    method = traits.Enum(
+        'auto', 'fast', 'none', xor=['method_as_numerical_threshold'],
+        argstr='-m %s', position=4, usedefault=True,
         desc=("Method must be one of auto, fast, none, or it can be entered "
               "using the 'method_as_numerical_threshold' input"))
-    method_as_numerical_threshold = traits.Float(argstr='-m', position=4,
+    method_as_numerical_threshold = traits.Float(
+        argstr='-m %.4f', position=4,
         desc=("Specify a numerical threshold value or use the 'method' input "
               "to choose auto, fast, or none"))
-    list_of_specific_structures = traits.List(traits.Str, argstr='-s %s',
-                                              sep=',', position=5, minlen=1,
+    list_of_specific_structures = traits.List(
+        traits.Str, argstr='-s %s', sep=',', position=5, minlen=1,
         desc='Runs only on the specified structures (e.g. L_Hipp, R_Hipp'
-                          'L_Accu, R_Accu, L_Amyg, R_Amyg'
-                          'L_Caud, R_Caud, L_Pall, R_Pall'
-                          'L_Puta, R_Puta, L_Thal, R_Thal, BrStem')
-    affine_file = File(exists=True, position=6,
-                  argstr='-a %s',
-                  desc=('Affine matrix to use (e.g. img2std.mat) (does not '
-                        're-run registration)'))
+             'L_Accu, R_Accu, L_Amyg, R_Amyg'
+             'L_Caud, R_Caud, L_Pall, R_Pall'
+             'L_Puta, R_Puta, L_Thal, R_Thal, BrStem')
+    affine_file = File(
+        exists=True, position=6, argstr='-a %s',
+        desc=('Affine matrix to use (e.g. img2std.mat) (does not '
+              're-run registration)'))
 
 
 class FIRSTOutputSpec(TraitedSpec):
-    vtk_surfaces = OutputMultiPath(File(exists=True),
-          desc='VTK format meshes for each subcortical region')
-    bvars = OutputMultiPath(File(exists=True),
-          desc='bvars for each subcortical region')
-    original_segmentations = File(exists=True,
-          desc=('3D image file containing the segmented regions as integer '
-                'values. Uses CMA labelling'))
-    segmentation_file = File(exists=True,
-          desc='4D image file containing a single volume per segmented region')
+    vtk_surfaces = OutputMultiPath(
+        File(exists=True),
+        desc='VTK format meshes for each subcortical region')
+    bvars = OutputMultiPath(
+        File(exists=True),
+        desc='bvars for each subcortical region')
+    original_segmentations = File(
+        exists=True, desc=('3D image file containing the segmented regions '
+                           'as integer values. Uses CMA labelling'))
+    segmentation_file = File(
+        exists=True, desc=('4D image file containing a single volume per '
+                           'segmented region'))
 
 
 class FIRST(FSLCommand):
-    """Use FSL's run_first_all command to segment subcortical volumes
+    """
+    Use FSL's run_first_all command to segment subcortical volumes
 
     http://www.fmrib.ox.ac.uk/fsl/first/index.html
 
@@ -1554,7 +1562,7 @@ class FIRST(FSLCommand):
                           'L_Thal', 'R_Thal',
                           'BrStem']
         outputs['original_segmentations'] = \
-                                      self._gen_fname('original_segmentations')
+            self._gen_fname('original_segmentations')
         outputs['segmentation_file'] = self._gen_fname('segmentation_file')
         outputs['vtk_surfaces'] = self._gen_mesh_names('vtk_surfaces',
                                                        structures)
@@ -1563,10 +1571,20 @@ class FIRST(FSLCommand):
 
     def _gen_fname(self, name):
         path, outname, ext = split_filename(self.inputs.out_file)
+
+        method = 'none'
+        if isdefined(self.inputs.method) and self.inputs.method == 'fast':
+            method = 'fast'
+
+        if isdefined(self.inputs.method_as_numerical_threshold):
+            thres = '%.4f' % self.inputs.method_as_numerical_threshold
+            method = thres.replace('.', '')
+
         if name == 'original_segmentations':
-            return op.abspath(outname + '_all_fast_origsegs.nii.gz')
+            return op.abspath('%s_all_%s_origsegs.nii.gz' % (outname, method))
         if name == 'segmentation_file':
-            return op.abspath(outname + '_all_fast_firstseg.nii.gz')
+            return op.abspath('%s_all_%s_firstseg.nii.gz' % (outname, method))
+
         return None
 
     def _gen_mesh_names(self, name, structures):

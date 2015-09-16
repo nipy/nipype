@@ -13,12 +13,14 @@ import ConfigParser
 from json import load, dump
 import os
 import shutil
+import errno
 from StringIO import StringIO
 from warnings import warn
 
 from ..external import portalocker
 
-homedir = os.environ['HOME']
+# Get home directory in platform-agnostic way
+homedir = os.path.expanduser('~')
 default_cfg = """
 [logging]
 workflow_level = INFO
@@ -42,6 +44,7 @@ ets_toolkit = null
 plugin = Linear
 remove_node_directories = false
 remove_unnecessary_outputs = true
+try_hard_link_datasink = true
 single_thread_matlab = true
 stop_on_first_crash = false
 stop_on_first_rerun = false
@@ -50,32 +53,43 @@ stop_on_unknown_version = false
 write_provenance = false
 parameterize_dirs = true
 poll_sleep_duration = 60
+xvfb_max_wait = 10
 
 [check]
 interval = 1209600
 """ % (homedir, os.getcwd())
 
 
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+
 class NipypeConfig(object):
+
     """Base nipype config class
     """
 
     def __init__(self, *args, **kwargs):
         self._config = ConfigParser.ConfigParser()
         config_dir = os.path.expanduser('~/.nipype')
-        if not os.path.exists(config_dir):
-            os.makedirs(config_dir)
+        mkdir_p(config_dir)
         old_config_file = os.path.expanduser('~/.nipype.cfg')
         new_config_file = os.path.join(config_dir, 'nipype.cfg')
         # To be deprecated in two releases
         if os.path.exists(old_config_file):
             if os.path.exists(new_config_file):
-                msg=("Detected presence of both old (%s, used by versions "
-                     "< 0.5.2) and new (%s) config files.  This version will "
-                     "proceed with the new one. We advise to merge settings "
-                     "and remove old config file if you are not planning to "
-                     "use previous releases of nipype.") % (old_config_file,
-                                                            new_config_file)
+                msg = ("Detected presence of both old (%s, used by versions "
+                       "< 0.5.2) and new (%s) config files.  This version will "
+                       "proceed with the new one. We advise to merge settings "
+                       "and remove old config file if you are not planning to "
+                       "use previous releases of nipype.") % (old_config_file,
+                                                              new_config_file)
                 warn(msg)
             else:
                 warn("Moving old config file from: %s to %s" % (old_config_file,
@@ -154,27 +168,9 @@ class NipypeConfig(object):
         matplotlib.use(self.get('execution', 'matplotlib_backend'))
 
     def update_ets(self):
-        can_import_ets = False
-        try:
-            from enthought.etsconfig.api import ETSConfig
-            can_import_ets = True
-        except ImportError:
-            pass
-
-        if not can_import_ets:
-            try:
-                from traits.etsconfig.etsconfig import ETSConfig
-                can_import_ets = True
-            except ImportError:
-                pass
-
-        if can_import_ets:
-            try:
-                ETSConfig.toolkit = '%s'
-            except ValueError:
-                pass
+        import os
+        os.environ['ETS_TOOLKIT'] = '%s' % self.get('execution', 'ets_toolkit')
 
     def enable_provenance(self):
         self._config.set('execution', 'write_provenance', 'true')
         self._config.set('execution', 'hash_method', 'content')
-

@@ -76,7 +76,14 @@ class PipeFunc(object):
         job_name = hasher.hexdigest()
         node = Node(interface, name=job_name)
         node.base_dir = os.path.join(self.base_dir, dir_name)
-        out = node.run()
+
+        cwd = os.getcwd()
+        try:
+            out = node.run()
+        finally:
+            # node.run() changes to the node directory - if something goes wrong
+            # before it cds back you would end up in strange places
+            os.chdir(cwd)
         if self.callback is not None:
             self.callback(dir_name, job_name)
         return out

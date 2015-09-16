@@ -32,6 +32,9 @@ import sqlite3
 from nipype.utils.misc import human_order_sorted
 from nipype.external import six
 
+from ..utils.misc import str2bool
+from .. import config
+
 try:
     import pyxnat
 except:
@@ -53,7 +56,7 @@ from .. import logging
 iflogger = logging.getLogger('interface')
 
 
-def copytree(src, dst):
+def copytree(src, dst, use_hardlink=False):
     """Recursively copy a directory tree using
     nipype.utils.filemanip.copyfile()
 
@@ -75,9 +78,10 @@ def copytree(src, dst):
         dstname = os.path.join(dst, name)
         try:
             if os.path.isdir(srcname):
-                copytree(srcname, dstname)
+                copytree(srcname, dstname, use_hardlink)
             else:
-                copyfile(srcname, dstname, True, hashmethod='content')
+                copyfile(srcname, dstname, True, hashmethod='content',
+                         use_hardlink=use_hardlink)
         except (IOError, os.error), why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
@@ -245,8 +249,8 @@ class DataSink(IOBase):
             self._always_run = True
 
     def _get_dst(self, src):
-        ## If path is directory with trailing os.path.sep,
-        ## then remove that for a more robust behavior
+        # If path is directory with trailing os.path.sep,
+        # then remove that for a more robust behavior
         src = src.rstrip(os.path.sep)
         path, fname = os.path.split(src)
         if self.inputs.parameterization:
@@ -306,6 +310,8 @@ class DataSink(IOBase):
                     pass
                 else:
                     raise(inst)
+        use_hardlink = str2bool(config.get('execution',
+                                           'try_hard_link_datasink') )
         for key, files in self.inputs._outputs.items():
             if not isdefined(files):
                 continue
@@ -338,7 +344,8 @@ class DataSink(IOBase):
                             else:
                                 raise(inst)
                     iflogger.debug("copyfile: %s %s" % (src, dst))
-                    copyfile(src, dst, copy=True, hashmethod='content')
+                    copyfile(src, dst, copy=True, hashmethod='content',
+                             use_hardlink=use_hardlink)
                     out_files.append(dst)
                 elif os.path.isdir(src):
                     dst = self._get_dst(os.path.join(src, ''))
@@ -364,7 +371,7 @@ class DataSink(IOBase):
         return outputs
 
 
-class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):  # InterfaceInputSpec):
+class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     base_directory = Directory(exists=True,
                                desc='Path to the base directory consisting of subject data.')
     raise_on_empty = traits.Bool(True, usedefault=True,
@@ -1775,13 +1782,20 @@ class SSHDataGrabber(DataGrabber):
                         outputs[key].append(list_to_filename(outfiles))
                         if self.inputs.download_files:
                             for f in outfiles:
-                                sftp.get(os.path.join(filledtemplate_dir, f), f)
+                                try:
+                                    sftp.get(os.path.join(filledtemplate_dir, f), f)
+                                except IOError:
+                                    iflogger.info('remote file %s not found' % f)
             if any([val is None for val in outputs[key]]):
                 outputs[key] = []
             if len(outputs[key]) == 0:
                 outputs[key] = None
             elif len(outputs[key]) == 1:
                 outputs[key] = outputs[key][0]
+
+        for k, v in outputs.items():
+            outputs[k] = os.path.join(os.getcwd(), v)
+
         return outputs
 
     def _get_ssh_client(self):
@@ -1944,7 +1958,7 @@ class JSONFileSink(IOBase):
         if not isdefined(self.inputs.out_file):
             out_file = op.abspath('datasink.json')
         else:
-            out_file = self.inputs.out_file
+            out_file = op.abspath(self.inputs.out_file)
 
         out_dict = self.inputs.in_dict
 

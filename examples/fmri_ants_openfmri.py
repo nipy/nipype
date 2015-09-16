@@ -105,9 +105,6 @@ def create_reg_workflow(name='registration'):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
-
-    Example
-    -------
     """
 
     register = pe.Workflow(name=name)
@@ -124,6 +121,7 @@ def create_reg_workflow(name='registration'):
                                                                  'transformed_files',
                                                                  'transformed_mean',
                                                                  'anat2target',
+                                                                 'mean2anat_mask'
                                                                  ]),
                          name='outputspec')
 
@@ -170,6 +168,13 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode, 'anatomical_image', mean2anatbbr, 'reference')
     register.connect(mean2anat, 'out_matrix_file',
                      mean2anatbbr, 'in_matrix_file')
+
+    """
+    Create a mask of the median image coregistered to the anatomical image
+    """
+
+    mean2anat_mask = Node(fsl.BET(mask=True), name='mean2anat_mask')
+    register.connect(mean2anatbbr, 'out_file', mean2anat_mask, 'in_file')
 
     """
     Convert the BBRegister transformation to ANTS ITK format
@@ -223,7 +228,6 @@ def create_reg_workflow(name='registration'):
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode,'target_image_brain', reg,'fixed_image')
 
-
     """
     Concatenate the affine and ants transforms into a list
     """
@@ -232,8 +236,7 @@ def create_reg_workflow(name='registration'):
 
     merge = pe.Node(niu.Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
-    register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
-
+    register.connect(reg, 'composite_transform', merge, 'in1')
 
     """
     Transform the mean image. First to anatomical and then to target
@@ -266,7 +269,6 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode,'source_files', warpall, 'input_image')
     register.connect(merge, 'out', warpall, 'transforms')
 
-
     """
     Assign all the output files
     """
@@ -276,6 +278,8 @@ def create_reg_workflow(name='registration'):
     register.connect(warpall, 'output_image', outputnode, 'transformed_files')
     register.connect(mean2anatbbr, 'out_matrix_file',
                      outputnode, 'func2anat_transform')
+    register.connect(mean2anat_mask, 'mask_file',
+                     outputnode, 'mean2anat_mask')
     register.connect(reg, 'composite_transform',
                      outputnode, 'anat2target_transform')
 
@@ -294,8 +298,6 @@ def create_fs_reg_workflow(name='registration'):
     Parameters
     ----------
 
-    ::
-
         name : name of workflow (default: 'registration')
 
     Inputs::
@@ -310,10 +312,6 @@ def create_fs_reg_workflow(name='registration'):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
-
-    Example
-    -------
-
     """
 
     register = Workflow(name=name)
@@ -333,7 +331,8 @@ def create_fs_reg_workflow(name='registration'):
                                                           'transformed_files',
                                                           'min_cost_file',
                                                           'anat2target',
-                                                          'aparc'
+                                                          'aparc',
+                                                          'mean2anat_mask'
                                                           ]),
                       name='outputspec')
 
@@ -349,7 +348,7 @@ def create_fs_reg_workflow(name='registration'):
     register.connect(fssource, 'T1', convert, 'in_file')
 
     # Coregister the median to the surface
-    bbregister = Node(freesurfer.BBRegister(),
+    bbregister = Node(freesurfer.BBRegister(registered_file=True),
                     name='bbregister')
     bbregister.inputs.init = 'fsl'
     bbregister.inputs.contrast_type = 't2'
@@ -358,6 +357,10 @@ def create_fs_reg_workflow(name='registration'):
     register.connect(inputnode, 'subject_id', bbregister, 'subject_id')
     register.connect(inputnode, 'mean_image', bbregister, 'source_file')
     register.connect(inputnode, 'subjects_dir', bbregister, 'subjects_dir')
+
+    # Create a mask of the median coregistered to the anatomical image
+    mean2anat_mask = Node(fsl.BET(mask=True), name='mean2anat_mask')
+    register.connect(bbregister, 'registered_file', mean2anat_mask, 'in_file')
 
     """
     use aparc+aseg's brain mask
@@ -373,6 +376,7 @@ def create_fs_reg_workflow(name='registration'):
     """
     Apply inverse transform to aparc file
     """
+
     aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,
                                                  interp='nearest'),
                     name='aparc_inverse_transform')
@@ -425,14 +429,13 @@ def create_fs_reg_workflow(name='registration'):
     reg.inputs.use_histogram_matching = [False] * 2 + [True]
     reg.inputs.winsorize_lower_quantile = 0.005
     reg.inputs.winsorize_upper_quantile = 0.995
-    reg.inputs.args = '--float'
+    reg.inputs.float = True
     reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
     reg.inputs.num_threads = 4
     reg.plugin_args = {'qsub_args': '-pe orte 4',
                        'sbatch_args': '--mem=6G -c 4'}
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode,'target_image', reg,'fixed_image')
-
 
     """
     Concatenate the affine and ants transforms into a list
@@ -442,12 +445,12 @@ def create_fs_reg_workflow(name='registration'):
 
     merge = Node(Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
-    register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
-
+    register.connect(reg, 'composite_transform', merge, 'in1')
 
     """
     Transform the mean image. First to anatomical and then to target
     """
+
     warpmean = Node(ants.ApplyTransforms(), name='warpmean')
     warpmean.inputs.input_image_type = 0
     warpmean.inputs.interpolation = 'Linear'
@@ -486,7 +489,6 @@ def create_fs_reg_workflow(name='registration'):
     register.connect(inputnode,'source_files', warpall, 'input_image')
     register.connect(merge, 'out', warpall, 'transforms')
 
-
     """
     Assign all the output files
     """
@@ -500,6 +502,8 @@ def create_fs_reg_workflow(name='registration'):
                      outputnode, 'out_reg_file')
     register.connect(bbregister, 'min_cost_file',
                      outputnode, 'min_cost_file')
+    register.connect(mean2anat_mask, 'mask_file',
+                     outputnode, 'mean2anat_mask')
     register.connect(reg, 'composite_transform',
                      outputnode, 'anat2target_transform')
     register.connect(merge, 'out', outputnode, 'transforms')
@@ -651,6 +655,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     """
     Return data components as anat, bold and behav
     """
+
     contrast_file = os.path.join(data_dir, 'models', 'model%03d' % model_id,
                                  'task_contrasts.txt')
     has_contrast = os.path.exists(contrast_file)
@@ -964,6 +969,8 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         subs.append(('/model%03d/task%03d_' % (model_id, task_id), '/'))
         subs.append(('_bold_dtype_mcf_bet_thresh_dil', '_mask'))
         subs.append(('_output_warped_image', '_anat2target'))
+        subs.append(('median_flirt_brain_mask', 'median_brain_mask'))
+        subs.append(('median_bbreg_brain_mask', 'median_brain_mask'))
         return subs
 
     subsgen = pe.Node(niu.Function(input_names=['subject_id', 'conds', 'run_id',
@@ -998,6 +1005,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                      ('outputspec.motion_plots',
                                       'qa.motion.plots'),
                                      ('outputspec.mask', 'qa.mask')])])
+    wf.connect(registration, 'outputspec.mean2anat_mask', datasink, 'qa.mask.mean2anat')
     wf.connect(art, 'norm_files', datasink, 'qa.art.@norm')
     wf.connect(art, 'intensity_files', datasink, 'qa.art.@intensity')
     wf.connect(art, 'outlier_files', datasink, 'qa.art.@outlier_files')
@@ -1086,7 +1094,7 @@ if __name__ == '__main__':
                           'task%03d' % int(args.task))
     derivatives = args.derivatives
     if derivatives is None:
-       derivatives = False
+        derivatives = False
     wf = analyze_openfmri_dataset(data_dir=os.path.abspath(args.datasetdir),
                                   subject=args.subject,
                                   model_id=int(args.model),
