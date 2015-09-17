@@ -16,6 +16,7 @@ nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 from future import standard_library
 standard_library.install_aliases()
 from builtins import str
+from past.builtins import basestring
 
 import os
 from glob import glob
@@ -42,6 +43,11 @@ import os
 from os.path import join as pjoin, split as psplit, splitext
 import sys
 from configparser import ConfigParser
+PY3 = sys.version_info[0] >= 3
+if PY3:
+    string_types = str,
+else:
+    string_types = basestring,
 
 from distutils.version import LooseVersion
 from distutils.command.build_py import build_py
