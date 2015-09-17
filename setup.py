@@ -12,6 +12,11 @@ nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 
 """
 """Build helper."""
+#from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.builtins import basestring
 
 import os
 from os.path import join as pjoin
@@ -44,7 +49,7 @@ if PY3:
 else:
     string_types = basestring,
 try:
-    from ConfigParser import ConfigParser
+    from configparser import ConfigParser
 except ImportError:
     from configparser import ConfigParser
 
@@ -295,7 +300,7 @@ def main(**extra_args):
           version=VERSION,
           install_requires=REQUIRES,
           provides=PROVIDES,
-          packages     = [ 'nipype',
+          packages = [     'nipype',
                            'nipype.algorithms',
                            'nipype.algorithms.tests',
                            'nipype.caching',
