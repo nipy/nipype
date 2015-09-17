@@ -545,11 +545,11 @@ class SegStatsInputSpec(FSTraitedSpec):
     _xor_inputs = ('segmentation_file', 'annot', 'surf_label')
     segmentation_file = File(exists=True, argstr='--seg %s', xor=_xor_inputs,
                   mandatory=True, desc='segmentation volume path')
-    annot = traits.Tuple(traits.Str, traits.Enum('lh', 'rh'), traits.Str,
+    annot = traits.Tuple(traits.Unicode, traits.Enum('lh', 'rh'), traits.Unicode,
                          argstr='--annot %s %s %s', xor=_xor_inputs,
                          mandatory=True,
                          desc='subject hemi parc : use surface parcellation')
-    surf_label = traits.Tuple(traits.Str, traits.Enum('lh', 'rh'), traits.Str,
+    surf_label = traits.Tuple(traits.Unicode, traits.Enum('lh', 'rh'), traits.Unicode,
                              argstr='--slabel %s %s %s', xor=_xor_inputs,
                              mandatory=True,
                              desc='subject hemi label : use surface label')
