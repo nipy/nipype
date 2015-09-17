@@ -17,10 +17,10 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 
-try:
-    import prov.model as pm
-except ImportError:
-    from ..external import provcopy as pm
+#try:
+#    import prov.model as pm
+#except ImportError:
+from ..external import provcopy as pm
 
 from .. import get_info
 from .filemanip import (md5, hashlib, hash_infile)
