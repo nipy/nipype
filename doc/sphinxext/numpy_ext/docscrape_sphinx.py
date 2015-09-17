@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import re, inspect, textwrap, pydoc
 import sphinx
 from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
-from nipype.external import six
+
 
 
 class SphinxDocString(NumpyDocString):

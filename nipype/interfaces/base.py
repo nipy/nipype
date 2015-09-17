@@ -33,21 +33,19 @@ from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
-from ..external import six
 
 
 from .traits_extension import (traits, Undefined, TraitDictObject,
                                TraitListObject, TraitError,
-                               isdefined, File, Directory,
+                               isdefined, File,
                                has_metadata)
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
-                               hash_timestamp, save_json,
+                               hash_timestamp,
                                split_filename)
 from ..utils.misc import is_container, trim, str2bool
 from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
-import random, time, fnmatch
 
 nipype_version = LooseVersion(__version__)
 

@@ -38,6 +38,7 @@ import shutil
 import errno
 import socket
 from shutil import rmtree
+
 import sys
 from tempfile import mkdtemp
 from warnings import warn
@@ -1624,7 +1625,7 @@ class Node(WorkflowBase):
                     needed_outputs=self.needed_outputs)
                 runtime = Bunch(cwd=cwd,
                                 returncode=0,
-                                environ=dict(os.environ),
+                                environ=deepcopy(os.environ.data),
                                 hostname=socket.gethostname())
                 result = InterfaceResult(
                     interface=self._interface.__class__,
@@ -1644,7 +1645,7 @@ class Node(WorkflowBase):
             self._originputs = deepcopy(self._interface.inputs)
         if execute:
             runtime = Bunch(returncode=1,
-                            environ=dict(os.environ),
+                            environ=deepcopy(os.environ.data),
                             hostname=socket.gethostname())
             result = InterfaceResult(
                 interface=self._interface.__class__,

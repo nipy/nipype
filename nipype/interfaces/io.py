@@ -846,7 +846,7 @@ class DataGrabber(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, str) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -857,7 +857,7 @@ class DataGrabber(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                        if isinstance(arg, str) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])

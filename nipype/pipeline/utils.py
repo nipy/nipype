@@ -20,7 +20,6 @@ import os
 import re
 import numpy as np
 from nipype.utils.misc import package_check
-from nipype.external import six
 from functools import reduce
 
 package_check('networkx', '1.3')
