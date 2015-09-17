@@ -212,7 +212,7 @@ def str2bool(v):
     elif lower in ("no", "false", "n", "f", "0"):
         return False
     else:
-        raise ValueError("%s cannot be converted to bool"%v)
+        raise ValueError("%s cannot be converted to bool" % v)
 
 def flatten(S):
     if S == []:

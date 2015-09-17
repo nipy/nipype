@@ -17,7 +17,6 @@ import re
 
 import numpy as np
 from nipype.utils.misc import package_check
-from nipype.external import six
 from functools import reduce
 
 package_check('networkx', '1.3')
@@ -107,7 +106,7 @@ def modify_paths(object, relative=True, basedir=None):
             out = tuple(out)
     else:
         if isdefined(object):
-            if isinstance(object, six.string_types) and os.path.isfile(object):
+            if isinstance(object, str) and os.path.isfile(object):
                 if relative:
                     if config.getboolean('execution', 'use_relative_paths'):
                         out = relpath(object, start=basedir)
@@ -190,7 +189,7 @@ def _write_detailed_dot(graph, dotfilename):
         inports = []
         for u, v, d in graph.in_edges_iter(nbunch=n, data=True):
             for cd in d['connect']:
-                if isinstance(cd[0], six.string_types):
+                if isinstance(cd[0], str):
                     outport = cd[0]
                 else:
                     outport = cd[0][0]
@@ -210,7 +209,7 @@ def _write_detailed_dot(graph, dotfilename):
         outports = []
         for u, v, d in graph.out_edges_iter(nbunch=n, data=True):
             for cd in d['connect']:
-                if isinstance(cd[0], six.string_types):
+                if isinstance(cd[0], str):
                     outport = cd[0]
                 else:
                     outport = cd[0][0]
@@ -611,7 +610,7 @@ def generate_expanded_graph(graph_in):
             # the itersource is a (node name, fields) tuple
             src_name, src_fields = inode.itersource
             # convert a single field to a list
-            if isinstance(src_fields, six.string_types):
+            if isinstance(src_fields, str):
                 src_fields = [src_fields]
             # find the unique iterable source node in the graph
             try:
@@ -792,7 +791,7 @@ def _standardize_iterables(node):
     if node.synchronize:
         if len(iterables) == 2:
             first, last = iterables
-            if all((isinstance(item, six.string_types) and item in fields
+            if all((isinstance(item, str) and item in fields
                     for item in first)):
                 iterables = _transpose_iterables(first, last)
 
@@ -963,7 +962,7 @@ def walk_outputs(object):
             if isdefined(val):
                 out.extend(walk_outputs(val))
     else:
-        if isdefined(object) and isinstance(object, six.string_types):
+        if isdefined(object) and isinstance(object, str):
             if os.path.islink(object) or os.path.isfile(object):
                 out = [(filename, 'f') for filename in get_all_files(object)]
             elif os.path.isdir(object):

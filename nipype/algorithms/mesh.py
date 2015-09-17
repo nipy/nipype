@@ -13,13 +13,13 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 from __future__ import unicode_literals
 from __future__ import division
 from builtins import zip
+from builtins import str
 from past.utils import old_div
 
 
 import numpy as np
 from numpy import linalg as nla
 import os.path as op
-from ..external import six
 
 from .. import logging
 
@@ -379,7 +379,7 @@ class MeshWarpMaths(BaseInterface):
         operator = self.inputs.operator
         opfield = np.ones_like(points1)
 
-        if isinstance(operator, six.string_types):
+        if isinstance(operator, str):
             r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
             vtk2 = r2.output
             r2.update()

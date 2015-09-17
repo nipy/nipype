@@ -11,7 +11,7 @@ from builtins import str
 from builtins import object
 import os
 import sys
-from nipype.external import six
+
 
 def get_package_name(filepath):
     """
@@ -172,7 +172,7 @@ class NoseTester(object):
         '''
         argv = [__file__, self.package_path, '-s']
         if label and label != 'full':
-            if not isinstance(label, six.string_types):
+            if not isinstance(label, str):
                 raise TypeError('Selection label should be a string')
             if label == 'fast':
                 label = 'not slow'

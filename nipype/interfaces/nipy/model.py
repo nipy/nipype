@@ -1,13 +1,12 @@
 from __future__ import unicode_literals
 from __future__ import division
 from builtins import range
+from builtins import str
 from past.utils import old_div
-import warnings
 import os
 
 import nibabel as nb
 import numpy as np
-from nipype.external import six
 
 
 from ...utils.misc import package_check
@@ -85,7 +84,7 @@ class FitGLM(BaseInterface):
         session_info = self.inputs.session_info
 
         functional_runs = self.inputs.session_info[0]['scans']
-        if isinstance(functional_runs, six.string_types):
+        if isinstance(functional_runs, str):
             functional_runs = [functional_runs]
         nii = nb.load(functional_runs[0])
         data = nii.get_data()

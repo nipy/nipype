@@ -20,17 +20,16 @@ These functions include:
 from __future__ import unicode_literals
 from __future__ import division
 from builtins import range
+from builtins import str
 from past.utils import old_div
 
 import os
 from copy import deepcopy
-from warnings import warn
 
 from nibabel import load, funcs, Nifti1Image
 import numpy as np
 from scipy import signal
 import scipy.io as sio
-from nipype.external import six
 
 from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
                                     OutputMultiPath, TraitedSpec, File,
@@ -284,7 +283,7 @@ class ArtifactDetect(BaseInterface):
         output_dir: string
             output directory in which the files will be generated
         """
-        if isinstance(motionfile, six.string_types):
+        if isinstance(motionfile, str):
             infile = motionfile
         elif isinstance(motionfile, list):
             infile = motionfile[0]
@@ -355,7 +354,7 @@ class ArtifactDetect(BaseInterface):
             cwd = os.getcwd()
 
         # read in functional image
-        if isinstance(imgfile, six.string_types):
+        if isinstance(imgfile, str):
             nim = load(imgfile)
         elif isinstance(imgfile, list):
             if len(imgfile) == 1:

@@ -20,7 +20,6 @@ from builtins import object
 
 from datetime import datetime
 from nipype.utils.misc import flatten, unflatten
-from nipype.interfaces.traits_extension import File
 try:
     from collections import OrderedDict
 except ImportError:
@@ -35,14 +34,13 @@ import os.path as op
 import re
 import shutil
 import errno
+import socket
 from shutil import rmtree
-from socket import gethostname
-from string import Template
+
 import sys
 from tempfile import mkdtemp
 from warnings import warn
 from hashlib import sha1
-from nipype.external import six
 
 import numpy as np
 
@@ -370,7 +368,7 @@ connected.
                         # handles the case that source is specified
                         # with a function
                         sourcename = source[0]
-                    elif isinstance(source, six.string_types):
+                    elif isinstance(source, str):
                         sourcename = source
                     else:
                         raise Exception(('Unknown source specification in '
@@ -391,7 +389,7 @@ connected.
         # turn functions into strings
         for srcnode, destnode, connects in connection_list:
             for idx, (src, dest) in enumerate(connects):
-                if isinstance(src, tuple) and not isinstance(src[1], six.string_types):
+                if isinstance(src, tuple) and not isinstance(src[1], str):
                     function_source = getsource(src[1])
                     connects[idx] = ((src[0], function_source, src[2:]), dest)
 
@@ -905,7 +903,7 @@ connected.
 
     def _set_node_input(self, node, param, source, sourceinfo):
         """Set inputs of a node given the edge connection"""
-        if isinstance(sourceinfo, six.string_types):
+        if isinstance(sourceinfo, str):
             val = source.get_output(sourceinfo)
         elif isinstance(sourceinfo, tuple):
             if callable(sourceinfo[1]):
@@ -1626,7 +1624,7 @@ class Node(WorkflowBase):
                 runtime = Bunch(cwd=cwd,
                                 returncode=0,
                                 environ=deepcopy(os.environ.data),
-                                hostname=gethostname())
+                                hostname=socket.gethostname())
                 result = InterfaceResult(
                     interface=self._interface.__class__,
                     runtime=runtime,
@@ -1646,7 +1644,7 @@ class Node(WorkflowBase):
         if execute:
             runtime = Bunch(returncode=1,
                             environ=deepcopy(os.environ.data),
-                            hostname=gethostname())
+                            hostname=socket.gethostname())
             result = InterfaceResult(
                 interface=self._interface.__class__,
                 runtime=runtime,
@@ -1853,7 +1851,7 @@ class JoinNode(Node):
         if not joinfield:
             # default is the interface fields
             joinfield = self._interface.inputs.copyable_trait_names()
-        elif isinstance(joinfield, six.string_types):
+        elif isinstance(joinfield, str):
             joinfield = [joinfield]
         self.joinfield = joinfield
         """the fields to join"""
@@ -2063,7 +2061,7 @@ class MapNode(Node):
 
 
         super(MapNode, self).__init__(interface, name, **kwargs)
-        if isinstance(iterfield, six.string_types):
+        if isinstance(iterfield, str):
             iterfield = [iterfield]
         self.iterfield = iterfield
         self.nested = nested

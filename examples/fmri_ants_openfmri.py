@@ -14,12 +14,12 @@ This script demonstrates how to use nipype to analyze a data set::
 from __future__ import unicode_literals
 from __future__ import division
 from builtins import range
+from builtins import str
 from past.utils import old_div
 
 from nipype import config
 config.enable_provenance()
 
-from nipype.external import six
 
 from glob import glob
 import os
@@ -27,8 +27,6 @@ import os
 import nipype.pipeline.engine as pe
 import nipype.algorithms.modelgen as model
 import nipype.algorithms.rapidart as ra
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.ants as ants
 from nipype.algorithms.misc import TSNR
 from nipype.interfaces.c3 import C3dAffineTool
 import nipype.interfaces.io as nio
@@ -41,9 +39,9 @@ from nipype import LooseVersion
 from nipype import Workflow, Node, MapNode
 from nipype.interfaces import (fsl, Function, ants, freesurfer)
 
-from nipype.interfaces.utility import Rename, Merge, IdentityInterface
+from nipype.interfaces.utility import Merge, IdentityInterface
 from nipype.utils.filemanip import filename_to_list
-from nipype.interfaces.io import DataSink, FreeSurferSource
+from nipype.interfaces.io import FreeSurferSource
 import nipype.interfaces.freesurfer as fs
 
 version = 0
@@ -770,10 +768,9 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     modelspec.inputs.input_units = 'secs'
 
     def check_behav_list(behav, run_id, conds):
-        from nipype.external import six
         import numpy as np
         num_conds = len(conds)
-        if isinstance(behav, six.string_types):
+        if isinstance(behav, str):
             behav = [behav]
         behav_array = np.array(behav).flatten()
         num_elements = behav_array.shape[0]

@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
+from builtins import str
+
 from nipype.interfaces.base import (traits, File, Directory, TraitedSpec,
                                     OutputMultiPath)
 import os.path as op
 import glob
 from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
 from nipype.utils.filemanip import list_to_filename
-from nipype.external import six
 import logging
 
 logging.basicConfig()
@@ -91,7 +92,7 @@ class WatershedBEM(FSCommand):
                         out_files = []
                         for value in value_list:
                             out_files.append(op.abspath(value))
-                    elif isinstance(value_list, six.string_types):
+                    elif isinstance(value_list, str):
                         out_files = op.abspath(value_list)
                     else:
                         raise TypeError

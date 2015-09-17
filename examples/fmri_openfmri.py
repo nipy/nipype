@@ -14,11 +14,9 @@ This script demonstrates how to use nipype to analyze a data set::
 from __future__ import unicode_literals
 from __future__ import division
 from builtins import range
+from builtins import str
 from past.utils import old_div
 
-from nipype import config
-#config.enable_provenance()
-from nipype.external import six
 
 from glob import glob
 import os
@@ -241,9 +239,8 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     modelspec.inputs.input_units = 'secs'
 
     def check_behav_list(behav):
-        from nipype.external import six
         out_behav = []
-        if isinstance(behav, six.string_types):
+        if isinstance(behav, str):
             behav = [behav]
         for val in behav:
             if not isinstance(val, list):

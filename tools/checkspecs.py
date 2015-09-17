@@ -6,17 +6,16 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import object
+from builtins import str
 
 # Stdlib imports
-import inspect
 import os
 import re
 import sys
-import tempfile
 import warnings
 
-from nipype.external import six
 from nipype.interfaces.base import BaseInterface
+
 
 # Functions and classes
 class InterfaceChecker(object):
@@ -219,7 +218,7 @@ class InterfaceChecker(object):
                         for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
                                 continue
-                            if isinstance(value, six.string_types):
+                            if isinstance(value, str):
                                 quote = "'"
                                 if "'" in value:
                                     quote = '"'
@@ -263,7 +262,7 @@ class InterfaceChecker(object):
                         for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
                                 continue
-                            if isinstance(value, six.string_types):
+                            if isinstance(value, str):
                                 quote = "'"
                                 if "'" in value:
                                     quote = '"'

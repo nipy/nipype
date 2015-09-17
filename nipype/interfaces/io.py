@@ -35,7 +35,6 @@ from warnings import warn
 
 import sqlite3
 from nipype.utils.misc import human_order_sorted
-from nipype.external import six
 
 from ..utils.misc import str2bool
 from .. import config
@@ -611,7 +610,7 @@ class S3DataGrabber(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, str) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -622,7 +621,7 @@ class S3DataGrabber(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                        if isinstance(arg, str) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -1113,7 +1112,7 @@ class DataFinder(IOBase):
 
     def _run_interface(self, runtime):
         #Prepare some of the inputs
-        if isinstance(self.inputs.root_paths, six.string_types):
+        if isinstance(self.inputs.root_paths, str):
             self.inputs.root_paths = [self.inputs.root_paths]
         self.match_regex = re.compile(self.inputs.match_regex)
         if self.inputs.max_depth is Undefined:
@@ -1482,7 +1481,7 @@ class XNATSource(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, str) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -1495,7 +1494,7 @@ class XNATSource(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, six.string_types) and \
+                        if isinstance(arg, str) and \
                                 hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
@@ -2052,7 +2051,7 @@ class SSHDataGrabber(DataGrabber):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, str) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -2063,7 +2062,7 @@ class SSHDataGrabber(DataGrabber):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                        if isinstance(arg, str) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])

@@ -20,6 +20,7 @@ These functions include:
 from __future__ import unicode_literals
 from __future__ import division
 from builtins import range
+from builtins import str
 from past.utils import old_div
 
 from copy import deepcopy
@@ -34,7 +35,6 @@ from nipype.interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
                                     isdefined)
 from nipype.utils.filemanip import filename_to_list
 from .. import config, logging
-from nipype.external import six
 iflogger = logging.getLogger('interface')
 
 
@@ -456,7 +456,7 @@ class SpecifySPMModel(SpecifyModel):
         for i, f in enumerate(self.inputs.functional_runs):
             if isinstance(f, list):
                 numscans = len(f)
-            elif isinstance(f, six.string_types):
+            elif isinstance(f, str):
                 img = load(f)
                 numscans = img.get_shape()[3]
             else:

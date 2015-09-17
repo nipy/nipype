@@ -17,10 +17,9 @@ from builtins import range
 
 import os
 import re
-from pickle import dumps, loads
+from pickle import dumps
 import numpy as np
 import nibabel as nb
-from nipype.external import six
 
 from nipype.utils.filemanip import (filename_to_list, copyfile, split_filename)
 from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec, File,
@@ -407,7 +406,7 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept ' \
                                     'function objects defined interactively ' \
                                     'in a python session')
-            elif isinstance(function, six.string_types):
+            elif isinstance(function, str):
                 self.inputs.function_str = dumps(function)
             else:
                 raise Exception('Unknown type of function')

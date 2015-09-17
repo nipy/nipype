@@ -2,15 +2,14 @@ from __future__ import unicode_literals
 from future import standard_library
 standard_library.install_aliases()
 from builtins import str
-from past.builtins import basestring
 from builtins import object
+
 from pickle import dumps
 import json
 import os
 import getpass
 from socket import getfqdn
 from uuid import uuid1
-from nipype.external import six
 
 import numpy as np
 try:
@@ -101,7 +100,7 @@ def _get_sorteddict(object, dictwithhash=False):
         if isinstance(object, tuple):
             out = tuple(out)
     else:
-        if isinstance(object, six.string_types) and os.path.isfile(object):
+        if isinstance(object, str) and os.path.isfile(object):
             hash = hash_infile(object)
             if dictwithhash:
                 out = (object, hash)
@@ -204,7 +203,7 @@ def prov_encode(graph, value, create_container=True):
                     entities.append(item_entity)
                     if isinstance(item, list):
                         continue
-                    if not isinstance(item_entity.get_value()[0], basestring):
+                    if not isinstance(item_entity.get_value()[0], str):
                         raise ValueError('Not a string literal')
                     if 'file://' not in item_entity.get_value()[0]:
                         raise ValueError('No file found')
@@ -220,7 +219,7 @@ def prov_encode(graph, value, create_container=True):
     else:
         encoded_literal = safe_encode(value)
         attr = {pm.PROV['value']: encoded_literal}
-        if isinstance(value, six.string_types) and os.path.exists(value):
+        if isinstance(value, str) and os.path.exists(value):
             attr.update({pm.PROV['location']: encoded_literal})
             if not os.path.isdir(value):
                 sha512 = hash_infile(value, crypto=hashlib.sha512)

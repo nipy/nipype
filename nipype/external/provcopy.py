@@ -18,11 +18,9 @@ from builtins import object
 import logging
 import datetime
 import json
-import re
 import dateutil.parser
 import collections
 from collections import defaultdict
-from . import six
 
 try:
     from rdflib.term import URIRef, BNode
@@ -193,7 +191,7 @@ def _parse_xsd_dateTime(s):
 
 
 def _ensure_datetime(time):
-    if isinstance(time, six.string_types):
+    if isinstance(time, str):
         return _parse_xsd_dateTime(time)
     else:
         return time
@@ -238,12 +236,12 @@ def parse_xsd_types(value, datatype):
 
 
 def _ensure_multiline_string_triple_quoted(s):
-    format_str = u'"""%s"""' if isinstance(s, six.string_types) and '\n' in s else u'"%s"'
+    format_str = u'"""%s"""' if isinstance(s, str) and '\n' in s else u'"%s"'
     return format_str % s
 
 
 def encoding_PROV_N_value(value):
-    if isinstance(value, six.string_types):
+    if isinstance(value, str):
         return _ensure_multiline_string_triple_quoted(value)
     elif isinstance(value, datetime.datetime):
         return value.isoformat()
@@ -542,7 +540,7 @@ class ProvRecord(object):
         if isinstance(literal, URIRef):
             return literal
 
-        if isinstance(literal, six.string_types):
+        if isinstance(literal, str):
             return str(literal)
 
         if isinstance(literal, Literal) and literal.has_no_langtag():
@@ -1574,7 +1572,7 @@ class ProvBundle(ProvEntity):
                          key=lambda tuple_rec: tuple_rec[0])
 
         record_map = {}
-        _parse_attr_value = lambda value: record_map[value] if (isinstance(value, six.string_types) and value in record_map) else self._decode_json_representation(value)
+        _parse_attr_value = lambda value: record_map[value] if (isinstance(value, str) and value in record_map) else self._decode_json_representation(value)
         #  Create all the records before setting their attributes
         for (record_type, identifier, content) in records:
             if record_type == PROV_REC_BUNDLE:

@@ -15,6 +15,7 @@ standard_library.install_aliases()
 from builtins import str
 from builtins import range
 from builtins import object
+from past.utils import old_div
 
 from configparser import NoOptionError
 from copy import deepcopy
@@ -32,21 +33,19 @@ from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
-from ..external import six
 
 
 from .traits_extension import (traits, Undefined, TraitDictObject,
                                TraitListObject, TraitError,
-                               isdefined, File, Directory,
+                               isdefined, File,
                                has_metadata)
 from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
-                               hash_timestamp, save_json,
+                               hash_timestamp,
                                split_filename)
 from ..utils.misc import is_container, trim, str2bool
 from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
-import random, time, fnmatch
 
 nipype_version = LooseVersion(__version__)
 
@@ -591,7 +590,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 out = tuple(out)
         else:
             if isdefined(object):
-                if (hash_files and isinstance(object, six.string_types) and
+                if (hash_files and isinstance(object, str) and
                         os.path.isfile(object)):
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
@@ -1066,7 +1065,7 @@ class BaseInterface(Interface):
             else:
                 inputs_str = ''
 
-            if len(e.args) == 1 and isinstance(e.args[0], six.string_types):
+            if len(e.args) == 1 and isinstance(e.args[0], str):
                 e.args = (e.args[0] + " ".join([message, inputs_str]),)
             else:
                 e.args += (message, )
@@ -1566,7 +1565,7 @@ class CommandLine(BaseInterface):
                     iflogger.warn('Only one name_source per trait is allowed')
                 ns = ns[0]
 
-            if not isinstance(ns, six.string_types):
+            if not isinstance(ns, str):
                 raise ValueError(('name_source of \'%s\' trait sould be an '
                                  'input trait name') % name)
 
