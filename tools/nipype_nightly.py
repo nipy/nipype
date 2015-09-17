@@ -3,6 +3,8 @@
 """Simple script to update the trunk nightly, build the docs and push
 to sourceforge.
 """
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import os
 import sys
@@ -11,7 +13,7 @@ import subprocess
 dirname = '/home/cburns/src/nipy-sf/nipype/trunk/'
 
 def run_cmd(cmd):
-    print cmd
+    print(cmd)
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             env=os.environ,
@@ -20,8 +22,8 @@ def run_cmd(cmd):
     returncode = proc.returncode
     if returncode:
         msg = 'Running cmd: %s\n Error: %s' % (cmd, error)
-        raise StandardError(msg)
-    print output
+        raise Exception(msg)
+    print(output)
 
 def update_repos():
     """Update svn repository."""

@@ -3,6 +3,9 @@
 
 """Attempt to check each interface in nipype
 """
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import object
 
 # Stdlib imports
 import inspect
@@ -241,7 +244,7 @@ class InterfaceChecker(object):
                         continue
                     parent_metadata = []
                     if 'parent' in trait.__dict__:
-                        parent_metadata = getattr(trait, 'parent').__dict__.keys()
+                        parent_metadata = list(getattr(trait, 'parent').__dict__.keys())
                     if key not in allowed_keys + classinst._additional_metadata\
                         + parent_metadata:
                         bad_specs.append([uri, c, 'Inputs', traitname, key])
@@ -283,7 +286,7 @@ class InterfaceChecker(object):
                         continue
                     parent_metadata = []
                     if 'parent' in trait.__dict__:
-                        parent_metadata = getattr(trait, 'parent').__dict__.keys()
+                        parent_metadata = list(getattr(trait, 'parent').__dict__.keys())
                     if key not in allowed_keys + classinst._additional_metadata\
                             + parent_metadata:
                         bad_specs.append([uri, c, 'Outputs', traitname, key])
@@ -380,7 +383,7 @@ class InterfaceChecker(object):
             if bad_specs:
                 checked_modules.extend(bad_specs)
         for bad_spec in checked_modules:
-            print ':'.join(bad_spec)
+            print(':'.join(bad_spec))
 
 if __name__ == "__main__":
     package = 'nipype'

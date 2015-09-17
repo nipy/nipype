@@ -1,4 +1,7 @@
-import httplib
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+import http.client
 import inspect
 import json
 import os
@@ -45,7 +48,7 @@ def create_hash_map():
     from base64 import encodestring as base64
     import pwd
     login_name = pwd.getpwuid(os.geteuid())[0]
-    conn = httplib.HTTPSConnection("api.github.com")
+    conn = http.client.HTTPSConnection("api.github.com")
     conn.request("GET", "/repos/nipy/nipype",
                  headers={'Authorization': 'Basic %s' % base64(login_name)})
     try:

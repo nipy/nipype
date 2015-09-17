@@ -1,10 +1,12 @@
+from __future__ import print_function
+from __future__ import unicode_literals
 import os
 import sys
 from shutil import rmtree
 
 
 def run_examples(example, pipelines, plugin):
-    print 'running example: %s with plugin: %s'%(example, plugin)
+    print('running example: %s with plugin: %s'%(example, plugin))
     from nipype import config
     config.enable_debug_mode()
     from nipype.interfaces.base import CommandLine
