@@ -8,6 +8,9 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
 
 __docformat__ = 'restructuredtext'
 

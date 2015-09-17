@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-from StringIO import StringIO
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from io import StringIO
 import unittest, sys
 from nipype.utils import nipype_cmd
 from contextlib import contextmanager

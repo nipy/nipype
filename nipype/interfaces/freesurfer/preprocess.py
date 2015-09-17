@@ -9,6 +9,8 @@
    >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
+from builtins import range
 __docformat__ = 'restructuredtext'
 
 import os
@@ -514,7 +516,7 @@ class DICOMConvert(FSCommand):
         if self.inputs.dicom_info:
             files = [filemap[r] for r in self._get_runs()]
         else:
-            files = [filemap[r] for r in filemap.keys()]
+            files = [filemap[r] for r in list(filemap.keys())]
         return files
 
     @property
@@ -1214,7 +1216,7 @@ class RobustRegister(FSCommand):
                         half_weights=("src", "_halfweights", True),
                         half_source_xfm=("src", "_robustxfm.lta", False),
                         half_targ_xfm=("trg", "_robustxfm.lta", False))
-        for name, sufftup in suffices.items():
+        for name, sufftup in list(suffices.items()):
             value = getattr(self.inputs, name)
             if isdefined(value):
                 if isinstance(value, bool):

@@ -2,8 +2,11 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via IPython controller
 """
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 
-from cPickle import dumps
+from pickle import dumps
 
 import sys
 
@@ -27,7 +30,7 @@ def execute_task(pckld_task, node_config, updatehash):
     try:
         config.update_config(node_config)
         logging.update_logging(config)
-        from cPickle import loads
+        from pickle import loads
         task = loads(pckld_task)
         result = task.run(updatehash=updatehash)
     except:
@@ -63,7 +66,7 @@ class IPythonPlugin(DistributedPluginBase):
                               "will be unavailable")
         try:
             self.taskclient = self.iparallel.Client()
-        except Exception, e:
+        except Exception as e:
             if isinstance(e, TimeoutError):
                 raise Exception("No IPython clients found.")
             if isinstance(e, IOError):

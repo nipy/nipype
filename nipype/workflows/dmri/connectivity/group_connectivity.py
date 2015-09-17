@@ -1,3 +1,6 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
 import os.path as op
 import nipype.interfaces.io as nio  # Data i/o
 import nipype.interfaces.utility as util  # utility
@@ -10,7 +13,7 @@ from nipype.utils.misc import package_check
 have_cmp = True
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     have_cmp = False
 else:
     import cmp
@@ -33,7 +36,7 @@ def pullnodeIDs(in_network, name_key='dn_name'):
     nodedata = ntwk.node
     ids = []
     integer_nodelist = []
-    for node in nodedata.keys():
+    for node in list(nodedata.keys()):
         integer_nodelist.append(int(node))
     for node in np.sort(integer_nodelist):
         try:
@@ -314,7 +317,7 @@ def create_merge_group_networks_workflow(group_list, data_dir, subjects_dir, out
     """
     l3infosource = pe.Node(interface=util.IdentityInterface(
         fields=['group_id']), name='l3infosource')
-    l3infosource.inputs.group_id = group_list.keys()
+    l3infosource.inputs.group_id = list(group_list.keys())
 
     l3source = pe.Node(nio.DataGrabber(
         infields=['group_id'], outfields=['CFFfiles']), name='l3source')
@@ -376,7 +379,7 @@ def create_merge_group_network_results_workflow(group_list, data_dir, subjects_d
 	"""
     l3infosource = pe.Node(interface=util.IdentityInterface(
 	    fields=['group_id']), name='l3infosource')
-    l3infosource.inputs.group_id = group_list.keys()
+    l3infosource.inputs.group_id = list(group_list.keys())
 
     l3source = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=['CFFfiles', 'CSVnodemetrics', 'CSVglobalmetrics', 'CSVmatrices']), name='l3source')
     l3source.inputs.template_args = dict(CFFfiles=[['group_id']], CSVnodemetrics=[['group_id']], CSVglobalmetrics=[['group_id']], CSVmatrices=[['group_id']])
@@ -455,16 +458,16 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
     """
     l4infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id1', 'group_id2']), name='l4infosource')
     try:
-        l4infosource.inputs.group_id1 = group_list.keys()[0]
-        l4infosource.inputs.group_id2 = group_list.keys()[1]
+        l4infosource.inputs.group_id1 = list(group_list.keys())[0]
+        l4infosource.inputs.group_id2 = list(group_list.keys())[1]
     except IndexError:
-        print 'The create_average_networks_by_group_workflow requires 2 groups'
+        print('The create_average_networks_by_group_workflow requires 2 groups')
         raise Exception
 
     l4info = dict(networks=[['group_id', '']], CMatrices=[['group_id', '']], fibmean=[['group_id', 'mean_fiber_length']],
         fibdev=[['group_id', 'fiber_length_std']])
 
-    l4source_grp1 = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=l4info.keys()), name='l4source_grp1')
+    l4source_grp1 = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=list(l4info.keys())), name='l4source_grp1')
     l4source_grp1.inputs.template = '%s/%s'
     l4source_grp1.inputs.field_template = dict(networks=op.join(output_dir, '%s/networks/*/*%s*intersections*.pck'), CMatrices=op.join(output_dir, '%s/cmatrix/*/*%s*.mat'),
         fibmean=op.join(output_dir, '%s/mean_fiber_length/*/*%s*.mat'), fibdev=op.join(output_dir, '%s/fiber_length_std/*/*%s*.mat'))

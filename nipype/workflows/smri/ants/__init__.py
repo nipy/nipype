@@ -1,2 +1,3 @@
+from __future__ import unicode_literals
 from .ANTSBuildTemplate import ANTSTemplateBuildSingleIterationWF
 from .antsRegistrationBuildTemplate import antsRegistrationTemplateBuildSingleIterationWF

@@ -1,5 +1,7 @@
 """Parallel workflow execution via LSF
 """
+from __future__ import unicode_literals
+from builtins import str
 
 import os
 
@@ -96,7 +98,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         while True:
             try:
                 result = cmd.run()
-            except Exception, e:
+            except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
                     sleep(

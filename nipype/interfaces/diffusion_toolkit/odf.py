@@ -9,6 +9,8 @@
    >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
+from builtins import range
 import re
 from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
 import os

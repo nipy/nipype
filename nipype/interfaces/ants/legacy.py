@@ -10,6 +10,9 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
 # Local imports
 from ..base import (TraitedSpec, File, traits, InputMultiPath,
                     isdefined)

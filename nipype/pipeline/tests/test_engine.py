@@ -2,6 +2,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine module
 """
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
 from copy import deepcopy
 from glob import glob
 import os
@@ -485,7 +488,7 @@ def test_mapnode_nested():
                  name='n1')
     n1.inputs.in1 = [[1,[2]],3,[4,5]]
     n1.run()
-    print n1.get_output('out')
+    print(n1.get_output('out'))
     yield assert_equal, n1.get_output('out'), [[2,[3]],4,[5,6]]
 
     n2 = MapNode(Function(input_names=['in1'],
@@ -498,7 +501,7 @@ def test_mapnode_nested():
     error_raised = False
     try:
         n2.run()
-    except Exception, e:
+    except Exception as e:
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_true, error_raised
@@ -539,7 +542,7 @@ def test_node_hash():
             raise Exception('Submit called')
     try:
         w1.run(plugin=RaiseError())
-    except Exception, e:
+    except Exception as e:
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_true, error_raised
@@ -553,7 +556,7 @@ def test_node_hash():
     error_raised = False
     try:
         w1.run(plugin=RaiseError())
-    except Exception, e:
+    except Exception as e:
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
@@ -588,7 +591,7 @@ def test_old_config():
     error_raised = False
     try:
         w1.run(plugin='Linear')
-    except Exception, e:
+    except Exception as e:
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
@@ -670,7 +673,7 @@ def test_serial_input():
     error_raised = False
     try:
         w1.run(plugin='MultiProc')
-    except Exception, e:
+    except Exception as e:
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
@@ -683,7 +686,7 @@ def test_serial_input():
     error_raised = False
     try:
         w1.run(plugin='MultiProc')
-    except Exception, e:
+    except Exception as e:
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised

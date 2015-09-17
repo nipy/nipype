@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Parallel workflow execution via IPython controller
 """
+from __future__ import unicode_literals
 
 import sys
 
@@ -40,7 +41,7 @@ class IPythonXPlugin(DistributedPluginBase):
                               "will be unavailable")
         try:
             self.taskclient = self.ipyclient.TaskClient()
-        except Exception, e:
+        except Exception as e:
             if isinstance(e, ConnectionRefusedError):
                 raise Exception("No IPython clients found.")
             if isinstance(e, ValueError):

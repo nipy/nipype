@@ -8,10 +8,16 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import str
+from builtins import range
 
 import os
 import re
-from cPickle import dumps, loads
+from pickle import dumps, loads
 import numpy as np
 import nibabel as nb
 from nipype.external import six
@@ -419,7 +425,7 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-            elif isinstance(new, six.string_types):
+            elif isinstance(new, str):
                 function_source = dumps(new)
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})

@@ -11,10 +11,12 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import absolute_import
+from __future__ import unicode_literals
 import os
 import os.path as op
 
-from base import MRTrix3BaseInputSpec, MRTrix3Base
+from .base import MRTrix3BaseInputSpec, MRTrix3Base
 from nipype.interfaces.base import (
     CommandLineInputSpec, CommandLine, traits, TraitedSpec, File)
 

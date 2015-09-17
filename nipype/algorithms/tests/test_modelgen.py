@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+from __future__ import division
+from past.utils import old_div
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from copy import deepcopy
@@ -85,7 +88,7 @@ def test_modelgen_spm_concat():
     yield assert_equal, s.inputs.output_units, 'scans'
     s.inputs.subject_info = deepcopy(info)
     res = s.run()
-    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), np.array([2.0, 50.0, 100.0, 170.0, 210.0, 220.0, 280.0, 330.0])/6
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['onset']), old_div(np.array([2.0, 50.0, 100.0, 170.0, 210.0, 220.0, 280.0, 330.0]),6)
     # Test case for no concatenation with seconds as output units
     s.inputs.concatenate_runs = False
     s.inputs.subject_info = deepcopy(info)

@@ -11,6 +11,9 @@ was written to work with FSL version 4.1.4.
     >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
 
 import os
 import shutil
@@ -92,7 +95,7 @@ class DTIFit(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        for k in outputs.keys():
+        for k in list(outputs.keys()):
             if k not in ('outputtype', 'environ', 'args'):
                 if k != 'tensor' or (isdefined(self.inputs.save_tensor)
                                           and self.inputs.save_tensor):
@@ -219,13 +222,13 @@ class FSLXCommand(FSLCommand):
         for k in multi_out:
             outputs[k] = []
 
-        for i in xrange(1, n_fibres + 1):
+        for i in range(1, n_fibres + 1):
             outputs['fsamples'].append(self._gen_fname('f%dsamples' % i,
                                        cwd=out_dir))
             outputs['mean_fsamples'].append(self._gen_fname(('mean_f%d'
                                             'samples') % i, cwd=out_dir))
 
-        for i in xrange(1, n_fibres + 1):
+        for i in range(1, n_fibres + 1):
             outputs['dyads'].append(self._gen_fname('dyads%d' % i,
                                     cwd=out_dir))
             outputs['phsamples'].append(self._gen_fname('ph%dsamples' % i,
@@ -370,7 +373,7 @@ class BEDPOSTX5(FSLXCommand):
         for k in multi_out:
             outputs[k] = []
 
-        for i in xrange(1, n_fibres + 1):
+        for i in range(1, n_fibres + 1):
             outputs['merged_thsamples'].append(self._gen_fname('merged_th%dsamples' % i,
                                        cwd=self._out_dir))
             outputs['merged_fsamples'].append(self._gen_fname('merged_f%dsamples' % i,
@@ -616,7 +619,7 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
         outputs['xfms_directory'] = os.path.join(bpx_directory + '.bedpostX',
                                                  'xfms')
 
-        for k in outputs.keys():
+        for k in list(outputs.keys()):
             if k not in ('outputtype', 'environ', 'args', 'bpx_out_directory',
                          'xfms_directory'):
                 outputs[k] = []

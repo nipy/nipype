@@ -1,4 +1,10 @@
-from cPickle import dumps
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from past.builtins import basestring
+from builtins import object
+from pickle import dumps
 import json
 import os
 import getpass
@@ -118,7 +124,7 @@ def safe_encode(x, as_literal=True):
         else:
             return value
     try:
-        if isinstance(x, (str, unicode)):
+        if isinstance(x, (str, str)):
             if os.path.exists(x):
                 value = 'file://%s%s' % (getfqdn(), x)
                 if not as_literal:
@@ -135,19 +141,19 @@ def safe_encode(x, as_literal=True):
                 if not as_literal:
                     return value
                 return pm.Literal(value, pm.XSD['string'])
-        if isinstance(x, (int,)):
+        if isinstance(x, int):
             if not as_literal:
                 return x
             return pm.Literal(int(x), pm.XSD['integer'])
-        if isinstance(x, (float,)):
+        if isinstance(x, float):
             if not as_literal:
                 return x
             return pm.Literal(x, pm.XSD['float'])
         if isinstance(x, dict):
             outdict = {}
-            for key, value in x.items():
+            for key, value in list(x.items()):
                 encoded_value = safe_encode(value, as_literal=False)
-                if isinstance(encoded_value, (pm.Literal,)):
+                if isinstance(encoded_value, pm.Literal):
                     outdict[key] = encoded_value.json_representation()
                 else:
                     outdict[key] = encoded_value
@@ -159,11 +165,11 @@ def safe_encode(x, as_literal=True):
                 nptype = np.array(x).dtype
                 if nptype == np.dtype(object):
                     raise ValueError('dtype object')
-            except ValueError, e:
+            except ValueError as e:
                 outlist = []
                 for value in x:
                     encoded_value = safe_encode(value, as_literal=False)
-                    if isinstance(encoded_value, (pm.Literal,)):
+                    if isinstance(encoded_value, pm.Literal):
                         outlist.append(encoded_value.json_representation())
                     else:
                         outlist.append(encoded_value)
@@ -175,7 +181,7 @@ def safe_encode(x, as_literal=True):
         if not as_literal:
             return dumps(x)
         return pm.Literal(dumps(x), nipype_ns['pickle'])
-    except TypeError, e:
+    except TypeError as e:
         iflogger.info(e)
         value = "Could not encode: " + str(e)
         if not as_literal:
@@ -206,7 +212,7 @@ def prov_encode(graph, value, create_container=True):
                 entity = graph.collection(identifier=id)
                 for item_entity in entities:
                     graph.hadMember(id, item_entity)
-            except ValueError, e:
+            except ValueError as e:
                 iflogger.debug(e)
                 entity = prov_encode(graph, value, create_container=False)
         else:
@@ -369,7 +375,7 @@ class ProvStore(object):
         agent_attr = {pm.PROV["type"]: pm.PROV["SoftwareAgent"],
                       pm.PROV["label"]: "Nipype",
                       foaf["name"]: safe_encode("Nipype")}
-        for key, value in get_info().items():
+        for key, value in list(get_info().items()):
             agent_attr.update({nipype_ns[key]: safe_encode(value)})
         software_agent = self.g.agent(get_attr_id(agent_attr), agent_attr)
         self.g.wasAssociatedWith(a0, user_agent, None, None,

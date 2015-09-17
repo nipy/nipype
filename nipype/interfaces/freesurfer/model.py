@@ -10,6 +10,7 @@
    >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
 __docformat__ = 'restructuredtext'
 
 import os
@@ -647,7 +648,7 @@ class SegStats(FSCommand):
             src = '_'.join(self.inputs.annot)
         if isdefined(self.inputs.surf_label):
             src = '_'.join(self.inputs.surf_label)
-        for name, suffix in suffices.items():
+        for name, suffix in list(suffices.items()):
             value = getattr(self.inputs, name)
             if isdefined(value):
                 if isinstance(value, bool):

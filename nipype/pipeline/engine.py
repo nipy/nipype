@@ -11,6 +11,12 @@ The `Workflow` class provides core functionality for batch processing.
    >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
 
 from datetime import datetime
 from nipype.utils.misc import flatten, unflatten
@@ -20,7 +26,7 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 from copy import deepcopy
-import cPickle
+import pickle
 from glob import glob
 import gzip
 import inspect
@@ -67,18 +73,18 @@ from .utils import (generate_expanded_graph, modify_paths,
 def _write_inputs(node):
     lines = []
     nodename = node.fullname.replace('.', '_')
-    for key, _ in node.inputs.items():
+    for key, _ in list(node.inputs.items()):
         val = getattr(node.inputs, key)
         if isdefined(val):
             if type(val) == str:
                 try:
                     func = create_function_from_source(val)
-                except RuntimeError, e:
+                except RuntimeError as e:
                     lines.append("%s.inputs.%s = '%s'" % (nodename, key, val))
                 else:
-                    funcname = [name for name in func.func_globals
+                    funcname = [name for name in func.__globals__
                                 if name != '__builtins__'][0]
-                    lines.append(cPickle.loads(val))
+                    lines.append(pickle.loads(val))
                     if funcname == nodename:
                         lines[-1] = lines[-1].replace(' %s(' % funcname,
                                                       ' %s_1(' % funcname)
@@ -626,7 +632,7 @@ connected.
                                 funcname = functions[args[1]]
                             else:
                                 func = create_function_from_source(args[1])
-                                funcname = [name for name in func.func_globals
+                                funcname = [name for name in func.__globals__
                                             if name != '__builtins__'][0]
                                 functions[args[1]] = funcname
                             args[1] = funcname
@@ -642,7 +648,7 @@ connected.
                             lines.append(connect_template2 % line_args)
             functionlines = ['# Functions']
             for function in functions:
-                functionlines.append(cPickle.loads(function).rstrip())
+                functionlines.append(pickle.loads(function).rstrip())
             all_lines = importlines + functionlines + lines
 
             if not filename:
@@ -865,7 +871,7 @@ connected.
                     for cd in d['connect']:
                         taken_inputs.append(cd[1])
                 unconnectedinputs = TraitedSpec()
-                for key, trait in node.inputs.items():
+                for key, trait in list(node.inputs.items()):
                     if key not in taken_inputs:
                         unconnectedinputs.add_trait(key,
                                                     traits.Trait(trait,
@@ -886,7 +892,7 @@ connected.
                 setattr(outputdict, node.name, node.outputs)
             elif node.outputs:
                 outputs = TraitedSpec()
-                for key, _ in node.outputs.items():
+                for key, _ in list(node.outputs.items()):
                     outputs.add_trait(key, traits.Any(node=node))
                     setattr(outputs, key, None)
                 setattr(outputdict, node.name, outputs)
@@ -1499,7 +1505,7 @@ class Node(WorkflowBase):
         other data sources (e.g., XNAT, HTTP, etc.,.)
         """
         logger.debug('Setting node inputs')
-        for key, info in self.input_source.items():
+        for key, info in list(self.input_source.items()):
             logger.debug('input: %s' % key)
             results_file = info[0]
             logger.debug('results file: %s' % results_file)
@@ -1521,7 +1527,7 @@ class Node(WorkflowBase):
             logger.debug('output: %s' % output_name)
             try:
                 self.set_input(key, deepcopy(output_value))
-            except traits.TraitError, e:
+            except traits.TraitError as e:
                 msg = ['Error setting node input:',
                        'Node: %s' % self.name,
                        'input: %s' % key,
@@ -1578,8 +1584,8 @@ class Node(WorkflowBase):
         if op.exists(resultsoutputfile):
             pkl_file = gzip.open(resultsoutputfile, 'rb')
             try:
-                result = cPickle.load(pkl_file)
-            except (traits.TraitError, AttributeError, ImportError), err:
+                result = pickle.load(pkl_file)
+            except (traits.TraitError, AttributeError, ImportError) as err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
                     logger.debug(('attribute error: %s probably using '
@@ -1652,7 +1658,7 @@ class Node(WorkflowBase):
             if issubclass(self._interface.__class__, CommandLine):
                 try:
                     cmd = self._interface.cmdline
-                except Exception, msg:
+                except Exception as msg:
                     self._result.runtime.stderr = msg
                     raise
                 cmdfile = op.join(cwd, 'command.txt')
@@ -1662,7 +1668,7 @@ class Node(WorkflowBase):
                 logger.info('Running: %s' % cmd)
             try:
                 result = self._interface.run()
-            except Exception, msg:
+            except Exception as msg:
                 self._result.runtime.stderr = msg
                 raise
 
@@ -1944,7 +1950,7 @@ class JoinNode(Node):
                 if not basetraits.trait(field):
                     raise ValueError("The JoinNode %s does not have a field"
                                      " named %s" % (self.name, field))
-        for name, trait in basetraits.items():
+        for name, trait in list(basetraits.items()):
             # if a join field has a single inner trait, then the item
             # trait is that inner trait. Otherwise, the item trait is
             # a new Any trait.
@@ -2073,7 +2079,7 @@ class MapNode(Node):
         output = DynamicTraitedSpec()
         if fields is None:
             fields = basetraits.copyable_trait_names()
-        for name, spec in basetraits.items():
+        for name, spec in list(basetraits.items()):
             if name in fields and ((nitems is None) or (nitems > 1)):
                 logger.debug('adding multipath trait: %s' % name)
                 if self.nested:
@@ -2183,7 +2189,7 @@ class MapNode(Node):
             err = None
             try:
                 node.run(updatehash=updatehash)
-            except Exception, err:
+            except Exception as err:
                 if str2bool(self.config['execution']['stop_on_first_crash']):
                     self._result = node.result
                     raise
@@ -2205,7 +2211,7 @@ class MapNode(Node):
                     self._result.provenance.insert(i, node.result.provenance)
             returncode.insert(i, err)
             if self.outputs:
-                for key, _ in self.outputs.items():
+                for key, _ in list(self.outputs.items()):
                     rm_extra = (self.config['execution']
                                 ['remove_unnecessary_outputs'])
                     if str2bool(rm_extra) and self.needed_outputs:
@@ -2223,7 +2229,7 @@ class MapNode(Node):
                         setattr(self._result.outputs, key, values)
 
         if self.nested:
-            for key, _ in self.outputs.items():
+            for key, _ in list(self.outputs.items()):
                 values = getattr(self._result.outputs, key)
                 if isdefined(values):
                     values = unflatten(values, filename_to_list(getattr(self.inputs, self.iterfield[0])))

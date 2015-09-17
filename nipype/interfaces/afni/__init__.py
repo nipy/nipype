@@ -5,6 +5,7 @@
 
 Top-level namespace for afni.
 """
+from __future__ import unicode_literals
 
 from .base import Info
 from .preprocess import (To3D, Refit, Resample, TStat, Automask, Volreg, Merge,

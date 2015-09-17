@@ -13,6 +13,11 @@ you can test by calling::
 
    spm.SPMCommand().version
 """
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
+from builtins import range
+from builtins import object
 
 __docformat__ = 'restructuredtext'
 
@@ -181,7 +186,7 @@ exit;
         """
         try:
             out = mlab.run()
-        except (IOError, RuntimeError), e:
+        except (IOError, RuntimeError) as e:
             # if no Matlab at all -- exception could be raised
             # No Matlab -- no spm
             logger.debug(str(e))
@@ -330,7 +335,7 @@ class SPMCommand(BaseInterface):
     def _parse_inputs(self, skip=()):
         spmdict = {}
         metadata = dict(field=lambda t: t is not None)
-        for name, spec in self.inputs.traits(**metadata).items():
+        for name, spec in list(self.inputs.traits(**metadata).items()):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
@@ -341,7 +346,7 @@ class SPMCommand(BaseInterface):
                 fields = field.split('.')
                 dictref = spmdict
                 for f in fields[:-1]:
-                    if f not in dictref.keys():
+                    if f not in list(dictref.keys()):
                         dictref[f] = {}
                     dictref = dictref[f]
                 dictref[fields[-1]] = self._format_arg(name, spec, value)
@@ -366,7 +371,7 @@ class SPMCommand(BaseInterface):
         """
         newdict = {}
         try:
-            for key, value in contents.items():
+            for key, value in list(contents.items()):
                 if isinstance(value, dict):
                     if value:
                         newdict[key] = self._reformat_dict_for_savemat(value)
@@ -376,7 +381,7 @@ class SPMCommand(BaseInterface):
 
             return [newdict]
         except TypeError:
-            print 'Requires dict input'
+            print('Requires dict input')
 
     def _generate_job(self, prefix='', contents=None):
         """Recursive function to generate spm job specification as a string
@@ -403,7 +408,7 @@ class SPMCommand(BaseInterface):
                 jobstring += self._generate_job(newprefix, value)
             return jobstring
         if isinstance(contents, dict):
-            for key, value in contents.items():
+            for key, value in list(contents.items()):
                 newprefix = "%s.%s" % (prefix, key)
                 jobstring += self._generate_job(newprefix, value)
             return jobstring

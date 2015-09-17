@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import os
 import nipype.interfaces.base as nib
 from tempfile import mkdtemp

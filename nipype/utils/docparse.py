@@ -12,6 +12,8 @@ better = fsl.Bet()
 docstring = docparse.get_doc(better.cmd, better.opt_map)
 
 """
+from __future__ import unicode_literals
+from builtins import str
 
 import subprocess
 from nipype.interfaces.base import CommandLine
@@ -72,7 +74,7 @@ def reverse_opt_map(opt_map):
     # if (k != 'flags' and v) , key must not be flags as it is generic,
     # v must not be None or it cannot be parsed by this line
     revdict = {}
-    for key, value in opt_map.items():
+    for key, value in list(opt_map.items()):
         if is_container(value):
             # The value is a tuple where the first element is the
             # format string and the second element is a docstring.
@@ -146,7 +148,7 @@ def insert_doc(doc, new_items):
     >>> new_items = ['infile : str', '    The name of the input file']
     >>> new_items.extend(['outfile : str', '    The name of the output file'])
     >>> newdoc = insert_doc(doc, new_items)
-    >>> print newdoc
+    >>> print(newdoc)
     Parameters
     ----------
     infile : str
@@ -360,6 +362,6 @@ def replace_opts(rep_doc, opts):
     """
 
     # Replace flags with attribute names
-    for key, val in opts.items():
+    for key, val in list(opts.items()):
         rep_doc = rep_doc.replace(key, val)
     return rep_doc

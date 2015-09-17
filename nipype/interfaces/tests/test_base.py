@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -95,7 +99,7 @@ def test_TraitedSpec():
 
 @skip
 def test_TraitedSpec_dynamic():
-    from cPickle import dumps, loads
+    from pickle import dumps, loads
     a = nib.BaseTraitedSpec()
     a.add_trait('foo', nib.traits.Int)
     a.foo = 1
@@ -285,7 +289,7 @@ def test_cycle_namesource2():
         res = to1.cmdline
     except nib.NipypeInterfaceError:
         not_raised = False
-    print res
+    print(res)
 
     yield assert_true, not_raised
     yield assert_true, '%s' % tmp_infile in res

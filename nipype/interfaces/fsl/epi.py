@@ -11,6 +11,8 @@ was written to work with FSL version 5.0.4.
     ...                            '../../testing/data'))
     >>> os.chdir(datadir)
 """
+from __future__ import unicode_literals
+from builtins import str
 
 import os
 from glob import glob

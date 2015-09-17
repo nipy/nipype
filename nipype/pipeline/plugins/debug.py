@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Debug plugin
 """
+from __future__ import unicode_literals
 
 from .base import (PluginBase, logger)
 from ..utils import (nx)

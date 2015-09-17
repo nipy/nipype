@@ -5,6 +5,8 @@ Created on Aug 2, 2013
 
 Parallel workflow execution with SLURM
 '''
+from __future__ import unicode_literals
+from builtins import str
 
 import os
 import re
@@ -106,7 +108,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         while True:
             try:
                 result = cmd.run()
-            except Exception, e:
+            except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
                     sleep(self._retry_timeout)  # sleep 2 seconds and try again.

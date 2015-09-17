@@ -8,6 +8,9 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
+from __future__ import division
+from past.utils import old_div
 
 # -*- coding: utf-8 -*-
 import os.path as op
@@ -26,7 +29,7 @@ import warnings
 have_dipy = True
 try:
     package_check('dipy')
-except Exception, e:
+except Exception as e:
     False
 else:
     from dipy.tracking.utils import move_streamlines, affine_from_fsl_mat_file
@@ -39,7 +42,7 @@ iflogger = logging.getLogger('interface')
 def transform_to_affine(streams, header, affine):
 	rotation, scale = np.linalg.qr(affine)
 	streams = move_streamlines(streams, rotation)
-	scale[0:3,0:3] = np.dot(scale[0:3,0:3], np.diag(1./header['voxel_size']))
+	scale[0:3,0:3] = np.dot(scale[0:3,0:3], np.diag(old_div(1.,header['voxel_size'])))
 	scale[0:3,3] = abs(scale[0:3,3])
 	streams = move_streamlines(streams, scale)
 	return streams
@@ -84,7 +87,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
         track_points = []
         iflogger.info('Identifying the number of points per tract...')
         all_str = fileobj.read()
-        num_triplets = len(all_str)/bytesize
+        num_triplets = old_div(len(all_str),bytesize)
         pts = np.ndarray(shape=(num_triplets,pt_cols), dtype='f4',buffer=all_str)
         nonfinite_list = np.where(np.isfinite(pts[:,2]) == False)
         nonfinite_list = list(nonfinite_list[0])[0:-1] # Converts numpy array to list, removes the last value
@@ -131,7 +134,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
             if n_streams == stream_count:
                 iflogger.info('100% : {n} tracks read'.format(n=n_streams))
                 raise StopIteration
-            if n_streams % (float(stream_count)/100) == 0:
+            if n_streams % (old_div(float(stream_count),100)) == 0:
                 percent = int(float(n_streams)/float(stream_count)*100)
                 iflogger.info('{p}% : {n} tracks read'.format(p=percent, n=n_streams))
     track_points, nonfinite_list = points_per_track(offset)
@@ -200,7 +203,7 @@ class MRTrix2TrackVis(BaseInterface):
             trk_header['dim'] = [r_dx,r_dy,r_dz]
             trk_header['voxel_size'] = [r_vx,r_vy,r_vz]
 
-            affine = np.dot(affine,np.diag(1./np.array([vx, vy, vz, 1])))
+            affine = np.dot(affine,np.diag(old_div(1.,np.array([vx, vy, vz, 1]))))
             transformed_streamlines = transform_to_affine(streamlines, trk_header, affine)
 
             aff = affine_from_fsl_mat_file(xfm, [vx,vy,vz], [r_vx,r_vy,r_vz])

@@ -8,6 +8,8 @@
     >>> os.chdir(datadir)
 
 """
+from __future__ import unicode_literals
+from builtins import range
 
 from nipype.interfaces.base import (
     BaseInterface, BaseInterfaceInputSpec, traits,
@@ -27,7 +29,7 @@ iflogger = logging.getLogger('interface')
 have_cmp = True
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     have_cmp = False
 else:
     import cmp

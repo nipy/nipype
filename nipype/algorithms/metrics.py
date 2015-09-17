@@ -11,6 +11,11 @@ measures to evaluate results from other processing units.
     >>> os.chdir(datadir)
 
 '''
+from __future__ import unicode_literals
+from __future__ import division
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 
 import os
 import os.path as op
@@ -288,7 +293,7 @@ class Overlap(BaseInterface):
 
         if self.inputs.vol_units == 'mm':
             voxvol = nii1.get_header().get_zooms()
-            for i in xrange(nii1.get_data().ndim-1):
+            for i in range(nii1.get_data().ndim-1):
                 scale = scale * voxvol[i]
 
         data1 = nii1.get_data()
@@ -326,10 +331,10 @@ class Overlap(BaseInterface):
 
         weights = np.ones((len(volumes1),), dtype=np.float32)
         if self.inputs.weighting != 'none':
-            weights = weights / np.array(volumes1)
+            weights = old_div(weights, np.array(volumes1))
             if self.inputs.weighting == 'squared_vol':
                 weights = weights**2
-        weights = weights / np.sum(weights)
+        weights = old_div(weights, np.sum(weights))
 
         both_data = np.zeros(data1.shape)
         both_data[(data1 - data2) != 0] = 1
@@ -339,8 +344,8 @@ class Overlap(BaseInterface):
 
         self._labels = labels
         self._ove_rois = results
-        self._vol_rois = ((np.array(volumes1) - np.array(volumes2)) /
-                          np.array(volumes1))
+        self._vol_rois = (old_div((np.array(volumes1) - np.array(volumes2)),
+                          np.array(volumes1)))
 
         self._dice = round(np.sum(weights*results['dice']), 5)
         self._jaccard = round(np.sum(weights*results['jaccard']), 5)
@@ -434,18 +439,18 @@ class FuzzyOverlap(BaseInterface):
         for ref_comp, tst_comp, diff_comp in zip( img_ref, img_tst, diff_im ):
             num = np.minimum( ref_comp, tst_comp )
             ddr = np.maximum( ref_comp, tst_comp )
-            diff_comp[ddr>0]+= 1.0-(num[ddr>0]/ddr[ddr>0])
-            self._jaccards.append( np.sum( num ) / np.sum( ddr ) )
+            diff_comp[ddr>0]+= 1.0-(old_div(num[ddr>0],ddr[ddr>0]))
+            self._jaccards.append( old_div(np.sum( num ), np.sum( ddr )) )
             volumes.append( np.sum( ref_comp ) )
 
         self._dices = 2.0*np.array(self._jaccards) / (np.array(self._jaccards) +1.0 )
 
         if self.inputs.weighting != "none":
-            weights = 1.0 / np.array(volumes)
+            weights = old_div(1.0, np.array(volumes))
             if self.inputs.weighting == "squared_vol":
                 weights = weights**2
 
-        weights = weights / np.sum( weights )
+        weights = old_div(weights, np.sum( weights ))
 
         setattr( self, '_jaccard',  np.sum( weights * self._jaccards ) )
         setattr( self, '_dice', np.sum( weights * self._dices ) )
@@ -630,7 +635,7 @@ class Similarity(BaseInterface):
     def __init__(self, **inputs):
         try:
             package_check('nipy')
-        except Exception, e:
+        except Exception as e:
             self._have_nipy = False
         super(Similarity,self).__init__(**inputs)
 

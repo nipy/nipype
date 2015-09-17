@@ -1,5 +1,7 @@
 """Parallel workflow execution via PBS/Torque
 """
+from __future__ import unicode_literals
+from builtins import str
 
 import os
 from time import sleep
@@ -89,7 +91,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
         while True:
             try:
                 result = cmd.run()
-            except Exception, e:
+            except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
                     sleep(self._retry_timeout)  # sleep 2 seconds and try again.

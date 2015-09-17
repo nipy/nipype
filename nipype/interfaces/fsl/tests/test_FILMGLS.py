@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from nipype.testing import assert_equal
 from nipype.interfaces.fsl.model import FILMGLS, FILMGLSInputSpec
 
@@ -45,10 +46,10 @@ def test_filmgls():
     )
     instance = FILMGLS()
     if isinstance(instance.inputs, FILMGLSInputSpec):
-        for key, metadata in input_map.items():
-            for metakey, value in metadata.items():
+        for key, metadata in list(input_map.items()):
+            for metakey, value in list(metadata.items()):
                 yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value
     else:
-        for key, metadata in input_map2.items():
-            for metakey, value in metadata.items():
+        for key, metadata in list(input_map2.items()):
+            for metakey, value in list(metadata.items()):
                 yield assert_equal, getattr(instance.inputs.traits()[key], metakey), value

@@ -7,8 +7,16 @@ Exaples  FSL, matlab/SPM , afni
 
 Requires Packages to be installed
 """
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
 
-from ConfigParser import NoOptionError
+from configparser import NoOptionError
 from copy import deepcopy
 import datetime
 import errno
@@ -24,7 +32,7 @@ from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
-from nipype.external import six
+from ..external import six
 
 
 from .traits_extension import (traits, Undefined, TraitDictObject,
@@ -141,12 +149,12 @@ class Bunch(object):
 
     def items(self):
         """iterates over bunch attributes as key, value pairs"""
-        return self.__dict__.items()
+        return list(self.__dict__.items())
 
     def iteritems(self):
         """iterates over bunch attributes as key, value pairs"""
         warn('iteritems is deprecated, use items instead')
-        return self.items()
+        return list(self.items())
 
     def get(self, *args):
         '''Support dictionary get() functionality
@@ -196,13 +204,12 @@ class Bunch(object):
         for afile in stuff:
             if os.path.isfile(afile):
                 md5obj = md5()
-                fp = file(afile, 'rb')
-                while True:
-                    data = fp.read(8192)
-                    if not data:
-                        break
-                    md5obj.update(data)
-                fp.close()
+                with open(afile, 'rb') as fp:
+                    while True:
+                        data = fp.read(8192)
+                        if not data:
+                            break
+                        md5obj.update(data)
                 md5hex = md5obj.hexdigest()
             else:
                 md5hex = None
@@ -231,7 +238,7 @@ class Bunch(object):
         """
 
         infile_list = []
-        for key, val in self.items():
+        for key, val in list(self.items()):
             if is_container(val):
                 # XXX - SG this probably doesn't catch numpy arrays
                 # containing embedded file names either.
@@ -496,7 +503,7 @@ class BaseTraitedSpec(traits.HasTraits):
         """
         if isinstance(object, TraitDictObject) or isinstance(object, dict):
             out = {}
-            for key, val in object.items():
+            for key, val in list(object.items()):
                 if isdefined(val):
                     out[key] = self._clean_container(val, undefinedval)
                 else:
@@ -829,7 +836,7 @@ class BaseInterface(Interface):
         helpstr = ['Inputs::']
 
         inputs = cls.input_spec()
-        if len(inputs.traits(transient=None).items()) == 0:
+        if len(list(inputs.traits(transient=None).items())) == 0:
             helpstr += ['', '\tNone']
             return helpstr
 
@@ -914,7 +921,7 @@ class BaseInterface(Interface):
     def _check_mandatory_inputs(self):
         """ Raises an exception if a mandatory input is Undefined
         """
-        for name, spec in self.inputs.traits(mandatory=True).items():
+        for name, spec in list(self.inputs.traits(mandatory=True).items()):
             value = getattr(self.inputs, name)
             self._check_xor(spec, name, value)
             if not isdefined(value) and spec.xor is None:
@@ -924,8 +931,8 @@ class BaseInterface(Interface):
                 raise ValueError(msg)
             if isdefined(value):
                 self._check_requires(spec, name, value)
-        for name, spec in self.inputs.traits(mandatory=None,
-                                             transient=None).items():
+        for name, spec in list(self.inputs.traits(mandatory=None,
+                                             transient=None).items()):
             self._check_requires(spec, name, getattr(self.inputs, name))
 
     def _check_version_requirements(self, trait_object, raise_exception=True):
@@ -1035,7 +1042,7 @@ class BaseInterface(Interface):
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
             runtime.duration = timediff.days * 86400 + timediff.seconds + \
-                timediff.microseconds/100000.
+                old_div(timediff.microseconds,100000.)
             results = InterfaceResult(interface, runtime,
                                       inputs=self.inputs.get_traitsfree(),
                                       outputs=outputs)
@@ -1043,11 +1050,11 @@ class BaseInterface(Interface):
             if str2bool(config.get('execution', 'write_provenance')):
                 prov_record = write_provenance(results)
             results.provenance = prov_record
-        except Exception, e:
+        except Exception as e:
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
             runtime.duration = timediff.days * 86400 + timediff.seconds + \
-                timediff.microseconds/100000.
+                old_div(timediff.microseconds,100000.)
             if len(e.args) == 0:
                 e.args = ("")
 
@@ -1073,7 +1080,7 @@ class BaseInterface(Interface):
             inputs = None
             try:
                 inputs = self.inputs.get_traitsfree()
-            except Exception, e:
+            except Exception as e:
                 pass
             results = InterfaceResult(interface, runtime, inputs=inputs)
             prov_record = None
@@ -1109,7 +1116,7 @@ class BaseInterface(Interface):
             if outputs:
                 _unavailable_outputs = \
                     self._check_version_requirements(self._outputs())
-            for key, val in predicted_outputs.items():
+            for key, val in list(predicted_outputs.items()):
                 if needed_outputs and key not in needed_outputs:
                     continue
                 if key in _unavailable_outputs:
@@ -1120,7 +1127,7 @@ class BaseInterface(Interface):
                 try:
                     setattr(outputs, key, val)
                     _ = getattr(outputs, key)
-                except TraitError, error:
+                except TraitError as error:
                     if hasattr(error, 'info') and \
                             error.info.startswith("an existing"):
                         msg = ("File/Directory '%s' not found for %s output "
@@ -1232,7 +1239,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         def _process(drain=0):
             try:
                 res = select.select(streams, [], [], timeout)
-            except select.error, e:
+            except select.error as e:
                 iflogger.info(str(e))
                 if e[0] == errno.EINTR:
                     return
@@ -1601,7 +1608,7 @@ class CommandLine(BaseInterface):
         traits = self.inputs.traits(**metadata)
         if traits:
             outputs = self.output_spec().get()
-            for name, trait_spec in traits.iteritems():
+            for name, trait_spec in traits.items():
                 out_name = name
                 if trait_spec.output_name is not None:
                     out_name = trait_spec.output_name
@@ -1721,7 +1728,7 @@ class SEMLikeCommandLine(CommandLine):
         return self._outputs_from_inputs(outputs)
 
     def _outputs_from_inputs(self, outputs):
-        for name in outputs.keys():
+        for name in list(outputs.keys()):
             corresponding_input = getattr(self.inputs, name)
             if isdefined(corresponding_input):
                 if (isinstance(corresponding_input, bool) and
@@ -1737,7 +1744,7 @@ class SEMLikeCommandLine(CommandLine):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if name in self._outputs_filenames.keys():
+        if name in list(self._outputs_filenames.keys()):
             if isinstance(value, bool):
                 if value:
                     value = os.path.abspath(self._outputs_filenames[name])

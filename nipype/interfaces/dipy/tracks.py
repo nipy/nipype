@@ -6,6 +6,7 @@ Change directory to provide relative paths for doctests
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+from __future__ import unicode_literals
 from nipype.interfaces.base import (
     TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
     File, isdefined, traits)
@@ -22,7 +23,7 @@ iflogger = logging.getLogger('interface')
 have_dipy = True
 try:
     package_check('dipy', version='0.6.0')
-except Exception, e:
+except Exception as e:
     have_dipy = False
 else:
     from dipy.tracking.utils import density_map

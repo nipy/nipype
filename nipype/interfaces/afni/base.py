@@ -1,6 +1,8 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provide interface to AFNI commands."""
+from __future__ import unicode_literals
+from builtins import object
 
 
 import os
@@ -93,7 +95,7 @@ class Info(object):
 
 
 class AFNICommandInputSpec(CommandLineInputSpec):
-    outputtype = traits.Enum('AFNI', Info.ftypes.keys(),
+    outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
                              desc='AFNI output filetype')
     out_file = File(name_template="%s_afni", desc='output image file name',
                     argstr='-prefix %s',
@@ -151,7 +153,7 @@ class AFNICommand(CommandLine):
     def _list_outputs(self):
         outputs = super(AFNICommand, self)._list_outputs()
         metadata = dict(name_source=lambda t: t is not None)
-        out_names = self.inputs.traits(**metadata).keys()
+        out_names = list(self.inputs.traits(**metadata).keys())
         if out_names:
             for name in out_names:
                 if outputs[name]:

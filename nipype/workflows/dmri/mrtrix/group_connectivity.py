@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import os.path as op
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
@@ -9,7 +10,7 @@ from nipype.utils.misc import package_check
 import warnings
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     warnings.warn('cmp not installed')
 else:
     import cmp
@@ -71,7 +72,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
         info = template_args_dict
 
     datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                                   outfields=info.keys()),
+                                                   outfields=list(info.keys())),
                          name = 'datasource')
 
     datasource.inputs.template = "%s/%s"

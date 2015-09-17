@@ -24,6 +24,8 @@ Examples
 See the docstrings of the individual classes for examples.
 
 """
+from __future__ import unicode_literals
+from builtins import object
 
 from glob import glob
 import os
@@ -145,7 +147,7 @@ class FSLCommandInputSpec(CommandLineInputSpec):
     -------
     fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
     """
-    output_type = traits.Enum('NIFTI', Info.ftypes.keys(),
+    output_type = traits.Enum('NIFTI', list(Info.ftypes.keys()),
                               desc='FSL output type')
 
 

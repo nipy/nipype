@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from shutil import rmtree
 from tempfile import mkdtemp
 from nipype.testing import (assert_equal, example_data)
