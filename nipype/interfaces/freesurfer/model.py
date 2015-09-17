@@ -24,15 +24,15 @@ from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
 class MRISPreprocInputSpec(FSTraitedSpec):
     out_file = File(argstr='--out %s', genfile=True,
                    desc='output filename')
-    target = traits.Str(argstr='--target %s', mandatory=True,
+    target = traits.Unicode(argstr='--target %s', mandatory=True,
                          desc='target subject name')
     hemi = traits.Enum('lh', 'rh', argstr='--hemi %s',
                        mandatory=True,
                        desc='hemisphere for source and target')
-    surf_measure = traits.Str(argstr='--meas %s',
+    surf_measure = traits.Unicode(argstr='--meas %s',
                              xor=('surf_measure', 'surf_measure_file', 'surf_area'),
                 desc='Use subject/surf/hemi.surf_measure as input')
-    surf_area = traits.Str(argstr='--area %s',
+    surf_area = traits.Unicode(argstr='--area %s',
                           xor=('surf_measure', 'surf_measure_file', 'surf_area'),
        desc='Extract vertex area from subject/surf/hemi.surfname to use as input.')
     subjects = traits.List(argstr='--s %s...',
@@ -47,8 +47,8 @@ class MRISPreprocInputSpec(FSTraitedSpec):
     surf_measure_file = InputMultiPath(File(exists=True), argstr='--is %s...',
                            xor=('surf_measure', 'surf_measure_file', 'surf_area'),
           desc='file alternative to surfmeas, still requires list of subjects')
-    source_format = traits.Str(argstr='--srcfmt %s', desc='source format')
-    surf_dir = traits.Str(argstr='--surfdir %s',
+    source_format = traits.Unicode(argstr='--srcfmt %s', desc='source format')
+    surf_dir = traits.Unicode(argstr='--surfdir %s',
                          desc='alternative directory (instead of surf)')
     vol_measure_file = InputMultiPath(traits.Tuple(File(exists=True),
                                       File(exists=True)),
@@ -115,7 +115,7 @@ class MRISPreproc(FSCommand):
 
 
 class GLMFitInputSpec(FSTraitedSpec):
-    glm_dir = traits.Str(argstr='--glmdir %s', desc='save outputs to dir',
+    glm_dir = traits.Unicode(argstr='--glmdir %s', desc='save outputs to dir',
                          genfile=True)
     in_file = File(desc='input 4D file', argstr='--y %s', mandatory=True,
                   copyfile=False)
@@ -191,12 +191,12 @@ class GLMFitInputSpec(FSTraitedSpec):
     surf = traits.Bool(argstr="--surf %s %s %s",
                        requires=["subject_id", "hemi"],
                        desc="analysis is on a surface mesh")
-    subject_id = traits.Str(desc="subject id for surface geometry")
+    subject_id = traits.Unicode(desc="subject id for surface geometry")
     hemi = traits.Enum("lh", "rh", desc="surface hemisphere")
-    surf_geo = traits.Str("white", usedefault=True,
+    surf_geo = traits.Unicode("white", usedefault=True,
                           desc="surface geometry name (e.g. white, pial)")
     simulation = traits.Tuple(traits.Enum('perm', 'mc-full', 'mc-z'),
-                              traits.Int(min=1), traits.Float, traits.Str,
+                              traits.Int(min=1), traits.Float, traits.Unicode,
                               argstr='--sim %s %d %f %s',
                               desc='nulltype nsim thresh csdbasename')
     sim_sign = traits.Enum('abs', 'pos', 'neg', argstr='--sim-sign %s',
@@ -717,11 +717,11 @@ class Label2VolInputSpec(FSTraitedSpec):
                         argstr='--proj %s %f %f %f',
                         requires=('subject_id', 'hemi'),
                         desc='project along surface normal')
-    subject_id = traits.Str(argstr='--subject %s',
+    subject_id = traits.Unicode(argstr='--subject %s',
                            desc='subject id')
     hemi = traits.Enum('lh', 'rh', argstr='--hemi %s',
                        desc='hemisphere to use lh or rh')
-    surface = traits.Str(argstr='--surf %s',
+    surface = traits.Unicode(argstr='--surf %s',
                          desc='use surface instead of white')
     vol_label_file = File(argstr='--o %s', genfile=True,
                           desc='output volume')
