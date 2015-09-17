@@ -45,6 +45,7 @@ Packages and Data Setup
 
 Import necessary modules from nipype.
 """
+from __future__ import unicode_literals
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
@@ -66,7 +67,7 @@ from nipype.workflows.smri.freesurfer import create_tessellation_flow
 
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     warnings.warn('cmp not installed')
 else:
     import cmp
@@ -114,7 +115,7 @@ Templates for the associated images are used to obtain the correct images.
 """
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                               outfields=info.keys()),
+                                               outfields=list(info.keys())),
                      name = 'datasource')
 
 datasource.inputs.template = "%s/%s"
