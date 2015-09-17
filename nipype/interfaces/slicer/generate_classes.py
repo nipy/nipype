@@ -50,7 +50,7 @@ import os\n\n\n"""
 def crawl_code_struct(code_struct, package_dir):
     subpackages = []
     for k, v in code_struct.items():
-        if isinstance(v, str) or isinstance(v, str):
+        if isinstance(v, six.string_types) or isinstance(v, str):
             module_name = k.lower()
             class_name = k
             class_code = v
@@ -60,7 +60,7 @@ def crawl_code_struct(code_struct, package_dir):
             l1 = {}
             l2 = {}
             for key in list(v.keys()):
-                if (isinstance(v[key], str) or isinstance(v[key], str)):
+                if (isinstance(v[key], six.string_types) or isinstance(v[key], str)):
                     l1[key] = v[key]
                 else:
                     l2[key] = v[key]
@@ -359,7 +359,7 @@ def grab_xml(module, launcher, mipav_hacks=False):
 def parse_params(params):
     list = []
     for key, value in params.items():
-        if isinstance(value, str):
+        if isinstance(value, six.string_types) or isinstance(value, str):
             list.append('%s="%s"' % (key, value.replace('"', "'")))
         else:
             list.append('%s=%s' % (key, value))

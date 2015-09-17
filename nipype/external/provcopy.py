@@ -21,6 +21,7 @@ import json
 import dateutil.parser
 import collections
 from collections import defaultdict
+from . import six
 
 try:
     from rdflib.term import URIRef, BNode
@@ -540,7 +541,7 @@ class ProvRecord(object):
         if isinstance(literal, URIRef):
             return literal
 
-        if isinstance(literal, str):
+        if isinstance(literal, six.string_types):
             return str(literal)
 
         if isinstance(literal, Literal) and literal.has_no_langtag():

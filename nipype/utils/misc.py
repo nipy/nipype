@@ -3,7 +3,6 @@
 """Miscellaneous utility functions
 """
 from __future__ import unicode_literals
-
 from future import standard_library
 standard_library.install_aliases()
 from builtins import next
@@ -16,7 +15,7 @@ import numpy as np
 from textwrap import dedent
 import sys
 import re
-from collections import Iterator
+from ..external.six import Iterator
 
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
@@ -84,7 +83,7 @@ def create_function_from_source(function_source, imports=None):
             for statement in imports:
                 exec(statement, ns)
             import_keys = list(ns.keys())
-        exec(function_source, ns)
+        exec(loads(function_source), ns)
 
     except Exception as msg:
         msg = str(msg) + '\nError executing function:\n %s\n'%function_source

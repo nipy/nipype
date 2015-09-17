@@ -6,15 +6,11 @@ from __future__ import unicode_literals
 from future import standard_library
 standard_library.install_aliases()
 
+from builtins import map
 from builtins import next
 from builtins import str
 from builtins import zip
 from builtins import range
-
-try:
-    import itertools.imap as map
-except ImportError:
-    pass
 
 from collections import OrderedDict
 from copy import deepcopy
@@ -24,6 +20,7 @@ import os
 import re
 import numpy as np
 from nipype.utils.misc import package_check
+from nipype.external import six
 from functools import reduce
 
 package_check('networkx', '1.3')
@@ -279,7 +276,7 @@ def count_iterables(iterables, synchronize=False):
         op = max
     else:
         op = lambda x,y: x*y
-    return reduce(op, [len(func()) for _, func in list(iterables.items())])
+    return reduce(op, [len(func()) for _, func in iterables.items()])
 
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
@@ -341,7 +338,7 @@ def synchronize_iterables(iterables):
 
     #factory = lambda *pairs: dict(filter(None, pairs))
     # Make a dictionary for each of the correlated (field, value) items
-    return [i for i in map(factory, *pair_lists)]
+    return list(map(factory, *pair_lists))
 
 def evaluate_connect_function(function_source, args, first_arg):
     func = create_function_from_source(function_source)
@@ -412,7 +409,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         for edge in supergraph.in_edges_iter(supernodes[nidx]):
                 #make sure edge is not part of subgraph
             if edge[0] not in subgraph.nodes():
-                if n._hierarchy + n._id not in edgeinfo.keys():
+                if n._hierarchy + n._id not in list(edgeinfo.keys()):
                     edgeinfo[n._hierarchy + n._id] = []
                 edgeinfo[n._hierarchy + n._id].append((edge[0],
                                                supergraph.get_edge_data(*edge)))
@@ -457,7 +454,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         supergraph.add_nodes_from(Gc.nodes())
         supergraph.add_edges_from(Gc.edges(data=True))
         for node in Gc.nodes():
-            if node._hierarchy + node._id in edgeinfo.keys():
+            if node._hierarchy + node._id in list(edgeinfo.keys()):
                 for info in edgeinfo[node._hierarchy + node._id]:
                     supergraph.add_edges_from([(info[0], node, info[1])])
             node._id += template % i
@@ -657,12 +654,11 @@ def generate_expanded_graph(graph_in):
             iter_dict = dict([(field, lookup[key]) for field, lookup in
                               inode.iterables if key in lookup])
             # convert the iterables to the standard {field: function} format
-            #iter_items = [lambda field, value: (field, lambda: value) for field, value in iter_dict.items()]
-            #iterables = dict(iter_items)
             def make_field_func(*pair):
                 return pair[0], lambda: pair[1]
 
             iterables = dict([make_field_func(*pair) for pair in iter_dict.items()])
+
         else:
             iterables = inode.iterables.copy()
         inode.iterables = None
@@ -700,14 +696,14 @@ def generate_expanded_graph(graph_in):
             # the edge source node replicates
             expansions = defaultdict(list)
             for node in graph_in.nodes_iter():
-                for src_id, edge_data in list(old_edge_dict.items()):
+                for src_id, edge_data in old_edge_dict.items():
                     if node._id.startswith(src_id):
                         expansions[src_id].append(node)
-            for in_id, in_nodes in list(expansions.items()):
+            for in_id, in_nodes in expansions.items():
                 logger.debug("The join node %s input %s was expanded"
                          " to %d nodes." %(jnode, in_id, len(in_nodes)))
             # preserve the node iteration order by sorting on the node id
-            for in_nodes in list(expansions.values()):
+            for in_nodes in expansions.values():
                 in_nodes.sort(key=lambda node: node._id)
 
             # the number of join source replicates.
@@ -723,7 +719,7 @@ def generate_expanded_graph(graph_in):
             # field 'in' are qualified as ('out_file', 'in1') and
             # ('out_file', 'in2'), resp. This preserves connection port
             # integrity.
-            for old_id, in_nodes in list(expansions.items()):
+            for old_id, in_nodes in expansions.items():
                 # reconnect each replication of the current join in-edge
                 # source
                 for in_idx, in_node in enumerate(in_nodes):
@@ -871,7 +867,7 @@ def _transpose_iterables(fields, values):
     """
     if isinstance(values, dict):
         transposed = dict([(field, defaultdict(list)) for field in fields])
-        for key, tuples in list(values.items()):
+        for key, tuples in values.items():
             for kvals in tuples:
                 for idx, val in enumerate(kvals):
                     if val != None:
@@ -1086,7 +1082,7 @@ def merge_dict(d1, d2, merge=lambda x, y: y):
     result = dict(d1)
     if d2 is None:
         return result
-    for k, v in list(d2.items()):
+    for k, v in d2.items():
         if k in result:
             result[k] = merge_dict(result[k], v, merge=merge)
         else:

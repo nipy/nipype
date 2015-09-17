@@ -33,6 +33,7 @@ from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
 from warnings import warn
+from ..external import six
 
 
 from .traits_extension import (traits, Undefined, TraitDictObject,
