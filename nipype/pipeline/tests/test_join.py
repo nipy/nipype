@@ -3,10 +3,10 @@
 """Tests for join expansion
 """
 from __future__ import unicode_literals
+
 import os
 from shutil import rmtree
 from tempfile import mkdtemp
-
 
 from nipype.testing import (assert_equal, assert_true)
 import nipype.interfaces.base as nib
