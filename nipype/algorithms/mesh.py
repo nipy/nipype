@@ -13,6 +13,7 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 
 import numpy as np
 from numpy import linalg as nla
+import os
 import os.path as op
 from ..external import six
 from .. import logging
@@ -22,14 +23,20 @@ from warnings import warn
 
 iflogger = logging.getLogger('interface')
 
+oldets = os.getenv('ETS_TOOLKIT')
 have_tvtk = False
+
 try:
-    import os
     os.environ['ETS_TOOLKIT'] = 'null'
     from tvtk.api import tvtk
     have_tvtk = True
 except ImportError:
     pass
+
+if oldets is not None:
+    os.environ['ETS_TOOLKIT'] = oldets
+else:
+    del os.environ['ETS_TOOLKIT']
 
 iflogger = logging.getLogger('interface')
 
@@ -40,24 +47,13 @@ class TVTKBaseInterface(BaseInterface):
 
     def __init__(self, **inputs):
         if not have_tvtk:
-            raise RuntimeError('Interface requires tvtk')
-
-        if have_tvtk:
-            from tvtk.tvtk_classes.vtk_version import vtk_build_version
-            self._vtk_major = int(vtk_build_version[0])
-        super(TVTKBaseInterface, self).__init__(**inputs)
-
-
-class TVTKBaseInterface(BaseInterface):
-    _redirect_x = True
-    _vtk_major = 6
-
-    def __init__(self, **inputs):
-        try:
-            from tvtk.tvtk_classes.vtk_version import vtk_build_version
-            self._vtk_major = int(vtk_build_version[0])
-        except ImportError:
-            iflogger.warning('VTK version-major inspection using tvtk failed.')
+            iflogger.warning('Interface requires tvtk, but it wasn\'t found')
+        else:
+            try:
+                from tvtk.tvtk_classes.vtk_version import vtk_build_version
+                self._vtk_major = int(vtk_build_version[0])
+            except ImportError:
+                iflogger.warning('VTK version-major inspection using tvtk failed.')
 
         super(TVTKBaseInterface, self).__init__(**inputs)
 
@@ -119,11 +115,6 @@ class WarpPoints(TVTKBaseInterface):
         import nibabel as nb
         import numpy as np
         from scipy import ndimage
-
-        try:
-            from tvtk.api import tvtk
-        except ImportError:
-            raise ImportError('Interface requires tvtk')
 
         r = tvtk.PolyDataReader(file_name=self.inputs.points)
         r.update()
@@ -240,11 +231,6 @@ class ComputeMeshWarp(TVTKBaseInterface):
         return area
 
     def _run_interface(self, runtime):
-        try:
-            from tvtk.api import tvtk
-        except ImportError:
-            raise ImportError('Interface requires tvtk')
-
         r1 = tvtk.PolyDataReader(file_name=self.inputs.surface1)
         r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
         vtk1 = r1.output
@@ -367,11 +353,6 @@ class MeshWarpMaths(TVTKBaseInterface):
     output_spec = MeshWarpMathsOutputSpec
 
     def _run_interface(self, runtime):
-        try:
-            from tvtk.api import tvtk
-        except ImportError:
-            raise ImportError('Interface requires tvtk')
-
         r1 = tvtk.PolyDataReader(file_name=self.inputs.in_surf)
         vtk1 = r1.output
         r1.update()
