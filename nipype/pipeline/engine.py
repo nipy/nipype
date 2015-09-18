@@ -1471,9 +1471,9 @@ class Node(WorkflowBase):
         rm_extra = self.config['execution']['remove_unnecessary_outputs']
         if str2bool(rm_extra) and self.needed_outputs:
             hashobject = md5()
-            hashobject.update(hashvalue)
+            hashobject.update(hashvalue.encode())
             sorted_outputs = sorted(self.needed_outputs)
-            hashobject.update(str(sorted_outputs))
+            hashobject.update(str(sorted_outputs).encode())
             hashvalue = hashobject.hexdigest()
             hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
@@ -1487,9 +1487,9 @@ class Node(WorkflowBase):
                 # XXX - SG current workaround is to just
                 # create the hashed file and not put anything
                 # in it
-                fd = open(hashfile, 'wt')
-                fd.writelines(str(hashed_inputs))
-                fd.close()
+                with open(hashfile, 'wt') as fd:
+                    fd.writelines(str(hashed_inputs))
+
                 logger.debug(('Unable to write a particular type to the json '
                               'file'))
             else:
@@ -1623,7 +1623,7 @@ class Node(WorkflowBase):
                     needed_outputs=self.needed_outputs)
                 runtime = Bunch(cwd=cwd,
                                 returncode=0,
-                                environ=deepcopy(os.environ.data),
+                                environ=dict(os.environ),
                                 hostname=socket.gethostname())
                 result = InterfaceResult(
                     interface=self._interface.__class__,
@@ -1643,7 +1643,7 @@ class Node(WorkflowBase):
             self._originputs = deepcopy(self._interface.inputs)
         if execute:
             runtime = Bunch(returncode=1,
-                            environ=deepcopy(os.environ.data),
+                            environ=dict(os.environ),
                             hostname=socket.gethostname())
             result = InterfaceResult(
                 interface=self._interface.__class__,
