@@ -600,12 +600,12 @@ def generate_expanded_graph(graph_in):
         jedge_dict = {}
         for jnode in jnodes:
             in_edges = jedge_dict[jnode] = {}
-            in_dests = {}
+            edges2remove = []
             for src, dest, data in graph_in.in_edges_iter(jnode, True):
                 in_edges[src._id] = data
-                in_dests[src] = dest
+                edges2remove.append((src, dest))
 
-            for src, dest in in_dests.items():
+            for src, dest in edges2remove:
                 graph_in.remove_edge(src, dest)
                 logger.debug("Excised the %s -> %s join node in-edge."
                              % (src, dest))
