@@ -26,6 +26,7 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 
+from collections import Iterable
 from copy import deepcopy
 import pickle
 from glob import glob
@@ -772,8 +773,15 @@ connected.
                                   imports=imports))
         save_json(graph_file, json_dict)
 
+    @staticmethod
+    def _list_itemget(item):
+        if isinstance(item, Iterable):
+            return str(item[0])
+        return item
+
     def _set_needed_outputs(self, graph):
         """Initialize node with list of which outputs are needed."""
+
         rm_outputs = self.config['execution']['remove_unnecessary_outputs']
         if not str2bool(rm_outputs):
             return
@@ -781,7 +789,7 @@ connected.
             node.needed_outputs = []
             for edge in graph.out_edges_iter(node):
                 data = graph.get_edge_data(*edge)
-                for sourceinfo, _ in sorted(data['connect']):
+                for sourceinfo, _ in sorted(data['connect'], key=lambda x: self._list_itemget(x)):
                     if isinstance(sourceinfo, tuple):
                         input_name = sourceinfo[0]
                     else:
@@ -798,7 +806,7 @@ connected.
             node.input_source = {}
             for edge in graph.in_edges_iter(node):
                 data = graph.get_edge_data(*edge)
-                for sourceinfo, field in sorted(data['connect']):
+                for sourceinfo, field in sorted(data['connect'], key=lambda x: self._list_itemget(x)):
                     node.input_source[field] = \
                         (op.join(edge[0].output_dir(),
                          'result_%s.pklz' % edge[0].name),
