@@ -20,28 +20,20 @@ from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
 from warnings import warn
 
-have_tvtk = False
-try:
-    import os
-    os.environ['ETS_TOOLKIT'] = 'null'
-    from tvtk.api import tvtk
-    have_tvtk = True
-except ImportError:
-    pass
-
-if have_tvtk:
-    from tvtk.tvtk_classes.vtk_version import vtk_build_version
-    vtk_major = int(vtk_build_version[0])
-
 iflogger = logging.getLogger('interface')
 
 
 class TVTKBaseInterface(BaseInterface):
     _redirect_x = True
+    _vtk_major = 6
 
     def __init__(self, **inputs):
-        if not have_tvtk:
-            raise RuntimeError('Interface requires tvtk')
+        try:
+            from tvtk.tvtk_classes.vtk_version import vtk_build_version
+            self._vtk_major = int(vtk_build_version[0])
+        except ImportError:
+            iflogger.warning('VTK version-major inspection using tvtk failed.')
+
         super(TVTKBaseInterface, self).__init__(**inputs)
 
 
@@ -103,6 +95,11 @@ class WarpPoints(TVTKBaseInterface):
         import numpy as np
         from scipy import ndimage
 
+        try:
+            from tvtk.api import tvtk
+        except ImportError:
+            raise ImportError('Interface requires tvtk')
+
         r = tvtk.PolyDataReader(file_name=self.inputs.points)
         r.update()
         mesh = r.output
@@ -133,7 +130,7 @@ class WarpPoints(TVTKBaseInterface):
         newpoints = [p+d for p, d in zip(points, disps)]
         mesh.points = newpoints
         w = tvtk.PolyDataWriter()
-        if vtk_major <= 5:
+        if self._vtk_major <= 5:
             w.input = mesh
         else:
             w.set_input_data_object(mesh)
@@ -218,6 +215,11 @@ class ComputeMeshWarp(TVTKBaseInterface):
         return area
 
     def _run_interface(self, runtime):
+        try:
+            from tvtk.api import tvtk
+        except ImportError:
+            raise ImportError('Interface requires tvtk')
+
         r1 = tvtk.PolyDataReader(file_name=self.inputs.surface1)
         r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
         vtk1 = r1.output
@@ -266,7 +268,7 @@ class ComputeMeshWarp(TVTKBaseInterface):
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_warp))
 
-        if vtk_major <= 5:
+        if self._vtk_major <= 5:
             writer.input = mesh
         else:
             writer.set_input_data_object(mesh)
@@ -340,6 +342,11 @@ class MeshWarpMaths(TVTKBaseInterface):
     output_spec = MeshWarpMathsOutputSpec
 
     def _run_interface(self, runtime):
+        try:
+            from tvtk.api import tvtk
+        except ImportError:
+            raise ImportError('Interface requires tvtk')
+
         r1 = tvtk.PolyDataReader(file_name=self.inputs.in_surf)
         vtk1 = r1.output
         r1.update()
@@ -388,7 +395,7 @@ class MeshWarpMaths(TVTKBaseInterface):
         vtk1.point_data.vectors = warping
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_warp))
-        if vtk_major <= 5:
+        if self._vtk_major <= 5:
             writer.input = vtk1
         else:
             writer.set_input_data_object(vtk1)
@@ -399,7 +406,7 @@ class MeshWarpMaths(TVTKBaseInterface):
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_file))
 
-        if vtk_major <= 5:
+        if self._vtk_major <= 5:
             writer.input = vtk1
         else:
             writer.set_input_data_object(vtk1)
