@@ -263,6 +263,7 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
                         usedefault=True, position=1, argstr='%s')
     gradnonlin = traits.Bool(False, argstr='-g', desc=('consider gradient '
                              'nonlinearities, default off'))
+    grad_dev = File(exists=True, desc='grad_dev file, if gradnonlin, -g is True')
     use_gpu = traits.Bool(False, desc='Use the GPU version of bedpostx')
 
 
@@ -346,6 +347,9 @@ class BEDPOSTX5(FSLXCommand):
                  os.path.join(subjectdir, 'bvals'))
         copyfile(self.inputs.bvecs,
                  os.path.join(subjectdir, 'bvecs'))
+        _, _, ext = split_filename(self.inputs.grad_dev)
+        copyfile(self.inputs.grad_dev,
+                 os.path.join(subjectdir, 'grad_dev' + ext))
 
         retval = super(BEDPOSTX5, self)._run_interface(runtime)
 
