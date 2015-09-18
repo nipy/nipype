@@ -266,7 +266,7 @@ class Bunch(object):
         # representation so we get a predictable order of the
         # dictionary.
         sorted_dict = str(sorted(dict_nofilename.items()))
-        return (dict_withhash, md5(sorted_dict).hexdigest())
+        return dict_withhash, md5(sorted_dict.encode()).hexdigest()
 
     def __pretty__(self, p, cycle):
         '''Support for the pretty module
@@ -568,7 +568,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 dict_withhash.append((name,
                     self._get_sorteddict(val, True, hash_method=hash_method,
                                          hash_files=hash_files)))
-        return dict_withhash, md5(str(dict_nofilename)).hexdigest()
+        return dict_withhash, md5(str(dict_nofilename).encode()).hexdigest()
 
     def _get_sorteddict(self, object, dictwithhash=False, hash_method=None,
                         hash_files=True):
@@ -1026,7 +1026,7 @@ class BaseInterface(Interface):
         self._check_version_requirements(self.inputs)
         interface = self.__class__
         # initialize provenance tracking
-        env = deepcopy(os.environ.data)
+        env = dict(os.environ)
         runtime = Bunch(cwd=os.getcwd(),
                         returncode=None,
                         duration=None,
@@ -1042,7 +1042,7 @@ class BaseInterface(Interface):
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
             runtime.duration = timediff.days * 86400 + timediff.seconds + \
-                old_div(timediff.microseconds,100000.)
+                old_div(timediff.microseconds, 100000.)
             results = InterfaceResult(interface, runtime,
                                       inputs=self.inputs.get_traitsfree(),
                                       outputs=outputs)
@@ -1054,7 +1054,7 @@ class BaseInterface(Interface):
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
             runtime.duration = timediff.days * 86400 + timediff.seconds + \
-                old_div(timediff.microseconds,100000.)
+                old_div(timediff.microseconds, 100000.)
             if len(e.args) == 0:
                 e.args = ("")
 
@@ -1448,7 +1448,7 @@ class CommandLine(BaseInterface):
     def version_from_command(self, flag='-v'):
         cmdname = self.cmd.split()[0]
         if _exists_in_path(cmdname):
-            env = deepcopy(os.environ.data)
+            env = dict(os.environ)
             out_environ = self._get_environ()
             env.update(out_environ)
             proc = subprocess.Popen(' '.join((cmdname, flag)),
