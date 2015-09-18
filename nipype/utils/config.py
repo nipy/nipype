@@ -100,11 +100,11 @@ class NipypeConfig(object):
                                                                 new_config_file))
                 shutil.move(old_config_file, new_config_file)
         self.data_file = os.path.join(config_dir, 'nipype.json')
-        self._config.readfp(StringIO(default_cfg))
+        self._config.read_file(StringIO(default_cfg))
         self._config.read([new_config_file, old_config_file, 'nipype.cfg'])
 
     def set_default_config(self):
-        self._config.readfp(StringIO(default_cfg))
+        self._config.read_file(StringIO(default_cfg))
 
     def enable_debug_mode(self):
         """Enables debug configuration
