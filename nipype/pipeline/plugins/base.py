@@ -54,8 +54,8 @@ def report_crash(node, traceback=None, hostname=None):
     timeofcrash = strftime('%Y%m%d-%H%M%S')
     login_name = getpass.getuser()
     crashfile = 'crash-%s-%s-%s.pklz' % (timeofcrash,
-                                         login_name,
-                                         name)
+                                        login_name,
+                                        name)
     crashdir = node.config['execution']['crashdump_dir']
     if crashdir is None:
         crashdir = os.getcwd()
@@ -106,10 +106,10 @@ def create_pyscript(node, updatehash=False, store_exception=True):
     pkl_file = os.path.join(batch_dir, 'node_%s.pklz' % suffix)
     savepkl(pkl_file, dict(node=node, updatehash=updatehash))
     mpl_backend = node.config["execution"]["matplotlib_backend"]
-    ets_toolkit = node.config["execution"]["ets_toolkit"]
     # create python script to load and trap exception
     cmdstr = """import os
 import sys
+
 can_import_matplotlib = True #Silently allow matplotlib to be ignored
 try:
     import matplotlib
@@ -117,8 +117,6 @@ try:
 except ImportError:
     can_import_matplotlib = False
     pass
-
-os.environ['ETS_TOOLKIT'] = '%s'
 
 from nipype import config, logging
 from nipype.utils.filemanip import loadpkl, savepkl
@@ -133,12 +131,9 @@ try:
         from collections import OrderedDict
     config_dict=%s
     config.update_config(config_dict)
-
-    ## Only configure matplotlib if it was successfully imported, matplotlib is
-    ## an optional component to nipype
+    ## Only configure matplotlib if it was successfully imported, matplotlib is an optional component to nipype
     if can_import_matplotlib:
         config.update_matplotlib()
-    config.update_ets()
     logging.update_logging(config)
     traceback=None
     cwd = os.getcwd()
@@ -170,8 +165,7 @@ except Exception, e:
         report_crash(info['node'], traceback, gethostname())
     raise Exception(e)
 """
-    cmdstr = cmdstr % (mpl_backend, ets_toolkit, pkl_file,
-                       batch_dir, node.config, suffix)
+    cmdstr = cmdstr % (mpl_backend, pkl_file, batch_dir, node.config, suffix)
     pyscript = os.path.join(batch_dir, 'pyscript_%s.py' % suffix)
     fp = open(pyscript, 'wt')
     fp.writelines(cmdstr)
@@ -180,7 +174,6 @@ except Exception, e:
 
 
 class PluginBase(object):
-
     """Base class for plugins"""
 
     def __init__(self, plugin_args=None):
@@ -195,7 +188,6 @@ class PluginBase(object):
 
 
 class DistributedPluginBase(PluginBase):
-
     """Execute workflow with a distribution engine
     """
 
@@ -238,7 +230,7 @@ class DistributedPluginBase(PluginBase):
         # setup polling - TODO: change to threaded model
         notrun = []
         while np.any(self.proc_done == False) | \
-                np.any(self.proc_pending == True):
+                    np.any(self.proc_pending == True):
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -316,7 +308,7 @@ class DistributedPluginBase(PluginBase):
         self.procs.extend(mapnodesubids)
         self.depidx = ssp.vstack((self.depidx,
                                   ssp.lil_matrix(np.zeros(
-                                      (numnodes, self.depidx.shape[1])))),
+                                  (numnodes, self.depidx.shape[1])))),
                                  'lil')
         self.depidx = ssp.hstack((self.depidx,
                                   ssp.lil_matrix(
@@ -365,23 +357,23 @@ class DistributedPluginBase(PluginBase):
                     self.proc_pending[jobid] = True
                     # Send job to task manager and add to pending tasks
                     logger.info('Executing: %s ID: %d' %
-                                (self.procs[jobid]._id, jobid))
+                               (self.procs[jobid]._id, jobid))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
                     continue_with_submission = True
                     if str2bool(self.procs[jobid].config['execution']
-                                ['local_hash_check']):
+                                                          ['local_hash_check']):
                         logger.debug('checking hash locally')
                         try:
                             hash_exists, _, _, _ = self.procs[
                                 jobid].hash_exists()
                             logger.debug('Hash exists %s' % str(hash_exists))
                             if (hash_exists and
-                                    (self.procs[jobid].overwrite == False or
-                                     (self.procs[jobid].overwrite == None and
-                                              not self.procs[jobid]._interface.always_run)
-                                     )
-                                    ):
+                                 (self.procs[jobid].overwrite == False or
+                                   (self.procs[jobid].overwrite == None and
+                                    not self.procs[jobid]._interface.always_run)
+                                 )
+                               ):
                                 continue_with_submission = False
                                 self._task_finished_cb(jobid)
                                 self._remove_node_dirs()
@@ -473,7 +465,6 @@ class DistributedPluginBase(PluginBase):
 
 
 class SGELikeBatchManagerBase(DistributedPluginBase):
-
     """Execute workflow with SGE/OGE/PBS like batch system
     """
 
@@ -536,7 +527,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
                                  'seconds. Batch dir contains crashdump file '
                                  'if node raised an exception.\n'
                                  'Node working directory: ({2}) '.format(
-                                     taskid, timeout, node_dir))
+                                 taskid,timeout,node_dir) )
                 raise IOError(error_message)
             except IOError, e:
                 result_data['traceback'] = format_exc()
@@ -583,7 +574,6 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
 
 
 class GraphPluginBase(PluginBase):
-
     """Base class for plugins that distribute graphs to workflows
     """
 
@@ -613,19 +603,19 @@ class GraphPluginBase(PluginBase):
             if keyword == "template" and os.path.isfile(value):
                 value = open(value).read()
             if (hasattr(node, "plugin_args") and
-                isinstance(node.plugin_args, dict) and
-                    keyword in node.plugin_args):
-                if (keyword == "template" and
-                        os.path.isfile(node.plugin_args[keyword])):
-                    tmp_value = open(node.plugin_args[keyword]).read()
-                else:
-                    tmp_value = node.plugin_args[keyword]
+                    isinstance(node.plugin_args, dict) and
+                        keyword in node.plugin_args):
+                    if (keyword == "template" and
+                            os.path.isfile(node.plugin_args[keyword])):
+                        tmp_value = open(node.plugin_args[keyword]).read()
+                    else:
+                        tmp_value = node.plugin_args[keyword]
 
-                if ('overwrite' in node.plugin_args and
-                        node.plugin_args['overwrite']):
-                    value = tmp_value
-                else:
-                    value += tmp_value
+                    if ('overwrite' in node.plugin_args and
+                            node.plugin_args['overwrite']):
+                        value = tmp_value
+                    else:
+                        value += tmp_value
             values += (value, )
         return values
 
@@ -636,12 +626,15 @@ class GraphPluginBase(PluginBase):
         """
         raise NotImplementedError
 
+
+
     def _get_result(self, taskid):
         if taskid not in self._pending:
             raise Exception('Task %d not found' % taskid)
         if self._is_pending(taskid):
             return None
         node_dir = self._pending[taskid]
+
 
         logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
                                                               '..'))))
@@ -663,3 +656,4 @@ class GraphPluginBase(PluginBase):
             result_out['result'] = result_data
 
         return result_out
+

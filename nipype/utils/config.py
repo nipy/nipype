@@ -40,7 +40,6 @@ job_finished_timeout = 5
 keep_inputs = false
 local_hash_check = true
 matplotlib_backend = Agg
-ets_toolkit = null
 plugin = Linear
 remove_node_directories = false
 remove_unnecessary_outputs = true
@@ -71,7 +70,6 @@ def mkdir_p(path):
 
 
 class NipypeConfig(object):
-
     """Base nipype config class
     """
 
@@ -84,12 +82,12 @@ class NipypeConfig(object):
         # To be deprecated in two releases
         if os.path.exists(old_config_file):
             if os.path.exists(new_config_file):
-                msg = ("Detected presence of both old (%s, used by versions "
-                       "< 0.5.2) and new (%s) config files.  This version will "
-                       "proceed with the new one. We advise to merge settings "
-                       "and remove old config file if you are not planning to "
-                       "use previous releases of nipype.") % (old_config_file,
-                                                              new_config_file)
+                msg=("Detected presence of both old (%s, used by versions "
+                     "< 0.5.2) and new (%s) config files.  This version will "
+                     "proceed with the new one. We advise to merge settings "
+                     "and remove old config file if you are not planning to "
+                     "use previous releases of nipype.") % (old_config_file,
+                                                            new_config_file)
                 warn(msg)
             else:
                 warn("Moving old config file from: %s to %s" % (old_config_file,
@@ -167,10 +165,7 @@ class NipypeConfig(object):
         import matplotlib
         matplotlib.use(self.get('execution', 'matplotlib_backend'))
 
-    def update_ets(self):
-        import os
-        os.environ['ETS_TOOLKIT'] = '%s' % self.get('execution', 'ets_toolkit')
-
     def enable_provenance(self):
         self._config.set('execution', 'write_provenance', 'true')
         self._config.set('execution', 'hash_method', 'content')
+

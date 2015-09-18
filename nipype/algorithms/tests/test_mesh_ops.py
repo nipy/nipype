@@ -13,14 +13,23 @@ import numpy as np
 
 from nipype.algorithms import mesh as m
 
-notvtk = True
 import platform
+
+notvtk = True
 if 'darwin' not in platform.system().lower():
+    oldets = os.getenv('ETS_TOOLKIT')
+    have_tvtk = False
     try:
+        os.environ['ETS_TOOLKIT'] = 'null'
         from tvtk.api import tvtk
         notvtk = False
     except ImportError:
         pass
+
+    if oldets is not None:
+        os.environ['ETS_TOOLKIT'] = oldets
+    else:
+        del os.environ['ETS_TOOLKIT']
 
 @skipif(notvtk)
 def test_ident_distances():

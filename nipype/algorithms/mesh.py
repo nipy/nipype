@@ -25,7 +25,6 @@ iflogger = logging.getLogger('interface')
 
 oldets = os.getenv('ETS_TOOLKIT')
 have_tvtk = False
-
 try:
     os.environ['ETS_TOOLKIT'] = 'null'
     from tvtk.api import tvtk

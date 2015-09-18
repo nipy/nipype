@@ -1854,11 +1854,20 @@ class WarpPoints(CommandLine):
         return first_args + [ second_args ]
 
     def _vtk_to_coords(self, in_file, out_file=None):
+        import os
         import os.path as op
+
+        oldets = os.getenv('ETS_TOOLKIT')
         try:
+            os.environ['ETS_TOOLKIT'] = 'null'
             from tvtk.api import tvtk
         except ImportError:
             raise ImportError('This interface requires tvtk to run.')
+        finally:
+            if oldets is not None:
+                os.environ['ETS_TOOLKIT'] = oldets
+            else:
+                del os.environ['ETS_TOOLKIT']
 
         reader = tvtk.PolyDataReader(file_name=in_file+'.vtk')
         reader.update()
@@ -1871,11 +1880,20 @@ class WarpPoints(CommandLine):
         return out_file
 
     def _coords_to_vtk(self, points, out_file):
+        import os
         import os.path as op
+
+        oldets = os.getenv('ETS_TOOLKIT')
         try:
+            os.environ['ETS_TOOLKIT'] = 'null'
             from tvtk.api import tvtk
         except ImportError:
             raise ImportError('This interface requires tvtk to run.')
+        finally:
+            if oldets is not None:
+                os.environ['ETS_TOOLKIT'] = oldets
+            else:
+                del os.environ['ETS_TOOLKIT']
 
         reader = tvtk.PolyDataReader(file_name=self.inputs.in_file)
         reader.update()

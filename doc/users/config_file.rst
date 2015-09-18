@@ -139,11 +139,6 @@ Execution
 *xvfb_max_wait*
     Maximum time (in seconds) to wait for Xvfb to start, if the _redirect_x parameter of an Interface is True.
 
-*ets_toolkit*
-    This sets the backend for the Enthought traits (should be ``'null'`` in headless
-    settings).
-
-
 Example
 ~~~~~~~
 
