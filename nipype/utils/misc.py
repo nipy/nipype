@@ -15,7 +15,7 @@ import numpy as np
 from textwrap import dedent
 import sys
 import re
-from ..external.six import Iterator
+from collections import Iterator
 
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
@@ -83,7 +83,6 @@ def create_function_from_source(function_source, imports=None):
             for statement in imports:
                 exec(statement, ns)
             import_keys = list(ns.keys())
-
         exec(loads(function_source), ns)
 
     except Exception as msg:
@@ -146,7 +145,7 @@ def container_to_string(cont):
        Container elements joined into a string.
 
    """
-   if hasattr(cont, '__iter__'):
+   if hasattr(cont, '__iter__') and not isinstance(cont, str):
       return ' '.join(cont)
    else:
       return str(cont)
