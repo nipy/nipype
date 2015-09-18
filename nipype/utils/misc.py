@@ -15,7 +15,7 @@ import numpy as np
 from textwrap import dedent
 import sys
 import re
-from ..external.six import Iterator
+from collections import Iterator
 
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
@@ -147,8 +147,8 @@ def container_to_string(cont):
    """
    if hasattr(cont, '__iter__') and not isinstance(cont, str):
       return str(' '.join(cont))
-
-   return str(cont)
+   else:
+      return str(cont)
 
 
 # Dependency checks.  Copied this from Nipy, with some modificiations
