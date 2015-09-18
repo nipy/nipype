@@ -3,12 +3,11 @@
 """Tests for join expansion
 """
 from __future__ import unicode_literals
-from copy import deepcopy
+
 import os
 from shutil import rmtree
 from tempfile import mkdtemp
 
-import networkx as nx
 
 from nipype.testing import (assert_equal, assert_true)
 import nipype.interfaces.base as nib
