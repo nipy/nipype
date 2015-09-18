@@ -24,6 +24,31 @@ from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
 from warnings import warn
 iflogger = logging.getLogger('interface')
 
+have_tvtk = False
+try:
+    import os
+    os.environ['ETS_TOOLKIT'] = 'null'
+    from tvtk.api import tvtk
+    have_tvtk = True
+except ImportError:
+    pass
+
+iflogger = logging.getLogger('interface')
+
+
+class TVTKBaseInterface(BaseInterface):
+    _redirect_x = True
+    _vtk_major = 6
+
+    def __init__(self, **inputs):
+        if not have_tvtk:
+            raise RuntimeError('Interface requires tvtk')
+
+        if have_tvtk:
+            from tvtk.tvtk_classes.vtk_version import vtk_build_version
+            self._vtk_major = int(vtk_build_version[0])
+        super(TVTKBaseInterface, self).__init__(**inputs)
+
 
 class WarpPointsInputSpec(BaseInterfaceInputSpec):
     points = File(exists=True, mandatory=True,
