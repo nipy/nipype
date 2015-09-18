@@ -79,7 +79,7 @@ def test_sc_populate_inputs():
                    intensity_values=None,
                    spm_mat_file=None,
                    concatenated_design=None)
-    yield assert_equal, list(sc.inputs.__dict__.keys()), list(inputs.__dict__.keys())
+    yield assert_equal, set(sc.inputs.__dict__.keys()), set(inputs.__dict__.keys())
 
 
 def test_sc_output_filenames():
