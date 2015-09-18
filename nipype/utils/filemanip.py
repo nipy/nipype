@@ -9,7 +9,6 @@ standard_library.install_aliases()
 from builtins import str
 
 import pickle
-from glob import glob
 import gzip
 import hashlib
 from hashlib import md5
@@ -192,8 +191,8 @@ def hash_timestamp(afile):
     if os.path.isfile(afile):
         md5obj = md5()
         stat = os.stat(afile)
-        md5obj.update(str(stat.st_size))
-        md5obj.update(str(stat.st_mtime))
+        md5obj.update(str(stat.st_size).encode())
+        md5obj.update(str(stat.st_mtime).encode())
         md5hex = md5obj.hexdigest()
     return md5hex
 
