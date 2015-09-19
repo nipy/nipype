@@ -69,6 +69,7 @@ class TrackDensityMap(BaseInterface):
     output_spec = TrackDensityMapOutputSpec
 
     def _run_interface(self, runtime):
+        from numpy import min_scalar_type
         tracks, header = nbt.read(self.inputs.in_file)
         streams = ((ii[0]) for ii in tracks)
 
@@ -95,7 +96,7 @@ class TrackDensityMap(BaseInterface):
             kwargs = dict(voxel_size=voxel_size)
 
         data = density_map(streams, data_dims, **kwargs)
-        data = data.astype(np.min_scalar_type(data.max()))
+        data = data.astype(min_scalar_type(data.max()))
         img = nb.Nifti1Image(data, affine)
         out_file = op.abspath(self.inputs.out_filename)
         nb.save(img, out_file)
