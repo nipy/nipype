@@ -796,6 +796,7 @@ connected.
                         input_name = sourceinfo
                     if input_name not in node.needed_outputs:
                         node.needed_outputs += [input_name]
+
             if node.needed_outputs:
                 node.needed_outputs = sorted(node.needed_outputs)
 
