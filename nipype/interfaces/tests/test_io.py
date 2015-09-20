@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from builtins import zip
 from builtins import str
 from builtins import range
+from builtins import open
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -275,7 +276,7 @@ def _temp_analyze_files():
     """Generate temporary analyze file pair."""
     fd, orig_img = mkstemp(suffix='.img', dir=mkdtemp())
     orig_hdr = orig_img[:-4] + '.hdr'
-    fp = file(orig_hdr, 'w+')
+    fp = open(orig_hdr, 'w+')
     fp.close()
     return orig_img, orig_hdr
 
