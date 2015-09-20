@@ -7,6 +7,7 @@ from io import StringIO
 import unittest, sys
 from nipype.utils import nipype_cmd
 from contextlib import contextmanager
+from six import PY2, PY3
 
 @contextmanager
 def capture_sys_output():
@@ -29,10 +30,17 @@ class TestNipypeCMD(unittest.TestCase):
         exit_exception = cm.exception
         self.assertEqual(exit_exception.code, 2)
 
-        self.assertEqual(stderr.getvalue(),
+        if PY2:
+            self.assertEqual(stderr.getvalue(),
 """usage: nipype_cmd [-h] module interface
 nipype_cmd: error: too few arguments
 """)
+        elif PY3:
+            self.assertEqual(stderr.getvalue(),
+"""usage: nipype_cmd [-h] module interface
+nipype_cmd: error: the following arguments are required: module, interface
+""")
+
         self.assertEqual(stdout.getvalue(), '')
 
     def test_main_returns_0_on_help(self):
@@ -88,8 +96,7 @@ optional arguments:
         exit_exception = cm.exception
         self.assertEqual(exit_exception.code, 2)
 
-        self.assertEqual(stderr.getvalue(),
-"""usage: nipype_cmd nipype.interfaces.nipy FmriRealign4d [-h]
+        error_message = """usage: nipype_cmd nipype.interfaces.nipy FmriRealign4d [-h]
                                                        [--between_loops [BETWEEN_LOOPS [BETWEEN_LOOPS ...]]]
                                                        [--ignore_exception]
                                                        [--loops [LOOPS [LOOPS ...]]]
@@ -99,9 +106,18 @@ optional arguments:
                                                        [--time_interp TIME_INTERP]
                                                        [--tr_slices TR_SLICES]
                                                        in_file [in_file ...]
-                                                       tr
+                                                       tr"""
+
+        if PY2:
+            error_message += """
 nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: too few arguments
-""")
+"""
+        elif PY3:
+            error_message += """
+nipype_cmd nipype.interfaces.nipy FmriRealign4d: error: the following arguments are required: in_file, tr
+"""
+
+        self.assertEqual(stderr.getvalue(), error_message)
         self.assertEqual(stdout.getvalue(), '')
 
     def test_run_4d_realign_help(self):
