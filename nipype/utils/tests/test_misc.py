@@ -33,7 +33,7 @@ def test_cont_to_str():
     yield assert_true, container_to_string('foobar') == 'foobar'
     # int.  Integers are not the main intent of this function, but see
     # no reason why they shouldn't work.
-    yield assert_equal, container_to_string(123), '123'
+    yield assert_true, (container_to_string(123) == '123')
 
 def _func1(x):
     return x**3
