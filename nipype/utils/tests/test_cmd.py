@@ -72,12 +72,12 @@ optional arguments:
         self.assertEqual(stderr.getvalue(), '')
         self.assertEqual(stdout.getvalue(),
 """Available Interfaces:
-	SpaceTimeRealigner
-	Similarity
 	ComputeMask
-	FitGLM
 	EstimateContrast
+	FitGLM
 	FmriRealign4d
+	Similarity
+	SpaceTimeRealigner
 """)
 
     def test_run_4d_realign_without_arguments(self):

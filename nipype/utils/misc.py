@@ -3,8 +3,10 @@
 """Miscellaneous utility functions
 """
 from __future__ import unicode_literals
+
 from future import standard_library
 standard_library.install_aliases()
+from past.builtins import basestring
 from builtins import next
 from builtins import str
 from pickle import dumps, loads
@@ -62,7 +64,7 @@ def trim(docstring, marker=None):
 
 def getsource(function):
     """Returns the source code of a function"""
-    src = dumps(dedent(inspect.getsource(function)))
+    src = dedent(inspect.getsource(function))
     return src
 
 def create_function_from_source(function_source, imports=None):
@@ -83,7 +85,7 @@ def create_function_from_source(function_source, imports=None):
             for statement in imports:
                 exec(statement, ns)
             import_keys = list(ns.keys())
-        exec(loads(function_source), ns)
+        exec(function_source, ns)
 
     except Exception as msg:
         msg = str(msg) + '\nError executing function:\n %s\n'%function_source
@@ -145,10 +147,12 @@ def container_to_string(cont):
        Container elements joined into a string.
 
    """
-   if hasattr(cont, '__iter__') and not isinstance(cont, str):
+   if hasattr(cont, '__iter__') and not isinstance(cont, basestring):
       return ' '.join(cont)
-   else:
-      return str(cont)
+   elif isinstance(cont, basestring):
+       return cont.decode()
+
+   return str(cont)
 
 
 # Dependency checks.  Copied this from Nipy, with some modificiations
