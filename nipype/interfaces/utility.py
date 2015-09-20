@@ -18,6 +18,7 @@ from builtins import range
 import os
 import re
 from pickle import dumps
+from textwrap import dedent
 import numpy as np
 import nibabel as nb
 
@@ -407,7 +408,7 @@ class Function(IOBase):
                                     'function objects defined interactively ' \
                                     'in a python session')
             elif isinstance(function, str):
-                self.inputs.function_str = dumps(function)
+                self.inputs.function_str = function
             else:
                 raise Exception('Unknown type of function')
         self.inputs.on_trait_change(self._set_function_string,
