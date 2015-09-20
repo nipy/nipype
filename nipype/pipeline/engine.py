@@ -17,6 +17,7 @@ standard_library.install_aliases()
 from builtins import str
 from builtins import range
 from builtins import object
+from past.builtins import basestring
 
 from datetime import datetime
 from nipype.utils.misc import flatten, unflatten
@@ -671,7 +672,7 @@ connected.
         """
         if plugin is None:
             plugin = config.get('execution', 'plugin')
-        if not isinstance(plugin, str):
+        if not isinstance(plugin, (basestring, str)):
             runner = plugin
         else:
             name = 'nipype.pipeline.plugins'
@@ -795,6 +796,7 @@ connected.
                         input_name = sourceinfo
                     if input_name not in node.needed_outputs:
                         node.needed_outputs += [input_name]
+
             if node.needed_outputs:
                 node.needed_outputs = sorted(node.needed_outputs)
 
