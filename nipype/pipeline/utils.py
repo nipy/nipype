@@ -9,6 +9,7 @@ from builtins import str
 from builtins import zip
 from builtins import range
 
+from collections import OrderedDict
 from copy import deepcopy
 from glob import glob
 from collections import defaultdict
@@ -272,7 +273,7 @@ def count_iterables(iterables, synchronize=False):
         op = max
     else:
         op = lambda x,y: x*y
-    return reduce(op, [len(func()) for _, func in iterables.items()])
+    return reduce(op, [len(func()) for _, func in list(iterables.items())])
 
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
@@ -323,7 +324,7 @@ def synchronize_iterables(iterables):
     """
     # Convert the (field, function) tuples into (field, value) lists
     pair_lists = [[(field, value) for value in func()]
-        for field, func in iterables.items()]
+        for field, func in list(iterables.items())]
     # A factory to make a dictionary from the mapped (field, value)
     # key-value pairs. The filter removes any unmapped None items.
     factory = lambda *pairs: dict([_f for _f in pairs if _f])
@@ -399,7 +400,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         for edge in supergraph.in_edges_iter(supernodes[nidx]):
                 #make sure edge is not part of subgraph
             if edge[0] not in subgraph.nodes():
-                if n._hierarchy + n._id not in list(edgeinfo.keys()):
+                if n._hierarchy + n._id not in edgeinfo.keys():
                     edgeinfo[n._hierarchy + n._id] = []
                 edgeinfo[n._hierarchy + n._id].append((edge[0],
                                                supergraph.get_edge_data(*edge)))
@@ -444,7 +445,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
         supergraph.add_nodes_from(Gc.nodes())
         supergraph.add_edges_from(Gc.edges(data=True))
         for node in Gc.nodes():
-            if node._hierarchy + node._id in list(edgeinfo.keys()):
+            if node._hierarchy + node._id in edgeinfo.keys():
                 for info in edgeinfo[node._hierarchy + node._id]:
                     supergraph.add_edges_from([(info[0], node, info[1])])
             node._id += template % i
@@ -641,11 +642,11 @@ def generate_expanded_graph(graph_in):
             # The itersource iterables is a {field: lookup} dictionary, where the
             # lookup is a {source key: iteration list} dictionary. Look up the
             # current iterable value using the predecessor itersource input values.
-            iter_dict = dict([(field, lookup[key]) for field, lookup in
-                              inode.iterables if key in lookup])
+            iter_dict = OrderedDict([(field, lookup[key]) for field, lookup in
+                                     inode.iterables if key in lookup])
             # convert the iterables to the standard {field: function} format
-            iter_items = [(field_value[0], lambda: field_value[1]) for field_value in iter(iter_dict.items())]
-            iterables = dict(iter_items)
+            make_field_func = lambda field, value: (field, lambda: value)
+            iterables = OrderedDict([make_field_func(field, value) for field, value in iter_dict.items()])
         else:
             iterables = inode.iterables.copy()
         inode.iterables = None
@@ -683,14 +684,14 @@ def generate_expanded_graph(graph_in):
             # the edge source node replicates
             expansions = defaultdict(list)
             for node in graph_in.nodes_iter():
-                for src_id, edge_data in old_edge_dict.items():
+                for src_id, edge_data in list(old_edge_dict.items()):
                     if node._id.startswith(src_id):
                         expansions[src_id].append(node)
-            for in_id, in_nodes in expansions.items():
+            for in_id, in_nodes in list(expansions.items()):
                 logger.debug("The join node %s input %s was expanded"
                          " to %d nodes." %(jnode, in_id, len(in_nodes)))
             # preserve the node iteration order by sorting on the node id
-            for in_nodes in expansions.values():
+            for in_nodes in list(expansions.values()):
                 in_nodes.sort(key=lambda node: node._id)
 
             # the number of join source replicates.
@@ -706,7 +707,7 @@ def generate_expanded_graph(graph_in):
             # field 'in' are qualified as ('out_file', 'in1') and
             # ('out_file', 'in2'), resp. This preserves connection port
             # integrity.
-            for old_id, in_nodes in expansions.items():
+            for old_id, in_nodes in list(expansions.items()):
                 # reconnect each replication of the current join in-edge
                 # source
                 for in_idx, in_node in enumerate(in_nodes):
@@ -809,8 +810,8 @@ def _standardize_iterables(node):
         # Convert a values list to a function. This is a legacy
         # Nipype requirement with unknown rationale.
         if not node.itersource:
-            iter_items = [(field_value1[0], lambda: field_value1[1]) for field_value1 in iterables]
-            iterables = dict(iter_items)
+            make_field_func = lambda field, value: (field, lambda: value)
+            iterables = OrderedDict([make_field_func(field, value) for field, value in iterables])
     node.iterables = iterables
 
 def _validate_iterables(node, iterables, fields):
@@ -852,7 +853,7 @@ def _transpose_iterables(fields, values):
     """
     if isinstance(values, dict):
         transposed = dict([(field, defaultdict(list)) for field in fields])
-        for key, tuples in values.items():
+        for key, tuples in list(values.items()):
             for kvals in tuples:
                 for idx, val in enumerate(kvals):
                     if val != None:
@@ -1067,7 +1068,7 @@ def merge_dict(d1, d2, merge=lambda x, y: y):
     result = dict(d1)
     if d2 is None:
         return result
-    for k, v in d2.items():
+    for k, v in list(d2.items()):
         if k in result:
             result[k] = merge_dict(result[k], v, merge=merge)
         else:
