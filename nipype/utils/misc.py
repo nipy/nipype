@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 
 from future import standard_library
 standard_library.install_aliases()
-from past.builtins import basestring
 from builtins import next
 from builtins import str
 from pickle import dumps, loads
@@ -147,10 +146,8 @@ def container_to_string(cont):
        Container elements joined into a string.
 
    """
-   if hasattr(cont, '__iter__') and not isinstance(cont, basestring):
-      return ' '.join(cont)
-   elif isinstance(cont, basestring):
-       return cont.decode()
+   if hasattr(cont, '__iter__') and not isinstance(cont, str):
+      return str(' '.join(cont))
 
    return str(cont)
 
