@@ -13,7 +13,7 @@ def listClasses(module=None):
         __import__(module)
         pkg = sys.modules[module]
         print("Available Interfaces:")
-        for k,v in sorted(list(pkg.__dict__.items())):
+        for k, v in sorted(list(pkg.__dict__.items())):
             if inspect.isclass(v) and issubclass(v, Interface):
                 print("\t%s"%k)
 
@@ -21,7 +21,7 @@ def add_options(parser=None, module=None, function=None):
     interface = None
     if parser and module and function:
         __import__(module)
-        interface = getattr(sys.modules[module],function)()
+        interface = getattr(sys.modules[module], function)()
 
         inputs = interface.input_spec()
         for name, spec in sorted(interface.inputs.traits(transient=None).items()):
@@ -33,11 +33,11 @@ def add_options(parser=None, module=None, function=None):
 
             if hasattr(spec, "mandatory") and spec.mandatory:
                 if spec.is_trait_type(InputMultiPath):
-                    args["nargs"]="+"
+                    args["nargs"] = "+"
                 parser.add_argument(name, help=desc, **args)
             else:
                 if spec.is_trait_type(InputMultiPath):
-                    args["nargs"]="*"
+                    args["nargs"] = "*"
                 parser.add_argument("--%s"%name, dest=name,
                                     help=desc, **args)
     return parser, interface
