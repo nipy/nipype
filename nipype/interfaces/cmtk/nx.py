@@ -39,13 +39,13 @@ else:
 
 
 def read_unknown_ntwk(ntwk):
-	if not isinstance(ntwk, nx.classes.graph.Graph):
-		path, name, ext = split_filename(ntwk)
-		if ext == '.pck':
-			ntwk = nx.read_gpickle(ntwk)
-		elif ext == '.graphml':
-			ntwk = nx.read_graphml(ntwk)
-	return ntwk
+    if not isinstance(ntwk, nx.classes.graph.Graph):
+        path, name, ext = split_filename(ntwk)
+        if ext == '.pck':
+            ntwk = nx.read_gpickle(ntwk)
+        elif ext == '.graphml':
+            ntwk = nx.read_graphml(ntwk)
+    return ntwk
 
 
 def remove_all_edges(ntwk):
@@ -68,7 +68,7 @@ def fix_keys_for_gexf(orig):
         newnodedata = {}
         newnodedata.update(orig.node[node])
         if 'dn_fsname' in orig.node[node]:
-			newnodedata['label'] = orig.node[node]['dn_fsname']
+            newnodedata['label'] = orig.node[node]['dn_fsname']
         ntwk.add_node(str(node), newnodedata)
         if 'dn_position' in ntwk.node[str(node)] and 'dn_position' in newnodedata:
             ntwk.node[str(node)]['dn_position'] = str(newnodedata['dn_position'])
@@ -327,13 +327,13 @@ def add_edge_data(edge_array, ntwk, above=0, below=0):
     for x, row in enumerate(edge_array):
         for y in range(0, np.max(np.shape(edge_array[x]))):
             if not edge_array[x, y] == 0:
-				data['value'] = edge_array[x, y]
-				if data['value'] <= below or data['value'] >= above:
-					if edge_ntwk.has_edge(x + 1, y + 1):
-						old_edge_dict = edge_ntwk.edge[x + 1][y + 1]
-						edge_ntwk.remove_edge(x + 1, y + 1)
-						data.update(old_edge_dict)
-					edge_ntwk.add_edge(x + 1, y + 1, data)
+                data['value'] = edge_array[x, y]
+                if data['value'] <= below or data['value'] >= above:
+                    if edge_ntwk.has_edge(x + 1, y + 1):
+                        old_edge_dict = edge_ntwk.edge[x + 1][y + 1]
+                        edge_ntwk.remove_edge(x + 1, y + 1)
+                        data.update(old_edge_dict)
+                    edge_ntwk.add_edge(x + 1, y + 1, data)
     return edge_ntwk
 
 

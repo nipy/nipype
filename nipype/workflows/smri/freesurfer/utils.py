@@ -318,12 +318,12 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
                           iterfield=['in_file'],
                           name='surfconvert')
     smoother = pe.MapNode(mf.MeshFix(),
-			  iterfield=['in_file1'],
+                          iterfield=['in_file1'],
                           name='smoother')
     if out_format == 'gii':
-	stl_to_gifti = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
-			      iterfield=['in_file'],
-			      name='stl_to_gifti')
+        stl_to_gifti = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
+                                  iterfield=['in_file'],
+                                  name='stl_to_gifti')
     smoother.inputs.save_as_stl = True
     smoother.inputs.laplacian_smoothing_steps = 1
 
@@ -353,7 +353,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
             (id_list_from_lookup_table_node, tessellate, [('id_list', 'out_file')]),
             (fssource, tessellate, [('aseg', 'in_file')]),
             (tessellate, surfconvert, [('surface','in_file')]),
-	    (surfconvert, smoother, [('converted','in_file1')]),
+            (surfconvert, smoother, [('converted','in_file1')]),
             ])
 
     """
@@ -361,17 +361,17 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     """
 
     outputnode = pe.Node(niu.IdentityInterface(fields=["meshes"]),
-			 name="outputspec")
+                         name="outputspec")
 
     if out_format == 'gii':
-	tessflow.connect([
-	    (smoother, stl_to_gifti, [("mesh_file", "in_file")]),
-	    ])
-	tessflow.connect([
-	    (stl_to_gifti, outputnode, [("converted", "meshes")]),
-	    ])
+        tessflow.connect([
+            (smoother, stl_to_gifti, [("mesh_file", "in_file")]),
+        ])
+        tessflow.connect([
+            (stl_to_gifti, outputnode, [("converted", "meshes")]),
+            ])
     else:
-	tessflow.connect([
-	    (smoother, outputnode, [("mesh_file", "meshes")]),
+        tessflow.connect([
+            (smoother, outputnode, [("mesh_file", "meshes")]),
             ])
     return tessflow
