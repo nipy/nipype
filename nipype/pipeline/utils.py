@@ -3,11 +3,18 @@
 """Utility routines for workflow graphs
 """
 from __future__ import unicode_literals
-from builtins import map
+from future import standard_library
+standard_library.install_aliases()
+
 from builtins import next
 from builtins import str
 from builtins import zip
 from builtins import range
+
+try:
+    import itertools.imap as map
+except ImportError:
+    pass
 
 from collections import OrderedDict
 from copy import deepcopy
@@ -15,7 +22,6 @@ from glob import glob
 from collections import defaultdict
 import os
 import re
-
 import numpy as np
 from nipype.utils.misc import package_check
 from functools import reduce
@@ -322,14 +328,20 @@ def synchronize_iterables(iterables):
     >>> synced == [{'a': 1, 'b': 3, 'c': 4}, {'a': 2, 'c': 5}, {'c': 6}]
     True
     """
+    if not iterables:
+        return None
+
     # Convert the (field, function) tuples into (field, value) lists
-    pair_lists = [[(field, value) for value in func()]
-        for field, func in list(iterables.items())]
+    def field_values_pairs(field, func): return [(field, value) for value in list(func())]
+    pair_lists = [field_values_pairs(field, func) for field, func in iterables.items()]
+
     # A factory to make a dictionary from the mapped (field, value)
     # key-value pairs. The filter removes any unmapped None items.
-    factory = lambda *pairs: dict([_f for _f in pairs if _f])
+    def factory(*pairs): return dict([p for p in pairs if p])
+
+    #factory = lambda *pairs: dict(filter(None, pairs))
     # Make a dictionary for each of the correlated (field, value) items
-    return list(map(factory, *pair_lists))
+    return [i for i in map(factory, *pair_lists)]
 
 def evaluate_connect_function(function_source, args, first_arg):
     func = create_function_from_source(function_source)
@@ -642,11 +654,15 @@ def generate_expanded_graph(graph_in):
             # The itersource iterables is a {field: lookup} dictionary, where the
             # lookup is a {source key: iteration list} dictionary. Look up the
             # current iterable value using the predecessor itersource input values.
-            iter_dict = OrderedDict([(field, lookup[key]) for field, lookup in
-                                     inode.iterables if key in lookup])
+            iter_dict = dict([(field, lookup[key]) for field, lookup in
+                              inode.iterables if key in lookup])
             # convert the iterables to the standard {field: function} format
-            make_field_func = lambda field, value: (field, lambda: value)
-            iterables = OrderedDict([make_field_func(field, value) for field, value in iter_dict.items()])
+            #iter_items = [lambda field, value: (field, lambda: value) for field, value in iter_dict.items()]
+            #iterables = dict(iter_items)
+            def make_field_func(*pair):
+                return pair[0], lambda: pair[1]
+
+            iterables = dict([make_field_func(*pair) for pair in iter_dict.items()])
         else:
             iterables = inode.iterables.copy()
         inode.iterables = None
@@ -781,7 +797,6 @@ def _iterable_nodes(graph_in):
 def _standardize_iterables(node):
     """Converts the given iterables to a {field: function} dictionary,
     if necessary, where the function returns a list."""
-    # trivial case
     if not node.iterables:
         return
     iterables = node.iterables
@@ -810,8 +825,11 @@ def _standardize_iterables(node):
         # Convert a values list to a function. This is a legacy
         # Nipype requirement with unknown rationale.
         if not node.itersource:
-            make_field_func = lambda field, value: (field, lambda: value)
-            iterables = OrderedDict([make_field_func(field, value) for field, value in iterables])
+            def make_field_func(*pair):
+                return pair[0], lambda: pair[1]
+
+            iter_items = [make_field_func(*field_value1) for field_value1 in iterables]
+            iterables = dict(iter_items)
     node.iterables = iterables
 
 def _validate_iterables(node, iterables, fields):
