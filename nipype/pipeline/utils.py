@@ -12,6 +12,11 @@ from builtins import str
 from builtins import zip
 from builtins import range
 
+try:
+    import itertools.imap as map
+except ImportError:
+    pass
+
 from collections import OrderedDict
 from copy import deepcopy
 from glob import glob
@@ -337,7 +342,7 @@ def synchronize_iterables(iterables):
 
     #factory = lambda *pairs: dict(filter(None, pairs))
     # Make a dictionary for each of the correlated (field, value) items
-    return list(map(factory, *pair_lists))
+    return [i for i in map(factory, *pair_lists)]
 
 def evaluate_connect_function(function_source, args, first_arg):
     func = create_function_from_source(function_source)
@@ -650,8 +655,8 @@ def generate_expanded_graph(graph_in):
             # The itersource iterables is a {field: lookup} dictionary, where the
             # lookup is a {source key: iteration list} dictionary. Look up the
             # current iterable value using the predecessor itersource input values.
-            iter_dict = OrderedDict([(field, lookup[key]) for field, lookup in
-                                     inode.iterables if key in lookup])
+            iter_dict = dict([(field, lookup[key]) for field, lookup in
+                              inode.iterables if key in lookup])
             # convert the iterables to the standard {field: function} format
             def make_field_func(*pair):
                 return pair[0], lambda: pair[1]
