@@ -10,7 +10,7 @@ import sys
 IPython_not_loaded = False
 try:
     from IPython import __version__ as IPyversion
-    from IPython.parallel.error import TimeoutError
+    from ipyparallel.error import TimeoutError
 except:
     IPython_not_loaded = True
 
@@ -42,7 +42,7 @@ class IPythonPlugin(DistributedPluginBase):
 
     def __init__(self, plugin_args=None):
         if IPython_not_loaded:
-            raise ImportError('IPython parallel could not be imported')
+            raise ImportError('ipyparallel could not be imported')
         super(IPythonPlugin, self).__init__(plugin_args=plugin_args)
         self.iparallel = None
         self.taskclient = None
@@ -51,11 +51,11 @@ class IPythonPlugin(DistributedPluginBase):
 
     def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline is distributed approaches
-        based on IPython's parallel processing interface
+        based on IPython's ipyparallel processing interface
         """
         # retrieve clients again
         try:
-            name = 'IPython.parallel'
+            name = 'ipyparallel'
             __import__(name)
             self.iparallel = sys.modules[name]
         except ImportError:

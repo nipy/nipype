@@ -21,14 +21,14 @@ class IPythonXPlugin(DistributedPluginBase):
 
     def __init__(self, plugin_args=None):
         if IPython_not_loaded:
-            raise ImportError('IPython parallel could not be imported')
+            raise ImportError('ipyparallel could not be imported')
         super(IPythonXPlugin, self).__init__(plugin_args=plugin_args)
         self.ipyclient = None
         self.taskclient = None
 
     def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline is distributed approaches
-        based on IPython's parallel processing interface
+        based on IPython's ipyparallel processing interface
         """
         # retrieve clients again
         try:
