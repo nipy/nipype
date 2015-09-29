@@ -96,3 +96,166 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _clear_task(self, taskid):
         del self._taskresult[taskid]
+
+
+
+
+
+import numpy as np
+from copy import deepcopy
+from ..engine import (MapNode, str2bool)
+import datetime
+import psutil
+
+class ResourceMultiProcPlugin(MultiProcPlugin):
+
+    def __init__(self, plugin_args=None):
+        super(ResourceMultiProcPlugin, self).__init__(plugin_args=plugin_args)
+        self.plugin_args = plugin_args
+        self.current_time = datetime.datetime.now()
+        self.log_nodes = []
+
+    def _send_procs_to_workers(self, updatehash=False, graph=None):
+        executing_now = []
+        processors = cpu_count()
+        memory = psutil.virtual_memory()
+        memory = memory.total
+        if self.plugin_args:
+            if 'n_procs' in self.plugin_args:
+                processors = self.plugin_args['n_procs']
+            if 'memory' in self.plugin_args:
+                memory = self.plugin_args['memory']
+
+
+        jobids = np.flatnonzero((self.proc_pending == True) & (self.depidx.sum(axis=0) == 0).__array__())
+        print('START, pending_tasks:', jobids)
+
+        #busy_processors = number of busy processors
+        busy_memory = 0
+        busy_processors = 0
+        for jobid in jobids:
+            print 'using memory:', jobid, self.procs[jobid]._interface.num_threads
+            busy_memory+= self.procs[jobid]._interface.memory
+            busy_processors+= self.procs[jobid]._interface.num_threads
+                
+
+        free_memory = memory - busy_memory
+        free_processors = processors - busy_processors
+
+        #jobids = all jobs without dependency not run
+        jobids = np.flatnonzero((self.proc_done == False) & (self.depidx.sum(axis=0) == 0).__array__())
+
+
+        #sort jobids first by memory and then by number of threads
+        jobids = sorted(jobids, key=lambda item: (self.procs[item]._interface.memory, self.procs[item]._interface.num_threads))
+        print('jobids ->', jobids)
+
+        print 'free memory ->', free_memory, ', free processors ->', free_processors
+
+
+        #while have enough memory and processors for first job
+        #submit first job on the list
+        for jobid in jobids:
+            print 'next_job ->', jobid, 'memory:', self.procs[jobid]._interface.memory, 'threads:', self.procs[jobid]._interface.num_threads
+
+            print 'can job execute?', self.procs[jobid]._interface.memory <= free_memory and self.procs[jobid]._interface.num_threads <= free_processors
+            if self.procs[jobid]._interface.memory <= free_memory and self.procs[jobid]._interface.num_threads <= free_processors:
+                print('Executing: %s ID: %d' %(self.procs[jobid]._id, jobid))
+                executing_now.append(self.procs[jobid])
+                
+                if isinstance(self.procs[jobid], MapNode):
+                    try:
+                        num_subnodes = self.procs[jobid].num_subnodes()
+                    except Exception:
+                        self._clean_queue(jobid, graph)
+                        self.proc_pending[jobid] = False
+                        continue
+                    if num_subnodes > 1:
+                        submit = self._submit_mapnode(jobid)
+                        if not submit:
+                            continue
+
+
+                self.proc_done[jobid] = True
+                self.proc_pending[jobid] = True
+
+                free_memory -= self.procs[jobid]._interface.memory
+                free_processors -= self.procs[jobid]._interface.num_threads
+
+                if self._status_callback:
+                    self._status_callback(self.procs[jobid], 'start')
+                    
+
+                
+                if str2bool(self.procs[jobid].config['execution']['local_hash_check']):
+                    print('checking hash locally')
+                    try:
+                        hash_exists, _, _, _ = self.procs[
+                            jobid].hash_exists()
+                        print('Hash exists %s' % str(hash_exists))
+                        if (hash_exists and (self.procs[jobid].overwrite == False or (self.procs[jobid].overwrite == None and not self.procs[jobid]._interface.always_run))):
+                            self._task_finished_cb(jobid)
+                            self._remove_node_dirs()
+                            continue
+                    except Exception:
+                        self._clean_queue(jobid, graph)
+                        self.proc_pending[jobid] = False
+                        continue
+
+                    
+                print('Finished checking hash')
+
+
+                if self.procs[jobid].run_without_submitting:
+                    print('Running node %s on master thread' %self.procs[jobid])
+                    try:
+                        self.procs[jobid].run()
+                    except Exception:
+                        self._clean_queue(jobid, graph)
+                    self._task_finished_cb(jobid)
+                    self._remove_node_dirs()
+
+                else:
+                    print('submitting', jobid)
+                    tid = self._submit_job(deepcopy(self.procs[jobid]), updatehash=updatehash)
+                    if tid is None:
+                        self.proc_done[jobid] = False
+                        self.proc_pending[jobid] = False
+                    else:
+                        self.pending_tasks.insert(0, (tid, jobid))
+            else:
+                break
+
+        #run this code when not running each node
+        # max_node = datetime.datetime.min
+        # for n in executing_now:
+        #     name = n.name 
+        #     start = self.current_time
+        #     finish = self.current_time + n._interface.time
+        #     duration = (finish - start).total_seconds()
+        #     memory = n._interface.memory
+        #     num_threads = n._interface.num_threads
+            
+        #     if finish > max_node:
+        #         max_node = finish
+
+        #     self.log_nodes.append({'name': name, 'start': str(start), 'finish': str(finish), 'duration': duration, 'memory':memory, 'num_threads': num_threads})
+
+
+        # if len(executing_now) > 0:
+        #     self.current_time = finish
+        #     #write log
+        #     self.log_nodes = sorted(self.log_nodes, key=lambda n: datetime.datetime.strptime(n['start'],"%Y-%m-%d %H:%M:%S.%f"))
+        #     first_node = datetime.datetime.strptime(self.log_nodes[0]['start'],"%Y-%m-%d %H:%M:%S.%f")
+        #     last_node = datetime.datetime.strptime(self.log_nodes[-1]['finish'],"%Y-%m-%d %H:%M:%S.%f")
+
+
+        #     result = {"name": os.getcwd(), "start": str(first_node), "finish": str(last_node), "duration": (last_node - first_node).total_seconds() / 60, "nodes": self.log_nodes}
+
+        #     log_content = json.dumps(result)
+        #     log_file = open('log_anat_preproc.py', 'wb')
+        #     log_file.write(log_content)
+        #     log_file.close()
+
+        print('- - - - - - - - - - - - - - - ', len(self.log_nodes), '- - - - - - - - - - - - - - - ')
+        print('No jobs waiting to execute')
