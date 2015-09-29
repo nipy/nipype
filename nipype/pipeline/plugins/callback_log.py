@@ -1,20 +1,11 @@
-import logging
 import datetime
+import logging
 
 def log_nodes_cb(node, status):
+    logger = logging.getLogger('callback')
     if status == 'start':
-        print 'START', "name:",node.name, "id:", node._id, "start:", datetime.datetime.now(), "memory:", node._interface.memory,"num_threads:", node._interface.num_threads
-        logging.debug(
-            "name:",node.name, 
-            "id:", node._id, 
-            "start:", datetime.datetime.now(), 
-            "memory:", node._interface.memory, 
-            "num_threads:", node._interface.num_threads)
+        message  = "name:",node.name, "id:", node._id, "start:", datetime.datetime.now(), "memory:", node._interface.memory, "num_threads:", node._interface.num_threads
+        logger.debug(message)
     else:
-        print 'FINISH', "name:",node.name, "id:", node._id, "finish:", datetime.datetime.now(), "memory:", node._interface.memory,"num_threads:", node._interface.num_threads
-        logging.debug(
-            "name:",node.name, 
-            "id:", node._id, 
-            "finish:", datetime.datetime.now(), 
-            "memory:", node._interface.memory, 
-            "num_threads:", node._interface.num_threads)
+        message  = "name:",node.name, "id:", node._id, "finish:", datetime.datetime.now(), "memory:", node._interface.memory, "num_threads:", node._interface.num_threads
+        logger.debug(message)
