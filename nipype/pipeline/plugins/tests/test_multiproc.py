@@ -83,7 +83,7 @@ def parse_log(filename, measure):
 
     json_data = open(filename).read()
     data = json.loads(json_data)
-    total_duration = int(float(data['duration']) * 60) #total duration in seconds
+    total_duration = int(float(data['duration'])) #total duration in seconds
 
     total = []
     for i in range(total_duration):
@@ -192,7 +192,7 @@ def test_do_not_use_more_threads_then_specified():
     pipe.run(plugin='ResourceMultiProc', plugin_args={'n_procs': max_threads, 'status_callback': log_nodes_cb})
 
     convert_logcb_to_json(LOG_FILENAME)
-    #memory usage in every second
+    #threads usage in every second
     threads = parse_log(LOG_FILENAME + '.json' , 'num_threads')
 
     result = True
