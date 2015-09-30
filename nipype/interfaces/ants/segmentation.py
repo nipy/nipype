@@ -656,7 +656,7 @@ class antsBrainExtraction(ANTSCommand):
     >>> brainextraction.inputs.brain_probability_mask ='ProbabilityMaskOfStudyTemplate.nii.gz'
     >>> brainextraction.cmdline
     'antsBrainExtraction.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -d 3 -s nii.gz -o highres001_
-
+    """
     input_spec = antsBrainExtractionInputSpec
     output_spec = antsBrainExtractionOutputSpec
     _cmd = 'antsBrainExtraction.sh'
