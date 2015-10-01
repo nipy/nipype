@@ -172,9 +172,6 @@ class GifRobustGroupwiseInputSpec(NIFTYSEGCommandInputSpec):
     mask_file = File(exists=True, argstr='-mask %s',
                      desc='Mask over the input image [default: none]')
 
-    cpp_dir = Directory(exists=True, mandatory=True, argstr='-cpp %s',
-                        desc='Folder to read/store affine transformation files.')
-
 
 class GifRobustGroupwiseOutputSpec(TraitedSpec):
 
@@ -188,11 +185,13 @@ class GifRobustGroupwise(NIFTYSEGCommand):
 
     input_spec = GifRobustGroupwiseInputSpec
     output_spec = GifRobustGroupwiseOutputSpec
-    _cmd = 'seg_GIF --aff_only'
+    _cmd = 'seg_GIF --aff_only -cpp .'
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        transformation_files = sorted(glob.glob(os.path.join(os.path.abspath(self.inputs.cpp_dir), '*.txt')))
+        text_files = [fn for fn in glob.glob(os.path.join(os.path.abspath(os.getcwd()), '*.txt'))
+                      if not os.path.basename(fn).startswith('command')]
+        transformation_files = sorted(text_files)
         outputs['affine_files'] = transformation_files
 
         return outputs
