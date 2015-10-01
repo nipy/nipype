@@ -85,9 +85,11 @@ def parse_log(filename, measure):
     data = json.loads(json_data)
     total_duration = int(float(data['duration'])) #total duration in seconds
 
-    total = []
+    total_memory = []
+    total_threads = []
     for i in range(total_duration):
-        total.append(0)
+        total_memory.append(0)
+        total_threads.append(0)
 
     now = parse(data['start'])
     for i in range(total_duration):
@@ -102,7 +104,8 @@ def parse_log(filename, measure):
             node_finish = parse(data['nodes'][j]['finish'])
 
             if node_start < x and node_finish > x:
-                total[i] += data['nodes'][j][measure]
+                total_memory[i] += data['nodes'][j]['memory']
+                total_threads[i] += data['nodes'][j]['num_threads']
                 start_index = j
 
             if node_start > x:
@@ -110,13 +113,15 @@ def parse_log(filename, measure):
 
         now += d.timedelta(seconds=1)
 
-    return total
+    return total_memory, total_threads
 
 
 import os
 from nipype.pipeline.plugins.callback_log import log_nodes_cb, convert_logcb_to_json
 import logging
 import logging.handlers
+import psutil
+from multiprocessing import cpu_count
 def test_do_not_use_more_memory_then_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')
@@ -148,7 +153,7 @@ def test_do_not_use_more_memory_then_specified():
 
     convert_logcb_to_json(LOG_FILENAME)
     #memory usage in every second
-    memory = parse_log(LOG_FILENAME + '.json' , 'memory')
+    memory, threads = parse_log(LOG_FILENAME + '.json' , 'memory')
 
     result = True
     for m in memory:
@@ -157,6 +162,16 @@ def test_do_not_use_more_memory_then_specified():
             break
 
     yield assert_equal, result, True
+
+    max_threads = cpu_count()
+
+    result = True
+    for t in threads:
+        if t > max_threads:
+            result = False
+            break
+
+    yield assert_equal, result, True, "using more threads than system has (threads is not specified by user)"
 
     os.remove(LOG_FILENAME)
     os.remove(LOG_FILENAME + '.json') 
@@ -193,7 +208,7 @@ def test_do_not_use_more_threads_then_specified():
 
     convert_logcb_to_json(LOG_FILENAME)
     #threads usage in every second
-    threads = parse_log(LOG_FILENAME + '.json' , 'num_threads')
+    memory, threads = parse_log(LOG_FILENAME + '.json' , 'num_threads')
 
     result = True
     for t in threads:
@@ -201,7 +216,15 @@ def test_do_not_use_more_threads_then_specified():
             result = False
             break
 
-    yield assert_equal, result, True
+    yield assert_equal, result, True, "using more threads than specified"
+
+    max_memory = psutil.virtual_memory().total / (1024*1024)
+    result = True
+    for m in memory:
+        if m > max_memory:
+            result = False
+            break
+    yield assert_equal, result, True, "using more memory than system has (memory is not specified by user)"
 
     os.remove(LOG_FILENAME)
     os.remove(LOG_FILENAME + '.json')
