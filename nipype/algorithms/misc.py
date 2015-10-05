@@ -332,11 +332,11 @@ class TSNR(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['tsnr_file'] = self._gen_output_file_name()
-        outputs['mean_file'] = self._gen_output_file_name('mean')
-        outputs['stddev_file'] = self._gen_output_file_name('stddev')
+        for k in ['tsnr_file', 'mean_file', 'stddev_file']:
+            outputs[k] = op.abspath(getattr(self.inputs, k))
+
         if isdefined(self.inputs.regress_poly):
-            outputs['detrended_file'] = self._gen_output_file_name('detrended')
+            outputs['detrended_file'] = op.abspath(self.inputs.detrended_file) 
         return outputs
 
 
