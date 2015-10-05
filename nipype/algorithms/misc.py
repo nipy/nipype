@@ -262,6 +262,11 @@ class TSNRInputSpec(BaseInterfaceInputSpec):
     in_file = InputMultiPath(File(exists=True), mandatory=True,
                              desc='realigned 4D file or a list of 3D files')
     regress_poly = traits.Range(low=1, desc='Remove polynomials')
+    tsnr_file = File('tsnr.nii.gz', usedefault=True, desc='output tSNR file')
+    mean_file = File('mean.nii.gz', usedefault=True, desc='output mean file')
+    stddev_file = File('stdev.nii.gz', usedefault=True, desc='output tSNR file')
+    detrended_file = File('detrend.nii.gz', usedefault=True,
+                          desc='input file after detrending')
 
 
 class TSNROutputSpec(TraitedSpec):
@@ -287,24 +292,17 @@ class TSNR(BaseInterface):
     input_spec = TSNRInputSpec
     output_spec = TSNROutputSpec
 
-    def _gen_output_file_name(self, suffix=None):
-        _, base, ext = split_filename(self.inputs.in_file[0])
-        if suffix in ['mean', 'stddev']:
-            return os.path.abspath(base + "_tsnr_" + suffix + ext)
-        elif suffix in ['detrended']:
-            return os.path.abspath(base + "_" + suffix + ext)
-        else:
-            return os.path.abspath(base + "_tsnr" + ext)
-
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file[0])
         header = img.get_header().copy()
         vollist = [nb.load(filename) for filename in self.inputs.in_file]
         data = np.concatenate([vol.get_data().reshape(
             vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
+        data = data.nan_to_num()
         if data.dtype.kind == 'i':
             header.set_data_dtype(np.float32)
             data = data.astype(np.float32)
+
         if isdefined(self.inputs.regress_poly):
             timepoints = img.get_shape()[-1]
             X = np.ones((timepoints, 1))
@@ -318,16 +316,18 @@ class TSNR(BaseInterface):
                                   0, 4)
             data = data - datahat
             img = nb.Nifti1Image(data, img.get_affine(), header)
-            nb.save(img, self._gen_output_file_name('detrended'))
+            nb.save(img, op.abspath(self.inputs.detrended_file))
+
         meanimg = np.mean(data, axis=3)
         stddevimg = np.std(data, axis=3)
-        tsnr = meanimg / stddevimg
+        tsnr = np.zeros_like(meanimg)
+        tsnr[stddevimg > 1.e-3] = meanimg[stddevimg > 1.e-3] / stddevimg[stddevimg > 1.e-3]
         img = nb.Nifti1Image(tsnr, img.get_affine(), header)
-        nb.save(img, self._gen_output_file_name())
+        nb.save(img, op.abspath(self.inputs.tsnr_file))
         img = nb.Nifti1Image(meanimg, img.get_affine(), header)
-        nb.save(img, self._gen_output_file_name('mean'))
+        nb.save(img, op.abspath(self.inputs.mean_file))
         img = nb.Nifti1Image(stddevimg, img.get_affine(), header)
-        nb.save(img, self._gen_output_file_name('stddev'))
+        nb.save(img, op.abspath(self.inputs.stddev_file))
         return runtime
 
     def _list_outputs(self):
