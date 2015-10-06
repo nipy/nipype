@@ -183,7 +183,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         desc='Folder within base directory in which to store output')
     parameterization = traits.Bool(True, usedefault=True,
                                    desc='store output in parametrized structure')
-    strip_dir = traits.Directory(desc='path to strip out of filename')
+    strip_dir = Directory(desc='path to strip out of filename')
     substitutions = InputMultiPath(traits.Tuple(traits.Str, traits.Str),
                                    desc=('List of 2-tuples reflecting string '
                                          'to substitute and string to replace '
@@ -206,10 +206,9 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     # Set call-able inputs attributes
     def __setattr__(self, key, value):
-        import nipype.interfaces.traits_extension as nit
 
         if key not in self.copyable_trait_names():
-            if not nit.isdefined(value):
+            if not isdefined(value):
                 super(DataSinkInputSpec, self).__setattr__(key, value)
             self._outputs[key] = value
         else:
