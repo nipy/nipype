@@ -592,8 +592,7 @@ class DataSink(IOBase):
         outputs = self.output_spec().get()
         out_files = []
         outdir = self.inputs.base_directory
-        use_hardlink = str2bool(config.get('execution',
-                                               'try_hard_link_datasink'))
+        use_hardlink = str2bool(config.get('execution', 'try_hard_link_datasink'))
 
         # If base directory isn't given, assume current directory
         if not isdefined(outdir):
