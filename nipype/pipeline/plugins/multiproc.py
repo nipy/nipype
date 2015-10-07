@@ -11,6 +11,9 @@ from traceback import format_exception
 import sys
 
 from .base import (DistributedPluginBase, report_crash)
+import semaphore_singleton
+
+
 
 def run_node(node, updatehash):
     result = dict(result=None, traceback=None)
@@ -21,6 +24,13 @@ def run_node(node, updatehash):
         result['traceback'] = format_exception(etype,eval,etr)
         result['result'] = node.result
     return result
+
+
+
+def release_lock(args):
+    print 'releasing semaphore'
+    semaphore_singleton.semaphore.release()
+
 
 class NonDaemonProcess(Process):
     """A non-daemon process to support internal multiprocessing.
@@ -66,6 +76,7 @@ class MultiProcPlugin(DistributedPluginBase):
         else:
             self.pool = Pool(processes=n_procs)
 
+
     def _get_result(self, taskid):
         if taskid not in self._taskresult:
             raise RuntimeError('Multiproc task %d not found'%taskid)
@@ -80,9 +91,8 @@ class MultiProcPlugin(DistributedPluginBase):
                 node.inputs.terminal_output = 'allatonce'
         except:
             pass
-        self._taskresult[self._taskid] = self.pool.apply_async(run_node,
-                                                               (node,
-                                                                updatehash,))
+        self._taskresult[self._taskid] = self.pool.apply_async(run_node, (node,
+                                                                updatehash,), callback=release_lock)
         return self._taskid
 
     def _report_crash(self, node, result=None):
@@ -114,17 +124,15 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
     def __init__(self, plugin_args=None):
         super(ResourceMultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self.plugin_args = plugin_args
-        self.current_time = datetime.datetime.now()
-        self.log_nodes = []
 
     def _send_procs_to_workers(self, updatehash=False, graph=None):
         """ Sends jobs to workers when system resources are available.
-            Check memory and cores usage before running jobs.
+            Check memory (mb) and cores usage before running jobs.
         """
         executing_now = []
         processors = cpu_count()
         memory = psutil.virtual_memory()
-        memory = memory.total
+        memory = memory.total / (1024*1024)
         if self.plugin_args:
             if 'n_procs' in self.plugin_args:
                 processors = self.plugin_args['n_procs']

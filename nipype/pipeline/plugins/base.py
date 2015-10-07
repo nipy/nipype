@@ -16,6 +16,7 @@ from warnings import warn
 
 import numpy as np
 import scipy.sparse as ssp
+import semaphore_singleton
 
 
 from ..utils import (nx, dfs_preorder, topological_sort)
@@ -261,9 +262,16 @@ class DistributedPluginBase(PluginBase):
                                             graph=graph)
             else:
                 logger.debug('Not submitting')
-            sleep(float(self._config['execution']['poll_sleep_duration']))
+
+            print 'locking semaphore'
+            print 'pending tasks:', len(self.pending_tasks)
+            if len(self.pending_tasks) > 0:
+                semaphore_singleton.semaphore.acquire()
+            print 'semaphore was released'
+            #sleep(float(self._config['execution']['poll_sleep_duration']))
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
+    semaphore_singleton.semaphore.release()
 
     def _get_result(self, taskid):
         raise NotImplementedError
