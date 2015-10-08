@@ -119,7 +119,9 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
 
     The plugin_args input to run can be used to control the multiprocessing
     execution and defining the maximum amount of memory and threads that 
-    should be used.
+    should be used. When those parameters are not specified,
+    the number of threads and memory of the system is used.
+
     System consuming nodes should be tagged:
     memory_consuming_node.interface.memory = 8 #Gb
     thread_consuming_node.interface.num_threads = 16
@@ -162,7 +164,7 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
         executing_now = []
         processors = cpu_count()
         memory = psutil.virtual_memory()
-        memory = memory.total / (1024*1024)
+        memory = memory.total / (1024*1024*1024)
         if self.plugin_args:
             if 'n_procs' in self.plugin_args:
                 processors = self.plugin_args['n_procs']
