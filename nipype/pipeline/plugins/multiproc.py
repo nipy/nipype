@@ -11,8 +11,6 @@ from traceback import format_exception
 import sys
 
 from .base import (DistributedPluginBase, report_crash)
-import semaphore_singleton
-
 
 
 def run_node(node, updatehash):
@@ -24,12 +22,6 @@ def run_node(node, updatehash):
         result['traceback'] = format_exception(etype,eval,etr)
         result['result'] = node.result
     return result
-
-
-
-def release_lock(args):
-    print 'releasing semaphore'
-    semaphore_singleton.semaphore.release()
 
 
 class NonDaemonProcess(Process):
@@ -92,7 +84,7 @@ class MultiProcPlugin(DistributedPluginBase):
         except:
             pass
         self._taskresult[self._taskid] = self.pool.apply_async(run_node, (node,
-                                                                updatehash,), callback=release_lock)
+                                                                updatehash,))
         return self._taskid
 
     def _report_crash(self, node, result=None):
@@ -109,25 +101,63 @@ class MultiProcPlugin(DistributedPluginBase):
 
 
 
-
-
 import numpy as np
 from copy import deepcopy
 from ..engine import (MapNode, str2bool)
 import datetime
 import psutil
 from ... import logging
+import semaphore_singleton
 logger = logging.getLogger('workflow')
 
+def release_lock(args):
+    semaphore_singleton.semaphore.release()
+
 class ResourceMultiProcPlugin(MultiProcPlugin):
+    """Execute workflow with multiprocessing not sending more jobs at once
+    than the system can support.
+
+    The plugin_args input to run can be used to control the multiprocessing
+    execution and defining the maximum amount of memory and threads that 
+    should be used.
+    System consuming nodes should be tagged:
+    memory_consuming_node.interface.memory = 8 #Gb
+    thread_consuming_node.interface.num_threads = 16
+
+    The default number of threads and memory for a node is 1. 
+
+    Currently supported options are:
+
+    - num_thread: maximum number of threads to be executed in parallel
+    - memory: maximum memory that can be used at once.
+
+    """
 
     def __init__(self, plugin_args=None):
         super(ResourceMultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self.plugin_args = plugin_args
 
+    def _wait(self):
+        if len(self.pending_tasks) > 0:
+            semaphore_singleton.semaphore.acquire()
+        else:
+            semaphore_singleton.semaphore.release()
+
+
+    def _submit_job(self, node, updatehash=False):
+        self._taskid += 1
+        try:
+            if node.inputs.terminal_output == 'stream':
+                node.inputs.terminal_output = 'allatonce'
+        except:
+            pass
+        self._taskresult[self._taskid] = self.pool.apply_async(run_node, (node,
+                                                                updatehash,), callback=release_lock)
+        return self._taskid
+
     def _send_procs_to_workers(self, updatehash=False, graph=None):
         """ Sends jobs to workers when system resources are available.
-            Check memory (mb) and cores usage before running jobs.
+            Check memory (gb) and cores usage before running jobs.
         """
         executing_now = []
         processors = cpu_count()
@@ -222,7 +252,7 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
                     self._remove_node_dirs()
 
                 else:
-                    print('submitting', jobid)
+                    logger.debug('submitting', jobid)
                     tid = self._submit_job(deepcopy(self.procs[jobid]), updatehash=updatehash)
                     if tid is None:
                         self.proc_done[jobid] = False

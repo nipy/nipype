@@ -4,10 +4,18 @@ import logging
 def log_nodes_cb(node, status):
     logger = logging.getLogger('callback')
     if status == 'start':
-        message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' + node._id + '"' + ',"start":' + '"' +str(datetime.datetime.now()) + '"' + ',"memory":' + str(node._interface.memory) + ',"num_threads":' + str(node._interface.num_threads) +  '}'
+        message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' +\
+        node._id + '"' + ',"start":' + '"' +str(datetime.datetime.now()) +\
+        '"' + ',"memory":' + str(node._interface.memory) + ',"num_threads":' \
+        + str(node._interface.num_threads) +  '}'
+
         logger.debug(message)
     else:
-        message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' + node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) + '"' + ',"memory":' + str(node._interface.memory) + ',"num_threads":' + str(node._interface.num_threads) +  '}'
+        message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' + \
+        node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) +\
+        '"' + ',"memory":' + str(node._interface.memory) + ',"num_threads":' \
+        + str(node._interface.num_threads) +  '}'
+        
         logger.debug(message)
 
 
@@ -34,6 +42,7 @@ def convert_logcb_to_json(filename):
 
             if end is not None:
                 element['finish'] = end['finish']
+                element['duration'] = (parser.parse(element['finish']) - parser.parse(element['start'])).total_seconds()
             else:
                 element['finish'] = element['start']
 
