@@ -1234,6 +1234,7 @@ class SkullStrip(AFNICommand):
 
     """
     _cmd = '3dSkullStrip'
+    _redirect_x = True
     input_spec = SkullStripInputSpec
     output_spec = AFNICommandOutputSpec
 
