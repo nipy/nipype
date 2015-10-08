@@ -400,8 +400,7 @@ class DataSink(IOBase):
             except Exception as exc:
                 err_msg = 'Unable to access S3 bucket. Error:\n%s. Exiting...'\
                           % exc
-                print err_msg
-                sys.exit()
+                raise Exception(err_msg)
             # Bucket access was a success, set flag
             s3_flag = True
         # Otherwise it's just a normal datasink
@@ -599,7 +598,18 @@ class DataSink(IOBase):
             outdir = '.'
 
         # Check if base directory reflects S3-bucket upload
-        s3_flag = self._check_s3_base_dir()
+        try:
+            s3_flag = self._check_s3_base_dir()
+        # If encountering an exception during bucket access, set output
+        # base directory to a local folder
+        except Exception as exc:
+            local_out_exception = os.path.join(os.path.expanduser('~'),
+                                               'data_output')
+            iflogger.info('Access to S3 failed! Storing outputs locally at: '\
+                          '%s\nError: %s' %(local_out_exception, exc))
+            self.inputs.base_directory = local_out_exception
+
+        # If not accessing S3, just set outdir to local absolute path 
         if not s3_flag:
             outdir = os.path.abspath(outdir)
 
