@@ -138,12 +138,19 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
     def __init__(self, plugin_args=None):
         super(ResourceMultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self.plugin_args = plugin_args
+        self.processors = cpu_count()
+        memory = psutil.virtual_memory()
+        self.memory = memory.total / (1024*1024*1024)
+        if self.plugin_args:
+            if 'n_procs' in self.plugin_args:
+                self.processors = self.plugin_args['n_procs']
+            if 'memory' in self.plugin_args:
+                self.memory = self.plugin_args['memory']
 
     def _wait(self):
         if len(self.pending_tasks) > 0:
             semaphore_singleton.semaphore.acquire()
-        else:
-            semaphore_singleton.semaphore.release()
+        semaphore_singleton.semaphore.release()
 
 
     def _submit_job(self, node, updatehash=False):
@@ -162,14 +169,6 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
             Check memory (gb) and cores usage before running jobs.
         """
         executing_now = []
-        processors = cpu_count()
-        memory = psutil.virtual_memory()
-        memory = memory.total / (1024*1024*1024)
-        if self.plugin_args:
-            if 'n_procs' in self.plugin_args:
-                processors = self.plugin_args['n_procs']
-            if 'memory' in self.plugin_args:
-                memory = self.plugin_args['memory']
 
         # Check to see if a job is available
         jobids = np.flatnonzero((self.proc_pending == True) & (self.depidx.sum(axis=0) == 0).__array__())
@@ -181,8 +180,8 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
             busy_memory+= self.procs[jobid]._interface.memory
             busy_processors+= self.procs[jobid]._interface.num_threads
                 
-        free_memory = memory - busy_memory
-        free_processors = processors - busy_processors
+        free_memory = self.memory - busy_memory
+        free_processors = self.processors - busy_processors
 
 
         #check all jobs without dependency not run

@@ -143,6 +143,3 @@ def generate_gantt_chart(logfile, cores, minute_scale=10, space_between_minutes=
     html_file = open(logfile +'.html', 'wb')
     html_file.write(html_string)
     html_file.close()
-
-
-generate_gantt_chart('/home/caroline/Desktop/callback.log', 8)

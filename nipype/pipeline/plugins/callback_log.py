@@ -2,6 +2,7 @@ import datetime
 import logging
 
 def log_nodes_cb(node, status):
+    print 'status', status
     logger = logging.getLogger('callback')
     if status == 'start':
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' +\
@@ -10,10 +11,19 @@ def log_nodes_cb(node, status):
         + str(node._interface.num_threads) +  '}'
 
         logger.debug(message)
-    else:
+
+    elif status == 'end':
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' + \
         node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) +\
         '"' + ',"memory":' + str(node._interface.memory) + ',"num_threads":' \
         + str(node._interface.num_threads) +  '}'
+
+        logger.debug(message)
+
+    else:
+        message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' + \
+        node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) +\
+        '"' + ',"memory":' + str(node._interface.memory) + ',"num_threads":' \
+        + str(node._interface.num_threads) + ',"error":"True"}'
 
         logger.debug(message)
