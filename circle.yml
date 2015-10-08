@@ -27,8 +27,9 @@ test:
           FORCE_SPMMCR: 1
           FSL_COURSE_DATA: "$HOME/examples/fsl_course_data"
           FSLDIR: "$HOME/fsl/"
-          PATH:"$HOME/fsl/bin:$PATH"
-          LD_LIBRARY_PATH:'$HOME/fsl/lib FSLOUTPUTTYPE="NIFTI_GZ"'
+          PATH: "$HOME/fsl/bin:$PATH"
+          LD_LIBRARY_PATH: "$HOME/fsl/lib"
+          FSLOUTPUTTYPE: "NIFTI_GZ"
         timeout: 2600
     - set -o pipefail && cd doc && make html 2>&1 | tee ~/log.txt
     - cat ~/log.txt && if grep -q "ERROR" ~/log.txt; then false; else true; fi
@@ -38,38 +39,43 @@ test:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
           FSLDIR: "$HOME/fsl/"
-          PATH:"$HOME/fsl/bin:$PATH"
-          LD_LIBRARY_PATH:'$HOME/fsl/lib FSLOUTPUTTYPE="NIFTI_GZ"'
+          PATH: "$HOME/fsl/bin:$PATH"
+          LD_LIBRARY_PATH: "$HOME/fsl/lib"
+          FSLOUTPUTTYPE: "NIFTI_GZ"
         timeout: 1600
     - python ~/nipype/tools/run_examples.py fmri_fsl_feeds Linear l1pipeline:
         pwd: ../examples
         environment:
           FSLDIR: "$HOME/fsl/"
-          PATH:"$HOME/fsl/bin:$PATH"
-          LD_LIBRARY_PATH:'$HOME/fsl/lib FSLOUTPUTTYPE="NIFTI_GZ"'
+          PATH: "$HOME/fsl/bin:$PATH"
+          LD_LIBRARY_PATH: "$HOME/fsl/lib"
+          FSLOUTPUTTYPE: "NIFTI_GZ"
     - python ~/nipype/tools/run_examples.py fmri_spm_dartel Linear level1 l2pipeline:
         pwd: ../examples
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
           FSLDIR: "$HOME/fsl/"
-          PATH:"$HOME/fsl/bin:$PATH"
-          LD_LIBRARY_PATH:'$HOME/fsl/lib FSLOUTPUTTYPE="NIFTI_GZ"'
+          PATH: "$HOME/fsl/bin:$PATH"
+          LD_LIBRARY_PATH: "$HOME/fsl/lib"
+          FSLOUTPUTTYPE: "NIFTI_GZ"
         timeout: 1600
     - python ~/nipype/tools/run_examples.py fmri_fsl_reuse Linear level1_workflow:
         pwd: ../examples
         environment:
           FSLDIR: "$HOME/fsl/"
-          PATH:"$HOME/fsl/bin:$PATH"
-          LD_LIBRARY_PATH:'$HOME/fsl/lib FSLOUTPUTTYPE="NIFTI_GZ"'
+          PATH: "$HOME/fsl/bin:$PATH"
+          LD_LIBRARY_PATH: "$HOME/fsl/lib"
+          FSLOUTPUTTYPE: "NIFTI_GZ"
     - python ~/nipype/tools/run_examples.py fmri_spm_nested Linear level1 l2pipeline:
         pwd: ../examples
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
           FSLDIR: "$HOME/fsl/"
-          PATH:"$HOME/fsl/bin:$PATH"
-          LD_LIBRARY_PATH:'$HOME/fsl/lib FSLOUTPUTTYPE="NIFTI_GZ"'
+          PATH: "$HOME/fsl/bin:$PATH"
+          LD_LIBRARY_PATH: "$HOME/fsl/lib"
+          FSLOUTPUTTYPE: "NIFTI_GZ"
 
 general:
   artifacts:
