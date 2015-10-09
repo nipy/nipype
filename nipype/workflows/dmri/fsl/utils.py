@@ -439,7 +439,6 @@ def b0_average(in_dwi, in_bval, max_b=10.0, out_file=None):
     import numpy as np
     import nibabel as nb
     import os.path as op
-    from nipype.workflows.dmri.fsl.utils import b0_indices
 
     if out_file is None:
         fname, ext = op.splitext(op.basename(in_dwi))
