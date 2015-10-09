@@ -1660,9 +1660,7 @@ class CommandLine(BaseInterface):
                 continue
             value = getattr(self.inputs, name)
             if spec.genfile:
-                value = self._filename_from_source(name)
-                if not isdefined(value):
-                    value = self._gen_filename(name)
+                value = self._gen_filename(name)
             if not isdefined(value):
                 continue
             arg = self._format_arg(name, spec, value)
