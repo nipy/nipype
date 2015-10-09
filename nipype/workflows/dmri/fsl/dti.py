@@ -17,7 +17,7 @@ def transpose(samples_over_fibres):
 
 
 def create_bedpostx_pipeline(name='bedpostx', params={'n_fibres':2, 'fudge':1, 'burn_in':1000,
-                                                      'n_jumps':1250, 'sample_every':25, 'model':1,
+                                                      'n_jumps':1250, 'sample_every':25, 'model':2,
                                                       'cnlinear':True}):
     """
     Creates a pipeline that does the same as bedpostx script from FSL -
