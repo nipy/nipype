@@ -341,7 +341,7 @@ class OneSampleTTest(GLMFit):
 
 class BinarizeInputSpec(FSTraitedSpec):
     in_file = File(exists=True, argstr='--i %s', mandatory=True,
-                  copyfile=False, desc='input volume')
+                   copyfile=False, desc='input volume')
     min = traits.Float(argstr='--min %f', xor=['wm_ven_csf'],
                        desc='min thresh')
     max = traits.Float(argstr='--max %f', xor=['wm_ven_csf'],
@@ -358,8 +358,9 @@ class BinarizeInputSpec(FSTraitedSpec):
          desc='set match vals those for aseg ventricles+choroid (not 4th)')
     wm_ven_csf = traits.Bool(argstr='--wm+vcsf', xor=['min', 'max'],
           desc='WM and ventricular CSF, including choroid (not 4th)')
-    binary_file = File(argstr='--o %s', genfile=True,
-                  desc='binary output volume')
+    binary_file = File(
+        argstr='--o %s', name_source='in_file', name_template='_bin',
+        keep_extension=True, desc='binary output volume')
     out_type = traits.Enum('nii', 'nii.gz', 'mgz', argstr='',
                            desc='output file type')
     count_file = traits.Either(traits.Bool, File,
@@ -408,7 +409,7 @@ class Binarize(FSCommand):
 
     >>> binvol = Binarize(in_file='structural.nii', min=10, binary_file='foo_out.nii')
     >>> binvol.cmdline
-    'mri_binarize --o foo_out.nii --i structural.nii --min 10.000000'
+    'mri_binarize --o structural_bin.nii --i structural.nii --min 10.000000'
 
    """
 

@@ -31,7 +31,7 @@ class Dcm2niiInputSpec(CommandLineInputSpec):
     gzip_output = traits.Bool(False, argstr='-g', usedefault=True)
     id_in_filename = traits.Bool(False, argstr='-i', usedefault=True)
     nii_output = traits.Bool(True, argstr='-n', usedefault=True)
-    output_dir = Directory(exists=True, argstr='-o %s', genfile=True)
+    output_dir = Directory('.', exists=True, argstr='-o %s', usedefault=True)
     protocol_in_filename = traits.Bool(True, argstr='-p', usedefault=True)
     reorient = traits.Bool(argstr='-r')
     spm_analyze = traits.Bool(argstr='-s', xor=['nii_output'])

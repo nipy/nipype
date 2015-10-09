@@ -947,7 +947,6 @@ class BaseInterface(Interface):
                 raise ValueError(('name_source of \'%s\' trait sould be an '
                                  'input trait name') % name)
 
-            ext = ''
             if isdefined(getattr(self.inputs, ns)):
                 name_source = ns
                 source = getattr(self.inputs, name_source)
@@ -956,7 +955,7 @@ class BaseInterface(Interface):
 
                 # special treatment for files
                 try:
-                    _, base, ext = split_filename(source)
+                    _, base, _ = split_filename(source)
                 except AttributeError:
                     base = source
             else:
@@ -1660,10 +1659,12 @@ class CommandLine(BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if spec.genfile:
-                value = self._gen_filename(name)
             if not isdefined(value):
-                continue
+                if spec.genfile:
+                    value = self._gen_filename(name)
+                else:
+                    continue
+
             arg = self._format_arg(name, spec, value)
             if arg is None:
                 continue
