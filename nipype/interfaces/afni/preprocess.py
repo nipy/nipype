@@ -362,7 +362,7 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
                         xor=['mask_only_targets'])
 
     out_file = File(name_template="%s_similarity_matrix.1D", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
+                    argstr='-prefix %s', name_source="in_file", keep_extension=False)
 
 
 class AutoTcorrelate(AFNICommand):
@@ -1643,7 +1643,7 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
         exists=True,
         copyfile=False)
     out_file = File(name_template='%s_blur', desc='output to the file', argstr='-prefix %s',
-                    name_source='in_file', position=-1)
+                    name_source='in_file', position=-1, keep_extension=False)
     mask = File(
         desc='Mask dataset, if desired.  Blurring will occur only within the mask.  Voxels NOT in the mask will be set to zero in the output.',
         argstr='-mask %s')
@@ -1940,7 +1940,7 @@ class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
         exists=True,
         copyfile=False)
     out_file = File(name_template="%s.nii", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
+                    argstr='-prefix %s', name_source="in_file", keep_extension=False)
     hash_files = False
 
 class AFNItoNIFTI(AFNICommand):
