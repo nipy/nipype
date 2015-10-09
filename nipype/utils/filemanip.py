@@ -18,9 +18,10 @@ import shutil
 
 import numpy as np
 
-from ..interfaces.traits_extension import isdefined
 from .misc import is_container
 from .config import mkdir_p
+from ..external.six import string_types
+from ..interfaces.traits_extension import isdefined
 
 from .. import logging, config
 fmlogger = logging.getLogger("filemanip")
@@ -349,7 +350,7 @@ def copyfiles(filelist, dest, copy=False, create_new=False):
 def filename_to_list(filename):
     """Returns a list given either a string or a list
     """
-    if isinstance(filename, (str, str)):
+    if isinstance(filename, (str, string_types)):
         return [filename]
     elif isinstance(filename, list):
         return filename

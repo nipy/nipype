@@ -37,6 +37,8 @@ except ImportError:
     from ordereddict import OrderedDict
 logger = logging.getLogger(__name__)
 
+from ..external.six import string_types
+
 #  # PROV record constants - PROV-DM LC
 #  C1. Entities/Activities
 PROV_REC_ENTITY = 1
@@ -190,7 +192,7 @@ def _parse_xsd_dateTime(s):
 
 
 def _ensure_datetime(time):
-    if isinstance(time, str):
+    if isinstance(time, string_types):
         return _parse_xsd_dateTime(time)
     else:
         return time
@@ -235,12 +237,12 @@ def parse_xsd_types(value, datatype):
 
 
 def _ensure_multiline_string_triple_quoted(s):
-    format_str = u'"""%s"""' if isinstance(s, str) and '\n' in s else u'"%s"'
+    format_str = u'"""%s"""' if isinstance(s, string_types) and '\n' in s else u'"%s"'
     return format_str % s
 
 
 def encoding_PROV_N_value(value):
-    if isinstance(value, str):
+    if isinstance(value, string_types):
         return _ensure_multiline_string_triple_quoted(value)
     elif isinstance(value, datetime.datetime):
         return value.isoformat()
@@ -394,11 +396,11 @@ class Namespace(object):
         return self._uri
 
     def contains(self, identifier):
-        uri = identifier if isinstance(identifier, (str, str)) else (identifier.get_uri() if isinstance(identifier, Identifier) else None)
+        uri = identifier if isinstance(identifier, (str, string_types)) else (identifier.get_uri() if isinstance(identifier, Identifier) else None)
         return uri.startswith(self._uri) if uri else False
 
     def qname(self, identifier):
-        uri = identifier if isinstance(identifier, (str, str)) else (identifier.get_uri() if isinstance(identifier, Identifier) else None)
+        uri = identifier if isinstance(identifier, (str, string_types)) else (identifier.get_uri() if isinstance(identifier, Identifier) else None)
         if uri and uri.startswith(self._uri):
             return QName(self, uri[len(self._uri):])
         else:
@@ -539,7 +541,7 @@ class ProvRecord(object):
         if isinstance(literal, URIRef):
             return literal
 
-        if isinstance(literal, str):
+        if isinstance(literal, string_types):
             return str(literal)
 
         if isinstance(literal, Literal) and literal.has_no_langtag():
@@ -1347,7 +1349,7 @@ class NamespaceManager(dict):
             else:
                 #  return the original identifier
                 return identifier
-        elif isinstance(identifier, (str, str)):
+        elif isinstance(identifier, (str, string_types)):
             if identifier.startswith('_:'):
                 return None
             elif ':' in identifier:
@@ -1571,7 +1573,7 @@ class ProvBundle(ProvEntity):
                          key=lambda tuple_rec: tuple_rec[0])
 
         record_map = {}
-        _parse_attr_value = lambda value: record_map[value] if (isinstance(value, str) and value in record_map) else self._decode_json_representation(value)
+        _parse_attr_value = lambda value: record_map[value] if (isinstance(value, string_types) and value in record_map) else self._decode_json_representation(value)
         #  Create all the records before setting their attributes
         for (record_type, identifier, content) in records:
             if record_type == PROV_REC_BUNDLE:

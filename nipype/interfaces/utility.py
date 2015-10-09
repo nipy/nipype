@@ -21,13 +21,14 @@ from textwrap import dedent
 import numpy as np
 import nibabel as nb
 
-from nipype.utils.filemanip import (filename_to_list, copyfile, split_filename)
-from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec, File,
-                                    Undefined, isdefined, OutputMultiPath,
-    InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
-from nipype.interfaces.io import IOBase, add_traits
-from nipype.testing import assert_equal
-from nipype.utils.misc import getsource, create_function_from_source
+from .base import (traits, TraitedSpec, DynamicTraitedSpec, File,
+                   Undefined, isdefined, OutputMultiPath,
+                   InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
+from .io import IOBase, add_traits
+from ..external.six import string_types
+from ..testing import assert_equal
+from ..utils.filemanip import (filename_to_list, copyfile, split_filename)
+from ..utils.misc import getsource, create_function_from_source
 
 
 class IdentityInterface(IOBase):
@@ -406,7 +407,7 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept ' \
                                     'function objects defined interactively ' \
                                     'in a python session')
-            elif isinstance(function, str):
+            elif isinstance(function, string_types):
                 self.inputs.function_str = function
             else:
                 raise Exception('Unknown type of function')
@@ -424,7 +425,7 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-            elif isinstance(new, str):
+            elif isinstance(new, string_types):
                 function_source = new
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})

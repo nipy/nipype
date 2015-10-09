@@ -27,6 +27,7 @@ import nipype.pipeline.engine as pe
 import nipype.algorithms.modelgen as model
 import nipype.algorithms.rapidart as ra
 from nipype.algorithms.misc import TSNR
+from nipype.external.six import string_types
 from nipype.interfaces.c3 import C3dAffineTool
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
@@ -769,7 +770,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     def check_behav_list(behav, run_id, conds):
         import numpy as np
         num_conds = len(conds)
-        if isinstance(behav, str):
+        if isinstance(behav, string_types):
             behav = [behav]
         behav_array = np.array(behav).flatten()
         num_elements = behav_array.shape[0]

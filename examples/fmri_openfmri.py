@@ -26,6 +26,7 @@ import nipype.algorithms.rapidart as ra
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
+from nipype.external.six import string_types
 from nipype.workflows.fmri.fsl import (create_featreg_preproc,
                                        create_modelfit_workflow,
                                        create_fixed_effects_flow,
@@ -239,7 +240,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
     def check_behav_list(behav):
         out_behav = []
-        if isinstance(behav, str):
+        if isinstance(behav, string_types):
             behav = [behav]
         for val in behav:
             if not isinstance(val, list):

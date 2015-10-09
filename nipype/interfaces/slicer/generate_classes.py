@@ -13,6 +13,8 @@ from shutil import rmtree
 import keyword
 python_keywords = keyword.kwlist  # If c++ SEM module uses one of these key words as a command line parameter, we need to modify variable
 
+from ..external.six import string_types
+
 
 def force_to_valid_python_variable_name(old_name):
     """  Valid c++ names are not always valid in python, so
@@ -49,7 +51,7 @@ import os\n\n\n"""
 def crawl_code_struct(code_struct, package_dir):
     subpackages = []
     for k, v in code_struct.items():
-        if isinstance(v, str) or isinstance(v, str):
+        if isinstance(v, str) or isinstance(v, string_types):
             module_name = k.lower()
             class_name = k
             class_code = v
@@ -59,7 +61,7 @@ def crawl_code_struct(code_struct, package_dir):
             l1 = {}
             l2 = {}
             for key in list(v.keys()):
-                if (isinstance(v[key], str) or isinstance(v[key], str)):
+                if (isinstance(v[key], str) or isinstance(v[key], string_types)):
                     l1[key] = v[key]
                 else:
                     l2[key] = v[key]
@@ -358,7 +360,7 @@ def grab_xml(module, launcher, mipav_hacks=False):
 def parse_params(params):
     list = []
     for key, value in params.items():
-        if isinstance(value, str):
+        if isinstance(value, string_types):
             list.append('%s="%s"' % (key, value.replace('"', "'")))
         else:
             list.append('%s=%s' % (key, value))

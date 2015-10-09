@@ -34,7 +34,7 @@ from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
                     BaseInterfaceInputSpec, Directory, Undefined)
 from ..matlab import MatlabCommand
 from ...utils import spm_docs as sd
-
+from ...external.six import string_types
 from ... import logging
 logger = logging.getLogger('interface')
 
@@ -420,7 +420,7 @@ class SPMCommand(BaseInterface):
                     if isinstance(val, np.ndarray):
                         jobstring += self._generate_job(prefix=None,
                                                         contents=val)
-                    elif isinstance(val, str):
+                    elif isinstance(val, string_types):
                         jobstring += '\'%s\';...\n' % (val)
                     else:
                         jobstring += '%s;...\n' % str(val)
@@ -435,7 +435,7 @@ class SPMCommand(BaseInterface):
                         jobstring += self._generate_job(newprefix,
                                                         val[field])
             return jobstring
-        if isinstance(contents, str):
+        if isinstance(contents, string_types):
             jobstring += "%s = '%s';\n" % (prefix, contents)
             return jobstring
         jobstring += "%s = %s;\n" % (prefix, str(contents))

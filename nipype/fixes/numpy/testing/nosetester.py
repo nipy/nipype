@@ -8,8 +8,11 @@ from __future__ import print_function
 from __future__ import absolute_import
 from builtins import str
 from builtins import object
+
 import os
 import sys
+
+from ....external.six import string_types
 
 
 def get_package_name(filepath):
@@ -171,7 +174,7 @@ class NoseTester(object):
         '''
         argv = [__file__, self.package_path, '-s']
         if label and label != 'full':
-            if not isinstance(label, str):
+            if not isinstance(label, string_types):
                 raise TypeError('Selection label should be a string')
             if label == 'fast':
                 label = 'not slow'

@@ -16,17 +16,15 @@ import string
 import errno
 from os import path as op
 from glob import glob
-from nipype.interfaces.base import (TraitedSpec,
-                                    DynamicTraitedSpec,
-                                    InputMultiPath,
-                                    File,
-                                    Directory,
-                                    traits,
-                                    BaseInterface,
-                                   )
+
 import nibabel as nb
-from nipype.interfaces.traits_extension import isdefined, Undefined
 import imghdr
+
+from .base import (TraitedSpec, DynamicTraitedSpec,
+                   InputMultiPath, File, Directory,
+                   traits, BaseInterface)
+from .traits_extension import isdefined, Undefined
+from ..external.six import string_types
 
 have_dcmstack = True
 try:
@@ -132,7 +130,7 @@ class DcmStack(NiftiGeneratorBase):
     output_spec = DcmStackOutputSpec
 
     def _get_filelist(self, trait_input):
-        if isinstance(trait_input, str):
+        if isinstance(trait_input, string_types):
             if op.isdir(trait_input):
                 return glob(op.join(trait_input, '*.dcm'))
             else:
@@ -368,7 +366,7 @@ class MergeNifti(NiftiGeneratorBase):
               ]
         if self.inputs.sort_order:
             sort_order = self.inputs.sort_order
-            if isinstance(sort_order, str):
+            if isinstance(sort_order, string_types):
                 sort_order = [sort_order]
             nws.sort(key=make_key_func(sort_order))
         if self.inputs.merge_dim == traits.Undefined:

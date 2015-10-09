@@ -17,6 +17,7 @@ from builtins import str
 import subprocess
 from nipype.interfaces.base import CommandLine
 from nipype.utils.misc import is_container
+from nipype.external.six import string_types
 
 
 def grab_doc(cmd, trap_error=True):
@@ -279,7 +280,7 @@ def _parse_doc(doc, style=['--']):
     # individual flag/option.
     doclist = doc.split('\n')
     optmap = {}
-    if isinstance(style, str):
+    if isinstance(style, string_types):
         style = [style]
     for line in doclist:
         linelist = line.split()

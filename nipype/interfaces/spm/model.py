@@ -23,12 +23,13 @@ import numpy as np
 import scipy.io as sio
 
 # Local imports
-from nipype.interfaces.base import (Bunch, traits, TraitedSpec, File, Directory,
-                                    OutputMultiPath, InputMultiPath, isdefined)
-from nipype.interfaces.spm.base import (SPMCommand, SPMCommandInputSpec,
-                                        scans_for_fnames)
-from nipype.utils.filemanip import (filename_to_list, list_to_filename,
-                                    split_filename)
+from ..interfaces.base import (Bunch, traits, TraitedSpec, File, Directory,
+                               OutputMultiPath, InputMultiPath, isdefined)
+from ..interfaces.spm.base import (SPMCommand, SPMCommandInputSpec,
+                                   scans_for_fnames)
+from ..utils.filemanip import (filename_to_list, list_to_filename,
+                               split_filename)
+from ...external.six import string_types
 
 from ... import logging
 logger = logging.getLogger('interface')
@@ -201,7 +202,7 @@ class EstimateModel(SPMCommand):
         if opt == 'spm_mat_file':
             return np.array([str(val)], dtype=object)
         if opt == 'estimation_method':
-            if isinstance(val, str):
+            if isinstance(val, string_types):
                 return {'%s' % val: 1}
             else:
                 return val

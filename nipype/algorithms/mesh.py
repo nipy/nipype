@@ -15,16 +15,16 @@ from builtins import zip
 from builtins import str
 from past.utils import old_div
 
+import os.path as op
+from warnings import warn
 
 import numpy as np
 from numpy import linalg as nla
-import os.path as op
 
 from .. import logging
-
+from ..external.six import string_types
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
-from warnings import warn
 iflogger = logging.getLogger('interface')
 
 
@@ -378,7 +378,7 @@ class MeshWarpMaths(BaseInterface):
         operator = self.inputs.operator
         opfield = np.ones_like(points1)
 
-        if isinstance(operator, str):
+        if isinstance(operator, string_types):
             r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
             vtk2 = r2.output
             r2.update()

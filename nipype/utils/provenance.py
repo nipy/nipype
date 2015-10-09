@@ -20,6 +20,7 @@ except ImportError:
 #    import prov.model as pm
 #except ImportError:
 from ..external import provcopy as pm
+from ..external.six import string_types
 
 from .. import get_info
 from .filemanip import (md5, hashlib, hash_infile)
@@ -99,7 +100,7 @@ def _get_sorteddict(object, dictwithhash=False):
         if isinstance(object, tuple):
             out = tuple(out)
     else:
-        if isinstance(object, str) and os.path.isfile(object):
+        if isinstance(object, string_types) and os.path.isfile(object):
             hash = hash_infile(object)
             if dictwithhash:
                 out = (object, hash)
@@ -122,7 +123,7 @@ def safe_encode(x, as_literal=True):
         else:
             return value
     try:
-        if isinstance(x, (str, str)):
+        if isinstance(x, (str, string_types)):
             if os.path.exists(x):
                 value = 'file://%s%s' % (getfqdn(), x)
                 if not as_literal:
@@ -202,7 +203,7 @@ def prov_encode(graph, value, create_container=True):
                     entities.append(item_entity)
                     if isinstance(item, list):
                         continue
-                    if not isinstance(item_entity.get_value()[0], str):
+                    if not isinstance(item_entity.get_value()[0], string_types):
                         raise ValueError('Not a string literal')
                     if 'file://' not in item_entity.get_value()[0]:
                         raise ValueError('No file found')
@@ -218,7 +219,7 @@ def prov_encode(graph, value, create_container=True):
     else:
         encoded_literal = safe_encode(value)
         attr = {pm.PROV['value']: encoded_literal}
-        if isinstance(value, str) and os.path.exists(value):
+        if isinstance(value, string_types) and os.path.exists(value):
             attr.update({pm.PROV['location']: encoded_literal})
             if not os.path.isdir(value):
                 sha512 = hash_infile(value, crypto=hashlib.sha512)

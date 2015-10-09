@@ -28,6 +28,7 @@ from string import Template
 import select
 import subprocess
 import sys
+import random, time, fnmatch
 from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
@@ -45,7 +46,7 @@ from ..utils.misc import is_container, trim, str2bool
 from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
-import random, time, fnmatch
+from ..external.six import string_types
 
 nipype_version = LooseVersion(__version__)
 
@@ -590,7 +591,7 @@ class BaseTraitedSpec(traits.HasTraits):
                 out = tuple(out)
         else:
             if isdefined(object):
-                if (hash_files and isinstance(object, str) and
+                if (hash_files and isinstance(object, string_types) and
                         os.path.isfile(object)):
                     if hash_method is None:
                         hash_method = config.get('execution', 'hash_method')
@@ -1065,7 +1066,7 @@ class BaseInterface(Interface):
             else:
                 inputs_str = ''
 
-            if len(e.args) == 1 and isinstance(e.args[0], str):
+            if len(e.args) == 1 and isinstance(e.args[0], string_types):
                 e.args = (e.args[0] + " ".join([message, inputs_str]),)
             else:
                 e.args += (message, )
@@ -1565,7 +1566,7 @@ class CommandLine(BaseInterface):
                     iflogger.warn('Only one name_source per trait is allowed')
                 ns = ns[0]
 
-            if not isinstance(ns, str):
+            if not isinstance(ns, string_types):
                 raise ValueError(('name_source of \'%s\' trait sould be an '
                                  'input trait name') % name)
 

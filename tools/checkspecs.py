@@ -14,6 +14,7 @@ import sys
 import warnings
 
 from nipype.interfaces.base import BaseInterface
+from nipype.external.six import string_types
 
 
 # Functions and classes
@@ -217,7 +218,7 @@ class InterfaceChecker(object):
                         for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
                                 continue
-                            if isinstance(value, str):
+                            if isinstance(value, string_types):
                                 quote = "'"
                                 if "'" in value:
                                     quote = '"'
@@ -261,7 +262,7 @@ class InterfaceChecker(object):
                         for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
                                 continue
-                            if isinstance(value, str):
+                            if isinstance(value, string_types):
                                 quote = "'"
                                 if "'" in value:
                                     quote = '"'
