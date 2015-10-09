@@ -1579,11 +1579,12 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
                               desc=('Alternative (to --warpres) specification of the resolution of '
                                     'the output spline-field.'))
 
-    out_file = File(argstr='--out=%s', position=-1, name_source = ['in_file'], output_name='out_file',
-                    desc=('Name of output file. The format of the output depends on what other '
-                          'parameters are set. The default format is a (4D) field-file. If the '
-                          '--outformat is set to spline the format will be a (4D) file of spline '
-                          'coefficients.'))
+    out_file = File(
+        argstr='--out=%s', position=-1, name_source=['in_file'], name_template='%s_coeffs.nii', keep_extension=True,
+        desc=('Name of output file. The format of the output depends on what other '
+              'parameters are set. The default format is a (4D) field-file. If the '
+              '--outformat is set to spline the format will be a (4D) file of spline '
+              'coefficients.'))
 
     write_jacobian = traits.Bool(False, mandatory=True, usedefault=True,
                                  desc='Switch on --jac flag with automatically generated filename')
