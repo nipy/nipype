@@ -249,7 +249,7 @@ def hmc_split(in_file, in_bval, ref_num=0, lowbval=5.0):
 
     volid = lowbs[0]
     if (isdefined(ref_num) and (ref_num < len(lowbs))):
-        volid = [ref_num]
+        volid = ref_num
 
     if volid == 0:
         data = data[..., 1:]
@@ -266,8 +266,8 @@ def hmc_split(in_file, in_bval, ref_num=0, lowbval=5.0):
     out_mov = op.abspath('hmc_mov.nii.gz')
     out_bval = op.abspath('bval_split.txt')
 
-    hdr.set_data_shape(refdata.shape)
     refdata = data[..., volid]
+    hdr.set_data_shape(refdata.shape)
     nb.Nifti1Image(refdata, im.get_affine(), hdr).to_filename(out_ref)
 
     hdr.set_data_shape(data.shape)
