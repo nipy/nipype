@@ -689,8 +689,9 @@ class CopyInputSpec(AFNICommandInputSpec):
                    mandatory=True,
                    exists=True,
                    copyfile=False)
-    out_file = File(name_template="%s_copy", desc='output image file name',
-                    argstr='%s', position=-1, name_source="in_file")
+    out_file = File(
+        name_template="%s_copy", desc='output image file name', argstr='%s',
+        position=-1, name_source="in_file", keep_extension=False)
 
 
 class Copy(AFNICommand):

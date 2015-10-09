@@ -947,6 +947,7 @@ class BaseInterface(Interface):
                 raise ValueError(('name_source of \'%s\' trait sould be an '
                                  'input trait name') % name)
 
+            ext = ''
             if isdefined(getattr(self.inputs, ns)):
                 name_source = ns
                 source = getattr(self.inputs, name_source)
@@ -966,9 +967,10 @@ class BaseInterface(Interface):
                 return self._resolve_namesource(ns, chain)
 
             retval = name_template % base
-
-            if trait_spec.keep_extension is None or trait_spec.keep_extension:
-                retval += ext
+            _, _, ext = split_filename(retval)
+            if trait_spec.keep_extension and ext:
+                return retval
+            return self._overload_extension(retval, name)
 
         return retval
 
@@ -994,6 +996,8 @@ class BaseInterface(Interface):
                                                'not be resolved' % (name, ns))
                 setattr(self.inputs, name, value)
 
+    def _overload_extension(self, value, name=None):
+        return value
 
 
     def _check_mandatory_inputs(self):
@@ -1635,9 +1639,6 @@ class CommandLine(BaseInterface):
 
     def _gen_filename(self, name):
         raise NotImplementedError
-
-    def _overload_extension(self, value, name=None):
-        return value
 
     def _parse_inputs(self, skip=None):
         """Parse all inputs using the ``argstr`` format string in the Trait.
