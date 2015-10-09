@@ -750,6 +750,8 @@ class BaseInterface(Interface):
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
+        self.memory = 1
+        self.num_threads = 1
 
     @classmethod
     def help(cls, returnhelp=False):
