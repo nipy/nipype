@@ -776,6 +776,7 @@ class BaseInterface(Interface):
         xor = spec.xor
         requires = spec.requires
         argstr = spec.argstr
+        ns = spec.name_source
 
         manhelpstr = ['\t%s' % name]
 
@@ -819,6 +820,14 @@ class BaseInterface(Interface):
             line = '%s' % ', '.join(others)
             manhelpstr += wrap(line, 70,
                                initial_indent='\t\trequires: ',
+                               subsequent_indent='\t\t ')
+
+        if ns:
+            tpl = ', name_template not defined'
+            if spec.name_template:
+                tpl = ', name_template is \'%s\'' % spec.name_template
+            manhelpstr += wrap(('name source: %s' % ns) + tpl, 70,
+                               initial_indent='\t\t',
                                subsequent_indent='\t\t ')
         return manhelpstr
 
@@ -910,6 +919,82 @@ class BaseInterface(Interface):
                        (self.__class__.__name__, ', '.join(spec.xor),
                         self.__class__.__name__))
                 raise ValueError(msg)
+
+    def _resolve_namesource(self, name, chain=None):
+        if chain is None:
+            chain = []
+
+        trait_spec = self.inputs.trait(name)
+        retval = getattr(self.inputs, name)
+
+        if not isdefined(retval) or "%s" in retval:
+            if not trait_spec.name_source:
+                return retval
+            if isdefined(retval) and "%s" in retval:
+                name_template = retval
+            else:
+                name_template = trait_spec.name_template
+            if not name_template:
+                name_template = "%s_generated"
+
+            ns = trait_spec.name_source
+            while isinstance(ns, list):
+                if len(ns) > 1:
+                    iflogger.warn('Only one name_source per trait is allowed')
+                ns = ns[0]
+
+            if not isinstance(ns, six.string_types):
+                raise ValueError(('name_source of \'%s\' trait sould be an '
+                                 'input trait name') % name)
+
+            if isdefined(getattr(self.inputs, ns)):
+                name_source = ns
+                source = getattr(self.inputs, name_source)
+                while isinstance(source, list):
+                    source = source[0]
+
+                # special treatment for files
+                try:
+                    _, base, ext = split_filename(source)
+                except AttributeError:
+                    base = source
+            else:
+                if name in chain:
+                    raise NipypeInterfaceError('Mutually pointing name_sources')
+
+                chain.append(name)
+                return self._resolve_namesource(ns, chain)
+
+            retval = name_template % base
+
+            if trait_spec.keep_extension is None or trait_spec.keep_extension:
+                retval += ext
+
+        return retval
+
+
+    def _update_autonames(self):
+        """
+        Checks for inputs undefined but providing name_source
+        """
+
+        metadata = dict(name_source=lambda t: t is not None)
+        for name, spec in self.inputs.traits(**metadata).items():
+            value = getattr(self.inputs, name)
+
+            if isdefined(value):
+                continue
+
+            ns = spec.name_source
+            if ns is not None:
+                value = self._resolve_namesource(name)
+
+                if not isdefined(value):
+                    raise NipypeInterfaceError('Input %s with name_source=%s could '
+                                               'not be resolved' % (name, ns))
+                setattr(self.inputs, name, value)
+
+
 
     def _check_mandatory_inputs(self):
         """ Raises an exception if a mandatory input is Undefined
@@ -1016,6 +1101,7 @@ class BaseInterface(Interface):
         """
         self.inputs.set(**inputs)
         self._check_mandatory_inputs()
+        self._update_autonames()
         self._check_version_requirements(self.inputs)
         interface = self.__class__
         # initialize provenance tracking
@@ -1104,6 +1190,16 @@ class BaseInterface(Interface):
         """
         predicted_outputs = self._list_outputs()
         outputs = self._outputs()
+
+        # fill automatically resolved outputs
+        metadata = dict(name_source=lambda t: t is not None)
+
+        for name, spec in self.inputs.traits(**metadata).iteritems():
+            out_name = name
+            if spec.output_name is not None:
+                out_name = spec.output_name
+            setattr(outputs, out_name, os.path.abspath(getattr(self.inputs, name)))
+
         if predicted_outputs:
             _unavailable_outputs = []
             if outputs:
@@ -1403,6 +1499,7 @@ class CommandLine(BaseInterface):
         """ `command` plus any arguments (args)
         validates arguments and generates command line"""
         self._check_mandatory_inputs()
+        self._update_autonames()
         allargs = self._parse_inputs()
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
@@ -1536,78 +1633,11 @@ class CommandLine(BaseInterface):
             # Append options using format string.
             return argstr % value
 
-    def _filename_from_source(self, name, chain=None):
-        if chain is None:
-            chain = []
-
-        trait_spec = self.inputs.trait(name)
-        retval = getattr(self.inputs, name)
-
-        if not isdefined(retval) or "%s" in retval:
-            if not trait_spec.name_source:
-                return retval
-            if isdefined(retval) and "%s" in retval:
-                name_template = retval
-            else:
-                name_template = trait_spec.name_template
-            if not name_template:
-                name_template = "%s_generated"
-
-            ns = trait_spec.name_source
-            while isinstance(ns, list):
-                if len(ns) > 1:
-                    iflogger.warn('Only one name_source per trait is allowed')
-                ns = ns[0]
-
-            if not isinstance(ns, six.string_types):
-                raise ValueError(('name_source of \'%s\' trait sould be an '
-                                 'input trait name') % name)
-
-            if isdefined(getattr(self.inputs, ns)):
-                name_source = ns
-                source = getattr(self.inputs, name_source)
-                while isinstance(source, list):
-                    source = source[0]
-
-                # special treatment for files
-                try:
-                    _, base, _ = split_filename(source)
-                except AttributeError:
-                    base = source
-            else:
-                if name in chain:
-                    raise NipypeInterfaceError('Mutually pointing name_sources')
-
-                chain.append(name)
-                base = self._filename_from_source(ns, chain)
-
-            chain = None
-            retval = name_template % base
-            _, _, ext = split_filename(retval)
-            if trait_spec.keep_extension and ext:
-                return retval
-            return self._overload_extension(retval, name)
-
-        return retval
-
     def _gen_filename(self, name):
         raise NotImplementedError
 
     def _overload_extension(self, value, name=None):
         return value
-
-    def _list_outputs(self):
-        metadata = dict(name_source=lambda t: t is not None)
-        traits = self.inputs.traits(**metadata)
-        if traits:
-            outputs = self.output_spec().get()
-            for name, trait_spec in traits.iteritems():
-                out_name = name
-                if trait_spec.output_name is not None:
-                    out_name = trait_spec.output_name
-                outputs[out_name] = \
-                    os.path.abspath(self._filename_from_source(name))
-            return outputs
 
     def _parse_inputs(self, skip=None):
         """Parse all inputs using the ``argstr`` format string in the Trait.
@@ -1629,7 +1659,7 @@ class CommandLine(BaseInterface):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
-            if spec.genfile or spec.name_source:
+            if spec.genfile:
                 value = self._filename_from_source(name)
                 if not isdefined(value):
                     value = self._gen_filename(name)

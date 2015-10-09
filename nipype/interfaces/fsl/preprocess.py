@@ -38,7 +38,8 @@ class BETInputSpec(FSLCommandInputSpec):
                    desc='input file to skull strip',
                    argstr='%s', position=0, mandatory=True)
     out_file = File(desc='name of output skull stripped image',
-                    argstr='%s', position=1, genfile=True, hash_files=False)
+                    argstr='%s', position=1, name_source=['in_file'],
+                    name_template='%s_brain', hash_files=False)
     outline = traits.Bool(desc='create surface outline image',
                           argstr='-o')
     mask = traits.Bool(desc='create binary mask image',
