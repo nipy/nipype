@@ -39,7 +39,7 @@ def get_nipype_gitversion():
     except Exception:
         pass
     else:
-        ver = o.strip().split('-')[-1]
+        ver = o.decode().strip().split('-')[-1]
     return ver
 
 if '-dev' in _version_extra:
