@@ -2,11 +2,12 @@
 
 from future import standard_library
 standard_library.install_aliases()
-from io import StringIO
+
 import unittest, sys
-from nipype.utils import nipype_cmd
 from contextlib import contextmanager
-from nipype.external.six import PY2, PY3
+
+from nipype.external.six import PY2, PY3, StringIO
+from nipype.utils import nipype_cmd
 
 @contextmanager
 def capture_sys_output():

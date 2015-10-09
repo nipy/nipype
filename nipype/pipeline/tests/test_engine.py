@@ -405,8 +405,8 @@ wf1.write_graph(graph2use='exec')
 import nipype.pipeline.engine as pe
 import nipype.interfaces.spm as spm
 import os
+from nipype.external.six import StringIO
 from nipype.utils.config import config
-from StringIO import StringIO
 
 config.readfp(StringIO("""
 [execution]

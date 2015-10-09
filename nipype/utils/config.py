@@ -10,7 +10,6 @@ hash_method : content, timestamp
 '''
 from future import standard_library
 standard_library.install_aliases()
-from builtins import str
 from builtins import object
 
 import configparser
@@ -18,10 +17,10 @@ from json import load, dump
 import os
 import shutil
 import errno
-from io import StringIO
 from warnings import warn
 
 from ..external import portalocker
+from ..external.six import StringIO
 
 
 # Get home directory in platform-agnostic way

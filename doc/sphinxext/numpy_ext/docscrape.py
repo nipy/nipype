@@ -10,8 +10,10 @@ import inspect
 import textwrap
 import re
 import pydoc
-from io import StringIO
 from warnings import warn
+
+from nipype.external.six import StringIO
+
 
 class Reader(object):
     """A line-based string reader.
