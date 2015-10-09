@@ -12,7 +12,6 @@ better = fsl.Bet()
 docstring = docparse.get_doc(better.cmd, better.opt_map)
 
 """
-from __future__ import unicode_literals
 from builtins import str
 
 import subprocess

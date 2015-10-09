@@ -11,7 +11,6 @@ measures to evaluate results from other processing units.
     >>> os.chdir(datadir)
 
 '''
-from __future__ import unicode_literals
 from __future__ import division
 from builtins import zip
 from builtins import range

@@ -17,7 +17,6 @@
     >>> os.chdir(datadir)
 
 """
-from __future__ import unicode_literals
 from builtins import zip
 from builtins import filter
 from builtins import str

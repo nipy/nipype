@@ -3,7 +3,6 @@
 """Tests for the engine module
 """
 from __future__ import print_function
-from __future__ import unicode_literals
 from builtins import str
 from copy import deepcopy
 from glob import glob

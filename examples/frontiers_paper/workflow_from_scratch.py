@@ -6,7 +6,6 @@ Workflow from scratch
 =====================
 
 """
-from __future__ import unicode_literals
 from builtins import range
 
 import nipype.interfaces.io as nio           # Data i/o

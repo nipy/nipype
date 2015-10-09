@@ -6,7 +6,6 @@
     >>> os.chdir(datadir)
 
 """
-from __future__ import unicode_literals
 import os
 
 from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,

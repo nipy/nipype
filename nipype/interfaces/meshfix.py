@@ -9,7 +9,6 @@
     >>> os.chdir(datadir)
 
 """
-from __future__ import unicode_literals
 from .base import (CommandLine, CommandLineInputSpec,
                    traits, TraitedSpec, isdefined,
                    File)

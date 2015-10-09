@@ -5,7 +5,6 @@
 
 Top-level namespace for fsl.
 """
-from __future__ import unicode_literals
 
 from .base import (FSLCommand, Info, check_fsl, no_fsl, no_fsl_course_data)
 from .preprocess import (FAST, FLIRT, ApplyXfm, BET, MCFLIRT, FNIRT, ApplyWarp,

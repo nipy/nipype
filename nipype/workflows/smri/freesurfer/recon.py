@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import nipype.pipeline.engine as pe
 import nipype.interfaces.freesurfer as fs
 import nipype.interfaces.utility as niu

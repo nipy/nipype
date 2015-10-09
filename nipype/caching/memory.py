@@ -9,7 +9,6 @@ name-steps pipeline: getting back scope in command-line based programming.
    >>> os.chdir(datadir)
 """
 from __future__ import print_function
-from __future__ import unicode_literals
 from builtins import object
 
 import os

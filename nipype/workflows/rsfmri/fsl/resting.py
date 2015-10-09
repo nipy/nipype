@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 from __future__ import division
 from past.utils import old_div
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-

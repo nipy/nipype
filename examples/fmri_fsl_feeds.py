@@ -12,7 +12,6 @@ stimuli.
 You can find it at http://www.fmrib.ox.ac.uk/fsl/feeds/doc/index.html
 
 """
-from __future__ import unicode_literals
 from __future__ import division
 from builtins import range
 from past.utils import old_div

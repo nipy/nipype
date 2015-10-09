@@ -12,7 +12,6 @@ will be fixed in a later release::
     python fmri_slicer_coregistration.py
 
 """
-from __future__ import unicode_literals
 
 #raise RuntimeWarning, 'Slicer not fully implmented'
 from nipype.interfaces.slicer import BRAINSFit, BRAINSResample

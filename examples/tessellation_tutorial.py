@@ -33,7 +33,6 @@ Packages and Data Setup
 
 Import the necessary modules and workflow from nipype.
 """
-from __future__ import unicode_literals
 
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.cmtk as cmtk

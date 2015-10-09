@@ -9,7 +9,6 @@ the elastix registration software.
 
 
 """
-from __future__ import unicode_literals
 
 from ..base import (CommandLine, CommandLineInputSpec, isdefined,
                     TraitedSpec, File, Directory, traits, InputMultiPath)

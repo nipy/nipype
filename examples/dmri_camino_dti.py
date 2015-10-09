@@ -17,7 +17,6 @@ http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
 Import necessary modules from nipype.
 """
-from __future__ import unicode_literals
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility

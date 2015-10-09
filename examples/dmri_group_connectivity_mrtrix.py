@@ -52,7 +52,6 @@ Import the workflows
 --------------------
 First, we import the necessary modules from nipype.
 """
-from __future__ import unicode_literals
 
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.freesurfer as fs    # freesurfer

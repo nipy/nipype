@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 from builtins import map
 from builtins import range
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-

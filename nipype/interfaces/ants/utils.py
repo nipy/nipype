@@ -6,7 +6,6 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import unicode_literals
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec

@@ -17,7 +17,6 @@ Example Makefile rule::
 
 """
 from __future__ import print_function
-from __future__ import unicode_literals
 import glob, re, inspect, os, optparse, pydoc
 from autosummary import import_by_name
 

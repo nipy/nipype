@@ -15,8 +15,6 @@ all of these bugs and they've been fixed in enthought svn repository
 (usually by Robert Kern).
 
 """
-from __future__ import unicode_literals
-from builtins import str
 import os
 
 # perform all external trait imports here

@@ -13,7 +13,6 @@ stored in a nipy data packages that you can download separately.
    import without nose being present on the python path.
 
 """
-from __future__ import unicode_literals
 
 import os
 

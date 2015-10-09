@@ -10,7 +10,6 @@
    >>> os.chdir(datadir)
 
 """
-from __future__ import unicode_literals
 __docformat__ = 'restructuredtext'
 
 import os

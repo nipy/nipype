@@ -2,7 +2,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Wrapper to run setup.py using setuptools."""
-from __future__ import unicode_literals
 from past.builtins import execfile
 
 from setuptools import setup

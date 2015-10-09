@@ -1,6 +1,5 @@
 """Parallel workflow execution via SLURM
 """
-from __future__ import unicode_literals
 
 import os
 import sys

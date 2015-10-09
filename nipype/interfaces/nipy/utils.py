@@ -6,7 +6,6 @@
     >>> os.chdir(datadir)
 
 """
-from __future__ import unicode_literals
 import warnings
 
 import nibabel as nb

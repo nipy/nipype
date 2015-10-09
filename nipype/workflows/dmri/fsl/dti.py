@@ -1,7 +1,6 @@
 # coding: utf-8
 
 from __future__ import absolute_import
-from __future__ import unicode_literals
 import nipype.pipeline.engine as pe
 from nipype.interfaces import utility as niu
 from nipype.interfaces import fsl

@@ -8,7 +8,6 @@ sMRI: USing CBS Tools for skullstripping
 
 This simple workflow uses SPECTRE2010 algorithm to skullstrip an MP2RAGE anatomical scan.
 """
-from __future__ import unicode_literals
 
 
 import nipype.pipeline.engine as pe

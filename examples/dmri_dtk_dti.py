@@ -19,7 +19,6 @@ line.
 
 Tell python where to find the appropriate functions.
 """
-from __future__ import unicode_literals
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.fsl as fsl          # fsl

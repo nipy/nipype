@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import os.path as op                      # system functions
 
 import nipype.interfaces.io as nio           # Data i/o

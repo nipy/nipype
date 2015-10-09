@@ -8,7 +8,6 @@
     >>> os.chdir(datadir)
 
 """
-from __future__ import unicode_literals
 from builtins import range
 
 from nipype.interfaces.base import (

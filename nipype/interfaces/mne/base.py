@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 from builtins import str
 
 from nipype.interfaces.base import (traits, File, Directory, TraitedSpec,

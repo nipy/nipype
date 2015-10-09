@@ -21,7 +21,6 @@ Can be executed in command line using ``python dmri_preprocessing.py``
 
 Import necessary modules from nipype.
 """
-from __future__ import unicode_literals
 
 import os                                    # system functions
 import nipype.interfaces.io as nio           # Data i/o

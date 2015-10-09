@@ -2,7 +2,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Camino top level namespace
 """
-from __future__ import unicode_literals
 
 from .connectivity import Conmat
 from .convert import (Image2Voxel, FSL2Scheme, VtkStreamlines, ProcStreamlines,

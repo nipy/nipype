@@ -10,7 +10,6 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
     >>> os.chdir(datadir)
 
 '''
-from __future__ import unicode_literals
 from __future__ import division
 from builtins import zip
 from builtins import str

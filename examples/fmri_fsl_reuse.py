@@ -15,7 +15,6 @@ tutorial data set::
 First tell python where to find the appropriate functions.
 """
 from __future__ import print_function
-from __future__ import unicode_literals
 from __future__ import division
 from builtins import str
 from builtins import range

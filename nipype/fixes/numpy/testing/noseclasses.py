@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-from __future__ import unicode_literals
 from builtins import object
 # These classes implement a doctest runner plugin for nose, a "known failure"
 # error class, and a customized TestProgram for NumPy.

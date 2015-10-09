@@ -3,7 +3,6 @@
 """
 Extend numpy's decorators to use nipype's gui and data labels.
 """
-from __future__ import unicode_literals
 from builtins import str
 
 from numpy.testing.decorators import *

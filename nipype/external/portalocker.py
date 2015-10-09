@@ -50,7 +50,6 @@ Version: $Id: portalocker.py 5474 2008-05-16 20:53:50Z lowell $
 '''
 from __future__ import print_function
 from __future__ import absolute_import
-from __future__ import unicode_literals
 
 
 __all__ = [

@@ -5,7 +5,6 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import unicode_literals
 
 from nipype.interfaces.base import (
     TraitedSpec, BaseInterface, File)

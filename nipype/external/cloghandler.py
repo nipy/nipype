@@ -42,7 +42,6 @@ for testing, patches are welcome.
 See the README file for an example usage of this module.
 
 """
-from __future__ import unicode_literals
 from builtins import range
 
 

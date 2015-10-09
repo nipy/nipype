@@ -9,7 +9,6 @@ Interfaces to functionality from nitime for time-series analysis of fmri data
 - nitime.viz.drawmatrix_channels
 
 """
-from __future__ import unicode_literals
 from builtins import zip
 from builtins import object
 

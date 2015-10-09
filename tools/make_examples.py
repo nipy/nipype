@@ -3,7 +3,6 @@
 
 This also creates the index.rst file appropriately, makes figures, etc.
 """
-from __future__ import unicode_literals
 from past.builtins import execfile
 #-----------------------------------------------------------------------------
 # Library imports

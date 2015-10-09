@@ -16,7 +16,6 @@ dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/face_r
     python fmri_spm.py
 
 Import necessary modules from nipype."""
-from __future__ import unicode_literals
 from __future__ import division
 from builtins import range
 from past.utils import old_div

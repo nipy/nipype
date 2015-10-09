@@ -1,6 +1,5 @@
 """Parallel workflow execution via PBS/Torque
 """
-from __future__ import unicode_literals
 
 import os
 import sys

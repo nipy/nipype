@@ -11,7 +11,6 @@ was written to work with FSL version 4.1.4.
     >>> os.chdir(datadir)
 """
 from __future__ import print_function
-from __future__ import unicode_literals
 from __future__ import division
 from builtins import str
 from builtins import range

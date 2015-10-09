@@ -8,7 +8,6 @@ Exaples  FSL, matlab/SPM , afni
 Requires Packages to be installed
 """
 from __future__ import print_function
-from __future__ import unicode_literals
 from __future__ import division
 from future import standard_library
 standard_library.install_aliases()

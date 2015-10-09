@@ -16,7 +16,6 @@ dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/audito
     python fmri_spm_auditory.py
 
 Import necessary modules from nipype."""
-from __future__ import unicode_literals
 from builtins import range
 
 import nipype.interfaces.io as nio           # Data i/o

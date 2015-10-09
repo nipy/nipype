@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-from __future__ import unicode_literals
 from .diffusion import *
 from .segmentation import *
 from .filtering import *

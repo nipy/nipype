@@ -8,7 +8,6 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-from __future__ import unicode_literals
 from future import standard_library
 standard_library.install_aliases()
 from builtins import zip

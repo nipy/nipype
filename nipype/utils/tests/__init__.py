@@ -18,5 +18,4 @@ Please try to include working test cases for all functions and classes that
 you contribute. Often, writing tests for your code before the code is written
 helps to frame your thoughts about what the code should look like.
 """
-from __future__ import unicode_literals
 

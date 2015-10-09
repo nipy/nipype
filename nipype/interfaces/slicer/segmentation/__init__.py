@@ -1,4 +1,3 @@
 from __future__ import absolute_import
-from __future__ import unicode_literals
 from .specialized import RobustStatisticsSegmenter, EMSegmentCommandLine, BRAINSROIAuto
 from .simpleregiongrowingsegmentation import SimpleRegionGrowingSegmentation

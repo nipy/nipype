@@ -4,7 +4,6 @@
     The maths module provides higher-level interfaces to some of the operations
     that can be performed with the fslmaths command-line program.
 """
-from __future__ import unicode_literals
 from __future__ import division
 from past.utils import old_div
 import os

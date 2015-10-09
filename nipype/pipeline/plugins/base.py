@@ -2,7 +2,6 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Common graph operations for execution
 """
-from __future__ import unicode_literals
 from builtins import str
 from builtins import range
 from builtins import object

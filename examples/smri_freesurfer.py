@@ -11,7 +11,6 @@ a set of subjects and then make an average subject::
 
 Import necessary modules from nipype.
 """
-from __future__ import unicode_literals
 
 import os
 

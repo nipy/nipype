@@ -10,7 +10,6 @@ PROV-DM: http://www.w3.org/TR/prov-dm/
 @copyright: University of Southampton 2013
 '''
 from __future__ import absolute_import
-from __future__ import unicode_literals
 from builtins import zip
 from builtins import str
 from builtins import object

@@ -1,6 +1,5 @@
 """ Test the nipype interface caching mechanism
 """
-from __future__ import unicode_literals
 
 from tempfile import mkdtemp
 from shutil import rmtree
