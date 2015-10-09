@@ -1,5 +1,8 @@
 Next Release
 ============
+
+* ENH: The name_source feature now available for all Interfaces derived from BaseInterface
+       (https://github.com/nipy/nipype/pull/1240)
 * ENH: New interfaces for interacting with AWS S3: S3DataSink and S3DataGrabber (https://github.com/nipy/nipype/pull/1201)
 
 Release 0.11.0 (September 15, 2015)
