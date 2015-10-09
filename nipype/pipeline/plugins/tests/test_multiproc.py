@@ -26,7 +26,7 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
-def run_multiproc():
+def test_run_multiproc():
     cur_dir = os.getcwd()
     temp_dir = mkdtemp(prefix='test_engine_')
     os.chdir(temp_dir)
