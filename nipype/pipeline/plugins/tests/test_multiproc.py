@@ -26,7 +26,7 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
-def test_run_multiproc():
+def run_multiproc():
     cur_dir = os.getcwd()
     temp_dir = mkdtemp(prefix='test_engine_')
     os.chdir(temp_dir)
@@ -49,8 +49,7 @@ def test_run_multiproc():
     rmtree(temp_dir)
 
 
-
-#################################
+################################
 
 
 class InputSpecSingleNode(nib.TraitedSpec):
@@ -75,15 +74,15 @@ class TestInterfaceSingleNode(nib.BaseInterface):
         return outputs
 
 
-def parse_log(filename, measure):
+def find_metrics(nodes, last_node):
     import json
     from dateutil.parser import parse
     from datetime import datetime
     import datetime as d
 
-    json_data = open(filename).read()
-    data = json.loads(json_data)
-    total_duration = int(float(data['duration'])) #total duration in seconds
+
+    start = parse(nodes[0]['start'])
+    total_duration = int((parse(last_node['finish']) - start).total_seconds())
 
     total_memory = []
     total_threads = []
@@ -91,7 +90,7 @@ def parse_log(filename, measure):
         total_memory.append(0)
         total_threads.append(0)
 
-    now = parse(data['start'])
+    now = start
     for i in range(total_duration):
         start_index = 0
         node_start = None
@@ -99,13 +98,13 @@ def parse_log(filename, measure):
 
         x = now
 
-        for j in range(start_index, len(data['nodes'])):
-            node_start = parse(data['nodes'][j]['start'])
-            node_finish = parse(data['nodes'][j]['finish'])
+        for j in range(start_index, len(nodes)):
+            node_start = parse(nodes[j]['start'])
+            node_finish = parse(nodes[j]['finish'])
 
             if node_start < x and node_finish > x:
-                total_memory[i] += data['nodes'][j]['memory']
-                total_threads[i] += data['nodes'][j]['num_threads']
+                total_memory[i] += nodes[j]['memory']
+                total_threads[i] += nodes[j]['num_threads']
                 start_index = j
 
             if node_start > x:
@@ -117,11 +116,14 @@ def parse_log(filename, measure):
 
 
 import os
-from nipype.pipeline.plugins.callback_log import log_nodes_cb, convert_logcb_to_json
+from nipype.pipeline.plugins.callback_log import log_nodes_cb
 import logging
 import logging.handlers
 import psutil
 from multiprocessing import cpu_count
+
+from nipype.utils import draw_gantt_chart
+
 def test_do_not_use_more_memory_then_specified():
     LOG_FILENAME = 'callback.log'
     my_logger = logging.getLogger('callback')
@@ -148,12 +150,14 @@ def test_do_not_use_more_memory_then_specified():
     pipe.connect(n2, 'output1', n4, 'input1')
     pipe.connect(n3, 'output1', n4, 'input2')
     n1.inputs.input1 = 10
-    pipe.config['execution']['poll_sleep_duration'] = 1
-    pipe.run(plugin='ResourceMultiProc', plugin_args={'memory': max_memory, 'status_callback': log_nodes_cb})
 
-    convert_logcb_to_json(LOG_FILENAME)
-    #memory usage in every second
-    memory, threads = parse_log(LOG_FILENAME + '.json' , 'memory')
+    pipe.run(plugin='ResourceMultiProc', plugin_args={'memory': max_memory, 
+                                        'status_callback': log_nodes_cb})
+
+
+    nodes, last_node = draw_gantt_chart.log_to_json(LOG_FILENAME)
+    #usage in every second
+    memory, threads = find_metrics(nodes, last_node)
 
     result = True
     for m in memory:
@@ -174,7 +178,6 @@ def test_do_not_use_more_memory_then_specified():
     yield assert_equal, result, True, "using more threads than system has (threads is not specified by user)"
 
     os.remove(LOG_FILENAME)
-    os.remove(LOG_FILENAME + '.json') 
 
 
 def test_do_not_use_more_threads_then_specified():
@@ -206,9 +209,9 @@ def test_do_not_use_more_threads_then_specified():
     pipe.config['execution']['poll_sleep_duration'] = 1
     pipe.run(plugin='ResourceMultiProc', plugin_args={'n_procs': max_threads, 'status_callback': log_nodes_cb})
 
-    convert_logcb_to_json(LOG_FILENAME)
-    #threads usage in every second
-    memory, threads = parse_log(LOG_FILENAME + '.json' , 'num_threads')
+    nodes, last_node = draw_gantt_chart.log_to_json(LOG_FILENAME)
+    #usage in every second
+    memory, threads = find_metrics(nodes, last_node)
 
     result = True
     for t in threads:
@@ -227,4 +230,3 @@ def test_do_not_use_more_threads_then_specified():
     yield assert_equal, result, True, "using more memory than system has (memory is not specified by user)"
 
     os.remove(LOG_FILENAME)
-    os.remove(LOG_FILENAME + '.json')

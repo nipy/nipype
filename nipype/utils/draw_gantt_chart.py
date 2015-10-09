@@ -78,6 +78,79 @@ def draw_nodes(start, nodes, cores, scale, colors):
     return result
 
 
+def draw_thread_bar(start, total_duration, nodes, space_between_minutes, minute_scale):
+    result = "<p class='time' style='top:198px;left:900px;'>Threads</p>"
+
+    total = total_duration/60
+    thread = [0 for x in range(total)]
+
+    now = start
+
+    #calculate nuber of threads in every second
+    for i in range(total):
+        node_start = None
+        node_finish = None
+
+        for j in range(i, len(nodes)):
+            node_start = parser.parse(nodes[j]['start'])
+            node_finish = parser.parse(nodes[j]['finish'])
+
+            if node_start <= now and node_finish >= now:
+                thread[i] += nodes[j]['num_threads']
+            if node_start > now:
+                break
+        now += datetime.timedelta(minutes=1)
+
+
+    #draw thread bar
+    scale = float(space_between_minutes/float(minute_scale))
+
+    for i in range(len(thread)):
+        width = thread[i] * 10
+        t = (i*scale*minute_scale) + 220
+        bar = "<div class='bar' style='height:"+ str(space_between_minutes) + "px;width:"+ str(width) +"px;left:900px;top:"+str(t)+"px'></div>"
+        result += bar
+
+    return result
+
+
+
+def draw_memory_bar(start, total_duration, nodes, space_between_minutes, minute_scale):
+    result = "<p class='time' style='top:198px;left:1200px;'>Memory</p>"
+
+    total = total_duration/60
+    memory = [0 for x in range(total)]
+
+    now = start
+
+    #calculate nuber of threads in every second
+    for i in range(total):
+        node_start = None
+        node_finish = None
+
+        for j in range(i, len(nodes)):
+            node_start = parser.parse(nodes[j]['start'])
+            node_finish = parser.parse(nodes[j]['finish'])
+
+            if node_start <= now and node_finish >= now:
+                memory[i] += nodes[j]['memory']
+            if node_start > now:
+                break
+        now += datetime.timedelta(minutes=1)
+
+
+    #draw thread bar
+    scale = float(space_between_minutes/float(minute_scale))
+
+    for i in range(len(memory)):
+        width = memory[i] * 10
+        t = (i*scale*minute_scale) + 220
+        bar = "<div class='bar' style='height:"+ str(space_between_minutes) + "px;width:"+ str(width) +"px;left:1200px;top:"+str(t)+"px'></div>"
+        result += bar
+
+    return result
+
+
 '''
 Generates a gantt chart in html showing the workflow execution based on a callback log file.
 This script was intended to be used with the ResourceMultiprocPlugin.
@@ -109,7 +182,48 @@ def generate_gantt_chart(logfile, cores, minute_scale=10, space_between_minutes=
     #add the html header
     html_string = '''<!DOCTYPE html>
     <head>
-        <link rel="stylesheet" type="text/css" href="style.css">
+        <style>
+            #content{
+                width:100%;
+                height:100%;
+                position:absolute;
+            }
+
+            .node{
+                background-color:#7070FF;
+                border-radius: 5px;
+                position:absolute;
+                width:20px;
+                white-space:pre-wrap;
+            }
+
+            .line{
+                position: absolute;
+                color: #C2C2C2;
+                opacity: 0.5;
+                margin: 0px;
+            }
+
+            .time{
+                position: absolute;
+                font-size: 16px;
+                color: #666666;
+                margin: 0px;
+            }
+
+            .bar{
+                position: absolute;
+                background-color: #80E680;
+                height: 1px;
+            }
+
+            .dot{
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                background-color: red;
+            }
+        </style>
     </head>
 
     <body>
@@ -133,6 +247,8 @@ def generate_gantt_chart(logfile, cores, minute_scale=10, space_between_minutes=
     #draw nodes
     html_string += draw_nodes(start, result, cores, scale, colors)
 
+    html_string += draw_thread_bar(start, duration, result, space_between_minutes, minute_scale)
+    html_string += draw_memory_bar(start, duration, result, space_between_minutes, minute_scale)
 
     #finish html
     html_string+= '''
