@@ -5,7 +5,7 @@ import os
 from nipype.interfaces.fsl.base import no_fsl, no_fsl_course_data
 import nipype.pipeline.engine as pe
 import nipype.interfaces.utility as util
-from nipype.testing import skipif, skip
+from nipype.testing import skipif
 import tempfile
 import shutil
 from subprocess import call
