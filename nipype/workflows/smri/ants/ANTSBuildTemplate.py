@@ -1,8 +1,3 @@
-from __future__ import print_function
-from builtins import map
-from builtins import str
-from builtins import zip
-from builtins import range
 #################################################################################
 ## Program:   Build Template Parallel
 ## Language:  Python
@@ -14,22 +9,28 @@ from builtins import range
 ##      PURPOSE.
 ##
 #################################################################################
+from __future__ import print_function
+from builtins import map
+from builtins import str
+from builtins import zip
+from builtins import range
 
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as util
-from nipype.interfaces.utility import Function
+from ....pipeline import engine as pe
+from ....interfaces import utility as util
+from ....interfaces.utility import Function
 
-from nipype.interfaces.ants import (
-                                    ANTS,
-                                    WarpImageMultiTransform,
-                                    AverageImages, MultiplyImages,
-                                    AverageAffineTransform)
+from ....interfaces.ants import (ANTS,
+                                 WarpImageMultiTransform,
+                                 AverageImages, MultiplyImages,
+                                 AverageAffineTransform)
+
 
 def GetFirstListElement(this_list):
     return this_list[0]
 
 def MakeTransformListWithGradientWarps(averageAffineTranform, gradientStepWarp):
     return [averageAffineTranform, gradientStepWarp, gradientStepWarp, gradientStepWarp, gradientStepWarp]
+
 def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes):
     import os
     """ Now make a list of lists of images where the outter list is per image type,

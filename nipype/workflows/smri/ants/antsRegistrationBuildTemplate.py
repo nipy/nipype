@@ -1,6 +1,3 @@
-from __future__ import print_function
-from builtins import str
-from builtins import range
 #################################################################################
 ## Program:   Build Template Parallel
 ## Language:  Python
@@ -12,16 +9,19 @@ from builtins import range
 ##      PURPOSE.
 ##
 #################################################################################
+from __future__ import print_function
+from builtins import str
+from builtins import range
 
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as util
-from nipype.interfaces.utility import Function
+from ....pipeline import engine as pe
+from ....interfaces import utility as util
+from ....interfaces.utility import Function
 
-from nipype.interfaces.ants import (
-                                    Registration,
-                                    ApplyTransforms,
-                                    AverageImages, MultiplyImages,
-                                    AverageAffineTransform)
+from ....interfaces.ants import (
+                                 Registration,
+                                 ApplyTransforms,
+                                 AverageImages, MultiplyImages,
+                                 AverageAffineTransform)
 
 def makeListOfOneElement(inputFile):
     outputList=[inputFile]

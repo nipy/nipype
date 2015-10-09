@@ -13,20 +13,22 @@ from __future__ import division
 from builtins import range
 from past.utils import old_div
 
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, InputMultiPath, Directory,
-                                    OutputMultiPath, isdefined)
-from nipype.utils.filemanip import split_filename
 import pickle
-import scipy.io as sio
 import os, os.path as op
+import sys
+
 import numpy as np
 import nibabel as nb
 import networkx as nx
-import sys
+import scipy.io as sio
 
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                    File, TraitedSpec, InputMultiPath, Directory,
+                    OutputMultiPath, isdefined)
+from ...utils.filemanip import split_filename
 from ... import logging
 iflogger = logging.getLogger('interface')
+
 
 def length(xyz, along=False):
     """

@@ -23,14 +23,13 @@ import numpy as np
 import scipy.io as sio
 
 # Local imports
-from ..interfaces.base import (Bunch, traits, TraitedSpec, File, Directory,
-                               OutputMultiPath, InputMultiPath, isdefined)
-from ..interfaces.spm.base import (SPMCommand, SPMCommandInputSpec,
+from .base import (SPMCommand, SPMCommandInputSpec,
                                    scans_for_fnames)
-from ..utils.filemanip import (filename_to_list, list_to_filename,
-                               split_filename)
+from ..base import (Bunch, traits, TraitedSpec, File, Directory,
+                               OutputMultiPath, InputMultiPath, isdefined)
 from ...external.six import string_types
-
+from ...utils.filemanip import (filename_to_list, list_to_filename,
+                               split_filename)
 from ... import logging
 logger = logging.getLogger('interface')
 

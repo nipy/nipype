@@ -33,11 +33,19 @@ import tempfile
 from warnings import warn
 
 import sqlite3
-from nipype.utils.misc import human_order_sorted
 
+from .base import (TraitedSpec, traits, File, Directory,
+                   BaseInterface, InputMultiPath, isdefined,
+                   OutputMultiPath, DynamicTraitedSpec,
+                   Undefined, BaseInterfaceInputSpec)
 from .. import config
 from ..external.six import string_types
+from ..utils.filemanip import (copyfile, list_to_filename,
+                               filename_to_list)
+from ..utils.misc import human_order_sorted
 from ..utils.misc import str2bool
+from .. import logging
+iflogger = logging.getLogger('interface')
 
 try:
     import pyxnat
@@ -54,16 +62,6 @@ try:
     from boto.s3.connection import S3Connection, OrdinaryCallingFormat
 except:
     pass
-
-from nipype.interfaces.base import (TraitedSpec, traits, File, Directory,
-                                    BaseInterface, InputMultiPath, isdefined,
-                                    OutputMultiPath, DynamicTraitedSpec,
-                                    Undefined, BaseInterfaceInputSpec)
-from nipype.utils.filemanip import (copyfile, list_to_filename,
-                                    filename_to_list)
-
-from .. import logging
-iflogger = logging.getLogger('interface')
 
 
 def copytree(src, dst, use_hardlink=False):

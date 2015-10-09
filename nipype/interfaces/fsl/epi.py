@@ -14,17 +14,17 @@ was written to work with FSL version 5.0.4.
 from builtins import str
 
 import os
-from glob import glob
 import warnings
+from glob import glob
 
 import numpy as np
 import nibabel as nib
 
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
-from nipype.interfaces.base import (traits, TraitedSpec, InputMultiPath, File,
-                                    isdefined, Undefined)
-from nipype.utils.filemanip import (load_json, save_json, split_filename,
-                                    fname_presuffix)
+from ..fsl.base import FSLCommand, FSLCommandInputSpec, Info
+from ..base import (traits, TraitedSpec, InputMultiPath, File,
+                    isdefined, Undefined)
+from ...utils.filemanip import (load_json, save_json, split_filename,
+                                fname_presuffix)
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)

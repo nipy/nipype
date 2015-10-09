@@ -2,11 +2,14 @@
 
 from __future__ import division
 from past.utils import old_div
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as niu
-import nipype.interfaces.fsl as fsl
-import os
+
 import warnings
+
+from ....pipeline import engine as pe
+from ....interfaces import utility as niu
+from ....interfaces import fsl as fsl
+
+
 
 def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fieldmap_registration=False):
     """

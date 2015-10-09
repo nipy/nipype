@@ -13,7 +13,7 @@ from shutil import rmtree
 import keyword
 python_keywords = keyword.kwlist  # If c++ SEM module uses one of these key words as a command line parameter, we need to modify variable
 
-from ..external.six import string_types
+from ...external.six import string_types
 
 
 def force_to_valid_python_variable_name(old_name):

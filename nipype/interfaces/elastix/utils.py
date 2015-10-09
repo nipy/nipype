@@ -7,15 +7,12 @@ Generic interfaces to manipulate registration parameters files, including
 transform files (to configure warpings)
 
 """
-
 import os.path as op
 import re
 
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, isdefined,
-                                    TraitedSpec, File, traits, InputMultiPath)
-
-
-from nipype import logging
+from ..base import (BaseInterface, BaseInterfaceInputSpec, isdefined,
+                     TraitedSpec, File, traits, InputMultiPath)
+from ... import logging
 logger = logging.getLogger('interface')
 
 

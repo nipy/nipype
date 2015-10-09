@@ -18,9 +18,9 @@ import time
 import shutil
 import glob
 
-from nipype.interfaces.base import BaseInterface
-from nipype.pipeline.engine import Node
-from nipype.pipeline.utils import modify_paths
+from ..interfaces.base import BaseInterface
+from ..pipeline.engine import Node
+from ..pipeline.utils import modify_paths
 
 ################################################################################
 # PipeFunc object: callable interface to nipype.interface objects

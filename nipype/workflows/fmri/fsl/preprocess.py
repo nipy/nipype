@@ -4,15 +4,14 @@ from past.utils import old_div
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
 import os
-import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.freesurfer as fs    # freesurfer
-import nipype.interfaces.spm as spm
 
-from nipype import LooseVersion
-
+from ....interfaces import fsl as fsl          # fsl
+from ....interfaces import utility as util     # utility
+from ....pipeline import engine as pe          # pypeline engine
+from ....interfaces import freesurfer as fs    # freesurfer
+from ....interfaces import spm as spm
 from ...smri.freesurfer.utils import create_getmask_flow
+from .... import LooseVersion
 
 def getthreshop(thresh):
     return ['-thr %.10f -Tmin -bin'%(0.1*val[1]) for val in thresh]

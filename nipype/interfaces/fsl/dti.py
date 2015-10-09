@@ -19,10 +19,10 @@ import shutil
 import warnings
 
 from ... import LooseVersion
-from nipype.interfaces.fsl.base import (FSLCommand, FSLCommandInputSpec, Info)
-from nipype.interfaces.base import (TraitedSpec, isdefined, File, Directory,
-                                    InputMultiPath, OutputMultiPath, traits)
-from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
+from ..base import (TraitedSpec, isdefined, File, Directory,
+                    InputMultiPath, OutputMultiPath, traits)
+from ..fsl.base import (FSLCommand, FSLCommandInputSpec, Info)
+from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)

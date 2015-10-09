@@ -8,10 +8,11 @@
 """
 import os
 
-from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
-                                    TraitedSpec, File, StdOutCommandLine,
-                                    StdOutCommandLineInputSpec, isdefined)
-from nipype.utils.filemanip import split_filename
+from ..base import (CommandLineInputSpec, CommandLine, traits,
+                    TraitedSpec, File, StdOutCommandLine,
+                    StdOutCommandLineInputSpec, isdefined)
+from ...utils.filemanip import split_filename
+
 
 class SFPICOCalibDataInputSpec(StdOutCommandLineInputSpec):
     snr = traits.Float(argstr='-snr %f', units='NA',

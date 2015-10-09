@@ -1,12 +1,14 @@
 import os.path as op
-import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.utility as util     # utility
-import nipype.interfaces.cmtk as cmtk
-import nipype.algorithms.misc as misc
-import nipype.pipeline.engine as pe          # pypeline engine
-from .connectivity_mapping import create_connectivity_pipeline
-from nipype.utils.misc import package_check
 import warnings
+
+from ....interfaces import io as nio           # Data i/o
+from ....interfaces import utility as util     # utility
+from ....interfaces import cmtk as cmtk
+from ....algorithms import misc as misc
+from ....pipeline import engine as pe          # pipeline engine
+from ....utils.misc import package_check
+from .connectivity_mapping import create_connectivity_pipeline
+
 try:
     package_check('cmp')
 except Exception as e:

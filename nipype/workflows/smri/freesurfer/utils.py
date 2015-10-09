@@ -1,17 +1,15 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import nipype.pipeline.engine as pe
-
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.meshfix as mf
-import nipype.interfaces.io as nio
-import nipype.interfaces.utility as niu
-import nipype.algorithms.misc as misc
-from nipype.interfaces.utility import Function
-from nipype.workflows.misc.utils import region_list_from_volume, id_list_from_lookup_table
-import os, os.path as op
+from ....pipeline import engine as pe
+from ....interfaces import fsl as fsl
+from ....interfaces import freesurfer as fs
+from ....interfaces import meshfix as mf
+from ....interfaces import io as nio
+from ....interfaces import utility as niu
+from ....algorithms import misc as misc
+from ....interfaces.utility import Function
+from ....workflows.misc.utils import region_list_from_volume, id_list_from_lookup_table
 
 
 def get_aparc_aseg(files):

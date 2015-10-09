@@ -13,14 +13,16 @@ Examples
 See the docstrings for the individual classes for 'working' examples.
 
 """
-from builtins import object
 __docformat__ = 'restructuredtext'
+
+from builtins import object
 
 import os
 
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import (CommandLine, Directory,
-                                    CommandLineInputSpec, isdefined)
+from ..base import (CommandLine, Directory,
+                    CommandLineInputSpec, isdefined)
+from ...utils.filemanip import fname_presuffix
+
 
 
 class Info(object):

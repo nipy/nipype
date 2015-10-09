@@ -8,10 +8,12 @@
     >>> os.chdir(datadir)
 
 """
-
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File, InputMultiPath, isdefined
-from nipype.utils.filemanip import split_filename
 import os.path as op
+
+from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
+                    File, InputMultiPath, isdefined)
+from ...utils.filemanip import split_filename
+
 
 class MRConvertInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,

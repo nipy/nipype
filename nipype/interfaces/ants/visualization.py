@@ -5,14 +5,14 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-
-from ..base import (TraitedSpec, File, traits)
-from .base import ANTSCommand, ANTSCommandInputSpec
-from nipype.utils.filemanip import split_filename
-from nipype.interfaces.base import InputMultiPath
-from nipype.interfaces.traits_extension import isdefined
 import numpy as np
 import os
+
+from .base import ANTSCommand, ANTSCommandInputSpec
+from ..base import (TraitedSpec, File, traits, InputMultiPath)
+from ..traits_extension import isdefined
+from ...utils.filemanip import split_filename
+
 
 class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
     dimension=traits.Enum(3, 2, argstr= '%d', usedefault=True,

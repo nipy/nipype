@@ -8,11 +8,12 @@
     >>> os.chdir(datadir)
 
 """
-
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
-from nipype.utils.filemanip import split_filename
 import os, os.path as op
-from nipype.interfaces.traits_extension import isdefined
+
+from ..base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
+from ..traits_extension import isdefined
+from ...utils.filemanip import split_filename
+
 
 class FilterTracksInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,

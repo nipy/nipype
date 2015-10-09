@@ -6,10 +6,12 @@
     >>> os.chdir(datadir)
 
 """
-from nipype.interfaces.base import (traits, TraitedSpec, File,
-                                    CommandLine, CommandLineInputSpec, isdefined)
-from nipype.utils.filemanip import split_filename
 import os
+
+from ..base import (traits, TraitedSpec, File,
+                    CommandLine, CommandLineInputSpec, isdefined)
+from ...utils.filemanip import split_filename
+
 
 class ConmatInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True,

@@ -13,14 +13,12 @@ import warnings
 import os
 import re
 
+from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec
+from ..base import CommandLineInputSpec, CommandLine, OutputMultiPath
 from ..base import (Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
 from ...utils.filemanip import (load_json, save_json, split_filename)
-from nipype.utils.filemanip import fname_presuffix
-from .base import AFNICommand, AFNICommandInputSpec,\
-    AFNICommandOutputSpec
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine,\
-    OutputMultiPath
+from ...utils.filemanip import fname_presuffix
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)

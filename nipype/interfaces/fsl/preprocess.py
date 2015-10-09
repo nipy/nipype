@@ -16,21 +16,19 @@ from builtins import str
 from builtins import range
 from past.utils import old_div
 
+import glob
 import os
 import os.path as op
 import warnings
-import glob
 
 import numpy as np
-
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
-from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
-                                    OutputMultiPath, Undefined, traits,
-                                    isdefined, OutputMultiPath)
-from nipype.utils.filemanip import split_filename
-
 from nibabel import load
 
+from ..fsl.base import FSLCommand, FSLCommandInputSpec
+from ..base import (TraitedSpec, File, InputMultiPath,
+                    OutputMultiPath, Undefined, traits,
+                    isdefined, OutputMultiPath)
+from ...utils.filemanip import split_filename
 
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)

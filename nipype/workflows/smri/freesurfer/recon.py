@@ -1,6 +1,7 @@
-import nipype.pipeline.engine as pe
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.utility as niu
+from ....pipeline import engine as pe
+from ....interfaces import freesurfer as fs
+from ....interfaces import utility as niu
+
 
 def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     """Performs recon-all on voulmes that are already skull stripped.

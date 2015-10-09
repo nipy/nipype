@@ -12,6 +12,7 @@ _version_minor = 12
 _version_micro = 0
 _version_extra = '-dev'  # Remove -dev for release
 
+
 def get_nipype_gitversion():
     """Nipype version as reported by the last commit in git
 

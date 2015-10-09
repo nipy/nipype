@@ -7,14 +7,15 @@
    >>> os.chdir(datadir)
 """
 
-from nipype.interfaces.base import (CommandLine, CommandLineInputSpec,
-                                    InputMultiPath, traits, TraitedSpec,
-                                    OutputMultiPath, isdefined,
-                                    File, Directory)
 import os
-from copy import deepcopy
-from nipype.utils.filemanip import split_filename
 import re
+from copy import deepcopy
+
+from .base import (CommandLine, CommandLineInputSpec,
+                   InputMultiPath, traits, TraitedSpec,
+                   OutputMultiPath, isdefined,
+                   File, Directory)
+from ..utils.filemanip import split_filename
 
 
 class Dcm2niiInputSpec(CommandLineInputSpec):

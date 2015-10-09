@@ -14,10 +14,10 @@ __docformat__ = 'restructuredtext'
 
 import os
 
-from nipype.utils.filemanip import fname_presuffix, split_filename
-from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
-                                    OutputMultiPath, Directory, isdefined)
+from ..freesurfer.base import FSCommand, FSTraitedSpec
+from ..base import (TraitedSpec, File, traits, InputMultiPath,
+                    OutputMultiPath, Directory, isdefined)
+from ...utils.filemanip import fname_presuffix, split_filename
 
 
 class MRISPreprocInputSpec(FSTraitedSpec):

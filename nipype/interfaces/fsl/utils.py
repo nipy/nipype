@@ -35,6 +35,7 @@ from ...utils.filemanip import (load_json, save_json, split_filename,
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+
 class CopyGeomInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr="%s", position=0,
                    desc="source image")

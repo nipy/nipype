@@ -13,18 +13,19 @@ from builtins import str
 from builtins import range
 from past.utils import old_div
 
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, InputMultiPath,
-                                    OutputMultiPath, isdefined)
-from nipype.utils.filemanip import split_filename
 import os, os.path as op
+import pickle
+import warnings
+
 import numpy as np
 import networkx as nx
 import scipy.io as sio
-import pickle
-from nipype.utils.misc import package_check
-import warnings
 
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                                    File, TraitedSpec, InputMultiPath,
+                                    OutputMultiPath, isdefined)
+from ...utils.filemanip import split_filename
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 

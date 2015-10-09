@@ -12,14 +12,16 @@
 """
 from builtins import str
 from builtins import range
-# Local imports
-from ..base import (TraitedSpec, File, traits, InputMultiPath,
-                    isdefined)
-from ...utils.filemanip import split_filename
-from .base import ANTSCommand, ANTSCommandInputSpec
+
 import os
 from glob import glob
-from nipype.interfaces.base import OutputMultiPath
+
+
+from .base import ANTSCommand, ANTSCommandInputSpec
+from ..base import (TraitedSpec, File, traits, InputMultiPath,
+                    isdefined, OutputMultiPath)
+from ...utils.filemanip import split_filename
+
 
 class antsIntroductionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,

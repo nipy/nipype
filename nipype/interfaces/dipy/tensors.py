@@ -5,16 +5,15 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-
-from nipype.interfaces.base import (
-    TraitedSpec, BaseInterface, File)
-from nipype.utils.filemanip import split_filename
 import os.path as op
-import nibabel as nb
-import numpy as np
-from nipype.utils.misc import package_check
 import warnings
 
+import nibabel as nb
+import numpy as np
+
+from ..base import (TraitedSpec, BaseInterface, File)
+from ...utils.filemanip import split_filename
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 

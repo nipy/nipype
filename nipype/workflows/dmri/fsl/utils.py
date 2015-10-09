@@ -7,10 +7,11 @@ from builtins import zip
 from builtins import next
 from builtins import range
 from past.utils import old_div
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as niu
-from nipype.interfaces import fsl
-from nipype.interfaces import ants
+
+from ....pipeline import engine as pe
+from ....interfaces import utility as niu
+from ....interfaces import fsl
+from ....interfaces import ants
 
 
 def cleanup_edge_pipeline(name='Cleanup'):

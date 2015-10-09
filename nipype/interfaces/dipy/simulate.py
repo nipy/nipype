@@ -9,19 +9,18 @@ from __future__ import division
 from builtins import range
 from past.utils import old_div
 
-from nipype.interfaces.base import (
-    traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File,
-    InputMultiPath, isdefined)
-from nipype.utils.filemanip import split_filename
 import os.path as op
-import nibabel as nb
-import numpy as np
-from nipype.utils.misc import package_check
 import warnings
-
 from multiprocessing import (Process, Pool, cpu_count, pool,
                              Manager, TimeoutError)
 
+import nibabel as nb
+import numpy as np
+
+from ..base import (traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
+                    File, InputMultiPath, isdefined)
+from ...utils.filemanip import split_filename
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 

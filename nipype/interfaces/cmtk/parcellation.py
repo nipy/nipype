@@ -10,18 +10,18 @@
 """
 from builtins import range
 
-from nipype.interfaces.base import (
-    BaseInterface, BaseInterfaceInputSpec, traits,
-    File, TraitedSpec, Directory, isdefined)
 import os
 import os.path as op
+import shutil
+import warnings
+
 import numpy as np
 import nibabel as nb
 import networkx as nx
-import shutil
-from nipype.utils.misc import package_check
-import warnings
 
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                    File, TraitedSpec, Directory, isdefined)
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 

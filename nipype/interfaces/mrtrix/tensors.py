@@ -8,15 +8,17 @@
     >>> os.chdir(datadir)
 
 """
-
-from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, BaseInterface, BaseInterfaceInputSpec,
-                                    traits, File, TraitedSpec, Directory, InputMultiPath, OutputMultiPath, isdefined)
-from nipype.utils.filemanip import split_filename
 import os.path as op
+
 import numpy as np
 
+from ..base import (CommandLineInputSpec, CommandLine, BaseInterface,
+                    BaseInterfaceInputSpec, traits, File, TraitedSpec,
+                    Directory, InputMultiPath, OutputMultiPath, isdefined)
+from ...utils.filemanip import split_filename
 from ... import logging
 iflogger = logging.getLogger('interface')
+
 
 class DWI2SphericalHarmonicsImageInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='Diffusion-weighted images')
