@@ -407,7 +407,7 @@ class Binarize(FSCommand):
     Examples
     --------
 
-    >>> binvol = Binarize(in_file='structural.nii', min=10, binary_file='foo_out.nii')
+    >>> binvol = Binarize(in_file='structural.nii', min=10)
     >>> binvol.cmdline
     'mri_binarize --o structural_bin.nii --i structural.nii --min 10.000000'
 

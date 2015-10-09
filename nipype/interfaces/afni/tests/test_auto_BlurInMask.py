@@ -31,6 +31,7 @@ def test_BlurInMask_inputs():
     position=2,
     ),
     out_file=dict(argstr='-prefix %s',
+    keep_extension=False,
     name_source='in_file',
     name_template='%s_blur',
     position=-1,

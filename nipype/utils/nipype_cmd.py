@@ -24,7 +24,7 @@ def add_options(parser=None, module=None, function=None):
         for name, spec in sorted(interface.inputs.traits(transient=None).items()):
             desc = "\n".join(interface._get_trait_desc(inputs, name, spec))[len(name)+2:]
             args = {}
-            
+
             if spec.is_trait_type(traits.Bool):
                 args["action"] = 'store_true'
 

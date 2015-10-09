@@ -39,7 +39,7 @@ def test_Dcm2nii_inputs():
     usedefault=True,
     ),
     output_dir=dict(argstr='-o %s',
-    genfile=True,
+    usedefault=True,
     ),
     protocol_in_filename=dict(argstr='-p',
     usedefault=True,

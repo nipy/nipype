@@ -1023,7 +1023,7 @@ class BaseInterface(Interface):
         # check minimum version
         check = dict(min_ver=lambda t: t is not None)
         names = trait_object.trait_names(**check)
-        
+
         if names:
             version = LooseVersion(str(self.version))
             if not version:
