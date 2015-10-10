@@ -213,7 +213,13 @@ def test_s3datasink_substitutions():
 
     # run fakes3 server and set up bucket
     fakes3dir = op.expanduser('~/fakes3')
-    proc = Popen(['fakes3', '-r', fakes3dir, '-p', '4567'], stdout=open(os.devnull, 'wb'))
+    try:
+        proc = Popen(['fakes3', '-r', fakes3dir, '-p', '4567'], stdout=open(os.devnull, 'wb'))
+    except OSError as ose:
+        if 'No such file or directory' in str(ose):
+            return  # fakes3 not installed. OK!
+        raise ose
+
     conn = S3Connection(anon=True, is_secure=False, port=4567,
                           host='localhost',
                           calling_format=OrdinaryCallingFormat())
