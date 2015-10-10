@@ -51,6 +51,7 @@ def test_create_bedpostx_pipeline():
     nipype_bedpostx.inputs.xfibres.sample_every = 1
     nipype_bedpostx.inputs.xfibres.cnlinear = True
     nipype_bedpostx.inputs.xfibres.seed = 0
+    nipype_bedpostx.inputs.xfibres.model = 2
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -64,6 +65,7 @@ def test_create_bedpostx_pipeline():
     original_bedpostx.inputs.n_jumps = 1
     original_bedpostx.inputs.sample_every = 1
     original_bedpostx.inputs.seed = 0
+    original_bedpostx.inputs.model = 2
 
     test_f1 = pe.Node(util.AssertEqual(), name="mean_f1_test")
 

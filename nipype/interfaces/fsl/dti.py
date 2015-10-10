@@ -114,7 +114,7 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
     n_fibres = traits.Range(
         usedefault=True, low=1, default=2, argstr='--nfibres=%d',
         desc=('Maximum number of fibres to fit in each voxel'), mandatory=True)
-    model = traits.Enum(1, 2, argstr='--model=%d',
+    model = traits.Enum(1, 2, 3, argstr='--model=%d',
                         desc=('use monoexponential (1, default, required for '
                               'single-shell) or multiexponential (2, multi-'
                               'shell) model'))
@@ -246,7 +246,7 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
     n_fibres = traits.Range(
         usedefault=True, low=1, default=2, argstr='-n %d',
         desc=('Maximum number of fibres to fit in each voxel'), mandatory=True)
-    model = traits.Enum(1, 2, argstr='-model %d',
+    model = traits.Enum(1, 2, 3, argstr='-model %d',
                         desc=('use monoexponential (1, default, required for '
                               'single-shell) or multiexponential (2, multi-'
                               'shell) model'))
