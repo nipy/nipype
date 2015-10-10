@@ -323,29 +323,16 @@ def synchronize_iterables(iterables):
     >>> from nipype.pipeline.utils import synchronize_iterables
     >>> iterables = dict(a=lambda: [1, 2], b=lambda: [3, 4])
     >>> synced = synchronize_iterables(iterables)
-    >>> [val['a'] for val in synced]
-    [1, 2]
-    >>> [val['b'] for val in synced]
-    [3, 4]
-
+    >>> synced == [{'a': 1, 'b': 3}, {'a': 2, 'b': 4}]
+    True
     >>> iterables = dict(a=lambda: [1, 2], b=lambda: [3], c=lambda: [4, 5, 6])
     >>> synced = synchronize_iterables(iterables)
-    >>> [len(d) for d in synced]
-    [3, 2, 1]
-    >>> [d.get('a', None) for d in synced]
-    [1, 2, None]
-    >>> [d.get('b', None) for d in synced]
-    [3, None, None]
-    >>> [d.get('c', None) for d in synced]
-    [4, 5, 6]
+    >>> synced == [{'a': 1, 'b': 3, 'c': 4}, {'a': 2, 'c': 5}, {'c': 6}]
+    True
     """
-    # Convert the (field, function) tuples into (field, value) lists
-    def nextval(val):
-        yield next(iter(val))
-
     out_list = []
     iterable_items = [(field, iter(fvals()))
-                      for field, fvals in iterables.items()]
+                      for field, fvals in sorted(iterables.items())]
     while True:
         cur_dict = {}
         for field, iter_values in iterable_items:
