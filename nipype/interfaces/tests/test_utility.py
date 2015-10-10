@@ -149,7 +149,7 @@ def test_csvReader():
              "baz,goodbye,0.3\n"]
     for x in range(2):
         fd, name = mkstemp(suffix=".csv")
-        with open(name, 'w+b') as fid:
+        with open(name, 'w') as fid:
             reader = utility.CSVReader()
             if x % 2 == 0:
                 fid.write(header)
