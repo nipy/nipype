@@ -20,7 +20,7 @@ For example::
   python rsfmri_preprocessing.py -d /data/12345-34-1.dcm -f /data/Resting.nii
       -s subj001 -o output -p PBS --plugin_args "dict(qsub_args='-q many')"
 
-  or
+or::
 
   python rsfmri_vol_surface_preprocessing.py -f SUB_1024011/E?/func/rest.nii
       -t OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz --TR 2 -s SUB_1024011
@@ -39,9 +39,10 @@ http://mindboggle.info/data.html
 
 specifically the 2mm versions of:
 
-- `Joint Fusion Atlas <http://mindboggle.info/data/atlases/jointfusion/OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm_v2.nii.gz>`_
-- `MNI template <http://mindboggle.info/data/templates/ants/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz>`_
+    * `Joint Fusion Atlas <http://mindboggle.info/data/atlases/jointfusion/OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm_v2.nii.gz>`_
+    * `MNI template <http://mindboggle.info/data/templates/ants/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz>`_
 
+Import necessary modules from nipype.
 """
 
 import os
@@ -70,6 +71,10 @@ import numpy as np
 import scipy as sp
 import nibabel as nb
 
+"""
+A list of modules and functions to import inside of nodes
+"""
+
 imports = ['import os',
            'import nibabel as nb',
            'import numpy as np',
@@ -77,6 +82,10 @@ imports = ['import os',
            'from nipype.utils.filemanip import filename_to_list, list_to_filename, split_filename',
            'from scipy.special import legendre'
            ]
+
+"""
+Define utility functions for use in workflow nodes
+"""
 
 
 def get_info(dicom_files):
@@ -340,28 +349,35 @@ def combine_hemi(left, right):
                fmt=','.join(['%d'] + ['%.10f'] * (all_data.shape[1] - 1)))
     return os.path.abspath(filename)
 
+"""
+Create a Registration Workflow
+"""
+
 
 def create_reg_workflow(name='registration'):
     """Create a FEAT preprocessing workflow together with freesurfer
 
     Parameters
     ----------
-
         name : name of workflow (default: 'registration')
 
-    Inputs::
+    Inputs:
 
         inputspec.source_files : files (filename or list of filenames to register)
         inputspec.mean_image : reference image to use
         inputspec.anatomical_image : anatomical image to coregister to
         inputspec.target_image : registration target
 
-    Outputs::
+    Outputs:
 
         outputspec.func2anat_transform : FLIRT transform
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
+
+    Example
+    -------
+        See code below
     """
 
     register = Workflow(name=name)
@@ -463,16 +479,17 @@ def create_reg_workflow(name='registration'):
     convert2itk.inputs.fsl2ras = True
     convert2itk.inputs.itk_transform = True
     register.connect(bbregister, 'out_fsl_file', convert2itk, 'transform_file')
-    register.connect(inputnode, 'mean_image',convert2itk, 'source_file')
+    register.connect(inputnode, 'mean_image', convert2itk, 'source_file')
     register.connect(stripper, 'out_file', convert2itk, 'reference_file')
 
     """
     Compute registration between the subject's structural and MNI template
-    This is currently set to perform a very quick registration. However, the
-    registration can be made significantly more accurate for cortical
-    structures by increasing the number of iterations
-    All parameters are set using the example from:
-    #https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh
+
+        * All parameters are set using the example from: \
+          `newAntsExample.sh <https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh>`_
+        * This is currently set to perform a very quick registration. However,\
+          the registration can be made significantly more accurate for cortical\
+          structures by increasing the number of iterations.
     """
 
     reg = Node(ants.Registration(), name='antsRegister')
@@ -505,15 +522,17 @@ def create_reg_workflow(name='registration'):
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode,'target_image', reg,'fixed_image')
 
-
     """
     Concatenate the affine and ants transforms into a list
     """
 
     merge = Node(Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
+<<<<<<< HEAD
     register.connect(reg, 'composite_transform', merge, 'in1')
-
+=======
+    register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
 
     """
     Transform the mean image. First to anatomical and then to target
@@ -531,7 +550,6 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode,'target_image', warpmean,'reference_image')
     register.connect(inputnode, 'mean_image', warpmean, 'input_image')
     register.connect(merge, 'out', warpmean, 'transforms')
-
 
     """
     Assign all the output files
@@ -554,7 +572,6 @@ def create_reg_workflow(name='registration'):
                      outputnode, 'min_cost_file')
 
     return register
-
 
 """
 Creates the main preprocessing workflow
@@ -606,8 +623,12 @@ def create_workflow(files,
                        name='median')
     wf.connect(tsnr, 'detrended_file', calc_median, 'in_files')
 
-    """Segment and Register
     """
+<<<<<<< HEAD
+=======
+    Segment and Register
+    """
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
 
     registration = create_reg_workflow(name='registration')
     wf.connect(calc_median, 'median_file', registration, 'inputspec.mean_image')
@@ -615,6 +636,7 @@ def create_workflow(files,
     registration.inputs.inputspec.subjects_dir = subjects_dir
     registration.inputs.inputspec.target_image = target_file
 
+<<<<<<< HEAD
     """Quantify TSNR in each freesurfer ROI
     """
 
@@ -624,6 +646,8 @@ def create_workflow(files,
     wf.connect(tsnr, 'tsnr_file', get_roi_tsnr, 'in_file')
     wf.connect(registration, 'outputspec.aparc', get_roi_tsnr, 'segmentation_file')
 
+=======
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
     """Use :class:`nipype.algorithms.rapidart` to determine which of the
     images in the functional series are outliers based on deviations in
     intensity or movement.
@@ -636,7 +660,6 @@ def create_workflow(files,
     art.inputs.zintensity_threshold = 9
     art.inputs.mask_type = 'spm_global'
     art.inputs.parameter_source = 'NiPy'
-
 
     """Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
     to use 4D. Also `get_vox_dims` function is passed along the input volume of normalise to set the optimal

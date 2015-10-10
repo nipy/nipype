@@ -25,30 +25,24 @@ setting up a workflow is separate from executing it.
 
 **1. Import appropriate modules**
 
-.. testcode::
-
-   import nipype.interfaces.spm as spm         # the spm interfaces
-   import nipype.pipeline.engine as pe         # the workflow and node wrappers
+.. literalinclude:: tutorial_101.py
+   :lines: 2-4
 
 **2. Define nodes**
 
 Here we take instances of interfaces and make them pipeline compatible by
 wrapping them with pipeline specific elements. To determine the inputs and outputs
 of a given interface, please see :ref:`interface_tutorial`. Let's
-start with defining a realign node using the interface
-:class:`nipype.interfaces.spm.Realign`
+start with defining a realign node using the :ref:`Realign <nipype.interfaces.spm.Realign>` interface:
 
-.. testcode::
-
-   realigner = pe.Node(interface=spm.Realign(), name='realign')
-   realigner.inputs.in_files = 'somefuncrun.nii'
-   realigner.inputs.register_to_mean = True
+.. literalinclude:: tutorial_101.py
+   :lines: 16-18
 
 This would be equivalent to:
 
 .. testcode::
-
-   realigner = pe.Node(interface=spm.Realign(infile='somefuncrun.nii',
+   
+   realigner = pe.Node(interface=spm.Realign(infile=os.abspath('somefuncrun.nii'),
                                              register_to_mean = True),
                        name='realign')
 
@@ -58,15 +52,17 @@ later or while initializing the interface.
 
 .. note::
 
-   In the above example, 'somefuncrun.nii' has to exist, otherwise the
-   commands won't work. A node will check if appropriate inputs are
-   being supplied.
+   a) In the above example, 'somefuncrun.nii' has to exist in the current directory,
+   otherwise the commands won't work. A node will check if appropriate
+   inputs are being supplied.
+
+   b) As noted above, you have to use the absolute path
+   of the file otherwise the workflow will fail to run.
 
 Similar to the realigner node, we now set up a smoothing node.
 
-.. testcode::
-
-   smoother = pe.Node(interface=spm.Smooth(fwhm=6), name='smooth')
+.. literalinclude:: tutorial_101.py
+   :lines: 20
 
 Now we have two nodes with their inputs defined. Note that we have not defined
 an input file for the smoothing node. This will be done by connecting the
@@ -77,17 +73,15 @@ realigner to the smoother in step 5.
 Here we create an instance of a workflow and indicate that it should operate in
 the current directory.
 
-.. testcode::
-
-   workflow = pe.Workflow(name='preproc')
-   workflow.base_dir = '.'
+.. literalinclude:: tutorial_101.py
+   :lines: 25-26
 
 **4. Adding nodes to workflows (optional)**
 
 If nodes are going to be connected (see step 5), this step is not
 necessary. However, if you would like to run a node by itself without
 connecting it to any other node, then you need to add it to the
-workflow. For adding nodes, order of nodes is not important.
+workflow. When adding nodes, the order is not important.
 
 .. testcode::
 
@@ -99,16 +93,20 @@ This results in a workflow containing two isolated nodes:
 
 **5. Connecting nodes to each other**
 
+<<<<<<< HEAD
 We want to connect the output produced by the node realignment to the input of
-the node smoothing. This is done as follows.
+the node smoothing. This is done as follows:
+=======
+We want to connect the output produced by realignment to the input of
+smoothing. This is done as follows:
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
 
-.. testcode::
+.. literalinclude:: tutorial_101.py
+   :lines: 31
 
-   workflow.connect(realigner, 'realigned_files', smoother, 'in_files')
-
-
-Although not shown here, the following notation can be used to connect multiple outputs from one node to
-multiple inputs (see step 7 below).
+or alternatively, a more flexible notation can be used. Although not shown here,
+the following notation can be used to connect multiple outputs from one node to
+multiple inputs (see step 7 below):
 
 .. testcode::
 
@@ -121,8 +119,8 @@ This results in a workflow containing two connected nodes:
 **6. Visualizing the workflow**
 
 The workflow is represented as a directed acyclic graph (DAG) and one
-can visualize this using the following command. In fact, the pictures
-above were generated using this.
+can visualize this using the following command (in fact, the pictures
+above were generated using this):
 
 .. testcode::
 
@@ -147,18 +145,9 @@ options:
 Now that you have seen a basic pipeline let's add another node to the
 above pipeline.
 
-.. testcode::
 
-   import nipype.algorithms.rapidart as ra
-   artdetect = pe.Node(interface=ra.ArtifactDetect(), name='artdetect')
-   artdetect.inputs.use_differences  = [True, False]
-   art.inputs.use_norm = True
-   art.inputs.norm_threshold = 0.5
-   art.inputs.zintensity_threshold = 3
-   workflow.connect([(realigner, artdetect,
-                      [('realigned_files', 'realigned_files'),
-                       ('realignment_parameters','realignment_parameters')]
-                     )])
+.. literalinclude:: tutorial_101.py
+   :lines: 42-53
 
 .. note::
 
@@ -180,13 +169,16 @@ This results in
 Assuming that **somefuncrun.nii** is actually a file or you've
 replaced it with an appropriate one, you can run the pipeline with:
 
-.. testcode::
-
-   workflow.run()
+.. literalinclude:: tutorial_101.py
+   :lines: 59
 
 This should create a folder called preproc in your current directory,
 inside which are three folders: realign, smooth and artdetect (the names
 of the nodes). The outputs of these routines are in these folders.
+
+.. admonition:: Example source code
+
+  You can download :download:`the source code of this example <tutorial_101.py>`.
 
 .. include:: ../links_names.txt
 

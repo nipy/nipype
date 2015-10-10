@@ -1256,7 +1256,7 @@ class FUGUE(FSLCommand):
     --------
 
 
-    Unwarping an input image (shift map is known)
+    Unwarping an input image (shift map is known):
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
@@ -1270,7 +1270,7 @@ class FUGUE(FSLCommand):
     >>> fugue.run() #doctest: +SKIP
 
 
-    Warping an input image (shift map is known)
+    Warping an input image (shift map is known):
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
@@ -1285,7 +1285,7 @@ class FUGUE(FSLCommand):
     >>> fugue.run() #doctest: +SKIP
 
 
-    Computing the vsm (unwrapped phase map is known)
+    Computing the vsm (unwrapped phase map is known):
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()

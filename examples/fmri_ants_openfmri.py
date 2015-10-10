@@ -10,6 +10,12 @@ A growing number of datasets are available on `OpenfMRI <http://openfmri.org>`_.
 This script demonstrates how to use nipype to analyze a data set::
 
     python fmri_ants_openfmri.py --datasetdir ds107
+
+This workflow also requires 2mm subcortical templates that are available from
+`MindBoggle <http://mindboggle.info/data.html>`_.
+Specifically the 2mm version of the `MNI template <http://mindboggle.info/data/templates/atropos/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz>`_.
+
+Import necessary modules from nipype.
 """
 
 from nipype import config
@@ -70,6 +76,7 @@ def median(in_files):
 
     out_file: a 3D Nifti file
     """
+
     average = None
     for idx, filename in enumerate(filename_to_list(in_files)):
         img = nb.load(filename)
@@ -105,16 +112,23 @@ def create_reg_workflow(name='registration'):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
+<<<<<<< HEAD
+=======
+
+    Example
+    -------
+        See code below
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
     """
 
     register = pe.Workflow(name=name)
 
     inputnode = pe.Node(interface=niu.IdentityInterface(fields=['source_files',
-                                                                 'mean_image',
-                                                                 'anatomical_image',
-                                                                 'target_image',
-                                                                 'target_image_brain',
-                                                                 'config_file']),
+                                                                'mean_image',
+                                                                'anatomical_image',
+                                                                'target_image',
+                                                                'target_image_brain',
+                                                                'config_file']),
                         name='inputspec')
     outputnode = pe.Node(interface=niu.IdentityInterface(fields=['func2anat_transform',
                                                                  'anat2target_transform',
@@ -185,16 +199,17 @@ def create_reg_workflow(name='registration'):
     convert2itk.inputs.fsl2ras = True
     convert2itk.inputs.itk_transform = True
     register.connect(mean2anatbbr, 'out_matrix_file', convert2itk, 'transform_file')
-    register.connect(inputnode, 'mean_image',convert2itk, 'source_file')
+    register.connect(inputnode, 'mean_image', convert2itk, 'source_file')
     register.connect(stripper, 'out_file', convert2itk, 'reference_file')
 
     """
     Compute registration between the subject's structural and MNI template
-    This is currently set to perform a very quick registration. However, the
-    registration can be made significantly more accurate for cortical
-    structures by increasing the number of iterations
-    All parameters are set using the example from:
-    #https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh
+
+        * All parameters are set using the example from: \
+          `newAntsExample.sh <https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh>`_
+        * This is currently set to perform a very quick registration. However,\
+          the registration can be made significantly more accurate for cortical\
+          structures by increasing the number of iterations.
     """
 
     reg = pe.Node(ants.Registration(), name='antsRegister')
@@ -226,7 +241,7 @@ def create_reg_workflow(name='registration'):
     reg.plugin_args = {'qsub_args': '-pe orte 4',
                        'sbatch_args': '--mem=6G -c 4'}
     register.connect(stripper, 'out_file', reg, 'moving_image')
-    register.connect(inputnode,'target_image_brain', reg,'fixed_image')
+    register.connect(inputnode, 'target_image_brain', reg, 'fixed_image')
 
     """
     Concatenate the affine and ants transforms into a list
@@ -236,7 +251,11 @@ def create_reg_workflow(name='registration'):
 
     merge = pe.Node(niu.Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
+<<<<<<< HEAD
     register.connect(reg, 'composite_transform', merge, 'in1')
+=======
+    register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
 
     """
     Transform the mean image. First to anatomical and then to target
@@ -249,7 +268,7 @@ def create_reg_workflow(name='registration'):
     warpmean.inputs.invert_transform_flags = [False, False]
     warpmean.inputs.terminal_output = 'file'
 
-    register.connect(inputnode,'target_image_brain', warpmean,'reference_image')
+    register.connect(inputnode, 'target_image_brain', warpmean, 'reference_image')
     register.connect(inputnode, 'mean_image', warpmean, 'input_image')
     register.connect(merge, 'out', warpmean, 'transforms')
 
@@ -265,8 +284,8 @@ def create_reg_workflow(name='registration'):
     warpall.inputs.invert_transform_flags = [False, False]
     warpall.inputs.terminal_output = 'file'
 
-    register.connect(inputnode,'target_image_brain',warpall,'reference_image')
-    register.connect(inputnode,'source_files', warpall, 'input_image')
+    register.connect(inputnode, 'target_image_brain', warpall, 'reference_image')
+    register.connect(inputnode, 'source_files', warpall, 'input_image')
     register.connect(merge, 'out', warpall, 'transforms')
 
     """
@@ -286,32 +305,46 @@ def create_reg_workflow(name='registration'):
     return register
 
 def get_aparc_aseg(files):
-    """Return the aparc+aseg.mgz file"""
+    """
+    Return the aparc+aseg.mgz file
+    """
+
     for name in files:
         if 'aparc+aseg.mgz' in name:
             return name
     raise ValueError('aparc+aseg.mgz not found')
+
 
 def create_fs_reg_workflow(name='registration'):
     """Create a FEAT preprocessing workflow together with freesurfer
 
     Parameters
     ----------
+<<<<<<< HEAD
 
+=======
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
         name : name of workflow (default: 'registration')
 
-    Inputs::
+    Inputs:
 
         inputspec.source_files : files (filename or list of filenames to register)
         inputspec.mean_image : reference image to use
         inputspec.target_image : registration target
 
-    Outputs::
+    Outputs:
 
         outputspec.func2anat_transform : FLIRT transform
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
+<<<<<<< HEAD
+=======
+
+    Example
+    -------
+        See code below
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
     """
 
     register = Workflow(name=name)
@@ -348,8 +381,13 @@ def create_fs_reg_workflow(name='registration'):
     register.connect(fssource, 'T1', convert, 'in_file')
 
     # Coregister the median to the surface
+<<<<<<< HEAD
     bbregister = Node(freesurfer.BBRegister(registered_file=True),
                     name='bbregister')
+=======
+    bbregister = Node(freesurfer.BBRegister(),
+                      name='bbregister')
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
     bbregister.inputs.init = 'fsl'
     bbregister.inputs.contrast_type = 't2'
     bbregister.inputs.out_fsl_file = True
@@ -369,7 +407,7 @@ def create_fs_reg_workflow(name='registration'):
     binarize = Node(fs.Binarize(min=0.5, out_type="nii.gz", dilate=1), name="binarize_aparc")
     register.connect(fssource, ("aparc_aseg", get_aparc_aseg), binarize, "in_file")
 
-    stripper = Node(fsl.ApplyMask(), name ='stripper')
+    stripper = Node(fsl.ApplyMask(), name='stripper')
     register.connect(binarize, "binary_file", stripper, "mask_file")
     register.connect(convert, 'out_file', stripper, 'in_file')
 
@@ -394,16 +432,17 @@ def create_fs_reg_workflow(name='registration'):
     convert2itk.inputs.fsl2ras = True
     convert2itk.inputs.itk_transform = True
     register.connect(bbregister, 'out_fsl_file', convert2itk, 'transform_file')
-    register.connect(inputnode, 'mean_image',convert2itk, 'source_file')
+    register.connect(inputnode, 'mean_image', convert2itk, 'source_file')
     register.connect(stripper, 'out_file', convert2itk, 'reference_file')
 
     """
     Compute registration between the subject's structural and MNI template
-    This is currently set to perform a very quick registration. However, the
-    registration can be made significantly more accurate for cortical
-    structures by increasing the number of iterations
-    All parameters are set using the example from:
-    #https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh
+
+        * All parameters are set using the example from: \
+          `newAntsExample.sh <https://github.com/stnava/ANTs/blob/master/Scripts/newAntsExample.sh>`_
+        * This is currently set to perform a very quick registration. However,\
+          the registration can be made significantly more accurate for cortical\
+          structures by increasing the number of iterations.
     """
 
     reg = Node(ants.Registration(), name='antsRegister')
@@ -435,7 +474,11 @@ def create_fs_reg_workflow(name='registration'):
     reg.plugin_args = {'qsub_args': '-pe orte 4',
                        'sbatch_args': '--mem=6G -c 4'}
     register.connect(stripper, 'out_file', reg, 'moving_image')
+<<<<<<< HEAD
     register.connect(inputnode,'target_image', reg,'fixed_image')
+=======
+    register.connect(inputnode, 'target_image', reg, 'fixed_image')
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
 
     """
     Concatenate the affine and ants transforms into a list
@@ -445,7 +488,11 @@ def create_fs_reg_workflow(name='registration'):
 
     merge = Node(Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
+<<<<<<< HEAD
     register.connect(reg, 'composite_transform', merge, 'in1')
+=======
+    register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
+>>>>>>> cb80e24fc2a68758defcb16c7ab70092aa35b693
 
     """
     Transform the mean image. First to anatomical and then to target
@@ -457,8 +504,6 @@ def create_fs_reg_workflow(name='registration'):
     warpmean.inputs.invert_transform_flags = [False, False]
     warpmean.inputs.terminal_output = 'file'
     warpmean.inputs.args = '--float'
-    #warpmean.inputs.num_threads = 4
-    #warpmean.plugin_args = {'sbatch_args': '--mem=4G -c 4'}
 
     """
     Transform the remaining images. First to anatomical and then to target
@@ -482,11 +527,11 @@ def create_fs_reg_workflow(name='registration'):
     register.connect(warpmean, 'output_image', outputnode, 'transformed_mean')
     register.connect(warpall, 'output_image', outputnode, 'transformed_files')
 
-    register.connect(inputnode,'target_image', warpmean,'reference_image')
+    register.connect(inputnode, 'target_image', warpmean, 'reference_image')
     register.connect(inputnode, 'mean_image', warpmean, 'input_image')
     register.connect(merge, 'out', warpmean, 'transforms')
-    register.connect(inputnode,'target_image', warpall,'reference_image')
-    register.connect(inputnode,'source_files', warpall, 'input_image')
+    register.connect(inputnode, 'target_image', warpall, 'reference_image')
+    register.connect(inputnode, 'source_files', warpall, 'input_image')
     register.connect(merge, 'out', warpall, 'transforms')
 
     """
@@ -515,6 +560,7 @@ def create_fs_reg_workflow(name='registration'):
 Get info for a given subject
 """
 
+
 def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     """Get info for a given subject
 
@@ -538,6 +584,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     TR : float
         Repetition time
     """
+
     from glob import glob
     import os
     import numpy as np
@@ -559,7 +606,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     for idx in range(n_tasks):
         taskidx = np.where(taskinfo[:, 0] == 'task%03d' % (idx + 1))
         conds.append([condition.replace(' ', '_') for condition
-                      in taskinfo[taskidx[0], 2]]) # if 'junk' not in condition])
+                      in taskinfo[taskidx[0], 2]])  # if 'junk' not in condition])
         files = sorted(glob(os.path.join(base_dir,
                                          subject_id,
                                          'BOLD',
@@ -567,8 +614,8 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
         runs = [int(val[-3:]) for val in files]
         run_ids.insert(idx, runs)
     json_info = os.path.join(base_dir, subject_id, 'BOLD',
-                                 'task%03d_run%03d' % (task_id, run_ids[task_id - 1][0]),
-                                 'bold_scaninfo.json')
+                             'task%03d_run%03d' % (task_id, run_ids[task_id - 1][0]),
+                             'bold_scaninfo.json')
     if os.path.exists(json_info):
         import json
         with open(json_info, 'rt') as fp:
@@ -576,8 +623,8 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
             TR = data['global']['const']['RepetitionTime']/1000.
     else:
         task_scan_key = os.path.join(base_dir, subject_id, 'BOLD',
-                                 'task%03d_run%03d' % (task_id, run_ids[task_id - 1][0]),
-                                 'scan_key.txt')
+                                     'task%03d_run%03d' % (task_id, run_ids[task_id - 1][0]),
+                                     'scan_key.txt')
         if os.path.exists(task_scan_key):
             TR = np.genfromtxt(task_scan_key)[1]
         else:
@@ -587,6 +634,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
 """
 Analyzes an open fmri dataset
 """
+
 
 def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                              task_id=None, output_dir=None, subj_prefix='*',
@@ -661,39 +709,39 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     has_contrast = os.path.exists(contrast_file)
     if has_contrast:
         datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
-                                                   'task_id', 'model_id'],
-                                         outfields=['anat', 'bold', 'behav',
-                                                    'contrasts']),
-                         name='datasource')
+                                                       'task_id', 'model_id'],
+                                             outfields=['anat', 'bold', 'behav',
+                                                        'contrasts']),
+                             name='datasource')
     else:
         datasource = pe.Node(nio.DataGrabber(infields=['subject_id', 'run_id',
-                                                   'task_id', 'model_id'],
-                                         outfields=['anat', 'bold', 'behav']),
-                         name='datasource')
+                                                       'task_id', 'model_id'],
+                                             outfields=['anat', 'bold', 'behav']),
+                             name='datasource')
     datasource.inputs.base_directory = data_dir
     datasource.inputs.template = '*'
 
     if has_contrast:
-        datasource.inputs.field_template = {'anat': '%s/anatomy/T1_001.nii.gz',
+        datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
                                             'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
                                             'behav': ('%s/model/model%03d/onsets/task%03d_'
                                                       'run%03d/cond*.txt'),
                                             'contrasts': ('models/model%03d/'
                                                           'task_contrasts.txt')}
         datasource.inputs.template_args = {'anat': [['subject_id']],
-                                       'bold': [['subject_id', 'task_id']],
-                                       'behav': [['subject_id', 'model_id',
-                                                  'task_id', 'run_id']],
-                                       'contrasts': [['model_id']]}
+                                           'bold': [['subject_id', 'task_id']],
+                                           'behav': [['subject_id', 'model_id',
+                                                      'task_id', 'run_id']],
+                                           'contrasts': [['model_id']]}
     else:
         datasource.inputs.field_template = {'anat': '%s/anatomy/T1_001.nii.gz',
                                             'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
                                             'behav': ('%s/model/model%03d/onsets/task%03d_'
                                                       'run%03d/cond*.txt')}
         datasource.inputs.template_args = {'anat': [['subject_id']],
-                                       'bold': [['subject_id', 'task_id']],
-                                       'behav': [['subject_id', 'model_id',
-                                                  'task_id', 'run_id']]}
+                                           'bold': [['subject_id', 'task_id']],
+                                           'behav': [['subject_id', 'model_id',
+                                                      'task_id', 'run_id']]}
 
     datasource.inputs.sort_filelist = True
 
@@ -736,7 +784,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         for row in contrast_def:
             if row[0] != 'task%03d' % task_id:
                 continue
-            con = [row[1], 'T', ['cond%03d' % (i + 1)  for i in range(len(conds))],
+            con = [row[1], 'T', ['cond%03d' % (i + 1) for i in range(len(conds))],
                    row[2:].astype(float).tolist()]
             contrasts.append(con)
         # add auto contrasts for each column
@@ -762,7 +810,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                      name="art")
 
     modelspec = pe.Node(interface=model.SpecifyModel(),
-                           name="modelspec")
+                        name="modelspec")
     modelspec.inputs.input_units = 'secs'
 
     def check_behav_list(behav, run_id, conds):
@@ -776,9 +824,9 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         return behav_array.reshape(num_elements/num_conds, num_conds).tolist()
 
     reshape_behav = pe.Node(niu.Function(input_names=['behav', 'run_id', 'conds'],
-                                       output_names=['behav'],
-                                       function=check_behav_list),
-                          name='reshape_behav')
+                                         output_names=['behav'],
+                                         function=check_behav_list),
+                            name='reshape_behav')
 
     wf.connect(subjinfo, 'TR', modelspec, 'time_repetition')
     wf.connect(datasource, 'behav', reshape_behav, 'behav')
@@ -858,7 +906,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                          ('varcopes', 'inputspec.varcopes'),
                                          ('n_runs', 'l2model.num_copes')]),
                 (modelfit, fixed_fx, [('outputspec.dof_file',
-                                        'inputspec.dof_files'),
+                                       'inputspec.dof_files'),
                                       ])
                 ])
 
@@ -888,9 +936,9 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
     mergefunc = pe.Node(niu.Function(input_names=['copes', 'varcopes',
                                                   'zstats'],
-                                   output_names=['out_files', 'splits'],
-                                   function=merge_files),
-                      name='merge_files')
+                                     output_names=['out_files', 'splits'],
+                                     function=merge_files),
+                        name='merge_files')
     wf.connect([(fixed_fx.get_node('outputspec'), mergefunc,
                                  [('copes', 'copes'),
                                   ('varcopes', 'varcopes'),
@@ -908,7 +956,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                      output_names=['copes', 'varcopes',
                                                    'zstats'],
                                      function=split_files),
-                      name='split_files')
+                        name='split_files')
     wf.connect(mergefunc, 'splits', splitfunc, 'splits')
     wf.connect(registration, 'outputspec.transformed_files',
                splitfunc, 'in_files')
@@ -932,12 +980,12 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
     def get_subs(subject_id, conds, run_id, model_id, task_id):
         subs = [('_subject_id_%s_' % subject_id, '')]
-        subs.append(('_model_id_%d' % model_id, 'model%03d' %model_id))
+        subs.append(('_model_id_%d' % model_id, 'model%03d' % model_id))
         subs.append(('task_id_%d/' % task_id, '/task%03d_' % task_id))
         subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_warp',
-        'mean'))
+                     'mean'))
         subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_flirt',
-        'affine'))
+                     'affine'))
 
         for i in range(len(conds)):
             subs.append(('_flameo%d/cope1.' % i, 'cope%02d.' % (i + 1)))
@@ -1058,7 +1106,7 @@ if __name__ == '__main__':
                         help="Model index" + defstr)
     parser.add_argument('-x', '--subjectprefix', default='sub*',
                         help="Subject prefix" + defstr)
-    parser.add_argument('-t', '--task', default=1, #nargs='+',
+    parser.add_argument('-t', '--task', default=1,
                         type=int, help="Task index" + defstr)
     parser.add_argument('--hpfilter', default=120.,
                         type=float, help="High pass filter cutoff (in secs)" + defstr)
@@ -1079,7 +1127,7 @@ if __name__ == '__main__':
                         help="FreeSurfer subjects directory (if available)")
     parser.add_argument("--target", dest="target_file",
                         help=("Target in MNI space. Best to use the MindBoggle "
-                              "template - only used with FreeSurfer"
+                              "template - only used with FreeSurfer "
                               "OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz"))
     args = parser.parse_args()
     outdir = args.outdir
