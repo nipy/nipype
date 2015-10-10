@@ -923,7 +923,7 @@ class SelectFiles(IOBase):
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
     >>> dg.outputs.get()
-    {u'T1': <undefined>, u'epi': <undefined>}
+    {'T1': <undefined>, 'epi': <undefined>}
 
     The same thing with dynamic grabbing of specific files:
 
@@ -1069,20 +1069,20 @@ class DataFinder(IOBase):
     >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
     >>> result = df.run() # doctest: +SKIP
     >>> print result.outputs.out_paths # doctest: +SKIP
-    [u'./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
-     u'./018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
-     u'./016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
-     u'./013-ep2d_fid_T1_pre/acquisition.nii.gz']
+    ['./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
+     './018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
+     './016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
+     './013-ep2d_fid_T1_pre/acquisition.nii.gz']
     >>> print result.outputs.series_dir # doctest: +SKIP
-    [u'027-ep2d_fid_T1_Gd4',
-     u'018-ep2d_fid_T1_Gd2',
-     u'016-ep2d_fid_T1_Gd1',
-     u'013-ep2d_fid_T1_pre']
+    ['027-ep2d_fid_T1_Gd4',
+     '018-ep2d_fid_T1_Gd2',
+     '016-ep2d_fid_T1_Gd1',
+     '013-ep2d_fid_T1_pre']
     >>> print result.outputs.basename # doctest: +SKIP
-    [u'acquisition',
-     u'acquisition'
-     u'acquisition',
-     u'acquisition']
+    ['acquisition',
+     'acquisition'
+     'acquisition',
+     'acquisition']
 
     """
 
@@ -2149,14 +2149,14 @@ class JSONFileGrabber(IOBase):
 
     >>> from nipype.interfaces.io import JSONFileGrabber
     >>> jsonSource = JSONFileGrabber()
-    >>> jsonSource.inputs.defaults = {'param1': u'overrideMe', 'param3': 1.0}
+    >>> jsonSource.inputs.defaults = {'param1': 'overrideMe', 'param3': 1.0}
     >>> res = jsonSource.run()
     >>> res.outputs.get()
-    {'param3': 1.0, 'param1': u'overrideMe'}
+    {'param3': 1.0, 'param1': 'overrideMe'}
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
     >>> res.outputs.get()
-    {'param3': 1.0, 'param2': 4, 'param1': u'exampleStr'}
+    {'param3': 1.0, 'param2': 4, 'param1': 'exampleStr'}
 
 
     """

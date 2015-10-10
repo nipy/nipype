@@ -1348,14 +1348,14 @@ class CommandLine(BaseInterface):
     >>> cli = CommandLine(command='ls', environ={'DISPLAY': ':1'})
     >>> cli.inputs.args = '-al'
     >>> cli.cmdline
-    u'ls -al'
+    'ls -al'
 
     >>> cli.inputs.trait_get()  # doctest: +NORMALIZE_WHITESPACE
-    {u'ignore_exception': False, u'terminal_output': u'stream',
-     u'environ': {u'DISPLAY': u':1'}, u'args': u'-al'}
+    {'ignore_exception': False, 'terminal_output': 'stream',
+     'environ': {'DISPLAY': ':1'}, 'args': '-al'}
 
     >>> cli.inputs.get_hashval()
-    ([(u'args', u'-al')], u'11c37f97649cd61627f4afe5136af8c0')
+    ([('args', '-al')], '11c37f97649cd61627f4afe5136af8c0')
 
     """
 

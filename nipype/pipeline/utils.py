@@ -279,7 +279,7 @@ def count_iterables(iterables, synchronize=False):
         op = max
     else:
         op = lambda x,y: x*y
-    return reduce(op, [len(func()) for _, func in list(iterables.items())])
+    return reduce(op, [len(func()) for _, func in iterables.items()])
 
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
@@ -288,8 +288,10 @@ def walk(children, level=0, path=None, usename=True):
     --------
     >>> from nipype.pipeline.utils import walk
     >>> iterables = [('a', lambda: [1, 2]), ('b', lambda: [3, 4])]
-    >>> list(walk(iterables))
-    [{'a': 1, 'b': 3}, {'a': 1, 'b': 4}, {'a': 2, 'b': 3}, {'a': 2, 'b': 4}]
+    >>> [val['a'] for val in walk(iterables)]
+    [1, 1, 2, 2]
+    >>> [val['b'] for val in walk(iterables)]
+    [3, 4, 3, 4]
     """
     # Entry point
     if level == 0:
@@ -321,27 +323,42 @@ def synchronize_iterables(iterables):
     >>> from nipype.pipeline.utils import synchronize_iterables
     >>> iterables = dict(a=lambda: [1, 2], b=lambda: [3, 4])
     >>> synced = synchronize_iterables(iterables)
-    >>> synced == [{'a': 1, 'b': 3}, {'a': 2, 'b': 4}]
-    True
+    >>> [val['a'] for val in synced]
+    [1, 2]
+    >>> [val['b'] for val in synced]
+    [3, 4]
+
     >>> iterables = dict(a=lambda: [1, 2], b=lambda: [3], c=lambda: [4, 5, 6])
     >>> synced = synchronize_iterables(iterables)
-    >>> synced == [{'a': 1, 'b': 3, 'c': 4}, {'a': 2, 'c': 5}, {'c': 6}]
-    True
+    >>> [len(d) for d in synced]
+    [3, 2, 1]
+    >>> [d.get('a', None) for d in synced]
+    [1, 2, None]
+    >>> [d.get('b', None) for d in synced]
+    [3, None, None]
+    >>> [d.get('c', None) for d in synced]
+    [4, 5, 6]
     """
-    if not iterables:
-        return None
-
     # Convert the (field, function) tuples into (field, value) lists
-    def field_values_pairs(field, func): return [(field, value) for value in list(func())]
-    pair_lists = [field_values_pairs(field, func) for field, func in iterables.items()]
+    def nextval(val):
+        yield next(iter(val))
 
-    # A factory to make a dictionary from the mapped (field, value)
-    # key-value pairs. The filter removes any unmapped None items.
-    def factory(*pairs): return dict([p for p in pairs if p])
+    out_list = []
+    iterable_items = [(field, iter(fvals()))
+                      for field, fvals in iterables.items()]
+    while True:
+        cur_dict = {}
+        for field, iter_values in iterable_items:
+            try:
+                cur_dict[field] = next(iter_values)
+            except StopIteration:
+                pass
+        if cur_dict:
+            out_list.append(cur_dict)
+        else:
+            break
 
-    #factory = lambda *pairs: dict(filter(None, pairs))
-    # Make a dictionary for each of the correlated (field, value) items
-    return [i for i in map(factory, *pair_lists)]
+    return out_list
 
 def evaluate_connect_function(function_source, args, first_arg):
     func = create_function_from_source(function_source)
@@ -1073,10 +1090,17 @@ def merge_dict(d1, d2, merge=lambda x, y: y):
     Examples:
 
     >>> d1 = {'a': 1, 'c': 3, 'b': 2}
-    >>> merge_dict(d1, d1)
-    {'a': 1, 'c': 3, 'b': 2}
-    >>> merge_dict(d1, d1, lambda x,y: x+y)
-    {'a': 2, 'c': 6, 'b': 4}
+    >>> d2 = merge_dict(d1, d1)
+    >>> len(d2)
+    3
+    >>> [d2[k] for k in ['a', 'b', 'c']]
+    [1, 2, 3]
+
+    >>> d3 = merge_dict(d1, d1, lambda x,y: x+y)
+    >>> len(d3)
+    3
+    >>> [d3[k] for k in ['a', 'b', 'c']]
+    [2, 4, 6]
 
     """
     if not isinstance(d1, dict):
