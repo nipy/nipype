@@ -380,7 +380,7 @@ class Registration(ANTSCommand):
     """
     Examples
     --------
-    >>> import copy
+    >>> import copy, pprint
     >>> from nipype.interfaces.ants import Registration
     >>> reg = Registration()
     >>> reg.inputs.fixed_image = 'fixed1.nii'
@@ -443,15 +443,32 @@ class Registration(ANTSCommand):
     >>> reg4.inputs.initialize_transforms_per_stage = True
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
-    >>> outputs  # doctest: +ELLIPSIS
-    {'reverse_invert_flags': [], 'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5', 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [], 'reverse_transforms': [], 'save_state': <undefined>, 'composite_transform': '.../nipype/testing/data/output_Composite.h5', 'forward_transforms': []}
+    >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    {'composite_transform': '.../nipype/testing/data/output_Composite.h5',
+     'forward_invert_flags': [],
+     'forward_transforms': [],
+     'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5',
+     'inverse_warped_image': <undefined>,
+     'reverse_invert_flags': [],
+     'reverse_transforms': [],
+     'save_state': <undefined>,
+     'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
 
     >>> # Test collapse transforms flag
     >>> reg4b = copy.deepcopy(reg4)
     >>> reg4b.inputs.write_composite_transform = False
     >>> outputs = reg4b._list_outputs()
-    >>> outputs  # doctest: +ELLIPSIS
-    {'reverse_invert_flags': [True, False], 'inverse_composite_transform': <undefined>, 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [False, False], 'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'], 'save_state': <undefined>, 'composite_transform': <undefined>, 'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1Warp.nii.gz']}
+    >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    {'composite_transform': <undefined>,
+     'forward_invert_flags': [False, False],
+     'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat',
+     '.../nipype/testing/data/output_1Warp.nii.gz'],
+     'inverse_composite_transform': <undefined>,
+     'inverse_warped_image': <undefined>,
+     'reverse_invert_flags': [True, False],
+     'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'],
+     'save_state': <undefined>,
+     'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
     >>> reg4b.aggregate_outputs()  # doctest: +SKIP
 
     >>> # Test multiple metrics per stage

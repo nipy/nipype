@@ -917,12 +917,13 @@ class SelectFiles(IOBase):
     Examples
     --------
 
+    >>> import pprint
     >>> from nipype import SelectFiles, Node
     >>> templates={"T1": "{subject_id}/struct/T1.nii",
     ...            "epi": "{subject_id}/func/f[0, 1].nii"}
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
-    >>> dg.outputs.get()
+    >>> pprint.pprint(dg.outputs.get())  # doctest: +NORMALIZE_WHITESPACE
     {'T1': <undefined>, 'epi': <undefined>}
 
     The same thing with dynamic grabbing of specific files:
@@ -2147,16 +2148,17 @@ class JSONFileGrabber(IOBase):
     Example
     -------
 
+    >>> import pprint
     >>> from nipype.interfaces.io import JSONFileGrabber
     >>> jsonSource = JSONFileGrabber()
     >>> jsonSource.inputs.defaults = {'param1': 'overrideMe', 'param3': 1.0}
     >>> res = jsonSource.run()
-    >>> res.outputs.get()
-    {'param3': 1.0, 'param1': 'overrideMe'}
+    >>> pprint.pprint(res.outputs.get())
+    {'param1': 'overrideMe', 'param3': 1.0}
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
-    >>> res.outputs.get()
-    {'param3': 1.0, 'param2': 4, 'param1': 'exampleStr'}
+    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE
+    {'param1': u'exampleStr', 'param2': 4, 'param3': 1.0}
 
 
     """

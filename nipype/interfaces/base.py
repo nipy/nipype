@@ -1343,16 +1343,18 @@ class CommandLine(BaseInterface):
 
     Examples
     --------
-
+    >>> import pprint
     >>> from nipype.interfaces.base import CommandLine
     >>> cli = CommandLine(command='ls', environ={'DISPLAY': ':1'})
     >>> cli.inputs.args = '-al'
     >>> cli.cmdline
     'ls -al'
 
-    >>> cli.inputs.trait_get()  # doctest: +NORMALIZE_WHITESPACE
-    {'ignore_exception': False, 'terminal_output': 'stream',
-     'environ': {'DISPLAY': ':1'}, 'args': '-al'}
+    >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE
+    {'args': '-al',
+     'environ': {'DISPLAY': ':1'},
+     'ignore_exception': False,
+     'terminal_output': 'stream'}
 
     >>> cli.inputs.get_hashval()
     ([('args', '-al')], '11c37f97649cd61627f4afe5136af8c0')
