@@ -56,9 +56,8 @@ def test_bunch_hash():
     yield assert_equal, bhash, 'ddcc7b4ec5675df8cf317a48bd1857fa'
     # Make sure the hash stored in the json file for `infile` is correct.
     jshash = nib.md5()
-    fp = open(json_pth)
-    jshash.update(fp.read())
-    fp.close()
+    with open(json_pth) as fp:
+        jshash.update(fp.read().encode('utf-8'))
     yield assert_equal, newbdict['infile'][0][1], jshash.hexdigest()
     yield assert_equal, newbdict['yat'], True
 
@@ -412,24 +411,21 @@ def test_BaseInterface():
     nib.BaseInterface.input_spec = None
     yield assert_raises, Exception, nib.BaseInterface
 
+def assert_not_raises(fn, *args, **kwargs):
+    fn(*args, **kwargs)
+    return True
+
 def test_input_version():
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
     obj = DerivedInterface1()
-    not_raised = True
-    try:
-        obj._check_version_requirements(obj.inputs)
-    except:
-        not_raised = False
-    yield assert_true, not_raised
+    yield assert_not_raises, obj._check_version_requirements, obj.inputs
+
     config.set('execution', 'stop_on_unknown_version', True)
-    try:
-        obj._check_version_requirements(obj.inputs)
-    except:
-        not_raised = False
-    yield assert_false, not_raised
+    yield assert_raises, Exception, obj._check_version_requirements, obj.inputs
+
     config.set_default_config()
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
@@ -439,18 +435,15 @@ def test_input_version():
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     yield assert_raises, Exception, obj._check_version_requirements
+
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.10'
     obj = DerivedInterface1()
-    not_raised = True
-    try:
-        obj._check_version_requirements(obj.inputs)
-    except:
-        not_raised = False
-    yield assert_true, not_raised
+    yield assert_not_raises, obj._check_version_requirements, obj.inputs
+
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
     class DerivedInterface1(nib.BaseInterface):
@@ -459,11 +452,8 @@ def test_input_version():
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     not_raised = True
-    try:
-        obj._check_version_requirements(obj.inputs)
-    except:
-        not_raised = False
-    yield assert_true, not_raised
+    yield assert_not_raises, obj._check_version_requirements, obj.inputs
+
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', max_ver='0.7')
     class DerivedInterface2(nib.BaseInterface):
@@ -472,6 +462,7 @@ def test_input_version():
     obj = DerivedInterface2()
     obj.inputs.foo = 1
     yield assert_raises, Exception, obj._check_version_requirements
+
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', max_ver='0.9')
     class DerivedInterface1(nib.BaseInterface):
@@ -480,11 +471,7 @@ def test_input_version():
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     not_raised = True
-    try:
-        obj._check_version_requirements(obj.inputs)
-    except:
-        not_raised = False
-    yield assert_true, not_raised
+    yield assert_not_raises, obj._check_version_requirements, obj.inputs
 
 def test_output_version():
     class InputSpec(nib.TraitedSpec):
