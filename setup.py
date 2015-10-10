@@ -37,9 +37,17 @@ from distutils.core import setup
 ''' Distutils / setuptools helpers from nibabel.nisext'''
 
 import os
-from os.path import join as pjoin, split as psplit, splitext
+from os.path import join as pjoin
 import sys
-from configparser import ConfigParser
+PY3 = sys.version_info[0] >= 3
+if PY3:
+    string_types = str,
+else:
+    string_types = basestring,
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
 
 from distutils.version import LooseVersion
 from distutils.command.build_py import build_py
@@ -108,7 +116,7 @@ def _add_append_key(in_dict, key, value):
     # Append value to in_dict[key] list
     if key not in in_dict:
         in_dict[key] = []
-    elif isinstance(in_dict[key], str):
+    elif isinstance(in_dict[key], string_types):
         in_dict[key] = [in_dict[key]]
     in_dict[key].append(value)
 
@@ -205,7 +213,7 @@ def package_check(pkg_name, version=None,
                     + msgs['opt suffix'])
         return
     # setuptools mode
-    if optional_tf and not isinstance(optional, str):
+    if optional_tf and not isinstance(optional, string_types):
         raise RuntimeError('Not-False optional arg should be string')
     dependency = pkg_name
     if version:
@@ -286,7 +294,7 @@ def main(**extra_args):
           version=VERSION,
           install_requires=REQUIRES,
           provides=PROVIDES,
-          packages = [     'nipype',
+          packages     = [ 'nipype',
                            'nipype.algorithms',
                            'nipype.algorithms.tests',
                            'nipype.caching',
