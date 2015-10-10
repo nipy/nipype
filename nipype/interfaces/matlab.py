@@ -179,9 +179,8 @@ class MatlabCommand(CommandLine):
 
         script_lines = '\n'.join(prescript)+script_lines+'\n'.join(postscript)
         if mfile:
-            mfile = file(os.path.join(cwd,self.inputs.script_file), 'wt')
-            mfile.write(script_lines)
-            mfile.close()
+            with open(os.path.join(cwd,self.inputs.script_file), 'wt') as mfile:
+                mfile.write(script_lines)
             if self.inputs.uses_mcr:
                 script = '%s' % (os.path.join(cwd,self.inputs.script_file))
             else:
