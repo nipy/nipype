@@ -534,7 +534,7 @@ def sdc_fmb(name='fmb_correction', interp='Linear',
     >>> from nipype.workflows.dmri.fsl.artifacts import sdc_fmb
     >>> fmb = sdc_fmb()
     >>> fmb.inputs.inputnode.in_file = 'diffusion.nii'
-    >>> fmb.inputs.inputnode.in_ref = range(0, 30, 6)
+    >>> fmb.inputs.inputnode.in_ref = list(range(0, 30, 6))
     >>> fmb.inputs.inputnode.in_mask = 'mask.nii'
     >>> fmb.inputs.inputnode.bmap_mag = 'magnitude.nii'
     >>> fmb.inputs.inputnode.bmap_pha = 'phase.nii'

@@ -129,7 +129,7 @@ class FmriRealign4d(BaseInterface):
     >>> realigner = FmriRealign4d()
     >>> realigner.inputs.in_file = ['functional.nii']
     >>> realigner.inputs.tr = 2
-    >>> realigner.inputs.slice_order = range(0,67)
+    >>> realigner.inputs.slice_order = list(range(0,67))
     >>> res = realigner.run() # doctest: +SKIP
 
     References
@@ -256,7 +256,7 @@ class SpaceTimeRealigner(BaseInterface):
     >>> realigner = SpaceTimeRealigner()
     >>> realigner.inputs.in_file = ['functional.nii']
     >>> realigner.inputs.tr = 2
-    >>> realigner.inputs.slice_times = range(0, 3, 67)
+    >>> realigner.inputs.slice_times = list(range(0, 3, 67))
     >>> realigner.inputs.slice_info = 2
     >>> res = realigner.run() # doctest: +SKIP
 
