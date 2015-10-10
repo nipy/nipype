@@ -7,6 +7,7 @@ standard_library.install_aliases()
 import os
 import tempfile
 import shutil
+import warnings
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                         assert_true, assert_false, with_setup, package_check,
@@ -16,7 +17,8 @@ from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import Undefined, config
 from traits.testing.nose_tools import skip
 import traits.api as traits
-#test Bunch
+
+
 def test_bunch():
     b = nib.Bunch()
     yield assert_equal, b.__dict__,{}
@@ -138,43 +140,67 @@ def test_TraitedSpec_logic():
     yield assert_equal, myif.inputs.kung, 2.0
 
 def test_deprecation():
-    class DeprecationSpec1(nib.TraitedSpec):
-        foo = nib.traits.Int(deprecated='0.1')
-    spec_instance = DeprecationSpec1()
-    set_foo = lambda : setattr(spec_instance, 'foo', 1)
-    yield assert_raises, nib.TraitError, set_foo
-    class DeprecationSpec1numeric(nib.TraitedSpec):
-        foo = nib.traits.Int(deprecated='0.1')
-    spec_instance = DeprecationSpec1numeric()
-    set_foo = lambda : setattr(spec_instance, 'foo', 1)
-    yield assert_raises, nib.TraitError, set_foo
-    class DeprecationSpec2(nib.TraitedSpec):
-        foo = nib.traits.Int(deprecated='100', new_name='bar')
-    spec_instance = DeprecationSpec2()
-    set_foo = lambda : setattr(spec_instance, 'foo', 1)
-    yield assert_raises, nib.TraitError, set_foo
-    class DeprecationSpec3(nib.TraitedSpec):
-        foo = nib.traits.Int(deprecated='1000', new_name='bar')
-        bar = nib.traits.Int()
-    spec_instance = DeprecationSpec3()
-    not_raised = True
-    try:
-        spec_instance.foo = 1
-    except nib.TraitError:
-        not_raised = False
-    yield assert_true, not_raised
-    class DeprecationSpec3(nib.TraitedSpec):
-        foo = nib.traits.Int(deprecated='1000', new_name='bar')
-        bar = nib.traits.Int()
-    spec_instance = DeprecationSpec3()
-    not_raised = True
-    try:
-        spec_instance.foo = 1
-    except nib.TraitError:
-        not_raised = False
-    yield assert_true, not_raised
-    yield assert_equal, spec_instance.foo, Undefined
-    yield assert_equal, spec_instance.bar, 1
+    with warnings.catch_warnings(record=True) as w:
+        warnings.filterwarnings('always', '', UserWarning)
+
+        class DeprecationSpec1(nib.TraitedSpec):
+            foo = nib.traits.Int(deprecated='0.1')
+        spec_instance = DeprecationSpec1()
+        set_foo = lambda : setattr(spec_instance, 'foo', 1)
+        yield assert_raises, nib.TraitError, set_foo
+        yield assert_equal, len(w), 0, 'no warnings, just errors'
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.filterwarnings('always', '', UserWarning)
+
+        class DeprecationSpec1numeric(nib.TraitedSpec):
+            foo = nib.traits.Int(deprecated='0.1')
+        spec_instance = DeprecationSpec1numeric()
+        set_foo = lambda : setattr(spec_instance, 'foo', 1)
+        yield assert_raises, nib.TraitError, set_foo
+        yield assert_equal, len(w), 0, 'no warnings, just errors'
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.filterwarnings('always', '', UserWarning)
+
+        class DeprecationSpec2(nib.TraitedSpec):
+            foo = nib.traits.Int(deprecated='100', new_name='bar')
+        spec_instance = DeprecationSpec2()
+        set_foo = lambda : setattr(spec_instance, 'foo', 1)
+        yield assert_raises, nib.TraitError, set_foo
+        yield assert_equal, len(w), 0, 'no warnings, just errors'
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.filterwarnings('always', '', UserWarning)
+
+        class DeprecationSpec3(nib.TraitedSpec):
+            foo = nib.traits.Int(deprecated='1000', new_name='bar')
+            bar = nib.traits.Int()
+        spec_instance = DeprecationSpec3()
+        not_raised = True
+        try:
+            spec_instance.foo = 1
+        except nib.TraitError:
+            not_raised = False
+        yield assert_true, not_raised
+        yield assert_equal, len(w), 1, 'deprecated warning 1 %s' % [w1.message for w1 in w]
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.filterwarnings('always', '', UserWarning)
+
+        class DeprecationSpec3(nib.TraitedSpec):
+            foo = nib.traits.Int(deprecated='1000', new_name='bar')
+            bar = nib.traits.Int()
+        spec_instance = DeprecationSpec3()
+        not_raised = True
+        try:
+            spec_instance.foo = 1
+        except nib.TraitError:
+            not_raised = False
+        yield assert_true, not_raised
+        yield assert_equal, spec_instance.foo, Undefined
+        yield assert_equal, spec_instance.bar, 1
+        yield assert_equal, len(w), 1, 'deprecated warning 2 %s' % [w1.message for w1 in w]
 
 
 def test_namesource():

@@ -421,7 +421,7 @@ class BaseTraitedSpec(traits.HasTraits):
                     if not msg:
                         msg = 'Input %s requires inputs: %s' \
                             % (name, ', '.join(trait_spec.requires))
-            if msg:
+            if msg:  # only one requires warning at a time.
                 warn(msg)
 
     def _deprecated_warn(self, obj, name, old, new):
@@ -445,10 +445,11 @@ class BaseTraitedSpec(traits.HasTraits):
             if LooseVersion(str(trait_spec.deprecated)) < nipype_version:
                 raise TraitError(msg)
             else:
+                if trait_spec.new_name:
+                    msg += 'Unsetting old value %s; setting new value %s.' % (
+                        name, trait_spec.new_name)
                 warn(msg)
                 if trait_spec.new_name:
-                    warn('Unsetting %s and setting %s.' % (name,
-                                                           trait_spec.new_name))
                     self.trait_set(trait_change_notify=False,
                                    **{'%s' % name: Undefined,
                                       '%s' % trait_spec.new_name: new})
