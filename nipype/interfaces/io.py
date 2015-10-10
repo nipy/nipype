@@ -1967,7 +1967,7 @@ class SSHDataGrabber(DataGrabber):
             paramiko
         except NameError:
             warn(
-                "The library parmiko needs to be installed"
+                "The library paramiko needs to be installed"
                 " for this module to run."
             )
         if not outfields:
@@ -1996,7 +1996,7 @@ class SSHDataGrabber(DataGrabber):
             paramiko
         except NameError:
             raise ImportError(
-                "The library parmiko needs to be installed"
+                "The library paramiko needs to be installed"
                 " for this module to run."
             )
 
