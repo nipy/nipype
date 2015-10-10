@@ -51,10 +51,10 @@ class Registration(CommandLine):
 
     >>> from nipype.interfaces.elastix import Registration
     >>> reg = Registration()
-    >>> reg.inputs.fixed_image = 'fixed1.nii'
-    >>> reg.inputs.moving_image = 'moving1.nii'
-    >>> reg.inputs.parameters = ['elastix.txt']
-    >>> reg.cmdline
+    >>> reg.inputs.fixed_image = 'fixed1.nii'  # doctest: +SKIP
+    >>> reg.inputs.moving_image = 'moving1.nii'  # doctest: +SKIP
+    >>> reg.inputs.parameters = ['elastix.txt']  # doctest: +SKIP
+    >>> reg.cmdline  # doctest: +SKIP
     'elastix -f fixed1.nii -m moving1.nii -out ./ -p elastix.txt'
 
 
@@ -144,9 +144,9 @@ class ApplyWarp(CommandLine):
 
     >>> from nipype.interfaces.elastix import ApplyWarp
     >>> reg = ApplyWarp()
-    >>> reg.inputs.moving_image = 'moving1.nii'
-    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> reg.cmdline
+    >>> reg.inputs.moving_image = 'moving1.nii'  # doctest: +SKIP
+    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'  # doctest: +SKIP
+    >>> reg.cmdline  # doctest: +SKIP
     'transformix -in moving1.nii -out ./ -tp TransformParameters.0.txt'
 
 
@@ -184,8 +184,8 @@ class AnalyzeWarp(CommandLine):
 
     >>> from nipype.interfaces.elastix import AnalyzeWarp
     >>> reg = AnalyzeWarp()
-    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> reg.cmdline
+    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'  # doctest: +SKIP
+    >>> reg.cmdline  # doctest: +SKIP
     'transformix -def all -jac all -jacmat all -out ./ -tp TransformParameters.0.txt'
 
 
@@ -224,9 +224,9 @@ class PointsWarp(CommandLine):
 
     >>> from nipype.interfaces.elastix import PointsWarp
     >>> reg = PointsWarp()
-    >>> reg.inputs.points_file = 'surf1.vtk'
-    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> reg.cmdline
+    >>> reg.inputs.points_file = 'surf1.vtk'  # doctest: +SKIP
+    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'  # doctest: +SKIP
+    >>> reg.cmdline  # doctest: +SKIP
     'transformix -out ./ -def surf1.vtk -tp TransformParameters.0.txt'
 
 
