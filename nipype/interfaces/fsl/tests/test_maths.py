@@ -16,6 +16,12 @@ import nipype.interfaces.fsl.maths as fsl
 from nipype.interfaces.fsl import no_fsl, Info
 
 
+def set_output_type(fsl_output_type=None):
+    prev_output_type = os.environ.get('FSLOUTPUTTYPE', None)
+    if fsl_output_type is not None:
+        os.environ['FSLOUTPUTTYPE'] = fsl_output_type
+    return prev_output_type
+
 def create_files_in_directory():
     testdir = os.path.realpath(mkdtemp())
     origdir = os.getcwd()
@@ -40,7 +46,8 @@ def clean_directory(testdir, origdir):
 
 
 @skipif(no_fsl)
-def test_maths_base():
+def test_maths_base(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get some fslmaths
@@ -78,9 +85,11 @@ def test_maths_base():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 @skipif(no_fsl)
-def test_changedt():
+def test_changedt(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get some fslmaths
@@ -108,9 +117,11 @@ def test_changedt():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 @skipif(no_fsl)
-def test_threshold():
+def test_threshold(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
@@ -142,10 +153,12 @@ def test_threshold():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 
 @skipif(no_fsl)
-def test_meanimage():
+def test_meanimage(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
@@ -169,9 +182,11 @@ def test_meanimage():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 @skipif(no_fsl)
-def test_maximage():
+def test_maximage(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
@@ -195,9 +210,11 @@ def test_maximage():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 @skipif(no_fsl)
-def test_smooth():
+def test_smooth(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
@@ -224,9 +241,11 @@ def test_smooth():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 @skipif(no_fsl)
-def test_mask():
+def test_mask(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
@@ -248,10 +267,12 @@ def test_mask():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 
 @skipif(no_fsl)
-def test_dilation():
+def test_dilation(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
@@ -290,9 +311,11 @@ def test_dilation():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 @skipif(no_fsl)
-def test_erosion():
+def test_erosion(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
@@ -314,9 +337,11 @@ def test_erosion():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 @skipif(no_fsl)
-def test_spatial_filter():
+def test_spatial_filter(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
@@ -339,10 +364,12 @@ def test_spatial_filter():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 
 @skipif(no_fsl)
-def test_unarymaths():
+def test_unarymaths(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
@@ -367,10 +394,12 @@ def test_unarymaths():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 
 @skipif(no_fsl)
-def test_binarymaths():
+def test_binarymaths(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
@@ -403,10 +432,12 @@ def test_binarymaths():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 
 @skipif(no_fsl)
-def test_multimaths():
+def test_multimaths(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
@@ -434,10 +465,12 @@ def test_multimaths():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
 
 @skipif(no_fsl)
-def test_tempfilt():
+def test_tempfilt(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
@@ -463,5 +496,16 @@ def test_tempfilt():
 
     # Clean up our mess
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
 
+@skipif(no_fsl)
+def test_all_again():
+    # Rerun tests with all file types
+    all_func = [test_binarymaths, test_changedt, test_dilation, test_erosion,
+                test_mask, test_maximage, test_meanimage, test_multimaths,
+                test_smooth, test_tempfilt, test_threshold, test_unarymaths]
 
+    for output_type in Info.ftypes:
+        for func in all_func:
+            for test in func(output_type):
+                yield test

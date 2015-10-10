@@ -13,28 +13,8 @@ from nipype.testing import (assert_equal, assert_not_equal,
 import nipype.interfaces.fsl.utils as fsl
 from nipype.interfaces.fsl import no_fsl, Info
 
-
-def create_files_in_directory():
-    outdir = mkdtemp()
-    cwd = os.getcwd()
-    os.chdir(outdir)
-    filelist = ['a.nii', 'b.nii']
-    for f in filelist:
-        hdr = nb.Nifti1Header()
-        shape = (3, 3, 3, 4)
-        hdr.set_data_shape(shape)
-        img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
-                os.path.join(outdir, f))
-
-    out_ext = Info.output_type_to_ext(Info.output_type())
-    return filelist, outdir, cwd, out_ext
-
-
-def clean_directory(outdir, old_wd):
-    if os.path.exists(outdir):
-        rmtree(outdir)
-    os.chdir(old_wd)
+from .test_maths import (set_output_type, create_files_in_directory,
+                         clean_directory)
 
 
 @skipif(no_fsl)
@@ -306,7 +286,8 @@ def test_convertxfm():
 
 
 @skipif(no_fsl)
-def test_swapdims():
+def test_swapdims(fsl_output_type=None):
+    prev_type = set_output_type(fsl_output_type)
     files, testdir, origdir, out_ext = create_files_in_directory()
     swap = fsl.SwapDimensions()
 
@@ -330,3 +311,4 @@ def test_swapdims():
 
     # Clean up
     clean_directory(testdir, origdir)
+    set_output_type(prev_type)
