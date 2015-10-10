@@ -66,9 +66,9 @@ class MatlabCommand(CommandLine):
     """Interface that runs matlab code
 
     >>> import nipype.interfaces.matlab as matlab
-    >>> mlab = matlab.MatlabCommand()
+    >>> mlab = matlab.MatlabCommand(mfile=False)  # don't write script file
     >>> mlab.inputs.script = "which('who')"
-    >>> out = mlab.run() # doctest: +SKIP
+    >>> out = mlab.run()  # doctest: +SKIP
     """
 
     _cmd = 'matlab'
@@ -156,6 +156,7 @@ class MatlabCommand(CommandLine):
         return super(MatlabCommand, self)._format_arg(name, trait_spec, value)
 
     def _gen_matlab_command(self, argstr, script_lines):
+        """ Generates commands and, if mfile specified, writes it to disk."""
         cwd = os.getcwd()
         mfile = self.inputs.mfile or self.inputs.uses_mcr
         paths = []
