@@ -942,9 +942,7 @@ class BaseInterface(Interface):
         check = dict(min_ver=lambda t: t is not None)
         names = trait_object.trait_names(**check)
         
-        if names:
-            if not self.version:
-                return None
+        if names and self.version:
             version = LooseVersion(str(self.version))
             for name in names:
                 min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
