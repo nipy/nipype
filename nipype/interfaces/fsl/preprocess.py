@@ -1122,13 +1122,13 @@ class SUSAN(FSLCommand):
 
     >>> from nipype.interfaces import fsl
     >>> from nipype.testing import example_data
-    >>> print anatfile #doctest: +SKIP
-    anatomical.nii #doctest: +SKIP
+    >>> anatfile  # doctest: +SKIP
+    anatomical.nii  # doctest: +SKIP
     >>> sus = fsl.SUSAN()
     >>> sus.inputs.in_file = example_data('structural.nii')
     >>> sus.inputs.brightness_threshold = 2000.0
     >>> sus.inputs.fwhm = 8.0
-    >>> result = sus.run() #doctest: +SKIP
+    >>> result = sus.run()  # doctest: +SKIP
     """
 
     _cmd = 'susan'

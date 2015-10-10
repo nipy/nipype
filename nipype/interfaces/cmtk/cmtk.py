@@ -600,7 +600,7 @@ class ROIGen(BaseInterface):
     >>> file = open("FreeSurferColorLUT_adapted_aparc+aseg_out.pck", "r")
     >>> file = open("fsLUT_aparc+aseg.pck", "r")
     >>> labelDict = pickle.load(file) # doctest: +SKIP
-    >>> print labelDict                     # doctest: +SKIP
+    >>> labelDict                     # doctest: +SKIP
     """
 
     input_spec = ROIGenInputSpec

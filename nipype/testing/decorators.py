@@ -30,7 +30,7 @@ def make_label_dec(label, ds=None):
     Examples
     --------
     >>> slow = make_label_dec('slow')
-    >>> print slow.__doc__
+    >>> slow.__doc__
     Labels a test as 'slow'
 
     >>> rare = make_label_dec(['slow','hard'],

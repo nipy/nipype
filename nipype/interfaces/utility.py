@@ -193,7 +193,7 @@ class Rename(IOBase):
     >>> rename1.inputs.in_file = "zstat1.nii.gz"
     >>> rename1.inputs.format_string = "Faces-Scenes.nii.gz"
     >>> res = rename1.run()          # doctest: +SKIP
-    >>> print res.outputs.out_file   # doctest: +SKIP
+    >>> res.outputs.out_file         # doctest: +SKIP
     'Faces-Scenes.nii.gz"            # doctest: +SKIP
 
     >>> rename2 = Rename(format_string="%(subject_id)s_func_run%(run)02d")
@@ -202,7 +202,7 @@ class Rename(IOBase):
     >>> rename2.inputs.subject_id = "subj_201"
     >>> rename2.inputs.run = 2
     >>> res = rename2.run()          # doctest: +SKIP
-    >>> print res.outputs.out_file   # doctest: +SKIP
+    >>> res.outputs.out_file         # doctest: +SKIP
     'subj_201_func_run02.nii'        # doctest: +SKIP
 
     >>> rename3 = Rename(format_string="%(subject_id)s_%(seq)s_run%(run)02d.nii")
@@ -211,7 +211,7 @@ class Rename(IOBase):
     >>> rename3.inputs.subject_id = "subj_201"
     >>> rename3.inputs.run = 2
     >>> res = rename3.run()          # doctest: +SKIP
-    >>> print res.outputs.out_file   # doctest: +SKIP
+    >>> res.outputs.out_file         # doctest: +SKIP
     'subj_201_epi_run02.nii'         # doctest: +SKIP
 
     """
