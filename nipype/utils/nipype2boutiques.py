@@ -15,7 +15,7 @@ import os
 import argparse
 import inspect
 import sys
-import json
+import simplejson
 import tempfile
 
 from nipype.interfaces.base import Interface
@@ -106,7 +106,7 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
   for input in tool_desc['inputs']:
     del input['tempvalue']
 
-  return json.dumps(tool_desc, indent=4, separators=(',', ': '))
+  return simplejson.dumps(tool_desc, indent=4, separators=(',', ': '))
 
 def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs,verbose,ignore_template_numbers):
   """

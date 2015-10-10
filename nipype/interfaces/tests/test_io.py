@@ -373,7 +373,7 @@ def test_freesurfersource():
 
 
 def test_jsonsink():
-    import json
+    import simplejson
     import os
 
     ds = nio.JSONFileSink()
@@ -392,7 +392,7 @@ def test_jsonsink():
     res = js.run()
 
     with open(res.outputs.out_file, 'r') as f:
-        data = json.load(f)
+        data = simplejson.load(f)
     yield assert_true, data == {"contrasts": {"alt": "someNestedValue"}, "foo": "var", "new_entry": "someValue"}
 
     js = nio.JSONFileSink(infields=['test'], in_dict={'foo': 'var'})
@@ -402,7 +402,7 @@ def test_jsonsink():
     res = js.run()
 
     with open(res.outputs.out_file, 'r') as f:
-        data = json.load(f)
+        data = simplejson.load(f)
     yield assert_true, data == {"test": "testInfields", "contrasts": {"alt": "someNestedValue"}, "foo": "var", "new_entry": "someValue"}
 
     os.chdir(curdir)

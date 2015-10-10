@@ -20,6 +20,7 @@
 from builtins import zip
 from builtins import filter
 from builtins import range
+
 import glob
 import fnmatch
 import string
@@ -2158,7 +2159,7 @@ class JSONFileGrabber(IOBase):
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
     >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE
-    {'param1': u'exampleStr', 'param2': 4, 'param3': 1.0}
+    {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
 
 
     """
@@ -2167,12 +2168,12 @@ class JSONFileGrabber(IOBase):
     _always_run = True
 
     def _list_outputs(self):
-        import json
+        import simplejson
 
         outputs = {}
         if isdefined(self.inputs.in_file):
             with open(self.inputs.in_file, 'r') as f:
-                data = json.load(f)
+                data = simplejson.load(f)
 
             if not isinstance(data, dict):
                 raise RuntimeError('JSON input has no dictionary structure')
@@ -2269,7 +2270,7 @@ class JSONFileSink(IOBase):
         return name, val
 
     def _list_outputs(self):
-        import json
+        import simplejson
         import os.path as op
 
         if not isdefined(self.inputs.out_file):
@@ -2287,7 +2288,7 @@ class JSONFileSink(IOBase):
             out_dict[key] = val
 
         with open(out_file, 'w') as f:
-            json.dump(out_dict, f)
+            simplejson.dump(out_dict, f)
         outputs = self.output_spec().get()
         outputs['out_file'] = out_file
         return outputs

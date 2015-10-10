@@ -14,12 +14,19 @@ from nipype.testing import (assert_equal, assert_raises, skipif)
 from nipype.interfaces.base import Undefined
 import nipype.interfaces.fsl.maths as fsl
 from nipype.interfaces.fsl import no_fsl, Info
+from nipype.interfaces.fsl.base import FSLCommand
 
 
-def set_output_type(fsl_output_type=None):
+def set_output_type(fsl_output_type):
     prev_output_type = os.environ.get('FSLOUTPUTTYPE', None)
+
     if fsl_output_type is not None:
         os.environ['FSLOUTPUTTYPE'] = fsl_output_type
+    elif 'FSLOUTPUTTYPE' in os.environ:
+        del os.environ['FSLOUTPUTTYPE']
+
+    FSLCommand.set_default_output_type(Info.output_type())
+
     return prev_output_type
 
 def create_files_in_directory():
@@ -500,7 +507,7 @@ def test_tempfilt(fsl_output_type=None):
 
 @skipif(no_fsl)
 def test_all_again():
-    # Rerun tests with all file types
+    # Rerun tests with all output file types
     all_func = [test_binarymaths, test_changedt, test_dilation, test_erosion,
                 test_mask, test_maximage, test_meanimage, test_multimaths,
                 test_smooth, test_tempfilt, test_threshold, test_unarymaths]

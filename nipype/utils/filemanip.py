@@ -10,7 +10,7 @@ import pickle
 import gzip
 import hashlib
 from hashlib import md5
-import json
+import simplejson
 import os
 import re
 import shutil
@@ -382,7 +382,7 @@ def save_json(filename, data):
     """
 
     with open(filename, 'w') as fp:
-        json.dump(data, fp, sort_keys=True, indent=4)
+        simplejson.dump(data, fp, sort_keys=True, indent=4)
 
 
 def load_json(filename):
@@ -400,7 +400,7 @@ def load_json(filename):
     """
 
     with open (filename, 'r') as fp:
-        data = json.load(fp)
+        data = simplejson.load(fp)
     return data
 
 def loadcrash(infile, *args):

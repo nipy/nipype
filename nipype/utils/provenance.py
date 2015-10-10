@@ -3,7 +3,7 @@ standard_library.install_aliases()
 from builtins import object
 
 from pickle import dumps
-import json
+import simplejson
 import os
 import getpass
 from socket import getfqdn
@@ -156,8 +156,8 @@ def safe_encode(x, as_literal=True):
                 else:
                     outdict[key] = encoded_value
             if not as_literal:
-                return json.dumps(outdict)
-            return pm.Literal(json.dumps(outdict), pm.XSD['string'])
+                return simplejson.dumps(outdict)
+            return pm.Literal(simplejson.dumps(outdict), pm.XSD['string'])
         if isinstance(x, list):
             try:
                 nptype = np.array(x).dtype
@@ -174,8 +174,8 @@ def safe_encode(x, as_literal=True):
             else:
                 outlist = x
             if not as_literal:
-                return json.dumps(outlist)
-            return pm.Literal(json.dumps(outlist), pm.XSD['string'])
+                return simplejson.dumps(outlist)
+            return pm.Literal(simplejson.dumps(outlist), pm.XSD['string'])
         if not as_literal:
             return dumps(x)
         return pm.Literal(dumps(x), nipype_ns['pickle'])
@@ -393,5 +393,5 @@ class ProvStore(object):
                     fp.writelines(self.g.get_provn())
             if format in ['json', 'all']:
                 with open(filename + '.json', 'wt') as fp:
-                    pm.json.dump(self.g, fp, cls=pm.ProvBundle.JSONEncoder)
+                    pm.simplejson.dump(self.g, fp, cls=pm.ProvBundle.JSONEncoder)
         return self.g
