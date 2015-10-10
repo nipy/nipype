@@ -1213,9 +1213,9 @@ class MergeROIs(BaseInterface):
 
     >>> from nipype.algorithms import misc
     >>> rois = misc.MergeROIs()
-    >>> rois.inputs.in_files = ['roi%02d.nii' % i for i in xrange(1, 6)]
+    >>> rois.inputs.in_files = ['roi%02d.nii' % i for i in range(1, 6)]
     >>> rois.inputs.in_reference = 'mask.nii'
-    >>> rois.inputs.in_index = ['roi%02d_idx.npz' % i for i in xrange(1, 6)]
+    >>> rois.inputs.in_index = ['roi%02d_idx.npz' % i for i in range(1, 6)]
     >>> rois.run() # doctest: +SKIP
 
     """
