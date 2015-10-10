@@ -72,7 +72,8 @@ def setup_file():
     #global tmp_infile, tmp_dir
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo.txt')
-    open(tmp_infile, 'w').writelines('123456789')
+    with open(tmp_infile, 'w'):
+        fp.writelines(['123456789'])
     return tmp_infile
 
 def teardown_file(tmp_dir):
