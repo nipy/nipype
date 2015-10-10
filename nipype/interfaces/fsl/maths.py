@@ -131,10 +131,10 @@ class MaxImage(MathsCommand):
     --------
     >>> from nipype.interfaces.fsl.maths import MaxImage
     >>> maxer = MaxImage()
-    >>> maxer.inputs.in_file = "functional.nii"
+    >>> maxer.inputs.in_file = "functional.nii"  # doctest: +SKIP
     >>> maxer.dimension = "T"
-    >>> maths.cmdline
-    >>> fslmaths functional.nii -Tmax functional_max.nii
+    >>> maxer.cmdline  # doctest: +SKIP
+    'fslmaths functional.nii -Tmax functional_max.nii'
 
     """
     input_spec = MaxImageInput
@@ -294,12 +294,12 @@ class MultiImageMaths(MathsCommand):
     --------
     >>> from nipype.interfaces.fsl import MultiImageMaths
     >>> maths = MultiImageMaths()
-    >>> maths.inputs.in_file = "functional.nii"
+    >>> maths.inputs.in_file = "functional.nii"  # doctest: +SKIP
     >>> maths.inputs.op_string = "-add %s -mul -1 -div %s"
-    >>> maths.inputs.operand_files = ["functional2.nii", "functional3.nii"]
-    >>> maths.inputs.out_file = functional4.nii
-    >>> maths.cmdline
-    >>> fslmaths functional1.nii -add functional2.nii -mul -1 -div functional3.nii functional4.nii
+    >>> maths.inputs.operand_files = ["functional2.nii", "functional3.nii"]  # doctest: +SKIP
+    >>> maths.inputs.out_file = "functional4.nii"  # doctest: +SKIP
+    >>> maths.cmdline  # doctest: +SKIP
+    'fslmaths functional.nii -add functional2.nii -mul -1 -div functional3.nii functional4.nii'
 
     """
     input_spec = MultiImageMathsInput
