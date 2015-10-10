@@ -1323,7 +1323,7 @@ def split_rois(in_file, mask=None, roishape=None):
     mask = mask.reshape(-1).astype(np.uint8)
     nzels = np.nonzero(mask)
     els = np.sum(mask)
-    nrois = int(ceil(old_div(els,roisize)))
+    nrois = int(ceil(els / float(roisize)))
 
     data = im.get_data().reshape((mask.size, -1))
     data = np.squeeze(data.take(nzels, axis=0))
