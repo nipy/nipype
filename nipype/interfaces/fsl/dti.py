@@ -24,7 +24,6 @@ from ..fsl.base import (FSLCommand, FSLCommandInputSpec, Info)
 from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class DTIFitInputSpec(FSLCommandInputSpec):

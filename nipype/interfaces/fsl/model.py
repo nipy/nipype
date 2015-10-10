@@ -32,7 +32,6 @@ from ...utils.filemanip import (list_to_filename, filename_to_list)
 from ...utils.misc import human_order_sorted
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class Level1DesignInputSpec(BaseInterfaceInputSpec):

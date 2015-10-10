@@ -33,7 +33,6 @@ from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix, copyfile)
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class CopyGeomInputSpec(FSLCommandInputSpec):

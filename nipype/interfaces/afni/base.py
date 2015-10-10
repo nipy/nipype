@@ -12,7 +12,6 @@ from ..base import (
     CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class Info(object):

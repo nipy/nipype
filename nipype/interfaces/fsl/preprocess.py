@@ -30,7 +30,6 @@ from ..base import (TraitedSpec, File, InputMultiPath,
 from ...utils.filemanip import split_filename
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class BETInputSpec(FSLCommandInputSpec):

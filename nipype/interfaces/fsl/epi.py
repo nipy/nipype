@@ -26,7 +26,6 @@ from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix)
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class PrepareFieldmapInputSpec(FSLCommandInputSpec):

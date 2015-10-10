@@ -21,7 +21,6 @@ from ...utils.filemanip import (load_json, save_json, split_filename)
 from ...utils.filemanip import fname_presuffix
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class To3DInputSpec(AFNICommandInputSpec):

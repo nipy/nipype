@@ -36,7 +36,6 @@ from ..base import (traits, isdefined,
                     File, Directory, InputMultiPath, OutputMultiPath)
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class Info(object):

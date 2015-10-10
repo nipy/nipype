@@ -23,7 +23,6 @@ from nipype.interfaces.base import CommandLineInputSpec, CommandLine,\
     OutputMultiPath
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 class SVMTrainInputSpec(AFNICommandInputSpec):
     #training options
