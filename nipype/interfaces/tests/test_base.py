@@ -3,7 +3,6 @@
 from __future__ import print_function
 from future import standard_library
 standard_library.install_aliases()
-from builtins import open
 
 import os
 import tempfile
@@ -72,7 +71,7 @@ def setup_file():
     #global tmp_infile, tmp_dir
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo.txt')
-    with open(tmp_infile, 'w'):
+    with open(tmp_infile, 'w') as fp:
         fp.writelines(['123456789'])
     return tmp_infile
 
