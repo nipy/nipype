@@ -15,7 +15,6 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import range
 from builtins import object
-from past.builtins import basestring
 
 from datetime import datetime
 from nipype.utils.misc import flatten, unflatten
@@ -42,10 +41,10 @@ from warnings import warn
 from hashlib import sha1
 
 import numpy as np
+import networkx as nx
 
 from ..utils.misc import package_check, str2bool
 package_check('networkx', '1.3')
-import networkx as nx
 
 from .. import config, logging
 logger = logging.getLogger('workflow')
@@ -669,7 +668,7 @@ connected.
         """
         if plugin is None:
             plugin = config.get('execution', 'plugin')
-        if not isinstance(plugin, (basestring, string_types)):
+        if not isinstance(plugin, string_types):
             runner = plugin
         else:
             name = 'nipype.pipeline.plugins'
