@@ -397,7 +397,7 @@ class EddyInputSpec(FSLCommandInputSpec):
     in_bval = File(exists=True, mandatory=True, argstr='--bvals=%s',
                    desc=('File containing the b-values for all volumes in '
                          '--imain'))
-    out_base = traits.Unicode('eddy_corrected', argstr='--out=%s',
+    out_base = traits.Str('eddy_corrected', argstr='--out=%s',
                               usedefault=True,
                               desc=('basename for output (warped) image'))
     session = File(exists=True, argstr='--session=%s',
