@@ -13,16 +13,13 @@ import nibabel as nb
 from nipype.testing import (assert_equal, assert_raises, skipif)
 from nipype.interfaces.base import Undefined
 import nipype.interfaces.fsl.maths as fsl
-from nipype.interfaces.fsl import no_fsl
+from nipype.interfaces.fsl import no_fsl, Info
 
 
 def create_files_in_directory():
     testdir = os.path.realpath(mkdtemp())
     origdir = os.getcwd()
     os.chdir(testdir)
-
-    ftype = os.environ["FSLOUTPUTTYPE"]
-    os.environ["FSLOUTPUTTYPE"] = "NIFTI"
 
     filelist = ['a.nii','b.nii']
     for f in filelist:
@@ -32,18 +29,19 @@ def create_files_in_directory():
         img = np.random.random(shape)
         nb.save(nb.Nifti1Image(img,np.eye(4),hdr),
                  os.path.join(testdir,f))
-    return filelist, testdir, origdir, ftype
 
-def clean_directory(testdir, origdir, ftype):
+    out_ext = Info.output_type_to_ext(Info.output_type())
+    return filelist, testdir, origdir, out_ext
+
+def clean_directory(testdir, origdir):
     if os.path.exists(testdir):
         rmtree(testdir)
     os.chdir(origdir)
-    os.environ["FSLOUTPUTTYPE"] = ftype
 
 
 @skipif(no_fsl)
 def test_maths_base():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get some fslmaths
     maths = fsl.MathsCommand()
@@ -56,21 +54,22 @@ def test_maths_base():
 
     # Set an in file
     maths.inputs.in_file = "a.nii"
+    out_file = "a_maths%s" % out_ext
 
     # Now test the most basic command line
-    yield assert_equal, maths.cmdline, "fslmaths a.nii %s"%os.path.join(testdir, "a_maths.nii")
+    yield assert_equal, maths.cmdline, "fslmaths a.nii %s"%os.path.join(testdir, out_file)
 
     # Now test that we can set the various data types
     dtypes = ["float","char","int","short","double","input"]
-    int_cmdline =  "fslmaths -dt %s a.nii " + os.path.join(testdir, "a_maths.nii")
-    out_cmdline =  "fslmaths a.nii " + os.path.join(testdir, "a_maths.nii") + " -odt %s"
-    duo_cmdline =  "fslmaths -dt %s a.nii " + os.path.join(testdir, "a_maths.nii") + " -odt %s"
+    int_cmdline =  "fslmaths -dt %s a.nii " + os.path.join(testdir, out_file)
+    out_cmdline =  "fslmaths a.nii " + os.path.join(testdir, out_file) + " -odt %s"
+    duo_cmdline =  "fslmaths -dt %s a.nii " + os.path.join(testdir, out_file) + " -odt %s"
     for dtype in dtypes:
-        foo = fsl.MathsCommand(in_file="a.nii",internal_datatype=dtype)
+        foo = fsl.MathsCommand(in_file="a.nii", internal_datatype=dtype)
         yield assert_equal, foo.cmdline, int_cmdline%dtype
-        bar = fsl.MathsCommand(in_file="a.nii",output_datatype=dtype)
-        yield assert_equal, bar.cmdline, out_cmdline%dtype
-        foobar = fsl.MathsCommand(in_file="a.nii",internal_datatype=dtype,output_datatype=dtype)
+        bar = fsl.MathsCommand(in_file="a.nii", output_datatype=dtype)
+        yield assert_equal, bar.cmdline, out_cmdline % dtype
+        foobar = fsl.MathsCommand(in_file="a.nii", internal_datatype=dtype, output_datatype=dtype)
         yield assert_equal, foobar.cmdline, duo_cmdline%(dtype, dtype)
 
     # Test that we can ask for an outfile name
@@ -78,11 +77,11 @@ def test_maths_base():
     yield assert_equal, maths.cmdline, "fslmaths a.nii b.nii"
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 @skipif(no_fsl)
 def test_changedt():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get some fslmaths
     cdt = fsl.ChangeDataType()
@@ -108,11 +107,11 @@ def test_changedt():
         yield assert_equal, foo.cmdline, cmdline%dtype
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 @skipif(no_fsl)
 def test_threshold():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
     thresh = fsl.Threshold(in_file="a.nii",out_file="b.nii")
@@ -142,12 +141,12 @@ def test_threshold():
     yield assert_equal, thresh.cmdline, cmdline%("-uthrP "+val)
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 
 @skipif(no_fsl)
 def test_meanimage():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
     meaner = fsl.MeanImage(in_file="a.nii",out_file="b.nii")
@@ -166,14 +165,14 @@ def test_meanimage():
 
     # Test the auto naming
     meaner = fsl.MeanImage(in_file="a.nii")
-    yield assert_equal, meaner.cmdline, "fslmaths a.nii -Tmean %s"%os.path.join(testdir, "a_mean.nii")
+    yield assert_equal, meaner.cmdline, "fslmaths a.nii -Tmean %s"%os.path.join(testdir, "a_mean%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 @skipif(no_fsl)
 def test_maximage():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
     maxer = fsl.MaxImage(in_file="a.nii",out_file="b.nii")
@@ -192,14 +191,14 @@ def test_maximage():
 
     # Test the auto naming
     maxer = fsl.MaxImage(in_file="a.nii")
-    yield assert_equal, maxer.cmdline, "fslmaths a.nii -Tmax %s"%os.path.join(testdir, "a_max.nii")
+    yield assert_equal, maxer.cmdline, "fslmaths a.nii -Tmax %s"%os.path.join(testdir, "a_max%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 @skipif(no_fsl)
 def test_smooth():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
     smoother = fsl.IsotropicSmooth(in_file="a.nii",out_file="b.nii")
@@ -221,14 +220,14 @@ def test_smooth():
 
     # Test automatic naming
     smoother = fsl.IsotropicSmooth(in_file="a.nii", sigma=5)
-    yield assert_equal, smoother.cmdline, "fslmaths a.nii -s %.5f %s"%(5, os.path.join(testdir, "a_smooth.nii"))
+    yield assert_equal, smoother.cmdline, "fslmaths a.nii -s %.5f %s"%(5, os.path.join(testdir, "a_smooth%s" % out_ext))
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 @skipif(no_fsl)
 def test_mask():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
     masker = fsl.ApplyMask(in_file="a.nii",out_file="c.nii")
@@ -245,15 +244,15 @@ def test_mask():
 
     # Test auto name generation
     masker = fsl.ApplyMask(in_file="a.nii",mask_file="b.nii")
-    yield assert_equal, masker.cmdline, "fslmaths a.nii -mas b.nii "+os.path.join(testdir, "a_masked.nii")
+    yield assert_equal, masker.cmdline, "fslmaths a.nii -mas b.nii "+os.path.join(testdir, "a_masked%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 
 @skipif(no_fsl)
 def test_dilation():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
     diller = fsl.DilateImage(in_file="a.nii",out_file="b.nii")
@@ -287,14 +286,14 @@ def test_dilation():
 
     # Test that we don't need to request an out name
     dil = fsl.DilateImage(in_file="a.nii", operation="max")
-    yield assert_equal, dil.cmdline, "fslmaths a.nii -dilF %s"%os.path.join(testdir, "a_dil.nii")
+    yield assert_equal, dil.cmdline, "fslmaths a.nii -dilF %s"%os.path.join(testdir, "a_dil%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 @skipif(no_fsl)
 def test_erosion():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
     erode = fsl.ErodeImage(in_file="a.nii",out_file="b.nii")
@@ -311,14 +310,14 @@ def test_erosion():
 
     # Test that we don't need to request an out name
     erode = fsl.ErodeImage(in_file="a.nii")
-    yield assert_equal, erode.cmdline, "fslmaths a.nii -ero %s"%os.path.join(testdir, "a_ero.nii")
+    yield assert_equal, erode.cmdline, "fslmaths a.nii -ero %s"%os.path.join(testdir, "a_ero%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 @skipif(no_fsl)
 def test_spatial_filter():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
     filter = fsl.SpatialFilter(in_file="a.nii",out_file="b.nii")
@@ -336,15 +335,15 @@ def test_spatial_filter():
 
     # Test that we don't need to ask for an out name
     filter = fsl.SpatialFilter(in_file="a.nii", operation="mean")
-    yield assert_equal, filter.cmdline, "fslmaths a.nii -fmean %s"%os.path.join(testdir, "a_filt.nii")
+    yield assert_equal, filter.cmdline, "fslmaths a.nii -fmean %s"%os.path.join(testdir, "a_filt%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 
 @skipif(no_fsl)
 def test_unarymaths():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
     maths = fsl.UnaryMaths(in_file="a.nii",out_file="b.nii")
@@ -364,15 +363,15 @@ def test_unarymaths():
     # Test that we don't need to ask for an out file
     for op in ops:
         maths = fsl.UnaryMaths(in_file="a.nii", operation=op)
-        yield assert_equal, maths.cmdline, "fslmaths a.nii -%s %s"%(op, os.path.join(testdir, "a_%s.nii"%op))
+        yield assert_equal, maths.cmdline, "fslmaths a.nii -%s %s"%(op, os.path.join(testdir, "a_%s%s"%(op, out_ext)))
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 
 @skipif(no_fsl)
 def test_binarymaths():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
     maths = fsl.BinaryMaths(in_file="a.nii",out_file="c.nii")
@@ -396,18 +395,19 @@ def test_binarymaths():
                 maths.inputs.operand_value = ent
                 yield assert_equal, maths.cmdline, "fslmaths a.nii -%s %.8f c.nii"%(op, ent)
 
+
     # Test that we don't need to ask for an out file
     for op in ops:
         maths = fsl.BinaryMaths(in_file="a.nii", operation=op, operand_file="b.nii")
-        yield assert_equal, maths.cmdline, "fslmaths a.nii -%s b.nii %s"%(op,os.path.join(testdir,"a_maths.nii"))
+        yield assert_equal, maths.cmdline, "fslmaths a.nii -%s b.nii %s"%(op,os.path.join(testdir, "a_maths%s" % out_ext))
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 
 @skipif(no_fsl)
 def test_multimaths():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
     maths = fsl.MultiImageMaths(in_file="a.nii",out_file="c.nii")
@@ -430,15 +430,15 @@ def test_multimaths():
     # Test that we don't need to ask for an out file
     maths = fsl.MultiImageMaths(in_file="a.nii", op_string="-add %s -mul 5", operand_files=["b.nii"])
     yield assert_equal, maths.cmdline, \
-    "fslmaths a.nii -add b.nii -mul 5 %s"%os.path.join(testdir,"a_maths.nii")
+    "fslmaths a.nii -add b.nii -mul 5 %s"%os.path.join(testdir, "a_maths%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 
 @skipif(no_fsl)
 def test_tempfilt():
-    files, testdir, origdir, ftype = create_files_in_directory()
+    files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
     filt = fsl.TemporalFilter(in_file="a.nii",out_file="b.nii")
@@ -459,9 +459,9 @@ def test_tempfilt():
     # Test that we don't need to ask for an out file
     filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma = 64)
     yield assert_equal, filt.cmdline, \
-    "fslmaths a.nii -bptf 64.000000 -1.000000 %s"%os.path.join(testdir,"a_filt.nii")
+    "fslmaths a.nii -bptf 64.000000 -1.000000 %s"%os.path.join(testdir,"a_filt%s" % out_ext)
 
     # Clean up our mess
-    clean_directory(testdir, origdir, ftype)
+    clean_directory(testdir, origdir)
 
 

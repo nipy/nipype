@@ -25,7 +25,7 @@ def test_fsloutputtype():
 
 
 def test_outputtype_to_ext():
-    for ftype, ext in list(fsl.Info.ftypes.items()):
+    for ftype, ext in fsl.Info.ftypes.items():
         res = fsl.Info.output_type_to_ext(ftype)
         yield assert_equal, res, ext
 
