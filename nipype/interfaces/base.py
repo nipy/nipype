@@ -1646,7 +1646,7 @@ class CommandLine(BaseInterface):
                 continue
             pos = spec.position
             if pos is not None:
-                if pos >= 0:
+                if int(pos) >= 0:
                     initial_args[pos] = arg
                 else:
                     final_args[pos] = arg
