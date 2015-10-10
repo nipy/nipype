@@ -943,9 +943,9 @@ class BaseInterface(Interface):
         names = trait_object.trait_names(**check)
         
         if names:
+            if not self.version:
+                return None
             version = LooseVersion(str(self.version))
-            if not version:
-                return
             for name in names:
                 min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
                 if min_ver > version:
@@ -1025,7 +1025,7 @@ class BaseInterface(Interface):
         self._check_version_requirements(self.inputs)
         interface = self.__class__
         # initialize provenance tracking
-        env = dict(os.environ)
+        env = deepcopy(dict(os.environ))
         runtime = Bunch(cwd=os.getcwd(),
                         returncode=None,
                         duration=None,
@@ -1264,8 +1264,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = [r[1] for r in temp]
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
-        result['stdout'] = stdout.split('\n')
-        result['stderr'] = stderr.split('\n')
+        result['stdout'] = stdout.decode().split('\n')
+        result['stderr'] = stderr.decode().split('\n')
         result['merged'] = ''
     if output == 'file':
         ret_code = proc.wait()
