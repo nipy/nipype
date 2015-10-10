@@ -778,13 +778,10 @@ connected.
             node.needed_outputs = []
             for edge in graph.out_edges_iter(node):
                 data = graph.get_edge_data(*edge)
-                for sourceinfo, _ in sorted(data['connect']):
-                    if isinstance(sourceinfo, tuple):
-                        input_name = sourceinfo[0]
-                    else:
-                        input_name = sourceinfo
-                    if input_name not in node.needed_outputs:
-                        node.needed_outputs += [input_name]
+                sourceinfo = [v1[0] if isinstance(v1, tuple) else v1
+                              for v1, v2 in data['connect']]
+                node.needed_outputs += [v for v in sourceinfo
+                                        if v not in node.needed_outputs]
             if node.needed_outputs:
                 node.needed_outputs = sorted(node.needed_outputs)
 
