@@ -2136,9 +2136,9 @@ class MapNode(Node):
         rm_extra = self.config['execution']['remove_unnecessary_outputs']
         if str2bool(rm_extra) and self.needed_outputs:
             hashobject = md5()
-            hashobject.update(hashvalue)
+            hashobject.update(hashvalue.encode())
             sorted_outputs = sorted(self.needed_outputs)
-            hashobject.update(str(sorted_outputs))
+            hashobject.update(str(sorted_outputs).encode())
             hashvalue = hashobject.hexdigest()
             hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
