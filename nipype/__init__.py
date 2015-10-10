@@ -33,7 +33,7 @@ class _NoseTester(nosetester.NoseTester):
         This will run the test suite and stop at the first failing
         example
         >>> from nipype import test
-        >>> test(extra_argv=['--exe', '-sx']) #doctest: +SKIP
+        >>> test(extra_argv=['--exe', '-sx'])  # doctest: +SKIP
         """
         return super(_NoseTester, self).test(label=label,
                                              verbose=verbose,

@@ -6,7 +6,6 @@
     >>> os.chdir(datadir)
 
 """
-from builtins import str
 
 import os, os.path as op
 import datetime

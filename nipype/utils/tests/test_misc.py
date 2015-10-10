@@ -4,7 +4,6 @@ from future import standard_library
 standard_library.install_aliases()
 
 from builtins import next
-from builtins import str
 
 from nipype.testing import assert_equal, assert_true, assert_false
 

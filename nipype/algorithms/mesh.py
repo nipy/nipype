@@ -12,7 +12,6 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 '''
 from __future__ import division
 from builtins import zip
-from builtins import str
 from past.utils import old_div
 
 import os.path as op
@@ -204,7 +203,7 @@ class ComputeMeshWarp(BaseInterface):
     >>> dist = m.ComputeMeshWarp()
     >>> dist.inputs.surface1 = 'surf1.vtk'
     >>> dist.inputs.surface2 = 'surf2.vtk'
-    >>> res = dist.run() # doctest: +SKIP
+    >>> res = dist.run()  # doctest: +SKIP
 
     """
 
@@ -345,7 +344,7 @@ class MeshWarpMaths(BaseInterface):
     >>> mmath.inputs.in_surf = 'surf1.vtk'
     >>> mmath.inputs.operator = 'surf2.vtk'
     >>> mmath.inputs.operation = 'mul'
-    >>> res = mmath.run() # doctest: +SKIP
+    >>> res = mmath.run()  # doctest: +SKIP
 
     """
 

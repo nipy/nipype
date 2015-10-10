@@ -1,6 +1,5 @@
 """Parallel workflow execution via LSF
 """
-from builtins import str
 
 import os
 

@@ -5,7 +5,6 @@ Created on Aug 2, 2013
 
 Parallel workflow execution with SLURM
 '''
-from builtins import str
 
 import os
 import re

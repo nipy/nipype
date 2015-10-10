@@ -1,6 +1,5 @@
 """Parallel workflow execution via Condor DAGMan
 """
-from builtins import str
 
 import os
 import sys

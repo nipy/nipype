@@ -6,7 +6,6 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-from builtins import str
 from builtins import range
 
 from ..base import (TraitedSpec, File, traits, InputMultiPath)
@@ -414,7 +413,7 @@ class Registration(ANTSCommand):
     >>> reg1.inputs.winsorize_lower_quantile = 0.025
     >>> reg1.cmdline
     'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
-    >>> reg1.run()  #doctest: +SKIP
+    >>> reg1.run()  # doctest: +SKIP
 
     >>> reg2 = copy.deepcopy(reg)
     >>> reg2.inputs.winsorize_upper_quantile = 0.975
@@ -453,7 +452,7 @@ class Registration(ANTSCommand):
     >>> outputs = reg4b._list_outputs()
     >>> print outputs #doctest: +ELLIPSIS
     {'reverse_invert_flags': [True, False], 'inverse_composite_transform': <undefined>, 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [False, False], 'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'], 'save_state': <undefined>, 'composite_transform': <undefined>, 'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1Warp.nii.gz']}
-    >>> reg4b.aggregate_outputs() #doctest: +SKIP
+    >>> reg4b.aggregate_outputs()  # doctest: +SKIP
 
     >>> # Test multiple metrics per stage
     >>> reg5 = copy.deepcopy(reg)

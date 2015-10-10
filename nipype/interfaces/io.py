@@ -19,7 +19,6 @@
 """
 from builtins import zip
 from builtins import filter
-from builtins import str
 from builtins import range
 import glob
 import fnmatch
@@ -218,7 +217,7 @@ class DataSink(IOBase):
         >>> ds.inputs.structural = 'structural.nii'
         >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
         >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
-        >>> ds.run() # doctest: +SKIP
+        >>> ds.run()  # doctest: +SKIP
 
         To use DataSink in a MapNode, its inputs have to be defined at the
         time the interface is created.
@@ -229,7 +228,7 @@ class DataSink(IOBase):
         >>> ds.inputs.structural = 'structural.nii'
         >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
         >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
-        >>> ds.run() # doctest: +SKIP
+        >>> ds.run()  # doctest: +SKIP
 
     """
     input_spec = DataSinkInputSpec
@@ -924,7 +923,7 @@ class SelectFiles(IOBase):
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
     >>> dg.outputs.get()
-    {'T1': <undefined>, 'epi': <undefined>}
+    {u'T1': <undefined>, u'epi': <undefined>}
 
     The same thing with dynamic grabbing of specific files:
 
@@ -1070,20 +1069,20 @@ class DataFinder(IOBase):
     >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
     >>> result = df.run() # doctest: +SKIP
     >>> print result.outputs.out_paths # doctest: +SKIP
-    ['./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
-     './018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
-     './016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
-     './013-ep2d_fid_T1_pre/acquisition.nii.gz']
+    [u'./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
+     u'./018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
+     u'./016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
+     u'./013-ep2d_fid_T1_pre/acquisition.nii.gz']
     >>> print result.outputs.series_dir # doctest: +SKIP
-    ['027-ep2d_fid_T1_Gd4',
-     '018-ep2d_fid_T1_Gd2',
-     '016-ep2d_fid_T1_Gd1',
-     '013-ep2d_fid_T1_pre']
+    [u'027-ep2d_fid_T1_Gd4',
+     u'018-ep2d_fid_T1_Gd2',
+     u'016-ep2d_fid_T1_Gd1',
+     u'013-ep2d_fid_T1_pre']
     >>> print result.outputs.basename # doctest: +SKIP
-    ['acquisition',
-     'acquisition'
-     'acquisition',
-     'acquisition']
+    [u'acquisition',
+     u'acquisition'
+     u'acquisition',
+     u'acquisition']
 
     """
 

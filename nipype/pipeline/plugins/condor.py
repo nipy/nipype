@@ -1,6 +1,5 @@
 """Parallel workflow execution via Condor
 """
-from builtins import str
 
 import os
 

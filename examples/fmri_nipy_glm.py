@@ -16,7 +16,6 @@ the nipype tutorial directory::
 
 """
 from __future__ import print_function
-from builtins import str
 from builtins import range
 
 from nipype.interfaces.nipy.model import FitGLM, EstimateContrast

@@ -10,7 +10,6 @@ and spm to access spm tools.
    >>> os.chdir(datadir)
 
 """
-from builtins import str
 
 __docformat__ = 'restructuredtext'
 

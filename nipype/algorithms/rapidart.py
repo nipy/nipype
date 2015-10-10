@@ -19,7 +19,6 @@ These functions include:
 """
 from __future__ import division
 from builtins import range
-from builtins import str
 from past.utils import old_div
 
 import os
@@ -262,7 +261,7 @@ class ArtifactDetect(BaseInterface):
     >>> ad.inputs.norm_threshold = 1
     >>> ad.inputs.use_differences = [True, False]
     >>> ad.inputs.zintensity_threshold = 3
-    >>> ad.run() # doctest: +SKIP
+    >>> ad.run()  # doctest: +SKIP
     """
 
     input_spec = ArtifactDetectInputSpec

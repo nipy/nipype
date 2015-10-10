@@ -12,7 +12,6 @@ better = fsl.Bet()
 docstring = docparse.get_doc(better.cmd, better.opt_map)
 
 """
-from builtins import str
 
 import subprocess
 from nipype.interfaces.base import CommandLine

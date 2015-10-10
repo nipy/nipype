@@ -11,7 +11,6 @@ was written to work with FSL version 5.0.4.
     ...                            '../../testing/data'))
     >>> os.chdir(datadir)
 """
-from builtins import str
 
 import os
 import warnings

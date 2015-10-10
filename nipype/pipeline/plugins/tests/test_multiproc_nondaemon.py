@@ -1,4 +1,3 @@
-from builtins import str
 from builtins import range
 import os
 from tempfile import mkdtemp

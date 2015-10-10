@@ -13,7 +13,6 @@ The `Workflow` class provides core functionality for batch processing.
 """
 from future import standard_library
 standard_library.install_aliases()
-from builtins import str
 from builtins import range
 from builtins import object
 from past.builtins import basestring

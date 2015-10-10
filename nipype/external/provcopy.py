@@ -11,7 +11,6 @@ PROV-DM: http://www.w3.org/TR/prov-dm/
 '''
 from __future__ import absolute_import
 from builtins import zip
-from builtins import str
 from builtins import object
 
 import logging

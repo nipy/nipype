@@ -12,7 +12,6 @@ was written to work with FSL version 4.1.4.
 """
 from __future__ import print_function
 from __future__ import division
-from builtins import str
 from builtins import range
 from past.utils import old_div
 

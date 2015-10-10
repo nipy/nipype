@@ -1,6 +1,5 @@
 """Parallel workflow execution via SGE
 """
-from builtins import str
 from builtins import object
 
 import os

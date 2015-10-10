@@ -1,4 +1,3 @@
-from builtins import str
 
 import os.path as op
 import glob

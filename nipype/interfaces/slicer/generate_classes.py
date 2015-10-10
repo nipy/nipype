@@ -3,7 +3,6 @@ modules are selected from the hardcoded list below and generated code is placed
 in the cli_modules.py file (and imported in __init__.py). For this to work
 correctly you must have your CLI executabes in $PATH"""
 from __future__ import print_function
-from builtins import str
 
 import xml.dom.minidom
 import subprocess
