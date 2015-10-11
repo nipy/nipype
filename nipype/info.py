@@ -108,6 +108,8 @@ SCIPY_MIN_VERSION = '0.11'
 TRAITS_MIN_VERSION = '4.3'
 DATEUTIL_MIN_VERSION = '1.5'
 NOSE_MIN_VERSION = '1.2'
+FUTURE_MIN_VERSION = '0.15.2'
+SIMPLEJSON_MIN_VERSION = '3.8.0'
 
 NAME                = 'nipype'
 MAINTAINER          = "nipype developers"
@@ -127,18 +129,13 @@ MICRO               = _version_micro
 ISRELEASE           = _version_extra == ''
 VERSION             = __version__
 PROVIDES            = ['nipype']
-REQUIRES            = ["nibabel (>=%s)" % NIBABEL_MIN_VERSION,
-                       "networkx (>=%s)" % NETWORKX_MIN_VERSION,
-                       "numpy (>=%s)" % NUMPY_MIN_VERSION,
-                       "python-dateutil (>=%s)" % DATEUTIL_MIN_VERSION,
-                       "scipy (>=%s)" % SCIPY_MIN_VERSION,
-                       "traits (>=%s)" % TRAITS_MIN_VERSION,
-                       "nose (>=%s)" % NOSE_MIN_VERSION]
 REQUIRES            = ["nibabel>=%s" % NIBABEL_MIN_VERSION,
                        "networkx>=%s" % NETWORKX_MIN_VERSION,
                        "numpy>=%s" % NUMPY_MIN_VERSION,
                        "python-dateutil>=%s" % DATEUTIL_MIN_VERSION,
                        "scipy>=%s" % SCIPY_MIN_VERSION,
                        "traits>=%s" % TRAITS_MIN_VERSION,
-                       "nose>=%s" % NOSE_MIN_VERSION]
+                       "nose>=%s" % NOSE_MIN_VERSION,
+                       "future>=%s" % FUTURE_MIN_VERSION,
+                       "simplejson>=%s" % SIMPLEJSON_MIN_VERSION]
 STATUS              = 'stable'

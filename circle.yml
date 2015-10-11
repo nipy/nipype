@@ -9,7 +9,6 @@ dependencies:
     - "~/examples/fsl_course_data"
   override:
     - pip install --upgrade pip
-    - pip install -r requirements.txt
     - pip install -e .
     - pip install matplotlib sphinx ipython boto
     - gem install fakes3
