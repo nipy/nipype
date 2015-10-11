@@ -19,7 +19,6 @@ These functions include:
 """
 from __future__ import division
 from builtins import range
-from past.utils import old_div
 
 import os
 from copy import deepcopy
@@ -112,7 +111,7 @@ def _calc_norm(mc, use_differences, source, brain_pts=None):
     n_pts = all_pts.size - all_pts.shape[1]
     newpos = np.zeros((mc.shape[0], n_pts))
     if brain_pts is not None:
-        displacement = np.zeros((mc.shape[0], old_div(n_pts, 3)))
+        displacement = np.zeros((mc.shape[0], int(n_pts / 3)))
     for i in range(mc.shape[0]):
         affine = _get_affine_matrix(mc[i, :], source)
         newpos[i, :] = np.dot(affine,
@@ -148,9 +147,9 @@ def _nanmean(a, axis=None):
 
     """
     if axis:
-        return old_div(np.nansum(a, axis), np.sum(1 - np.isnan(a), axis))
+        return np.nansum(a, axis) / np.sum(1 - np.isnan(a), axis)
     else:
-        return old_div(np.nansum(a), np.sum(1 - np.isnan(a)))
+        return np.nansum(a) / np.sum(1 - np.isnan(a))
 
 
 class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
@@ -377,12 +376,12 @@ class ArtifactDetect(BaseInterface):
                     vol = data[:, :, :, t0]
                     # Use an SPM like approach
                     mask_tmp = vol > \
-                               (old_div(_nanmean(vol), self.inputs.global_threshold))
+                               (_nanmean(vol) / self.inputs.global_threshold)
                     mask = mask * mask_tmp
                 for t0 in range(timepoints):
                     vol = data[:, :, :, t0]
                     g[t0] = _nanmean(vol[mask])
-                if len(find_indices(mask)) < (old_div(np.prod((x, y, z)), 10)):
+                if len(find_indices(mask)) < (np.prod((x, y, z)) / 10):
                     intersect_mask = False
                     g = np.zeros((timepoints, 1))
             if not intersect_mask:
@@ -391,9 +390,9 @@ class ArtifactDetect(BaseInterface):
                 for t0 in range(timepoints):
                     vol = data[:, :, :, t0]
                     mask_tmp = vol > \
-                                 (old_div(_nanmean(vol), self.inputs.global_threshold))
+                                 (_nanmean(vol) / self.inputs.global_threshold)
                     mask[:, :, :, t0] = mask_tmp
-                    g[t0] = old_div(np.nansum(vol * mask_tmp),np.nansum(mask_tmp))
+                    g[t0] = np.nansum(vol * mask_tmp) / np.nansum(mask_tmp)
         elif masktype == 'file':  # uses a mask image to determine intensity
             maskimg = load(self.inputs.mask_file)
             mask = maskimg.get_data()
@@ -416,7 +415,7 @@ class ArtifactDetect(BaseInterface):
         if self.inputs.use_differences[1]:
             gz = np.concatenate((np.zeros((1, 1)), np.diff(gz, n=1, axis=0)),
                                 axis=0)
-        gz = old_div((gz - np.mean(gz)), np.std(gz))  # normalize the detrended signal
+        gz = (gz - np.mean(gz)) / np.std(gz)  # normalize the detrended signal
         iidx = find_indices(abs(gz) > self.inputs.zintensity_threshold)
 
         # read in motion parameters

@@ -10,22 +10,20 @@
 """
 from __future__ import division
 from builtins import range
-from past.utils import old_div
 
-import os, os.path as op
+import os.path as op
 import pickle
-import warnings
 
 import numpy as np
 import networkx as nx
 import scipy.io as sio
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, InputMultiPath,
-                                    OutputMultiPath, isdefined)
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
+                    TraitedSpec, InputMultiPath, OutputMultiPath, isdefined)
 from ...utils.filemanip import split_filename
 from ...utils.misc import package_check
 from ... import logging
+
 iflogger = logging.getLogger('interface')
 
 have_cmp = True
@@ -105,21 +103,27 @@ def average_networks(in_files, ntwk_res_file, group_id):
     """
     import networkx as nx
     import os.path as op
-    iflogger.info("Creating average network for group: {grp}".format(grp=group_id))
+    iflogger.info(("Creating average network for group: "
+                   "{grp}").format(grp=group_id))
     matlab_network_list = []
     if len(in_files) == 1:
         avg_ntwk = read_unknown_ntwk(in_files[0])
     else:
-        count_to_keep_edge = np.round(old_div(float(len(in_files)), 2))
-        iflogger.info("Number of networks: {L}, an edge must occur in at least {c} to remain in the average network".format(L=len(in_files), c=count_to_keep_edge))
+        count_to_keep_edge = np.round(len(in_files) / 2.0)
+        iflogger.info(("Number of networks: {L}, an edge must occur in at "
+                       "least {c} to remain in the "
+                       "average network").format(L=len(in_files),
+                                                 c=count_to_keep_edge))
         ntwk_res_file = read_unknown_ntwk(ntwk_res_file)
-        iflogger.info("{n} Nodes found in network resolution file".format(n=ntwk_res_file.number_of_nodes()))
+        iflogger.info(("{n} Nodes found in network resolution "
+                       "file").format(n=ntwk_res_file.number_of_nodes()))
         ntwk = remove_all_edges(ntwk_res_file)
         counting_ntwk = ntwk.copy()
         # Sums all the relevant variables
         for index, subject in enumerate(in_files):
             tmp = nx.read_gpickle(subject)
-            iflogger.info('File {s} has {n} edges'.format(s=subject, n=tmp.number_of_edges()))
+            iflogger.info(('File {s} has {n} '
+                           'edges').format(s=subject, n=tmp.number_of_edges()))
             edges = tmp.edges_iter()
             for edge in edges:
                 data = {}
@@ -141,25 +145,27 @@ def average_networks(in_files, ntwk_res_file, group_id):
         # Divides each value by the number of files
         nodes = ntwk.nodes_iter()
         edges = ntwk.edges_iter()
-        iflogger.info('Total network has {n} edges'.format(n=ntwk.number_of_edges()))
+        iflogger.info(('Total network has {n} '
+                       'edges').format(n=ntwk.number_of_edges()))
         avg_ntwk = nx.Graph()
         newdata = {}
         for node in nodes:
             data = ntwk.node[node]
             newdata = data
             if 'value' in data:
-                newdata['value'] = old_div(data['value'], len(in_files))
+                newdata['value'] = data['value'] / len(in_files)
                 ntwk.node[node]['value'] = newdata
             avg_ntwk.add_node(node, newdata)
 
         edge_dict = {}
-        edge_dict['count'] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))
+        edge_dict['count'] = np.zeros((avg_ntwk.number_of_nodes(),
+                                       avg_ntwk.number_of_nodes()))
         for edge in edges:
             data = ntwk.edge[edge[0]][edge[1]]
             if ntwk.edge[edge[0]][edge[1]]['count'] >= count_to_keep_edge:
                 for key in list(data.keys()):
                     if not key == 'count':
-                        data[key] = old_div(data[key], len(in_files))
+                        data[key] = data[key] / len(in_files)
                 ntwk.edge[edge[0]][edge[1]] = data
                 avg_ntwk.add_edge(edge[0],edge[1],data)
             edge_dict['count'][edge[0]-1][edge[1]-1] = ntwk.edge[edge[0]][edge[1]]['count']

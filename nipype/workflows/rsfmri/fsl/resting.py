@@ -1,7 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from __future__ import division
-from past.utils import old_div
 
 from ....interfaces import fsl as fsl          # fsl
 from ....interfaces import utility as util     # utility
@@ -28,7 +27,7 @@ def extract_noise_components(realigned_file, noise_mask_file, num_components):
     stdX[stdX == 0] = 1.
     stdX[np.isnan(stdX)] = 1.
     stdX[np.isinf(stdX)] = 1.
-    X = old_div((X - np.mean(X, axis=0)),stdX)
+    X = (X - np.mean(X, axis=0)) / stdX
     u, _, _ = sp.linalg.svd(X, full_matrices=False)
     if components is None:
         components = u[:, :num_components]
@@ -46,7 +45,7 @@ def select_volume(filename, which):
     if which.lower() == 'first':
         idx = 0
     elif which.lower() == 'middle':
-        idx = int(np.ceil(old_div(load(filename).get_shape()[3],2)))
+        idx = int(np.ceil(load(filename).get_shape()[3] / 2))
     else:
         raise Exception('unknown value for volume selection : %s'%which)
     return idx

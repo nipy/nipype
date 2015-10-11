@@ -5,11 +5,15 @@ from __future__ import division
 
 from ....interfaces.io import JSONFileGrabber
 from ....interfaces import utility as niu
-from ....interfaces import freesurfer as fs
 from ....interfaces import ants
 from ....interfaces import fsl
-from .utils import *
-
+from ....pipeline import engine as pe
+from .utils import (b0_indices, time_avg, apply_all_corrections, b0_average,
+                    hmc_split, dwi_flirt, eddy_rotate_bvecs, rotate_bvecs,
+                    insert_mat, extract_bval, recompose_dwi, recompose_xfm,
+                    siemens2rads, rads2radsec, demean_image,
+                    cleanup_edge_pipeline, add_empty_vol, vsm2warp,
+                    compute_readout,)
 
 def all_fmb_pipeline(name='hmc_sdc_ecc', fugue_params=dict(smooth3d=2.0)):
     """
@@ -860,7 +864,7 @@ def remove_bias(name='bias_correct'):
 
 
 def _eff_t_echo(echospacing, acc_factor):
-    eff_echo = old_div(echospacing, (1.0 * acc_factor))
+    eff_echo = echospacing / (1.0 * acc_factor)
     return eff_echo
 
 

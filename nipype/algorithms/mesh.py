@@ -12,7 +12,6 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 '''
 from __future__ import division
 from builtins import zip
-from past.utils import old_div
 
 import os.path as op
 from warnings import warn
@@ -217,7 +216,7 @@ class ComputeMeshWarp(BaseInterface):
         C = np.array(C)
         ABxAC = nla.norm(A - B) * nla.norm(A - C)
         prod = np.dot(B - A, C - A)
-        angle = np.arccos(old_div(prod, ABxAC))
+        angle = np.arccos(prod / ABxAC)
         area = 0.5 * ABxAC * np.sin(angle)
         return area
 

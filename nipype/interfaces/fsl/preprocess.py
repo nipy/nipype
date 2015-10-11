@@ -13,9 +13,7 @@ was written to work with FSL version 4.1.4.
 from __future__ import print_function
 from __future__ import division
 from builtins import range
-from past.utils import old_div
 
-import glob
 import os
 import os.path as op
 import warnings
@@ -1136,7 +1134,7 @@ class SUSAN(FSLCommand):
 
     def _format_arg(self, name, spec, value):
         if name == 'fwhm':
-            return spec.argstr % (old_div(float(value), np.sqrt(8 * np.log(2))))
+            return spec.argstr % (float(value) / np.sqrt(8 * np.log(2)))
         if name == 'usans':
             if not value:
                 return '0'

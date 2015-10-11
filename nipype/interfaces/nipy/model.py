@@ -1,6 +1,5 @@
 from __future__ import division
 from builtins import range
-from past.utils import old_div
 import os
 
 import nibabel as nb
@@ -148,7 +147,9 @@ class FitGLM(BaseInterface):
                )
         if self.inputs.normalize_design_matrix:
             for i in range(len(self._reg_names)-1):
-                design_matrix[:,i] = old_div((design_matrix[:,i]-design_matrix[:,i].mean()),design_matrix[:,i].std())
+                design_matrix[:,i] = ((design_matrix[:,i] -
+                                       design_matrix[:,i].mean()) /
+                                      design_matrix[:,i].std())
 
         if self.inputs.plot_design_matrix:
             import pylab

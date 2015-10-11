@@ -17,7 +17,6 @@ See the docstrings of the individual classes for examples.
 from __future__ import division
 from builtins import map
 from builtins import range
-from past.utils import old_div
 
 import os
 from glob import glob
@@ -171,7 +170,7 @@ class Smooth(FSLCommand):
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'fwhm':
-            sigma = old_div(float(value), np.sqrt(8 * np.log(2)))
+            sigma = float(value) / np.sqrt(8 * np.log(2))
             return super(Smooth, self)._format_arg(name, trait_spec, sigma)
         return super(Smooth, self)._format_arg(name, trait_spec, value)
 

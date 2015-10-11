@@ -13,7 +13,6 @@ This script demonstrates how to use nipype to analyze a data set::
 """
 from __future__ import division
 from builtins import range
-from past.utils import old_div
 
 
 from glob import glob
@@ -187,7 +186,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                 ])
 
     def get_highpass(TR, hpcutoff):
-        return old_div(hpcutoff, (2 * TR))
+        return hpcutoff / (2. * TR)
     gethighpass = pe.Node(niu.Function(input_names=['TR', 'hpcutoff'],
                                        output_names=['highpass'],
                                        function=get_highpass),

@@ -1,7 +1,6 @@
-from __future__ import division
-from past.utils import old_div
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import division
 
 import os
 from tempfile import mkdtemp
@@ -235,11 +234,11 @@ def test_smooth(fsl_output_type=None):
 
     # Test smoothing kernels
     cmdline = "fslmaths a.nii -s %.5f b.nii"
-    for val in [0,1.,1,25,0.5,old_div(8,3)]:
+    for val in [0, 1., 1, 25, 0.5, 8 / 3.]:
         smoother = fsl.IsotropicSmooth(in_file="a.nii",out_file="b.nii",sigma=val)
         yield assert_equal, smoother.cmdline, cmdline%val
         smoother = fsl.IsotropicSmooth(in_file="a.nii",out_file="b.nii",fwhm=val)
-        val = old_div(float(val),np.sqrt(8 * np.log(2)))
+        val = float(val) / np.sqrt(8 * np.log(2))
         yield assert_equal, smoother.cmdline, cmdline%val
 
     # Test automatic naming
