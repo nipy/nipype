@@ -1,6 +1,5 @@
 from __future__ import division
 from builtins import range
-from past.utils import old_div
 from numpy import ones, kron, mean, eye, hstack, dot, tile
 from scipy.linalg import pinv
 from ..interfaces.base import BaseInterfaceInputSpec, TraitedSpec, \
@@ -110,22 +109,22 @@ def ICC_rep_anova(Y):
 
     residuals.shape = Y.shape
 
-    MSE = old_div(SSE, dfe)
+    MSE = SSE / dfe
 
     # Sum square session effect - between colums/sessions
     SSC = ((mean(Y, 0) - mean_Y) ** 2).sum() * nb_subjects
     MSC = SSC / dfc / nb_subjects
 
-    session_effect_F = old_div(MSC, MSE)
+    session_effect_F = MSC / MSE
 
     # Sum Square subject effect - between rows/subjects
     SSR = SST - SSC - SSE
-    MSR = old_div(SSR, dfr)
+    MSR = SSR / dfr
 
     # ICC(3,1) = (mean square subjeT - mean square error) / (mean square subjeT + (k-1)*-mean square error)
-    ICC = old_div((MSR - MSE), (MSR + dfc * MSE))
+    ICC = (MSR - MSE) / (MSR + dfc * MSE)
 
-    e_var = MSE #variance of error
-    r_var = old_div((MSR - MSE),nb_conditions) #variance between subjects
+    e_var = MSE  # variance of error
+    r_var = (MSR - MSE) / nb_conditions  # variance between subjects
 
     return ICC, r_var, e_var, session_effect_F, dfc, dfe

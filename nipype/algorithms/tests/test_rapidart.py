@@ -1,7 +1,7 @@
-from __future__ import division
-from past.utils import old_div
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import division
+
 import numpy as np
 
 from ...testing import (assert_equal, assert_false, assert_true,
@@ -41,7 +41,7 @@ def test_ad_get_affine_matrix():
     out[0:3, 3] = params
     yield assert_equal, matrix, out
     # test rotation
-    params = np.array([0, 0, 0, old_div(np.pi, 2), old_div(np.pi, 2), old_div(np.pi, 2)])
+    params = np.array([0, 0, 0, np.pi / 2, np.pi / 2, np.pi / 2])
     matrix = ra._get_affine_matrix(params, 'SPM')
     out = np.array([0, 0, 1, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1]).reshape((4, 4))
     yield assert_almost_equal, matrix, out
@@ -58,9 +58,9 @@ def test_ad_get_affine_matrix():
 
 
 def test_ad_get_norm():
-    params = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, old_div(np.pi, 4), old_div(np.pi, 4),
-                       old_div(np.pi, 4), 0, 0, 0, old_div(-np.pi, 4),
-                       old_div(-np.pi, 4), old_div(-np.pi, 4)]).reshape((3, 6))
+    params = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, np.pi / 4, np.pi / 4,
+                       np.pi / 4, 0, 0, 0, -np.pi / 4,
+                       -np.pi / 4, -np.pi / 4]).reshape((3, 6))
     norm, _ = ra._calc_norm(params, False, 'SPM')
     yield assert_almost_equal, norm, np.array([18.86436316, 37.74610158, 31.29780829])
     norm, _ = ra._calc_norm(params, True, 'SPM')

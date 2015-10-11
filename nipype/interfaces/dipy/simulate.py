@@ -7,19 +7,14 @@
 """
 from __future__ import division
 from builtins import range
-from past.utils import old_div
 
 import os.path as op
-import warnings
-from multiprocessing import (Process, Pool, cpu_count, pool,
-                             Manager, TimeoutError)
+from multiprocessing import (Pool, cpu_count)
 
 import nibabel as nb
-import numpy as np
 
 from ..base import (traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
                     File, InputMultiPath, isdefined)
-from ...utils.filemanip import split_filename
 from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
@@ -292,7 +287,7 @@ def _compute_voxel(args):
     # Simulate dwi signal
     sf_vf = np.sum(ffs)
     if sf_vf > 0.0:
-        ffs = ((old_div(np.array(ffs), sf_vf)) * 100)
+        ffs = ((np.array(ffs) / sf_vf) * 100)
         snr = args['snr'] if args['snr'] > 0 else None
 
         try:

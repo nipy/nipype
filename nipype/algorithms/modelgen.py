@@ -19,7 +19,6 @@ These functions include:
 """
 from __future__ import division
 from builtins import range
-from past.utils import old_div
 
 from copy import deepcopy
 import os
@@ -94,13 +93,13 @@ def spm_hrf(RT, P=None, fMRI_T=16):
 
     _spm_Gpdf = lambda x, h, l: np.exp(h * np.log(l) + (h - 1) * np.log(x) - (l * x) - gammaln(h))
     # modelled hemodynamic response function - {mixture of Gammas}
-    dt = old_div(RT, float(fMRI_T))
-    u = np.arange(0, int(old_div(p[6], dt) + 1)) - old_div(p[5], dt)
-    hrf = _spm_Gpdf(u, old_div(p[0], p[2]), old_div(dt, p[2])) - old_div(_spm_Gpdf(u, old_div(p[1], p[3]),
-                                                           old_div(dt, p[3])), p[4])
-    idx = np.arange(0, int((old_div(p[6], RT)) + 1)) * fMRI_T
+    dt = RT / float(fMRI_T)
+    u = np.arange(0, int(p[6] / dt + 1)) - p[5] / dt
+    hrf = _spm_Gpdf(u, p[0] / p[2], dt / p[2]) - _spm_Gpdf(u, p[1] / p[3],
+                                                           dt / p[3]) / p[4]
+    idx = np.arange(0, int((p[6] / RT) + 1)) * fMRI_T
     hrf = hrf[idx]
-    hrf = old_div(hrf, np.sum(hrf))
+    hrf = hrf / np.sum(hrf)
     return hrf
 
 
@@ -141,7 +140,7 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
     if (input_units == 'scans') and (output_units == 'secs'):
         _scalefactor = time_repetition
     if (input_units == 'secs') and (output_units == 'scans'):
-        _scalefactor = old_div(1.,time_repetition)
+        _scalefactor = 1. / time_repetition
     timelist = [np.max([0., _scalefactor * t]) for t in timelist]
     return timelist
 
@@ -630,7 +629,7 @@ class SpecifySparseModel(SpecifyModel):
         SCANONSET = np.round(self.inputs.scan_onset * 1000)
         total_time = TR * (nscans - nvol) / nvol + TA * nvol + SCANONSET
         SILENCE = TR - TA * nvol
-        dt = old_div(TA, 10.0)
+        dt = TA / 10.0
         durations = np.round(np.array(i_durations) * 1000)
         if len(durations) == 1:
             durations = durations*np.ones((len(i_onsets)))
@@ -642,7 +641,7 @@ class SpecifySparseModel(SpecifyModel):
         if dt < 1:
             raise Exception("Time multiple less than 1 ms")
         iflogger.info("Setting dt = %d ms\n" % dt)
-        npts = int(np.ceil(old_div(total_time, dt)))
+        npts = int(np.ceil(total_time / dt))
         times = np.arange(0, total_time, dt) * 1e-3
         timeline = np.zeros((npts))
         timeline2 = np.zeros((npts))
@@ -653,17 +652,17 @@ class SpecifySparseModel(SpecifyModel):
             boxcar = np.zeros((50.0 * 1e3 / dt))
             if self.inputs.stimuli_as_impulses:
                 boxcar[1.0 * 1e3 / dt] = 1.0
-                reg_scale = float(old_div(TA, dt))
+                reg_scale = float(TA / dt)
             else:
                 boxcar[(1.0 * 1e3 / dt):(2.0 * 1e3 / dt)] = 1.0
             if isdefined(self.inputs.model_hrf) and self.inputs.model_hrf:
                 response = np.convolve(boxcar, hrf)
-                reg_scale = old_div(1.0, response.max())
+                reg_scale = 1.0 / response.max()
                 iflogger.info('response sum: %.4f max: %.4f' % (response.sum(),
                                                                 response.max()))
             iflogger.info('reg_scale: %.4f' % reg_scale)
         for i, t in enumerate(onsets):
-            idx = int(np.round(old_div(t, dt)))
+            idx = int(np.round(t / dt))
             if i_amplitudes:
                 if len(i_amplitudes) > 1:
                     timeline2[idx] = i_amplitudes[i]
@@ -677,7 +676,7 @@ class SpecifySparseModel(SpecifyModel):
             if not self.inputs.stimuli_as_impulses:
                 if durations[i] == 0:
                     durations[i] = TA * nvol
-                stimdur = np.ones((int(old_div(durations[i], dt))))
+                stimdur = np.ones((int(durations[i] / dt)))
                 timeline2 = np.convolve(timeline2, stimdur)[0:len(timeline2)]
             timeline += timeline2
             timeline2[:] = 0
@@ -700,9 +699,9 @@ class SpecifySparseModel(SpecifyModel):
         timeline2 = np.zeros((npts))
         reg = []
         regderiv = []
-        for i, trial in enumerate(old_div(np.arange(nscans),nvol)):
-            scanstart = int(old_div((SCANONSET + trial * TR + (i % nvol) * TA), dt))
-            scanidx = scanstart+np.arange(int(old_div(TA,dt)))
+        for i, trial in enumerate(np.arange(nscans) / nvol):
+            scanstart = int((SCANONSET + trial * TR + (i % nvol) * TA) / dt)
+            scanidx = scanstart+np.arange(int(TA / dt))
             timeline2[scanidx] = np.max(timeline)
             reg.insert(i, np.mean(timeline[scanidx]) * reg_scale)
             if isdefined(self.inputs.use_temporal_deriv) and \
@@ -759,7 +758,7 @@ class SpecifySparseModel(SpecifyModel):
         nvol = self.inputs.volumes_in_cluster
         if nvol > 1:
             for i in range(nvol-1):
-                treg = np.zeros((old_div(nscans,nvol), nvol))
+                treg = np.zeros((nscans / nvol, nvol))
                 treg[:, i] = 1
                 reg.insert(len(reg), treg.ravel().tolist())
                 regnames.insert(len(regnames), 'T1effect_%d' % i)

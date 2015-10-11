@@ -11,11 +11,9 @@
 from __future__ import print_function
 from __future__ import division
 from builtins import range
-from past.utils import old_div
 
 import pickle
-import os, os.path as op
-import sys
+import os.path as op
 
 import numpy as np
 import nibabel as nb
@@ -79,9 +77,9 @@ def get_rois_crossed(pointsmm, roiData, voxelSize):
 	rois_crossed = []
 	for j in range(0, n_points):
 		# store point
-		x = int(old_div(pointsmm[j, 0], float(voxelSize[0])))
-		y = int(old_div(pointsmm[j, 1], float(voxelSize[1])))
-		z = int(old_div(pointsmm[j, 2], float(voxelSize[2])))
+		x = int(pointsmm[j, 0] / float(voxelSize[0]))
+		y = int(pointsmm[j, 1] / float(voxelSize[1]))
+		z = int(pointsmm[j, 2] / float(voxelSize[2]))
 		if not roiData[x, y, z] == 0:
 			rois_crossed.append(roiData[x, y, z])
 	rois_crossed = list(dict.fromkeys(rois_crossed).keys()) #Removed duplicates from the list
@@ -107,7 +105,7 @@ def create_allpoints_cmat(streamlines, roiData, voxelSize, n_rois):
 	final_fiber_ids = []
 	list_of_roi_crossed_lists = []
 	for i, fiber in enumerate(streamlines):
-		pcN = int(round(old_div(float(100 * i), n_fib)))
+		pcN = int(round(float(100 * i) / n_fib))
 		if pcN > pc and pcN % 1 == 0:
 			pc = pcN
 			print('%4.0f%%' % (pc))
@@ -157,12 +155,12 @@ def create_endpoints_array(fib, voxelSize):
         endpointsmm[i, 1, :] = f[-1, :]
 
         # Translate from mm to index
-        endpoints[i, 0, 0] = int(old_div(endpoints[i, 0, 0], float(voxelSize[0])))
-        endpoints[i, 0, 1] = int(old_div(endpoints[i, 0, 1], float(voxelSize[1])))
-        endpoints[i, 0, 2] = int(old_div(endpoints[i, 0, 2], float(voxelSize[2])))
-        endpoints[i, 1, 0] = int(old_div(endpoints[i, 1, 0], float(voxelSize[0])))
-        endpoints[i, 1, 1] = int(old_div(endpoints[i, 1, 1], float(voxelSize[1])))
-        endpoints[i, 1, 2] = int(old_div(endpoints[i, 1, 2], float(voxelSize[2])))
+        endpoints[i, 0, 0] = int(endpoints[i, 0, 0] / float(voxelSize[0]))
+        endpoints[i, 0, 1] = int(endpoints[i, 0, 1] / float(voxelSize[1]))
+        endpoints[i, 0, 2] = int(endpoints[i, 0, 2] / float(voxelSize[2]))
+        endpoints[i, 1, 0] = int(endpoints[i, 1, 0] / float(voxelSize[0]))
+        endpoints[i, 1, 1] = int(endpoints[i, 1, 1] / float(voxelSize[1]))
+        endpoints[i, 1, 2] = int(endpoints[i, 1, 2] / float(voxelSize[2]))
 
     # Return the matrices
     iflogger.info('Returning the endpoint matrix')

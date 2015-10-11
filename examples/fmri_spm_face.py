@@ -18,7 +18,6 @@ dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/face_r
 Import necessary modules from nipype."""
 from __future__ import division
 from builtins import range
-from past.utils import old_div
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
@@ -327,9 +326,9 @@ TR = 2.
 slice_timingref = l1pipeline.inputs.preproc.slice_timing
 slice_timingref.num_slices = num_slices
 slice_timingref.time_repetition = TR
-slice_timingref.time_acquisition = TR - old_div(TR,float(num_slices))
+slice_timingref.time_acquisition = TR - TR / float(num_slices)
 slice_timingref.slice_order = list(range(num_slices,0,-1))
-slice_timingref.ref_slice = int(old_div(num_slices,2))
+slice_timingref.ref_slice = int(num_slices / 2)
 
 l1pipeline.inputs.preproc.smooth.fwhm = [8, 8, 8]
 

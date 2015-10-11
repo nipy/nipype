@@ -15,7 +15,6 @@ from __future__ import absolute_import
 from __future__ import division
 from builtins import zip
 from builtins import range
-from past.utils import old_div
 
 import os
 import os.path as op
@@ -24,9 +23,6 @@ import nibabel as nb
 import numpy as np
 from math import floor, ceil
 from scipy.ndimage.morphology import grey_dilation
-from scipy.ndimage.morphology import binary_erosion
-from scipy.spatial.distance import cdist, euclidean, dice, jaccard
-from scipy.ndimage.measurements import center_of_mass, label
 from scipy.special import legendre
 import scipy.io as sio
 import itertools
@@ -104,9 +100,9 @@ class PickAtlas(BaseInterface):
         for lab in labels:
             newdata[origdata == lab] = 1
         if self.inputs.hemi == 'right':
-            newdata[floor(old_div(float(origdata.shape[0]), 2)):, :, :] = 0
+            newdata[int(floor(float(origdata.shape[0]) /  2)):, :, :] = 0
         elif self.inputs.hemi == 'left':
-            newdata[:ceil(old_div(float(origdata.shape[0]), 2)), :, :] = 0
+            newdata[:int(ceil(float(origdata.shape[0]) / 2)), :, :] = 0
 
         if self.inputs.dilation_size != 0:
             newdata = grey_dilation(
@@ -327,7 +323,7 @@ class TSNR(BaseInterface):
             nb.save(img, self._gen_output_file_name('detrended'))
         meanimg = np.mean(data, axis=3)
         stddevimg = np.std(data, axis=3)
-        tsnr = old_div(meanimg, stddevimg)
+        tsnr = meanimg / stddevimg
         img = nb.Nifti1Image(tsnr, img.get_affine(), header)
         nb.save(img, self._gen_output_file_name())
         img = nb.Nifti1Image(meanimg, img.get_affine(), header)
@@ -976,7 +972,7 @@ def calc_moments(timeseries_file, moment):
     m2 = stats.moment(timeseries, 2, axis=0)
     m3 = stats.moment(timeseries, moment, axis=0)
     zero = (m2 == 0)
-    return np.where(zero, 0, old_div(m3, m2**(old_div(moment,2.0))))
+    return np.where(zero, 0, m3 / m2 ** (moment / 2.0))
 
 
 class AddNoiseInputSpec(TraitedSpec):
@@ -1051,7 +1047,7 @@ class AddNoise(BaseInterface):
         added gaussian noise (rayleigh for background in mask)
         """
         from math import sqrt
-        snr = sqrt(np.power(10.0, old_div(snr_db,10.0)))
+        snr = sqrt(np.power(10.0, snr_db / 10.0))
 
         if mask is None:
             mask = np.ones_like(image)
@@ -1066,7 +1062,7 @@ class AddNoise(BaseInterface):
 
         if dist == 'normal':
             signal = signal - signal.mean()
-            sigma_n = sqrt(old_div(signal.var(),snr))
+            sigma_n = sqrt(signal.var() / snr)
             noise = np.random.normal(size=image.shape, scale=sigma_n)
 
             if (np.any(mask == 0)) and (bg_dist == 'rayleigh'):
@@ -1076,11 +1072,11 @@ class AddNoise(BaseInterface):
             im_noise = image + noise
 
         elif dist == 'rician':
-            sigma_n = old_div(signal.mean(),snr)
+            sigma_n = signal.mean() / snr
             n_1 = np.random.normal(size=image.shape, scale=sigma_n)
             n_2 = np.random.normal(size=image.shape, scale=sigma_n)
-            stde_1 = old_div(n_1,sqrt(2.0))
-            stde_2 = old_div(n_2,sqrt(2.0))
+            stde_1 = n_1 / sqrt(2.0)
+            stde_2 = n_2 / sqrt(2.0)
             im_noise = np.sqrt((image + stde_1)**2 + (stde_2)**2)
         else:
             raise NotImplementedError(('Only normal and rician distributions '
@@ -1285,7 +1281,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
 
     for i,out_file in enumerate(out_files):
         data = np.ma.masked_equal(img_data[i], 0)
-        probmap = old_div(data, weights)
+        probmap = data / weights
         hdr = imgs[i].get_header().copy()
         hdr['data_type']= 16
         hdr.set_data_dtype('float32')

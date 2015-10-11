@@ -1,7 +1,6 @@
 # coding: utf-8
 
 from __future__ import division
-from past.utils import old_div
 
 import warnings
 
@@ -709,7 +708,7 @@ def _cat_logs(in_files):
 
 
 def _compute_dwelltime(dwell_time=0.68, pi_factor=1.0, is_reverse_encoding=False):
-    dwell_time *= (old_div(1.0,pi_factor))
+    dwell_time *= (1.0 / pi_factor)
 
     if is_reverse_encoding:
         dwell_time *= -1.0
@@ -717,7 +716,7 @@ def _compute_dwelltime(dwell_time=0.68, pi_factor=1.0, is_reverse_encoding=False
     return dwell_time
 
 def _effective_echospacing( dwell_time, pi_factor=1.0 ):
-    dwelltime = 1.0e-3 * dwell_time * ( old_div(1.0,pi_factor) )
+    dwelltime = 1.0e-3 * dwell_time * (1.0 / pi_factor)
     return dwelltime
 
 
@@ -728,7 +727,7 @@ def _prepare_phasediff(in_file):
     img = nib.load(in_file)
     max_diff = np.max(img.get_data().reshape(-1))
     min_diff = np.min(img.get_data().reshape(-1))
-    A = old_div((2.0 * np.pi),(max_diff-min_diff))
+    A = (2.0 * np.pi) / (max_diff-min_diff)
     B = np.pi - (A * max_diff)
     diff_norm = img.get_data() * A + B
 

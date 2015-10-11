@@ -17,7 +17,6 @@ First tell python where to find the appropriate functions.
 from __future__ import print_function
 from __future__ import division
 from builtins import range
-from past.utils import old_div
 
 import os                                    # system functions
 
@@ -29,8 +28,8 @@ import nipype.algorithms.modelgen as model   # model generation
 import nipype.algorithms.rapidart as ra      # artifact detection
 
 from nipype.workflows.fmri.fsl import (create_featreg_preproc,
-                                  create_modelfit_workflow,
-                                  create_fixed_effects_flow)
+                                       create_modelfit_workflow,
+                                       create_fixed_effects_flow)
 
 
 """
@@ -185,7 +184,7 @@ inputnode.iterables = ('fwhm', [5.,10.])
 
 hpcutoff = 120.
 TR = 3.
-inputnode.inputs.highpass = old_div(hpcutoff,(2*TR))
+inputnode.inputs.highpass = hpcutoff / (2. * TR)
 
 """
 Setup a function that returns subject-specific information about the

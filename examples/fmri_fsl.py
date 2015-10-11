@@ -17,7 +17,6 @@ First tell python where to find the appropriate functions.
 from __future__ import print_function
 from __future__ import division
 from builtins import range
-from past.utils import old_div
 
 import os                                    # system functions
 
@@ -108,7 +107,7 @@ def getmiddlevolume(func):
     if isinstance(func, list):
         funcfile = func[0]
     _,_,_,timepoints = load(funcfile).get_shape()
-    return (old_div(timepoints,2))-1
+    return int(timepoints / 2) - 1
 
 preproc.connect(inputnode, ('func', getmiddlevolume), extract_ref, 't_min')
 
@@ -290,7 +289,7 @@ Define a function to get the scaling factor for intensity normalization
 """
 
 def getinormscale(medianvals):
-    return ['-mul %.10f'%(old_div(10000.,val)) for val in medianvals]
+    return ['-mul %.10f' % (10000. / val) for val in medianvals]
 preproc.connect(medianval, ('out_stat', getinormscale), intnorm, 'op_string')
 
 """
@@ -555,9 +554,9 @@ assert(str(smoothnode)=='preproc.smooth')
 smoothnode.iterables = ('fwhm', [5.,10.])
 
 hpcutoff = 120
-TR = 3.
+TR = 3.  # ensure float
 firstlevel.inputs.preproc.highpass.suffix = '_hpf'
-firstlevel.inputs.preproc.highpass.op_string = '-bptf %d -1'%(old_div(hpcutoff,TR))
+firstlevel.inputs.preproc.highpass.op_string = '-bptf %d -1' % (hpcutoff / TR)
 
 
 """
@@ -572,7 +571,7 @@ for every participant. Other examples of this function are available in the
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print("Subject ID: %s\n"%str(subject_id))
+    print("Subject ID: %s\n" % str(subject_id))
     output = []
     names = ['Task-Odd','Task-Even']
     for r in range(4):
