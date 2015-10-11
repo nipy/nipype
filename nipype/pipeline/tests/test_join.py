@@ -397,7 +397,7 @@ def test_multifield_join_node():
     assert_equal(len(result.nodes()), 10,
                  "The number of expanded nodes is incorrect.")
     # the product inputs are [2, 4], [2, 5], [3, 4], [3, 5]
-    assert_equal(_products, [8, 10, 12, 15],
+    assert_equal(set(_products), set([8, 10, 12, 15]),
                  "The post-join products is incorrect: %s." % _products)
 
     os.chdir(cwd)
