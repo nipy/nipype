@@ -3,6 +3,12 @@
 """
     The maths module provides higher-level interfaces to some of the operations
     that can be performed with the fslmaths command-line program.
+
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
 """
 from __future__ import division
 import os
@@ -293,11 +299,11 @@ class MultiImageMaths(MathsCommand):
     --------
     >>> from nipype.interfaces.fsl import MultiImageMaths
     >>> maths = MultiImageMaths()
-    >>> maths.inputs.in_file = "functional.nii"  # doctest: +SKIP
+    >>> maths.inputs.in_file = "functional.nii"
     >>> maths.inputs.op_string = "-add %s -mul -1 -div %s"
-    >>> maths.inputs.operand_files = ["functional2.nii", "functional3.nii"]  # doctest: +SKIP
-    >>> maths.inputs.out_file = "functional4.nii"  # doctest: +SKIP
-    >>> maths.cmdline  # doctest: +SKIP
+    >>> maths.inputs.operand_files = ["functional2.nii", "functional3.nii"]
+    >>> maths.inputs.out_file = "functional4.nii"
+    >>> maths.cmdline
     'fslmaths functional.nii -add functional2.nii -mul -1 -div functional3.nii functional4.nii'
 
     """
