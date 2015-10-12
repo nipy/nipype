@@ -5,6 +5,7 @@
 /nipype/build
 /nipype/nipype.egg-info
 /doc/_build
+/doc/preproc
 /doc/users/examples
 /doc/api/generated
 *.pyc

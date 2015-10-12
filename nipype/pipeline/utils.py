@@ -946,9 +946,17 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
 
 
 def format_dot(dotfilename, format=None):
+    """Dump a directed graph (Linux only; install via `brew` on OSX)"""
     cmd = 'dot -T%s -O \'%s\'' % (format, dotfilename)
-    CommandLine(cmd).run()
-    logger.info('Converting dotfile: %s to %s format' % (dotfilename, format))
+    try:
+        CommandLine(cmd).run()
+    except IOError as ioe:
+        if "could not be found" in str(ioe):
+            raise IOError("Cannot draw directed graph; executable 'dot' is unavailable")
+        else:
+            raise ioe
+    else:
+        logger.info('Converting dotfile: %s to %s format' % (dotfilename, format))
 
 
 def make_output_dir(outdir):

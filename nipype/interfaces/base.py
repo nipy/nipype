@@ -1486,7 +1486,7 @@ class CommandLine(BaseInterface):
         exist_val, cmd_path = _exists_in_path(executable_name,
                                               runtime.environ)
         if not exist_val:
-            raise IOError("%s could not be found on host %s" %
+            raise IOError("command '%s' could not be found on host %s" %
                           (self.cmd.split()[0], runtime.hostname))
         setattr(runtime, 'command_path', cmd_path)
         setattr(runtime, 'dependencies', get_dependencies(executable_name,

@@ -203,7 +203,7 @@ def no_spm():
     used with nosetests skipif to skip tests
     that will fail if spm is not installed"""
 
-    if Info.version() is None or 'NIPYPE_NO_MATLAB' in os.environ:
+    if 'NIPYPE_NO_MATLAB' in os.environ or Info.version() is None:
         return True
     else:
         return False
