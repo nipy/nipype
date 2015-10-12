@@ -11,6 +11,7 @@ was written to work with FSL version 4.1.4.
     >>> os.chdir(datadir)
 
 """
+
 from builtins import range
 
 import os

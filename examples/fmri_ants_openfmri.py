@@ -11,6 +11,7 @@ This script demonstrates how to use nipype to analyze a data set::
 
     python fmri_ants_openfmri.py --datasetdir ds107
 """
+
 from __future__ import division
 from builtins import range
 

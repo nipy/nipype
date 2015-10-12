@@ -5,8 +5,8 @@
 Paper: Smoothing comparison
 ===========================
 """
-from builtins import range
 
+from builtins import range
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm

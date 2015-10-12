@@ -13,6 +13,7 @@ you can test by calling::
 
    spm.SPMCommand().version
 """
+
 from __future__ import print_function
 from builtins import range
 from builtins import object

@@ -6,6 +6,7 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+
 from builtins import range
 import os
 

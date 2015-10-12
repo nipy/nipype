@@ -8,6 +8,7 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+
 from builtins import range
 
 __docformat__ = 'restructuredtext'
@@ -210,7 +211,7 @@ class Realign(SPMCommand):
         outputs = self._outputs().get()
         resliced_all = self.inputs.write_which[0] > 0
         resliced_mean = self.inputs.write_which[1] > 0
-        
+
         if self.inputs.jobtype != "write":
             if isdefined(self.inputs.in_files):
                 outputs['realignment_parameters'] = []
@@ -766,7 +767,7 @@ class Segment(SPMCommand):
 
     input_spec = SegmentInputSpec
     output_spec = SegmentOutputSpec
-    
+
     def __init__(self, **inputs):
         _local_version = SPMCommand().version
         if _local_version and '12.' in _local_version:
@@ -775,7 +776,7 @@ class Segment(SPMCommand):
         else:
             self._jobtype = 'spatial'
             self._jobname = 'preproc'
-        
+
         SPMCommand.__init__(self, **inputs)
 
     def _format_arg(self, opt, spec, val):
@@ -895,7 +896,7 @@ class NewSegment(SPMCommand):
 
     input_spec = NewSegmentInputSpec
     output_spec = NewSegmentOutputSpec
-        
+
     def __init__(self, **inputs):
         _local_version = SPMCommand().version
         if _local_version and '12.' in _local_version:
@@ -904,7 +905,7 @@ class NewSegment(SPMCommand):
         else:
             self._jobtype = 'tools'
             self._jobname = 'preproc8'
-        
+
         SPMCommand.__init__(self, **inputs)
 
     def _format_arg(self, opt, spec, val):

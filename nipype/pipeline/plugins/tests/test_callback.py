@@ -3,6 +3,7 @@
 
 """Tests for workflow callbacks
 """
+
 from builtins import object
 from tempfile import mkdtemp
 from shutil import rmtree

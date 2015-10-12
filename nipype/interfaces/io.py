@@ -17,6 +17,7 @@
     >>> os.chdir(datadir)
 
 """
+
 from builtins import zip
 from builtins import filter
 from builtins import range
@@ -425,7 +426,7 @@ class S3DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 class S3DataSink(DataSink):
     """ Works exactly like DataSink, except the specified files will
         also be uploaded to Amazon S3 storage in the specified bucket
-        and location.  'bucket_path' is the s3 analog for 
+        and location.  'bucket_path' is the s3 analog for
         'base_directory'.
 
     """
@@ -587,7 +588,7 @@ class S3DataGrabber(IOBase):
                     isdefined(self.inputs.field_template) and \
                     key in self.inputs.field_template:
                 template = self.inputs.field_template[key] # template override for multiple outfields
-            if isdefined(self.inputs.bucket_path): 
+            if isdefined(self.inputs.bucket_path):
                 template = os.path.join(self.inputs.bucket_path, template)
             if not args:
                 filelist = []

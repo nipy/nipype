@@ -14,6 +14,7 @@ See the docstrings of the individual classes for examples.
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
+
 from __future__ import division
 from builtins import map
 from builtins import range

@@ -42,6 +42,7 @@ specifically the 2mm versions of:
 - `Joint Fusion Atlas <http://mindboggle.info/data/atlases/jointfusion/OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_2mm_v2.nii.gz>`_
 - `MNI template <http://mindboggle.info/data/templates/ants/OASIS-30_Atropos_template_in_MNI152_2mm.nii.gz>`_
 """
+
 from __future__ import division
 from builtins import range
 

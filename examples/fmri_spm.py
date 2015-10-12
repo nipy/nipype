@@ -14,6 +14,7 @@ nipype tutorial directory::
     python fmri_spm.py
 
 Import necessary modules from nipype."""
+
 from __future__ import print_function
 from builtins import range
 

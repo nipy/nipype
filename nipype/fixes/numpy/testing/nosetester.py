@@ -4,6 +4,7 @@ Nose test running.
 This module implements ``test()`` and ``bench()`` functions for NumPy modules.
 
 """
+
 from __future__ import print_function
 from __future__ import absolute_import
 from builtins import object

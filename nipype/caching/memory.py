@@ -8,6 +8,7 @@ name-steps pipeline: getting back scope in command-line based programming.
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
+
 from __future__ import print_function
 from builtins import object
 

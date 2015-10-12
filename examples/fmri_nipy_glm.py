@@ -15,6 +15,7 @@ the nipype tutorial directory::
     python fmri_nipy_glm.py
 
 """
+
 from __future__ import print_function
 from builtins import range
 

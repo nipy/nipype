@@ -1,5 +1,6 @@
 """Various utilities common to IPython release and maintenance tools.
 """
+
 from builtins import map
 # Library imports
 import os

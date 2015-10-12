@@ -7,6 +7,7 @@ Exaples  FSL, matlab/SPM , afni
 
 Requires Packages to be installed
 """
+
 from __future__ import print_function
 from __future__ import division
 from future import standard_library
@@ -941,7 +942,7 @@ class BaseInterface(Interface):
         # check minimum version
         check = dict(min_ver=lambda t: t is not None)
         names = trait_object.trait_names(**check)
-        
+
         if names and self.version:
             version = LooseVersion(str(self.version))
             for name in names:

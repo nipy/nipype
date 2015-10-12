@@ -16,6 +16,7 @@ Example Makefile rule::
             ./ext/autosummary_generate.py -o source/generated source/*.rst
 
 """
+
 from __future__ import print_function
 import glob, re, inspect, os, optparse, pydoc
 from autosummary import import_by_name

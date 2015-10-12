@@ -7,6 +7,7 @@ To use this code, run::
 
     python setup.py build_sphinx
 """
+
 from __future__ import print_function
 
 # Standard library imports

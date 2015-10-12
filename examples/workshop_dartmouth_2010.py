@@ -95,6 +95,7 @@ Using interfaces
 
 Having interfaces allows us to use third party software (like FSL BET) as function. Look how simple it is.
 """
+
 from __future__ import print_function
 
 import nipype.interfaces.fsl as fsl

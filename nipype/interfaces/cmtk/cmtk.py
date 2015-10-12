@@ -8,6 +8,7 @@
     >>> os.chdir(datadir)
 
 """
+
 from __future__ import print_function
 from __future__ import division
 from builtins import range
@@ -178,7 +179,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     iflogger.info('Reading Trackvis file {trk}'.format(trk=track_file))
     fib, hdr = nb.trackvis.read(track_file, False)
     stats['orig_n_fib'] = len(fib)
-    
+
     roi = nb.load(roi_file)
     roiData = roi.get_data()
     roiVoxelSize = roi.get_header().get_zooms()
@@ -227,7 +228,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
         intersection_matrix = np.matrix(intersection_matrix)
         I = G.copy()
         H = nx.from_numpy_matrix(np.matrix(intersection_matrix))
-        H = nx.relabel_nodes(H, lambda x: x + 1) #relabel nodes so they start at 1		
+        H = nx.relabel_nodes(H, lambda x: x + 1) #relabel nodes so they start at 1
         I.add_weighted_edges_from(((u, v, d['weight']) for u, v, d in H.edges(data=True)))
 
     dis = 0
@@ -381,7 +382,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     stats['endpoint_n_fib'] = save_fibers(hdr, fib, finalfibers_fname, final_fibers_idx)
     stats['endpoints_percent'] = float(stats['endpoint_n_fib'])/float(stats['orig_n_fib'])*100
     stats['intersections_percent'] = float(stats['intersections_n_fib'])/float(stats['orig_n_fib'])*100
-    
+
     out_stats_file = op.abspath(endpoint_name + '_statistics.mat')
     iflogger.info("Saving matrix creation statistics as %s" % out_stats_file)
     sio.savemat(out_stats_file, stats)
@@ -498,7 +499,7 @@ class CreateMatrix(BaseInterface):
 
         outputs['matrix_file'] = out_matrix_file
         outputs['intersection_matrix_file'] = out_intersection_matrix_file
-        
+
         matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
         path, name, ext = split_filename(matrix_mat_file)
         if not ext == '.mat':
@@ -544,12 +545,12 @@ class CreateMatrix(BaseInterface):
         if self.inputs.count_region_intersections:
             outputs['matrix_files'] = [out_matrix_file, out_intersection_matrix_file]
             outputs['matlab_matrix_files'] = [outputs['matrix_mat_file'],
-            outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'], 
+            outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'],
             outputs['fiber_length_std_matrix_mat_file'], outputs['intersection_matrix_mat_file']]
         else:
             outputs['matrix_files'] = [out_matrix_file]
             outputs['matlab_matrix_files'] = [outputs['matrix_mat_file'],
-            outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'], 
+            outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'],
             outputs['fiber_length_std_matrix_mat_file']]
 
         outputs['filtered_tractography'] = op.abspath(endpoint_name + '_streamline_final.trk')

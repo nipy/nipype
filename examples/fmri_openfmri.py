@@ -11,9 +11,9 @@ This script demonstrates how to use nipype to analyze a data set::
 
     python fmri_openfmri.py --datasetdir ds107
 """
+
 from __future__ import division
 from builtins import range
-
 
 from glob import glob
 import os
@@ -38,6 +38,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
 
     Parameters
     ----------
+
     subject_id : string
         Subject identifier (e.g., sub001)
     base_dir : string
@@ -49,6 +50,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
 
     Returns
     -------
+
     run_ids : list of ints
         Run numbers
     conds : list of str
@@ -62,6 +64,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     condition_info = []
     cond_file = os.path.join(base_dir, 'models', 'model%03d' % model_id,
                              'condition_key.txt')
+
     with open(cond_file, 'rt') as fp:
         for line in fp:
             info = line.strip().split()

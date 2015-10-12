@@ -6,6 +6,7 @@ Workflow from scratch
 =====================
 
 """
+
 from builtins import range
 
 import nipype.interfaces.io as nio           # Data i/o

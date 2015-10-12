@@ -18,6 +18,7 @@ files are modules, and therefore which module URIs will be passed to
 NOTE: this is a modified version of a script originally shipped with the
 PyMVPA project, which we've adapted for NIPY use.  PyMVPA is an MIT-licensed
 project."""
+
 from __future__ import print_function
 from builtins import object
 

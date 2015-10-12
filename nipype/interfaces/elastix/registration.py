@@ -7,6 +7,7 @@ Interfaces to perform image registrations and to apply the resulting
 displacement maps to images and points.
 
 """
+
 from __future__ import absolute_import
 
 import os.path as op

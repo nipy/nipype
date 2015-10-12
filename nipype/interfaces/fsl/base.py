@@ -24,6 +24,7 @@ Examples
 See the docstrings of the individual classes for examples.
 
 """
+
 from builtins import object
 
 from glob import glob

@@ -3,6 +3,7 @@
 """Simple script to update the trunk nightly, build the docs and push
 to sourceforge.
 """
+
 from __future__ import print_function
 
 import os

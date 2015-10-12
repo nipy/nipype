@@ -2,6 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Utility routines for workflow graphs
 """
+
 from future import standard_library
 standard_library.install_aliases()
 
