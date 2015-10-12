@@ -621,6 +621,7 @@ def test_CommandLine_output():
     ci.inputs.terminal_output = 'file'
     res = ci.run()
     yield assert_true, 'stdout.nipype' in res.runtime.stdout
+    yield assert_equal, type(res.runtime.stdout), type('hi')
     ci = nib.CommandLine(command='ls -l')
     ci.inputs.terminal_output = 'none'
     res = ci.run()

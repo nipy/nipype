@@ -1212,7 +1212,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     if output == 'file':
         errfile = os.path.join(runtime.cwd, 'stderr.nipype')
         outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-        stderr = open(errfile, 'wt')
+        stderr = open(errfile, 'wt')  # t=='text'===default
         stdout = open(outfile, 'wt')
 
         proc = subprocess.Popen(cmdline,
@@ -1263,8 +1263,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = [r[1] for r in temp]
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
-        result['stdout'] = stdout.decode().split('\n')
-        result['stderr'] = stderr.decode().split('\n')
+        result['stdout'] = str(stdout).split('\n')
+        result['stderr'] = str(stderr).split('\n')
         result['merged'] = ''
     if output == 'file':
         ret_code = proc.wait()
