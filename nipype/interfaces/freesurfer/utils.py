@@ -355,7 +355,11 @@ class SurfaceTransform(FSCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = self.inputs.out_file
         if not isdefined(outputs["out_file"]):
-            source = self.inputs.source_file
+            if isdefined(self.inputs.source_file):
+                source = self.inputs.source_file
+            else:
+                source = self.inputs.source_annot_file
+                
             # Some recon-all files don't have a proper extension (e.g. "lh.thickness")
             # so we have to account for that here
             bad_extensions = [".%s" % e for e in ["area", "mid", "pial", "avg_curv", "curv", "inflated",
