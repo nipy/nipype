@@ -1205,7 +1205,8 @@ class RobustRegister(FSCommand):
         outputs['out_reg_file'] = self.inputs.out_reg_file
         if not isdefined(self.inputs.out_reg_file) and self.inputs.source_file:
             outputs['out_reg_file'] = fname_presuffix(self.inputs.source_file,
-                                         suffix='_robustreg.lta', use_ext=False)
+                                         suffix='_robustreg.lta', use_ext=False,
+                                         newpath=os.getcwd())
         prefices = dict(src=self.inputs.source_file, trg=self.inputs.target_file)
         suffices = dict(registered_file=("src", "_robustreg", True),
                         weights_file=("src", "_robustweights", True),
