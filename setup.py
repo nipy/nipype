@@ -13,9 +13,6 @@ nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 """
 """Build helper."""
 
-from future import standard_library
-standard_library.install_aliases()
-
 import os
 from glob import glob
 import sys
