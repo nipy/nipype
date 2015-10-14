@@ -1918,7 +1918,9 @@ class JoinNode(Node):
         # the new field name
         name = self._join_item_field_name(field, index)
         # make a copy of the join trait
-        trait = self._inputs.trait(field, False, True)
+        # This always returns NoneType for some reason. I replaced it by the traits Any type
+        #trait = self._inputs.trait(field, False, True)
+        trait = traits.Any
         # add the join item trait to the override traits
         self._inputs.add_trait(name, trait)
 
@@ -1970,21 +1972,23 @@ class JoinNode(Node):
         """
         Collects each override join item field into the interface join
         field input."""
+
         for field in self.inputs.copyable_trait_names():
-            if field in self.joinfield:
-                # collate the join field
-                val = self._collate_input_value(field)
-                try:
-                    setattr(self._interface.inputs, field, val)
-                except Exception as e:
-                    raise ValueError(">>JN %s %s %s %s %s: %s" % (self, field, val, self.inputs.copyable_trait_names(), self.joinfield, e))
-            elif hasattr(self._interface.inputs, field):
+            if hasattr(self._interface.inputs, field):
                 # copy the non-join field
                 val = getattr(self._inputs, field)
                 if isdefined(val):
                     setattr(self._interface.inputs, field, val)
-        logger.debug("Collated %d inputs into the %s node join fields"
-                     % (self._next_slot_index, self))
+
+        for field in self.joinfield:
+            val = self._collate_input_value(field)
+            try:
+                setattr(self._interface.inputs, field, val)
+            except Exception as e:
+                raise ValueError(">>JN %s %s %s %s %s: %s" % (self, field, val,
+                                                              self.inputs.copyable_trait_names(), self.joinfield, e))
+
+        logger.debug("Collated %d inputs into the %s node join fields" % (self._next_slot_index, self))
 
     def _collate_input_value(self, field):
         """

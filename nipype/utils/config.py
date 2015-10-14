@@ -27,13 +27,15 @@ workflow_level = INFO
 filemanip_level = INFO
 interface_level = INFO
 log_to_file = false
-log_directory = %s
+log_directory = {log_directory}
 log_size = 16384000
 log_rotate = 4
+log_format: %%(asctime)s,%%(msecs)d %%(name)-2s %%(levelname)-2s\\n\\t%%(message)s
+log_dateformat = %%y%%m%%d-%%H:%%M:%%S
 
 [execution]
 create_report = true
-crashdump_dir = %s
+crashdump_dir = {crashdump_dir}
 display_variable = :1
 hash_method = timestamp
 job_finished_timeout = 5
@@ -56,7 +58,7 @@ xvfb_max_wait = 10
 
 [check]
 interval = 1209600
-""" % (homedir, os.getcwd())
+""".format(log_directory=homedir, crashdump_dir=os.getcwd())
 
 
 def mkdir_p(path):
@@ -74,7 +76,7 @@ class NipypeConfig(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self._config = ConfigParser.ConfigParser()
+        self._config = ConfigParser.SafeConfigParser()
         config_dir = os.path.expanduser('~/.nipype')
         mkdir_p(config_dir)
         old_config_file = os.path.expanduser('~/.nipype.cfg')
