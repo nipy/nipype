@@ -544,8 +544,11 @@ class DataSink(IOBase):
         '''
 
         # Import packages
+        import hashlib
         import logging
         import os
+
+        from botocore.exceptions import ClientError
 
         # Init variables
         bucket = self.bucket
@@ -571,8 +574,25 @@ class DataSink(IOBase):
             dst_f = dst_files[src_idx]
             dst_k = dst_f.replace(s3_prefix, '').lstrip('/')
 
+            # See if same file is already up there
+            try:
+                dst_obj = bucket.Object(key=dst_k)
+                dst_md5 = dst_obj.e_tag.strip('"')
+
+                # See if same file is already there
+                src_read = open(src_f, 'rb').read()
+                src_md5 = hashlib.md5(src_read).hexdigest()
+                # Move to next loop iteration
+                if dst_md5 == src_md5:
+                    continue
+                else:
+                    iflogger.info('Overwriting previous S3 file...')
+
+            except ClientError as exc:
+                iflogger.info('New file to S3')
+
             # Copy file up to S3 (either encrypted or not)
-            iflogger.info('Copying %s to S3 bucket, %s, as %s...'\
+            iflogger.info('Uploading %s to S3 bucket, %s, as %s...'\
                           % (src_f, bucket.name, dst_f))
             if self.inputs.encrypt_bucket_keys:
                 extra_args = {'ServerSideEncryption' : 'AES256'}
