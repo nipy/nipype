@@ -572,7 +572,7 @@ class DataSink(IOBase):
             dst_k = dst_f.replace(s3_prefix, '').lstrip('/')
 
             # Copy file up to S3 (either encrypted or not)
-            iflogger.info('Copying %s to S3 bucket, %s, as %s...'\
+            iflogger.info('Uploading %s to S3 bucket, %s, as %s...'\
                           % (src_f, bucket.name, dst_f))
             if self.inputs.encrypt_bucket_keys:
                 extra_args = {'ServerSideEncryption' : 'AES256'}
