@@ -1,7 +1,10 @@
+from __future__ import absolute_import
 import re, inspect, textwrap, pydoc
 import sphinx
-from docscrape import NumpyDocString, FunctionDoc, ClassDoc
-from nipype.external import six
+from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
+from nipype.external.six import string_types
+
+
 
 class SphinxDocString(NumpyDocString):
     def __init__(self, docstring, config={}):
@@ -128,7 +131,7 @@ class SphinxDocString(NumpyDocString):
             return out
 
         out += ['.. index:: %s' % idx.get('default','')]
-        for section, references in idx.iteritems():
+        for section, references in list(idx.items()):
             if section == 'default':
                 continue
             elif section == 'refguide':
@@ -141,7 +144,7 @@ class SphinxDocString(NumpyDocString):
         out = []
         if self['References']:
             out += self._str_header('References')
-            if isinstance(self['References'], six.string_types):
+            if isinstance(self['References'], string_types):
                 self['References'] = [self['References']]
             out.extend(self['References'])
             out += ['']

@@ -13,20 +13,19 @@ was written to work with FSL version 5.0.4.
 """
 
 import os
-from glob import glob
 import warnings
+from glob import glob
 
 import numpy as np
 import nibabel as nib
 
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec, Info
-from nipype.interfaces.base import (traits, TraitedSpec, InputMultiPath, File,
-                                    isdefined, Undefined)
-from nipype.utils.filemanip import (load_json, save_json, split_filename,
-                                    fname_presuffix)
+from ..fsl.base import FSLCommand, FSLCommandInputSpec, Info
+from ..base import (traits, TraitedSpec, InputMultiPath, File,
+                    isdefined, Undefined)
+from ...utils.filemanip import (load_json, save_json, split_filename,
+                                fname_presuffix)
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class PrepareFieldmapInputSpec(FSLCommandInputSpec):
@@ -398,7 +397,7 @@ class EddyInputSpec(FSLCommandInputSpec):
     in_bval = File(exists=True, mandatory=True, argstr='--bvals=%s',
                    desc=('File containing the b-values for all volumes in '
                          '--imain'))
-    out_base = traits.Unicode('eddy_corrected', argstr='--out=%s',
+    out_base = traits.Str('eddy_corrected', argstr='--out=%s',
                               usedefault=True,
                               desc=('basename for output (warped) image'))
     session = File(exists=True, argstr='--session=%s',

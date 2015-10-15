@@ -9,27 +9,27 @@
    >>> os.chdir(datadir)
 
 """
+
+from builtins import range
 __docformat__ = 'restructuredtext'
 
 import os
 import os.path as op
 from glob import glob
-#import itertools
+
 import numpy as np
-
 from nibabel import load
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.io import FreeSurferSource
 
-from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.interfaces.base import (TraitedSpec, File, traits,
-                                    Directory, InputMultiPath,
-                                    OutputMultiPath, CommandLine,
-                                    CommandLineInputSpec, isdefined)
-
-
+from ..io import FreeSurferSource
+from ..freesurfer.base import FSCommand, FSTraitedSpec
+from ..base import (TraitedSpec, File, traits,
+                    Directory, InputMultiPath,
+                    OutputMultiPath, CommandLine,
+                    CommandLineInputSpec, isdefined)
+from ...utils.filemanip import fname_presuffix
 from ... import logging
 iflogger = logging.getLogger('interface')
+
 
 class ParseDICOMDirInputSpec(FSTraitedSpec):
     dicom_dir = Directory(exists=True, argstr='--d %s', mandatory=True,
@@ -514,7 +514,7 @@ class DICOMConvert(FSCommand):
         if self.inputs.dicom_info:
             files = [filemap[r] for r in self._get_runs()]
         else:
-            files = [filemap[r] for r in filemap.keys()]
+            files = [filemap[r] for r in list(filemap.keys())]
         return files
 
     @property
@@ -1214,7 +1214,7 @@ class RobustRegister(FSCommand):
                         half_weights=("src", "_halfweights", True),
                         half_source_xfm=("src", "_robustxfm.lta", False),
                         half_targ_xfm=("trg", "_robustxfm.lta", False))
-        for name, sufftup in suffices.items():
+        for name, sufftup in list(suffices.items()):
             value = getattr(self.inputs, name)
             if isdefined(value):
                 if isinstance(value, bool):

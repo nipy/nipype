@@ -7,6 +7,8 @@ Workflow from scratch
 
 """
 
+from builtins import range
+
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.pipeline.engine as pe          # pypeline engine
@@ -65,8 +67,8 @@ specify_model.inputs.input_units             = 'secs'
 specify_model.inputs.time_repetition         = 3.
 specify_model.inputs.high_pass_filter_cutoff = 120
 specify_model.inputs.subject_info = [Bunch(conditions=['Task-Odd','Task-Even'],
-                                           onsets=[range(15,240,60),
-                                                   range(45,240,60)],
+                                           onsets=[list(range(15,240,60)),
+                                                   list(range(45,240,60))],
                                            durations=[[15], [15]])]*4
 
 level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")

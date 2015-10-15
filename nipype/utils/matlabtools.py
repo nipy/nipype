@@ -2,6 +2,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Useful Functions for working with matlab"""
 
+from builtins import range
+
 # Stdlib imports
 import os
 import re

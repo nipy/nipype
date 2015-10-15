@@ -9,11 +9,13 @@
    >>> os.chdir(datadir)
 
 """
-import os
 __docformat__ = 'restructuredtext'
 
-from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
-    InputMultiPath, CommandLineInputSpec)
+import os
+
+from ..base import (TraitedSpec, File, traits, CommandLine,
+                    InputMultiPath, CommandLineInputSpec)
+
 
 class SplineFilterInputSpec(CommandLineInputSpec):
     track_file = File(exists=True, desc="file containing tracks to be filtered", position=0, argstr="%s", mandatory=True)

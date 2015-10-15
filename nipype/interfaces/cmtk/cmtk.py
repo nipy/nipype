@@ -9,20 +9,25 @@
 
 """
 
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, InputMultiPath, Directory,
-                                    OutputMultiPath, isdefined)
-from nipype.utils.filemanip import split_filename
+from __future__ import print_function
+from __future__ import division
+from builtins import range
+
 import pickle
-import scipy.io as sio
-import os, os.path as op
+import os.path as op
+
 import numpy as np
 import nibabel as nb
 import networkx as nx
-import sys
+import scipy.io as sio
 
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                    File, TraitedSpec, InputMultiPath, Directory,
+                    OutputMultiPath, isdefined)
+from ...utils.filemanip import split_filename
 from ... import logging
 iflogger = logging.getLogger('interface')
+
 
 def length(xyz, along=False):
     """
@@ -71,14 +76,14 @@ def length(xyz, along=False):
 def get_rois_crossed(pointsmm, roiData, voxelSize):
 	n_points = len(pointsmm)
 	rois_crossed = []
-	for j in xrange(0, n_points):
+	for j in range(0, n_points):
 		# store point
 		x = int(pointsmm[j, 0] / float(voxelSize[0]))
 		y = int(pointsmm[j, 1] / float(voxelSize[1]))
 		z = int(pointsmm[j, 2] / float(voxelSize[2]))
 		if not roiData[x, y, z] == 0:
 			rois_crossed.append(roiData[x, y, z])
-	rois_crossed = dict.fromkeys(rois_crossed).keys() #Removed duplicates from the list
+	rois_crossed = list(dict.fromkeys(rois_crossed).keys()) #Removed duplicates from the list
 	return rois_crossed
 
 def get_connectivity_matrix(n_rois, list_of_roi_crossed_lists):
@@ -104,7 +109,7 @@ def create_allpoints_cmat(streamlines, roiData, voxelSize, n_rois):
 		pcN = int(round(float(100 * i) / n_fib))
 		if pcN > pc and pcN % 1 == 0:
 			pc = pcN
-			print '%4.0f%%' % (pc)
+			print('%4.0f%%' % (pc))
 		rois_crossed = get_rois_crossed(fiber[0], roiData, voxelSize)
 		if len(rois_crossed) > 0:
 			list_of_roi_crossed_lists.append(list(rois_crossed))
@@ -174,7 +179,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     iflogger.info('Reading Trackvis file {trk}'.format(trk=track_file))
     fib, hdr = nb.trackvis.read(track_file, False)
     stats['orig_n_fib'] = len(fib)
-    
+
     roi = nb.load(roi_file)
     roiData = roi.get_data()
     roiVoxelSize = roi.get_header().get_zooms()
@@ -204,7 +209,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     nROIs = len(gp.nodes())
 
     # add node information from parcellation
-    if gp.node[gp.nodes()[0]].has_key('dn_position'):
+    if 'dn_position' in gp.node[gp.nodes()[0]]:
         G = gp.copy()
     else:
         G = nx.Graph()
@@ -223,11 +228,11 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
         intersection_matrix = np.matrix(intersection_matrix)
         I = G.copy()
         H = nx.from_numpy_matrix(np.matrix(intersection_matrix))
-        H = nx.relabel_nodes(H, lambda x: x + 1) #relabel nodes so they start at 1		
+        H = nx.relabel_nodes(H, lambda x: x + 1) #relabel nodes so they start at 1
         I.add_weighted_edges_from(((u, v, d['weight']) for u, v, d in H.edges(data=True)))
 
     dis = 0
-    for i in xrange(endpoints.shape[0]):
+    for i in range(endpoints.shape[0]):
 
         # ROI start => ROI end
         try:
@@ -264,7 +269,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
         final_fibers_idx.append(i)
 
         # Add edge to graph
-        if G.has_edge(startROI, endROI) and G.edge[startROI][endROI].has_key('fiblist'):
+        if G.has_edge(startROI, endROI) and 'fiblist' in G.edge[startROI][endROI]:
             G.edge[startROI][endROI]['fiblist'].append(i)
         else:
             G.add_edge(startROI, endROI, fiblist=[i])
@@ -297,7 +302,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     for u, v, d in G.edges_iter(data=True):
         G.remove_edge(u, v)
         di = {}
-        if d.has_key('fiblist'):
+        if 'fiblist' in d:
             di['number_of_fibers'] = len(d['fiblist'])
             idx = np.where((final_fiberlabels_array[:, 0] == int(u)) & (final_fiberlabels_array[:, 1] == int(v)))[0]
             di['fiber_length_mean'] = float(np.mean(final_fiberlength_array[idx]))
@@ -310,7 +315,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
             di['fiber_length_std'] = 0
         if not u == v: #Fix for self loop problem
             G.add_edge(u, v, di)
-            if d.has_key('fiblist'):
+            if 'fiblist' in d:
                 numfib.add_edge(u, v, weight=di['number_of_fibers'])
                 fibmean.add_edge(u, v, weight=di['fiber_length_mean'])
                 fibmedian.add_edge(u, v, weight=di['fiber_length_median'])
@@ -377,7 +382,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     stats['endpoint_n_fib'] = save_fibers(hdr, fib, finalfibers_fname, final_fibers_idx)
     stats['endpoints_percent'] = float(stats['endpoint_n_fib'])/float(stats['orig_n_fib'])*100
     stats['intersections_percent'] = float(stats['intersections_n_fib'])/float(stats['orig_n_fib'])*100
-    
+
     out_stats_file = op.abspath(endpoint_name + '_statistics.mat')
     iflogger.info("Saving matrix creation statistics as %s" % out_stats_file)
     sio.savemat(out_stats_file, stats)
@@ -494,7 +499,7 @@ class CreateMatrix(BaseInterface):
 
         outputs['matrix_file'] = out_matrix_file
         outputs['intersection_matrix_file'] = out_intersection_matrix_file
-        
+
         matrix_mat_file = op.abspath(self.inputs.out_matrix_mat_file)
         path, name, ext = split_filename(matrix_mat_file)
         if not ext == '.mat':
@@ -540,12 +545,12 @@ class CreateMatrix(BaseInterface):
         if self.inputs.count_region_intersections:
             outputs['matrix_files'] = [out_matrix_file, out_intersection_matrix_file]
             outputs['matlab_matrix_files'] = [outputs['matrix_mat_file'],
-            outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'], 
+            outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'],
             outputs['fiber_length_std_matrix_mat_file'], outputs['intersection_matrix_mat_file']]
         else:
             outputs['matrix_files'] = [out_matrix_file]
             outputs['matlab_matrix_files'] = [outputs['matrix_mat_file'],
-            outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'], 
+            outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'],
             outputs['fiber_length_std_matrix_mat_file']]
 
         outputs['filtered_tractography'] = op.abspath(endpoint_name + '_streamline_final.trk')
@@ -594,7 +599,7 @@ class ROIGen(BaseInterface):
     >>> file = open("FreeSurferColorLUT_adapted_aparc+aseg_out.pck", "r")
     >>> file = open("fsLUT_aparc+aseg.pck", "r")
     >>> labelDict = pickle.load(file) # doctest: +SKIP
-    >>> print labelDict                     # doctest: +SKIP
+    >>> labelDict                     # doctest: +SKIP
     """
 
     input_spec = ROIGenInputSpec
@@ -646,7 +651,7 @@ class ROIGen(BaseInterface):
             LUTlabelDict = {}
 
             """ Create dictionary for input LUT table"""
-            for labels in xrange(0, numLUTLabels):
+            for labels in range(0, numLUTLabels):
                 LUTlabelDict[LUTlabelsRGBA[labels][0]] = [LUTlabelsRGBA[labels][1], LUTlabelsRGBA[labels][2], LUTlabelsRGBA[labels][3], LUTlabelsRGBA[labels][4], LUTlabelsRGBA[labels][5]]
 
             iflogger.info('Printing LUT label dictionary')

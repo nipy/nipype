@@ -2,6 +2,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provide interface to AFNI commands."""
 
+from builtins import object
+
 
 import os
 import warnings
@@ -11,7 +13,6 @@ from ..base import (
     CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class Info(object):
@@ -93,7 +94,7 @@ class Info(object):
 
 
 class AFNICommandInputSpec(CommandLineInputSpec):
-    outputtype = traits.Enum('AFNI', Info.ftypes.keys(),
+    outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
                              desc='AFNI output filetype')
     out_file = File(name_template="%s_afni", desc='output image file name',
                     argstr='-prefix %s',
@@ -151,7 +152,7 @@ class AFNICommand(CommandLine):
     def _list_outputs(self):
         outputs = super(AFNICommand, self)._list_outputs()
         metadata = dict(name_source=lambda t: t is not None)
-        out_names = self.inputs.traits(**metadata).keys()
+        out_names = list(self.inputs.traits(**metadata).keys())
         if out_names:
             for name in out_names:
                 if outputs[name]:

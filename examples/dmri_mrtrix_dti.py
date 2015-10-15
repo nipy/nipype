@@ -57,7 +57,7 @@ Templates for the associated images are used to obtain the correct images.
 """
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                               outfields=info.keys()),
+                                               outfields=list(info.keys())),
                      name = 'datasource')
 
 datasource.inputs.template = "%s/%s"

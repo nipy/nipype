@@ -146,7 +146,7 @@ The data are assumed to lie in data_dir/subject_id/.
 """
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                               outfields=info.keys()),
+                                               outfields=list(info.keys())),
                      name = 'datasource')
 
 datasource.inputs.template = "%s/%s"

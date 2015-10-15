@@ -20,16 +20,15 @@ from glob import glob
 # Third-party imports
 import numpy as np
 import scipy.io as sio
-from nipype.external import six
 
 # Local imports
-from nipype.interfaces.base import (Bunch, traits, TraitedSpec, File, Directory,
-                                    OutputMultiPath, InputMultiPath, isdefined)
-from nipype.interfaces.spm.base import (SPMCommand, SPMCommandInputSpec,
-                                        scans_for_fnames)
-from nipype.utils.filemanip import (filename_to_list, list_to_filename,
-                                    split_filename)
-
+from .base import (SPMCommand, SPMCommandInputSpec,
+                                   scans_for_fnames)
+from ..base import (Bunch, traits, TraitedSpec, File, Directory,
+                               OutputMultiPath, InputMultiPath, isdefined)
+from ...external.six import string_types
+from ...utils.filemanip import (filename_to_list, list_to_filename,
+                               split_filename)
 from ... import logging
 logger = logging.getLogger('interface')
 
@@ -201,7 +200,7 @@ class EstimateModel(SPMCommand):
         if opt == 'spm_mat_file':
             return np.array([str(val)], dtype=object)
         if opt == 'estimation_method':
-            if isinstance(val, six.string_types):
+            if isinstance(val, string_types):
                 return {'%s' % val: 1}
             else:
                 return val
@@ -765,7 +764,7 @@ class FactorialDesign(SPMCommand):
                        'centering': 'iCC'}
             for dictitem in val:
                 outdict = {}
-                for key, keyval in dictitem.items():
+                for key, keyval in list(dictitem.items()):
                     outdict[mapping[key]] = keyval
                 outlist.append(outdict)
             return outlist
@@ -921,7 +920,7 @@ class MultipleRegressionDesign(FactorialDesign):
                        'centering': 'iCC'}
             for dictitem in val:
                 outdict = {}
-                for key, keyval in dictitem.items():
+                for key, keyval in list(dictitem.items()):
                     outdict[mapping[key]] = keyval
                 outlist.append(outdict)
             return outlist

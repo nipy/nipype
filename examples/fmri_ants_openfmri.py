@@ -12,10 +12,12 @@ This script demonstrates how to use nipype to analyze a data set::
     python fmri_ants_openfmri.py --datasetdir ds107
 """
 
+from __future__ import division
+from builtins import range
+
 from nipype import config
 config.enable_provenance()
 
-from nipype.external import six
 
 from glob import glob
 import os
@@ -23,9 +25,8 @@ import os
 import nipype.pipeline.engine as pe
 import nipype.algorithms.modelgen as model
 import nipype.algorithms.rapidart as ra
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.ants as ants
 from nipype.algorithms.misc import TSNR
+from nipype.external.six import string_types
 from nipype.interfaces.c3 import C3dAffineTool
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
@@ -37,9 +38,9 @@ from nipype import LooseVersion
 from nipype import Workflow, Node, MapNode
 from nipype.interfaces import (fsl, Function, ants, freesurfer)
 
-from nipype.interfaces.utility import Rename, Merge, IdentityInterface
+from nipype.interfaces.utility import Merge, IdentityInterface
 from nipype.utils.filemanip import filename_to_list
-from nipype.interfaces.io import DataSink, FreeSurferSource
+from nipype.interfaces.io import FreeSurferSource
 import nipype.interfaces.freesurfer as fs
 
 version = 0
@@ -78,7 +79,7 @@ def median(in_files):
             average = data
         else:
             average = average + data
-    median_img = nb.Nifti1Image(average/float(idx + 1),
+    median_img = nb.Nifti1Image(average / float(idx + 1),
                                 img.get_affine(), img.get_header())
     filename = os.path.join(os.getcwd(), 'median.nii.gz')
     median_img.to_filename(filename)
@@ -573,7 +574,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
         import json
         with open(json_info, 'rt') as fp:
             data = json.load(fp)
-            TR = data['global']['const']['RepetitionTime']/1000.
+            TR = data['global']['const']['RepetitionTime'] / 1000.
     else:
         task_scan_key = os.path.join(base_dir, subject_id, 'BOLD',
                                  'task%03d_run%03d' % (task_id, run_ids[task_id - 1][0]),
@@ -713,7 +714,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                 ])
 
     def get_highpass(TR, hpcutoff):
-        return hpcutoff / (2 * TR)
+        return hpcutoff / (2. * TR)
     gethighpass = pe.Node(niu.Function(input_names=['TR', 'hpcutoff'],
                                        output_names=['highpass'],
                                        function=get_highpass),
@@ -766,14 +767,14 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     modelspec.inputs.input_units = 'secs'
 
     def check_behav_list(behav, run_id, conds):
-        from nipype.external import six
         import numpy as np
         num_conds = len(conds)
-        if isinstance(behav, six.string_types):
+        if isinstance(behav, string_types):
             behav = [behav]
         behav_array = np.array(behav).flatten()
         num_elements = behav_array.shape[0]
-        return behav_array.reshape(num_elements/num_conds, num_conds).tolist()
+        return behav_array.reshape(int(num_elements / num_conds),
+                                   num_conds).tolist()
 
     reshape_behav = pe.Node(niu.Function(input_names=['behav', 'run_id', 'conds'],
                                        output_names=['behav'],
@@ -836,8 +837,10 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         n_runs = len(copes)
         all_copes = np.array(copes).flatten()
         all_varcopes = np.array(varcopes).flatten()
-        outcopes = all_copes.reshape(len(all_copes)/num_copes, num_copes).T.tolist()
-        outvarcopes = all_varcopes.reshape(len(all_varcopes)/num_copes, num_copes).T.tolist()
+        outcopes = all_copes.reshape(int(len(all_copes) / num_copes),
+                                     num_copes).T.tolist()
+        outvarcopes = all_varcopes.reshape(int(len(all_varcopes) / num_copes),
+                                           num_copes).T.tolist()
         return outcopes, outvarcopes, n_runs
 
     cope_sorter = pe.Node(niu.Function(input_names=['copes', 'varcopes',

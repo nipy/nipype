@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This tool exports a Nipype interface in the Boutiques (https://github.com/boutiques) JSON format.
 # Boutiques tools can be imported in CBRAIN (https://github.com/aces/cbrain) among other platforms.
 #
@@ -14,7 +15,7 @@ import os
 import argparse
 import inspect
 import sys
-import json
+import simplejson
 import tempfile
 
 from nipype.interfaces.base import Interface
@@ -86,7 +87,7 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
     tool_desc['inputs'].append(input)
     tool_desc['command-line']+= input['command-line-key']+" "
     if verbose:
-      print "-> Adding input "+input['name']
+      print("-> Adding input "+input['name'])
 
   # Generates tool outputs
   for name,spec in sorted(outputs.traits(transient=None).items()):
@@ -94,9 +95,9 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
     if output['path-template'] != "":
       tool_desc['outputs'].append(output)
       if verbose:
-        print "-> Adding output "+output['name']
+        print("-> Adding output "+output['name'])
     elif verbose:
-      print "xx Skipping output "+output['name']+" with no path template."
+      print("xx Skipping output "+output['name']+" with no path template.")
   if tool_desc['outputs'] == []:
     raise Exception("Tool has no output.")
 
@@ -105,7 +106,7 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
   for input in tool_desc['inputs']:
     del input['tempvalue']
 
-  return json.dumps(tool_desc, indent=4, separators=(',', ': '))
+  return simplejson.dumps(tool_desc, indent=4, separators=(',', ': '))
 
 def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs,verbose,ignore_template_numbers):
   """
@@ -152,7 +153,7 @@ def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs
     setattr(interface.inputs,input_name,tempvalue)
     input['tempvalue'] = tempvalue
     if verbose:
-      print "oo Path-template creation using "+input['id']+"="+str(tempvalue)
+      print("oo Path-template creation using "+input['id']+"="+str(tempvalue))
 
   # Now that temp values have been generated, set Boolean types to
   # Number (there is no Boolean type in Boutiques)

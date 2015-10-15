@@ -16,7 +16,8 @@ docstring = docparse.get_doc(better.cmd, better.opt_map)
 import subprocess
 from nipype.interfaces.base import CommandLine
 from nipype.utils.misc import is_container
-from nipype.external import six
+from nipype.external.six import string_types
+
 
 def grab_doc(cmd, trap_error=True):
     """Run cmd without args and grab documentation.
@@ -72,7 +73,7 @@ def reverse_opt_map(opt_map):
     # if (k != 'flags' and v) , key must not be flags as it is generic,
     # v must not be None or it cannot be parsed by this line
     revdict = {}
-    for key, value in opt_map.items():
+    for key, value in list(opt_map.items()):
         if is_container(value):
             # The value is a tuple where the first element is the
             # format string and the second element is a docstring.
@@ -146,7 +147,7 @@ def insert_doc(doc, new_items):
     >>> new_items = ['infile : str', '    The name of the input file']
     >>> new_items.extend(['outfile : str', '    The name of the output file'])
     >>> newdoc = insert_doc(doc, new_items)
-    >>> print newdoc
+    >>> print(newdoc)
     Parameters
     ----------
     infile : str
@@ -278,7 +279,7 @@ def _parse_doc(doc, style=['--']):
     # individual flag/option.
     doclist = doc.split('\n')
     optmap = {}
-    if isinstance(style,six.string_types):
+    if isinstance(style, string_types):
         style = [style]
     for line in doclist:
         linelist = line.split()
@@ -360,6 +361,6 @@ def replace_opts(rep_doc, opts):
     """
 
     # Replace flags with attribute names
-    for key, val in opts.items():
+    for key, val in list(opts.items()):
         rep_doc = rep_doc.replace(key, val)
     return rep_doc

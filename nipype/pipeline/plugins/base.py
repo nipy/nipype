@@ -3,6 +3,9 @@
 """Common graph operations for execution
 """
 
+from builtins import range
+from builtins import object
+
 from copy import deepcopy
 from glob import glob
 import os
@@ -513,7 +516,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
                 glob(os.path.join(node_dir, 'result_*.pklz')).pop()
                 timed_out = False
                 break
-            except Exception, e:
+            except Exception as e:
                 logger.debug(e)
             sleep(2)
         if timed_out:
@@ -529,7 +532,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
                                  'Node working directory: ({2}) '.format(
                                  taskid,timeout,node_dir) )
                 raise IOError(error_message)
-            except IOError, e:
+            except IOError as e:
                 result_data['traceback'] = format_exc()
         else:
             results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]

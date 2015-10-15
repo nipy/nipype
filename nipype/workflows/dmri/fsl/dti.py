@@ -1,13 +1,14 @@
 # coding: utf-8
 
-import nipype.pipeline.engine as pe
-from nipype.interfaces import utility as niu
-from nipype.interfaces import fsl
-from nipype.algorithms import misc
-import os
+from __future__ import absolute_import
+
+from ....pipeline import engine as pe
+from ....interfaces import utility as niu
+from ....interfaces import fsl
+from ....algorithms import misc
 
 #backwards compatibility
-from epi import create_eddy_correct_pipeline
+from .epi import create_eddy_correct_pipeline
 
 
 def transpose(samples_over_fibres):

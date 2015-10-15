@@ -6,8 +6,9 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-from nipype.interfaces.base import (CommandLineInputSpec, traits, TraitedSpec,
-				    File, SEMLikeCommandLine)
+
+from .base import (CommandLineInputSpec, traits, TraitedSpec,
+	               File, SEMLikeCommandLine)
 
 
 class C3dAffineToolInputSpec(CommandLineInputSpec):

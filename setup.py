@@ -14,7 +14,6 @@ nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 """Build helper."""
 
 import os
-from os.path import join as pjoin
 from glob import glob
 import sys
 from functools import partial
@@ -36,7 +35,7 @@ from distutils.core import setup
 ''' Distutils / setuptools helpers from nibabel.nisext'''
 
 import os
-from os.path import join as pjoin, split as psplit, splitext
+from os.path import join as pjoin
 import sys
 PY3 = sys.version_info[0] >= 3
 if PY3:
@@ -50,8 +49,6 @@ except ImportError:
 
 from distutils.version import LooseVersion
 from distutils.command.build_py import build_py
-from distutils.command.install_scripts import install_scripts
-
 from distutils import log
 
 def get_comrec_build(pkg_dir, build_cmd=build_py):
@@ -273,6 +270,8 @@ pkg_chk('numpy', NUMPY_MIN_VERSION)
 pkg_chk('scipy', SCIPY_MIN_VERSION)
 pkg_chk('traits', TRAITS_MIN_VERSION)
 pkg_chk('nose', NOSE_MIN_VERSION)
+pkg_chk('future', FUTURE_MIN_VERSION)
+pkg_chk('simplejson', SIMPLEJSON_MIN_VERSION)
 custom_dateutil_messages = {'missing opt': ('Missing optional package "%s"'
                                             ' provided by package '
                                             '"python-dateutil"')}

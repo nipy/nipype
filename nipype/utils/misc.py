@@ -2,7 +2,11 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Miscellaneous utility functions
 """
-from cPickle import dumps, loads
+
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
+from pickle import dumps, loads
 import inspect
 
 from distutils.version import LooseVersion
@@ -10,7 +14,10 @@ import numpy as np
 from textwrap import dedent
 import sys
 import re
-from nipype.external.six import Iterator
+from collections import Iterator
+
+from ..external.six import string_types
+
 
 def human_order_sorted(l):
     """Sorts string in human order (i.e. 'stat10' will go after 'stat2')"""
@@ -31,14 +38,14 @@ def trim(docstring, marker=None):
     # and split into a list of lines:
     lines = docstring.expandtabs().splitlines()
     # Determine minimum indentation (first line doesn't count):
-    indent = sys.maxint
+    indent = sys.maxsize
     for line in lines[1:]:
         stripped = line.lstrip()
         if stripped:
             indent = min(indent, len(line) - len(stripped))
     # Remove indentation (first line is special):
     trimmed = [lines[0].strip()]
-    if indent < sys.maxint:
+    if indent < sys.maxsize:
         for line in lines[1:]:
             # replace existing REST marker with doc level marker
             stripped = line.lstrip().strip().rstrip()
@@ -57,7 +64,7 @@ def trim(docstring, marker=None):
 
 def getsource(function):
     """Returns the source code of a function"""
-    src = dumps(dedent(inspect.getsource(function)))
+    src = dedent(inspect.getsource(function))
     return src
 
 def create_function_from_source(function_source, imports=None):
@@ -76,12 +83,11 @@ def create_function_from_source(function_source, imports=None):
     try:
         if imports is not None:
             for statement in imports:
-                exec statement in ns
-            import_keys = ns.keys()
+                exec(statement, ns)
+            import_keys = list(ns.keys())
+        exec(function_source, ns)
 
-        exec loads(function_source) in ns
-
-    except Exception, msg:
+    except Exception as msg:
         msg = str(msg) + '\nError executing function:\n %s\n'%function_source
         msg += '\n'.join(["Functions in connection strings have to be standalone.",
                           "They cannot be declared either interactively or inside",
@@ -114,7 +120,9 @@ def is_container(item):
        True if container
        False if not (eg string)
    """
-   if hasattr(item, '__iter__'):
+   if isinstance(item, string_types):
+       return False
+   elif hasattr(item, '__iter__'):
       return True
    else:
       return False
@@ -139,10 +147,10 @@ def container_to_string(cont):
        Container elements joined into a string.
 
    """
-   if hasattr(cont, '__iter__'):
-      return ' '.join(cont)
-   else:
-      return str(cont)
+   if hasattr(cont, '__iter__') and not isinstance(cont, string_types):
+      return str(' '.join(cont))
+
+   return str(cont)
 
 
 # Dependency checks.  Copied this from Nipy, with some modificiations
@@ -205,7 +213,7 @@ def str2bool(v):
     elif lower in ("no", "false", "n", "f", "0"):
         return False
     else:
-        raise ValueError("%s cannot be converted to bool"%v)
+        raise ValueError("%s cannot be converted to bool" % v)
 
 def flatten(S):
     if S == []:
@@ -219,7 +227,7 @@ def unflatten(in_list, prev_structure):
         in_list = iter(in_list)
 
     if not isinstance(prev_structure, list):
-        return in_list.next()
+        return next(in_list)
     else:
         out = []
         for item in prev_structure:

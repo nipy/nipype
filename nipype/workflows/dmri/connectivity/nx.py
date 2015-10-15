@@ -1,9 +1,9 @@
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as util
-import nipype.interfaces.cmtk as cmtk
-import nipype.algorithms.misc as misc
+from ....pipeline import engine as pe
+from ....interfaces import utility as util
+from ....interfaces import cmtk as cmtk
+from ....algorithms import misc as misc
+from ....algorithms.misc import remove_identical_paths
 from .group_connectivity import pullnodeIDs
-from nipype.algorithms.misc import remove_identical_paths
 
 def add_global_to_filename(in_file):
     from nipype.utils.filemanip import split_filename

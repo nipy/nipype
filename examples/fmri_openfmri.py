@@ -12,9 +12,8 @@ This script demonstrates how to use nipype to analyze a data set::
     python fmri_openfmri.py --datasetdir ds107
 """
 
-from nipype import config
-#config.enable_provenance()
-from nipype.external import six
+from __future__ import division
+from builtins import range
 
 from glob import glob
 import os
@@ -25,6 +24,7 @@ import nipype.algorithms.rapidart as ra
 import nipype.interfaces.fsl as fsl
 import nipype.interfaces.io as nio
 import nipype.interfaces.utility as niu
+from nipype.external.six import string_types
 from nipype.workflows.fmri.fsl import (create_featreg_preproc,
                                        create_modelfit_workflow,
                                        create_fixed_effects_flow,
@@ -38,6 +38,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
 
     Parameters
     ----------
+
     subject_id : string
         Subject identifier (e.g., sub001)
     base_dir : string
@@ -49,6 +50,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
 
     Returns
     -------
+
     run_ids : list of ints
         Run numbers
     conds : list of str
@@ -62,6 +64,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     condition_info = []
     cond_file = os.path.join(base_dir, 'models', 'model%03d' % model_id,
                              'condition_key.txt')
+
     with open(cond_file, 'rt') as fp:
         for line in fp:
             info = line.strip().split()
@@ -82,7 +85,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
                                   subject_id,
                                   'BOLD',
                                   'task%03d_run*' % (idx + 1)))
-        run_ids.insert(idx, range(1, len(files) + 1))
+        run_ids.insert(idx, list(range(1, len(files) + 1)))
     TR = np.genfromtxt(os.path.join(base_dir, 'scan_key.txt'))[1]
     return run_ids[task_id - 1], conds[task_id - 1], TR
 
@@ -186,7 +189,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                 ])
 
     def get_highpass(TR, hpcutoff):
-        return hpcutoff / (2 * TR)
+        return hpcutoff / (2. * TR)
     gethighpass = pe.Node(niu.Function(input_names=['TR', 'hpcutoff'],
                                        output_names=['highpass'],
                                        function=get_highpass),
@@ -237,9 +240,8 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     modelspec.inputs.input_units = 'secs'
 
     def check_behav_list(behav):
-        from nipype.external import six
         out_behav = []
-        if isinstance(behav, six.string_types):
+        if isinstance(behav, string_types):
             behav = [behav]
         for val in behav:
             if not isinstance(val, list):

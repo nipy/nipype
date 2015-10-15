@@ -15,6 +15,10 @@ See the docstrings of the individual classes for examples.
     >>> os.chdir(datadir)
 """
 
+from __future__ import division
+from builtins import map
+from builtins import range
+
 import os
 from glob import glob
 import warnings
@@ -29,7 +33,7 @@ from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix, copyfile)
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
+
 
 class CopyGeomInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr="%s", position=0,
@@ -290,7 +294,7 @@ class ExtractROI(FSLCommand):
     def _format_arg(self, name, spec, value):
 
         if name == "crop_list":
-            return " ".join(map(str, sum(map(list, value), [])))
+            return " ".join(map(str, sum(list(map(list, value)), [])))
         return super(ExtractROI, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
@@ -480,7 +484,7 @@ class FilterRegressor(FSLCommand):
                 n_cols = design.shape[1]
             except IndexError:
                 n_cols = 1
-            return trait_spec.argstr % ",".join(map(str, range(1, n_cols + 1)))
+            return trait_spec.argstr % ",".join(map(str, list(range(1, n_cols + 1))))
         return super(FilterRegressor, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):

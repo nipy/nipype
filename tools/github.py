@@ -1,6 +1,8 @@
-import httplib
+from future import standard_library
+standard_library.install_aliases()
+import http.client
 import inspect
-import json
+import simplejson
 import os
 from subprocess import Popen, PIPE
 
@@ -45,7 +47,7 @@ def create_hash_map():
     from base64 import encodestring as base64
     import pwd
     login_name = pwd.getpwuid(os.geteuid())[0]
-    conn = httplib.HTTPSConnection("api.github.com")
+    conn = http.client.HTTPSConnection("api.github.com")
     conn.request("GET", "/repos/nipy/nipype",
                  headers={'Authorization': 'Basic %s' % base64(login_name)})
     try:
@@ -56,7 +58,7 @@ def create_hash_map():
         r1 = conn.getresponse()
         if r1.reason != 'OK':
             raise Exception('HTTP Response  %s:%s' % (r1.status, r1.reason))
-        payload = json.loads(r1.read())
+        payload = simplejson.loads(r1.read())
         for infodict in payload['tree']:
             if infodict['type'] == "blob":
                 hashmap[infodict['sha']] = infodict['path']

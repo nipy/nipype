@@ -9,6 +9,8 @@
    >>> os.chdir(datadir)
 """
 
+from builtins import range
+
 __docformat__ = 'restructuredtext'
 
 # Standard library imports
@@ -74,7 +76,7 @@ class SliceTiming(SPMCommand):
     >>> st.inputs.num_slices = 32
     >>> st.inputs.time_repetition = 6.0
     >>> st.inputs.time_acquisition = 6. - 6./32.
-    >>> st.inputs.slice_order = range(32,0,-1)
+    >>> st.inputs.slice_order = list(range(32,0,-1))
     >>> st.inputs.ref_slice = 1
     >>> st.run() # doctest: +SKIP
 
@@ -209,7 +211,7 @@ class Realign(SPMCommand):
         outputs = self._outputs().get()
         resliced_all = self.inputs.write_which[0] > 0
         resliced_mean = self.inputs.write_which[1] > 0
-        
+
         if self.inputs.jobtype != "write":
             if isdefined(self.inputs.in_files):
                 outputs['realignment_parameters'] = []
@@ -765,7 +767,7 @@ class Segment(SPMCommand):
 
     input_spec = SegmentInputSpec
     output_spec = SegmentOutputSpec
-    
+
     def __init__(self, **inputs):
         _local_version = SPMCommand().version
         if _local_version and '12.' in _local_version:
@@ -774,7 +776,7 @@ class Segment(SPMCommand):
         else:
             self._jobtype = 'spatial'
             self._jobname = 'preproc'
-        
+
         SPMCommand.__init__(self, **inputs)
 
     def _format_arg(self, opt, spec, val):
@@ -894,7 +896,7 @@ class NewSegment(SPMCommand):
 
     input_spec = NewSegmentInputSpec
     output_spec = NewSegmentOutputSpec
-        
+
     def __init__(self, **inputs):
         _local_version = SPMCommand().version
         if _local_version and '12.' in _local_version:
@@ -903,7 +905,7 @@ class NewSegment(SPMCommand):
         else:
             self._jobtype = 'tools'
             self._jobname = 'preproc8'
-        
+
         SPMCommand.__init__(self, **inputs)
 
     def _format_arg(self, opt, spec, val):

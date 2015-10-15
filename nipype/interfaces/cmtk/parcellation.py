@@ -9,25 +9,27 @@
 
 """
 
-from nipype.interfaces.base import (
-    BaseInterface, BaseInterfaceInputSpec, traits,
-    File, TraitedSpec, Directory, isdefined)
+from builtins import range
+
 import os
 import os.path as op
+import shutil
+import warnings
+
 import numpy as np
 import nibabel as nb
 import networkx as nx
-import shutil
-from nipype.utils.misc import package_check
-import warnings
 
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                    File, TraitedSpec, Directory, isdefined)
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_cmp = True
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     have_cmp = False
 else:
     import cmp

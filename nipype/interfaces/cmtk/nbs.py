@@ -1,21 +1,23 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, InputMultiPath,
-                                    OutputMultiPath, isdefined)
+
 import os.path as op
-import numpy as np
-import networkx as nx
-from nipype.utils.misc import package_check
 import warnings
 
+import numpy as np
+import networkx as nx
+
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                    File, TraitedSpec, InputMultiPath,
+                    OutputMultiPath, isdefined)
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_cv = True
 try:
     package_check('cviewer')
-except Exception, e:
+except Exception as e:
     have_cv = False
 else:
     import cviewer.libs.pyconto.groupstatistics.nbs as nbs

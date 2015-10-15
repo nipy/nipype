@@ -3,14 +3,17 @@ modules are selected from the hardcoded list below and generated code is placed
 in the cli_modules.py file (and imported in __init__.py). For this to work
 correctly you must have your CLI executabes in $PATH"""
 
+from __future__ import print_function
+
 import xml.dom.minidom
 import subprocess
 import os
 from shutil import rmtree
-from nipype.external import six
 
 import keyword
 python_keywords = keyword.kwlist  # If c++ SEM module uses one of these key words as a command line parameter, we need to modify variable
+
+from ...external.six import string_types
 
 
 def force_to_valid_python_variable_name(old_name):
@@ -47,8 +50,8 @@ import os\n\n\n"""
 
 def crawl_code_struct(code_struct, package_dir):
     subpackages = []
-    for k, v in code_struct.iteritems():
-        if isinstance(v, six.string_types) or isinstance(v, unicode):
+    for k, v in code_struct.items():
+        if isinstance(v, str) or isinstance(v, string_types):
             module_name = k.lower()
             class_name = k
             class_code = v
@@ -57,8 +60,8 @@ def crawl_code_struct(code_struct, package_dir):
         else:
             l1 = {}
             l2 = {}
-            for key in v.keys():
-                if (isinstance(v[key], six.string_types) or isinstance(v[key], unicode)):
+            for key in list(v.keys()):
+                if (isinstance(v[key], str) or isinstance(v[key], string_types)):
                     l1[key] = v[key]
                 else:
                     l2[key] = v[key]
@@ -74,13 +77,13 @@ def crawl_code_struct(code_struct, package_dir):
                 os.mkdir(new_pkg_dir)
                 crawl_code_struct(v, new_pkg_dir)
                 if l1:
-                    for ik, iv in l1.iteritems():
+                    for ik, iv in l1.items():
                         crawl_code_struct({ik: {ik: iv}}, new_pkg_dir)
             elif l1:
                 v = l1
                 module_name = k.lower()
                 add_class_to_package(
-                    v.values(), v.keys(), module_name, package_dir)
+                    list(v.values()), list(v.keys()), module_name, package_dir)
         if subpackages:
             f = open(os.path.join(package_dir, "setup.py"), 'w')
             f.write("""# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
@@ -292,7 +295,7 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x =
 
     output_filenames_code = "_outputs_filenames = {"
     output_filenames_code += ",".join(["'%s':'%s'" % (
-        key, value) for key, value in outputs_filenames.iteritems()])
+        key, value) for key, value in outputs_filenames.items()])
     output_filenames_code += "}"
 
     input_spec_code += "\n\n"
@@ -344,8 +347,8 @@ def grab_xml(module, launcher, mipav_hacks=False):
             xmlReturnValue = xmlReturnValue.strip()[len("Error: Unable to set default atlas"):]
     try:
         dom = xml.dom.minidom.parseString(xmlReturnValue.strip())
-    except Exception, e:
-        print xmlReturnValue.strip()
+    except Exception as e:
+        print(xmlReturnValue.strip())
         raise e
     return dom
 #        if ret.runtime.returncode == 0:
@@ -356,8 +359,8 @@ def grab_xml(module, launcher, mipav_hacks=False):
 
 def parse_params(params):
     list = []
-    for key, value in params.iteritems():
-        if isinstance(value, six.string_types) or isinstance(value, unicode):
+    for key, value in params.items():
+        if isinstance(value, string_types):
             list.append('%s="%s"' % (key, value.replace('"', "'")))
         else:
             list.append('%s=%s' % (key, value))

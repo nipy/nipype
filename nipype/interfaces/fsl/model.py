@@ -11,6 +11,9 @@ was written to work with FSL version 4.1.4.
     >>> os.chdir(datadir)
 """
 
+from __future__ import print_function
+from builtins import range
+
 import os
 from glob import glob
 import warnings
@@ -30,7 +33,6 @@ from ...utils.filemanip import (list_to_filename, filename_to_list)
 from ...utils.misc import human_order_sorted
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class Level1DesignInputSpec(BaseInterfaceInputSpec):
@@ -223,7 +225,7 @@ class Level1Design(BaseInterface):
                 if con[1] == 'F':
                     ftest_idx.append(j)
                     for c in con[2]:
-                        if c[0] not in con_map.keys():
+                        if c[0] not in list(con_map.keys()):
                             con_map[c[0]] = []
                         con_map[c[0]].append(j)
                 else:
@@ -250,7 +252,7 @@ class Level1Design(BaseInterface):
                                                               element=count,
                                                               ctype=ctype, val=val)
                         ev_txt += "\n"
-                    if con[0] in con_map.keys():
+                    if con[0] in list(con_map.keys()):
                         for fconidx in con_map[con[0]]:
                             ev_txt += contrast_ftest_element.substitute(
                                 cnum=ftest_idx.index(fconidx) + 1,
@@ -292,7 +294,7 @@ class Level1Design(BaseInterface):
             prewhiten = int(self.inputs.model_serial_correlations)
         usetd = 0
         no_bases = False
-        basis_key = self.inputs.bases.keys()[0]
+        basis_key = list(self.inputs.bases.keys())[0]
         if basis_key in ['dgamma', 'gamma']:
             usetd = int(self.inputs.bases[basis_key]['derivs'])
         if basis_key == 'none':
@@ -344,7 +346,7 @@ class Level1Design(BaseInterface):
         outputs['fsf_files'] = []
         outputs['ev_files'] = []
         usetd = 0
-        basis_key = self.inputs.bases.keys()[0]
+        basis_key = list(self.inputs.bases.keys())[0]
         if basis_key in ['dgamma', 'gamma']:
             usetd = int(self.inputs.bases[basis_key]['derivs'])
         for runno, runinfo in enumerate(self._format_session_info(self.inputs.session_info)):
@@ -404,7 +406,7 @@ class FEAT(FSLCommand):
                 outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*ica'))[0]
             else:
                 outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
-        print 'Outputs from FEATmodel:',outputs
+        print('Outputs from FEATmodel:',outputs)
         return outputs
 
 
@@ -1168,7 +1170,7 @@ class L2Model(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        for field in outputs.keys():
+        for field in list(outputs.keys()):
             outputs[field] = os.path.join(os.getcwd(),
                                           field.replace('_', '.'))
         return outputs
@@ -1315,7 +1317,7 @@ class MultipleRegressDesign(BaseInterface):
                'design.grp': grp_txt}
 
         # write design files
-        for key, val in txt.items():
+        for key, val in list(txt.items()):
             if ('fts' in key) and (nfcons == 0):
                 continue
             filename = key.replace('_', '.')
@@ -1328,7 +1330,7 @@ class MultipleRegressDesign(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         nfcons = sum([1 for con in self.inputs.contrasts if con[1] == 'F'])
-        for field in outputs.keys():
+        for field in list(outputs.keys()):
             if ('fts' in field) and (nfcons == 0):
                 continue
             outputs[field] = os.path.join(os.getcwd(),
@@ -1653,7 +1655,7 @@ class Cluster(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        for key, suffix in self.filemap.items():
+        for key, suffix in list(self.filemap.items()):
             outkey = key[4:]
             inval = getattr(self.inputs, key)
             if isdefined(inval):
@@ -1670,7 +1672,7 @@ class Cluster(FSLCommand):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if name in self.filemap.keys():
+        if name in list(self.filemap.keys()):
             if isinstance(value, bool):
                 fname = self._list_outputs()[name[4:]]
             else:

@@ -1,3 +1,5 @@
+from __future__ import division
+from builtins import range
 from nipype.testing import assert_equal, assert_raises, example_data
 from nipype.interfaces.base import InputMultiPath
 from traits.trait_errors import TraitError

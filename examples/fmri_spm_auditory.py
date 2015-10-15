@@ -17,6 +17,8 @@ dataset that can be downloaded from http://www.fil.ion.ucl.ac.uk/spm/data/audito
 
 Import necessary modules from nipype."""
 
+from builtins import range
+
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.interfaces.fsl as fsl          # fsl
@@ -237,7 +239,7 @@ data_dir = os.path.abspath('spm_auditory_data')
 # Specify the subject directories
 subject_list = ['M00223']
 # Map field names to individual subject runs.
-info = dict(func=[['f', 'subject_id', 'f', 'subject_id', range(16,100)]],
+info = dict(func=[['f', 'subject_id', 'f', 'subject_id', list(range(16,100))]],
             struct=[['s', 'subject_id', 's', 'subject_id', 2]])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
@@ -282,7 +284,7 @@ necessary to generate an SPM design matrix.
 
 from nipype.interfaces.base import Bunch
 subjectinfo = [Bunch(conditions=['Task'],
-                            onsets=[range(6,84,12)],
+                            onsets=[list(range(6,84,12))],
                             durations=[[6]])]
 
 """Setup the contrast structure that needs to be evaluated. This is a

@@ -7,15 +7,12 @@ Generic interfaces to manipulate registration parameters files, including
 transform files (to configure warpings)
 
 """
-
 import os.path as op
 import re
 
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, isdefined,
-                                    TraitedSpec, File, traits, InputMultiPath)
-
-
-from nipype import logging
+from ..base import (BaseInterface, BaseInterfaceInputSpec, isdefined,
+                     TraitedSpec, File, traits, InputMultiPath)
+from ... import logging
 logger = logging.getLogger('interface')
 
 
@@ -38,6 +35,7 @@ class EditTransformInputSpec(BaseInterfaceInputSpec):
                                 desc='set a new image format for resampled images')
     output_file = File(desc='the filename for the resulting transform file')
 
+
 class EditTransformOutputSpec(TraitedSpec):
     output_file = File(exists=True, desc='output transform file')
 
@@ -51,11 +49,10 @@ class EditTransform(BaseInterface):
 
     >>> from nipype.interfaces.elastix import EditTransform
     >>> tfm = EditTransform()
-    >>> tfm.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> tfm.inputs.reference_image = 'fixed1.nii'
+    >>> tfm.inputs.transform_file = 'TransformParameters.0.txt'  # doctest: +SKIP
+    >>> tfm.inputs.reference_image = 'fixed1.nii'  # doctest: +SKIP
     >>> tfm.inputs.output_type = 'unsigned char'
     >>> tfm.run() # doctest: +SKIP
-
 
     """
 

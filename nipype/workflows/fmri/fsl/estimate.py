@@ -1,10 +1,12 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
+from builtins import range
 
-from nipype import LooseVersion
+from ....interfaces import fsl as fsl          # fsl
+from ....interfaces import utility as util     # utility
+from ....pipeline import engine as pe          # pypeline engine
+
+from .... import LooseVersion
 
 
 def create_modelfit_workflow(name='modelfit', f_contrasts=False):

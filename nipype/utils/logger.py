@@ -1,3 +1,4 @@
+from builtins import object
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
@@ -108,7 +109,7 @@ class Logging(object):
                     # tuples, we might need to cast them into the same type
                     # as the last resort.  And lets try to be more generic
                     same = old.__class__(new) == old
-            except Exception, e:
+            except Exception as e:
                 same = False
             if not same:
                 msgs += ["%s: %r != %r"

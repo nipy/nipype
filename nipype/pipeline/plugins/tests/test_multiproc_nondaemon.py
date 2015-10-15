@@ -1,3 +1,4 @@
+from builtins import range
 import os
 from tempfile import mkdtemp
 from shutil import rmtree
@@ -42,7 +43,7 @@ def mytestFunction(insum=0):
         with open(filename, 'w') as f:
           f.write(str(j))
 
-    for n in xrange(numberOfThreads):
+    for n in range(numberOfThreads):
 
       # mark thread as alive
       a[n] = True
@@ -62,7 +63,7 @@ def mytestFunction(insum=0):
 
       time.sleep(1)
 
-      for n in xrange(numberOfThreads):
+      for n in range(numberOfThreads):
 
         a[n] = t[n].is_alive()
 

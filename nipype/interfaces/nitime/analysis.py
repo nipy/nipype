@@ -10,6 +10,9 @@ Interfaces to functionality from nitime for time-series analysis of fmri data
 
 """
 
+from builtins import zip
+from builtins import object
+
 import warnings
 import numpy as np
 import tempfile
@@ -23,7 +26,7 @@ from ...utils.filemanip import fname_presuffix
 have_nitime = True
 try:
     package_check('nitime')
-except Exception, e:
+except Exception as e:
     have_nitime = False
 else:
     import nitime.analysis as nta
@@ -143,7 +146,7 @@ class CoherenceAnalyzer(BaseInterface):
             TS = self.inputs.in_TS
 
         # deal with creating or storing ROI names:
-        if not TS.metadata.has_key('ROIs'):
+        if 'ROIs' not in TS.metadata:
             self.ROIs = ['roi_%d' % x for x, _ in enumerate(TS.data)]
         else:
             self.ROIs = TS.metadata['ROIs']
@@ -245,14 +248,14 @@ class CoherenceAnalyzer(BaseInterface):
                                     suffix='_delay'))
 
 
-class GetTimeSeriesInputSpec():
+class GetTimeSeriesInputSpec(object):
     pass
 
 
-class GetTimeSeriesOutputSpec():
+class GetTimeSeriesOutputSpec(object):
     pass
 
 
-class GetTimeSeries():
+class GetTimeSeries(object):
     # getting time series data from nifti files and ROIs
     pass

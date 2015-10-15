@@ -1,16 +1,19 @@
+from __future__ import print_function
+
 import os.path as op
-import nipype.interfaces.io as nio  # Data i/o
-import nipype.interfaces.utility as util  # utility
-import nipype.interfaces.cmtk as cmtk
-import nipype.algorithms.misc as misc
-import nipype.pipeline.engine as pe  # pypeline engine
-from nipype.interfaces.utility import Function
-from nipype.utils.misc import package_check
+
+from ....interfaces import io as nio  # Data i/o
+from ....interfaces import utility as util  # utility
+from ....interfaces import cmtk as cmtk
+from ....algorithms import misc as misc
+from ....pipeline import engine as pe  # pypeline engine
+from ....interfaces.utility import Function
+from ....utils.misc import package_check
 
 have_cmp = True
 try:
     package_check('cmp')
-except Exception, e:
+except Exception as e:
     have_cmp = False
 else:
     import cmp
@@ -33,7 +36,7 @@ def pullnodeIDs(in_network, name_key='dn_name'):
     nodedata = ntwk.node
     ids = []
     integer_nodelist = []
-    for node in nodedata.keys():
+    for node in list(nodedata.keys()):
         integer_nodelist.append(int(node))
     for node in np.sort(integer_nodelist):
         try:
@@ -314,7 +317,7 @@ def create_merge_group_networks_workflow(group_list, data_dir, subjects_dir, out
     """
     l3infosource = pe.Node(interface=util.IdentityInterface(
         fields=['group_id']), name='l3infosource')
-    l3infosource.inputs.group_id = group_list.keys()
+    l3infosource.inputs.group_id = list(group_list.keys())
 
     l3source = pe.Node(nio.DataGrabber(
         infields=['group_id'], outfields=['CFFfiles']), name='l3source')
@@ -348,35 +351,35 @@ def create_merge_group_networks_workflow(group_list, data_dir, subjects_dir, out
 
 def create_merge_group_network_results_workflow(group_list, data_dir, subjects_dir, output_dir, title='group'):
     """Creates a third-level pipeline to merge the Connectome File Format (CFF) outputs from each group
-	and combines them into a single CFF file for each group. This version of the third-level pipeline also
-	concatenates the comma-separated value files for the NetworkX metrics and the connectivity matrices
-	into single files.
+    and combines them into a single CFF file for each group. This version of the third-level pipeline also
+    concatenates the comma-separated value files for the NetworkX metrics and the connectivity matrices
+    into single files.
 
-	Example
-	-------
+    Example
+    -------
 
-	>>> import nipype.workflows.dmri.connectivity.group_connectivity as groupwork
-	>>> from nipype.testing import example_data
-	>>> subjects_dir = '.'
-	>>> data_dir = '.'
-	>>> output_dir = '.'
-	>>> group_list = {}
-	>>> group_list['group1'] = ['subj1', 'subj2']
-	>>> group_list['group2'] = ['subj3', 'subj4']
-	>>> l3pipeline = groupwork.create_merge_group_network_results_workflow(group_list, data_dir, subjects_dir, output_dir)
-	>>> l3pipeline.run()                 # doctest: +SKIP
+    >>> import nipype.workflows.dmri.connectivity.group_connectivity as groupwork
+    >>> from nipype.testing import example_data
+    >>> subjects_dir = '.'
+    >>> data_dir = '.'
+    >>> output_dir = '.'
+    >>> group_list = {}
+    >>> group_list['group1'] = ['subj1', 'subj2']
+    >>> group_list['group2'] = ['subj3', 'subj4']
+    >>> l3pipeline = groupwork.create_merge_group_network_results_workflow(group_list, data_dir, subjects_dir, output_dir)
+    >>> l3pipeline.run()                 # doctest: +SKIP
 
-	Inputs::
+    Inputs::
 
-		group_list: Dictionary of subject lists, keyed by group name
-		data_dir: Path to the data directory
-		subjects_dir: Path to the Freesurfer 'subjects' directory
-		output_dir: Path for the output files
-		title: String to use as a title for the output merged CFF file (default 'group')
-	"""
+        group_list: Dictionary of subject lists, keyed by group name
+        data_dir: Path to the data directory
+        subjects_dir: Path to the Freesurfer 'subjects' directory
+        output_dir: Path for the output files
+        title: String to use as a title for the output merged CFF file (default 'group')
+    """
     l3infosource = pe.Node(interface=util.IdentityInterface(
-	    fields=['group_id']), name='l3infosource')
-    l3infosource.inputs.group_id = group_list.keys()
+        fields=['group_id']), name='l3infosource')
+    l3infosource.inputs.group_id = list(group_list.keys())
 
     l3source = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=['CFFfiles', 'CSVnodemetrics', 'CSVglobalmetrics', 'CSVmatrices']), name='l3source')
     l3source.inputs.template_args = dict(CFFfiles=[['group_id']], CSVnodemetrics=[['group_id']], CSVglobalmetrics=[['group_id']], CSVmatrices=[['group_id']])
@@ -384,8 +387,8 @@ def create_merge_group_network_results_workflow(group_list, data_dir, subjects_d
     l3source.inputs.sort_filelist = True
 
     l3source.inputs.field_template = dict(
-	    CFFfiles=op.join(output_dir, '%s/*.cff'), CSVnodemetrics=op.join(output_dir, '%s/node_csv/*.csv'),
-	CSVglobalmetrics=op.join(output_dir, '%s/global_csv/*.csv'), CSVmatrices=op.join(output_dir, '%s/cmatrices_csv/*/*.csv'))
+        CFFfiles=op.join(output_dir, '%s/*.cff'), CSVnodemetrics=op.join(output_dir, '%s/node_csv/*.csv'),
+    CSVglobalmetrics=op.join(output_dir, '%s/global_csv/*.csv'), CSVmatrices=op.join(output_dir, '%s/cmatrices_csv/*/*.csv'))
 
     l3inputnode = pe.Node(interface=util.IdentityInterface(fields=['Group_CFFs', 'Group_CSVnodemetrics', 'Group_CSVglobalmetrics', 'Group_CSVmatrices']), name='l3inputnode')
 
@@ -398,18 +401,18 @@ def create_merge_group_network_results_workflow(group_list, data_dir, subjects_d
     l3pipeline = pe.Workflow(name="l3output")
     l3pipeline.base_dir = output_dir
     l3pipeline.connect([
-						(l3infosource, l3source, [('group_id', 'group_id')]),
-						(l3source, l3inputnode, [('CFFfiles', 'Group_CFFs')]),
-						(l3source, l3inputnode, [('CSVnodemetrics', 'Group_CSVnodemetrics')]),
-						(l3source, l3inputnode, [('CSVglobalmetrics', 'Group_CSVglobalmetrics')]),
-						(l3source, l3inputnode, [('CSVmatrices', 'Group_CSVmatrices')]),
-					])
+                        (l3infosource, l3source, [('group_id', 'group_id')]),
+                        (l3source, l3inputnode, [('CFFfiles', 'Group_CFFs')]),
+                        (l3source, l3inputnode, [('CSVnodemetrics', 'Group_CSVnodemetrics')]),
+                        (l3source, l3inputnode, [('CSVglobalmetrics', 'Group_CSVglobalmetrics')]),
+                        (l3source, l3inputnode, [('CSVmatrices', 'Group_CSVmatrices')]),
+                    ])
 
     l3pipeline.connect([(l3inputnode, MergeCNetworks_grp, [('Group_CFFs', 'in_files')])])
     l3pipeline.connect([(MergeCNetworks_grp, l3datasink, [('connectome_file', '@l3output')])])
 
     concat_csv_interface = Function(input_names=["in_files"], output_names=["out_name"],
-							 function=concatcsv)
+                             function=concatcsv)
 
     concat_node_csvs = pe.Node(interface=concat_csv_interface, name='concat_node_csvs')
     concat_global_csvs = pe.Node(interface=concat_csv_interface, name='concat_global_csvs')
@@ -455,16 +458,16 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
     """
     l4infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id1', 'group_id2']), name='l4infosource')
     try:
-        l4infosource.inputs.group_id1 = group_list.keys()[0]
-        l4infosource.inputs.group_id2 = group_list.keys()[1]
+        l4infosource.inputs.group_id1 = list(group_list.keys())[0]
+        l4infosource.inputs.group_id2 = list(group_list.keys())[1]
     except IndexError:
-        print 'The create_average_networks_by_group_workflow requires 2 groups'
+        print('The create_average_networks_by_group_workflow requires 2 groups')
         raise Exception
 
     l4info = dict(networks=[['group_id', '']], CMatrices=[['group_id', '']], fibmean=[['group_id', 'mean_fiber_length']],
         fibdev=[['group_id', 'fiber_length_std']])
 
-    l4source_grp1 = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=l4info.keys()), name='l4source_grp1')
+    l4source_grp1 = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=list(l4info.keys())), name='l4source_grp1')
     l4source_grp1.inputs.template = '%s/%s'
     l4source_grp1.inputs.field_template = dict(networks=op.join(output_dir, '%s/networks/*/*%s*intersections*.pck'), CMatrices=op.join(output_dir, '%s/cmatrix/*/*%s*.mat'),
         fibmean=op.join(output_dir, '%s/mean_fiber_length/*/*%s*.mat'), fibdev=op.join(output_dir, '%s/fiber_length_std/*/*%s*.mat'))

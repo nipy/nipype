@@ -1,14 +1,15 @@
-import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.camino as camino
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.camino2trackvis as cam2trk
-import nipype.interfaces.freesurfer as fs    # freesurfer
-import nipype.interfaces.cmtk as cmtk
-import nipype.algorithms.misc as misc
 import inspect
 import os.path as op
+
+from ....interfaces import io as nio # Data i/o
+from ....interfaces import utility as util     # utility
+from ....pipeline import engine as pe          # pypeline engine
+from ....interfaces import camino as camino
+from ....interfaces import fsl as fsl
+from ....interfaces import camino2trackvis as cam2trk
+from ....interfaces import freesurfer as fs    # freesurfer
+from ....interfaces import cmtk as cmtk
+from ....algorithms import misc as misc
 from ...misc.utils import (get_affine, get_data_dims, get_vox_dims, select_aparc, select_aparc_annot)
 
 

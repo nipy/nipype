@@ -111,7 +111,7 @@ class SlicerCommandLine(CommandLine):
                     undefined_traits[name] = Undefined
 
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
-        for name in undefined_traits.keys():
+        for name in list(undefined_traits.keys()):
             _ = getattr(self.inputs, name)
         #self._outputs().trait_set(trait_change_notify=False, **undefined_output_traits)
 

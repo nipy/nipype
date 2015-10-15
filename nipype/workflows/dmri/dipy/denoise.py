@@ -2,10 +2,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as niu
-from nipype.interfaces import fsl
-from nipype.interfaces import dipy
+from builtins import range
+from ....pipeline import engine as pe
+from ....interfaces import utility as niu
+from ....interfaces import dipy
 
 
 def nlmeans_pipeline(name='Denoise',
@@ -79,7 +79,7 @@ def csf_mask(in_file, in_mask, out_file=None):
                             structure=np.ones((2, 2, 2))).astype(np.uint8)
 
     label_im, nb_labels = label(imdata)
-    sizes = nd.sum(imdata, label_im, range(nb_labels + 1))
+    sizes = nd.sum(imdata, label_im, list(range(nb_labels + 1)))
     mask_size = sizes != sizes.max()
     remove_pixel = mask_size[label_im]
     label_im[remove_pixel] = 0

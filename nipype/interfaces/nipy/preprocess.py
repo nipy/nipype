@@ -19,7 +19,7 @@ from ...utils.filemanip import split_filename, fname_presuffix
 have_nipy = True
 try:
     package_check('nipy')
-except Exception, e:
+except Exception as e:
     have_nipy = False
 else:
     import nipy
@@ -53,7 +53,7 @@ class ComputeMask(BaseInterface):
     def _run_interface(self, runtime):
         from nipy.labs.mask import compute_mask
         args = {}
-        for key in [k for k, _ in self.inputs.items()
+        for key in [k for k, _ in list(self.inputs.items())
                     if k not in BaseInterfaceInputSpec().trait_names()]:
             value = getattr(self.inputs, key)
             if isdefined(value):
@@ -129,7 +129,7 @@ class FmriRealign4d(BaseInterface):
     >>> realigner = FmriRealign4d()
     >>> realigner.inputs.in_file = ['functional.nii']
     >>> realigner.inputs.tr = 2
-    >>> realigner.inputs.slice_order = range(0,67)
+    >>> realigner.inputs.slice_order = list(range(0,67))
     >>> res = realigner.run() # doctest: +SKIP
 
     References
@@ -256,7 +256,7 @@ class SpaceTimeRealigner(BaseInterface):
     >>> realigner = SpaceTimeRealigner()
     >>> realigner.inputs.in_file = ['functional.nii']
     >>> realigner.inputs.tr = 2
-    >>> realigner.inputs.slice_times = range(0, 3, 67)
+    >>> realigner.inputs.slice_times = list(range(0, 3, 67))
     >>> realigner.inputs.slice_info = 2
     >>> res = realigner.run() # doctest: +SKIP
 

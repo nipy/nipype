@@ -207,7 +207,7 @@ def test_randomise2():
                'list_img_voxel_EVs':                 ('--vxf=6,7,8,9,3',
                                                       '6,7,8,9,3')}
 
-    for name, settings in opt_map.items():
+    for name, settings in list(opt_map.items()):
         rand4 = fsl.Randomise(input_4D='infile', output_rootname='root',
                               **{name: settings[1]})
         yield assert_equal, rand4.cmdline, rand4.cmd + ' -i infile -o root ' \
@@ -292,7 +292,7 @@ def test_Randomise_parallel():
                                                         + repr([6, 7, 8, 9, 3]),
                                                       repr([6, 7, 8, 9, 3]))}
 
-    for name, settings in opt_map.items():
+    for name, settings in list(opt_map.items()):
         rand4 = fsl.Randomise_parallel(input_4D='infile',
                                        output_rootname='root',
                                        **{name: settings[1]})
@@ -387,7 +387,7 @@ def test_Vec_reg():
                'interpolation':     ('--interp=sinc', 'sinc'),
                'brainMask':         ('-m mask', 'mask')}
 
-    for name, settings in opt_map.items():
+    for name, settings in list(opt_map.items()):
         vrg4 = fsl.VecReg(infile='infile', outfile='outfile',
                           refVolName='MNI152', **{name: settings[1]})
         yield assert_equal, vrg4.cmdline, vrg4.cmd + \

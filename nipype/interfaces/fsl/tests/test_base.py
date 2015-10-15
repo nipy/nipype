@@ -19,7 +19,7 @@ def test_fslversion():
 
 @skipif(no_fsl)#skip if fsl not installed)
 def test_fsloutputtype():
-    types = fsl.Info.ftypes.keys()
+    types = list(fsl.Info.ftypes.keys())
     orig_out_type = fsl.Info.output_type()
     yield assert_true, orig_out_type in types
 

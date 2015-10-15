@@ -9,6 +9,9 @@ name-steps pipeline: getting back scope in command-line based programming.
    >>> os.chdir(datadir)
 """
 
+from __future__ import print_function
+from builtins import object
+
 import os
 import hashlib
 import pickle
@@ -16,9 +19,9 @@ import time
 import shutil
 import glob
 
-from nipype.interfaces.base import BaseInterface
-from nipype.pipeline.engine import Node
-from nipype.pipeline.utils import modify_paths
+from ..interfaces.base import BaseInterface
+from ..pipeline.engine import Node
+from ..pipeline.utils import modify_paths
 
 ################################################################################
 # PipeFunc object: callable interface to nipype.interface objects
@@ -130,7 +133,7 @@ def rm_all_but(base_dir, dirs_to_keep, warn=False):
         dir_name = os.path.join(base_dir, dir_name)
         if os.path.exists(dir_name):
             if warn:
-                print 'removing directory: %s' % dir_name
+                print('removing directory: %s' % dir_name)
             shutil.rmtree(dir_name)
 
 
@@ -288,7 +291,7 @@ class Memory(object):
             input.
         """
         rm_all_but(self.base_dir, set(runs.keys()), warn=warn)
-        for dir_name, job_names in runs.iteritems():
+        for dir_name, job_names in runs.items():
             rm_all_but(os.path.join(self.base_dir, dir_name),
                        job_names, warn=warn)
 

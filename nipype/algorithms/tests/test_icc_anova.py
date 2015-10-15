@@ -1,3 +1,4 @@
+from __future__ import division
 import numpy as np
 from nipype.testing import assert_equal
 from nipype.algorithms.icc import ICC_rep_anova
@@ -18,4 +19,4 @@ def test_ICC_rep_anova():
     yield assert_equal, round(icc, 2), 0.71
     yield assert_equal, dfc, 3
     yield assert_equal, dfe, 15
-    yield assert_equal, r_var/(r_var + e_var), icc
+    yield assert_equal, r_var / (r_var + e_var), icc

@@ -9,16 +9,18 @@
 ##      PURPOSE.
 ##
 #################################################################################
+from __future__ import print_function
+from builtins import range
 
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as util
-from nipype.interfaces.utility import Function
+from ....pipeline import engine as pe
+from ....interfaces import utility as util
+from ....interfaces.utility import Function
 
-from nipype.interfaces.ants import (
-                                    Registration,
-                                    ApplyTransforms,
-                                    AverageImages, MultiplyImages,
-                                    AverageAffineTransform)
+from ....interfaces.ants import (
+                                 Registration,
+                                 ApplyTransforms,
+                                 AverageImages, MultiplyImages,
+                                 AverageAffineTransform)
 
 def makeListOfOneElement(inputFile):
     outputList=[inputFile]
@@ -51,19 +53,19 @@ def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes,
         curr_name=flattened_image_nametypes[index]
         curr_file=deformedPassiveImages[index]
         image_dictionary_of_lists[curr_name].append(curr_file)
-    for image_type,image_list in image_dictionary_of_lists.items():
+    for image_type,image_list in list(image_dictionary_of_lists.items()):
         nested_imagetype_list.append(image_list)
         outputAverageImageName_list.append('AVG_'+image_type+'.nii.gz')
         image_type_list.append('WARP_AVG_'+image_type)
-        if interpolationMapping.has_key(image_type):
+        if image_type in interpolationMapping:
             nested_interpolation_type.append(interpolationMapping[image_type])
         else:
             nested_interpolation_type.append('Linear') #Linear is the default.
-    print "\n"*10
-    print "HACK: ", nested_imagetype_list
-    print "HACK: ", outputAverageImageName_list
-    print "HACK: ", image_type_list
-    print "HACK: ", nested_interpolation_type
+    print("\n"*10)
+    print("HACK: ", nested_imagetype_list)
+    print("HACK: ", outputAverageImageName_list)
+    print("HACK: ", image_type_list)
+    print("HACK: ", nested_interpolation_type)
     return nested_imagetype_list,outputAverageImageName_list,image_type_list,nested_interpolation_type
 
 def SplitAffineAndWarpComponents(list_of_transforms_lists):
@@ -74,7 +76,7 @@ def SplitAffineAndWarpComponents(list_of_transforms_lists):
     for transform in list_of_transforms_lists:
         affine_component_list.append(transform[0])
         warp_component_list.append(transform[1])
-    print "HACK ", affine_component_list, " ", warp_component_list
+    print("HACK ", affine_component_list, " ", warp_component_list)
     return affine_component_list, warp_component_list
 
 ## Flatten and return equal length transform and images lists.
@@ -84,11 +86,11 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transforms,inv
     subjCount=len(ListOfPassiveImagesDictionaries)
     tranCount=len(transforms)
     if subjCount != tranCount:
-        print "ERROR:  subjCount must equal tranCount {0} != {1}".format(subjCount,tranCount)
+        print("ERROR:  subjCount must equal tranCount {0} != {1}".format(subjCount,tranCount))
         sys.exit(-1)
     invertTfmsFlagsCount=len(invert_transform_flags)
     if subjCount != invertTfmsFlagsCount:
-        print "ERROR:  subjCount must equal invertTfmsFlags {0} != {1}".format(subjCount,invertTfmsFlagsCount)
+        print("ERROR:  subjCount must equal invertTfmsFlags {0} != {1}".format(subjCount,invertTfmsFlagsCount))
         sys.exit(-1)
     flattened_images=list()
     flattened_image_nametypes=list()
@@ -103,12 +105,12 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transforms,inv
         subjImgDictionary=ListOfPassiveImagesDictionaries[subjIndex]
         subjToAtlasTransform=transforms[subjIndex]
         subjToAtlasInvertFlags=invert_transform_flags[subjIndex]
-        for imgname,img in subjImgDictionary.items():
+        for imgname,img in list(subjImgDictionary.items()):
             flattened_images.append(img)
             flattened_image_nametypes.append(imgname)
             flattened_transforms.append(subjToAtlasTransform)
             flattened_invert_transform_flags.append(subjToAtlasInvertFlags)
-            if interpolationMapping.has_key(imgname):
+            if imgname in interpolationMapping:
                 flattened_interpolation_type.append(interpolationMapping[imgname])
             else:
                 flattened_interpolation_type.append('Linear') #Linear is the default.
@@ -138,7 +140,7 @@ def GetPassiveImages(ListOfImagesDictionaries,registrationImageTypes):
     passive_images=list()
     for mdict in ListOfImagesDictionaries:
         ThisSubjectPassiveImages=dict()
-        for key,value in mdict.items():
+        for key,value in list(mdict.items()):
             if key not in registrationImageTypes:
                 ThisSubjectPassiveImages[key]=value
         passive_images.append(ThisSubjectPassiveImages)

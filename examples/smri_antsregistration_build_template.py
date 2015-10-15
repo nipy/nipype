@@ -12,6 +12,10 @@ create a template out of multiple T1 volumes. We will also showcase how to fine 
 1. Tell python where to find the appropriate functions.
 """
 
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+
 import os
 import nipype.interfaces.utility as util
 import nipype.interfaces.ants as ants
@@ -24,13 +28,13 @@ from nipype.workflows.smri.ants import antsRegistrationTemplateBuildSingleIterat
 2. Download T1 volumes into home directory
 """
 
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 homeDir=os.getenv("HOME")
 requestedPath=os.path.join(homeDir,'nipypeTestPath')
 mydatadir=os.path.realpath(requestedPath)
 if not os.path.exists(mydatadir):
     os.makedirs(mydatadir)
-print mydatadir
+print(mydatadir)
 
 MyFileURLs=[
            ('http://slicer.kitware.com/midas3/download?bitstream=13121','01_T1_half.nii.gz'),
@@ -44,7 +48,7 @@ for tt in MyFileURLs:
     myURL=tt[0]
     localFilename=os.path.join(mydatadir,tt[1])
     if not os.path.exists(localFilename):
-        remotefile = urllib2.urlopen(myURL)
+        remotefile = urllib.request.urlopen(myURL)
 
         localFile = open(localFilename, 'wb')
         localFile.write(remotefile.read())

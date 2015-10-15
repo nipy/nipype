@@ -1,16 +1,16 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import division
 
 import os
-import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.freesurfer as fs    # freesurfer
-import nipype.interfaces.spm as spm
 
-from nipype import LooseVersion
-
+from ....interfaces import fsl as fsl          # fsl
+from ....interfaces import utility as util     # utility
+from ....pipeline import engine as pe          # pypeline engine
+from ....interfaces import freesurfer as fs    # freesurfer
+from ....interfaces import spm as spm
 from ...smri.freesurfer.utils import create_getmask_flow
+from .... import LooseVersion
 
 def getthreshop(thresh):
     return ['-thr %.10f -Tmin -bin'%(0.1*val[1]) for val in thresh]
@@ -26,7 +26,7 @@ def pickmiddle(files):
     import numpy as np
     middlevol = []
     for f in files:
-        middlevol.append(int(np.ceil(load(f).get_shape()[3]/2)))
+        middlevol.append(int(np.ceil(load(f).get_shape()[3] / 2)))
     return middlevol
 
 def pickvol(filenames, fileidx, which):
@@ -35,7 +35,7 @@ def pickvol(filenames, fileidx, which):
     if which.lower() == 'first':
         idx = 0
     elif which.lower() == 'middle':
-        idx = int(np.ceil(load(filenames[fileidx]).get_shape()[3]/2))
+        idx = int(np.ceil(load(filenames[fileidx]).get_shape()[3] / 2))
     elif which.lower() == 'last':
         idx = load(filenames[fileidx]).get_shape()[3]-1
     else:
@@ -52,10 +52,10 @@ def chooseindex(fwhm):
         return [1]
 
 def getmeanscale(medianvals):
-    return ['-mul %.10f'%(10000./val) for val in medianvals]
+    return ['-mul %.10f' % (10000. / val) for val in medianvals]
 
 def getusans(x):
-    return [[tuple([val[0],0.75*val[1]])] for val in x]
+    return [[tuple([val[0], 0.75 * val[1]])] for val in x]
 
 tolist = lambda x: [x]
 highpass_operand = lambda x:'-bptf %.10f -1'%x

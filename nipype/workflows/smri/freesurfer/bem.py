@@ -1,11 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import nipype.pipeline.engine as pe
-
-import nipype.interfaces.mne as mne
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.utility as niu
+from ....pipeline import engine as pe
+from ....interfaces import mne as mne
+from ....interfaces import freesurfer as fs
+from ....interfaces import utility as niu
 
 
 def create_bem_flow(name='bem', out_format='stl'):

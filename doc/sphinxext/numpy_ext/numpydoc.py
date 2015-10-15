@@ -16,13 +16,16 @@ It will:
 
 """
 
+from __future__ import absolute_import
+from builtins import object
+
 import sphinx
 
 if sphinx.__version__ < '1.0.1':
     raise RuntimeError("Sphinx 1.0.1 or newer is required")
 
 import os, re, pydoc
-from docscrape_sphinx import get_doc_object, SphinxDocString
+from .docscrape_sphinx import get_doc_object, SphinxDocString
 from sphinx.util.compat import Directive
 import inspect
 
@@ -39,7 +42,7 @@ def mangle_docstrings(app, what, name, obj, options, lines,
         lines[:] = title_re.sub(u'', u"\n".join(lines)).split(u"\n")
     else:
         doc = get_doc_object(obj, what, u"\n".join(lines), config=cfg)
-        lines[:] = unicode(doc).split(u"\n")
+        lines[:] = str(doc).split(u"\n")
 
     if app.config.numpydoc_edit_link and hasattr(obj, '__name__') and \
            obj.__name__:
@@ -120,7 +123,7 @@ class ManglingDomainBase(object):
         self.wrap_mangling_directives()
 
     def wrap_mangling_directives(self):
-        for name, objtype in self.directive_mangling_map.items():
+        for name, objtype in list(self.directive_mangling_map.items()):
             self.directives[name] = wrap_mangling_directive(
                 self.directives[name], objtype)
 

@@ -1,1 +1,2 @@
-from registration import scalartransform
+from __future__ import absolute_import
+from .registration import scalartransform

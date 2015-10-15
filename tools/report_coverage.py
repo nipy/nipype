@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import subprocess
 
 def run_tests(cmd):
@@ -10,7 +11,7 @@ def run_tests(cmd):
     stdout, stderr = proc.communicate()
     if proc.returncode:
         msg = 'Running cmd: %s\n Error: %s' % (cmd, error)
-        raise StandardError(msg)
+        raise Exception(msg)
     # Nose returns the output in stderr
     return stderr
 
@@ -41,10 +42,10 @@ def grab_coverage(output):
 
 def main():
     cmd = 'nosetests --with-coverage --cover-package=nipype'
-    print 'From current directory, running cmd:'
-    print cmd, '\n'
+    print('From current directory, running cmd:')
+    print(cmd, '\n')
     output = run_tests(cmd)
     report = grab_coverage(output)
-    print report
+    print(report)
 
 main()

@@ -10,18 +10,19 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
     >>> os.chdir(datadir)
 
 '''
+from __future__ import division
+from builtins import zip
 
+import os.path as op
+from warnings import warn
 
 import numpy as np
 from numpy import linalg as nla
-import os.path as op
-from ..external import six
 
 from .. import logging
-
+from ..external.six import string_types
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
-from warnings import warn
 iflogger = logging.getLogger('interface')
 
 
@@ -201,7 +202,7 @@ class ComputeMeshWarp(BaseInterface):
     >>> dist = m.ComputeMeshWarp()
     >>> dist.inputs.surface1 = 'surf1.vtk'
     >>> dist.inputs.surface2 = 'surf2.vtk'
-    >>> res = dist.run() # doctest: +SKIP
+    >>> res = dist.run()  # doctest: +SKIP
 
     """
 
@@ -342,7 +343,7 @@ class MeshWarpMaths(BaseInterface):
     >>> mmath.inputs.in_surf = 'surf1.vtk'
     >>> mmath.inputs.operator = 'surf2.vtk'
     >>> mmath.inputs.operation = 'mul'
-    >>> res = mmath.run() # doctest: +SKIP
+    >>> res = mmath.run()  # doctest: +SKIP
 
     """
 
@@ -375,7 +376,7 @@ class MeshWarpMaths(BaseInterface):
         operator = self.inputs.operator
         opfield = np.ones_like(points1)
 
-        if isinstance(operator, six.string_types):
+        if isinstance(operator, string_types):
             r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
             vtk2 = r2.output
             r2.update()

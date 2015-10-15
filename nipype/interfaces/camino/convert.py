@@ -9,11 +9,12 @@
 import os
 import glob
 
-from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
-                                    TraitedSpec, File, StdOutCommandLine,
-                                    OutputMultiPath, StdOutCommandLineInputSpec,
-                                    isdefined)
-from nipype.utils.filemanip import split_filename
+from ..base import (CommandLineInputSpec, CommandLine, traits,
+                    TraitedSpec, File, StdOutCommandLine,
+                    OutputMultiPath, StdOutCommandLineInputSpec,
+                    isdefined)
+from ...utils.filemanip import split_filename
+
 
 class Image2VoxelInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-4dimage %s',

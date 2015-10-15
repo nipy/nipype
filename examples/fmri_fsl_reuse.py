@@ -15,6 +15,10 @@ tutorial data set::
 First tell python where to find the appropriate functions.
 """
 
+from __future__ import print_function
+from __future__ import division
+from builtins import range
+
 import os                                    # system functions
 
 import nipype.interfaces.io as nio           # Data i/o
@@ -25,8 +29,8 @@ import nipype.algorithms.modelgen as model   # model generation
 import nipype.algorithms.rapidart as ra      # artifact detection
 
 from nipype.workflows.fmri.fsl import (create_featreg_preproc,
-                                  create_modelfit_workflow,
-                                  create_fixed_effects_flow)
+                                       create_modelfit_workflow,
+                                       create_fixed_effects_flow)
 
 
 """
@@ -181,7 +185,7 @@ inputnode.iterables = ('fwhm', [5.,10.])
 
 hpcutoff = 120.
 TR = 3.
-inputnode.inputs.highpass = hpcutoff/(2*TR)
+inputnode.inputs.highpass = hpcutoff / (2. * TR)
 
 """
 Setup a function that returns subject-specific information about the
@@ -195,11 +199,11 @@ for every participant. Other examples of this function are available in the
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print "Subject ID: %s\n"%str(subject_id)
+    print("Subject ID: %s\n"%str(subject_id))
     output = []
     names = ['Task-Odd','Task-Even']
     for r in range(4):
-        onsets = [range(15,240,60),range(45,240,60)]
+        onsets = [list(range(15,240,60)),list(range(45,240,60))]
         output.insert(r,
                       Bunch(conditions=names,
                             onsets=deepcopy(onsets),

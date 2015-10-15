@@ -1,14 +1,14 @@
-from nipype.interfaces.base import (traits, File, Directory, TraitedSpec,
-                                    OutputMultiPath)
+
 import os.path as op
 import glob
-from nipype.interfaces.freesurfer.base import FSCommand, FSTraitedSpec
-from nipype.utils.filemanip import list_to_filename
-from nipype.external import six
 import logging
-
 logging.basicConfig()
 iflogger = logging.getLogger('interface')
+
+from ..base import (traits, File, Directory, TraitedSpec, OutputMultiPath)
+from ..freesurfer.base import FSCommand, FSTraitedSpec
+from ...external.six import string_types
+from ...utils.filemanip import list_to_filename
 
 
 class WatershedBEMInputSpec(FSTraitedSpec):
@@ -79,7 +79,7 @@ class WatershedBEM(FSCommand):
         subject_path = op.join(subjects_dir, self.inputs.subject_id)
         output_traits = self._outputs()
         mesh_paths = []
-        for k in outputs.keys():
+        for k in list(outputs.keys()):
             if k != 'mesh_files':
                 val = self._get_files(subject_path, k,
                                       output_traits.traits()[k].loc,
@@ -90,7 +90,7 @@ class WatershedBEM(FSCommand):
                         out_files = []
                         for value in value_list:
                             out_files.append(op.abspath(value))
-                    elif isinstance(value_list, six.string_types):
+                    elif isinstance(value_list, string_types):
                         out_files = op.abspath(value_list)
                     else:
                         raise TypeError

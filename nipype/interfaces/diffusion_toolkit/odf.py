@@ -9,13 +9,16 @@
    >>> os.chdir(datadir)
 
 """
-import re
-from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
-import os
 __docformat__ = 'restructuredtext'
+from builtins import range
 
-from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
-                                    CommandLineInputSpec, isdefined)
+import os
+import re
+
+from ..base import (TraitedSpec, File, traits, CommandLine,
+                    CommandLineInputSpec, isdefined)
+from ...utils.filemanip import fname_presuffix, split_filename, copyfile
+
 
 class HARDIMatInputSpec(CommandLineInputSpec):
     bvecs = File(exists=True, desc = 'b vectors file',

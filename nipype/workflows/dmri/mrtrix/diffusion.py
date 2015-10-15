@@ -1,7 +1,7 @@
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.mrtrix as mrtrix
+from ....interfaces import utility as util     # utility
+from ....pipeline import engine as pe          # pypeline engine
+from ....interfaces import fsl as fsl
+from ....interfaces import mrtrix as mrtrix
 
 def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilistic'):
     """Creates a pipeline that does the same diffusion processing as in the

@@ -8,16 +8,20 @@ hash_method : content, timestamp
 
 @author: Chris Filo Gorgolewski
 '''
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 
-import ConfigParser
+import configparser
 from json import load, dump
 import os
 import shutil
 import errno
-from StringIO import StringIO
 from warnings import warn
 
 from ..external import portalocker
+from ..external.six import StringIO
+
 
 # Get home directory in platform-agnostic way
 homedir = os.path.expanduser('~')
@@ -74,7 +78,7 @@ class NipypeConfig(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self._config = ConfigParser.ConfigParser()
+        self._config = configparser.ConfigParser()
         config_dir = os.path.expanduser('~/.nipype')
         mkdir_p(config_dir)
         old_config_file = os.path.expanduser('~/.nipype.cfg')
@@ -121,6 +125,9 @@ class NipypeConfig(object):
         return self._config.get(section, option)
 
     def set(self, section, option, value):
+        if isinstance(value, bool):
+            value = str(value)
+
         return self._config.set(section, option, value)
 
     def getboolean(self, section, option):
@@ -157,7 +164,7 @@ class NipypeConfig(object):
     def update_config(self, config_dict):
         for section in ['execution', 'logging', 'check']:
             if section in config_dict:
-                for key, val in config_dict[section].items():
+                for key, val in list(config_dict[section].items()):
                     if not key.startswith('__'):
                         self._config.set(section, key, str(val))
 

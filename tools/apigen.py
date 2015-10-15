@@ -21,6 +21,7 @@ project."""
 
 # Stdlib imports
 from __future__ import print_function
+from builtins import object
 import os
 import re
 

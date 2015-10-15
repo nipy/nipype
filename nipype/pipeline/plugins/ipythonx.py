@@ -40,7 +40,7 @@ class IPythonXPlugin(DistributedPluginBase):
                               "will be unavailable")
         try:
             self.taskclient = self.ipyclient.TaskClient()
-        except Exception, e:
+        except Exception as e:
             if isinstance(e, ConnectionRefusedError):
                 raise Exception("No IPython clients found.")
             if isinstance(e, ValueError):

@@ -9,13 +9,16 @@
    >>> os.chdir(datadir)
 
 """
-import re
-from nipype.utils.filemanip import fname_presuffix, split_filename, copyfile
-import os
 __docformat__ = 'restructuredtext'
+from builtins import range
 
-from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
-                                    CommandLineInputSpec, isdefined)
+import os
+import re
+
+from ..base import (TraitedSpec, File, traits, CommandLine,
+                    CommandLineInputSpec, isdefined)
+from ...utils.filemanip import fname_presuffix, split_filename, copyfile
+
 
 class DTIReconInputSpec(CommandLineInputSpec):
     DWI = File(desc='Input diffusion volume', argstr='%s',exists=True, mandatory=True,position=1)

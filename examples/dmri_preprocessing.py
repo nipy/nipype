@@ -81,7 +81,7 @@ functionality.
 """
 
 datasource = pe.Node(nio.DataGrabber(infields=['subject_id'],
-                     outfields=info.keys()), name='datasource')
+                     outfields=list(info.keys())), name='datasource')
 
 datasource.inputs.template = "%s/%s"
 

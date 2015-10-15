@@ -18,22 +18,23 @@ These functions include:
    >>> os.chdir(datadir)
 """
 
+from __future__ import division
+from builtins import range
+
 import os
 from copy import deepcopy
-from warnings import warn
 
 from nibabel import load, funcs, Nifti1Image
 import numpy as np
 from scipy import signal
 import scipy.io as sio
-from nipype.external import six
 
+from ..external.six import string_types
 from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
                                     OutputMultiPath, TraitedSpec, File,
                                     BaseInterfaceInputSpec, isdefined)
 from ..utils.filemanip import filename_to_list, save_json, split_filename
 from ..utils.misc import find_indices
-
 from .. import logging, config
 iflogger = logging.getLogger('interface')
 
@@ -111,7 +112,7 @@ def _calc_norm(mc, use_differences, source, brain_pts=None):
     n_pts = all_pts.size - all_pts.shape[1]
     newpos = np.zeros((mc.shape[0], n_pts))
     if brain_pts is not None:
-        displacement = np.zeros((mc.shape[0], n_pts / 3))
+        displacement = np.zeros((mc.shape[0], int(n_pts / 3)))
     for i in range(mc.shape[0]):
         affine = _get_affine_matrix(mc[i, :], source)
         newpos[i, :] = np.dot(affine,
@@ -260,7 +261,7 @@ class ArtifactDetect(BaseInterface):
     >>> ad.inputs.norm_threshold = 1
     >>> ad.inputs.use_differences = [True, False]
     >>> ad.inputs.zintensity_threshold = 3
-    >>> ad.run() # doctest: +SKIP
+    >>> ad.run()  # doctest: +SKIP
     """
 
     input_spec = ArtifactDetectInputSpec
@@ -280,7 +281,7 @@ class ArtifactDetect(BaseInterface):
         output_dir: string
             output directory in which the files will be generated
         """
-        if isinstance(motionfile, six.string_types):
+        if isinstance(motionfile, string_types):
             infile = motionfile
         elif isinstance(motionfile, list):
             infile = motionfile[0]
@@ -351,7 +352,7 @@ class ArtifactDetect(BaseInterface):
             cwd = os.getcwd()
 
         # read in functional image
-        if isinstance(imgfile, six.string_types):
+        if isinstance(imgfile, string_types):
             nim = load(imgfile)
         elif isinstance(imgfile, list):
             if len(imgfile) == 1:
@@ -392,7 +393,7 @@ class ArtifactDetect(BaseInterface):
                     mask_tmp = vol > \
                                  (_nanmean(vol) / self.inputs.global_threshold)
                     mask[:, :, :, t0] = mask_tmp
-                    g[t0] = np.nansum(vol * mask_tmp)/np.nansum(mask_tmp)
+                    g[t0] = np.nansum(vol * mask_tmp) / np.nansum(mask_tmp)
         elif masktype == 'file':  # uses a mask image to determine intensity
             maskimg = load(self.inputs.mask_file)
             mask = maskimg.get_data()
@@ -642,7 +643,7 @@ class StimulusCorrelation(BaseInterface):
         U = spmmat['SPM'][0][0].Sess[0][sessidx].U[0]
         if rows is None:
             rows = spmmat['SPM'][0][0].Sess[0][sessidx].row[0] - 1
-        cols = spmmat['SPM'][0][0].Sess[0][sessidx].col[0][range(len(U))] - 1
+        cols = spmmat['SPM'][0][0].Sess[0][sessidx].col[0][list(range(len(U)))] - 1
         outmatrix = designmatrix.take(rows.tolist(), axis=0).take(cols.tolist(),
                                                                   axis=1)
         return outmatrix

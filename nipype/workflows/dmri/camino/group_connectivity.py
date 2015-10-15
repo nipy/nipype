@@ -1,9 +1,9 @@
 import os.path as op                      # system functions
 
-import nipype.interfaces.io as nio           # Data i/o
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
 from .connectivity_mapping import create_connectivity_pipeline
+from ....interfaces import io as nio           # Data i/o
+from ....interfaces import utility as util     # utility
+from ....pipeline import engine as pe          # pypeline engine
 
 
 def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
@@ -55,7 +55,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
         info = template_args_dict
 
     datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                                   outfields=info.keys()),
+                                                   outfields=list(info.keys())),
                          name = 'datasource')
 
     datasource.inputs.template = "%s/%s"

@@ -17,6 +17,8 @@ Hettinger. http://users.rcn.com/python/download/Descriptor.htm
 [2] Python data model, http://docs.python.org/reference/datamodel.html
 """
 
+from builtins import object
+
 class OneTimeProperty(object):
    """A descriptor to make special properties that become normal attributes.
    """
@@ -32,7 +34,7 @@ class OneTimeProperty(object):
             the value of this computation.
        """
        self.getter = func
-       self.name = func.func_name
+       self.name = func.__name__
 
    def __get__(self, obj, type=None):
        """ Called on attribute access on the class or instance.  """

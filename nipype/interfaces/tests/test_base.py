@@ -1,8 +1,13 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+
 import os
 import tempfile
 import shutil
+import warnings
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
                         assert_true, assert_false, with_setup, package_check,
@@ -12,7 +17,8 @@ from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import Undefined, config
 from traits.testing.nose_tools import skip
 import traits.api as traits
-#test Bunch
+
+
 def test_bunch():
     b = nib.Bunch()
     yield assert_equal, b.__dict__,{}
@@ -52,9 +58,8 @@ def test_bunch_hash():
     yield assert_equal, bhash, 'ddcc7b4ec5675df8cf317a48bd1857fa'
     # Make sure the hash stored in the json file for `infile` is correct.
     jshash = nib.md5()
-    fp = file(json_pth)
-    jshash.update(fp.read())
-    fp.close()
+    with open(json_pth) as fp:
+        jshash.update(fp.read().encode('utf-8'))
     yield assert_equal, newbdict['infile'][0][1], jshash.hexdigest()
     yield assert_equal, newbdict['yat'], True
 
@@ -67,7 +72,8 @@ def setup_file():
     #global tmp_infile, tmp_dir
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo.txt')
-    open(tmp_infile, 'w').writelines('123456789')
+    with open(tmp_infile, 'w') as fp:
+        fp.writelines(['123456789'])
     return tmp_infile
 
 def teardown_file(tmp_dir):
@@ -95,7 +101,7 @@ def test_TraitedSpec():
 
 @skip
 def test_TraitedSpec_dynamic():
-    from cPickle import dumps, loads
+    from pickle import dumps, loads
     a = nib.BaseTraitedSpec()
     a.add_trait('foo', nib.traits.Int)
     a.foo = 1
@@ -134,43 +140,67 @@ def test_TraitedSpec_logic():
     yield assert_equal, myif.inputs.kung, 2.0
 
 def test_deprecation():
-    class DeprecationSpec1(nib.TraitedSpec):
-        foo = nib.traits.Int(deprecated='0.1')
-    spec_instance = DeprecationSpec1()
-    set_foo = lambda : setattr(spec_instance, 'foo', 1)
-    yield assert_raises, nib.TraitError, set_foo
-    class DeprecationSpec1numeric(nib.TraitedSpec):
-        foo = nib.traits.Int(deprecated='0.1')
-    spec_instance = DeprecationSpec1numeric()
-    set_foo = lambda : setattr(spec_instance, 'foo', 1)
-    yield assert_raises, nib.TraitError, set_foo
-    class DeprecationSpec2(nib.TraitedSpec):
-        foo = nib.traits.Int(deprecated='100', new_name='bar')
-    spec_instance = DeprecationSpec2()
-    set_foo = lambda : setattr(spec_instance, 'foo', 1)
-    yield assert_raises, nib.TraitError, set_foo
-    class DeprecationSpec3(nib.TraitedSpec):
-        foo = nib.traits.Int(deprecated='1000', new_name='bar')
-        bar = nib.traits.Int()
-    spec_instance = DeprecationSpec3()
-    not_raised = True
-    try:
-        spec_instance.foo = 1
-    except nib.TraitError:
-        not_raised = False
-    yield assert_true, not_raised
-    class DeprecationSpec3(nib.TraitedSpec):
-        foo = nib.traits.Int(deprecated='1000', new_name='bar')
-        bar = nib.traits.Int()
-    spec_instance = DeprecationSpec3()
-    not_raised = True
-    try:
-        spec_instance.foo = 1
-    except nib.TraitError:
-        not_raised = False
-    yield assert_true, not_raised
-    yield assert_equal, spec_instance.foo, Undefined
-    yield assert_equal, spec_instance.bar, 1
+    with warnings.catch_warnings(record=True) as w:
+        warnings.filterwarnings('always', '', UserWarning)
+
+        class DeprecationSpec1(nib.TraitedSpec):
+            foo = nib.traits.Int(deprecated='0.1')
+        spec_instance = DeprecationSpec1()
+        set_foo = lambda : setattr(spec_instance, 'foo', 1)
+        yield assert_raises, nib.TraitError, set_foo
+        yield assert_equal, len(w), 0, 'no warnings, just errors'
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.filterwarnings('always', '', UserWarning)
+
+        class DeprecationSpec1numeric(nib.TraitedSpec):
+            foo = nib.traits.Int(deprecated='0.1')
+        spec_instance = DeprecationSpec1numeric()
+        set_foo = lambda : setattr(spec_instance, 'foo', 1)
+        yield assert_raises, nib.TraitError, set_foo
+        yield assert_equal, len(w), 0, 'no warnings, just errors'
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.filterwarnings('always', '', UserWarning)
+
+        class DeprecationSpec2(nib.TraitedSpec):
+            foo = nib.traits.Int(deprecated='100', new_name='bar')
+        spec_instance = DeprecationSpec2()
+        set_foo = lambda : setattr(spec_instance, 'foo', 1)
+        yield assert_raises, nib.TraitError, set_foo
+        yield assert_equal, len(w), 0, 'no warnings, just errors'
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.filterwarnings('always', '', UserWarning)
+
+        class DeprecationSpec3(nib.TraitedSpec):
+            foo = nib.traits.Int(deprecated='1000', new_name='bar')
+            bar = nib.traits.Int()
+        spec_instance = DeprecationSpec3()
+        not_raised = True
+        try:
+            spec_instance.foo = 1
+        except nib.TraitError:
+            not_raised = False
+        yield assert_true, not_raised
+        yield assert_equal, len(w), 1, 'deprecated warning 1 %s' % [w1.message for w1 in w]
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.filterwarnings('always', '', UserWarning)
+
+        class DeprecationSpec3(nib.TraitedSpec):
+            foo = nib.traits.Int(deprecated='1000', new_name='bar')
+            bar = nib.traits.Int()
+        spec_instance = DeprecationSpec3()
+        not_raised = True
+        try:
+            spec_instance.foo = 1
+        except nib.TraitError:
+            not_raised = False
+        yield assert_true, not_raised
+        yield assert_equal, spec_instance.foo, Undefined
+        yield assert_equal, spec_instance.bar, 1
+        yield assert_equal, len(w), 1, 'deprecated warning 2 %s' % [w1.message for w1 in w]
 
 
 def test_namesource():
@@ -285,7 +315,7 @@ def test_cycle_namesource2():
         res = to1.cmdline
     except nib.NipypeInterfaceError:
         not_raised = False
-    print res
+    print(res)
 
     yield assert_true, not_raised
     yield assert_true, '%s' % tmp_infile in res
@@ -407,24 +437,21 @@ def test_BaseInterface():
     nib.BaseInterface.input_spec = None
     yield assert_raises, Exception, nib.BaseInterface
 
+def assert_not_raises(fn, *args, **kwargs):
+    fn(*args, **kwargs)
+    return True
+
 def test_input_version():
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
     obj = DerivedInterface1()
-    not_raised = True
-    try:
-        obj._check_version_requirements(obj.inputs)
-    except:
-        not_raised = False
-    yield assert_true, not_raised
+    yield assert_not_raises, obj._check_version_requirements, obj.inputs
+
     config.set('execution', 'stop_on_unknown_version', True)
-    try:
-        obj._check_version_requirements(obj.inputs)
-    except:
-        not_raised = False
-    yield assert_false, not_raised
+    yield assert_raises, Exception, obj._check_version_requirements, obj.inputs
+
     config.set_default_config()
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
@@ -434,18 +461,15 @@ def test_input_version():
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     yield assert_raises, Exception, obj._check_version_requirements
+
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.10'
     obj = DerivedInterface1()
-    not_raised = True
-    try:
-        obj._check_version_requirements(obj.inputs)
-    except:
-        not_raised = False
-    yield assert_true, not_raised
+    yield assert_not_raises, obj._check_version_requirements, obj.inputs
+
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
     class DerivedInterface1(nib.BaseInterface):
@@ -454,11 +478,8 @@ def test_input_version():
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     not_raised = True
-    try:
-        obj._check_version_requirements(obj.inputs)
-    except:
-        not_raised = False
-    yield assert_true, not_raised
+    yield assert_not_raises, obj._check_version_requirements, obj.inputs
+
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', max_ver='0.7')
     class DerivedInterface2(nib.BaseInterface):
@@ -467,6 +488,7 @@ def test_input_version():
     obj = DerivedInterface2()
     obj.inputs.foo = 1
     yield assert_raises, Exception, obj._check_version_requirements
+
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', max_ver='0.9')
     class DerivedInterface1(nib.BaseInterface):
@@ -475,11 +497,7 @@ def test_input_version():
     obj = DerivedInterface1()
     obj.inputs.foo = 1
     not_raised = True
-    try:
-        obj._check_version_requirements(obj.inputs)
-    except:
-        not_raised = False
-    yield assert_true, not_raised
+    yield assert_not_raises, obj._check_version_requirements, obj.inputs
 
 def test_output_version():
     class InputSpec(nib.TraitedSpec):
@@ -603,6 +621,7 @@ def test_CommandLine_output():
     ci.inputs.terminal_output = 'file'
     res = ci.run()
     yield assert_true, 'stdout.nipype' in res.runtime.stdout
+    yield assert_equal, type(res.runtime.stdout), type('hi')
     ci = nib.CommandLine(command='ls -l')
     ci.inputs.terminal_output = 'none'
     res = ci.run()

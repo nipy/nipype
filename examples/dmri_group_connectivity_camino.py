@@ -126,7 +126,7 @@ using the NBS plugin in ConnectomeViewer.
 title = ''
 for idx, group_id in enumerate(group_list.keys()):
     title += group_id
-    if not idx == len(group_list.keys()) - 1:
+    if not idx == len(list(group_list.keys())) - 1:
         title += '-'
 
     info = dict(dwi=[['subject_id', 'dti']],

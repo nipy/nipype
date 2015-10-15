@@ -15,7 +15,6 @@ all of these bugs and they've been fixed in enthought svn repository
 (usually by Robert Kern).
 
 """
-
 import os
 
 # perform all external trait imports here
@@ -109,7 +108,7 @@ class File ( BaseFile ):
         """
         if not exists:
             # Define the C-level fast validator to use:
-            fast_validate = ( 11, basestring )
+            fast_validate = ( 11, str )
 
         super( File, self ).__init__( value, filter, auto_set, entries, exists,
                                       **metadata )
@@ -195,7 +194,7 @@ class Directory ( BaseDirectory ):
         # Define the C-level fast validator to use if the directory existence
         # test is not required:
         if not exists:
-            self.fast_validate = ( 11, basestring )
+            self.fast_validate = ( 11, str )
 
         super( Directory, self ).__init__( value, auto_set, entries, exists,
                                            **metadata )
@@ -235,7 +234,7 @@ def has_metadata(trait, metadata, value=None, recursive=True):
     Checks if a given trait has a metadata (and optionally if it is set to particular value)
     '''
     count = 0
-    if hasattr(trait, "_metadata") and metadata in trait._metadata.keys() and (trait._metadata[metadata] == value or value==None):
+    if hasattr(trait, "_metadata") and metadata in list(trait._metadata.keys()) and (trait._metadata[metadata] == value or value==None):
         count += 1
     if recursive:
         if hasattr(trait, 'inner_traits'):

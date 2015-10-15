@@ -3,9 +3,10 @@
 """ General matlab interface code """
 import os
 
-from nipype.interfaces.base import (CommandLineInputSpec, InputMultiPath, isdefined,
-                                    CommandLine, traits, File, Directory)
+from .base import (CommandLineInputSpec, InputMultiPath, isdefined,
+                   CommandLine, traits, File, Directory)
 from .. import config
+
 
 def get_matlab_command():
     if 'NIPYPE_NO_MATLAB' in os.environ:
@@ -20,7 +21,7 @@ def get_matlab_command():
         res = CommandLine(command='which', args=matlab_cmd,
                           terminal_output='allatonce').run()
         matlab_path = res.runtime.stdout.strip()
-    except Exception, e:
+    except Exception as e:
         return None
     return matlab_cmd
 
@@ -65,9 +66,9 @@ class MatlabCommand(CommandLine):
     """Interface that runs matlab code
 
     >>> import nipype.interfaces.matlab as matlab
-    >>> mlab = matlab.MatlabCommand()
+    >>> mlab = matlab.MatlabCommand(mfile=False)  # don't write script file
     >>> mlab.inputs.script = "which('who')"
-    >>> out = mlab.run() # doctest: +SKIP
+    >>> out = mlab.run()  # doctest: +SKIP
     """
 
     _cmd = 'matlab'
@@ -155,6 +156,7 @@ class MatlabCommand(CommandLine):
         return super(MatlabCommand, self)._format_arg(name, trait_spec, value)
 
     def _gen_matlab_command(self, argstr, script_lines):
+        """ Generates commands and, if mfile specified, writes it to disk."""
         cwd = os.getcwd()
         mfile = self.inputs.mfile or self.inputs.uses_mcr
         paths = []
@@ -178,9 +180,8 @@ class MatlabCommand(CommandLine):
 
         script_lines = '\n'.join(prescript)+script_lines+'\n'.join(postscript)
         if mfile:
-            mfile = file(os.path.join(cwd,self.inputs.script_file), 'wt')
-            mfile.write(script_lines)
-            mfile.close()
+            with open(os.path.join(cwd,self.inputs.script_file), 'wt') as mfile:
+                mfile.write(script_lines)
             if self.inputs.uses_mcr:
                 script = '%s' % (os.path.join(cwd,self.inputs.script_file))
             else:

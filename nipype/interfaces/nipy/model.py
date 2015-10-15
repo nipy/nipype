@@ -1,17 +1,17 @@
-import warnings
+from __future__ import division
+from builtins import range
 import os
 
 import nibabel as nb
 import numpy as np
-from nipype.external import six
-
 
 from ...utils.misc import package_check
+from ...external.six import string_types
 
 have_nipy = True
 try:
     package_check('nipy')
-except Exception, e:
+except Exception as e:
     have_nipy = False
 else:
     import nipy.modalities.fmri.design_matrix as dm
@@ -81,7 +81,7 @@ class FitGLM(BaseInterface):
         session_info = self.inputs.session_info
 
         functional_runs = self.inputs.session_info[0]['scans']
-        if isinstance(functional_runs, six.string_types):
+        if isinstance(functional_runs, string_types):
             functional_runs = [functional_runs]
         nii = nb.load(functional_runs[0])
         data = nii.get_data()
@@ -105,7 +105,7 @@ class FitGLM(BaseInterface):
 
         nscans = timeseries.shape[1]
 
-        if 'hpf' in session_info[0].keys():
+        if 'hpf' in list(session_info[0].keys()):
             hpf = session_info[0]['hpf']
             drift_model=self.inputs.drift_model
         else:
@@ -147,7 +147,9 @@ class FitGLM(BaseInterface):
                )
         if self.inputs.normalize_design_matrix:
             for i in range(len(self._reg_names)-1):
-                design_matrix[:,i] = (design_matrix[:,i]-design_matrix[:,i].mean())/design_matrix[:,i].std()
+                design_matrix[:,i] = ((design_matrix[:,i] -
+                                       design_matrix[:,i].mean()) /
+                                      design_matrix[:,i].std())
 
         if self.inputs.plot_design_matrix:
             import pylab

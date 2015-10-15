@@ -7,6 +7,8 @@
    >>> os.chdir(datadir)
 """
 
+from builtins import range
+
 from ..base import (TraitedSpec, File, traits, InputMultiPath)
 from .base import ANTSCommand, ANTSCommandInputSpec
 import os
@@ -379,7 +381,7 @@ class Registration(ANTSCommand):
     """
     Examples
     --------
-    >>> import copy
+    >>> import copy, pprint
     >>> from nipype.interfaces.ants import Registration
     >>> reg = Registration()
     >>> reg.inputs.fixed_image = 'fixed1.nii'
@@ -412,7 +414,7 @@ class Registration(ANTSCommand):
     >>> reg1.inputs.winsorize_lower_quantile = 0.025
     >>> reg1.cmdline
     'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
-    >>> reg1.run()  #doctest: +SKIP
+    >>> reg1.run()  # doctest: +SKIP
 
     >>> reg2 = copy.deepcopy(reg)
     >>> reg2.inputs.winsorize_upper_quantile = 0.975
@@ -442,16 +444,33 @@ class Registration(ANTSCommand):
     >>> reg4.inputs.initialize_transforms_per_stage = True
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
-    >>> print outputs #doctest: +ELLIPSIS
-    {'reverse_invert_flags': [], 'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5', 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [], 'reverse_transforms': [], 'save_state': <undefined>, 'composite_transform': '.../nipype/testing/data/output_Composite.h5', 'forward_transforms': []}
+    >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    {'composite_transform': '.../nipype/testing/data/output_Composite.h5',
+     'forward_invert_flags': [],
+     'forward_transforms': [],
+     'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5',
+     'inverse_warped_image': <undefined>,
+     'reverse_invert_flags': [],
+     'reverse_transforms': [],
+     'save_state': <undefined>,
+     'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
 
     >>> # Test collapse transforms flag
     >>> reg4b = copy.deepcopy(reg4)
     >>> reg4b.inputs.write_composite_transform = False
     >>> outputs = reg4b._list_outputs()
-    >>> print outputs #doctest: +ELLIPSIS
-    {'reverse_invert_flags': [True, False], 'inverse_composite_transform': <undefined>, 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [False, False], 'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'], 'save_state': <undefined>, 'composite_transform': <undefined>, 'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1Warp.nii.gz']}
-    >>> reg4b.aggregate_outputs() #doctest: +SKIP
+    >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    {'composite_transform': <undefined>,
+     'forward_invert_flags': [False, False],
+     'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat',
+     '.../nipype/testing/data/output_1Warp.nii.gz'],
+     'inverse_composite_transform': <undefined>,
+     'inverse_warped_image': <undefined>,
+     'reverse_invert_flags': [True, False],
+     'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'],
+     'save_state': <undefined>,
+     'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
+    >>> reg4b.aggregate_outputs()  # doctest: +SKIP
 
     >>> # Test multiple metrics per stage
     >>> reg5 = copy.deepcopy(reg)
@@ -519,8 +538,8 @@ class Registration(ANTSCommand):
         # Otherwise, make a singleton list of the metric specification
         # from the non-list inputs.
         if isinstance(name_input, list):
-            items = stage_inputs.items()
-            indexes = range(0, len(name_input))
+            items = list(stage_inputs.items())
+            indexes = list(range(0, len(name_input)))
             specs = list()
             for i in indexes:
                 temp = dict([(k, v[i]) for k, v in items])
@@ -550,9 +569,9 @@ class Registration(ANTSCommand):
                                          kwargs['radius_or_bins'])
 
         # The optional sampling strategy.
-        if kwargs.has_key('sampling_strategy'):
+        if 'sampling_strategy' in kwargs:
             sampling_strategy = kwargs['sampling_strategy']
-        elif kwargs.has_key('sampling_percentage'):
+        elif 'sampling_percentage' in kwargs:
             # The sampling percentage is specified but not the
             # sampling strategy. Use the default strategy.
             sampling_strategy = Registration.DEF_SAMPLING_STRATEGY
@@ -561,7 +580,7 @@ class Registration(ANTSCommand):
         # Format the optional sampling arguments.
         if sampling_strategy:
             retval += ', %s' % sampling_strategy
-            if kwargs.has_key('sampling_percentage'):
+            if 'sampling_percentage' in kwargs:
                 retval += ', %g' % kwargs['sampling_percentage']
 
         retval += ' ]'
@@ -711,7 +730,7 @@ class Registration(ANTSCommand):
                                            'Translation': 'Translation.mat',
                                            'BSpline': 'BSpline.txt',
                                            'Initial': 'DerivedInitialMovingTranslation.mat'}
-        if transform in self.lowDimensionalTransformMap.keys():
+        if transform in list(self.lowDimensionalTransformMap.keys()):
             suffix = self.lowDimensionalTransformMap[transform]
             inverse_mode = inverse
         else:

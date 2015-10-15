@@ -19,6 +19,9 @@ NOTE: this is a modified version of a script originally shipped with the
 PyMVPA project, which we've adapted for NIPY use.  PyMVPA is an MIT-licensed
 project."""
 
+from __future__ import print_function
+from builtins import object
+
 # Stdlib imports
 import inspect
 import os
@@ -260,7 +263,7 @@ class InterfaceHelpWriter(object):
                 workflows.append((workflow,function, finst))
 
         if not classes and not workflows and not helper_functions:
-            print 'WARNING: Empty -',uri  # dbg
+            print('WARNING: Empty -',uri)  # dbg
             return ''
 
         # Make a shorter version of the uri that omits the package name for
@@ -286,13 +289,13 @@ class InterfaceHelpWriter(object):
         #    self.rst_section_levels[2] * 7 + '\n'
         for c in classes:
             __import__(uri)
-            print c
+            print(c)
             try:
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     classinst = sys.modules[uri].__dict__[c]
             except Exception as inst:
-                print inst
+                print(inst)
                 continue
 
             if not issubclass(classinst, BaseInterface):

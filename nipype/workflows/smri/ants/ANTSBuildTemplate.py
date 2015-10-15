@@ -9,22 +9,27 @@
 ##      PURPOSE.
 ##
 #################################################################################
+from __future__ import print_function
+from builtins import map
+from builtins import zip
+from builtins import range
 
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as util
-from nipype.interfaces.utility import Function
+from ....pipeline import engine as pe
+from ....interfaces import utility as util
+from ....interfaces.utility import Function
 
-from nipype.interfaces.ants import (
-                                    ANTS,
-                                    WarpImageMultiTransform,
-                                    AverageImages, MultiplyImages,
-                                    AverageAffineTransform)
+from ....interfaces.ants import (ANTS,
+                                 WarpImageMultiTransform,
+                                 AverageImages, MultiplyImages,
+                                 AverageAffineTransform)
+
 
 def GetFirstListElement(this_list):
     return this_list[0]
 
 def MakeTransformListWithGradientWarps(averageAffineTranform, gradientStepWarp):
     return [averageAffineTranform, gradientStepWarp, gradientStepWarp, gradientStepWarp, gradientStepWarp]
+
 def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes):
     import os
     """ Now make a list of lists of images where the outter list is per image type,
@@ -44,14 +49,14 @@ def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes)
         curr_name=flattened_image_nametypes[index]
         curr_file=deformedPassiveImages[index]
         image_dictionary_of_lists[curr_name].append(curr_file)
-    for image_type,image_list in image_dictionary_of_lists.items():
+    for image_type,image_list in list(image_dictionary_of_lists.items()):
         nested_imagetype_list.append(image_list)
         outputAverageImageName_list.append('AVG_'+image_type+'.nii.gz')
         image_type_list.append('WARP_AVG_'+image_type)
-    print "\n"*10
-    print "HACK: ", nested_imagetype_list
-    print "HACK: ", outputAverageImageName_list
-    print "HACK: ", image_type_list
+    print("\n"*10)
+    print("HACK: ", nested_imagetype_list)
+    print("HACK: ", outputAverageImageName_list)
+    print("HACK: ", image_type_list)
     return nested_imagetype_list,outputAverageImageName_list,image_type_list
 
 ## Utility Function
@@ -62,7 +67,7 @@ def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes)
 ## ll
 ##[['af1.mat', 'wp1.nii'], ['af2.mat', 'wp2.nii'], ['af3.mat', 'wp3.nii']]
 def MakeListsOfTransformLists(warpTransformList, AffineTransformList):
-    return map(list, zip(warpTransformList,AffineTransformList))
+    return list(map(list, list(zip(warpTransformList,AffineTransformList))))
 
 ## Flatten and return equal length transform and images lists.
 def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transformation_series):
@@ -71,7 +76,7 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transformation
     subjCount=len(ListOfPassiveImagesDictionaries)
     tranCount=len(transformation_series)
     if subjCount != tranCount:
-        print "ERROR:  subjCount must equal tranCount {0} != {1}".format(subjCount,tranCount)
+        print("ERROR:  subjCount must equal tranCount {0} != {1}".format(subjCount,tranCount))
         sys.exit(-1)
     flattened_images=list()
     flattened_image_nametypes=list()
@@ -83,7 +88,7 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transformation
         #    sys.exit(-1)
         subjImgDictionary=ListOfPassiveImagesDictionaries[subjIndex]
         subjToAtlasTransform=transformation_series[subjIndex]
-        for imgname,img in subjImgDictionary.items():
+        for imgname,img in list(subjImgDictionary.items()):
             flattened_images.append(img)
             flattened_image_nametypes.append(imgname)
             flattened_transforms.append(subjToAtlasTransform)

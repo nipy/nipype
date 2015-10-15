@@ -9,23 +9,21 @@
 """
 
 from __future__ import absolute_import
+
 import os
 import string
 import errno
 from os import path as op
 from glob import glob
-from nipype.interfaces.base import (TraitedSpec,
-                                    DynamicTraitedSpec,
-                                    InputMultiPath,
-                                    File,
-                                    Directory,
-                                    traits,
-                                    BaseInterface,
-                                   )
+
 import nibabel as nb
-from nipype.interfaces.traits_extension import isdefined, Undefined
 import imghdr
-from nipype.external import six
+
+from .base import (TraitedSpec, DynamicTraitedSpec,
+                   InputMultiPath, File, Directory,
+                   traits, BaseInterface)
+from .traits_extension import isdefined, Undefined
+from ..external.six import string_types
 
 have_dcmstack = True
 try:
@@ -131,7 +129,7 @@ class DcmStack(NiftiGeneratorBase):
     output_spec = DcmStackOutputSpec
 
     def _get_filelist(self, trait_input):
-        if isinstance(trait_input, six.string_types):
+        if isinstance(trait_input, string_types):
             if op.isdir(trait_input):
                 return glob(op.join(trait_input, '*.dcm'))
             else:
@@ -184,7 +182,7 @@ class GroupAndStack(DcmStack):
         stacks = dcmstack.parse_and_stack(src_paths)
 
         self.out_list = []
-        for key, stack in stacks.iteritems():
+        for key, stack in stacks.items():
             nw = NiftiWrapper(stack.to_nifti(embed_meta=True))
             const_meta = nw.meta_ext.get_class_dict(('global', 'const'))
             out_path =  self._get_out_path(const_meta)
@@ -246,12 +244,12 @@ class LookupMeta(BaseInterface):
         self._make_name_map()
         outputs = super(LookupMeta, self)._outputs()
         undefined_traits = {}
-        for out_name in self._meta_keys.values():
+        for out_name in list(self._meta_keys.values()):
             outputs.add_trait(out_name, traits.Any)
             undefined_traits[out_name] = Undefined
         outputs.trait_set(trait_change_notify=False, **undefined_traits)
         # Not sure why this is needed
-        for out_name in self._meta_keys.values():
+        for out_name in list(self._meta_keys.values()):
             _ = getattr(outputs, out_name)
         return outputs
 
@@ -260,7 +258,7 @@ class LookupMeta(BaseInterface):
         self._make_name_map()
         nw = NiftiWrapper.from_filename(self.inputs.in_file)
         self.result = {}
-        for meta_key, out_name in self._meta_keys.iteritems():
+        for meta_key, out_name in self._meta_keys.items():
             self.result[out_name] = nw.meta_ext.get_values(meta_key)
 
         return runtime
@@ -367,7 +365,7 @@ class MergeNifti(NiftiGeneratorBase):
               ]
         if self.inputs.sort_order:
             sort_order = self.inputs.sort_order
-            if isinstance(sort_order, six.string_types):
+            if isinstance(sort_order, string_types):
                 sort_order = [sort_order]
             nws.sort(key=make_key_func(sort_order))
         if self.inputs.merge_dim == traits.Undefined:

@@ -18,6 +18,9 @@ These functions include:
 
 """
 
+from __future__ import division
+from builtins import range
+
 from copy import deepcopy
 import os
 
@@ -25,12 +28,12 @@ from nibabel import load
 import numpy as np
 from scipy.special import gammaln
 
-from nipype.interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
-                                    traits, File, Bunch, BaseInterfaceInputSpec,
-                                    isdefined)
-from nipype.utils.filemanip import filename_to_list
+from ..external.six import string_types
+from ..interfaces.base import (BaseInterface, TraitedSpec, InputMultiPath,
+                               traits, File, Bunch, BaseInterfaceInputSpec,
+                               isdefined)
+from ..utils.filemanip import filename_to_list
 from .. import config, logging
-from nipype.external import six
 iflogger = logging.getLogger('interface')
 
 
@@ -77,7 +80,7 @@ def spm_hrf(RT, P=None, fMRI_T=16):
         hrf = gamma.pdf(u, p[0]/p[2], scale=dt/p[2]) -
               gamma.pdf(u, p[1]/p[3], scale=dt/p[3])/p[4]
 
-    >>> print spm_hrf(2)
+    >>> print(spm_hrf(2))
     [  0.00000000e+00   8.65660810e-02   3.74888236e-01   3.84923382e-01
        2.16117316e-01   7.68695653e-02   1.62017720e-03  -3.06078117e-02
       -3.73060781e-02  -3.08373716e-02  -2.05161334e-02  -1.16441637e-02
@@ -138,7 +141,7 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
     if (input_units == 'scans') and (output_units == 'secs'):
         _scalefactor = time_repetition
     if (input_units == 'secs') and (output_units == 'scans'):
-        _scalefactor = 1./time_repetition
+        _scalefactor = 1. / time_repetition
     timelist = [np.max([0., _scalefactor * t]) for t in timelist]
     return timelist
 
@@ -452,7 +455,7 @@ class SpecifySPMModel(SpecifyModel):
         for i, f in enumerate(self.inputs.functional_runs):
             if isinstance(f, list):
                 numscans = len(f)
-            elif isinstance(f, six.string_types):
+            elif isinstance(f, string_types):
                 img = load(f)
                 numscans = img.get_shape()[3]
             else:
@@ -697,9 +700,9 @@ class SpecifySparseModel(SpecifyModel):
         timeline2 = np.zeros((npts))
         reg = []
         regderiv = []
-        for i, trial in enumerate(np.arange(nscans)/nvol):
+        for i, trial in enumerate(np.arange(nscans) / nvol):
             scanstart = int((SCANONSET + trial * TR + (i % nvol) * TA) / dt)
-            scanidx = scanstart+np.arange(int(TA/dt))
+            scanidx = scanstart+np.arange(int(TA / dt))
             timeline2[scanidx] = np.max(timeline)
             reg.insert(i, np.mean(timeline[scanidx]) * reg_scale)
             if isdefined(self.inputs.use_temporal_deriv) and \
@@ -756,7 +759,7 @@ class SpecifySparseModel(SpecifyModel):
         nvol = self.inputs.volumes_in_cluster
         if nvol > 1:
             for i in range(nvol-1):
-                treg = np.zeros((nscans/nvol, nvol))
+                treg = np.zeros((nscans / nvol, nvol))
                 treg[:, i] = 1
                 reg.insert(len(reg), treg.ravel().tolist())
                 regnames.insert(len(regnames), 'T1effect_%d' % i)

@@ -44,6 +44,9 @@ specifically the 2mm versions of:
 
 """
 
+from __future__ import division
+from builtins import range
+
 import os
 
 from nipype.interfaces.base import CommandLine
@@ -91,7 +94,7 @@ def get_info(dicom_files):
     meta = default_extractor(read_file(filename_to_list(dicom_files)[0],
                                        stop_before_pixels=True,
                                        force=True))
-    return (meta['RepetitionTime']/1000., meta['CsaImage.MosaicRefAcqTimes'],
+    return (meta['RepetitionTime'] / 1000., meta['CsaImage.MosaicRefAcqTimes'],
             meta['SpacingBetweenSlices'])
 
 
@@ -116,7 +119,7 @@ def median(in_files):
             average = data
         else:
             average = average + data
-    median_img = nb.Nifti1Image(average/float(idx + 1),
+    median_img = nb.Nifti1Image(average / float(idx + 1),
                                 img.get_affine(), img.get_header())
     filename = os.path.join(os.getcwd(), 'median.nii.gz')
     median_img.to_filename(filename)
@@ -140,7 +143,7 @@ def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
         img = nb.load(filename)
         timepoints = img.shape[-1]
         F = np.zeros((timepoints))
-        lowidx = timepoints/2 + 1
+        lowidx = int(timepoints / 2) + 1
         if lowpass_freq > 0:
             lowidx = np.round(float(lowpass_freq) / fs * timepoints)
         highidx = 0
@@ -257,7 +260,7 @@ def extract_noise_components(realigned_file, mask_file, num_components=5,
         stdX[stdX == 0] = 1.
         stdX[np.isnan(stdX)] = 1.
         stdX[np.isinf(stdX)] = 1.
-        X = (X - np.mean(X, axis=0))/stdX
+        X = (X - np.mean(X, axis=0)) / stdX
         u, _, _ = sp.linalg.svd(X, full_matrices=False)
         if components is None:
             components = u[:, :num_components]
@@ -584,7 +587,7 @@ def create_workflow(files,
                           iterfield=['in_file', 'run'],
                           name='rename')
     name_unique.inputs.keep_ext = True
-    name_unique.inputs.run = range(1, len(files) + 1)
+    name_unique.inputs.run = list(range(1, len(files) + 1))
     name_unique.inputs.in_file = files
 
     realign = Node(nipy.SpaceTimeRealigner(), name="spacetime_realign")
@@ -732,7 +735,7 @@ def create_workflow(files,
                               function=bandpass_filter,
                               imports=imports),
                      name='bandpass_unsmooth')
-    bandpass.inputs.fs = 1./TR
+    bandpass.inputs.fs = 1. / TR
     bandpass.inputs.highpass_freq = highpass_freq
     bandpass.inputs.lowpass_freq = lowpass_freq
     wf.connect(filter2, 'out_res', bandpass, 'files')
@@ -791,9 +794,9 @@ def create_workflow(files,
                           iterfield=['in_file', 'summary_file',
                                      'avgwf_txt_file'],
                           name='aparc_ts')
-    sampleaparc.inputs.segment_id = ([8] + range(10, 14) + [17, 18, 26, 47] +
-                                     range(49, 55) + [58] + range(1001, 1036) +
-                                     range(2001, 2036))
+    sampleaparc.inputs.segment_id = ([8] + list(range(10, 14)) + [17, 18, 26, 47] +
+                                     list(range(49, 55)) + [58] + list(range(1001, 1036)) +
+                                     list(range(2001, 2036)))
 
     wf.connect(registration, 'outputspec.aparc',
                sampleaparc, 'segmentation_file')
@@ -863,8 +866,8 @@ def create_workflow(files,
                               imports=imports),
                      iterfield=['timeseries_file'],
                      name='getsubcortts')
-    ts2txt.inputs.indices = [8] + range(10, 14) + [17, 18, 26, 47] +\
-                            range(49, 55) + [58]
+    ts2txt.inputs.indices = [8] + list(range(10, 14)) + [17, 18, 26, 47] +\
+                            list(range(49, 55)) + [58]
     ts2txt.inputs.label_file = \
         os.path.abspath(('OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_'
                          '2mm_v2.nii.gz'))
@@ -958,7 +961,7 @@ def create_resting_workflow(args, name=None):
     slice_times = args.slice_times
     if args.dicom_file:
         TR, slice_times, slice_thickness = get_info(args.dicom_file)
-        slice_times = (np.array(slice_times)/1000.).tolist()
+        slice_times = (np.array(slice_times) / 1000.).tolist()
 
     if name is None:
         name = 'resting_' + args.subject_id

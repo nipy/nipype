@@ -9,20 +9,26 @@
    >>> os.chdir(datadir)
 """
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import zip
+from builtins import range
+
 import os
 import re
-from cPickle import dumps, loads
+from pickle import dumps
+from textwrap import dedent
 import numpy as np
 import nibabel as nb
-from nipype.external import six
 
-from nipype.utils.filemanip import (filename_to_list, copyfile, split_filename)
-from nipype.interfaces.base import (traits, TraitedSpec, DynamicTraitedSpec, File,
-                                    Undefined, isdefined, OutputMultiPath,
-    InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
-from nipype.interfaces.io import IOBase, add_traits
-from nipype.testing import assert_equal
-from nipype.utils.misc import getsource, create_function_from_source
+from .base import (traits, TraitedSpec, DynamicTraitedSpec, File,
+                   Undefined, isdefined, OutputMultiPath,
+                   InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
+from .io import IOBase, add_traits
+from ..external.six import string_types
+from ..testing import assert_equal
+from ..utils.filemanip import (filename_to_list, copyfile, split_filename)
+from ..utils.misc import getsource, create_function_from_source
 
 
 class IdentityInterface(IOBase):
@@ -188,7 +194,7 @@ class Rename(IOBase):
     >>> rename1.inputs.in_file = "zstat1.nii.gz"
     >>> rename1.inputs.format_string = "Faces-Scenes.nii.gz"
     >>> res = rename1.run()          # doctest: +SKIP
-    >>> print res.outputs.out_file   # doctest: +SKIP
+    >>> res.outputs.out_file         # doctest: +SKIP
     'Faces-Scenes.nii.gz"            # doctest: +SKIP
 
     >>> rename2 = Rename(format_string="%(subject_id)s_func_run%(run)02d")
@@ -197,7 +203,7 @@ class Rename(IOBase):
     >>> rename2.inputs.subject_id = "subj_201"
     >>> rename2.inputs.run = 2
     >>> res = rename2.run()          # doctest: +SKIP
-    >>> print res.outputs.out_file   # doctest: +SKIP
+    >>> res.outputs.out_file         # doctest: +SKIP
     'subj_201_func_run02.nii'        # doctest: +SKIP
 
     >>> rename3 = Rename(format_string="%(subject_id)s_%(seq)s_run%(run)02d.nii")
@@ -206,7 +212,7 @@ class Rename(IOBase):
     >>> rename3.inputs.subject_id = "subj_201"
     >>> rename3.inputs.run = 2
     >>> res = rename3.run()          # doctest: +SKIP
-    >>> print res.outputs.out_file   # doctest: +SKIP
+    >>> res.outputs.out_file         # doctest: +SKIP
     'subj_201_epi_run02.nii'         # doctest: +SKIP
 
     """
@@ -401,8 +407,8 @@ class Function(IOBase):
                     raise Exception('Interface Function does not accept ' \
                                     'function objects defined interactively ' \
                                     'in a python session')
-            elif isinstance(function, six.string_types):
-                self.inputs.function_str = dumps(function)
+            elif isinstance(function, string_types):
+                self.inputs.function_str = function
             else:
                 raise Exception('Unknown type of function')
         self.inputs.on_trait_change(self._set_function_string,
@@ -419,8 +425,8 @@ class Function(IOBase):
         if name == 'function_str':
             if hasattr(new, '__call__'):
                 function_source = getsource(new)
-            elif isinstance(new, six.string_types):
-                function_source = dumps(new)
+            elif isinstance(new, string_types):
+                function_source = new
             self.inputs.trait_set(trait_change_notify=False,
                                   **{'%s' % name: function_source})
 

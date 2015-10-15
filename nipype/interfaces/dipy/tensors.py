@@ -5,23 +5,22 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-
-from nipype.interfaces.base import (
-    TraitedSpec, BaseInterface, File)
-from nipype.utils.filemanip import split_filename
 import os.path as op
-import nibabel as nb
-import numpy as np
-from nipype.utils.misc import package_check
 import warnings
 
+import nibabel as nb
+import numpy as np
+
+from ..base import (TraitedSpec, BaseInterface, File)
+from ...utils.filemanip import split_filename
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_dipy = True
 try:
     package_check('dipy', version='0.6.0')
-except Exception, e:
+except Exception as e:
     have_dipy = False
 else:
     import dipy.reconst.dti as dti

@@ -2,12 +2,10 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for join expansion
 """
-from copy import deepcopy
+
 import os
 from shutil import rmtree
 from tempfile import mkdtemp
-
-import networkx as nx
 
 from nipype.testing import (assert_equal, assert_true)
 import nipype.interfaces.base as nib
@@ -399,7 +397,7 @@ def test_multifield_join_node():
     assert_equal(len(result.nodes()), 10,
                  "The number of expanded nodes is incorrect.")
     # the product inputs are [2, 4], [2, 5], [3, 4], [3, 5]
-    assert_equal(_products, [8, 10, 12, 15],
+    assert_equal(set(_products), set([8, 10, 12, 15]),
                  "The post-join products is incorrect: %s." % _products)
 
     os.chdir(cwd)

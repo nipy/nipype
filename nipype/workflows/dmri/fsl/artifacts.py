@@ -1,16 +1,19 @@
 # coding: utf-8
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-import os
+from __future__ import division
 
-import nipype.pipeline.engine as pe
-from nipype.interfaces.io import JSONFileGrabber
-from nipype.interfaces import utility as niu
-from nipype.interfaces import freesurfer as fs
-from nipype.interfaces import ants
-from nipype.interfaces import fsl
-from .utils import *
-
+from ....interfaces.io import JSONFileGrabber
+from ....interfaces import utility as niu
+from ....interfaces import ants
+from ....interfaces import fsl
+from ....pipeline import engine as pe
+from .utils import (b0_indices, time_avg, apply_all_corrections, b0_average,
+                    hmc_split, dwi_flirt, eddy_rotate_bvecs, rotate_bvecs,
+                    insert_mat, extract_bval, recompose_dwi, recompose_xfm,
+                    siemens2rads, rads2radsec, demean_image,
+                    cleanup_edge_pipeline, add_empty_vol, vsm2warp,
+                    compute_readout,)
 
 def all_fmb_pipeline(name='hmc_sdc_ecc', fugue_params=dict(smooth3d=2.0)):
     """
@@ -535,7 +538,7 @@ def sdc_fmb(name='fmb_correction', interp='Linear',
     >>> from nipype.workflows.dmri.fsl.artifacts import sdc_fmb
     >>> fmb = sdc_fmb()
     >>> fmb.inputs.inputnode.in_file = 'diffusion.nii'
-    >>> fmb.inputs.inputnode.in_ref = range(0, 30, 6)
+    >>> fmb.inputs.inputnode.in_ref = list(range(0, 30, 6))
     >>> fmb.inputs.inputnode.in_mask = 'mask.nii'
     >>> fmb.inputs.inputnode.bmap_mag = 'magnitude.nii'
     >>> fmb.inputs.inputnode.bmap_pha = 'phase.nii'

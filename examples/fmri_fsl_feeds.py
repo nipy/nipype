@@ -13,6 +13,9 @@ You can find it at http://www.fmrib.ox.ac.uk/fsl/feeds/doc/index.html
 
 """
 
+from __future__ import division
+from builtins import range
+
 import os                                    # system functions
 
 import nipype.interfaces.io as nio           # Data i/o
@@ -34,7 +37,6 @@ routines is being set to compressed NIFTI.
 """
 
 fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
-
 
 
 """
@@ -69,7 +71,7 @@ datasource.inputs.sort_filelist = True
 preproc = create_featreg_preproc(whichvol='first')
 TR = 3.
 preproc.inputs.inputspec.fwhm = 5
-preproc.inputs.inputspec.highpass = 100/TR
+preproc.inputs.inputspec.highpass = 100. / TR
 
 modelspec = pe.Node(interface=model.SpecifyModel(),
                     name="modelspec")
@@ -77,13 +79,13 @@ modelspec.inputs.input_units = 'secs'
 modelspec.inputs.time_repetition = TR
 modelspec.inputs.high_pass_filter_cutoff = 100
 modelspec.inputs.subject_info = [Bunch(conditions=['Visual','Auditory'],
-                                onsets=[range(0,int(180*TR),60),range(0,int(180*TR),90)],
-                                durations=[[30], [45]],
-                                amplitudes=None,
-                                tmod=None,
-                                pmod=None,
-                                regressor_names=None,
-                                regressors=None)]
+                                 onsets=[list(range(0,int(180*TR),60)),list(range(0,int(180*TR),90))],
+                                 durations=[[30], [45]],
+                                 amplitudes=None,
+                                 tmod=None,
+                                 pmod=None,
+                                 regressor_names=None,
+                                 regressors=None)]
 
 modelfit = create_modelfit_workflow(f_contrasts=True)
 modelfit.inputs.inputspec.interscan_interval = TR
@@ -141,4 +143,3 @@ generate any output. To actually run the analysis on the data the
 
 if __name__ == '__main__':
     l1pipeline.run()
-

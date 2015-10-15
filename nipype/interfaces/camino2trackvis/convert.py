@@ -1,4 +1,6 @@
 """
+Provides interfaces to various commands provided by Camino-Trackvis
+
     Change directory to provide relative paths for doctests
     >>> import os
     >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
@@ -6,12 +8,11 @@
     >>> os.chdir(datadir)
 
 """
-
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
-from nipype.utils.filemanip import split_filename
 import os
 
-"""Provides interfaces to various commands provided by Camino-Trackvis """
+from ..base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
+from ...utils.filemanip import split_filename
+
 
 class Camino2TrackvisInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='-i %s', mandatory=True, position=1,

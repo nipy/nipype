@@ -8,6 +8,8 @@ To use this code, run::
     python setup.py build_sphinx
 """
 
+from __future__ import print_function
+
 # Standard library imports
 import sys
 import os
@@ -43,7 +45,7 @@ class TempInstall(Command):
         install.run()
 
         # Horrible trick to reload nipype with our temporary instal
-        for key in sys.modules.keys():
+        for key in list(sys.modules.keys()):
             if key.startswith('nipype'):
                 sys.modules.pop(key, None)
         sys.path.append(os.path.abspath(self.temp_install_dir))
@@ -131,7 +133,7 @@ else:
 
         def zip_docs(self):
             if not os.path.exists(DOC_BUILD_DIR):
-                raise OSError, 'Doc directory does not exist.'
+                raise OSError('Doc directory does not exist.')
             target_file = os.path.join('doc', 'documentation.zip')
             # ZIP_DEFLATED actually compresses the archive. However, there
             # will be a RuntimeError if zlib is not installed, so we check
@@ -170,17 +172,17 @@ class Clean(clean):
         clean.run(self)
         api_path = os.path.join('doc', 'api', 'generated')
         if os.path.exists(api_path):
-            print "Removing %s" % api_path
+            print("Removing %s" % api_path)
             shutil.rmtree(api_path)
         interface_path = os.path.join('doc', 'interfaces', 'generated')
         if os.path.exists(interface_path):
-            print "Removing %s" % interface_path
+            print("Removing %s" % interface_path)
             shutil.rmtree(interface_path)
         if os.path.exists(DOC_BUILD_DIR):
-            print "Removing %s" % DOC_BUILD_DIR
+            print("Removing %s" % DOC_BUILD_DIR)
             shutil.rmtree(DOC_BUILD_DIR)
         if os.path.exists(DOC_DOCTREES_DIR):
-            print "Removing %s" % DOC_DOCTREES_DIR
+            print("Removing %s" % DOC_DOCTREES_DIR)
             shutil.rmtree(DOC_DOCTREES_DIR)
 
 

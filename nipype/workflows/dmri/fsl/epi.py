@@ -1,10 +1,14 @@
 # coding: utf-8
 
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as niu
-import nipype.interfaces.fsl as fsl
-import os
+from __future__ import division
+
 import warnings
+
+from ....pipeline import engine as pe
+from ....interfaces import utility as niu
+from ....interfaces import fsl as fsl
+
+
 
 def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fieldmap_registration=False):
     """
@@ -704,7 +708,7 @@ def _cat_logs(in_files):
 
 
 def _compute_dwelltime(dwell_time=0.68, pi_factor=1.0, is_reverse_encoding=False):
-    dwell_time *= (1.0/pi_factor)
+    dwell_time *= (1.0 / pi_factor)
 
     if is_reverse_encoding:
         dwell_time *= -1.0
@@ -712,7 +716,7 @@ def _compute_dwelltime(dwell_time=0.68, pi_factor=1.0, is_reverse_encoding=False
     return dwell_time
 
 def _effective_echospacing( dwell_time, pi_factor=1.0 ):
-    dwelltime = 1.0e-3 * dwell_time * ( 1.0/pi_factor )
+    dwelltime = 1.0e-3 * dwell_time * (1.0 / pi_factor)
     return dwelltime
 
 
@@ -723,7 +727,7 @@ def _prepare_phasediff(in_file):
     img = nib.load(in_file)
     max_diff = np.max(img.get_data().reshape(-1))
     min_diff = np.min(img.get_data().reshape(-1))
-    A = (2.0 * np.pi)/(max_diff-min_diff)
+    A = (2.0 * np.pi) / (max_diff-min_diff)
     B = np.pi - (A * max_diff)
     diff_norm = img.get_data() * A + B
 

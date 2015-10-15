@@ -96,9 +96,11 @@ Using interfaces
 Having interfaces allows us to use third party software (like FSL BET) as function. Look how simple it is.
 """
 
+from __future__ import print_function
+
 import nipype.interfaces.fsl as fsl
 result = fsl.BET(in_file='data/s1/struct.nii').run()
-print result
+print(result)
 
 """
 Running a single program is not much of a breakthrough. Lets run motion correction followed by smoothing
@@ -231,20 +233,20 @@ datasource1 = nio.DataGrabber()
 datasource1.inputs.template = 'data/s1/f3.nii'
 datasource1.inputs.sort_filelist = True
 results = datasource1.run()
-print results.outputs
+print(results.outputs)
 
 datasource2 = nio.DataGrabber()
 datasource2.inputs.template = 'data/s*/f*.nii'
 datasource2.inputs.sort_filelist = True
 results = datasource2.run()
-print results.outputs
+print(results.outputs)
 
 datasource3 = nio.DataGrabber(infields=['run'])
 datasource3.inputs.template = 'data/s1/f%d.nii'
 datasource3.inputs.sort_filelist = True
 datasource3.inputs.run = [3, 7]
 results = datasource3.run()
-print results.outputs
+print(results.outputs)
 
 datasource4 = nio.DataGrabber(infields=['subject_id', 'run'])
 datasource4.inputs.template = 'data/%s/f%d.nii'
@@ -252,7 +254,7 @@ datasource4.inputs.sort_filelist = True
 datasource4.inputs.run = [3, 7]
 datasource4.inputs.subject_id = ['s1', 's3']
 results = datasource4.run()
-print results.outputs
+print(results.outputs)
 
 """
 Iterables

@@ -6,11 +6,13 @@
     >>> os.chdir(datadir)
 
 """
-from nipype.interfaces.base import (traits, TraitedSpec, File,
-                                    CommandLine, CommandLineInputSpec, isdefined,
-                                    InputMultiPath)
-from nipype.utils.filemanip import split_filename
 import os
+
+from ..base import (traits, TraitedSpec, File,
+                   CommandLine, CommandLineInputSpec, isdefined,
+                   InputMultiPath)
+from ...utils.filemanip import split_filename
+
 
 class ImageStatsInputSpec(CommandLineInputSpec):
     in_files = InputMultiPath(File(exists=True), argstr='-images %s', mandatory=True,

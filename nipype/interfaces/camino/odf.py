@@ -8,10 +8,11 @@
 """
 import os
 
-from nipype.interfaces.base import (CommandLineInputSpec, CommandLine, traits,
-                                    TraitedSpec, File, StdOutCommandLine,
-                                    StdOutCommandLineInputSpec, isdefined)
-from nipype.utils.filemanip import split_filename
+from ..base import (CommandLineInputSpec, CommandLine, traits,
+                    TraitedSpec, File, StdOutCommandLine,
+                    StdOutCommandLineInputSpec, isdefined)
+from ...utils.filemanip import split_filename
+
 
 class QBallMXInputSpec(StdOutCommandLineInputSpec):
     basistype = traits.Enum('rbf', 'sh', argstr='-basistype %s',

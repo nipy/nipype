@@ -11,29 +11,25 @@ measures to evaluate results from other processing units.
     >>> os.chdir(datadir)
 
 '''
+from __future__ import division
+from builtins import zip
+from builtins import range
 
 import os
 import os.path as op
 
 import nibabel as nb
 import numpy as np
-from math import floor, ceil
-from scipy.ndimage.morphology import grey_dilation
 from scipy.ndimage.morphology import binary_erosion
 from scipy.spatial.distance import cdist, euclidean, dice, jaccard
 from scipy.ndimage.measurements import center_of_mass, label
-from scipy.special import legendre
-import scipy.io as sio
-import itertools
-import scipy.stats as stats
 
 from .. import logging
 from ..utils.misc import package_check
 
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
-                               InputMultiPath, OutputMultiPath,
+                               InputMultiPath,
                                BaseInterfaceInputSpec, isdefined)
-from ..utils.filemanip import fname_presuffix, split_filename
 iflogger = logging.getLogger('interface')
 
 
@@ -288,7 +284,7 @@ class Overlap(BaseInterface):
 
         if self.inputs.vol_units == 'mm':
             voxvol = nii1.get_header().get_zooms()
-            for i in xrange(nii1.get_data().ndim-1):
+            for i in range(nii1.get_data().ndim-1):
                 scale = scale * voxvol[i]
 
         data1 = nii1.get_data()
@@ -339,8 +335,8 @@ class Overlap(BaseInterface):
 
         self._labels = labels
         self._ove_rois = results
-        self._vol_rois = ((np.array(volumes1) - np.array(volumes2)) /
-                          np.array(volumes1))
+        self._vol_rois = (np.array(volumes1)
+                          - np.array(volumes2)) / np.array(volumes1)
 
         self._dice = round(np.sum(weights*results['dice']), 5)
         self._jaccard = round(np.sum(weights*results['jaccard']), 5)
@@ -434,21 +430,22 @@ class FuzzyOverlap(BaseInterface):
         for ref_comp, tst_comp, diff_comp in zip( img_ref, img_tst, diff_im ):
             num = np.minimum( ref_comp, tst_comp )
             ddr = np.maximum( ref_comp, tst_comp )
-            diff_comp[ddr>0]+= 1.0-(num[ddr>0]/ddr[ddr>0])
-            self._jaccards.append( np.sum( num ) / np.sum( ddr ) )
-            volumes.append( np.sum( ref_comp ) )
+            diff_comp[ddr>0] += 1.0 - (num[ddr>0] / ddr[ddr>0])
+            self._jaccards.append(np.sum(num) / np.sum(ddr))
+            volumes.append(np.sum(ref_comp))
 
-        self._dices = 2.0*np.array(self._jaccards) / (np.array(self._jaccards) +1.0 )
+        self._dices = 2.0 * (np.array(self._jaccards) /
+                             (np.array(self._jaccards) + 1.0))
 
         if self.inputs.weighting != "none":
             weights = 1.0 / np.array(volumes)
             if self.inputs.weighting == "squared_vol":
-                weights = weights**2
+                weights = weights ** 2
 
-        weights = weights / np.sum( weights )
+        weights = weights / np.sum(weights)
 
-        setattr( self, '_jaccard',  np.sum( weights * self._jaccards ) )
-        setattr( self, '_dice', np.sum( weights * self._dices ) )
+        setattr(self, '_jaccard',  np.sum( weights * self._jaccards ) )
+        setattr(self, '_dice', np.sum( weights * self._dices ) )
 
 
         diff = np.zeros( diff_im[0].shape )
@@ -630,7 +627,7 @@ class Similarity(BaseInterface):
     def __init__(self, **inputs):
         try:
             package_check('nipy')
-        except Exception, e:
+        except Exception as e:
             self._have_nipy = False
         super(Similarity,self).__init__(**inputs)
 

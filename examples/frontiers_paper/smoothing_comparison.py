@@ -6,6 +6,7 @@ Paper: Smoothing comparison
 ===========================
 """
 
+from builtins import range
 
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
@@ -91,8 +92,8 @@ preprocessing.connect(merge_smoothed_files, 'out', select_smoothed_files,
                       'inlist')
 
 def chooseindex(roi):
-    return {'isotropic_voxel':range(0,4), 'anisotropic_voxel':range(4,8),
-            'isotropic_surface':range(8,12)}[roi]
+    return {'isotropic_voxel':list(range(0,4)), 'anisotropic_voxel':list(range(4,8)),
+            'isotropic_surface':list(range(8,12))}[roi]
 
 preprocessing.connect(iter_smoothing_method, ("smoothing_method", chooseindex),
                       select_smoothed_files, 'index')
@@ -108,8 +109,8 @@ specify_model.inputs.input_units             = 'secs'
 specify_model.inputs.time_repetition         = 3.
 specify_model.inputs.high_pass_filter_cutoff = 120
 specify_model.inputs.subject_info = [Bunch(conditions=['Task-Odd','Task-Even'],
-                                           onsets=[range(15,240,60),
-                                                   range(45,240,60)],
+                                           onsets=[list(range(15,240,60)),
+                                                   list(range(45,240,60))],
                                            durations=[[15], [15]])]*4
 
 level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")

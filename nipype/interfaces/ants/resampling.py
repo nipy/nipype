@@ -6,13 +6,14 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+
+from builtins import range
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec
 from ..base import (TraitedSpec, File, traits,
-                    isdefined)
+                    isdefined, InputMultiPath)
 from ...utils.filemanip import split_filename
-from nipype.interfaces.base import InputMultiPath
 
 
 class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):

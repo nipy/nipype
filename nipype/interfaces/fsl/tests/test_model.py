@@ -1,5 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from builtins import open
+
 import os
 import tempfile
 import shutil
@@ -21,7 +23,7 @@ def setup_infile():
     ext = Info.output_type_to_ext(Info.output_type())
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo' + ext)
-    file(tmp_infile, 'w')
+    open(tmp_infile, 'w')
     os.chdir(tmp_dir)
     return tmp_infile, tmp_dir
 
@@ -80,9 +82,9 @@ def test_MultipleRegressDesign():
 1
 1
 """
-    yield assert_equal, open(os.path.join(os.getcwd(),'design.con'), 'r').read(), design_con_expected_content
-    yield assert_equal, open(os.path.join(os.getcwd(),'design.mat'), 'r').read(), design_mat_expected_content
-    yield assert_equal, open(os.path.join(os.getcwd(),'design.fts'), 'r').read(), design_fts_expected_content
-    yield assert_equal, open(os.path.join(os.getcwd(),'design.grp'), 'r').read(), design_grp_expected_content
+    yield assert_equal, open(os.path.join(os.getcwd(), 'design.con'), 'r').read(), design_con_expected_content
+    yield assert_equal, open(os.path.join(os.getcwd(), 'design.mat'), 'r').read(), design_mat_expected_content
+    yield assert_equal, open(os.path.join(os.getcwd(), 'design.fts'), 'r').read(), design_fts_expected_content
+    yield assert_equal, open(os.path.join(os.getcwd(), 'design.grp'), 'r').read(), design_grp_expected_content
 
     teardown_infile(tp_dir)
