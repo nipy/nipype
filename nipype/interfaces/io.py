@@ -584,6 +584,7 @@ class DataSink(IOBase):
                 src_md5 = hashlib.md5(src_read).hexdigest()
                 # Move to next loop iteration
                 if dst_md5 == src_md5:
+                    iflogger.info('File %s already exists on S3, skipping...' % dst_f)
                     continue
                 else:
                     iflogger.info('Overwriting previous S3 file...')
