@@ -134,7 +134,7 @@ class IOBase(BaseInterface):
 # Class to track percentage of S3 file upload
 class ProgressPercentage(object):
     '''
-    Call-able class instsance (via __call__ method) that displays
+    Callable class instsance (via __call__ method) that displays
     upload percentage of a file to S3
     '''
 
@@ -367,7 +367,7 @@ class DataSink(IOBase):
     def _check_s3_base_dir(self):
         '''
         Method to see if the datasink's base directory specifies an
-        S3 bucket path; it it does, it parses the path for the bucket
+        S3 bucket path; if it does, it parses the path for the bucket
         name in the form 's3://bucket_name/...' and adds a bucket
         attribute to the data sink instance, i.e. self.bucket
 
@@ -451,7 +451,7 @@ class DataSink(IOBase):
     # Fetch bucket object
     def _fetch_bucket(self, bucket_name):
         '''
-        Method to a return a bucket object which can be used to interact
+        Method to return a bucket object which can be used to interact
         with an AWS S3 bucket using credentials found in a local file.
 
         Parameters
