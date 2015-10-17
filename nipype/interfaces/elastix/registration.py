@@ -95,7 +95,7 @@ class Registration(CommandLine):
             warped_file = None
             if config['WriteResultImage']:
                 warped_file = op.join(out_dir,
-                                      'result.%01d.%s' %(i,config['ResultImageFormat']))
+                                      'result.%01d.%s' % (i,config['ResultImageFormat']))
 
             outputs['warped_files'].append(warped_file)
             outputs['warped_files_flags'].append(config['WriteResultImage'])

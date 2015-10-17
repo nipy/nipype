@@ -227,7 +227,7 @@ def create_camino_dti_pipeline(name="dtiproc"):
                                                    (('dwi', get_data_dims), 'data_dims')])])
 
 
-    inputnode= pe.Node(interface = util.IdentityInterface(fields=["dwi", "bvecs", "bvals"]), name="inputnode")
+    inputnode = pe.Node(interface = util.IdentityInterface(fields=["dwi", "bvecs", "bvals"]), name="inputnode")
 
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["fa",
                                                                     "trace",
@@ -237,7 +237,7 @@ def create_camino_dti_pipeline(name="dtiproc"):
                          name="outputnode")
 
     workflow = pe.Workflow(name=name)
-    workflow.base_output_dir=name
+    workflow.base_output_dir = name
 
     workflow.connect([(inputnode, tractography, [("dwi", "inputnode1.dwi"),
                                                  ("bvals", "inputnode1.bvals"),

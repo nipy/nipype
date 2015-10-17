@@ -708,7 +708,7 @@ def generate_expanded_graph(graph_in):
                         expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug("The join node %s input %s was expanded"
-                             " to %d nodes." %(jnode, in_id, len(in_nodes)))
+                             " to %d nodes." % (jnode, in_id, len(in_nodes)))
             # preserve the node iteration order by sorting on the node id
             for in_nodes in list(expansions.values()):
                 in_nodes.sort(key=lambda node: node._id)
@@ -1187,9 +1187,9 @@ def topological_sort(graph, depth_first=False):
     if not depth_first:
         return nodesort, None
     logger.debug("Performing depth first search")
-    nodes=[]
-    groups=[]
-    group=0
+    nodes = []
+    groups = []
+    group = 0
     G = nx.Graph()
     G.add_nodes_from(graph.nodes())
     G.add_edges_from(graph.edges())

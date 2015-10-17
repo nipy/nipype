@@ -151,7 +151,7 @@ class MatlabCommand(CommandLine):
         if name in ['script']:
             argstr = trait_spec.argstr
             if self.inputs.uses_mcr:
-                argstr='%s'
+                argstr = '%s'
             return self._gen_matlab_command(argstr, value)
         return super(MatlabCommand, self)._format_arg(name, trait_spec, value)
 

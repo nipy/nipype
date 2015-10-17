@@ -125,23 +125,23 @@ extract the volume with b=0 (nodif_brain)
 """
 
 fslroi = pe.Node(interface=fsl.ExtractROI(),name='fslroi')
-fslroi.inputs.t_min=0
-fslroi.inputs.t_size=1
+fslroi.inputs.t_min = 0
+fslroi.inputs.t_size = 1
 
 """
 create a brain mask from the nodif_brain
 """
 
 bet = pe.Node(interface=fsl.BET(),name='bet')
-bet.inputs.mask=True
-bet.inputs.frac=0.34
+bet.inputs.mask = True
+bet.inputs.frac = 0.34
 
 """
 correct the diffusion weighted images for eddy_currents
 """
 
 eddycorrect = create_eddy_correct_pipeline('eddycorrect')
-eddycorrect.inputs.inputnode.ref_num=0
+eddycorrect.inputs.inputnode.ref_num = 0
 
 """
 compute the diffusion tensor in each voxel

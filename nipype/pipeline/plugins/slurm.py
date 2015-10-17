@@ -35,7 +35,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
 
     def __init__(self, **kwargs):
 
-        template="#!/bin/bash"
+        template = "#!/bin/bash"
 
         self._retry_timeout = 2
         self._max_tries = 2

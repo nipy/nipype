@@ -152,7 +152,7 @@ def test_threshold(fsl_output_type=None):
     yield assert_equal, thresh.cmdline, cmdline%("-thrP "+val)
     thresh = fsl.Threshold(in_file="a.nii",out_file="b.nii",thresh=42,direction="above")
     yield assert_equal, thresh.cmdline, cmdline%("-uthr "+val)
-    thresh.inputs.use_robust_range=True
+    thresh.inputs.use_robust_range = True
     yield assert_equal, thresh.cmdline, cmdline%("-uthrp "+val)
     thresh.inputs.use_nonzero_voxels = True
     yield assert_equal, thresh.cmdline, cmdline%("-uthrP "+val)
@@ -179,7 +179,7 @@ def test_meanimage(fsl_output_type=None):
     # Test the other dimensions
     cmdline = "fslmaths a.nii -%smean b.nii"
     for dim in ["X","Y","Z","T"]:
-        meaner.inputs.dimension=dim
+        meaner.inputs.dimension = dim
         yield assert_equal, meaner.cmdline, cmdline%dim
 
     # Test the auto naming
@@ -207,7 +207,7 @@ def test_maximage(fsl_output_type=None):
     # Test the other dimensions
     cmdline = "fslmaths a.nii -%smax b.nii"
     for dim in ["X","Y","Z","T"]:
-        maxer.inputs.dimension=dim
+        maxer.inputs.dimension = dim
         yield assert_equal, maxer.cmdline, cmdline%dim
 
     # Test the auto naming

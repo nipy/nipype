@@ -36,7 +36,7 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
                         name='inputspec')
 
     autorecon1 = pe.Node(fs.ReconAll(), name="autorecon1")
-    autorecon1.plugin_args={'submit_specs': 'request_memory = 2500'}
+    autorecon1.plugin_args = {'submit_specs': 'request_memory = 2500'}
     autorecon1.inputs.directive = "autorecon1"
     autorecon1.inputs.args = "-noskullstrip"
     autorecon1._interface._can_resume = False
@@ -63,7 +63,7 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
 
 
     autorecon_resume = pe.Node(fs.ReconAll(), name="autorecon_resume")
-    autorecon_resume.plugin_args={'submit_specs': 'request_memory = 2500'}
+    autorecon_resume.plugin_args = {'submit_specs': 'request_memory = 2500'}
     autorecon_resume.inputs.args = "-no-isrunning"
     wf.connect(masks, "subjects_dir", autorecon_resume, "subjects_dir")
     wf.connect(masks, "subject_id", autorecon_resume, "subject_id")

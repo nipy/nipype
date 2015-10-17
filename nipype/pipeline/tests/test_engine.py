@@ -168,7 +168,7 @@ def test8():
     edgenum = sorted([(len(pipe._execgraph.in_edges(node)) + \
                        len(pipe._execgraph.out_edges(node))) \
                       for node in pipe._execgraph.nodes()])
-    yield assert_true, edgenum[0]>0
+    yield assert_true, edgenum[0] > 0
 
 def test_expansion():
     pipe1 = pe.Workflow(name='pipe1')
@@ -691,7 +691,7 @@ def test_serial_input():
     yield assert_false, error_raised
 
     # test output of num_subnodes method when serial is True
-    n1._serial=True
+    n1._serial = True
     yield assert_equal, n1.num_subnodes(), 1
 
     # test running the workflow on serial conditions

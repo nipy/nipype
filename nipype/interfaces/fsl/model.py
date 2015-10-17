@@ -387,17 +387,17 @@ class FEAT(FSLCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         is_ica = False
-        outputs['feat_dir']=None
+        outputs['feat_dir'] = None
         with open(self.inputs.fsf_file, 'rt') as fp:
             text = fp.read()
             if "set fmri(inmelodic) 1" in text:
                 is_ica = True
             for line in text.split('\n'):
-                if line.find("set fmri(outputdir)")>-1:
+                if line.find("set fmri(outputdir)") > -1:
                     try:
-                        outputdir_spec=line.split('"')[-2]
+                        outputdir_spec = line.split('"')[-2]
                         if os.path.exists(outputdir_spec):
-                            outputs['feat_dir']=outputdir_spec
+                            outputs['feat_dir'] = outputdir_spec
 
                     except:
                         pass

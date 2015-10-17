@@ -1250,31 +1250,31 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
                 fext = fext2 + fext
 
             out_file = op.abspath('%s_norm_%02d%s' % (fname,i,fext))
-            out_files+= [out_file]
+            out_files += [out_file]
 
     imgs = [nib.load(fim) for fim in in_files]
 
-    if len(in_files)==1:
+    if len(in_files) == 1:
         img_data = imgs[0].get_data()
-        img_data[img_data>0.0] = 1.0
+        img_data[img_data > 0.0] = 1.0
         hdr = imgs[0].get_header().copy()
-        hdr['data_type']= 16
+        hdr['data_type'] = 16
         hdr.set_data_dtype(np.float32)
         nib.save(nib.Nifti1Image(img_data.astype(np.float32), imgs[0].get_affine(), hdr), out_files[0])
         return out_files[0]
 
     img_data = np.array([im.get_data() for im in imgs]).astype(np.float32)
     #img_data[img_data>1.0] = 1.0
-    img_data[img_data<0.0] = 0.0
+    img_data[img_data < 0.0] = 0.0
     weights = np.sum(img_data, axis=0)
 
     msk = np.ones_like(imgs[0].get_data())
-    msk[weights<= 0] = 0
+    msk[weights <= 0] = 0
 
     if not in_mask is None:
         msk = nib.load(in_mask).get_data()
-        msk[msk<=0] = 0
-        msk[msk>0] = 1
+        msk[msk <= 0] = 0
+        msk[msk > 0] = 1
 
     msk = np.ma.masked_equal(msk, 0)
 
@@ -1283,7 +1283,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
         data = np.ma.masked_equal(img_data[i], 0)
         probmap = data / weights
         hdr = imgs[i].get_header().copy()
-        hdr['data_type']= 16
+        hdr['data_type'] = 16
         hdr.set_data_dtype('float32')
         nib.save(nib.Nifti1Image(probmap.astype(np.float32), imgs[i].get_affine(), hdr), out_file)
 

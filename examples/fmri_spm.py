@@ -353,7 +353,7 @@ contrasts.
 contrast_ids = list(range(1,len(contrasts)+1))
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
 # we use .*i* to capture both .img (SPM8) and .nii (SPM12)
-l2source.inputs.template=os.path.abspath('spm_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')
+l2source.inputs.template = os.path.abspath('spm_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')
 # iterate over all contrast images
 l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]

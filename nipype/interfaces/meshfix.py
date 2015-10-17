@@ -105,8 +105,8 @@ class MeshFix(CommandLine):
     'meshfix lh-pial.stl rh-pial.stl -o lh-pial_fixed.off'
     """
     _cmd = 'meshfix'
-    input_spec=MeshFixInputSpec
-    output_spec=MeshFixOutputSpec
+    input_spec = MeshFixInputSpec
+    output_spec = MeshFixOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

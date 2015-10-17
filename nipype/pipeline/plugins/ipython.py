@@ -23,8 +23,8 @@ def execute_task(pckld_task, node_config, updatehash):
     from socket import gethostname
     from traceback import format_exc
     from nipype import config, logging
-    traceback=None
-    result=None
+    traceback = None
+    result = None
     import os
     cwd = os.getcwd()
     try:

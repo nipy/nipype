@@ -826,8 +826,8 @@ class ProvRelation(ProvRecord):
             graph = Graph()
         pred = PROV[PROV_N_MAP[self.get_type()]].rdf_representation()
         items = []
-        subj=None
-        obj=None
+        subj = None
+        obj = None
         for idx, (attr, value) in enumerate(self._attributes.items()):
             if idx == 0:
                 subj = value.get_identifier().rdf_representation()

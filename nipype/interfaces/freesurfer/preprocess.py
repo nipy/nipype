@@ -889,7 +889,7 @@ class BBRegister(FSCommand):
 
         if isdefined(_in.out_fsl_file):
             if isinstance(_in.out_fsl_file, bool):
-                suffix='_bbreg_%s.mat' % _in.subject_id
+                suffix = '_bbreg_%s.mat' % _in.subject_id
                 out_fsl_file = fname_presuffix(_in.source_file,
                                                suffix=suffix,
                                                use_ext=False)

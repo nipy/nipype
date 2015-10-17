@@ -175,8 +175,8 @@ the contrast estimate and a background image into one volume.
 
 overlaystats = pe.Node(interface=fsl.Overlay(), name="overlaystats")
 overlaystats.inputs.stat_thresh = (3,10)
-overlaystats.inputs.show_negative_stats=True
-overlaystats.inputs.auto_thresh_bg=True
+overlaystats.inputs.show_negative_stats = True
+overlaystats.inputs.auto_thresh_bg = True
 
 """Use :class:`nipype.interfaces.fsl.Slicer` to create images of the overlaid
 statistical volumes for a report of the first-level results.
@@ -439,7 +439,7 @@ contrasts.
 contrast_ids = list(range(1,len(contrasts)+1))
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
 # we use .*i* to capture both .img (SPM8) and .nii (SPM12)
-l2source.inputs.template=os.path.abspath('spm_tutorial2/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')
+l2source.inputs.template = os.path.abspath('spm_tutorial2/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')
 # iterate over all contrast images
 l2source.iterables = [('fwhm',fwhmlist),
                       ('con',contrast_ids)]

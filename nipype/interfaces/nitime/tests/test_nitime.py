@@ -47,9 +47,9 @@ def test_coherence_analysis():
     yield assert_equal,o.outputs.coherence_array.shape,(31,31)
 
     #This is the nitime analysis:
-    TR=1.89
+    TR = 1.89
     data_rec = np.recfromcsv(example_data('fmri_timeseries.csv'))
-    roi_names= np.array(data_rec.dtype.names)
+    roi_names = np.array(data_rec.dtype.names)
     n_samples = data_rec.shape[0]
     data = np.zeros((len(roi_names),n_samples))
 
@@ -65,8 +65,8 @@ def test_coherence_analysis():
                                             NFFT=CA.inputs.NFFT,
                                             n_overlap=CA.inputs.n_overlap))
 
-    freq_idx = np.where((C.frequencies>CA.inputs.frequency_range[0]) *
-                        (C.frequencies<CA.inputs.frequency_range[1]))[0]
+    freq_idx = np.where((C.frequencies > CA.inputs.frequency_range[0]) *
+                        (C.frequencies < CA.inputs.frequency_range[1]))[0]
 
     #Extract the coherence and average across these frequency bands:
     coh = np.mean(C.coherence[:,:,freq_idx],-1) #Averaging on the last dimension

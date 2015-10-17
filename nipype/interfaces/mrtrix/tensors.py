@@ -70,8 +70,8 @@ class DWI2SphericalHarmonicsImage(CommandLine):
     >>> dwi2SH.run()                                    # doctest: +SKIP
     """
     _cmd = 'dwi2SH'
-    input_spec=DWI2SphericalHarmonicsImageInputSpec
-    output_spec=DWI2SphericalHarmonicsImageOutputSpec
+    input_spec = DWI2SphericalHarmonicsImageInputSpec
+    output_spec = DWI2SphericalHarmonicsImageOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -149,8 +149,8 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     """
 
     _cmd = 'csdeconv'
-    input_spec=ConstrainedSphericalDeconvolutionInputSpec
-    output_spec=ConstrainedSphericalDeconvolutionOutputSpec
+    input_spec = ConstrainedSphericalDeconvolutionInputSpec
+    output_spec = ConstrainedSphericalDeconvolutionOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -199,8 +199,8 @@ class EstimateResponseForSH(CommandLine):
     >>> estresp.run()                                   # doctest: +SKIP
     """
     _cmd = 'estimate_response'
-    input_spec=EstimateResponseForSHInputSpec
-    output_spec=EstimateResponseForSHOutputSpec
+    input_spec = EstimateResponseForSHInputSpec
+    output_spec = EstimateResponseForSHOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -326,8 +326,8 @@ class GenerateDirections(CommandLine):
     """
 
     _cmd = 'gendir'
-    input_spec=GenerateDirectionsInputSpec
-    output_spec=GenerateDirectionsOutputSpec
+    input_spec = GenerateDirectionsInputSpec
+    output_spec = GenerateDirectionsOutputSpec
 
 
 class FindShPeaksInputSpec(CommandLineInputSpec):
@@ -364,8 +364,8 @@ class FindShPeaks(CommandLine):
     """
 
     _cmd = 'find_SH_peaks'
-    input_spec=FindShPeaksInputSpec
-    output_spec=FindShPeaksOutputSpec
+    input_spec = FindShPeaksInputSpec
+    output_spec = FindShPeaksOutputSpec
 
 
 
@@ -399,6 +399,6 @@ class Directions2Amplitude(CommandLine):
     """
 
     _cmd = 'dir2amp'
-    input_spec=Directions2AmplitudeInputSpec
-    output_spec=Directions2AmplitudeOutputSpec
+    input_spec = Directions2AmplitudeInputSpec
+    output_spec = Directions2AmplitudeOutputSpec
 

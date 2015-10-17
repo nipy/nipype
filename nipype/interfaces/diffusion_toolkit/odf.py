@@ -57,8 +57,8 @@ class HARDIMatOutputSpec(TraitedSpec):
 class HARDIMat(CommandLine):
     """Use hardi_mat to calculate a reconstruction matrix from a gradient table
     """
-    input_spec=HARDIMatInputSpec
-    output_spec=HARDIMatOutputSpec
+    input_spec = HARDIMatInputSpec
+    output_spec = HARDIMatOutputSpec
 
     _cmd = 'hardi_mat'
 
@@ -130,8 +130,8 @@ class ODFRecon(CommandLine):
     """Use odf_recon to generate tensors and other maps
     """
 
-    input_spec=ODFReconInputSpec
-    output_spec=ODFReconOutputSpec
+    input_spec = ODFReconInputSpec
+    output_spec = ODFReconOutputSpec
 
     _cmd = 'odf_recon'
 
@@ -140,12 +140,12 @@ class ODFRecon(CommandLine):
         output_type = self.inputs.output_type
 
         outputs = self.output_spec().get()
-        outputs['B0'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_b0.'+ output_type))
-        outputs['DWI'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_dwi.'+ output_type))
-        outputs['max'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_max.'+ output_type))
-        outputs['ODF'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_odf.'+ output_type))
+        outputs['B0'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_b0.' + output_type))
+        outputs['DWI'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_dwi.' + output_type))
+        outputs['max'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_max.' + output_type))
+        outputs['ODF'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_odf.' + output_type))
         if isdefined(self.inputs.output_entropy):
-            outputs['entropy'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_entropy.'+ output_type))
+            outputs['entropy'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_entropy.' + output_type))
 
         return outputs
 
@@ -209,8 +209,8 @@ class ODFTracker(CommandLine):
     """Use odf_tracker to generate track file
     """
 
-    input_spec=ODFTrackerInputSpec
-    output_spec=ODFTrackerOutputSpec
+    input_spec = ODFTrackerInputSpec
+    output_spec = ODFTrackerOutputSpec
 
     _cmd = 'odf_tracker'
 

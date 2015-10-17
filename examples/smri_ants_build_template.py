@@ -29,14 +29,14 @@ from nipype.workflows.smri.ants import ANTSTemplateBuildSingleIterationWF
 """
 
 import urllib.request, urllib.error, urllib.parse
-homeDir=os.getenv("HOME")
-requestedPath=os.path.join(homeDir,'nipypeTestPath')
-mydatadir=os.path.realpath(requestedPath)
+homeDir = os.getenv("HOME")
+requestedPath = os.path.join(homeDir,'nipypeTestPath')
+mydatadir = os.path.realpath(requestedPath)
 if not os.path.exists(mydatadir):
     os.makedirs(mydatadir)
 print(mydatadir)
 
-MyFileURLs=[
+MyFileURLs = [
            ('http://slicer.kitware.com/midas3/download?bitstream=13121','01_T1_half.nii.gz'),
            ('http://slicer.kitware.com/midas3/download?bitstream=13122','02_T1_half.nii.gz'),
            ('http://slicer.kitware.com/midas3/download?bitstream=13124','03_T1_half.nii.gz'),
@@ -45,8 +45,8 @@ MyFileURLs=[
            ('http://slicer.kitware.com/midas3/download?bitstream=13125','03_T1_inv_half.nii.gz'),
            ]
 for tt in MyFileURLs:
-    myURL=tt[0]
-    localFilename=os.path.join(mydatadir,tt[1])
+    myURL = tt[0]
+    localFilename = os.path.join(mydatadir,tt[1])
     if not os.path.exists(localFilename):
         remotefile = urllib.request.urlopen(myURL)
 
@@ -57,12 +57,12 @@ for tt in MyFileURLs:
     else:
         print("File previously downloaded {0}".format(localFilename))
 
-input_images=[
+input_images = [
     os.path.join(mydatadir,'01_T1_half.nii.gz'),
     os.path.join(mydatadir,'02_T1_half.nii.gz'),
     os.path.join(mydatadir,'03_T1_half.nii.gz')
 ]
-input_passive_images=[
+input_passive_images = [
     {'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
     {'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
     {'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
@@ -73,8 +73,8 @@ input_passive_images=[
 3. Define the workflow and its working directory
 """
 
-tbuilder=pe.Workflow(name="ANTSTemplateBuilder")
-tbuilder.base_dir=requestedPath
+tbuilder = pe.Workflow(name="ANTSTemplateBuilder")
+tbuilder.base_dir = requestedPath
 
 """
 4. Define data sources. In real life these would be replace by DataGrabbers
@@ -84,8 +84,8 @@ datasource = pe.Node(interface=util.IdentityInterface(fields=
                                                       ['imageList', 'passiveImagesDictionariesList']),
                      run_without_submitting=True,
                      name='InputImages')
-datasource.inputs.imageList=input_images
-datasource.inputs.passiveImagesDictionariesList=input_passive_images
+datasource.inputs.imageList = input_images
+datasource.inputs.passiveImagesDictionariesList = input_passive_images
 datasource.inputs.sort_filelist = True
 
 """
@@ -102,7 +102,7 @@ tbuilder.connect(datasource, "imageList", initAvg, "images")
 6. Define the first iteration of template building
 """
 
-buildTemplateIteration1=ANTSTemplateBuildSingleIterationWF('iteration01')
+buildTemplateIteration1 = ANTSTemplateBuildSingleIterationWF('iteration01')
 tbuilder.connect(initAvg, 'output_average_image', buildTemplateIteration1, 'inputspec.fixed_image')
 tbuilder.connect(datasource, 'imageList', buildTemplateIteration1, 'inputspec.images')
 tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateIteration1, 'inputspec.ListOfPassiveImagesDictionaries')

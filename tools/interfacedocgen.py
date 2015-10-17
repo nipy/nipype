@@ -274,7 +274,7 @@ class InterfaceHelpWriter(object):
         ad = '.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n'
 
         chap_title = uri_short
-        ad += (chap_title+'\n'+ self.rst_section_levels[1] * len(chap_title)
+        ad += (chap_title+'\n' + self.rst_section_levels[1] * len(chap_title)
                + '\n\n')
 
         # Set the chapter title to read 'module' for all modules except for the

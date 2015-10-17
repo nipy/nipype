@@ -357,7 +357,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
     def get_subs(subject_id, conds, model_id, task_id):
         subs = [('_subject_id_%s_' % subject_id, '')]
-        subs.append(('_model_id_%d' % model_id, 'model%03d' %model_id))
+        subs.append(('_model_id_%d' % model_id, 'model%03d' % model_id))
         subs.append(('task_id_%d/' % task_id, '/task%03d_' % task_id))
         subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_warp',
                      'mean'))

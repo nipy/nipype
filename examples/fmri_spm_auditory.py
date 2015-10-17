@@ -70,7 +70,7 @@ merge_to_4d = True
 
 if merge_to_4d:
     merge = pe.Node(interface=fsl.Merge(), name="merge")
-    merge.inputs.dimension="t"
+    merge.inputs.dimension = "t"
 
 """Use :class:`nipype.interfaces.spm.Realign` for motion correction
 and register all images to the mean image.

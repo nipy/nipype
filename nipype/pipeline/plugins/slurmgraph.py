@@ -39,7 +39,7 @@ class SLURMGraphPlugin(GraphPluginBase):
                   qsub call
 
     """
-    _template="#!/bin/bash"
+    _template = "#!/bin/bash"
 
     def __init__(self, **kwargs):
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
@@ -66,9 +66,9 @@ class SLURMGraphPlugin(GraphPluginBase):
             - nodeslist: The name of the node being processed
             - return: A string representing this job to be displayed by SLURM
             """
-            job_name='j{0}_{1}'.format(jobnumber, nodeslist[jobnumber]._id)
+            job_name = 'j{0}_{1}'.format(jobnumber, nodeslist[jobnumber]._id)
             # Condition job_name to be a valid bash identifier (i.e. - is invalid)
-            job_name=job_name.replace('-','_').replace('.','_').replace(':','_')
+            job_name = job_name.replace('-','_').replace('.','_').replace(':','_')
             return job_name
         batch_dir, _ = os.path.split(pyfiles[0])
         submitjobsfile = os.path.join(batch_dir, 'submit_jobs.sh')

@@ -21,7 +21,7 @@ def test_normalize_tpms():
 
     in_mask = example_data('tpms_msk.nii.gz')
     mskdata = nb.load(in_mask).get_data()
-    mskdata[mskdata>0.0] = 1.0
+    mskdata[mskdata > 0.0] = 1.0
 
     mapdata = []
     in_files = []
@@ -46,10 +46,10 @@ def test_normalize_tpms():
 
     for i,tstfname in enumerate(out_files):
         normdata = nb.load(tstfname).get_data()
-        sumdata+=normdata
-        yield assert_equal, np.all(normdata[mskdata==0]==0), True
+        sumdata += normdata
+        yield assert_equal, np.all(normdata[mskdata == 0] == 0), True
         yield assert_equal, np.allclose(normdata, mapdata[i]), True
 
-    yield assert_equal, np.allclose(sumdata[sumdata>0.0], 1.0), True
+    yield assert_equal, np.allclose(sumdata[sumdata > 0.0], 1.0), True
 
     rmtree(tempdir)

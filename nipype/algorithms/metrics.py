@@ -414,9 +414,9 @@ class FuzzyOverlap(BaseInterface):
 
 
         msk = np.sum(img_ref, axis=0)
-        msk[msk>0] = 1.0
+        msk[msk > 0] = 1.0
         tst_msk = np.sum(img_tst, axis=0)
-        tst_msk[tst_msk>0] = 1.0
+        tst_msk[tst_msk > 0] = 1.0
 
         #check that volumes are normalized
         #img_ref[:][msk>0] = img_ref[:][msk>0] / (np.sum( img_ref, axis=0 ))[msk>0]
@@ -430,7 +430,7 @@ class FuzzyOverlap(BaseInterface):
         for ref_comp, tst_comp, diff_comp in zip(img_ref, img_tst, diff_im):
             num = np.minimum(ref_comp, tst_comp)
             ddr = np.maximum(ref_comp, tst_comp)
-            diff_comp[ddr>0] += 1.0 - (num[ddr>0] / ddr[ddr>0])
+            diff_comp[ddr > 0] += 1.0 - (num[ddr > 0] / ddr[ddr > 0])
             self._jaccards.append(np.sum(num) / np.sum(ddr))
             volumes.append(np.sum(ref_comp))
 
@@ -451,8 +451,8 @@ class FuzzyOverlap(BaseInterface):
         diff = np.zeros(diff_im[0].shape)
 
         for w,ch in zip(weights,diff_im):
-            ch[msk==0] = 0
-            diff+= w* ch
+            ch[msk == 0] = 0
+            diff += w * ch
 
         nb.save(nb.Nifti1Image(diff, nb.load(self.inputs.in_ref[0]).get_affine(),
                                nb.load(self.inputs.in_ref[0]).get_header()), self.inputs.out_file)
@@ -467,7 +467,7 @@ class FuzzyOverlap(BaseInterface):
         #outputs['volume_difference'] = self._volume
         outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
         outputs['class_fji'] = np.array(self._jaccards).astype(float).tolist();
-        outputs['class_fdi']= self._dices.astype(float).tolist();
+        outputs['class_fdi'] = self._dices.astype(float).tolist();
         return outputs
 
 
@@ -529,7 +529,7 @@ class ErrorMap(BaseInterface):
 
         # Flatten both volumes and make the pixel differennce
         mskvector = msk.reshape(-1)
-        msk_idxs = np.where(mskvector==1)
+        msk_idxs = np.where(mskvector == 1)
         refvector = ref_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
         tstvector = tst_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
         diffvector = (refvector-tstvector)
@@ -559,7 +559,7 @@ class ErrorMap(BaseInterface):
 
         if not isdefined(self.inputs.out_map):
             fname,ext = op.splitext(op.basename(self.inputs.in_tst))
-            if ext=='.gz':
+            if ext == '.gz':
                 fname,ext2 = op.splitext(fname)
                 ext = ext2 + ext
             self._out_file = op.abspath(fname + "_errmap" + ext)
@@ -644,14 +644,14 @@ class Similarity(BaseInterface):
 
         dims = vol1_nii.get_data().ndim
 
-        if dims==3 or dims==2:
+        if dims == 3 or dims == 2:
             vols1 = [vol1_nii]
             vols2 = [vol2_nii]
-        if dims==4:
+        if dims == 4:
             vols1 = nb.four_to_three(vol1_nii)
             vols2 = nb.four_to_three(vol2_nii)
 
-        if dims<2 or dims>4:
+        if dims < 2 or dims > 4:
             raise RuntimeError('Image dimensions not supported (detected %dD file)' % dims)
 
         if isdefined(self.inputs.mask1):

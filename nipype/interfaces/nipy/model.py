@@ -107,9 +107,9 @@ class FitGLM(BaseInterface):
 
         if 'hpf' in list(session_info[0].keys()):
             hpf = session_info[0]['hpf']
-            drift_model=self.inputs.drift_model
+            drift_model = self.inputs.drift_model
         else:
-            hpf=0
+            hpf = 0
             drift_model = "Blank"
 
         reg_names = []
@@ -121,7 +121,7 @@ class FitGLM(BaseInterface):
             reg_vals[:,i] = np.array(session_info[0]['regress'][i]['val']).reshape(1,-1)
 
 
-        frametimes= np.linspace(0, (nscans-1)*self.inputs.TR, nscans)
+        frametimes = np.linspace(0, (nscans-1)*self.inputs.TR, nscans)
 
         conditions = []
         onsets = []

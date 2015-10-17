@@ -15,22 +15,22 @@ from ...utils.filemanip import split_filename
 
 
 class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
-    dimension=traits.Enum(3, 2, argstr= '%d', usedefault=True,
+    dimension = traits.Enum(3, 2, argstr= '%d', usedefault=True,
                           desc='image dimension (2 or 3)', mandatory=True,
                           position = 0)
-    input_image=File(argstr='%s', exists=True,
+    input_image = File(argstr='%s', exists=True,
                      desc='Main input is a 3-D grayscale image.', mandatory=True,
                      position = 1)
-    output_image=traits.Str('rgb.nii.gz', argstr='%s', usedefault=True,
+    output_image = traits.Str('rgb.nii.gz', argstr='%s', usedefault=True,
                             desc=('rgb output image'), position = 2)
-    mask_image=File('none', argstr='%s', exists=True,
+    mask_image = File('none', argstr='%s', exists=True,
                     desc = 'mask image', position = 3, usedefault = True)
-    colormap=traits.Str(argstr='%s', usedefault=True,
+    colormap = traits.Str(argstr='%s', usedefault=True,
                         desc=('Possible colormaps: grey, red, green, '
                               'blue, copper, jet, hsv, spring, summer, '
                               'autumn, winter, hot, cool, overunder, custom '
                   ), mandatory = True, position = 4)
-    custom_color_map_file=traits.Str('none', argstr='%s', usedefault=True,
+    custom_color_map_file = traits.Str('none', argstr='%s', usedefault=True,
                                      desc = 'custom color map file', position = 5)
     minimum_input = traits.Int(argstr='%d', desc='minimum input',
                                mandatory = True, position = 6)
@@ -42,7 +42,7 @@ class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
                                     argstr='%d', desc = '', position = 9)
 
 class ConvertScalarImageToRGBOutputSpec(TraitedSpec):
-    output_image= File(exists=True, desc='converted RGB image')
+    output_image = File(exists=True, desc='converted RGB image')
 
 class ConvertScalarImageToRGB(ANTSCommand):
     """
@@ -76,7 +76,7 @@ class CreateTiledMosaicInputSpec(ANTSCommandInputSpec):
     input_image = File(argstr='-i %s', exists=True,
                        desc = 'Main input is a 3-D grayscale image.',
                        mandatory = True)
-    rgb_image= File(argstr='-r %s', exists = True,
+    rgb_image = File(argstr='-r %s', exists = True,
                     desc = ('An optional Rgb image can be added as an overlay.'
                             'It must have the same image'
                             'geometry as the input grayscale image.'),
@@ -121,7 +121,7 @@ class CreateTiledMosaicInputSpec(ANTSCommandInputSpec):
 
 
 class CreateTiledMosaicOutputSpec(TraitedSpec):
-    output_image= File(exists=True, desc='image file')
+    output_image = File(exists=True, desc='image file')
 
 class CreateTiledMosaic(ANTSCommand):
     """The program CreateTiledMosaic in conjunction with ConvertScalarImageToRGB

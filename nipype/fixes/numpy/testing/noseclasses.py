@@ -129,12 +129,12 @@ class NumpyOutputChecker(doctest.OutputChecker):
             # actually some bigendian examples in the doctests). Let's try
             # making them all little endian
             got = got.replace("'>","'<")
-            want= want.replace("'>","'<")
+            want = want.replace("'>","'<")
 
             # try to normalize out 32 and 64 bit default int sizes
             for sz in [4,8]:
                 got = got.replace("'<i%d'"%sz,"int")
-                want= want.replace("'<i%d'"%sz,"int")
+                want = want.replace("'<i%d'"%sz,"int")
 
             ret = doctest.OutputChecker.check_output(self, want,
                                                      got, optionflags)

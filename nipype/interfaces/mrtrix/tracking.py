@@ -61,8 +61,8 @@ class FilterTracks(CommandLine):
     """
 
     _cmd = 'filter_tracks'
-    input_spec=FilterTracksInputSpec
-    output_spec=FilterTracksOutputSpec
+    input_spec = FilterTracksInputSpec
+    output_spec = FilterTracksOutputSpec
 
 
 class Tracks2ProbInputSpec(CommandLineInputSpec):
@@ -101,8 +101,8 @@ class Tracks2Prob(CommandLine):
     """
 
     _cmd = 'tracks2prob'
-    input_spec=Tracks2ProbInputSpec
-    output_spec=Tracks2ProbOutputSpec
+    input_spec = Tracks2ProbInputSpec
+    output_spec = Tracks2ProbOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

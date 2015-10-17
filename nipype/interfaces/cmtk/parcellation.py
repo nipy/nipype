@@ -463,7 +463,7 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
 
     ds.append((op.abspath('ROI_%s.nii.gz' % parcellation_name),
                op.abspath('ROI_HR_th.nii.gz')))
-    if(dilation==True):
+    if(dilation == True):
         ds.append((op.abspath('ROIv_%s.nii.gz' % parcellation_name),
                    op.abspath('ROIv_HR_th.nii.gz')))
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
@@ -588,7 +588,7 @@ class Parcellate(BaseInterface):
         else:
             outputs['roi_file'] = op.abspath(
                 self._gen_outfilename('nii.gz', 'ROI'))
-        if(self.inputs.dilation==True):
+        if(self.inputs.dilation == True):
             outputs['roiv_file'] = op.abspath(self._gen_outfilename(
                 'nii.gz', 'ROIv'))
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
@@ -597,7 +597,7 @@ class Parcellate(BaseInterface):
         outputs['aseg_file'] = op.abspath('aseg.nii.gz')
         outputs['roi_file_in_structural_space'] = op.abspath(
             'ROI_HR_th.nii.gz')
-        if(self.inputs.dilation==True):
+        if(self.inputs.dilation == True):
             outputs['dilated_roi_file_in_structural_space'] = op.abspath(
                 'ROIv_HR_th.nii.gz')
         return outputs

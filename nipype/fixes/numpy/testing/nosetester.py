@@ -234,7 +234,7 @@ class NoseTester(object):
             argv += ['--exclude', ename]
         # our way of doing coverage
         if coverage:
-            argv+=['--cover-package=%s' % self.package_name, '--with-coverage',
+            argv += ['--cover-package=%s' % self.package_name, '--with-coverage',
                    '--cover-tests', '--cover-inclusive', '--cover-erase']
         # construct list of plugins
         import nose.plugins.builtin

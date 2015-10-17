@@ -99,7 +99,7 @@ def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilisti
     tck2trk = pe.Node(interface=mrtrix.MRTrix2TrackVis(),name='tck2trk')
 
     workflow = pe.Workflow(name=name)
-    workflow.base_output_dir=name
+    workflow.base_output_dir = name
 
     workflow.connect([(inputnode, fsl2mrtrix, [("bvecs", "bvec_file"),
                                                ("bvals", "bval_file")])])

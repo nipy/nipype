@@ -61,8 +61,8 @@ class DTIRecon(CommandLine):
     """Use dti_recon to generate tensors and other maps
     """
 
-    input_spec=DTIReconInputSpec
-    output_spec=DTIReconOutputSpec
+    input_spec = DTIReconInputSpec
+    output_spec = DTIReconOutputSpec
 
     _cmd = 'dti_recon'
 
@@ -91,18 +91,18 @@ class DTIRecon(CommandLine):
         output_type = self.inputs.output_type
 
         outputs = self.output_spec().get()
-        outputs['ADC'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_adc.'+ output_type))
-        outputs['B0'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_b0.'+ output_type))
-        outputs['L1'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_e1.'+ output_type))
-        outputs['L2'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_e2.'+ output_type))
-        outputs['L3'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_e3.'+ output_type))
-        outputs['exp'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_exp.'+ output_type))
-        outputs['FA'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_fa.'+ output_type))
-        outputs['FA_color'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_fa_color.'+ output_type))
-        outputs['tensor'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_tensor.'+ output_type))
-        outputs['V1'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_v1.'+ output_type))
-        outputs['V2'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_v2.'+ output_type))
-        outputs['V3'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_v3.'+ output_type))
+        outputs['ADC'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_adc.' + output_type))
+        outputs['B0'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_b0.' + output_type))
+        outputs['L1'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_e1.' + output_type))
+        outputs['L2'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_e2.' + output_type))
+        outputs['L3'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_e3.' + output_type))
+        outputs['exp'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_exp.' + output_type))
+        outputs['FA'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_fa.' + output_type))
+        outputs['FA_color'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_fa_color.' + output_type))
+        outputs['tensor'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_tensor.' + output_type))
+        outputs['V1'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_v1.' + output_type))
+        outputs['V2'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_v2.' + output_type))
+        outputs['V3'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_v3.' + output_type))
 
         return outputs
 
@@ -148,8 +148,8 @@ class DTITrackerOutputSpec(TraitedSpec):
     mask_file = File(exists=True)
 
 class DTITracker(CommandLine):
-    input_spec=DTITrackerInputSpec
-    output_spec=DTITrackerOutputSpec
+    input_spec = DTITrackerInputSpec
+    output_spec = DTITrackerOutputSpec
 
     _cmd = 'dti_tracker'
 

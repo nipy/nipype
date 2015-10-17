@@ -138,7 +138,7 @@ class EditTransform(BaseInterface):
 
     def _get_outfile(self):
         val = getattr(self,'_out_file')
-        if not val is None and not val=='':
+        if not val is None and not val == '':
             return val
 
         if isdefined(self.inputs.output_file):

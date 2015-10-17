@@ -354,7 +354,7 @@ def test_identity_join_node():
     assert_equal(len(result.nodes()), 5,
                  "The number of expanded nodes is incorrect.")
     assert_equal(_sum_operands[0], [2, 3, 4],
-                 "The join Sum input is incorrect: %s." %_sum_operands[0])
+                 "The join Sum input is incorrect: %s." % _sum_operands[0])
 
     os.chdir(cwd)
     rmtree(wd)

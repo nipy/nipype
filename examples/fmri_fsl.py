@@ -551,7 +551,7 @@ iterables on this node to perform two different extents of smoothing.
 """
 
 smoothnode = firstlevel.get_node('preproc.smooth')
-assert(str(smoothnode)=='preproc.smooth')
+assert(str(smoothnode) == 'preproc.smooth')
 smoothnode.iterables = ('fwhm', [5.,10.])
 
 hpcutoff = 120

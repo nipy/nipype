@@ -62,8 +62,8 @@ class MRConvert(CommandLine):
     """
 
     _cmd = 'mrconvert'
-    input_spec=MRConvertInputSpec
-    output_spec=MRConvertOutputSpec
+    input_spec = MRConvertInputSpec
+    output_spec = MRConvertOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -143,8 +143,8 @@ class DWI2Tensor(CommandLine):
     """
 
     _cmd = 'dwi2tensor'
-    input_spec=DWI2TensorInputSpec
-    output_spec=DWI2TensorOutputSpec
+    input_spec = DWI2TensorInputSpec
+    output_spec = DWI2TensorOutputSpec
 
 class Tensor2VectorInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
@@ -170,8 +170,8 @@ class Tensor2Vector(CommandLine):
     """
 
     _cmd = 'tensor2vector'
-    input_spec=Tensor2VectorInputSpec
-    output_spec=Tensor2VectorOutputSpec
+    input_spec = Tensor2VectorInputSpec
+    output_spec = Tensor2VectorOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -215,8 +215,8 @@ class Tensor2FractionalAnisotropy(CommandLine):
     """
 
     _cmd = 'tensor2FA'
-    input_spec=Tensor2FractionalAnisotropyInputSpec
-    output_spec=Tensor2FractionalAnisotropyOutputSpec
+    input_spec = Tensor2FractionalAnisotropyInputSpec
+    output_spec = Tensor2FractionalAnisotropyOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -260,8 +260,8 @@ class Tensor2ApparentDiffusion(CommandLine):
     """
 
     _cmd = 'tensor2ADC'
-    input_spec=Tensor2ApparentDiffusionInputSpec
-    output_spec=Tensor2ApparentDiffusionOutputSpec
+    input_spec = Tensor2ApparentDiffusionInputSpec
+    output_spec = Tensor2ApparentDiffusionOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -306,8 +306,8 @@ class MRMultiply(CommandLine):
     """
 
     _cmd = 'mrmult'
-    input_spec=MRMultiplyInputSpec
-    output_spec=MRMultiplyOutputSpec
+    input_spec = MRMultiplyInputSpec
+    output_spec = MRMultiplyOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -351,8 +351,8 @@ class MRTrixViewer(CommandLine):
     """
 
     _cmd = 'mrview'
-    input_spec=MRTrixViewerInputSpec
-    output_spec=MRTrixViewerOutputSpec
+    input_spec = MRTrixViewerInputSpec
+    output_spec = MRTrixViewerOutputSpec
 
     def _list_outputs(self):
         return
@@ -378,8 +378,8 @@ class MRTrixInfo(CommandLine):
     """
 
     _cmd = 'mrinfo'
-    input_spec=MRTrixInfoInputSpec
-    output_spec=MRTrixInfoOutputSpec
+    input_spec = MRTrixInfoInputSpec
+    output_spec = MRTrixInfoOutputSpec
 
     def _list_outputs(self):
         return
@@ -410,8 +410,8 @@ class GenerateWhiteMatterMask(CommandLine):
     """
 
     _cmd = 'gen_WM_mask'
-    input_spec=GenerateWhiteMatterMaskInputSpec
-    output_spec=GenerateWhiteMatterMaskOutputSpec
+    input_spec = GenerateWhiteMatterMaskInputSpec
+    output_spec = GenerateWhiteMatterMaskOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -452,8 +452,8 @@ class Erode(CommandLine):
     >>> erode.run()                                     # doctest: +SKIP
     """
     _cmd = 'erode'
-    input_spec=ErodeInputSpec
-    output_spec=ErodeOutputSpec
+    input_spec = ErodeInputSpec
+    output_spec = ErodeOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -506,8 +506,8 @@ class Threshold(CommandLine):
     """
 
     _cmd = 'threshold'
-    input_spec=ThresholdInputSpec
-    output_spec=ThresholdOutputSpec
+    input_spec = ThresholdInputSpec
+    output_spec = ThresholdOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -551,8 +551,8 @@ class MedianFilter3D(CommandLine):
     """
 
     _cmd = 'median3D'
-    input_spec=MedianFilter3DInputSpec
-    output_spec=MedianFilter3DOutputSpec
+    input_spec = MedianFilter3DInputSpec
+    output_spec = MedianFilter3DOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -605,8 +605,8 @@ class MRTransform(CommandLine):
     """
 
     _cmd = 'mrtransform'
-    input_spec=MRTransformInputSpec
-    output_spec=MRTransformOutputSpec
+    input_spec = MRTransformInputSpec
+    output_spec = MRTransformOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

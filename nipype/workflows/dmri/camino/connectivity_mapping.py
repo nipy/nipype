@@ -467,7 +467,7 @@ def create_connectivity_pipeline(name="connectivity"):
                          name="outputnode")
 
     connectivity = pe.Workflow(name="connectivity")
-    connectivity.base_output_dir=name
+    connectivity.base_output_dir = name
 
     connectivity.connect([(inputnode, mapping, [("dwi", "inputnode_within.dwi"),
                                                 ("bvals", "inputnode_within.bvals"),

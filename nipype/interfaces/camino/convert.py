@@ -61,7 +61,7 @@ class Image2Voxel(StdOutCommandLine):
 
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
-        return name + '.B'+ self.inputs.out_type
+        return name + '.B' + self.inputs.out_type
 
 class FSL2SchemeInputSpec(StdOutCommandLineInputSpec):
     bvec_file = File(exists=True, argstr='-bvecfile %s',
@@ -106,8 +106,8 @@ class FSL2Scheme(StdOutCommandLine):
 
     """
     _cmd = 'fsl2scheme'
-    input_spec=FSL2SchemeInputSpec
-    output_spec=FSL2SchemeOutputSpec
+    input_spec = FSL2SchemeInputSpec
+    output_spec = FSL2SchemeOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -159,8 +159,8 @@ class VtkStreamlines(StdOutCommandLine):
     >>> vtk.run()                  # doctest: +SKIP
     """
     _cmd = 'vtkstreamlines'
-    input_spec=VtkStreamlinesInputSpec
-    output_spec=VtkStreamlinesOutputSpec
+    input_spec = VtkStreamlinesInputSpec
+    output_spec = VtkStreamlinesOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -178,13 +178,13 @@ class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
                    mandatory=True, position=1,
                    desc='data file')
 
-    maxtractpoints= traits.Int(argstr='-maxtractpoints %d', units='NA',
+    maxtractpoints = traits.Int(argstr='-maxtractpoints %d', units='NA',
                                desc="maximum number of tract points")
-    mintractpoints= traits.Int(argstr='-mintractpoints %d', units='NA',
+    mintractpoints = traits.Int(argstr='-mintractpoints %d', units='NA',
                                desc="minimum number of tract points")
-    maxtractlength= traits.Int(argstr='-maxtractlength %d', units='mm',
+    maxtractlength = traits.Int(argstr='-maxtractlength %d', units='mm',
                                desc="maximum length of tracts")
-    mintractlength= traits.Int(argstr='-mintractlength %d', units='mm',
+    mintractlength = traits.Int(argstr='-mintractlength %d', units='mm',
                                desc="minimum length of tracts")
     datadims = traits.List(traits.Int, desc = 'data dimensions in voxels',
                            argstr='-datadims %s', minlen=3, maxlen=3,
@@ -261,8 +261,8 @@ class ProcStreamlines(StdOutCommandLine):
     >>> proc.run()                  # doctest: +SKIP
     """
     _cmd = 'procstreamlines'
-    input_spec=ProcStreamlinesInputSpec
-    output_spec=ProcStreamlinesOutputSpec
+    input_spec = ProcStreamlinesInputSpec
+    output_spec = ProcStreamlinesOutputSpec
 
     def _format_arg(self, name, spec, value):
         if name == 'outputroot':
@@ -334,8 +334,8 @@ class TractShredder(StdOutCommandLine):
     >>> shred.run()                  # doctest: +SKIP
     """
     _cmd = 'tractshredder'
-    input_spec=TractShredderInputSpec
-    output_spec=TractShredderOutputSpec
+    input_spec = TractShredderInputSpec
+    output_spec = TractShredderOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -371,8 +371,8 @@ class DT2NIfTI(CommandLine):
     Reads Camino diffusion tensors, and converts them to NIFTI format as three .nii files.
     """
     _cmd = 'dt2nii'
-    input_spec=DT2NIfTIInputSpec
-    output_spec=DT2NIfTIOutputSpec
+    input_spec = DT2NIfTIInputSpec
+    output_spec = DT2NIfTIOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -451,8 +451,8 @@ class NIfTIDT2Camino(CommandLine):
 
     """
     _cmd = 'niftidt2camino'
-    input_spec=NIfTIDT2CaminoInputSpec
-    output_spec=NIfTIDT2CaminoOutputSpec
+    input_spec = NIfTIDT2CaminoInputSpec
+    output_spec = NIfTIDT2CaminoOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -602,8 +602,8 @@ class AnalyzeHeader(StdOutCommandLine):
     >>> hdr.run()                  # doctest: +SKIP
     """
     _cmd = 'analyzeheader'
-    input_spec=AnalyzeHeaderInputSpec
-    output_spec=AnalyzeHeaderOutputSpec
+    input_spec = AnalyzeHeaderInputSpec
+    output_spec = AnalyzeHeaderOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -653,8 +653,8 @@ class Shredder(StdOutCommandLine):
     >>> shred.run()                  # doctest: +SKIP
     """
     _cmd = 'shredder'
-    input_spec=ShredderInputSpec
-    output_spec=ShredderOutputSpec
+    input_spec = ShredderInputSpec
+    output_spec = ShredderOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

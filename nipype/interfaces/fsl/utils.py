@@ -1286,12 +1286,12 @@ class SigLoss(FSLCommand):
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']) and \
                 isdefined(self.inputs.in_file):
-            outputs['out_file']=self._gen_fname(self.inputs.in_file,
+            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                 suffix='_sigloss')
         return outputs
 
     def _gen_filename(self, name):
-        if name=='out_file':
+        if name == 'out_file':
             return self._list_outputs()['out_file']
         return None
 
@@ -1517,13 +1517,13 @@ class Complex(FSLCommand):
             else:
                 return None
             return self._gen_fname(in_file, suffix="_cplx")
-        elif name =='magnitude_out_file':
+        elif name == 'magnitude_out_file':
             return self._gen_fname(self.inputs.complex_in_file, suffix="_mag")
-        elif name =='phase_out_file':
+        elif name == 'phase_out_file':
             return self._gen_fname(self.inputs.complex_in_file,suffix="_phase")
-        elif name =='real_out_file':
+        elif name == 'real_out_file':
             return self._gen_fname(self.inputs.complex_in_file, suffix="_real")
-        elif name =='imaginary_out_file':
+        elif name == 'imaginary_out_file':
             return self._gen_fname(self.inputs.complex_in_file, suffix="_imag")
         return None
 
@@ -1642,7 +1642,7 @@ class WarpUtils(FSLCommand):
             skip = []
 
         suffix = 'field'
-        if isdefined(self.inputs.out_format) and self.inputs.out_format=='spline':
+        if isdefined(self.inputs.out_format) and self.inputs.out_format == 'spline':
             suffix = 'coeffs'
 
         trait_spec = self.inputs.trait('out_file')
@@ -1655,9 +1655,9 @@ class WarpUtils(FSLCommand):
                 jac_spec.name_template = '%s_jac'
                 jac_spec.output_name = 'out_jacobian'
         else:
-            skip+=['out_jacobian']
+            skip += ['out_jacobian']
 
-        skip+=['write_jacobian']
+        skip += ['write_jacobian']
         return super(WarpUtils, self)._parse_inputs(skip=skip)
 
 
@@ -1679,7 +1679,7 @@ class ConvertWarpInputSpec(FSLCommandInputSpec):
                        'fnirt-transform from a subjects structural scan to an average of a group '
                        'of subjects.'))
 
-    midmat=File(exists=True, argstr="--midmat=%s",
+    midmat = File(exists=True, argstr="--midmat=%s",
                 desc="Name of file containing mid-warp-affine transform")
 
     warp2 = File(exists=True, argstr='--warp2=%s',

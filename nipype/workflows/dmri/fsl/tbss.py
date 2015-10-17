@@ -138,7 +138,7 @@ def create_tbss_2_reg(name="tbss_2_reg"):
     else:
         config_file = os.path.join(os.environ["FSLDIR"],
                                    "etc/flirtsch/FA_2_FMRIB58_1mm.cnf")
-        fnirt.inputs.config_file=config_file
+        fnirt.inputs.config_file = config_file
 
     # Define the registration workflow
     tbss2 = pe.Workflow(name=name)

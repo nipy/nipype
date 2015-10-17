@@ -85,7 +85,7 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
     for name, spec in sorted(interface.inputs.traits(transient=None).items()):
         input = get_boutiques_input(inputs, interface, name, spec,ignored_template_inputs,verbose,ignore_template_numbers)
         tool_desc['inputs'].append(input)
-        tool_desc['command-line']+= input['command-line-key']+" "
+        tool_desc['command-line'] += input['command-line-key']+" "
         if verbose:
             print("-> Adding input "+input['name'])
 
@@ -259,7 +259,7 @@ def must_generate_value(name,type,ignored_template_inputs,spec_info,spec,ignore_
     if ignore_template_numbers and type == "Number":
         return False
     # Only generate value for the first element of mutually exclusive inputs.
-    if spec.xor and spec.xor[0]!=name:
+    if spec.xor and spec.xor[0] != name:
         return False
     # Directory types are not supported
     if "an existing directory name" in spec_info:

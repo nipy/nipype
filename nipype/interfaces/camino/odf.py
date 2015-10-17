@@ -77,8 +77,8 @@ class QBallMX(StdOutCommandLine):
     >>> qballcoeffs.run()             # doctest: +SKIP
     """
     _cmd = 'qballmx'
-    input_spec=QBallMXInputSpec
-    output_spec=QBallMXOutputSpec
+    input_spec = QBallMXInputSpec
+    output_spec = QBallMXOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -153,8 +153,8 @@ class LinRecon(StdOutCommandLine):
     >>> qballcoeffs.run()         # doctest: +SKIP
     """
     _cmd = 'linrecon'
-    input_spec=LinReconInputSpec
-    output_spec=LinReconOutputSpec
+    input_spec = LinReconInputSpec
+    output_spec = LinReconOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -274,8 +274,8 @@ class MESD(StdOutCommandLine):
     >>> mesd.run()            # doctest: +SKIP
     """
     _cmd = 'mesd'
-    input_spec=MESDInputSpec
-    output_spec=MESDOutputSpec
+    input_spec = MESDInputSpec
+    output_spec = MESDOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -418,8 +418,8 @@ class SFPeaks(StdOutCommandLine):
     >>> sf_peaks.run()          # doctest: +SKIP
     """
     _cmd = 'sfpeaks'
-    input_spec=SFPeaksInputSpec
-    output_spec=SFPeaksOutputSpec
+    input_spec = SFPeaksInputSpec
+    output_spec = SFPeaksOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()

@@ -56,8 +56,8 @@ class DTIFit(StdOutCommandLine):
     >>> fit.run()                  # doctest: +SKIP
     """
     _cmd = 'dtfit'
-    input_spec=DTIFitInputSpec
-    output_spec=DTIFitOutputSpec
+    input_spec = DTIFitInputSpec
+    output_spec = DTIFitOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -139,8 +139,8 @@ class DTMetric(CommandLine):
     >>> dtmetric.run()                  # doctest: +SKIP
     """
     _cmd = 'dtshape'
-    input_spec=DTMetricInputSpec
-    output_spec=DTMetricOutputSpec
+    input_spec = DTMetricInputSpec
+    output_spec = DTMetricOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -160,7 +160,7 @@ class DTMetric(CommandLine):
         if name == 'outputfile':
             _, name, _ = split_filename(self.inputs.eigen_data)
             metric = self.inputs.metric
-            datatype= self.inputs.outputdatatype
+            datatype = self.inputs.outputdatatype
             if isdefined(self.inputs.data_header):
                 filename = name + '_' + metric + '.nii.gz'
             else:
@@ -240,8 +240,8 @@ class ModelFit(StdOutCommandLine):
     >>> fit.run()                  # doctest: +SKIP
     """
     _cmd = 'modelfit'
-    input_spec=ModelFitInputSpec
-    output_spec=ModelFitOutputSpec
+    input_spec = ModelFitInputSpec
+    output_spec = ModelFitOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -319,8 +319,8 @@ class DTLUTGen(StdOutCommandLine):
     >>> dtl.run()                  # doctest: +SKIP
     """
     _cmd = 'dtlutgen'
-    input_spec=DTLUTGenInputSpec
-    output_spec=DTLUTGenOutputSpec
+    input_spec = DTLUTGenInputSpec
+    output_spec = DTLUTGenOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -380,8 +380,8 @@ class PicoPDFs(StdOutCommandLine):
     >>> pdf.run()                  # doctest: +SKIP
     """
     _cmd = 'picopdfs'
-    input_spec=PicoPDFsInputSpec
-    output_spec=PicoPDFsOutputSpec
+    input_spec = PicoPDFsInputSpec
+    output_spec = PicoPDFsOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -837,8 +837,8 @@ class ComputeMeanDiffusivity(StdOutCommandLine):
     >>> md.run()                  # doctest: +SKIP
     """
     _cmd = 'md'
-    input_spec=ComputeMeanDiffusivityInputSpec
-    output_spec=ComputeMeanDiffusivityOutputSpec
+    input_spec = ComputeMeanDiffusivityInputSpec
+    output_spec = ComputeMeanDiffusivityOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -896,8 +896,8 @@ class ComputeFractionalAnisotropy(StdOutCommandLine):
     >>> fa.run()                  # doctest: +SKIP
     """
     _cmd = 'fa'
-    input_spec=ComputeFractionalAnisotropyInputSpec
-    output_spec=ComputeFractionalAnisotropyOutputSpec
+    input_spec = ComputeFractionalAnisotropyInputSpec
+    output_spec = ComputeFractionalAnisotropyOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -957,8 +957,8 @@ class ComputeTensorTrace(StdOutCommandLine):
     >>> trace.run()                 # doctest: +SKIP
     """
     _cmd = 'trd'
-    input_spec=ComputeTensorTraceInputSpec
-    output_spec=ComputeTensorTraceOutputSpec
+    input_spec = ComputeTensorTraceInputSpec
+    output_spec = ComputeTensorTraceOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1015,8 +1015,8 @@ class ComputeEigensystem(StdOutCommandLine):
     >>> dteig.run()                  # doctest: +SKIP
     """
     _cmd = 'dteig'
-    input_spec=ComputeEigensystemInputSpec
-    output_spec=ComputeEigensystemOutputSpec
+    input_spec = ComputeEigensystemInputSpec
+    output_spec = ComputeEigensystemOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -1025,5 +1025,5 @@ class ComputeEigensystem(StdOutCommandLine):
 
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
-        datatype= self.inputs.outputdatatype
+        datatype = self.inputs.outputdatatype
         return name + '_eig.B' + datatype

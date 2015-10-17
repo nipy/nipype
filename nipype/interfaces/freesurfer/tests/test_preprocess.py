@@ -58,7 +58,7 @@ def test_robustregister():
                                      out_reg_file='foo.lta', half_targ=True)
     yield assert_equal, reg2.cmdline, ('mri_robust_register --halfdst %s_halfway.nii --lta foo.lta '
                                        '--sat 3.0000 --mov %s --dst %s'
-                                       %(os.path.join(outdir,filelist[1][:-4]),filelist[0],filelist[1]))
+                                       % (os.path.join(outdir,filelist[1][:-4]),filelist[0],filelist[1]))
     clean_directory(outdir, cwd)
 
 @skipif(no_freesurfer)
@@ -81,7 +81,7 @@ def test_fitmsparams():
     # constructor based parameter setting
     fit2 = freesurfer.FitMSParams(in_files=filelist,te_list=[1.5,3.5],flip_list=[20,30],out_dir=outdir)
     yield assert_equal, fit2.cmdline, ('mri_ms_fitparms  -te %.3f -fa %.1f %s -te %.3f -fa %.1f %s %s'
-                                       %(1.500,20.0,filelist[0],3.500,30.0,filelist[1],outdir))
+                                       % (1.500,20.0,filelist[0],3.500,30.0,filelist[1],outdir))
 
     clean_directory(outdir, cwd)
 
@@ -105,10 +105,10 @@ def test_synthesizeflash():
     syn.inputs.tr = 20
 
     yield assert_equal, syn.cmdline, ('mri_synthesize 20.00 30.00 4.500 %s %s %s'
-                                      %(filelist[0],filelist[1],os.path.join(outdir,'synth-flash_30.mgz')))
+                                      % (filelist[0],filelist[1],os.path.join(outdir,'synth-flash_30.mgz')))
 
     # constructor based parameters setting
     syn2 = freesurfer.SynthesizeFLASH(t1_image=filelist[0],pd_image=filelist[1],flip_angle=20,te=5,tr=25)
     yield assert_equal, syn2.cmdline, ('mri_synthesize 25.00 20.00 5.000 %s %s %s'
-                                       %(filelist[0],filelist[1],os.path.join(outdir,'synth-flash_20.mgz')))
+                                       % (filelist[0],filelist[1],os.path.join(outdir,'synth-flash_20.mgz')))
 

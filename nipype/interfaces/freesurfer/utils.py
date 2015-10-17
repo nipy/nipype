@@ -1186,9 +1186,9 @@ class ExtractMainComponent(CommandLine):
 
     """
 
-    _cmd='mris_extract_main_component'
-    input_spec=ExtractMainComponentInputSpec
-    output_spec=ExtractMainComponentOutputSpec
+    _cmd = 'mris_extract_main_component'
+    input_spec = ExtractMainComponentInputSpec
+    output_spec = ExtractMainComponentOutputSpec
 
 
 class Tkregister2InputSpec(FSTraitedSpec):

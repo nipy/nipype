@@ -53,7 +53,7 @@ def tensor_fitting(data, bvals, bvecs, mask_file=None):
     if mask_file is not None:
         mask = nb.load(self.inputs.mask_file).get_data()
     else:
-        mask=None
+        mask = None
 
     # Load information about the gradients:
     gtab = grad.gradient_table(self.inputs.bvals, self.inputs.bvecs)

@@ -136,7 +136,7 @@ def scale_timings(timelist, input_units, output_units, time_repetition):
     time_repetition: float in seconds
 
     """
-    if input_units==output_units:
+    if input_units == output_units:
         _scalefactor = 1.
     if (input_units == 'scans') and (output_units == 'secs'):
         _scalefactor = time_repetition
@@ -329,7 +329,7 @@ class SpecifyModel(BaseInterface):
                                     info.pmod[cid].poly[j]
                                 sessinfo[i]['cond'][cid]['pmod'][j]['param'] = \
                                     info.pmod[cid].param[j]
-            sessinfo[i]['regress']= []
+            sessinfo[i]['regress'] = []
             if hasattr(info, 'regressors') and info.regressors is not None:
                 for j, r in enumerate(info.regressors):
                     sessinfo[i]['regress'].insert(j, dict(name='', val=[]))
@@ -559,7 +559,7 @@ class SpecifySPMModel(SpecifyModel):
 class SpecifySparseModelInputSpec(SpecifyModelInputSpec):
     time_acquisition = traits.Float(0, mandatory=True,
                                     desc="Time in seconds to acquire a single image volume")
-    volumes_in_cluster=traits.Range(1, usedefault=True,
+    volumes_in_cluster = traits.Range(1, usedefault=True,
                                     desc="Number of scan volumes in a cluster")
     model_hrf = traits.Bool(desc="model sparse events with hrf")
     stimuli_as_impulses = traits.Bool(True,
@@ -617,7 +617,7 @@ class SpecifySparseModel(SpecifyModel):
         """
         bplot = False
         if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
-            bplot=True
+            bplot = True
             import matplotlib
             matplotlib.use(config.get("execution", "matplotlib_backend"))
             import matplotlib.pyplot as plt

@@ -290,7 +290,7 @@ and we can change a node attribute and run it again
 """
 
 smoothnode = my_workflow.get_node('preproc.smooth')
-assert(str(smoothnode)=='preproc.smooth')
+assert(str(smoothnode) == 'preproc.smooth')
 smoothnode.iterables = ('fwhm', [5.,10.])
 my_workflow.run()
 

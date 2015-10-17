@@ -43,8 +43,8 @@ class SplineFilter(CommandLine):
     >>> filt.inputs.step_length = 0.5
     >>> filt.run()                                 # doctest: +SKIP
     """
-    input_spec=SplineFilterInputSpec
-    output_spec=SplineFilterOutputSpec
+    input_spec = SplineFilterInputSpec
+    output_spec = SplineFilterOutputSpec
 
     _cmd = "spline_filter"
 
@@ -81,8 +81,8 @@ class TrackMerge(CommandLine):
     >>> mrg.inputs.track_files = ['track1.trk','track2.trk']
     >>> mrg.run()                                 # doctest: +SKIP
     """
-    input_spec=TrackMergeInputSpec
-    output_spec=TrackMergeOutputSpec
+    input_spec = TrackMergeInputSpec
+    output_spec = TrackMergeOutputSpec
 
     _cmd = "track_merge"
 
