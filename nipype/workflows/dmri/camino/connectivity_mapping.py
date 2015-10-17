@@ -54,13 +54,13 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     inputnode_within = pe.Node(interface=util.IdentityInterface(fields=["subject_id",
-                                                                  "dwi",
-                                                                  "bvecs",
-                                                                  "bvals",
-                                                                  "subjects_dir",
-                                                                  "resolution_network_file",
+                                                                        "dwi",
+                                                                        "bvecs",
+                                                                        "bvals",
+                                                                        "subjects_dir",
+                                                                        "resolution_network_file",
                                                                         ]),
-                         name="inputnode_within")
+                               name="inputnode_within")
 
     FreeSurferSource = pe.Node(interface=nio.FreeSurferSource(), name='fssource')
 
@@ -276,7 +276,7 @@ def create_connectivity_pipeline(name="connectivity"):
 
     mapping.connect([(inputnode_within, image2voxel, [("dwi", "in_file")]),
                      (inputnode_within, fsl2scheme, [("bvecs", "bvec_file"),
-                                                    ("bvals", "bval_file")]),
+                                                     ("bvals", "bval_file")]),
                      (image2voxel, dtifit,[['voxel_order','in_file']]),
                      (fsl2scheme, dtifit,[['scheme','scheme_file']])
                      ])
@@ -348,7 +348,7 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
     mapping.connect([(fa, analyzeheader_fa,[("fa","in_file")])])
     mapping.connect([(inputnode_within, analyzeheader_fa,[(('dwi', get_vox_dims), 'voxel_dims'),
-        (('dwi', get_data_dims), 'data_dims')])])
+                                                          (('dwi', get_data_dims), 'data_dims')])])
     mapping.connect([(fa, fa2nii,[('fa','data_file')])])
     mapping.connect([(inputnode_within, fa2nii,[(('dwi', get_affine), 'affine')])])
     mapping.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
@@ -357,7 +357,7 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(dtifit, trace,[("tensor_fitted","in_file")])])
     mapping.connect([(trace, analyzeheader_trace,[("trace","in_file")])])
     mapping.connect([(inputnode_within, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
-        (('dwi', get_data_dims), 'data_dims')])])
+                                                             (('dwi', get_data_dims), 'data_dims')])])
     mapping.connect([(trace, trace2nii,[('trace','data_file')])])
     mapping.connect([(inputnode_within, trace2nii,[(('dwi', get_affine), 'affine')])])
     mapping.connect([(analyzeheader_trace, trace2nii,[('header', 'header_file')])])
@@ -374,7 +374,7 @@ def create_connectivity_pipeline(name="connectivity"):
                      (camino2trackvis, trk2camino,[['trackvis','in_file']])
                      ])
     mapping.connect([(inputnode_within, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dims'),
-        (('dwi', get_data_dims), 'data_dims')])])
+                                                         (('dwi', get_data_dims), 'data_dims')])])
 
     """
     Here the CMTK connectivity mapping nodes are connected.
@@ -454,40 +454,40 @@ def create_connectivity_pipeline(name="connectivity"):
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["subject_id", "dwi", "bvecs", "bvals", "subjects_dir", "resolution_network_file"]), name="inputnode")
 
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["fa",
-                                                                "struct",
-                                                                "trace",
-                                                                "tracts",
-                                                                "connectome",
-                                                                "cmatrix",
-                                                                "networks",
-                                                                "rois",
-                                                                "mean_fiber_length",
-                                                                "fiber_length_std",
-                                                                "tensors"]),
+                                                                    "struct",
+                                                                    "trace",
+                                                                    "tracts",
+                                                                    "connectome",
+                                                                    "cmatrix",
+                                                                    "networks",
+                                                                    "rois",
+                                                                    "mean_fiber_length",
+                                                                    "fiber_length_std",
+                                                                    "tensors"]),
                          name="outputnode")
 
     connectivity = pe.Workflow(name="connectivity")
     connectivity.base_output_dir=name
 
     connectivity.connect([(inputnode, mapping, [("dwi", "inputnode_within.dwi"),
-                                              ("bvals", "inputnode_within.bvals"),
-                                              ("bvecs", "inputnode_within.bvecs"),
-                                              ("subject_id", "inputnode_within.subject_id"),
-                                              ("subjects_dir", "inputnode_within.subjects_dir"),
-                                              ("resolution_network_file", "inputnode_within.resolution_network_file")])
+                                                ("bvals", "inputnode_within.bvals"),
+                                                ("bvecs", "inputnode_within.bvecs"),
+                                                ("subject_id", "inputnode_within.subject_id"),
+                                                ("subjects_dir", "inputnode_within.subjects_dir"),
+                                                ("resolution_network_file", "inputnode_within.resolution_network_file")])
                           ])
 
     connectivity.connect([(mapping, outputnode, [("camino2trackvis.trackvis", "tracts"),
-        ("CFFConverter.connectome_file", "connectome"),
-        ("CreateMatrix.matrix_mat_file", "cmatrix"),
-        ("CreateMatrix.mean_fiber_length_matrix_mat_file", "mean_fiber_length"),
-        ("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),
-        ("fa2nii.nifti_file", "fa"),
-        ("CreateMatrix.matrix_files", "networks"),
-        ("ROIGen.roi_file", "rois"),
-        ("mri_convert_Brain.out_file", "struct"),
-        ("trace2nii.nifti_file", "trace"),
-        ("dtifit.tensor_fitted", "tensors")])
+                                                 ("CFFConverter.connectome_file", "connectome"),
+                                                 ("CreateMatrix.matrix_mat_file", "cmatrix"),
+                                                 ("CreateMatrix.mean_fiber_length_matrix_mat_file", "mean_fiber_length"),
+                                                 ("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),
+                                                 ("fa2nii.nifti_file", "fa"),
+                                                 ("CreateMatrix.matrix_files", "networks"),
+                                                 ("ROIGen.roi_file", "rois"),
+                                                 ("mri_convert_Brain.out_file", "struct"),
+                                                 ("trace2nii.nifti_file", "trace"),
+                                                 ("dtifit.tensor_fitted", "tensors")])
         ])
 
     return connectivity

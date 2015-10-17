@@ -153,7 +153,7 @@ else:
                 if not relative.startswith('.doctrees'):
                     for f in files:
                         zf.write(os.path.join(root, f),
-                                os.path.join(relative, 'html_docs', f))
+                                 os.path.join(relative, 'html_docs', f))
             zf.close()
 
 

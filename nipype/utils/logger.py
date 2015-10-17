@@ -91,10 +91,10 @@ class Logging(object):
         old_keys = set(dold.keys())
         if len(new_keys - old_keys):
             self._logger.debug("%s not previously seen: %s"
-                         % (prefix, new_keys - old_keys))
+                               % (prefix, new_keys - old_keys))
         if len(old_keys - new_keys):
             self._logger.debug("%s not presently seen: %s"
-                         % (prefix, old_keys - new_keys))
+                               % (prefix, old_keys - new_keys))
 
         # Values in common keys would differ quite often,
         # so we need to join the messages together
@@ -116,4 +116,4 @@ class Logging(object):
                          % (k, dnew[k], dold[k])]
         if len(msgs):
             self._logger.debug("%s values differ in fields: %s" % (prefix,
-                                                             ", ".join(msgs)))
+                                                                   ", ".join(msgs)))

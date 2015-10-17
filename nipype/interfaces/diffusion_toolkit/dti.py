@@ -25,7 +25,7 @@ class DTIReconInputSpec(CommandLineInputSpec):
     out_prefix = traits.Str("dti", desc='Output file prefix', argstr='%s', usedefault=True,position=2)
     output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-ot %s', desc='output file type', usedefault=True)
     bvecs = File(exists=True, desc = 'b vectors file',
-                argstr='-gm %s', mandatory=True)
+                 argstr='-gm %s', mandatory=True)
     bvals = File(exists=True,desc = 'b values file', mandatory=True)
     n_averages = traits.Int(desc='Number of averages', argstr='-nex %s')
     image_orientation_vectors = traits.List(traits.Float(), minlen=6, maxlen=6, desc="""specify image orientation vectors. if just one argument given,

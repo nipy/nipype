@@ -176,12 +176,12 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     group_infosource.inputs.group_id = group_id
 
     l2infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id',
-        'merged']), name='l2infosource')
+                                                                    'merged']), name='l2infosource')
 
     l2source = pe.Node(
         nio.DataGrabber(
             infields=['group_id'], outfields=['CFFfiles', 'CSVmatrices',
-    'CSVfibers', 'CSVnodal', 'CSVglobal']), name='l2source')
+                                              'CSVfibers', 'CSVnodal', 'CSVglobal']), name='l2source')
 
     l2source.inputs.template_args = dict(
         CFFfiles=[['group_id']], CSVmatrices=[['group_id']],
@@ -195,7 +195,7 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     l2source.inputs.sort_filelist = True
 
     l2inputnode = pe.Node(interface=util.IdentityInterface(fields=['CFFfiles',
-    'CSVfibers', 'CSVmatrices', 'CSVnodal', 'CSVglobal', 'network_file']), name='l2inputnode')
+                                                                   'CSVfibers', 'CSVmatrices', 'CSVnodal', 'CSVglobal', 'network_file']), name='l2inputnode')
 
     MergeCNetworks = pe.Node(
         interface=cmtk.MergeCNetworks(), name="MergeCNetworks")
@@ -266,7 +266,7 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     l2pipeline.connect([(group_infosource, AddCSVColumn_global, [(
         'group_id', 'extra_field')])])
     l2pipeline.connect([(AddCSVColumn_global, l2datasink, [('csv_file',
-                       '@l2output.global_csv')])])
+                                                            '@l2output.global_csv')])])
 
     l2pipeline.connect(
         [(l2inputnode, concat_matrix_csvs, [('CSVmatrices', 'in_files')])])
@@ -284,7 +284,7 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     l2pipeline.connect([(group_infosource, AddCSVColumn_fibers, [(
         'group_id', 'extra_field')])])
     l2pipeline.connect([(AddCSVColumn_fibers, l2datasink, [('csv_file',
-                       '@l2output.fibers_csv')])])
+                                                            '@l2output.fibers_csv')])])
     return l2pipeline
 
 
@@ -411,7 +411,7 @@ def create_merge_group_network_results_workflow(group_list, data_dir, subjects_d
     l3pipeline.connect([(MergeCNetworks_grp, l3datasink, [('connectome_file', '@l3output')])])
 
     concat_csv_interface = Function(input_names=["in_files"], output_names=["out_name"],
-                             function=concatcsv)
+                                    function=concatcsv)
 
     concat_node_csvs = pe.Node(interface=concat_csv_interface, name='concat_node_csvs')
     concat_global_csvs = pe.Node(interface=concat_csv_interface, name='concat_global_csvs')
@@ -464,12 +464,12 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
         raise Exception
 
     l4info = dict(networks=[['group_id', '']], CMatrices=[['group_id', '']], fibmean=[['group_id', 'mean_fiber_length']],
-        fibdev=[['group_id', 'fiber_length_std']])
+                  fibdev=[['group_id', 'fiber_length_std']])
 
     l4source_grp1 = pe.Node(nio.DataGrabber(infields=['group_id'], outfields=list(l4info.keys())), name='l4source_grp1')
     l4source_grp1.inputs.template = '%s/%s'
     l4source_grp1.inputs.field_template = dict(networks=op.join(output_dir, '%s/networks/*/*%s*intersections*.pck'), CMatrices=op.join(output_dir, '%s/cmatrix/*/*%s*.mat'),
-        fibmean=op.join(output_dir, '%s/mean_fiber_length/*/*%s*.mat'), fibdev=op.join(output_dir, '%s/fiber_length_std/*/*%s*.mat'))
+                                               fibmean=op.join(output_dir, '%s/mean_fiber_length/*/*%s*.mat'), fibdev=op.join(output_dir, '%s/fiber_length_std/*/*%s*.mat'))
     l4source_grp1.inputs.base_directory = output_dir
     l4source_grp1.inputs.template_args = l4info
     l4source_grp1.inputs.sort_filelist = True
@@ -477,7 +477,7 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
     l4source_grp2 = l4source_grp1.clone(name='l4source_grp2')
 
     l4inputnode = pe.Node(interface=util.IdentityInterface(fields=['networks_grp1', 'networks_grp2', 'CMatrices_grp1', 'CMatrices_grp2',
-        'fibmean_grp1', 'fibmean_grp2', 'fibdev_grp1', 'fibdev_grp2']), name='l4inputnode')
+                                                                   'fibmean_grp1', 'fibmean_grp2', 'fibdev_grp1', 'fibdev_grp2']), name='l4inputnode')
 
     average_networks_grp1 = pe.Node(interface=cmtk.AverageNetworks(), name='average_networks_grp1')
     average_networks_grp2 = average_networks_grp1.clone('average_networks_grp2')

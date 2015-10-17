@@ -137,7 +137,7 @@ class NumpyOutputChecker(doctest.OutputChecker):
                 want= want.replace("'<i%d'"%sz,"int")
 
             ret = doctest.OutputChecker.check_output(self, want,
-                    got, optionflags)
+                                                     got, optionflags)
 
         return ret
 

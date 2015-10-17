@@ -81,8 +81,8 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     pipeline.connect([(ntwkMetrics, mergeNetworks,[("gpickled_network_files","in2")])])
 
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["network_files",
-    "csv_files", "matlab_files", "node_csv", "global_csv"]),
-                        name="outputnode")
+                                                                    "csv_files", "matlab_files", "node_csv", "global_csv"]),
+                         name="outputnode")
 
     pipeline.connect([(MergeCSVFiles_node, outputnode, [("csv_file", "node_csv")])])
     pipeline.connect([(MergeCSVFiles_global, outputnode, [("csv_file", "global_csv")])])
@@ -132,7 +132,7 @@ def create_cmats_to_csv_pipeline(name="cmats_to_csv", extra_column_heading="subj
     pipeline.connect([(inputnode, MergeCSVFiles,[("extra_field","extra_field")])])
 
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["csv_file"]),
-                        name="outputnode")
+                         name="outputnode")
 
     pipeline.connect([(MergeCSVFiles, outputnode, [("csv_file", "csv_file")])])
     return pipeline

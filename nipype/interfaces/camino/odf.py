@@ -190,8 +190,8 @@ class MESDInputSpec(StdOutCommandLineInputSpec):
     bgmask = File(exists=True, argstr='-bgmask %s', desc='background mask')
     inputdatatype = traits.Enum('float', 'char', 'short', 'int', 'long', 'double', argstr='-inputdatatype %s',
                                 desc=('Specifies the data type of the input file: "char", "short", "int", "long",'
-                                     '"float" or "double". The input file must have BIG-ENDIAN ordering.'
-                                     'By default, the input type is "float".'))
+                                      '"float" or "double". The input file must have BIG-ENDIAN ordering.'
+                                      'By default, the input type is "float".'))
 
 class MESDOutputSpec(TraitedSpec):
     mesd_data = File(exists=True, desc='MESD data')
@@ -310,10 +310,10 @@ class SFPeaksInputSpec(StdOutCommandLineInputSpec):
                                    'The default value is 246.'))
     mepointset = traits.Int(argstr='-mepointset %d', units='NA',
                             desc=('Use a set of directions other than those in the scheme file for the deconvolution '
-                                 'kernel. The number refers to the number of directions on the unit sphere. '
-                                 'For example, "mepointset = 54" uses the directions in "camino/PointSets/Elec054.txt" '
-                                 'Use this option only if you told MESD to use a custom set of directions with the same '
-                                 'option. Otherwise, specify the scheme file with the "schemefile" attribute.'))
+                                  'kernel. The number refers to the number of directions on the unit sphere. '
+                                  'For example, "mepointset = 54" uses the directions in "camino/PointSets/Elec054.txt" '
+                                  'Use this option only if you told MESD to use a custom set of directions with the same '
+                                  'option. Otherwise, specify the scheme file with the "schemefile" attribute.'))
     numpds = traits.Int(argstr='-numpds %d', units='NA',
                         desc='The largest number of peak directions to output in each voxel.')
     noconsistencycheck = traits.Bool(argstr='-noconsistencycheck',
@@ -333,8 +333,8 @@ class SFPeaksInputSpec(StdOutCommandLineInputSpec):
                             desc=('Base threshold on the actual peak direction strength divided by the mean of the '
                                   'function.  The default is 1.0 (the peak must be equal or greater than the mean).'))
     stdsfrommean = traits.Float(argstr='-stdsfrommean %f', units='NA',
-                            desc=('This is the number of standard deviations of the function to be added to the '
-                                 '"pdthresh" attribute in the peak directions pruning.'))
+                                desc=('This is the number of standard deviations of the function to be added to the '
+                                      '"pdthresh" attribute in the peak directions pruning.'))
 
 class SFPeaksOutputSpec(TraitedSpec):
     peaks = File(exists=True, desc='Peaks of the spherical functions.')

@@ -420,7 +420,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
                 if n._hierarchy + n._id not in edgeinfo.keys():
                     edgeinfo[n._hierarchy + n._id] = []
                 edgeinfo[n._hierarchy + n._id].append((edge[0],
-                                               supergraph.get_edge_data(*edge)))
+                                                       supergraph.get_edge_data(*edge)))
     supergraph.remove_nodes_from(nodes)
     # Add copies of the subgraph depending on the number of iterables
     iterable_params = expand_iterables(iterables, synchronize)
@@ -500,8 +500,8 @@ def _identity_nodes(graph, include_iterables):
     to True.
     """
     return [node for node in nx.topological_sort(graph)
-        if isinstance(node._interface, IdentityInterface) and
-           (include_iterables or getattr(node, 'iterables') is None)]
+            if isinstance(node._interface, IdentityInterface) and
+            (include_iterables or getattr(node, 'iterables') is None)]
 
 def _remove_identity_node(graph, node):
     """Remove identity nodes from an execution graph
@@ -608,9 +608,9 @@ def generate_expanded_graph(graph_in):
 
         # the join successor nodes of the current iterable node
         jnodes = [node for node in graph_in.nodes_iter()
-            if hasattr(node, 'joinsource')
-               and inode.name == node.joinsource
-               and nx.has_path(graph_in, inode, node)]
+                  if hasattr(node, 'joinsource')
+                  and inode.name == node.joinsource
+                  and nx.has_path(graph_in, inode, node)]
 
         # excise the join in-edges. save the excised edges in a
         # {jnode: {source name: (destination name, edge data)}}
@@ -708,7 +708,7 @@ def generate_expanded_graph(graph_in):
                         expansions[src_id].append(node)
             for in_id, in_nodes in list(expansions.items()):
                 logger.debug("The join node %s input %s was expanded"
-                         " to %d nodes." %(jnode, in_id, len(in_nodes)))
+                             " to %d nodes." %(jnode, in_id, len(in_nodes)))
             # preserve the node iteration order by sorting on the node id
             for in_nodes in list(expansions.values()):
                 in_nodes.sort(key=lambda node: node._id)
@@ -736,7 +736,7 @@ def generate_expanded_graph(graph_in):
                     connects = newdata['connect']
                     # the join fields connected to the source
                     join_fields = [field for _, field in connects
-                        if field in jnode.joinfield]
+                                   if field in jnode.joinfield]
                     # the {field: slot fields} maps assigned to the input
                     # node, e.g. {'image': 'imageJ3', 'mask': 'maskJ3'}
                     # for the third join source expansion replicate of a
@@ -882,7 +882,7 @@ def _transpose_iterables(fields, values):
         return list(transposed.items())
     else:
         return list(zip(fields, [[v for v in list(transpose) if v != None]
-                            for transpose in zip(*values)]))
+                                 for transpose in zip(*values)]))
 
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                  show_connectinfo=False, dotfilename='graph.dot', format='png',
@@ -1163,7 +1163,7 @@ def write_workflow_prov(graph, filename=None, format='turtle'):
     # Process->Process
     for idx, edgeinfo in enumerate(graph.in_edges_iter()):
         ps.g.wasStartedBy(processes[nodes.index(edgeinfo[1])],
-                       starter=processes[nodes.index(edgeinfo[0])])
+                          starter=processes[nodes.index(edgeinfo[0])])
 
     # write provenance
     try:

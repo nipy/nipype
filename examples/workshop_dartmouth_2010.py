@@ -280,7 +280,7 @@ my_workflow.base_dir = os.path.abspath('.')
 
 my_workflow.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                      (datasource, preproc, [('func', 'inputspec.func'),
-                                          ('struct', 'inputspec.struct')])])
+                                            ('struct', 'inputspec.struct')])])
 my_workflow.run()
 
 

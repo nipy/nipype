@@ -118,26 +118,26 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
                                                                      'highpass']),
                             name='inputspec')
         outputnode = pe.Node(interface=util.IdentityInterface(fields=['reference',
-                                                                  'motion_parameters',
-                                                                  'realigned_files',
-                                                                  'motion_plots',
-                                                                  'mask',
-                                                                  'smoothed_files',
-                                                                  'highpassed_files',
-                                                                  'mean']),
-                         name='outputspec')
+                                                                      'motion_parameters',
+                                                                      'realigned_files',
+                                                                      'motion_plots',
+                                                                      'mask',
+                                                                      'smoothed_files',
+                                                                      'highpassed_files',
+                                                                      'mean']),
+                             name='outputspec')
     else:
         inputnode = pe.Node(interface=util.IdentityInterface(fields=['func',
                                                                      'fwhm']),
                             name='inputspec')
         outputnode = pe.Node(interface=util.IdentityInterface(fields=['reference',
-                                                                  'motion_parameters',
-                                                                  'realigned_files',
-                                                                  'motion_plots',
-                                                                  'mask',
-                                                                  'smoothed_files',
-                                                                  'mean']),
-                         name='outputspec')
+                                                                      'motion_parameters',
+                                                                      'realigned_files',
+                                                                      'motion_plots',
+                                                                      'mask',
+                                                                      'smoothed_files',
+                                                                      'mean']),
+                             name='outputspec')
 
     """
     Set up a node to define outputs for the preprocessing workflow
@@ -151,8 +151,8 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     """
 
     img2float = pe.MapNode(interface=fsl.ImageMaths(out_data_type='float',
-                                                 op_string = '',
-                                                 suffix='_dtype'),
+                                                    op_string = '',
+                                                    suffix='_dtype'),
                            iterfield=['in_file'],
                            name='img2float')
     featpreproc.connect(inputnode, 'func', img2float, 'in_file')
@@ -187,8 +187,8 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     """
 
     plot_motion = pe.MapNode(interface=fsl.PlotMotionParams(in_source='fsl'),
-                            name='plot_motion',
-                            iterfield=['in_file'])
+                             name='plot_motion',
+                             iterfield=['in_file'])
     plot_motion.iterables = ('plot_type', ['rotations', 'translations'])
     featpreproc.connect(motion_correct, 'par_file', plot_motion, 'in_file')
     featpreproc.connect(plot_motion, 'out_file', outputnode, 'motion_plots')
@@ -208,8 +208,8 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     """
 
     meanfuncmask = pe.MapNode(interface=fsl.BET(mask = True,
-                                             no_output=True,
-                                             frac = 0.3),
+                                                no_output=True,
+                                                frac = 0.3),
                               iterfield=['in_file'],
                               name = 'meanfuncmask')
     featpreproc.connect(meanfunc, 'out_file', meanfuncmask, 'in_file')
@@ -241,7 +241,7 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     """
 
     threshold = pe.MapNode(interface=fsl.ImageMaths(out_data_type='char',
-                                                 suffix='_thresh'),
+                                                    suffix='_thresh'),
                            iterfield=['in_file', 'op_string'],
                            name='threshold')
     featpreproc.connect(maskfunc, 'out_file', threshold, 'in_file')
@@ -267,7 +267,7 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     """
 
     dilatemask = pe.MapNode(interface=fsl.ImageMaths(suffix='_dil',
-                                                  op_string='-dilF'),
+                                                     op_string='-dilF'),
                             iterfield=['in_file'],
                             name='dilatemask')
     featpreproc.connect(threshold, 'out_file', dilatemask, 'in_file')
@@ -279,8 +279,8 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
 
     maskfunc2 = pe.MapNode(interface=fsl.ImageMaths(suffix='_mask',
                                                     op_string='-mas'),
-                          iterfield=['in_file', 'in_file2'],
-                          name='maskfunc2')
+                           iterfield=['in_file', 'in_file2'],
+                           name='maskfunc2')
     featpreproc.connect(motion_correct, 'out_file', maskfunc2, 'in_file')
     featpreproc.connect(dilatemask, 'out_file', maskfunc2, 'in_file2')
 
@@ -302,8 +302,8 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
 
     maskfunc3 = pe.MapNode(interface=fsl.ImageMaths(suffix='_mask',
                                                     op_string='-mas'),
-                          iterfield=['in_file', 'in_file2'],
-                          name='maskfunc3')
+                           iterfield=['in_file', 'in_file2'],
+                           name='maskfunc3')
     featpreproc.connect(smooth, 'outputnode.smoothed_files', maskfunc3, 'in_file')
 
     featpreproc.connect(dilatemask, 'out_file', maskfunc3, 'in_file2')
@@ -333,8 +333,8 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     """
 
     meanscale = pe.MapNode(interface=fsl.ImageMaths(suffix='_gms'),
-                          iterfield=['in_file','op_string'],
-                          name='meanscale')
+                           iterfield=['in_file','op_string'],
+                           name='meanscale')
     featpreproc.connect(selectnode, 'out', meanscale, 'in_file')
 
     """
@@ -362,7 +362,7 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     meanfunc3 = pe.MapNode(interface=fsl.ImageMaths(op_string='-Tmean',
                                                     suffix='_mean'),
                            iterfield=['in_file'],
-                          name='meanfunc3')
+                           name='meanfunc3')
     if highpass:
         featpreproc.connect(highpass, 'out_file', meanfunc3, 'in_file')
     else:
@@ -437,26 +437,26 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
                                                                      'highpass']),
                             name='inputspec')
         outputnode = pe.Node(interface=util.IdentityInterface(fields=['reference',
-                                                                  'motion_parameters',
-                                                                  'realigned_files',
-                                                                  'motion_plots',
-                                                                  'mask',
-                                                                  'smoothed_files',
-                                                                  'highpassed_files',
-                                                                  'mean']),
-                         name='outputspec')
+                                                                      'motion_parameters',
+                                                                      'realigned_files',
+                                                                      'motion_plots',
+                                                                      'mask',
+                                                                      'smoothed_files',
+                                                                      'highpassed_files',
+                                                                      'mean']),
+                             name='outputspec')
     else:
         inputnode = pe.Node(interface=util.IdentityInterface(fields=['func',
                                                                      'fwhm']),
                             name='inputspec')
         outputnode = pe.Node(interface=util.IdentityInterface(fields=['reference',
-                                                                  'motion_parameters',
-                                                                  'realigned_files',
-                                                                  'motion_plots',
-                                                                  'mask',
-                                                                  'smoothed_files',
-                                                                  'mean']),
-                         name='outputspec')
+                                                                      'motion_parameters',
+                                                                      'realigned_files',
+                                                                      'motion_plots',
+                                                                      'mask',
+                                                                      'smoothed_files',
+                                                                      'mean']),
+                             name='outputspec')
 
     """
     Set up a node to define outputs for the preprocessing workflow
@@ -471,8 +471,8 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
 
     img2float = pe.MapNode(interface=fsl.ImageMaths(out_data_type='float',
-                                                 op_string = '',
-                                                 suffix='_dtype'),
+                                                    op_string = '',
+                                                    suffix='_dtype'),
                            iterfield=['in_file'],
                            name='img2float')
     featpreproc.connect(inputnode, 'func', img2float, 'in_file')
@@ -514,8 +514,8 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     """
 
     plot_motion = pe.MapNode(interface=fsl.PlotMotionParams(in_source='fsl'),
-                            name='plot_motion',
-                            iterfield=['in_file'])
+                             name='plot_motion',
+                             iterfield=['in_file'])
     plot_motion.iterables = ('plot_type', ['rotations', 'translations'])
     featpreproc.connect(motion_correct, 'par_file', plot_motion, 'in_file')
     featpreproc.connect(plot_motion, 'out_file', outputnode, 'motion_plots')
@@ -566,7 +566,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     """
 
     threshold = pe.MapNode(interface=fsl.ImageMaths(out_data_type='char',
-                                                 suffix='_thresh'),
+                                                    suffix='_thresh'),
                            iterfield=['in_file', 'op_string'],
                            name='threshold')
     featpreproc.connect(maskfunc, 'out_file', threshold, 'in_file')
@@ -592,7 +592,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     """
 
     dilatemask = pe.MapNode(interface=fsl.ImageMaths(suffix='_dil',
-                                                  op_string='-dilF'),
+                                                     op_string='-dilF'),
                             iterfield=['in_file'],
                             name='dilatemask')
     featpreproc.connect(threshold, 'out_file', dilatemask, 'in_file')
@@ -604,8 +604,8 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
     maskfunc2 = pe.MapNode(interface=fsl.ImageMaths(suffix='_mask',
                                                     op_string='-mas'),
-                          iterfield=['in_file', 'in_file2'],
-                          name='maskfunc2')
+                           iterfield=['in_file', 'in_file2'],
+                           name='maskfunc2')
     featpreproc.connect(motion_correct, 'out_file', maskfunc2, 'in_file')
     featpreproc.connect(dilatemask, 'out_file', maskfunc2, 'in_file2')
 
@@ -627,8 +627,8 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
     maskfunc3 = pe.MapNode(interface=fsl.ImageMaths(suffix='_mask',
                                                     op_string='-mas'),
-                          iterfield=['in_file', 'in_file2'],
-                          name='maskfunc3')
+                           iterfield=['in_file', 'in_file2'],
+                           name='maskfunc3')
     featpreproc.connect(smooth, 'outputnode.smoothed_files', maskfunc3, 'in_file')
 
     featpreproc.connect(dilatemask, 'out_file', maskfunc3, 'in_file2')
@@ -658,8 +658,8 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     """
 
     meanscale = pe.MapNode(interface=fsl.ImageMaths(suffix='_gms'),
-                          iterfield=['in_file','op_string'],
-                          name='meanscale')
+                           iterfield=['in_file','op_string'],
+                           name='meanscale')
     featpreproc.connect(selectnode, 'out', meanscale, 'in_file')
 
     """
@@ -829,7 +829,7 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     susan_smooth.connect(merge, ('out', getusans), smooth, 'usans')
 
     outputnode = pe.Node(interface=util.IdentityInterface(fields=['smoothed_files']),
-                    name='outputnode')
+                         name='outputnode')
 
     susan_smooth.connect(smooth, 'smoothed_file', outputnode, 'smoothed_files')
 
@@ -895,16 +895,16 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
                                                                      'highpass']),
                             name='inputspec')
         outputnode = pe.Node(interface=util.IdentityInterface(fields=['reference',
-                                                                  'motion_parameters',
-                                                                  'realigned_files',
-                                                                  'motion_plots',
-                                                                  'mask_file',
-                                                                  'smoothed_files',
-                                                                  'highpassed_files',
-                                                                  'reg_file',
-                                                                  'reg_cost'
+                                                                      'motion_parameters',
+                                                                      'realigned_files',
+                                                                      'motion_plots',
+                                                                      'mask_file',
+                                                                      'smoothed_files',
+                                                                      'highpassed_files',
+                                                                      'reg_file',
+                                                                      'reg_cost'
                                                                       ]),
-                         name='outputspec')
+                             name='outputspec')
     else:
         inputnode = pe.Node(interface=util.IdentityInterface(fields=['func',
                                                                      'fwhm',
@@ -913,15 +913,15 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
                                                                      ]),
                             name='inputspec')
         outputnode = pe.Node(interface=util.IdentityInterface(fields=['reference',
-                                                                  'motion_parameters',
-                                                                  'realigned_files',
-                                                                  'motion_plots',
-                                                                  'mask_file',
-                                                                  'smoothed_files',
-                                                                  'reg_file',
-                                                                  'reg_cost'
+                                                                      'motion_parameters',
+                                                                      'realigned_files',
+                                                                      'motion_plots',
+                                                                      'mask_file',
+                                                                      'smoothed_files',
+                                                                      'reg_file',
+                                                                      'reg_cost'
                                                                       ]),
-                         name='outputspec')
+                             name='outputspec')
 
     """
     Set up a node to define outputs for the preprocessing workflow
@@ -935,8 +935,8 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     """
 
     img2float = pe.MapNode(interface=fsl.ImageMaths(out_data_type='float',
-                                                 op_string = '',
-                                                 suffix='_dtype'),
+                                                    op_string = '',
+                                                    suffix='_dtype'),
                            iterfield=['in_file'],
                            name='img2float')
     featpreproc.connect(inputnode, 'func', img2float, 'in_file')
@@ -979,8 +979,8 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     """
 
     plot_motion = pe.MapNode(interface=fsl.PlotMotionParams(in_source='fsl'),
-                            name='plot_motion',
-                            iterfield=['in_file'])
+                             name='plot_motion',
+                             iterfield=['in_file'])
     plot_motion.iterables = ('plot_type', ['rotations', 'translations'])
     featpreproc.connect(motion_correct, 'par_file', plot_motion, 'in_file')
     featpreproc.connect(plot_motion, 'out_file', outputnode, 'motion_plots')
@@ -990,7 +990,7 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
 
     maskflow = create_getmask_flow()
     featpreproc.connect([(inputnode, maskflow, [('subject_id','inputspec.subject_id'),
-                                             ('subjects_dir', 'inputspec.subjects_dir')])])
+                                                ('subjects_dir', 'inputspec.subjects_dir')])])
     maskflow.inputs.inputspec.contrast_type = 't2'
     if whichvol != 'mean':
         featpreproc.connect(extract_ref, 'roi_file', maskflow, 'inputspec.source_file')
@@ -1027,8 +1027,8 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
 
     maskfunc3 = pe.MapNode(interface=fsl.ImageMaths(suffix='_mask',
                                                     op_string='-mas'),
-                          iterfield=['in_file'],
-                          name='maskfunc3')
+                           iterfield=['in_file'],
+                           name='maskfunc3')
     featpreproc.connect(smooth, 'outputnode.smoothed_files', maskfunc3, 'in_file')
     featpreproc.connect(maskflow, ('outputspec.mask_file', pickfirst), maskfunc3, 'in_file2')
 
@@ -1057,8 +1057,8 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     """
 
     meanscale = pe.MapNode(interface=fsl.ImageMaths(suffix='_gms'),
-                          iterfield=['in_file','op_string'],
-                          name='meanscale')
+                           iterfield=['in_file','op_string'],
+                           name='meanscale')
     featpreproc.connect(selectnode, 'out', meanscale, 'in_file')
 
     """
@@ -1134,11 +1134,11 @@ def create_reg_workflow(name='registration'):
                                                                  'config_file']),
                         name='inputspec')
     outputnode = pe.Node(interface=util.IdentityInterface(fields=['func2anat_transform',
-                                                              'anat2target_transform',
-                                                              'transformed_files',
-                                                              'transformed_mean',
+                                                                  'anat2target_transform',
+                                                                  'transformed_files',
+                                                                  'transformed_mean',
                                                                   ]),
-                     name='outputspec')
+                         name='outputspec')
 
     """
     Estimate the tissue classes from the anatomical image. But use spm's segment

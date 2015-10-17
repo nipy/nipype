@@ -71,7 +71,7 @@ class DTIInputSpec(TraitedSpec):
     bvals = File(exists=True, mandatory=True,
                  desc='The input b-value text file')
     mask_file = File(exists=True,
-                 desc='An optional white matter mask')
+                     desc='An optional white matter mask')
     out_filename = File(
         genfile=True, desc='The output filename for the DTI parameters image')
 

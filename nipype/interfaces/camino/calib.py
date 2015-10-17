@@ -17,7 +17,7 @@ from ...utils.filemanip import split_filename
 class SFPICOCalibDataInputSpec(StdOutCommandLineInputSpec):
     snr = traits.Float(argstr='-snr %f', units='NA',
                        desc=('Specifies  the  signal-to-noise ratio of the '
-                            'non-diffusion-weighted measurements to use in simulations.'))
+                             'non-diffusion-weighted measurements to use in simulations.'))
     scheme_file = File(exists=True, argstr='-schemefile %s', mandatory=True,
                        desc='Specifies the scheme file for the diffusion MRI data')
     info_file = File(desc='The name to be given to the information output filename.',
@@ -39,16 +39,16 @@ class SFPICOCalibDataInputSpec(StdOutCommandLineInputSpec):
                                      'to give all the different permutations.'))
     twodtfastep = traits.Float(argstr='-twodtfastep %f', units='NA',
                                desc=('FA step size controlling how many steps there are '
-                                    'between the minimum and maximum FA settings '
-                                    'for the two tensor cases.'))
+                                     'between the minimum and maximum FA settings '
+                                     'for the two tensor cases.'))
     twodtanglerange = traits.List(traits.Float, argstr='-twodtanglerange %s',
                                   minlen=2, maxlen=2, units='NA',
                                   desc=('Minimum and maximum crossing angles '
                                         'between the two fibres.'))
     twodtanglestep = traits.Float(argstr='-twodtanglestep %f', units='NA',
-                               desc=('Angle step size controlling how many steps there are '
-                                     'between the minimum and maximum crossing angles for '
-                                     'the two tensor cases.'))
+                                  desc=('Angle step size controlling how many steps there are '
+                                        'between the minimum and maximum crossing angles for '
+                                        'the two tensor cases.'))
     twodtmixmax = traits.Float(argstr='-twodtmixmax %f', units='NA',
                                desc=('Mixing parameter controlling the proportion of one fibre population '
                                      'to the other. The minimum mixing parameter is (1 - twodtmixmax).'))

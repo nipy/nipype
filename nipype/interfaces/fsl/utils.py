@@ -1563,8 +1563,8 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
 
     out_format = traits.Enum('spline', 'field', argstr='--outformat=%s',
                              desc=('Specifies the output format. If set to field (default) '
-                             'the output will be a (4D) field-file. If set to spline '
-                             'the format will be a (4D) file of spline coefficients.'))
+                                   'the output will be a (4D) field-file. If set to spline '
+                                   'the format will be a (4D) file of spline coefficients.'))
 
     warp_resolution = traits.Tuple(traits.Float, traits.Float, traits.Float,
                                    argstr='--warpres=%0.4f,%0.4f,%0.4f',
@@ -1729,12 +1729,12 @@ class ConvertWarpInputSpec(FSLCommandInputSpec):
                                 'coordinates in the next space.'))
 
     out_abswarp = traits.Bool(argstr='--absout', xor=['out_relwarp'],
-                          desc=('If set it indicates that the warps in --out should be absolute, i.e. '
-                                'the values in --out are displacements from the coordinates in --ref.'))
+                              desc=('If set it indicates that the warps in --out should be absolute, i.e. '
+                                    'the values in --out are displacements from the coordinates in --ref.'))
 
     out_relwarp = traits.Bool(argstr='--relout', xor=['out_abswarp'],
-                          desc=('If set it indicates that the warps in --out should be relative, i.e. '
-                                'the values in --out are displacements from the coordinates in --ref.'))
+                              desc=('If set it indicates that the warps in --out should be relative, i.e. '
+                                    'the values in --out are displacements from the coordinates in --ref.'))
 
 
 class ConvertWarpOutputSpec(TraitedSpec):

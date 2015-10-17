@@ -176,31 +176,31 @@ def gen_info(run_event_files):
 class SpecifyModelInputSpec(BaseInterfaceInputSpec):
     subject_info = InputMultiPath(Bunch, mandatory=True, xor=['subject_info',
                                                               'event_files'],
-         desc=("Bunch or List(Bunch) subject specific condition information. "
-               "see :ref:`SpecifyModel` or SpecifyModel.__doc__ for details"))
+                                  desc=("Bunch or List(Bunch) subject specific condition information. "
+                                        "see :ref:`SpecifyModel` or SpecifyModel.__doc__ for details"))
     event_files = InputMultiPath(traits.List(File(exists=True)), mandatory=True,
                                  xor=['subject_info', 'event_files'],
-         desc=('list of event description files 1, 2 or 3 column format '
-               'corresponding to onsets, durations and amplitudes'))
+                                 desc=('list of event description files 1, 2 or 3 column format '
+                                       'corresponding to onsets, durations and amplitudes'))
     realignment_parameters = InputMultiPath(File(exists=True),
-         desc="Realignment parameters returned by motion correction algorithm",
-         copyfile=False)
+                                            desc="Realignment parameters returned by motion correction algorithm",
+                                            copyfile=False)
     outlier_files = InputMultiPath(File(exists=True),
-         desc="Files containing scan outlier indices that should be tossed",
-         copyfile=False)
+                                   desc="Files containing scan outlier indices that should be tossed",
+                                   copyfile=False)
     functional_runs = InputMultiPath(traits.Either(traits.List(File(exists=True)),
                                                    File(exists=True)),
                                      mandatory=True,
-         desc=("Data files for model. List of 4D files or list of list of 3D "
-               "files per session"), copyfile=False)
+                                     desc=("Data files for model. List of 4D files or list of list of 3D "
+                                           "files per session"), copyfile=False)
     input_units = traits.Enum('secs', 'scans', mandatory=True,
-         desc=("Units of event onsets and durations (secs or scans). Output "
-               "units are always in secs"))
+                              desc=("Units of event onsets and durations (secs or scans). Output "
+                                    "units are always in secs"))
     high_pass_filter_cutoff = traits.Float(mandatory=True,
-         desc="High-pass filter cutoff in secs")
+                                           desc="High-pass filter cutoff in secs")
     time_repetition = traits.Float(mandatory=True,
-         desc=("Time between the start of one volume to the start of "
-               "the next image volume."))
+                                   desc=("Time between the start of one volume to the start of "
+                                         "the next image volume."))
     # Not implemented yet
     #polynomial_order = traits.Range(0, low=0,
     #        desc ="Number of polynomial functions to model high pass filter.")
@@ -395,9 +395,9 @@ class SpecifyModel(BaseInterface):
             else:
                 infolist = gen_info(self.inputs.event_files)
         self._sessinfo = self._generate_standard_design(infolist,
-                                  functional_runs=self.inputs.functional_runs,
-                                  realignment_parameters=realignment_parameters,
-                                  outliers=outliers)
+                                                        functional_runs=self.inputs.functional_runs,
+                                                        realignment_parameters=realignment_parameters,
+                                                        outliers=outliers)
 
     def _run_interface(self, runtime):
         """
@@ -417,9 +417,9 @@ class SpecifyModel(BaseInterface):
 
 class SpecifySPMModelInputSpec(SpecifyModelInputSpec):
     concatenate_runs = traits.Bool(False, usedefault=True,
-            desc="Concatenate all runs to look like a single session.")
+                                   desc="Concatenate all runs to look like a single session.")
     output_units = traits.Enum('secs', 'scans', usedefault=True,
-            desc="Units of design event onsets and durations (secs or scans)")
+                               desc="Units of design event onsets and durations (secs or scans)")
 
 
 class SpecifySPMModel(SpecifyModel):
@@ -551,27 +551,27 @@ class SpecifySPMModel(SpecifyModel):
                         outliers[0].extend((np.array(out) +
                                             sum(nscans[0:i])).tolist())
         self._sessinfo = self._generate_standard_design(concatlist,
-                                  functional_runs=functional_runs,
-                                  realignment_parameters=realignment_parameters,
-                                  outliers=outliers)
+                                                        functional_runs=functional_runs,
+                                                        realignment_parameters=realignment_parameters,
+                                                        outliers=outliers)
 
 
 class SpecifySparseModelInputSpec(SpecifyModelInputSpec):
     time_acquisition = traits.Float(0, mandatory=True,
-           desc="Time in seconds to acquire a single image volume")
+                                    desc="Time in seconds to acquire a single image volume")
     volumes_in_cluster=traits.Range(1, usedefault=True,
                                     desc="Number of scan volumes in a cluster")
     model_hrf = traits.Bool(desc="model sparse events with hrf")
     stimuli_as_impulses = traits.Bool(True,
-           desc="Treat each stimulus to be impulse like.",
-           usedefault=True)
+                                      desc="Treat each stimulus to be impulse like.",
+                                      usedefault=True)
     use_temporal_deriv = traits.Bool(requires=['model_hrf'],
-           desc="Create a temporal derivative in addition to regular regressor")
+                                     desc="Create a temporal derivative in addition to regular regressor")
     scale_regressors = traits.Bool(True, desc="Scale regressors by the peak",
                                    usedefault=True)
     scan_onset = traits.Float(0.0,
-           desc="Start of scanning relative to onset of run in secs",
-           usedefault=True)
+                              desc="Start of scanning relative to onset of run in secs",
+                              usedefault=True)
     save_plot = traits.Bool(desc=('save plot of sparse design calculation '
                                   '(Requires matplotlib)'))
 

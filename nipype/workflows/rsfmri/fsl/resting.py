@@ -71,7 +71,7 @@ def create_realign_flow(name='realign'):
     outputnode = pe.Node(interface=util.IdentityInterface(fields=[
                                                                'realigned_file',
                                                                  ]),
-                        name='outputspec')
+                         name='outputspec')
     realigner = pe.Node(fsl.MCFLIRT(save_mats=True, stats_imgs=True),
                         name='realigner')
     splitter = pe.Node(fsl.Split(dimension='t'), name='splitter')
@@ -136,7 +136,7 @@ def create_resting_preproc(name='restpreproc'):
                                                               'noise_mask_file',
                                                               'filtered_file',
                                                               ]),
-                     name='outputspec')
+                         name='outputspec')
     slicetimer = pe.Node(fsl.SliceTimer(), name='slicetimer')
     realigner = create_realign_flow()
     tsnr = pe.Node(TSNR(regress_poly=2), name='tsnr')

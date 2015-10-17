@@ -151,7 +151,7 @@ def test_join_expansion():
     wf.connect(pre_join1, 'output1', pre_join2, 'input1')
     # the join node
     join = pe.JoinNode(SumInterface(), joinsource='inputspec',
-        joinfield='input1', name='join')
+                       joinfield='input1', name='join')
     wf.connect(pre_join2, 'output1', join, 'input1')
     # an uniterated post-join node
     post_join1 = pe.Node(IncrementInterface(), name='post_join1')
@@ -176,7 +176,7 @@ def test_join_expansion():
     assert_equal(_sums[0], 7, "The join Sum output value is incorrect: %s." % _sums[0])
     # the join input preserves the iterables input order
     assert_equal(_sum_operands[0], [3, 4],
-        "The join Sum input is incorrect: %s." % _sum_operands[0])
+                 "The join Sum input is incorrect: %s." % _sum_operands[0])
     # there are two iterations of the post-join node in the iterable path
     assert_equal(len(_products), 2,
                  "The number of iterated post-join outputs is incorrect")
@@ -197,11 +197,11 @@ def test_node_joinsource():
     inputspec.iterables = [('n', [1, 2])]
     # the join node
     join = pe.JoinNode(SetInterface(), joinsource=inputspec,
-        joinfield='input1', name='join')
+                       joinfield='input1', name='join')
 
     # the joinsource is the inputspec name
     assert_equal(join.joinsource, inputspec.name,
-        "The joinsource is not set to the node name.")
+                 "The joinsource is not set to the node name.")
 
     os.chdir(cwd)
     rmtree(wd)
@@ -222,14 +222,14 @@ def test_set_join_node():
     wf.connect(inputspec, 'n', pre_join1, 'input1')
     # the set join node
     join = pe.JoinNode(SetInterface(), joinsource='inputspec',
-        joinfield='input1', name='join')
+                       joinfield='input1', name='join')
     wf.connect(pre_join1, 'output1', join, 'input1')
 
     wf.run()
 
     # the join length is the number of unique inputs
     assert_equal(_set_len, 3,
-        "The join Set output value is incorrect: %s." % _set_len)
+                 "The join Set output value is incorrect: %s." % _set_len)
 
     os.chdir(cwd)
     rmtree(wd)
@@ -252,13 +252,13 @@ def test_unique_join_node():
     wf.connect(inputspec, 'n', pre_join1, 'input1')
     # the set join node
     join = pe.JoinNode(SumInterface(), joinsource='inputspec',
-        joinfield='input1', unique=True, name='join')
+                       joinfield='input1', unique=True, name='join')
     wf.connect(pre_join1, 'output1', join, 'input1')
 
     wf.run()
 
     assert_equal(_sum_operands[0], [4, 2, 3],
-        "The unique join output value is incorrect: %s." % _sum_operands[0])
+                 "The unique join output value is incorrect: %s." % _sum_operands[0])
 
     os.chdir(cwd)
     rmtree(wd)
@@ -352,7 +352,7 @@ def test_identity_join_node():
     # node and 1 post-join node. Nipype factors away the iterable input
     # IdentityInterface but keeps the join IdentityInterface.
     assert_equal(len(result.nodes()), 5,
-        "The number of expanded nodes is incorrect.")
+                 "The number of expanded nodes is incorrect.")
     assert_equal(_sum_operands[0], [2, 3, 4],
                  "The join Sum input is incorrect: %s." %_sum_operands[0])
 
@@ -424,7 +424,7 @@ def test_synchronize_join_node():
     wf.connect(inputspec, 'n', inc2, 'input1')
     # the join node
     join = pe.JoinNode(IdentityInterface(fields=['vector1', 'vector2']),
-        joinsource='inputspec', name='join')
+                       joinsource='inputspec', name='join')
     wf.connect(inc1, 'output1', join, 'vector1')
     wf.connect(inc2, 'output1', join, 'vector2')
     # a post-join node
@@ -470,7 +470,7 @@ def test_itersource_join_source_node():
     wf.connect(pre_join2, 'output1', pre_join3, 'input1')
     # the join node
     join = pe.JoinNode(IdentityInterface(fields=['vector']),
-        joinsource='pre_join2', joinfield='vector', name='join')
+                       joinsource='pre_join2', joinfield='vector', name='join')
     wf.connect(pre_join3, 'output1', join, 'vector')
     # a join successor node
     post_join1 = pe.Node(SumInterface(), name='post_join1')
@@ -528,14 +528,14 @@ def test_itersource_two_join_nodes():
     wf.connect(pre_join2, 'output1', pre_join3, 'input1')
     # the first join node
     join1 = pe.JoinNode(IdentityInterface(fields=['vector']),
-        joinsource='pre_join2', joinfield='vector', name='join1')
+                        joinsource='pre_join2', joinfield='vector', name='join1')
     wf.connect(pre_join3, 'output1', join1, 'vector')
     # a join successor node
     post_join1 = pe.Node(SumInterface(), name='post_join1')
     wf.connect(join1, 'vector', post_join1, 'input1')
     # a summary join node
     join2 = pe.JoinNode(IdentityInterface(fields=['vector']),
-        joinsource='inputspec', joinfield='vector', name='join2')
+                        joinsource='inputspec', joinfield='vector', name='join2')
     wf.connect(post_join1, 'output1', join2, 'vector')
 
     result = wf.run()
@@ -566,7 +566,7 @@ def test_set_join_node_file_input():
     wf.connect(inputspec, 'n', pre_join1, 'n')
     # the set join node
     join = pe.JoinNode(PickFirst(), joinsource='inputspec',
-        joinfield='in_files', name='join')
+                       joinfield='in_files', name='join')
     wf.connect(pre_join1, 'n', join, 'in_files')
 
     wf.run()

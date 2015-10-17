@@ -484,7 +484,7 @@ class CreateMatrix(BaseInterface):
             endpoint_name = op.abspath(self.inputs.out_endpoint_array_name)
 
         cmat(self.inputs.tract_file, self.inputs.roi_file, self.inputs.resolution_network_file,
-        matrix_file, matrix_mat_file, endpoint_name, self.inputs.count_region_intersections)
+             matrix_file, matrix_mat_file, endpoint_name, self.inputs.count_region_intersections)
         return runtime
 
     def _list_outputs(self):
@@ -545,13 +545,13 @@ class CreateMatrix(BaseInterface):
         if self.inputs.count_region_intersections:
             outputs['matrix_files'] = [out_matrix_file, out_intersection_matrix_file]
             outputs['matlab_matrix_files'] = [outputs['matrix_mat_file'],
-                outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'],
-                outputs['fiber_length_std_matrix_mat_file'], outputs['intersection_matrix_mat_file']]
+                                              outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'],
+                                              outputs['fiber_length_std_matrix_mat_file'], outputs['intersection_matrix_mat_file']]
         else:
             outputs['matrix_files'] = [out_matrix_file]
             outputs['matlab_matrix_files'] = [outputs['matrix_mat_file'],
-                outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'],
-                outputs['fiber_length_std_matrix_mat_file']]
+                                              outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'],
+                                              outputs['fiber_length_std_matrix_mat_file']]
 
         outputs['filtered_tractography'] = op.abspath(endpoint_name + '_streamline_final.trk')
         outputs['filtered_tractography_by_intersections'] = op.abspath(endpoint_name + '_intersections_streamline_final.trk')
@@ -642,7 +642,7 @@ class ROIGen(BaseInterface):
         if write_dict:
             iflogger.info('Lookup table: {name}'.format(name=op.abspath(self.LUT_file)))
             LUTlabelsRGBA = np.loadtxt(self.LUT_file, skiprows=4, usecols=[0, 1, 2, 3, 4, 5], comments='#',
-                            dtype={'names': ('index', 'label', 'R', 'G', 'B', 'A'), 'formats': ('int', '|S30', 'int', 'int', 'int', 'int')})
+                                       dtype={'names': ('index', 'label', 'R', 'G', 'B', 'A'), 'formats': ('int', '|S30', 'int', 'int', 'int', 'int')})
             numLUTLabels = np.size(LUTlabelsRGBA)
             if numLUTLabels < numDataLabels:
                 iflogger.error('LUT file provided does not contain all of the regions in the image')
@@ -659,13 +659,13 @@ class ROIGen(BaseInterface):
 
         mapDict = {}
         MAPPING = [[1, 2012], [2, 2019], [3, 2032], [4, 2014], [5, 2020], [6, 2018], [7, 2027], [8, 2028], [9, 2003], [10, 2024], [11, 2017], [12, 2026],
-               [13, 2002], [14, 2023], [15, 2010], [16, 2022], [17, 2031], [18, 2029], [19, 2008], [20, 2025], [21, 2005], [22, 2021], [23, 2011],
-               [24, 2013], [25, 2007], [26, 2016], [27, 2006], [28, 2033], [29, 2009], [30, 2015], [31, 2001], [32, 2030], [33, 2034], [34, 2035],
-               [35, 49], [36, 50], [37, 51], [38, 52], [39, 58], [40, 53], [41, 54], [42, 1012], [43, 1019], [44, 1032], [45, 1014], [46, 1020], [47, 1018],
-               [48, 1027], [49, 1028], [50, 1003], [51, 1024], [52, 1017], [53, 1026], [54, 1002], [55, 1023], [56, 1010], [57, 1022], [58, 1031],
-               [59, 1029], [60, 1008], [61, 1025], [62, 1005], [63, 1021], [64, 1011], [65, 1013], [66, 1007], [67, 1016], [68, 1006], [69, 1033],
-               [70, 1009], [71, 1015], [72, 1001], [73, 1030], [74, 1034], [75, 1035], [76, 10], [77, 11], [78, 12], [79, 13], [80, 26], [81, 17],
-               [82, 18], [83, 16]]
+                   [13, 2002], [14, 2023], [15, 2010], [16, 2022], [17, 2031], [18, 2029], [19, 2008], [20, 2025], [21, 2005], [22, 2021], [23, 2011],
+                   [24, 2013], [25, 2007], [26, 2016], [27, 2006], [28, 2033], [29, 2009], [30, 2015], [31, 2001], [32, 2030], [33, 2034], [34, 2035],
+                   [35, 49], [36, 50], [37, 51], [38, 52], [39, 58], [40, 53], [41, 54], [42, 1012], [43, 1019], [44, 1032], [45, 1014], [46, 1020], [47, 1018],
+                   [48, 1027], [49, 1028], [50, 1003], [51, 1024], [52, 1017], [53, 1026], [54, 1002], [55, 1023], [56, 1010], [57, 1022], [58, 1031],
+                   [59, 1029], [60, 1008], [61, 1025], [62, 1005], [63, 1021], [64, 1011], [65, 1013], [66, 1007], [67, 1016], [68, 1006], [69, 1033],
+                   [70, 1009], [71, 1015], [72, 1001], [73, 1030], [74, 1034], [75, 1035], [76, 10], [77, 11], [78, 12], [79, 13], [80, 26], [81, 17],
+                   [82, 18], [83, 16]]
 
         """ Create empty grey matter mask, Populate with only those regions defined in the mapping."""
         niiGM = np.zeros(niiAPARCdata.shape, dtype=np.uint)

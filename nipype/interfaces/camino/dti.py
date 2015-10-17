@@ -17,7 +17,7 @@ from ...utils.filemanip import split_filename
 
 class DTIFitInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=1,
-        desc='voxel-order data filename')
+                   desc='voxel-order data filename')
 
     bgmask = File(argstr='-bgmask %s', exists=True,
                   desc=('Provides the name of a file containing a background mask computed using, '
@@ -25,10 +25,10 @@ class DTIFitInputSpec(StdOutCommandLineInputSpec):
                         'voxels and non-zero in foreground.'))
 
     scheme_file = File(exists=True, argstr='%s', mandatory=True, position=2,
-        desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
+                       desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
 
     non_linear = traits.Bool(argstr='-nonlinear', position=3,
-        desc="Use non-linear fitting instead of the default linear regression to the log measurements. ")
+                             desc="Use non-linear fitting instead of the default linear regression to the log measurements. ")
 
 class DTIFitOutputSpec(TraitedSpec):
     tensor_fitted = File(exists=True, desc='path/name of 4D volume in voxel order')
@@ -192,7 +192,7 @@ class ModelFitInputSpec(StdOutCommandLineInputSpec):
                                 desc='Specifies the data type of the input file: "char", "short", "int", "long", "float" or "double". The input file must have BIG-ENDIAN ordering. By default, the input type is "float".')
 
     scheme_file = File(exists=True, argstr='-schemefile %s', mandatory=True,
-        desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
+                       desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
 
     outputfile = File(argstr='-outputfile %s', desc='Filename of the output file.')
 
@@ -254,29 +254,29 @@ class ModelFit(StdOutCommandLine):
 
 class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
     lrange = traits.List(traits.Float, desc = 'Index to one-tensor LUTs. This is the ratio L1/L3 and L2 / L3.' \
-        'The LUT is square, with half the values calculated (because L2 / L3 cannot be less than L1 / L3 by definition).' \
-        'The minimum must be >= 1. For comparison, a ratio L1 / L3 = 10 with L2 / L3 = 1 corresponds to an FA of 0.891, '\
-        'and L1 / L3 = 15 with L2 / L3 = 1 corresponds to an FA of 0.929. The default range is 1 to 10.', \
-        argstr='-lrange %s', minlen=2, maxlen=2, position=1,
-        units='NA')
+                         'The LUT is square, with half the values calculated (because L2 / L3 cannot be less than L1 / L3 by definition).' \
+                         'The minimum must be >= 1. For comparison, a ratio L1 / L3 = 10 with L2 / L3 = 1 corresponds to an FA of 0.891, '\
+                         'and L1 / L3 = 15 with L2 / L3 = 1 corresponds to an FA of 0.929. The default range is 1 to 10.', \
+                         argstr='-lrange %s', minlen=2, maxlen=2, position=1,
+                         units='NA')
 
     frange = traits.List(traits.Float, desc = 'Index to two-tensor LUTs. This is the fractional anisotropy \
         of the two tensors. The default is 0.3 to 0.94', \
-        argstr='-frange %s', minlen=2, maxlen=2, position=1,
-        units='NA')
+                         argstr='-frange %s', minlen=2, maxlen=2, position=1,
+                         units='NA')
 
     step = traits.Float(argstr='-step %f', units='NA',
-        desc='Distance between points in the LUT.' \
-        'For example, if lrange is 1 to 10 and the step is 0.1, LUT entries will be computed ' \
-        'at L1 / L3 = 1, 1.1, 1.2 ... 10.0 and at L2 / L3 = 1.0, 1.1 ... L1 / L3.' \
-        'For single tensor LUTs, the default step is 0.2, for two-tensor LUTs it is 0.02.')
+                        desc='Distance between points in the LUT.' \
+                        'For example, if lrange is 1 to 10 and the step is 0.1, LUT entries will be computed ' \
+                        'at L1 / L3 = 1, 1.1, 1.2 ... 10.0 and at L2 / L3 = 1.0, 1.1 ... L1 / L3.' \
+                        'For single tensor LUTs, the default step is 0.2, for two-tensor LUTs it is 0.02.')
 
     samples = traits.Int(argstr='-samples %d', units='NA',
-        desc='The number of synthetic measurements to generate at each point in the LUT. The default is 2000.')
+                         desc='The number of synthetic measurements to generate at each point in the LUT. The default is 2000.')
 
     snr = traits.Float(argstr='-snr %f', units='NA',
-        desc='The signal to noise ratio of the unweighted (q = 0) measurements.'\
-        'This should match the SNR (in white matter) of the images that the LUTs are used with.')
+                       desc='The signal to noise ratio of the unweighted (q = 0) measurements.'\
+                       'This should match the SNR (in white matter) of the images that the LUTs are used with.')
 
     bingham = traits.Bool(argstr='-bingham', desc="Compute a LUT for the Bingham PDF. This is the default.")
 
@@ -285,13 +285,13 @@ class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
     watson = traits.Bool(argstr='-watson', desc="Compute a LUT for the Watson PDF.")
 
     inversion = traits.Int(argstr='-inversion %d', units='NA',
-        desc='Index of the inversion to use. The default is 1 (linear single tensor inversion).')
+                           desc='Index of the inversion to use. The default is 1 (linear single tensor inversion).')
 
     trace = traits.Float(argstr='-trace %G', units='NA',
-        desc='Trace of the diffusion tensor(s) used in the test function in the LUT generation. The default is 2100E-12 m^2 s^-1.')
+                         desc='Trace of the diffusion tensor(s) used in the test function in the LUT generation. The default is 2100E-12 m^2 s^-1.')
 
     scheme_file = File(argstr='-schemefile %s', mandatory=True, position=2,
-        desc='The scheme file of the images to be processed using this LUT.')
+                       desc='The scheme file of the images to be processed using this LUT.')
 
 class DTLUTGenOutputSpec(TraitedSpec):
     dtLUT = File(exists=True, desc='Lookup Table')
@@ -333,34 +333,34 @@ class DTLUTGen(StdOutCommandLine):
 
 class PicoPDFsInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
-        desc='voxel-order data filename')
+                   desc='voxel-order data filename')
 
     inputmodel = traits.Enum('dt', 'multitensor', 'pds',
-        argstr='-inputmodel %s', position=2, desc='input model type', usedefault=True)
+                             argstr='-inputmodel %s', position=2, desc='input model type', usedefault=True)
 
     luts = InputMultiPath(File(exists=True), argstr='-luts %s', mandatory=True,
-        desc='Files containing the lookup tables.'\
-        'For tensor data, one lut must be specified for each type of inversion used in the image (one-tensor, two-tensor, three-tensor).'\
-        'For pds, the number of LUTs must match -numpds (it is acceptable to use the same LUT several times - see example, above).'\
-        'These LUTs may be generated with dtlutgen.')
+                          desc='Files containing the lookup tables.'\
+                          'For tensor data, one lut must be specified for each type of inversion used in the image (one-tensor, two-tensor, three-tensor).'\
+                          'For pds, the number of LUTs must match -numpds (it is acceptable to use the same LUT several times - see example, above).'\
+                          'These LUTs may be generated with dtlutgen.')
 
     pdf = traits.Enum('bingham', 'watson', 'acg',
-        argstr='-pdf %s', position=4, desc=' Specifies the PDF to use. There are three choices:'\
-        'watson - The Watson distribution. This distribution is rotationally symmetric.'\
-        'bingham - The Bingham distributionn, which allows elliptical probability density contours.'\
-        'acg - The Angular Central Gaussian distribution, which also allows elliptical probability density contours', usedefault=True)
+                      argstr='-pdf %s', position=4, desc=' Specifies the PDF to use. There are three choices:'\
+                      'watson - The Watson distribution. This distribution is rotationally symmetric.'\
+                      'bingham - The Bingham distributionn, which allows elliptical probability density contours.'\
+                      'acg - The Angular Central Gaussian distribution, which also allows elliptical probability density contours', usedefault=True)
 
     directmap = traits.Bool(argstr='-directmap', desc="Only applicable when using pds as the inputmodel. Use direct mapping between the eigenvalues and the distribution parameters instead of the log of the eigenvalues.")
 
     maxcomponents = traits.Int(argstr='-maxcomponents %d', units='NA',
-        desc='The maximum number of tensor components in a voxel (default 2) for multitensor data.'\
-        'Currently, only the default is supported, but future releases may allow the input of three-tensor data using this option.')
+                               desc='The maximum number of tensor components in a voxel (default 2) for multitensor data.'\
+                               'Currently, only the default is supported, but future releases may allow the input of three-tensor data using this option.')
 
     numpds = traits.Int(argstr='-numpds %d', units='NA',
-        desc='The maximum number of PDs in a voxel (default 3) for PD data.' \
-        'This option determines the size of the input and output voxels.' \
-        'This means that the data file may be large enough to accomodate three or more PDs,'\
-        'but does not mean that any of the voxels are classified as containing three or more PDs.')
+                        desc='The maximum number of PDs in a voxel (default 3) for PD data.' \
+                        'This option determines the size of the input and output voxels.' \
+                        'This means that the data file may be large enough to accomodate three or more PDs,'\
+                        'but does not mean that any of the voxels are classified as containing three or more PDs.')
 
 class PicoPDFsOutputSpec(TraitedSpec):
     pdfs = File(exists=True, desc='path/name of 4D volume in voxel order')
@@ -615,7 +615,7 @@ class TrackPICo(Track):
 
 class TrackBedpostxDeterInputSpec(TrackInputSpec):
     bedpostxdir = Directory(argstr='-bedpostxdir %s', mandatory=True, exists=True,
-                       desc=('Directory containing bedpostx output'))
+                            desc=('Directory containing bedpostx output'))
 
     min_vol_frac = traits.Float(argstr='-bedpostxminf %d', units='NA',
                                 desc=("Zeros out compartments in bedpostx data "
@@ -654,7 +654,7 @@ class TrackBedpostxDeter(Track):
 
 class TrackBedpostxProbaInputSpec(TrackInputSpec):
     bedpostxdir = Directory(argstr='-bedpostxdir %s', mandatory=True, exists=True,
-                       desc=('Directory containing bedpostx output'))
+                            desc=('Directory containing bedpostx output'))
 
     min_vol_frac = traits.Float(argstr='-bedpostxminf %d', units='NA',
                                 desc=("Zeros out compartments in bedpostx data "
@@ -796,29 +796,29 @@ class TrackBootstrap(Track):
 
 class ComputeMeanDiffusivityInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
-        desc='Tensor-fitted data filename')
+                   desc='Tensor-fitted data filename')
 
     scheme_file = File(exists=True, argstr='%s', position=2,
-        desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
+                       desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
 
     out_file = File(argstr="> %s", position=-1, genfile=True)
 
     inputmodel = traits.Enum('dt', 'twotensor', 'threetensor',
-        argstr='-inputmodel %s',
-        desc='Specifies the model that the input tensor data contains parameters for.' \
-        'Possible model types are: "dt" (diffusion-tensor data), "twotensor" (two-tensor data), '\
-        '"threetensor" (three-tensor data). By default, the program assumes that the input data '\
-        'contains a single diffusion tensor in each voxel.')
+                             argstr='-inputmodel %s',
+                             desc='Specifies the model that the input tensor data contains parameters for.' \
+                             'Possible model types are: "dt" (diffusion-tensor data), "twotensor" (two-tensor data), '\
+                             '"threetensor" (three-tensor data). By default, the program assumes that the input data '\
+                             'contains a single diffusion tensor in each voxel.')
 
     inputdatatype = traits.Enum('char', 'short', 'int', 'long', 'float', 'double',
-        argstr='-inputdatatype %s',
-        desc='Specifies the data type of the input file. The data type can be any of the' \
-        'following strings: "char", "short", "int", "long", "float" or "double".')
+                                argstr='-inputdatatype %s',
+                                desc='Specifies the data type of the input file. The data type can be any of the' \
+                                'following strings: "char", "short", "int", "long", "float" or "double".')
 
     outputdatatype = traits.Enum('char', 'short', 'int', 'long', 'float', 'double',
-        argstr='-outputdatatype %s',
-        desc='Specifies the data type of the output data. The data type can be any of the' \
-        'following strings: "char", "short", "int", "long", "float" or "double".')
+                                 argstr='-outputdatatype %s',
+                                 desc='Specifies the data type of the output data. The data type can be any of the' \
+                                 'following strings: "char", "short", "int", "long", "float" or "double".')
 
 class ComputeMeanDiffusivityOutputSpec(TraitedSpec):
     md = File(exists=True, desc='Mean Diffusivity Map')
@@ -851,27 +851,27 @@ class ComputeMeanDiffusivity(StdOutCommandLine):
 
 class ComputeFractionalAnisotropyInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
-        desc='Tensor-fitted data filename')
+                   desc='Tensor-fitted data filename')
 
     scheme_file = File(exists=True, argstr='%s', position=2,
-        desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
+                       desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
 
     inputmodel = traits.Enum('dt', 'twotensor', 'threetensor', 'multitensor',
-        argstr='-inputmodel %s',
-        desc='Specifies the model that the input tensor data contains parameters for.' \
-        'Possible model types are: "dt" (diffusion-tensor data), "twotensor" (two-tensor data), '\
-        '"threetensor" (three-tensor data). By default, the program assumes that the input data '\
-        'contains a single diffusion tensor in each voxel.')
+                             argstr='-inputmodel %s',
+                             desc='Specifies the model that the input tensor data contains parameters for.' \
+                             'Possible model types are: "dt" (diffusion-tensor data), "twotensor" (two-tensor data), '\
+                             '"threetensor" (three-tensor data). By default, the program assumes that the input data '\
+                             'contains a single diffusion tensor in each voxel.')
 
     inputdatatype = traits.Enum('char', 'short', 'int', 'long', 'float', 'double',
-        argstr='-inputdatatype %s',
-        desc='Specifies the data type of the input file. The data type can be any of the' \
-        'following strings: "char", "short", "int", "long", "float" or "double".')
+                                argstr='-inputdatatype %s',
+                                desc='Specifies the data type of the input file. The data type can be any of the' \
+                                'following strings: "char", "short", "int", "long", "float" or "double".')
 
     outputdatatype = traits.Enum('char', 'short', 'int', 'long', 'float', 'double',
-        argstr='-outputdatatype %s',
-        desc='Specifies the data type of the output data. The data type can be any of the' \
-        'following strings: "char", "short", "int", "long", "float" or "double".')
+                                 argstr='-outputdatatype %s',
+                                 desc='Specifies the data type of the output data. The data type can be any of the' \
+                                 'following strings: "char", "short", "int", "long", "float" or "double".')
 
 class ComputeFractionalAnisotropyOutputSpec(TraitedSpec):
     fa = File(exists=True, desc='Fractional Anisotropy Map')
@@ -910,27 +910,27 @@ class ComputeFractionalAnisotropy(StdOutCommandLine):
 
 class ComputeTensorTraceInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
-        desc='Tensor-fitted data filename')
+                   desc='Tensor-fitted data filename')
 
     scheme_file = File(exists=True, argstr='%s', position=2,
-        desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
+                       desc='Camino scheme file (b values / vectors, see camino.fsl2scheme)')
 
     inputmodel = traits.Enum('dt', 'twotensor', 'threetensor', 'multitensor',
-        argstr='-inputmodel %s',
-        desc='Specifies the model that the input tensor data contains parameters for.' \
-        'Possible model types are: "dt" (diffusion-tensor data), "twotensor" (two-tensor data), '\
-        '"threetensor" (three-tensor data). By default, the program assumes that the input data '\
-        'contains a single diffusion tensor in each voxel.')
+                             argstr='-inputmodel %s',
+                             desc='Specifies the model that the input tensor data contains parameters for.' \
+                             'Possible model types are: "dt" (diffusion-tensor data), "twotensor" (two-tensor data), '\
+                             '"threetensor" (three-tensor data). By default, the program assumes that the input data '\
+                             'contains a single diffusion tensor in each voxel.')
 
     inputdatatype = traits.Enum('char', 'short', 'int', 'long', 'float', 'double',
-        argstr='-inputdatatype %s',
-        desc='Specifies the data type of the input file. The data type can be any of the' \
-        'following strings: "char", "short", "int", "long", "float" or "double".')
+                                argstr='-inputdatatype %s',
+                                desc='Specifies the data type of the input file. The data type can be any of the' \
+                                'following strings: "char", "short", "int", "long", "float" or "double".')
 
     outputdatatype = traits.Enum('char', 'short', 'int', 'long', 'float', 'double',
-        argstr='-outputdatatype %s',
-        desc='Specifies the data type of the output data. The data type can be any of the' \
-        'following strings: "char", "short", "int", "long", "float" or "double".')
+                                 argstr='-outputdatatype %s',
+                                 desc='Specifies the data type of the output data. The data type can be any of the' \
+                                 'following strings: "char", "short", "int", "long", "float" or "double".')
 
 class ComputeTensorTraceOutputSpec(TraitedSpec):
     trace = File(exists=True, desc='Trace of the diffusion tensor')

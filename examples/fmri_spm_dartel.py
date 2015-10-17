@@ -181,13 +181,13 @@ slicestats.inputs.all_axial = True
 slicestats.inputs.image_width = 750
 
 l1analysis.connect([(modelspec,level1design,[('session_info','session_info')]),
-                  (level1design,level1estimate,[('spm_mat_file','spm_mat_file')]),
-                  (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
-                                                  ('beta_images','beta_images'),
-                                                  ('residual_image','residual_image')]),
-                  (contrastestimate,selectcontrast,[('spmT_images','inlist')]),
-                  (selectcontrast,overlaystats,[('out','stat_image')]),
-                  (overlaystats,slicestats,[('out_file','in_file')])
+                    (level1design,level1estimate,[('spm_mat_file','spm_mat_file')]),
+                    (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
+                                                      ('beta_images','beta_images'),
+                                                      ('residual_image','residual_image')]),
+                    (contrastestimate,selectcontrast,[('spmT_images','inlist')]),
+                    (selectcontrast,overlaystats,[('out','stat_image')]),
+                    (overlaystats,slicestats,[('out_file','in_file')])
                   ])
 
 """
@@ -405,7 +405,7 @@ level1.connect([(datasource_dartel, rename_dartel, [('struct', 'in_file')]),
                                         ('struct', 'preproc.coregister.target'),
                                         ('struct', 'preproc.normalize_struct.apply_to_files')]),
                 (dartel_workflow, l1pipeline, [('outputspec.template_file', 'preproc.normalize_struct.template_file'),
-                                        ('outputspec.template_file', 'preproc.normalize_and_smooth_func.template_file')]),
+                                               ('outputspec.template_file', 'preproc.normalize_and_smooth_func.template_file')]),
                 (infosource, pick_flow, [('subject_id', 'subject_id')]),
                 (dartel_workflow, pick_flow, [('outputspec.flow_fields', 'dartel_flow_fields')]),
                 (pick_flow, l1pipeline, [('dartel_flow_field', 'preproc.normalize_struct.flowfield_files'),
@@ -514,10 +514,10 @@ l2conestimate.inputs.group_contrast = True
 l2pipeline = pe.Workflow(name="level2")
 l2pipeline.base_dir = os.path.abspath('spm_dartel_tutorial/l2output')
 l2pipeline.connect([(l2source,onesamplettestdes,[('outfiles','in_files')]),
-                  (onesamplettestdes,l2estimate,[('spm_mat_file','spm_mat_file')]),
-                  (l2estimate,l2conestimate,[('spm_mat_file','spm_mat_file'),
-                                             ('beta_images','beta_images'),
-                                             ('residual_image','residual_image')]),
+                    (onesamplettestdes,l2estimate,[('spm_mat_file','spm_mat_file')]),
+                    (l2estimate,l2conestimate,[('spm_mat_file','spm_mat_file'),
+                                               ('beta_images','beta_images'),
+                                               ('residual_image','residual_image')]),
                     ])
 
 """

@@ -9,8 +9,8 @@
 import os
 
 from ..base import (traits, TraitedSpec, File,
-                   CommandLine, CommandLineInputSpec, isdefined,
-                   InputMultiPath)
+                    CommandLine, CommandLineInputSpec, isdefined,
+                    InputMultiPath)
 from ...utils.filemanip import split_filename
 
 

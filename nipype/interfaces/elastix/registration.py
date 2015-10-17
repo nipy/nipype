@@ -23,9 +23,9 @@ logger = logging.getLogger('interface')
 
 class RegistrationInputSpec(ElastixBaseInputSpec):
     fixed_image = File(exists=True, mandatory=True, argstr='-f %s',
-           desc='fixed image')
+                       desc='fixed image')
     moving_image = File(exists=True, mandatory=True, argstr='-m %s',
-           desc='moving image')
+                        desc='moving image')
     parameters = InputMultiPath(File(exists=True), mandatory=True, argstr='-p %s...',
                                 desc='parameter file, elastix handles 1 or more -p')
     fixed_mask = File(exists=True, argstr='-fMask %s', desc='mask for fixed image')
@@ -40,7 +40,7 @@ class RegistrationOutputSpec(TraitedSpec):
     warped_files = InputMultiPath(File(exists=False),
                                   desc=('input moving image warped to fixed image at each level'))
     warped_files_flags = traits.List(traits.Bool(False),
-                                    desc='flag indicating if warped image was generated')
+                                     desc='flag indicating if warped image was generated')
 
 
 class Registration(CommandLine):
@@ -90,7 +90,7 @@ class Registration(CommandLine):
                             config[m.group(1).strip()] = value
 
             outputs['transform'].append(op.join(out_dir,
-                                        'TransformParameters.%01d.txt' % i ))
+                                                'TransformParameters.%01d.txt' % i ))
 
             warped_file = None
             if config['WriteResultImage']:

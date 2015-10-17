@@ -35,9 +35,9 @@ class DTIFitInputSpec(FSLCommandInputSpec):
     mask = File(exists=True, desc='bet binary mask file',
                 argstr='-m %s', position=2, mandatory=True)
     bvecs = File(exists=True, desc='b vectors file',
-                argstr='-r %s', position=3, mandatory=True)
+                 argstr='-r %s', position=3, mandatory=True)
     bvals = File(exists=True, desc='b values file',
-                argstr='-b %s', position=4, mandatory=True)
+                 argstr='-b %s', position=4, mandatory=True)
     min_z = traits.Int(argstr='-z %d', desc='min z')
     max_z = traits.Int(argstr='-Z %d', desc='max z')
     min_y = traits.Int(argstr='-y %d', desc='min y')
@@ -45,7 +45,7 @@ class DTIFitInputSpec(FSLCommandInputSpec):
     min_x = traits.Int(argstr='-x %d', desc='min x')
     max_x = traits.Int(argstr='-X %d', desc='max x')
     save_tensor = traits.Bool(desc='save the elements of the tensor',
-                        argstr='--save_tensor')
+                              argstr='--save_tensor')
     sse = traits.Bool(desc='output sum of squared errors', argstr='--sse')
     cni = File(exists=True, desc='input counfound regressors', argstr='--cni=%s')
     little_bit = traits.Bool(desc='only process small area of brain',
@@ -169,16 +169,16 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
 
 class FSLXCommandOutputSpec(TraitedSpec):
     dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
-                                          ' in vector form.'))
+                                                     ' in vector form.'))
     fsamples = OutputMultiPath(File(exists=True), desc=('Samples from the '
-                               'distribution on f anisotropy'))
+                                                        'distribution on f anisotropy'))
     mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
     mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                    'distribution on f anisotropy'))
+                                                             'distribution on f anisotropy'))
     mean_S0samples = File(exists=True,desc=('Mean of distribution on T2w'
-                                'baseline signal intensity S0'))
+                                            'baseline signal intensity S0'))
     mean_tausamples = File(exists=True,desc=('Mean of distribution on '
-                                 'tau samples (only with rician noise)'))
+                                             'tau samples (only with rician noise)'))
     phsamples = OutputMultiPath(File(exists=True), desc=('phi samples, per fiber'))
     thsamples = OutputMultiPath(File(exists=True), desc=('theta samples, per fiber'))
 
@@ -222,17 +222,17 @@ class FSLXCommand(FSLCommand):
 
         for i in range(1, n_fibres + 1):
             outputs['fsamples'].append(self._gen_fname('f%dsamples' % i,
-                                       cwd=out_dir))
+                                                       cwd=out_dir))
             outputs['mean_fsamples'].append(self._gen_fname(('mean_f%d'
-                                            'samples') % i, cwd=out_dir))
+                                                             'samples') % i, cwd=out_dir))
 
         for i in range(1, n_fibres + 1):
             outputs['dyads'].append(self._gen_fname('dyads%d' % i,
-                                    cwd=out_dir))
+                                                    cwd=out_dir))
             outputs['phsamples'].append(self._gen_fname('ph%dsamples' % i,
-                                        cwd=out_dir))
+                                                        cwd=out_dir))
             outputs['thsamples'].append(self._gen_fname('th%dsamples' % i,
-                                        cwd=out_dir))
+                                                        cwd=out_dir))
 
         return outputs
 
@@ -263,29 +263,29 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
     out_dir = Directory('bedpostx', mandatory=True, desc='output directory',
                         usedefault=True, position=1, argstr='%s')
     gradnonlin = traits.Bool(False, argstr='-g', desc=('consider gradient '
-                             'nonlinearities, default off'))
+                                                       'nonlinearities, default off'))
     use_gpu = traits.Bool(False, desc='Use the GPU version of bedpostx')
 
 
 class BEDPOSTX5OutputSpec(TraitedSpec):
     mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
     mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                    'distribution on f anisotropy'))
+                                                             'distribution on f anisotropy'))
     mean_S0samples = File(exists=True,desc=('Mean of distribution on T2w'
-                                'baseline signal intensity S0'))
+                                            'baseline signal intensity S0'))
     mean_phsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                    'distribution on phi'))
+                                                              'distribution on phi'))
     mean_thsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                    'distribution on theta'))
+                                                              'distribution on theta'))
     merged_thsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
-                                       'the distribution on theta'))
+                                                                'the distribution on theta'))
     merged_phsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
-                                       'the distribution on phi'))
+                                                                'the distribution on phi'))
     merged_fsamples = OutputMultiPath(File(exists=True),
                                       desc=('Samples from the distribution on '
                                             'anisotropic volume fraction'))
     dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
-                                          ' in vector form.'))
+                                                     ' in vector form.'))
     dyads_dispersion = OutputMultiPath(File(exists=True), desc=('Dispersion'))
 
 
@@ -373,22 +373,22 @@ class BEDPOSTX5(FSLXCommand):
 
         for i in range(1, n_fibres + 1):
             outputs['merged_thsamples'].append(self._gen_fname('merged_th%dsamples' % i,
-                                       cwd=self._out_dir))
+                                                               cwd=self._out_dir))
             outputs['merged_fsamples'].append(self._gen_fname('merged_f%dsamples' % i,
-                                       cwd=self._out_dir))
+                                                              cwd=self._out_dir))
             outputs['merged_phsamples'].append(self._gen_fname('merged_ph%dsamples' % i,
-                                       cwd=self._out_dir))
+                                                               cwd=self._out_dir))
 
             outputs['mean_thsamples'].append(self._gen_fname('mean_th%dsamples' % i,
-                                       cwd=self._out_dir))
+                                                             cwd=self._out_dir))
             outputs['mean_phsamples'].append(self._gen_fname('mean_ph%dsamples' % i,
-                                       cwd=self._out_dir))
+                                                             cwd=self._out_dir))
             outputs['mean_fsamples'].append(self._gen_fname('mean_f%dsamples' % i,
-                                       cwd=self._out_dir))
+                                                            cwd=self._out_dir))
             outputs['dyads'].append(self._gen_fname('dyads%d' % i,
-                                       cwd=self._out_dir))
+                                                    cwd=self._out_dir))
             outputs['dyads_dispersion'].append(self._gen_fname('dyads%d_dispersion' % i,
-                                       cwd=self._out_dir))
+                                                               cwd=self._out_dir))
         return outputs
 
 
@@ -423,11 +423,11 @@ class XFibres4InputSpec(FSLCommandInputSpec):
     burn_in = traits.Range(low=0, argstr="--burnin=%d",
                            desc="Total num of jumps at start of MCMC to be discarded")
     burn_in_no_ard = traits.Range(low=0, argstr="--burninnoard=%d",
-                           desc="num of burnin jumps before the ard is imposed")
+                                  desc="num of burnin jumps before the ard is imposed")
     sample_every = traits.Range(low=0, argstr="--sampleevery=%d",
-                           desc="Num of jumps for each sample (MCMC)")
+                                desc="Num of jumps for each sample (MCMC)")
     update_proposal_every = traits.Range(low=1, argstr="--updateproposalevery=%d",
-                           desc="Num of jumps for each update to the proposal density std (MCMC)")
+                                         desc="Num of jumps for each update to the proposal density std (MCMC)")
     seed = traits.Int(argstr="--seed=%d", desc="seed for pseudo random number generator")
     model = traits.Int(argstr="--model=%d", desc="Which model to use. \
 1=mono-exponential (default and required for single shell). 2=continous \
@@ -522,7 +522,7 @@ class BEDPOSTX4InputSpec(XFibres4InputSpec):
                         desc=('model choice: monoexponential (1) or '
                               'multiexponential (2). '))
     nlgradient = traits.Bool(False, argstr='-g', desc=('consider gradient'
-                             'nonlinearities, default off'))
+                                                       'nonlinearities, default off'))
     no_cuda = traits.Bool(False, argstr='-c',
                           desc=('do not use CUDA capable hardware/queue '
                                 '(if found)'))
@@ -533,7 +533,7 @@ class BEDPOSTX4OutputSpec(TraitedSpec):
                                   desc='path/name of directory with all ' +
                                        'bedpostx output files for this subject')
     xfms_directory = Directory(exists=True,
-                              desc='path/name of directory with the ' +
+                               desc='path/name of directory with the ' +
                                    'tranformation matrices')
     merged_thsamples = traits.List(File(exists=True),
                                    desc='a list of path/name of 4D volume ' +
@@ -625,7 +625,7 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
         for n in range(self.inputs.fibres):
             outputs['merged_thsamples'].append(self._gen_fname('merged_th' + repr(n + 1)
                                                                + 'samples', suffix='',
-                                               cwd=outputs['bpx_out_directory']))
+                                                               cwd=outputs['bpx_out_directory']))
             outputs['merged_phsamples'].append(self._gen_fname('merged_ph' + repr(n + 1)
                                                                + 'samples', suffix='',
                                                                cwd=outputs['bpx_out_directory']))
@@ -648,7 +648,7 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
 
 
 if (Info.version() and
-   LooseVersion(Info.version()) >= LooseVersion('5.0.0')):
+    LooseVersion(Info.version()) >= LooseVersion('5.0.0')):
     CurrentXFibres = XFibres5
     CurrentBEDPOST = BEDPOSTX5
 else:
@@ -678,17 +678,17 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
                          'or freesurfer label file',
                          argstr='--seed=%s', mandatory=True)
     target_masks = InputMultiPath(File(exits=True), desc='list of target masks - ' +
-                       'required for seeds_to_targets classification', argstr='--targetmasks=%s')
+                                  'required for seeds_to_targets classification', argstr='--targetmasks=%s')
     waypoints = File(exists=True, desc='waypoint mask or ascii list of waypoint masks - ' +
                      'only keep paths going through ALL the masks', argstr='--waypoints=%s')
     network = traits.Bool(desc='activate network mode - only keep paths going through ' +
                           'at least one seed mask (required if multiple seed masks)',
                           argstr='--network')
     seed_ref = File(exists=True, desc='reference vol to define seed space in ' +
-                   'simple mode - diffusion space assumed if absent',
-                   argstr='--seedref=%s')
+                    'simple mode - diffusion space assumed if absent',
+                    argstr='--seedref=%s')
     out_dir = Directory(exists=True, argstr='--dir=%s',
-                       desc='directory to put the final volumes in', genfile=True)
+                        desc='directory to put the final volumes in', genfile=True)
     force_dir = traits.Bool(True, desc='use the actual directory name given - i.e. ' +
                             'do not add + to make a new directory', argstr='--forcedir',
                             usedefault=True)
@@ -711,12 +711,12 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
                            desc='number of samples - default=5000', usedefault=True)
     n_steps = traits.Int(argstr='--nsteps=%d', desc='number of steps per sample - default=2000')
     dist_thresh = traits.Float(argstr='--distthresh=%.3f', desc='discards samples shorter than ' +
-                              'this threshold (in mm - default=0)')
+                               'this threshold (in mm - default=0)')
     c_thresh = traits.Float(argstr='--cthr=%.3f', desc='curvature threshold - default=0.2')
     sample_random_points = traits.Bool(argstr='--sampvox', desc='sample random points within seed voxels')
     step_length = traits.Float(argstr='--steplength=%.3f', desc='step_length in mm - default=0.5')
     loop_check = traits.Bool(argstr='--loopcheck', desc='perform loop_checks on paths -' +
-                            ' slower, but allows lower curvature threshold')
+                             ' slower, but allows lower curvature threshold')
     use_anisotropy = traits.Bool(argstr='--usef', desc='use anisotropy to constrain tracking')
     rand_fib = traits.Enum(0, 1, 2, 3, argstr='--randfib=%d',
                            desc='options: 0 - default, 1 - to randomly sample' +
@@ -748,10 +748,10 @@ class ProbTrackXInputSpec(ProbTrackXBaseInputSpec):
 class ProbTrackXOutputSpec(TraitedSpec):
     log = File(exists=True, desc='path/name of a text record of the command that was run')
     fdt_paths = OutputMultiPath(File(exists=True), desc='path/name of a 3D image file containing the output ' +
-                     'connectivity distribution to the seed mask')
+                                'connectivity distribution to the seed mask')
     way_total = File(exists=True, desc='path/name of a text file containing a single number ' +
-                    'corresponding to the total number of generated tracts that ' +
-                    'have not been rejected by inclusion/exclusion mask criteria')
+                     'corresponding to the total number of generated tracts that ' +
+                     'have not been rejected by inclusion/exclusion mask criteria')
     targets = traits.List(File(exists=True), desc='a list with all generated seeds_to_target files')
     particle_files = traits.List(File(exists=True), desc='Files describing ' +
                                  'all of the tract samples. Generated only if ' +
@@ -847,7 +847,7 @@ class ProbTrackX(FSLCommand):
                                                 cwd=out_dir, suffix='')))
             else:
                 outputs['fdt_paths'] = os.path.abspath(self._gen_fname("fdt_paths",
-                                               cwd=out_dir, suffix=''))
+                                                                       cwd=out_dir, suffix=''))
 
         # handle seeds-to-target output files
         if isdefined(self.inputs.target_masks):
@@ -855,8 +855,8 @@ class ProbTrackX(FSLCommand):
             for target in self.inputs.target_masks:
                 outputs['targets'].append(os.path.abspath(
                                                 self._gen_fname('seeds_to_' + os.path.split(target)[1],
-                                                cwd=out_dir,
-                                                suffix='')))
+                                                                cwd=out_dir,
+                                                                suffix='')))
         if isdefined(self.inputs.verbose) and self.inputs.verbose == 2:
             outputs['particle_files'] = [os.path.abspath(
                                             os.path.join(out_dir, 'particle%d' % i))
@@ -966,21 +966,21 @@ class ProbTrackX2(ProbTrackX):
 
 class VecRegInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='-i %s', desc='filename for input vector or tensor field',
-                  mandatory=True)
+                   mandatory=True)
     out_file = File(argstr='-o %s', desc='filename for output registered vector or tensor field',
-                   genfile=True, hash_files=False)
+                    genfile=True, hash_files=False)
     ref_vol = File(exists=True, argstr='-r %s', desc='filename for reference (target) volume',
-                  mandatory=True)
+                   mandatory=True)
     affine_mat = File(exists=True, argstr='-t %s',
                       desc='filename for affine transformation matrix')
     warp_field = File(exists=True, argstr='-w %s',
                       desc='filename for 4D warp field for nonlinear registration')
     rotation_mat = File(exists=True, argstr='--rotmat=%s',
                         desc='filename for secondary affine matrix' +
-                  'if set, this will be used for the rotation of the vector/tensor field')
+                        'if set, this will be used for the rotation of the vector/tensor field')
     rotation_warp = File(exists=True, argstr='--rotwarp=%s',
                          desc='filename for secondary warp field' +
-                   'if set, this will be used for the rotation of the vector/tensor field')
+                         'if set, this will be used for the rotation of the vector/tensor field')
     interpolation = traits.Enum("nearestneighbour", "trilinear", "sinc", "spline",
                                 argstr='--interp=%s',
                                 desc='interpolation method : ' +
@@ -1029,7 +1029,7 @@ class VecReg(FSLCommand):
         if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
             pth, base_name = os.path.split(self.inputs.in_file)
             outputs['out_file'] = self._gen_fname(base_name, cwd=os.path.abspath(pth),
-                                                 suffix='_vreg')
+                                                  suffix='_vreg')
         outputs['out_file'] = os.path.abspath(outputs['out_file'])
         return outputs
 
@@ -1087,7 +1087,7 @@ class ProjThresh(FSLCommand):
 class FindTheBiggestInputSpec(FSLCommandInputSpec):
     in_files = traits.List(File(exists=True), argstr='%s',
                            desc='a list of input volumes or a singleMatrixFile',
-                          position=0, mandatory=True)
+                           position=0, mandatory=True)
     out_file = File(argstr='%s', desc='file with the resulting segmentation',
                     position=2, genfile=True, hash_files=False)
 
@@ -1289,9 +1289,9 @@ class DistanceMap(FSLCommand):
             outputs["local_max_file"] = _si.local_max_file
             if isinstance(_si.local_max_file, bool):
                 outputs["local_max_file"] = fname_presuffix(_si.in_file,
-                                                           suffix="_lclmax",
-                                                           use_ext=True,
-                                                           newpath=os.getcwd())
+                                                            suffix="_lclmax",
+                                                            use_ext=True,
+                                                            newpath=os.getcwd())
             outputs["local_max_file"] = os.path.abspath(outputs["local_max_file"])
         return outputs
 

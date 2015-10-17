@@ -482,8 +482,8 @@ class SPMCommand(BaseInterface):
                                               contents[0])
             else:
                 if self.jobname in ['st', 'smooth', 'preproc', 'preproc8',
-                                'fmri_spec', 'fmri_est', 'factorial_design',
-                                'defs']:
+                                    'fmri_spec', 'fmri_est', 'factorial_design',
+                                    'defs']:
                     # parentheses
                     mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' %
                                                   (self.jobtype, self.jobname),

@@ -459,7 +459,7 @@ files will be correct and readable.
 mapping.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
 mapping.connect([(fa, analyzeheader_fa,[("fa","in_file")])])
 mapping.connect([(inputnode, analyzeheader_fa,[(('dwi', get_vox_dims), 'voxel_dims'),
-    (('dwi', get_data_dims), 'data_dims')])])
+                                               (('dwi', get_data_dims), 'data_dims')])])
 mapping.connect([(fa, fa2nii,[('fa','data_file')])])
 mapping.connect([(inputnode, fa2nii,[(('dwi', get_affine), 'affine')])])
 mapping.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
@@ -468,7 +468,7 @@ mapping.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
 mapping.connect([(dtifit, trace,[("tensor_fitted","in_file")])])
 mapping.connect([(trace, analyzeheader_trace,[("trace","in_file")])])
 mapping.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
-    (('dwi', get_data_dims), 'data_dims')])])
+                                                  (('dwi', get_data_dims), 'data_dims')])])
 mapping.connect([(trace, trace2nii,[('trace','data_file')])])
 mapping.connect([(inputnode, trace2nii,[(('dwi', get_affine), 'affine')])])
 mapping.connect([(analyzeheader_trace, trace2nii,[('header', 'header_file')])])
@@ -485,7 +485,7 @@ mapping.connect([(track, camino2trackvis, [('tracked','in_file')]),
                  (camino2trackvis, trk2camino,[['trackvis','in_file']])
                  ])
 mapping.connect([(inputnode, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dims'),
-    (('dwi', get_data_dims), 'data_dims')])])
+                                              (('dwi', get_data_dims), 'data_dims')])])
 
 """
 Here the CMTK connectivity mapping nodes are connected.

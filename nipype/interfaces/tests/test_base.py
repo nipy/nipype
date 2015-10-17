@@ -10,8 +10,8 @@ import shutil
 import warnings
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                        assert_true, assert_false, with_setup, package_check,
-                        skipif)
+                            assert_true, assert_false, with_setup, package_check,
+                            skipif)
 import nipype.interfaces.base as nib
 from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import Undefined, config

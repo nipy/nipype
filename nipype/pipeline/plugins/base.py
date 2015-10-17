@@ -57,8 +57,8 @@ def report_crash(node, traceback=None, hostname=None):
     timeofcrash = strftime('%Y%m%d-%H%M%S')
     login_name = getpass.getuser()
     crashfile = 'crash-%s-%s-%s.pklz' % (timeofcrash,
-                                        login_name,
-                                        name)
+                                         login_name,
+                                         name)
     crashdir = node.config['execution']['crashdump_dir']
     if crashdir is None:
         crashdir = os.getcwd()
@@ -360,7 +360,7 @@ class DistributedPluginBase(PluginBase):
                     self.proc_pending[jobid] = True
                     # Send job to task manager and add to pending tasks
                     logger.info('Executing: %s ID: %d' %
-                               (self.procs[jobid]._id, jobid))
+                                (self.procs[jobid]._id, jobid))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
                     continue_with_submission = True

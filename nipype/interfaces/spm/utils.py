@@ -118,7 +118,7 @@ class CalcCoregAffine(SPMCommand):
 
 class ApplyTransformInputSpec(SPMCommandInputSpec):
     in_file = File( exists = True, mandatory = True, copyfile=True,
-                   desc='file to apply transform to, (only updates header)')
+                    desc='file to apply transform to, (only updates header)')
     mat = File( exists = True, mandatory = True,
                 desc='file holding transform to apply')
     out_file = File(desc="output file name for transformed data",
@@ -387,18 +387,18 @@ class DicomImportInputSpec(SPMCommandInputSpec):
         usedefault=True,
         desc='directory structure for the output.')
     output_dir = traits.Str('./converted_dicom',
-        field='outdir',
-        usedefault=True,
-        desc='output directory.')
+                            field='outdir',
+                            usedefault=True,
+                            desc='output directory.')
     format = traits.Enum(
         'nii', 'img',
         field='convopts.format',
         usedefault=True,
         desc='output format.')
     icedims = traits.Bool(False,
-        field='convopts.icedims',
-        usedefault=True,
-        desc='If image sorting fails, one can try using the additional\
+                          field='convopts.icedims',
+                          usedefault=True,
+                          desc='If image sorting fails, one can try using the additional\
               SIEMENS ICEDims information to create unique filenames.\
               Use this only if there would be multiple volumes with\
               exactly the same file names.')

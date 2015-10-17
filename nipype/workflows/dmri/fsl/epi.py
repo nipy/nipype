@@ -71,7 +71,7 @@ def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fiel
     """
 
     warnings.warn(('This workflow is deprecated from v.1.0.0, use of available '
-                  'nipype.workflows.dmri.preprocess.epi.all_*'), DeprecationWarning)
+                   'nipype.workflows.dmri.preprocess.epi.all_*'), DeprecationWarning)
 
     pipeline = pe.Workflow(name=name)
 
@@ -164,7 +164,7 @@ def create_motion_correct_pipeline(name='motion_correct'):
     """
 
     warnings.warn(('This workflow is deprecated from v.1.0.0, use '
-                  'nipype.workflows.dmri.preprocess.epi.hmc_pipeline instead'),
+                   'nipype.workflows.dmri.preprocess.epi.hmc_pipeline instead'),
                   DeprecationWarning)
 
     inputnode = pe.Node(
@@ -177,7 +177,7 @@ def create_motion_correct_pipeline(name='motion_correct'):
     split = pe.Node(fsl.Split(dimension='t'), name='split')
     pick_ref = pe.Node(niu.Select(), name='pick_ref')
     coregistration = pe.MapNode(fsl.FLIRT(no_search=True, interp='spline',
-                                padding_size=1, dof=6), name='coregistration', iterfield=['in_file'])
+                                          padding_size=1, dof=6), name='coregistration', iterfield=['in_file'])
     rotate_bvecs = pe.Node(niu.Function(input_names=['in_bvec', 'in_matrix'], output_names=[
                            'out_file'], function=_rotate_bvecs), name='rotate_b_matrix')
     merge = pe.Node(fsl.Merge(dimension='t'), name='merge')
@@ -233,7 +233,7 @@ def create_eddy_correct_pipeline(name='eddy_correct'):
     """
 
     warnings.warn(('This workflow is deprecated from v.1.0.0, use '
-                  'nipype.workflows.dmri.preprocess.epi.ecc_pipeline instead'),
+                   'nipype.workflows.dmri.preprocess.epi.ecc_pipeline instead'),
                   DeprecationWarning)
 
     inputnode = pe.Node(
@@ -245,7 +245,7 @@ def create_eddy_correct_pipeline(name='eddy_correct'):
     split = pe.Node(fsl.Split(dimension='t'), name='split')
     pick_ref = pe.Node(niu.Select(), name='pick_ref')
     coregistration = pe.MapNode(fsl.FLIRT(no_search=True, padding_size=1,
-                                interp='trilinear'), name='coregistration', iterfield=['in_file'])
+                                          interp='trilinear'), name='coregistration', iterfield=['in_file'])
     merge = pe.Node(fsl.Merge(dimension='t'), name='merge')
     outputnode = pe.Node(
         niu.IdentityInterface(fields=['eddy_corrected']),
@@ -317,18 +317,18 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
     """
 
     warnings.warn(('This workflow is deprecated from v.1.0.0, use '
-                  'nipype.workflows.dmri.preprocess.epi.sdc_fmb instead'),
+                   'nipype.workflows.dmri.preprocess.epi.sdc_fmb instead'),
                   DeprecationWarning)
 
     inputnode = pe.Node(niu.IdentityInterface(
                         fields=['in_file',
-                        'in_mask',
-                        'fieldmap_pha',
-                        'fieldmap_mag',
-                        'te_diff',
-                        'epi_echospacing',
-                        'vsm_sigma',
-                        'encoding_direction'
+                                'in_mask',
+                                'fieldmap_pha',
+                                'fieldmap_mag',
+                                'te_diff',
+                                'epi_echospacing',
+                                'vsm_sigma',
+                                'encoding_direction'
                                 ]), name='inputnode'
                         )
 
@@ -371,25 +371,25 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
 
     pipeline.connect([
                      (inputnode,    select_mag, [('fieldmap_mag', 'in_file')])
-                    ,(inputnode,       fslprep, [('fieldmap_pha', 'in_phase'),('te_diff', 'delta_TE') ])
-                    ,(inputnode,      mask_mag, [('in_mask', 'mask_file' )])
-                    ,(select_mag,     mask_mag, [('roi_file', 'in_file')])
-                    ,(mask_mag,        fslprep, [('out_file', 'in_magnitude')])
-                    ,(fslprep,             vsm, [('out_fieldmap', 'phasemap_in_file')])
-                    ,(inputnode,           vsm, [('fieldmap_mag', 'in_file'),
-                                                 ('encoding_direction','unwarp_direction'),
-                                                 (('te_diff', _ms2sec), 'asym_se_time'),
-                                                 ('vsm_sigma', 'smooth2d'),
-                                                 (('epi_echospacing', _ms2sec), 'dwell_time')])
-                    ,(mask_mag,            vsm, [('out_file', 'mask_file')])
-                    ,(inputnode,     dwi_split, [('in_file', 'in_file')])
-                    ,(dwi_split,  dwi_applyxfm, [('out_files', 'in_file')])
-                    ,(mask_mag,   dwi_applyxfm, [('out_file', 'mask_file')])
-                    ,(vsm,        dwi_applyxfm, [('shift_out_file', 'shift_in_file')])
-                    ,(inputnode,  dwi_applyxfm, [('encoding_direction','unwarp_direction')])
-                    ,(dwi_applyxfm,  dwi_merge, [('unwarped_file', 'in_files')])
-                    ,(dwi_merge,    outputnode, [('merged_file', 'epi_corrected')])
-                    ,(vsm,          outputnode, [('shift_out_file','out_vsm') ])
+                     ,(inputnode,       fslprep, [('fieldmap_pha', 'in_phase'),('te_diff', 'delta_TE') ])
+                     ,(inputnode,      mask_mag, [('in_mask', 'mask_file' )])
+                     ,(select_mag,     mask_mag, [('roi_file', 'in_file')])
+                     ,(mask_mag,        fslprep, [('out_file', 'in_magnitude')])
+                     ,(fslprep,             vsm, [('out_fieldmap', 'phasemap_in_file')])
+                     ,(inputnode,           vsm, [('fieldmap_mag', 'in_file'),
+                                                  ('encoding_direction','unwarp_direction'),
+                                                  (('te_diff', _ms2sec), 'asym_se_time'),
+                                                  ('vsm_sigma', 'smooth2d'),
+                                                  (('epi_echospacing', _ms2sec), 'dwell_time')])
+                     ,(mask_mag,            vsm, [('out_file', 'mask_file')])
+                     ,(inputnode,     dwi_split, [('in_file', 'in_file')])
+                     ,(dwi_split,  dwi_applyxfm, [('out_files', 'in_file')])
+                     ,(mask_mag,   dwi_applyxfm, [('out_file', 'mask_file')])
+                     ,(vsm,        dwi_applyxfm, [('shift_out_file', 'shift_in_file')])
+                     ,(inputnode,  dwi_applyxfm, [('encoding_direction','unwarp_direction')])
+                     ,(dwi_applyxfm,  dwi_merge, [('unwarped_file', 'in_files')])
+                     ,(dwi_merge,    outputnode, [('merged_file', 'epi_corrected')])
+                     ,(vsm,          outputnode, [('shift_out_file','out_vsm') ])
                      ])
 
 
@@ -434,7 +434,7 @@ def topup_correction( name='topup_correction' ):
     """
 
     warnings.warn(('This workflow is deprecated from v.1.0.0, use '
-                  'nipype.workflows.dmri.preprocess.epi.sdc_peb instead'),
+                   'nipype.workflows.dmri.preprocess.epi.sdc_peb instead'),
                   DeprecationWarning)
 
     pipeline = pe.Workflow(name=name)
@@ -602,25 +602,25 @@ def create_epidewarp_pipeline(name='epidewarp', fieldmap_registration=False):
 
     pipeline.connect([
                      (inputnode,    dwell_time, [('epi_echospacing', 'dwell_time'), ('pi_accel_factor', 'pi_factor'), ('epi_rev_encoding', 'is_reverse_encoding')])
-                    ,(inputnode,    select_mag, [('fieldmap_mag', 'in_file')])
-                    ,(inputnode,      norm_pha, [('fieldmap_pha', 'in_file')])
-                    ,(select_mag,     mask_mag, [('roi_file', 'in_file')])
-                    ,(mask_mag,   mask_mag_dil, [('mask_file', 'in_file')])
-                    ,(select_mag,      prelude, [('roi_file', 'magnitude_file')])
-                    ,(norm_pha,        prelude, [('out_file', 'phase_file')])
-                    ,(mask_mag_dil,    prelude, [('out_file', 'mask_file')])
-                    ,(prelude,      fill_phase, [('unwrapped_phase_file', 'in_file')])
-                    ,(inputnode,           vsm, [('fieldmap_mag', 'in_file')])
-                    ,(fill_phase,          vsm, [('out_file', 'phasemap_in_file')])
-                    ,(inputnode,           vsm, [(('te_diff', _ms2sec), 'asym_se_time'), ('vsm_sigma', 'smooth2d')])
-                    ,(dwell_time,          vsm, [(('dwell_time', _ms2sec), 'dwell_time')])
-                    ,(mask_mag_dil,        vsm, [('out_file', 'mask_file')])
-                    ,(mask_mag_dil,   vsm_mean, [('out_file', 'mask_file')])
-                    ,(vsm,            vsm_mean, [('unwarped_file', 'in_unwarped'), ('shift_out_file', 'in_file')])
-                    ,(inputnode,     dwi_split, [('in_file', 'in_file')])
-                    ,(dwi_split,  dwi_applyxfm, [('out_files', 'in_file')])
-                    ,(dwi_applyxfm,  dwi_merge, [('unwarped_file', 'in_files')])
-                    ,(dwi_merge,    outputnode, [('merged_file', 'epi_corrected')])
+                     ,(inputnode,    select_mag, [('fieldmap_mag', 'in_file')])
+                     ,(inputnode,      norm_pha, [('fieldmap_pha', 'in_file')])
+                     ,(select_mag,     mask_mag, [('roi_file', 'in_file')])
+                     ,(mask_mag,   mask_mag_dil, [('mask_file', 'in_file')])
+                     ,(select_mag,      prelude, [('roi_file', 'magnitude_file')])
+                     ,(norm_pha,        prelude, [('out_file', 'phase_file')])
+                     ,(mask_mag_dil,    prelude, [('out_file', 'mask_file')])
+                     ,(prelude,      fill_phase, [('unwrapped_phase_file', 'in_file')])
+                     ,(inputnode,           vsm, [('fieldmap_mag', 'in_file')])
+                     ,(fill_phase,          vsm, [('out_file', 'phasemap_in_file')])
+                     ,(inputnode,           vsm, [(('te_diff', _ms2sec), 'asym_se_time'), ('vsm_sigma', 'smooth2d')])
+                     ,(dwell_time,          vsm, [(('dwell_time', _ms2sec), 'dwell_time')])
+                     ,(mask_mag_dil,        vsm, [('out_file', 'mask_file')])
+                     ,(mask_mag_dil,   vsm_mean, [('out_file', 'mask_file')])
+                     ,(vsm,            vsm_mean, [('unwarped_file', 'in_unwarped'), ('shift_out_file', 'in_file')])
+                     ,(inputnode,     dwi_split, [('in_file', 'in_file')])
+                     ,(dwi_split,  dwi_applyxfm, [('out_files', 'in_file')])
+                     ,(dwi_applyxfm,  dwi_merge, [('unwarped_file', 'in_files')])
+                     ,(dwi_merge,    outputnode, [('merged_file', 'epi_corrected')])
                      ])
 
     if fieldmap_registration:

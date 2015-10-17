@@ -892,17 +892,17 @@ class DataGrabber(IOBase):
 class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     base_directory = Directory(exists=True,
-        desc="Root path common to templates.")
+                               desc="Root path common to templates.")
     sort_filelist = traits.Bool(True, usedefault=True,
-        desc="When matching mutliple files, return them in sorted order.")
+                                desc="When matching mutliple files, return them in sorted order.")
     raise_on_empty = traits.Bool(True, usedefault=True,
-        desc="Raise an exception if a template pattern matches no files.")
+                                 desc="Raise an exception if a template pattern matches no files.")
     force_lists = traits.Either(traits.Bool(), traits.List(traits.Str()),
-        default=False, usedefault=True,
-        desc=("Whether to return outputs as a list even when only one file "
-              "matches the template. Either a boolean that applies to all "
-              "output fields or a list of output field names to coerce to "
-              " a list"))
+                                default=False, usedefault=True,
+                                desc=("Whether to return outputs as a list even when only one file "
+                                      "matches the template. Either a boolean that applies to all "
+                                      "output fields or a list of output field names to coerce to "
+                                      " a list"))
 
 
 class SelectFiles(IOBase):
@@ -1040,10 +1040,10 @@ class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     match_regex = traits.Str('(.+)',
                              usedefault=True,
                              desc=("Regular expression for matching "
-                             "paths."))
+                                   "paths."))
     ignore_regexes = traits.List(desc=("List of regular expressions, "
-                                 "if any match the path it will be "
-                                 "ignored.")
+                                       "if any match the path it will be "
+                                       "ignored.")
                                  )
     max_depth = traits.Int(desc="The maximum depth to search beneath "
                            "the root_paths")
@@ -1166,7 +1166,7 @@ class DataFinder(IOBase):
                 if key == "out_paths":
                     continue
                 sort_tuples = human_order_sorted(list(zip(self.result["out_paths"],
-                                                     self.result[key])))
+                                                          self.result[key])))
                 self.result[key] = [x for (_, x) in sort_tuples]
             self.result["out_paths"] = human_order_sorted(self.result["out_paths"])
 
@@ -1455,7 +1455,7 @@ class XNATSource(IOBase):
                 if not isdefined(value):
                     msg = ("%s requires a value for input '%s' "
                            "because it was listed in 'infields'" %
-                          (self.__class__.__name__, key)
+                           (self.__class__.__name__, key)
                            )
                     raise ValueError(msg)
 
@@ -1575,11 +1575,11 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     )
 
     share = traits.Bool(False,
-        desc=('Option to share the subjects from the original project'
-              'instead of creating new ones when possible - the created '
-              'experiments are then shared back to the original project'
+                        desc=('Option to share the subjects from the original project'
+                              'instead of creating new ones when possible - the created '
+                              'experiments are then shared back to the original project'
               ),
-        usedefault=True)
+                        usedefault=True)
 
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
@@ -1880,11 +1880,11 @@ class SSHDataGrabberInputSpec(DataGrabberInputSpec):
     download_files = traits.Bool(True, usedefault=True,
                                  desc='If false it will return the file names without downloading them')
     base_directory = traits.Str(mandatory=True,
-                               desc='Path to the base directory consisting of subject data.')
+                                desc='Path to the base directory consisting of subject data.')
     template_expression = traits.Enum(['fnmatch', 'regexp'], usedefault=True,
-                            desc='Use either fnmatch or regexp to express templates')
+                                      desc='Use either fnmatch or regexp to express templates')
     ssh_log_to_file = traits.Str('', usedefault=True,
-                            desc='If set SSH commands will be logged to the given file')
+                                 desc='If set SSH commands will be logged to the given file')
 
 
 class SSHDataGrabber(DataGrabber):
@@ -2138,7 +2138,7 @@ class SSHDataGrabber(DataGrabber):
 class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     in_file = File(exists=True, desc='JSON source file')
     defaults = traits.Dict(desc=('JSON dictionary that sets default output'
-                                'values, overridden by values found in in_file'))
+                                 'values, overridden by values found in in_file'))
 
 
 class JSONFileGrabber(IOBase):

@@ -141,9 +141,9 @@ class FitGLM(BaseInterface):
         else:
             paradigm = None
         design_matrix, self._reg_names = dm.dmtx_light(frametimes, paradigm, drift_model=drift_model, hfcut=hpf,
-               hrf_model=self.inputs.hrf_model,
-               add_regs=reg_vals,
-               add_reg_names=reg_names
+                                                       hrf_model=self.inputs.hrf_model,
+                                                       add_regs=reg_vals,
+                                                       add_reg_names=reg_names
                                                        )
         if self.inputs.normalize_design_matrix:
             for i in range(len(self._reg_names)-1):

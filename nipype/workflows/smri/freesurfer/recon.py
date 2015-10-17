@@ -69,8 +69,8 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     wf.connect(masks, "subject_id", autorecon_resume, "subject_id")
 
     outputnode = pe.Node(niu.IdentityInterface(fields=['subject_id',
-                                                      'subjects_dir']),
-                        name='outputspec')
+                                                       'subjects_dir']),
+                         name='outputspec')
 
     wf.connect(autorecon_resume, "subjects_dir", outputnode, "subjects_dir")
     wf.connect(autorecon_resume, "subject_id", outputnode, "subject_id")

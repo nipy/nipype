@@ -265,7 +265,7 @@ will be correct and readable.
 tractography.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
 tractography.connect([(fa, analyzeheader_fa,[("fa","in_file")])])
 tractography.connect([(inputnode, analyzeheader_fa,[(('dwi', get_vox_dims), 'voxel_dims'),
-(('dwi', get_data_dims), 'data_dims')])])
+                                                    (('dwi', get_data_dims), 'data_dims')])])
 tractography.connect([(fa, fa2nii,[('fa','data_file')])])
 tractography.connect([(inputnode, fa2nii,[(('dwi', get_affine), 'affine')])])
 tractography.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
@@ -274,7 +274,7 @@ tractography.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
 tractography.connect([(dtifit, trace,[("tensor_fitted","in_file")])])
 tractography.connect([(trace, analyzeheader_trace,[("trace","in_file")])])
 tractography.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
-(('dwi', get_data_dims), 'data_dims')])])
+                                                       (('dwi', get_data_dims), 'data_dims')])])
 tractography.connect([(trace, trace2nii,[('trace','data_file')])])
 tractography.connect([(inputnode, trace2nii,[(('dwi', get_affine), 'affine')])])
 tractography.connect([(analyzeheader_trace, trace2nii,[('header', 'header_file')])])

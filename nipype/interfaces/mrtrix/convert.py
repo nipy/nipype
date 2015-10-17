@@ -145,7 +145,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
 
 class MRTrix2TrackVisInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
-    desc='The input file for the tracks in MRTrix (.tck) format')
+                   desc='The input file for the tracks in MRTrix (.tck) format')
     image_file = File(exists=True, desc='The image the tracks were generated from')
     matrix_file = File(exists=True, desc='A transformation matrix to apply to the tracts after they have been generated (from FLIRT - affine transformation from image_file to registration_image_file)')
     registration_image_file = File(exists=True, desc='The final image the tracks should be registered to.')

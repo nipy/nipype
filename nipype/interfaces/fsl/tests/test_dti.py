@@ -366,9 +366,9 @@ def test_Vec_reg():
 
     vrg3 = fsl.VecReg()
     results = vrg3.run(infile='infile3',
-                     outfile='outfile3',
-                     refVolName='MNI152',
-                     affineTmat='tmat3.mat',)
+                       outfile='outfile3',
+                       refVolName='MNI152',
+                       affineTmat='tmat3.mat',)
 
     yield assert_equal, results.runtime.cmdline, \
     'vecreg -i infile3 -o outfile3 -r MNI152 -t tmat3.mat'
@@ -380,12 +380,12 @@ def test_Vec_reg():
 
     # test arguments for opt_map
     opt_map = { 'verbose':           ('-v', True),
-               'helpDoc':           ('-h', True),
-               'tensor':            ('--tensor', True),
-               'affineTmat':        ('-t Tmat', 'Tmat'),
-               'warpFile':          ('-w wrpFile', 'wrpFile'),
-               'interpolation':     ('--interp=sinc', 'sinc'),
-               'brainMask':         ('-m mask', 'mask')}
+                'helpDoc':           ('-h', True),
+                'tensor':            ('--tensor', True),
+                'affineTmat':        ('-t Tmat', 'Tmat'),
+                'warpFile':          ('-w wrpFile', 'wrpFile'),
+                'interpolation':     ('--interp=sinc', 'sinc'),
+                'brainMask':         ('-m mask', 'mask')}
 
     for name, settings in list(opt_map.items()):
         vrg4 = fsl.VecReg(infile='infile', outfile='outfile',
@@ -460,7 +460,7 @@ def test_tbss_skeleton():
     # Now we get a command line
     yield assert_equal, bones.cmdline, \
         "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s"%(Info.standard_image("LowerCingulum_1mm.nii.gz"),
-                                                         os.path.join(newdir, "b_skeletonised.nii"))
+                                                             os.path.join(newdir, "b_skeletonised.nii"))
 
     # Can we specify a mask?
     bones.inputs.use_cingulum_mask = Undefined

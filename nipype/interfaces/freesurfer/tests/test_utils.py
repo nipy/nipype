@@ -79,8 +79,8 @@ def test_sample2surf():
 
     # Test a basic command line
     yield assert_equal, s2s.cmdline, ("mri_vol2surf "
-    "--hemi lh --o %s --ref %s --reg reg.dat --projfrac 0.500 --mov %s"
-    %(os.path.join(cwd, "lh.a.mgz"),files[1],files[0]))
+                                      "--hemi lh --o %s --ref %s --reg reg.dat --projfrac 0.500 --mov %s"
+                                      %(os.path.join(cwd, "lh.a.mgz"),files[1],files[0]))
 
     # Test identity
     s2sish = fs.SampleToSurface(source_file = files[1], reference_file = files[0],hemi="rh")
@@ -122,7 +122,7 @@ def test_surfsmooth():
     # Test the command line
     yield assert_equal, smooth.cmdline, \
         ("mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval %s --tval %s/lh.a_smooth%d.nii --s fsaverage"%
-    (surf, cwd, fwhm))
+         (surf, cwd, fwhm))
 
     # Test identity
     shmooth = fs.SurfaceSmooth(
@@ -155,7 +155,7 @@ def test_surfxfm():
     # Test the command line
     yield assert_equal, xfm.cmdline, \
         ("mri_surf2surf --hemi lh --tval %s/lh.a.fsaverage.nii --sval %s --srcsubject my_subject --trgsubject fsaverage"%
-    (cwd, surf))
+         (cwd, surf))
 
     # Test identity
     xfmish = fs.SurfaceTransform(

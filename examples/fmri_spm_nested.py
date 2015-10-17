@@ -187,13 +187,13 @@ slicestats.inputs.all_axial = True
 slicestats.inputs.image_width = 750
 
 l1analysis.connect([(modelspec,level1design,[('session_info','session_info')]),
-                  (level1design,level1estimate,[('spm_mat_file','spm_mat_file')]),
-                  (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
-                                                  ('beta_images','beta_images'),
-                                                  ('residual_image','residual_image')]),
-                  (contrastestimate,selectcontrast,[('spmT_images','inlist')]),
-                  (selectcontrast,overlaystats,[('out','stat_image')]),
-                  (overlaystats,slicestats,[('out_file','in_file')])
+                    (level1design,level1estimate,[('spm_mat_file','spm_mat_file')]),
+                    (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
+                                                      ('beta_images','beta_images'),
+                                                      ('residual_image','residual_image')]),
+                    (contrastestimate,selectcontrast,[('spmT_images','inlist')]),
+                    (selectcontrast,overlaystats,[('out','stat_image')]),
+                    (overlaystats,slicestats,[('out_file','in_file')])
                   ])
 
 """
@@ -468,10 +468,10 @@ l2conestimate.inputs.group_contrast = True
 l2pipeline = pe.Workflow(name="level2")
 l2pipeline.base_dir = os.path.abspath('spm_tutorial2/l2output')
 l2pipeline.connect([(l2source,onesamplettestdes,[('outfiles','in_files')]),
-                  (onesamplettestdes,l2estimate,[('spm_mat_file','spm_mat_file')]),
-                  (l2estimate,l2conestimate,[('spm_mat_file','spm_mat_file'),
-                                             ('beta_images','beta_images'),
-                                             ('residual_image','residual_image')]),
+                    (onesamplettestdes,l2estimate,[('spm_mat_file','spm_mat_file')]),
+                    (l2estimate,l2conestimate,[('spm_mat_file','spm_mat_file'),
+                                               ('beta_images','beta_images'),
+                                               ('residual_image','residual_image')]),
                     ])
 
 """

@@ -11,8 +11,8 @@ import os
 
 class ICCInputSpec(BaseInterfaceInputSpec):
     subjects_sessions = traits.List(traits.List(File(exists=True)),
-                           desc="n subjects m sessions 3D stat files",
-                           mandatory=True)
+                                    desc="n subjects m sessions 3D stat files",
+                                    mandatory=True)
     mask = File(exists=True, mandatory=True)
 
 

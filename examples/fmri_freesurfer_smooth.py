@@ -177,7 +177,7 @@ preproc.connect([(realign, surfregister,[('mean_image', 'source_file')]),
                  (realign, ApplyVolTransform,[('mean_image', 'source_file')]),
                  (ApplyVolTransform, Threshold,[('transformed_file','in_file')]),
                  (realign, art,[('realignment_parameters','realignment_parameters'),
-                               ('realigned_files','realigned_files')]),
+                                ('realigned_files','realigned_files')]),
                  (Threshold, art, [('binary_file', 'mask_file')]),
                  (realign, volsmooth, [('realigned_files', 'in_files')]),
                  (realign, surfsmooth, [('realigned_files', 'in_file')]),
@@ -225,10 +225,10 @@ first level contrasts specified in a few steps above.
 contrastestimate = pe.Node(interface = spm.EstimateContrast(), name="contrastestimate")
 
 volanalysis.connect([(modelspec,level1design,[('session_info','session_info')]),
-                  (level1design,level1estimate,[('spm_mat_file','spm_mat_file')]),
-                  (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
-                                                  ('beta_images','beta_images'),
-                                                  ('residual_image','residual_image')]),
+                     (level1design,level1estimate,[('spm_mat_file','spm_mat_file')]),
+                     (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
+                                                       ('beta_images','beta_images'),
+                                                       ('residual_image','residual_image')]),
                   ])
 
 """
@@ -338,13 +338,13 @@ l1pipeline.connect([(inputnode,preproc,[('func','realign.in_files'),
 
 # attach volume and surface model specification and estimation components
 l1pipeline.connect([(preproc, volanalysis, [('realign.realignment_parameters',
-                                            'modelspec.realignment_parameters'),
-                                           ('volsmooth.smoothed_files',
-                                            'modelspec.functional_runs'),
-                                           ('art.outlier_files',
-                                            'modelspec.outlier_files'),
-                                           ('threshold.binary_file',
-                                            'level1design.mask_image')]),
+                                             'modelspec.realignment_parameters'),
+                                            ('volsmooth.smoothed_files',
+                                             'modelspec.functional_runs'),
+                                            ('art.outlier_files',
+                                             'modelspec.outlier_files'),
+                                            ('threshold.binary_file',
+                                             'level1design.mask_image')]),
                     (preproc, surfanalysis, [('realign.realignment_parameters',
                                               'modelspec.realignment_parameters'),
                                              ('surfsmooth.smoothed_file',
@@ -520,8 +520,8 @@ level1.base_dir = os.path.abspath('volsurf_tutorial/workingdir')
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                 (datasource,l1pipeline,[('func','inputnode.func')]),
                 (infosource,l1pipeline,[('subject_id','inputnode.subject_id'),
-                                       (('subject_id', subjectinfo),
-                                        'inputnode.session_info')]),
+                                        (('subject_id', subjectinfo),
+                                         'inputnode.session_info')]),
                 ])
 
 

@@ -355,7 +355,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     """
 
     mapping.connect([(inputnode_within, fsl2mrtrix, [("bvecs", "bvec_file"),
-                                                    ("bvals", "bval_file")])])
+                                                     ("bvals", "bval_file")])])
     mapping.connect([(inputnode_within, eddycorrect,[("dwi","inputnode.in_file")])])
     mapping.connect([(eddycorrect, dwi2tensor,[("outputnode.eddy_corrected","in_file")])])
     mapping.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
@@ -519,25 +519,25 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["subject_id", "dwi", "bvecs", "bvals", "subjects_dir"]), name="inputnode")
 
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["fa",
-                                                                "struct",
-                                                                "tracts",
-                                                                "tracks2prob",
-                                                                "connectome",
-                                                                "nxstatscff",
-                                                                "nxmatlab",
-                                                                "nxcsv",
-                                                                "fiber_csv",
-                                                                "cmatrices_csv",
-                                                                "nxmergedcsv",
-                                                                "cmatrix",
-                                                                "networks",
-                                                                "filtered_tracts",
-                                                                "rois",
-                                                                "odfs",
-                                                                "tdi",
-                                                                "mean_fiber_length",
-                                                                "median_fiber_length",
-                                                                "fiber_length_std"]),
+                                                                    "struct",
+                                                                    "tracts",
+                                                                    "tracks2prob",
+                                                                    "connectome",
+                                                                    "nxstatscff",
+                                                                    "nxmatlab",
+                                                                    "nxcsv",
+                                                                    "fiber_csv",
+                                                                    "cmatrices_csv",
+                                                                    "nxmergedcsv",
+                                                                    "cmatrix",
+                                                                    "networks",
+                                                                    "filtered_tracts",
+                                                                    "rois",
+                                                                    "odfs",
+                                                                    "tdi",
+                                                                    "mean_fiber_length",
+                                                                    "median_fiber_length",
+                                                                    "fiber_length_std"]),
                          name="outputnode")
 
     connectivity = pe.Workflow(name="connectivity")
@@ -545,28 +545,28 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     connectivity.base_dir=name
 
     connectivity.connect([(inputnode, mapping, [("dwi", "inputnode_within.dwi"),
-                                              ("bvals", "inputnode_within.bvals"),
-                                              ("bvecs", "inputnode_within.bvecs"),
-                                              ("subject_id", "inputnode_within.subject_id"),
-                                              ("subjects_dir", "inputnode_within.subjects_dir")])
+                                                ("bvals", "inputnode_within.bvals"),
+                                                ("bvecs", "inputnode_within.bvecs"),
+                                                ("subject_id", "inputnode_within.subject_id"),
+                                                ("subjects_dir", "inputnode_within.subjects_dir")])
                           ])
 
     connectivity.connect([(mapping, outputnode, [("tck2trk.out_file", "tracts"),
-        ("CFFConverter.connectome_file", "connectome"),
-        ("NxStatsCFFConverter.connectome_file", "nxstatscff"),
-        ("CreateMatrix.matrix_mat_file", "cmatrix"),
-        ("CreateMatrix.mean_fiber_length_matrix_mat_file", "mean_fiber_length"),
-        ("CreateMatrix.median_fiber_length_matrix_mat_file", "median_fiber_length"),
-        ("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),
-        ("CreateMatrix.matrix_files", "networks"),
-        ("CreateMatrix.filtered_tractographies", "filtered_tracts"),
-        ("merge_nfib_csvs.csv_file", "fiber_csv"),
-        ("mri_convert_ROI_scale500.out_file", "rois"),
-        ("trk2tdi.out_file", "tdi"),
-        ("csdeconv.spherical_harmonics_image", "odfs"),
-        ("mri_convert_Brain.out_file", "struct"),
-        ("MRconvert_fa.converted", "fa"),
-        ("MRconvert_tracks2prob.converted", "tracks2prob")])
+                                                 ("CFFConverter.connectome_file", "connectome"),
+                                                 ("NxStatsCFFConverter.connectome_file", "nxstatscff"),
+                                                 ("CreateMatrix.matrix_mat_file", "cmatrix"),
+                                                 ("CreateMatrix.mean_fiber_length_matrix_mat_file", "mean_fiber_length"),
+                                                 ("CreateMatrix.median_fiber_length_matrix_mat_file", "median_fiber_length"),
+                                                 ("CreateMatrix.fiber_length_std_matrix_mat_file", "fiber_length_std"),
+                                                 ("CreateMatrix.matrix_files", "networks"),
+                                                 ("CreateMatrix.filtered_tractographies", "filtered_tracts"),
+                                                 ("merge_nfib_csvs.csv_file", "fiber_csv"),
+                                                 ("mri_convert_ROI_scale500.out_file", "rois"),
+                                                 ("trk2tdi.out_file", "tdi"),
+                                                 ("csdeconv.spherical_harmonics_image", "odfs"),
+                                                 ("mri_convert_Brain.out_file", "struct"),
+                                                 ("MRconvert_fa.converted", "fa"),
+                                                 ("MRconvert_tracks2prob.converted", "tracks2prob")])
         ])
 
     connectivity.connect([(cmats_to_csv, outputnode,[("outputnode.csv_file","cmatrices_csv")])])

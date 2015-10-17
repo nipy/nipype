@@ -106,10 +106,10 @@ tbuilder.base_dir=requestedPath
 InitialTemplateInputs=[ mdict['T1'] for mdict in ListOfImagesDictionaries ]
 
 datasource = pe.Node(interface=util.IdentityInterface(fields=
-                    ['InitialTemplateInputs', 'ListOfImagesDictionaries',
-                     'registrationImageTypes','interpolationMapping']),
-                    run_without_submitting=True,
-                    name='InputImages' )
+                                                      ['InitialTemplateInputs', 'ListOfImagesDictionaries',
+                                                       'registrationImageTypes','interpolationMapping']),
+                     run_without_submitting=True,
+                     name='InputImages' )
 datasource.inputs.InitialTemplateInputs=InitialTemplateInputs
 datasource.inputs.ListOfImagesDictionaries=ListOfImagesDictionaries
 datasource.inputs.registrationImageTypes=registrationImageTypes

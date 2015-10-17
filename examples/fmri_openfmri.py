@@ -161,11 +161,11 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     datasource.inputs.base_directory = data_dir
     datasource.inputs.template = '*'
     datasource.inputs.field_template = {'anat': '%s/anatomy/highres001.nii.gz',
-                                'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
-                                'behav': ('%s/model/model%03d/onsets/task%03d_'
-                                          'run%03d/cond*.txt'),
-                                'contrasts': ('models/model%03d/'
-                                              'task_contrasts.txt')}
+                                        'bold': '%s/BOLD/task%03d_r*/bold.nii.gz',
+                                        'behav': ('%s/model/model%03d/onsets/task%03d_'
+                                                  'run%03d/cond*.txt'),
+                                        'contrasts': ('models/model%03d/'
+                                                      'task_contrasts.txt')}
     datasource.inputs.template_args = {'anat': [['subject_id']],
                                        'bold': [['subject_id', 'task_id']],
                                        'behav': [['subject_id', 'model_id',
@@ -325,9 +325,9 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
 
     mergefunc = pe.Node(niu.Function(input_names=['copes', 'varcopes',
                                                   'zstats'],
-                                   output_names=['out_files', 'splits'],
-                                   function=merge_files),
-                      name='merge_files')
+                                     output_names=['out_files', 'splits'],
+                                     function=merge_files),
+                        name='merge_files')
     wf.connect([(fixed_fx.get_node('outputspec'), mergefunc,
                  [('copes', 'copes'),
                   ('varcopes', 'varcopes'),
@@ -345,7 +345,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                      output_names=['copes', 'varcopes',
                                                    'zstats'],
                                      function=split_files),
-                      name='split_files')
+                        name='split_files')
     wf.connect(mergefunc, 'splits', splitfunc, 'splits')
     wf.connect(registration, 'outputspec.transformed_files',
                splitfunc, 'in_files')
@@ -360,9 +360,9 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         subs.append(('_model_id_%d' % model_id, 'model%03d' %model_id))
         subs.append(('task_id_%d/' % task_id, '/task%03d_' % task_id))
         subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_warp',
-        'mean'))
+                     'mean'))
         subs.append(('bold_dtype_mcf_mask_smooth_mask_gms_tempfilt_mean_flirt',
-        'affine'))
+                     'affine'))
 
         for i in range(len(conds)):
             subs.append(('_flameo%d/cope1.' % i, 'cope%02d.' % (i + 1)))
@@ -463,11 +463,11 @@ if __name__ == '__main__':
     outdir = os.path.join(outdir, 'model%02d' % int(args.model),
                           'task%03d' % int(args.task))
     wf = analyze_openfmri_dataset(data_dir=os.path.abspath(args.datasetdir),
-                             subject=args.subject,
-                             model_id=int(args.model),
-                             task_id=[int(args.task)],
-                             subj_prefix=args.subjectprefix,
-                             output_dir=outdir)
+                                  subject=args.subject,
+                                  model_id=int(args.model),
+                                  task_id=[int(args.task)],
+                                  subj_prefix=args.subjectprefix,
+                                  output_dir=outdir)
     wf.base_dir = work_dir
     if args.plugin_args:
         wf.run(args.plugin, plugin_args=eval(args.plugin_args))

@@ -46,8 +46,8 @@ class MatlabInputSpec(CommandLineInputSpec):
     logfile = File(argstr='-logfile %s',
                           desc='Save matlab output to log')
     single_comp_thread = traits.Bool(argstr="-singleCompThread",
-                                   desc="force single threaded operation",
-                                   nohash=True)
+                                     desc="force single threaded operation",
+                                     nohash=True)
     # non-commandline options
     mfile   = traits.Bool(True, desc='Run m-code using m-file',
                           usedefault=True)

@@ -40,7 +40,7 @@ class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
     #discriminate
     _xor_inputs = ('in_file', 'in_TS')
     in_file = File(desc=('csv file with ROIs on the columns and '
-                   'time-points on the rows. ROI names at the top row'),
+                         'time-points on the rows. ROI names at the top row'),
                    exists=True,
                    requires=('TR',))
 
@@ -52,12 +52,12 @@ class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
 
     NFFT = traits.Range(low=32, value=64, usedefault=True,
                         desc=('This is the size of the window used for '
-                        'the spectral estimation. Use values between '
-                        '32 and the number of samples in your time-series.'
-                        '(Defaults to 64.)'))
+                              'the spectral estimation. Use values between '
+                              '32 and the number of samples in your time-series.'
+                              '(Defaults to 64.)'))
     n_overlap = traits.Range(low=0, value=0, usedefault=True,
                              desc=('The number of samples which overlap'
-                             'between subsequent windows.(Defaults to 0)'))
+                                   'between subsequent windows.(Defaults to 0)'))
 
     frequency_range = traits.List(value=[0.02, 0.15], usedefault=True,
                                   minlen=2,
@@ -222,30 +222,30 @@ class CoherenceAnalyzer(BaseInterface):
         """
         if self.inputs.figure_type == 'matrix':
             fig_coh = viz.drawmatrix_channels(self.coherence,
-                                channel_names=self.ROIs,
-                                color_anchor=0)
+                                              channel_names=self.ROIs,
+                                              color_anchor=0)
 
             fig_coh.savefig(fname_presuffix(self.inputs.output_figure_file,
-                                    suffix='_coherence'))
+                                            suffix='_coherence'))
 
             fig_dt = viz.drawmatrix_channels(self.delay,
-                                channel_names=self.ROIs,
-                                color_anchor=0)
+                                             channel_names=self.ROIs,
+                                             color_anchor=0)
 
             fig_dt.savefig(fname_presuffix(self.inputs.output_figure_file,
-                                    suffix='_delay'))
+                                           suffix='_delay'))
         else:
             fig_coh = viz.drawgraph_channels(self.coherence,
-                                channel_names=self.ROIs)
+                                             channel_names=self.ROIs)
 
             fig_coh.savefig(fname_presuffix(self.inputs.output_figure_file,
-                                    suffix='_coherence'))
+                                            suffix='_coherence'))
 
             fig_dt = viz.drawgraph_channels(self.delay,
-                                channel_names=self.ROIs)
+                                            channel_names=self.ROIs)
 
             fig_dt.savefig(fname_presuffix(self.inputs.output_figure_file,
-                                    suffix='_delay'))
+                                           suffix='_delay'))
 
 
 class GetTimeSeriesInputSpec(object):

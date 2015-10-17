@@ -207,8 +207,8 @@ class LookupMetaInputSpec(TraitedSpec):
                               traits.Dict(),
                               mandatory=True,
                               desc=("List of meta data keys to lookup, or a "
-                              "dict where keys specify the meta data keys to "
-                              "lookup and the values specify the output names")
+                                    "dict where keys specify the meta data keys to "
+                                    "lookup and the values specify the output names")
                               )
 
 

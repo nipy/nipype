@@ -22,7 +22,7 @@ from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 
 class HARDIMatInputSpec(CommandLineInputSpec):
     bvecs = File(exists=True, desc = 'b vectors file',
-                argstr='%s', position=1, mandatory=True)
+                 argstr='%s', position=1, mandatory=True)
     bvals = File(exists=True,desc = 'b values file', mandatory=True)
     out_file = File("recon_mat.dat", desc = 'output matrix file', argstr='%s', usedefault=True, position=2)
     order = traits.Int(argstr='-order %s', desc="""maximum order of spherical harmonics. must be even number. default

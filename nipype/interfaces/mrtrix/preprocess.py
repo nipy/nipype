@@ -17,25 +17,25 @@ from ...utils.filemanip import split_filename
 
 class MRConvertInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-        desc='voxel-order data filename')
+                   desc='voxel-order data filename')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
     extract_at_axis = traits.Enum(1,2,3, argstr='-coord %s', position=1,
-                           desc='"Extract data only at the coordinates specified. This option specifies the Axis. Must be used in conjunction with extract_at_coordinate.')
+                                  desc='"Extract data only at the coordinates specified. This option specifies the Axis. Must be used in conjunction with extract_at_coordinate.')
     extract_at_coordinate = traits.List(traits.Float, argstr='%s', sep=',', position=2, minlen=1, maxlen=3,
-        desc='"Extract data only at the coordinates specified. This option specifies the coordinates. Must be used in conjunction with extract_at_axis. Three comma-separated numbers giving the size of each voxel in mm.')
+                                        desc='"Extract data only at the coordinates specified. This option specifies the coordinates. Must be used in conjunction with extract_at_axis. Three comma-separated numbers giving the size of each voxel in mm.')
     voxel_dims = traits.List(traits.Float, argstr='-vox %s', sep=',',
-        position=3, minlen=3, maxlen=3,
-        desc='Three comma-separated numbers giving the size of each voxel in mm.')
+                             position=3, minlen=3, maxlen=3,
+                             desc='Three comma-separated numbers giving the size of each voxel in mm.')
     output_datatype = traits.Enum("nii", "float", "char", "short", "int", "long", "double", argstr='-output %s', position=2,
-                           desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"') #, usedefault=True)
+                                  desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"') #, usedefault=True)
     extension = traits.Enum("mif","nii", "float", "char", "short", "int", "long", "double", position=2,
-                           desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"', usedefault=True)
+                            desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"', usedefault=True)
     layout = traits.Enum("nii", "float", "char", "short", "int", "long", "double", argstr='-output %s', position=2,
                          desc='specify the layout of the data in memory. The actual layout produced will depend on whether the output image format can support it.')
     resample = traits.Float(argstr='-scale %d', position=3,
-        units='mm', desc='Apply scaling to the intensity values.')
+                            units='mm', desc='Apply scaling to the intensity values.')
     offset_bias = traits.Float(argstr='-scale %d', position=3,
-        units='mm', desc='Apply offset to the intensity values.')
+                               units='mm', desc='Apply offset to the intensity values.')
     replace_NaN_with_zero = traits.Bool(argstr='-zero', position=3, desc="Replace all NaN values with zero.")
     prs = traits.Bool(argstr='-prs', position=3, desc="Assume that the DW gradients are specified in the PRS frame (Siemens DICOM only).")
 
@@ -148,7 +148,7 @@ class DWI2Tensor(CommandLine):
 
 class Tensor2VectorInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-        desc='Diffusion tensor image')
+                   desc='Diffusion tensor image')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output vector filename')
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
@@ -193,7 +193,7 @@ class Tensor2Vector(CommandLine):
 
 class Tensor2FractionalAnisotropyInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-        desc='Diffusion tensor image')
+                   desc='Diffusion tensor image')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output Fractional Anisotropy filename')
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
@@ -238,7 +238,7 @@ class Tensor2FractionalAnisotropy(CommandLine):
 
 class Tensor2ApparentDiffusionInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-        desc='Diffusion tensor image')
+                   desc='Diffusion tensor image')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output Fractional Anisotropy filename')
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
@@ -359,7 +359,7 @@ class MRTrixViewer(CommandLine):
 
 class MRTrixInfoInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-        desc='Input images to be read')
+                   desc='Input images to be read')
 
 class MRTrixInfoOutputSpec(TraitedSpec):
     pass
@@ -389,7 +389,7 @@ class GenerateWhiteMatterMaskInputSpec(CommandLineInputSpec):
     binary_mask = File(exists=True, argstr='%s', mandatory=True, position = -2, desc='Binary brain mask')
     out_WMProb_filename = File(genfile=True, argstr='%s', position = -1, desc='Output WM probability image filename')
     encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=1,
-    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
+                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     noise_level_margin = traits.Float(argstr='-margin %s', desc='Specify the width of the margin on either side of the image to be used to estimate the noise level (default = 10)')
 
 class GenerateWhiteMatterMaskOutputSpec(TraitedSpec):
@@ -429,7 +429,7 @@ class GenerateWhiteMatterMask(CommandLine):
 
 class ErodeInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-        desc='Input mask image to be eroded')
+                   desc='Input mask image to be eroded')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output image filename')
     number_of_passes = traits.Int(argstr='-npass %s', desc='the number of passes (default: 1)')
     dilate = traits.Bool(argstr='-dilate', position=1, desc="Perform dilation rather than erosion")
@@ -475,7 +475,7 @@ class Erode(CommandLine):
 
 class ThresholdInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-        desc='The input image to be thresholded')
+                   desc='The input image to be thresholded')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='The output binary image mask.')
     absolute_threshold_value = traits.Float(argstr='-abs %s', desc='Specify threshold value as absolute intensity.')
     percentage_threshold_value = traits.Float(argstr='-percent %s', desc='Specify threshold value as a percentage of the peak intensity in the input image.')
@@ -529,7 +529,7 @@ class Threshold(CommandLine):
 
 class MedianFilter3DInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-        desc='Input images to be smoothed')
+                   desc='Input images to be smoothed')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output image filename')
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
@@ -580,11 +580,11 @@ class MRTransformInputSpec(CommandLineInputSpec):
     invert = traits.Bool(argstr='-inverse', position=1, desc="Invert the specified transform before using it")
     replace_transform = traits.Bool(argstr='-replace', position=1, desc="replace the current transform by that specified, rather than applying it to the current transform")
     transformation_file = File(exists=True, argstr='-transform %s', position=1,
-        desc='The transform to apply, in the form of a 4x4 ascii file.')
+                               desc='The transform to apply, in the form of a 4x4 ascii file.')
     template_image = File(exists=True, argstr='-template %s', position=1,
-        desc='Reslice the input image to match the specified template image.')
+                          desc='Reslice the input image to match the specified template image.')
     reference_image = File(exists=True, argstr='-reference %s', position=1,
-        desc='in case the transform supplied maps from the input image onto a reference image, use this option to specify the reference. Note that this implicitly sets the -replace option.')
+                           desc='in case the transform supplied maps from the input image onto a reference image, use this option to specify the reference. Note that this implicitly sets the -replace option.')
     flip_x = traits.Bool(argstr='-flipx', position=1, desc="assume the transform is supplied assuming a coordinate system with the x-axis reversed relative to the MRtrix convention (i.e. x increases from right to left). This is required to handle transform matrices produced by FSL's FLIRT command. This is only used in conjunction with the -reference option.")
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")

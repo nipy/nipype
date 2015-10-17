@@ -401,7 +401,7 @@ def create_reg_workflow(name='registration'):
 
     # Coregister the median to the surface
     bbregister = Node(freesurfer.BBRegister(),
-                    name='bbregister')
+                      name='bbregister')
     bbregister.inputs.init = 'fsl'
     bbregister.inputs.contrast_type = 't2'
     bbregister.inputs.out_fsl_file = True

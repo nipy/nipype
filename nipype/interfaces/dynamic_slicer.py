@@ -41,7 +41,7 @@ class SlicerCommandLine(CommandLine):
 
     def __init__(self, module, **inputs):
         warnings.warn('slicer is Not fully implemented',
-                  RuntimeWarning)
+                      RuntimeWarning)
         super(SlicerCommandLine, self).__init__(command= "Slicer3 --launch %s "%module, name= module, **inputs)
         dom = self._grab_xml(module)
         self._outputs_filenames = {}

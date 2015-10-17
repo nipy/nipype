@@ -45,8 +45,8 @@ class ConmatInputSpec(CommandLineInputSpec):
                                    'See TractStats for details.'))
 
     output_root = File(argstr='-outputroot %s', genfile=True,
-        desc=('filename root prepended onto the names of the output files. '
-              'The extension will be determined from the input.'))
+                       desc=('filename root prepended onto the names of the output files. '
+                             'The extension will be determined from the input.'))
 
 class ConmatOutputSpec(TraitedSpec):
     conmat_sc = File(exists=True, desc='Connectivity matrix in CSV file.')

@@ -587,8 +587,8 @@ class VolregInputSpec(AFNICommandInputSpec):
                       argstr='-zpad %d',
                       position=-5)
     md1d_file = File(name_template='%s_md.1D', desc='max displacement output file',
-                    argstr='-maxdisp1D %s', name_source="in_file",
-                    keep_extension=True, position=-4)
+                     argstr='-maxdisp1D %s', name_source="in_file",
+                     keep_extension=True, position=-4)
     oned_file = File(name_template='%s.1D', desc='1D movement parameters output file',
                      argstr='-1Dfile %s',
                      name_source="in_file",
@@ -1147,7 +1147,7 @@ class Allineate(AFNICommand):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_filename(self.inputs.in_file,
-                                                  suffix=self.inputs.suffix)
+                                                     suffix=self.inputs.suffix)
         else:
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -1381,30 +1381,30 @@ class TCorr1DInputSpec(AFNICommandInputSpec):
                 mandatory = True,
                 exists = True)
     out_file = File(desc = 'output filename prefix',
-                   name_template='%s_correlation.nii.gz',
-                   argstr = '-prefix %s',
-                   name_source = 'xset',
-                   keep_extension = True)
+                    name_template='%s_correlation.nii.gz',
+                    argstr = '-prefix %s',
+                    name_source = 'xset',
+                    keep_extension = True)
     pearson = traits.Bool(desc='Correlation is the normal' +
-                   ' Pearson correlation coefficient',
-                   argstr=' -pearson',
-                   xor=['spearman','quadrant','ktaub'],
-                   position=1)
+                          ' Pearson correlation coefficient',
+                          argstr=' -pearson',
+                          xor=['spearman','quadrant','ktaub'],
+                          position=1)
     spearman = traits.Bool(desc='Correlation is the' +
-                   ' Spearman (rank) correlation coefficient',
-                   argstr=' -spearman',
-                   xor=['pearson','quadrant','ktaub'],
-                   position=1)
+                           ' Spearman (rank) correlation coefficient',
+                           argstr=' -spearman',
+                           xor=['pearson','quadrant','ktaub'],
+                           position=1)
     quadrant = traits.Bool(desc='Correlation is the' +
-                   ' quadrant correlation coefficient',
-                   argstr=' -quadrant',
-                   xor=['pearson','spearman','ktaub'],
-                   position=1)
+                           ' quadrant correlation coefficient',
+                           argstr=' -quadrant',
+                           xor=['pearson','spearman','ktaub'],
+                           position=1)
     ktaub = traits.Bool(desc='Correlation is the' +
-                   ' Kendall\'s tau_b correlation coefficient',
-                   argstr=' -ktaub',
-                   xor=['pearson','spearman','quadrant'],
-                   position=1)
+                        ' Kendall\'s tau_b correlation coefficient',
+                        argstr=' -ktaub',
+                        xor=['pearson','spearman','quadrant'],
+                        position=1)
 
 
 
@@ -1931,11 +1931,11 @@ class Retroicor(AFNICommand):
 
 class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dAFNItoNIFTI',
-        argstr='%s',
-        position=-1,
-        mandatory=True,
-        exists=True,
-        copyfile=False)
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
     out_file = File(name_template="%s.nii", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
     hash_files = False
@@ -1981,7 +1981,7 @@ class EvalInputSpec(AFNICommandInputSpec):
     out_file = File(name_template="%s_calc", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file_a")
     out1D = traits.Bool(desc="output in 1D",
-                    argstr='-1D')
+                        argstr='-1D')
     expr = traits.Str(desc='expr', argstr='-expr "%s"', position=3,
                       mandatory=True)
     start_idx = traits.Int(desc='start index for in_file_a',
@@ -2034,14 +2034,14 @@ class Eval(AFNICommand):
 
 class MeansInputSpec(AFNICommandInputSpec):
     in_file_a = File(desc='input file to 3dMean',
-        argstr='%s',
-        position=0,
-        mandatory=True,
-        exists=True)
+                     argstr='%s',
+                     position=0,
+                     mandatory=True,
+                     exists=True)
     in_file_b = File(desc='another input file to 3dMean',
-        argstr='%s',
-        position=1,
-        exists=True)
+                     argstr='%s',
+                     position=1,
+                     exists=True)
     out_file = File(name_template="%s_mean", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file_a")
     scale = traits.Str(desc='scaling of output', argstr='-%sscale')

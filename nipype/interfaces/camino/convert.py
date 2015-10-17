@@ -65,23 +65,23 @@ class Image2Voxel(StdOutCommandLine):
 
 class FSL2SchemeInputSpec(StdOutCommandLineInputSpec):
     bvec_file = File(exists=True, argstr='-bvecfile %s',
-                    mandatory=True, position=1,
-                    desc='b vector file')
+                     mandatory=True, position=1,
+                     desc='b vector file')
 
     bval_file = File(exists=True, argstr='-bvalfile %s',
-                    mandatory=True, position=2,
-                    desc='b value file')
+                     mandatory=True, position=2,
+                     desc='b value file')
 
     numscans = traits.Int(argstr='-numscans %d', units='NA',
-                desc="Output all measurements numerous (n) times, used when combining multiple scans from the same imaging session.")
+                          desc="Output all measurements numerous (n) times, used when combining multiple scans from the same imaging session.")
 
     interleave = traits.Bool(argstr='-interleave', desc="Interleave repeated scans. Only used with -numscans.")
 
     bscale = traits.Float(argstr='-bscale %d', units='NA',
-                desc="Scaling factor to convert the b-values into different units. Default is 10^6.")
+                          desc="Scaling factor to convert the b-values into different units. Default is 10^6.")
 
     diffusiontime = traits.Float(argstr = '-diffusiontime %f', units = 'NA',
-                desc="Diffusion time")
+                                 desc="Diffusion time")
 
     flipx = traits.Bool(argstr='-flipx', desc="Negate the x component of all the vectors.")
     flipy = traits.Bool(argstr='-flipy', desc="Negate the y component of all the vectors.")
@@ -126,17 +126,17 @@ class VtkStreamlinesInputSpec(StdOutCommandLineInputSpec):
                    desc='data file')
 
     voxeldims = traits.List(traits.Int, desc = 'voxel dimensions in mm',
-                 argstr='-voxeldims %s', minlen=3, maxlen=3, position=4,
-                 units='mm')
+                            argstr='-voxeldims %s', minlen=3, maxlen=3, position=4,
+                            units='mm')
 
     seed_file = File(exists=False, argstr='-seedfile %s', position=1,
-                    desc='image containing seed points')
+                     desc='image containing seed points')
 
     target_file = File(exists=False, argstr='-targetfile %s', position=2,
-                    desc='image containing integer-valued target regions')
+                       desc='image containing integer-valued target regions')
 
     scalar_file = File(exists=False, argstr='-scalarfile %s', position=3,
-                    desc='image that is in the same physical space as the tracts')
+                       desc='image that is in the same physical space as the tracts')
 
     colourorient = traits.Bool(argstr='-colourorient', desc="Each point on the streamline is coloured by the local orientation.")
     interpolatescalars = traits.Bool(argstr='-interpolatescalars', desc="the scalar value at each point on the streamline is calculated by trilinear interpolation")
@@ -179,57 +179,57 @@ class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
                    desc='data file')
 
     maxtractpoints= traits.Int(argstr='-maxtractpoints %d', units='NA',
-                desc="maximum number of tract points")
+                               desc="maximum number of tract points")
     mintractpoints= traits.Int(argstr='-mintractpoints %d', units='NA',
-                desc="minimum number of tract points")
+                               desc="minimum number of tract points")
     maxtractlength= traits.Int(argstr='-maxtractlength %d', units='mm',
-                desc="maximum length of tracts")
+                               desc="maximum length of tracts")
     mintractlength= traits.Int(argstr='-mintractlength %d', units='mm',
-                desc="minimum length of tracts")
+                               desc="minimum length of tracts")
     datadims = traits.List(traits.Int, desc = 'data dimensions in voxels',
-                 argstr='-datadims %s', minlen=3, maxlen=3,
-                 units='voxels')
+                           argstr='-datadims %s', minlen=3, maxlen=3,
+                           units='voxels')
     voxeldims = traits.List(traits.Int, desc = 'voxel dimensions in mm',
-                 argstr='-voxeldims %s', minlen=3, maxlen=3,
-                 units='mm')
+                            argstr='-voxeldims %s', minlen=3, maxlen=3,
+                            units='mm')
     seedpointmm = traits.List(traits.Int, desc = 'The coordinates of a single seed point for tractography in mm',
-                 argstr='-seedpointmm %s', minlen=3, maxlen=3,
-                 units='mm')
+                              argstr='-seedpointmm %s', minlen=3, maxlen=3,
+                              units='mm')
     seedpointvox = traits.List(traits.Int, desc = 'The coordinates of a single seed point for tractography in voxels',
-                             argstr='-seedpointvox %s', minlen=3, maxlen=3,
-                             units='voxels')
+                               argstr='-seedpointvox %s', minlen=3, maxlen=3,
+                               units='voxels')
     seedfile = File(exists=False, argstr='-seedfile %s',
                     desc='Image Containing Seed Points')
     regionindex = traits.Int(argstr='-regionindex %d', units='mm',
-                desc="index of specific region to process")
+                             desc="index of specific region to process")
     iterations = traits.Float(argstr='-iterations %d', units='NA',
-                desc="Number of streamlines generated for each seed. Not required when outputting streamlines, but needed to create PICo images. The default is 1 if the output is streamlines, and 5000 if the output is connection probability images.")
+                              desc="Number of streamlines generated for each seed. Not required when outputting streamlines, but needed to create PICo images. The default is 1 if the output is streamlines, and 5000 if the output is connection probability images.")
     targetfile = File(exists=False, argstr='-targetfile %s',
-                    desc='Image containing target volumes.')
+                      desc='Image containing target volumes.')
     allowmultitargets = traits.Bool(argstr='-allowmultitargets', desc="Allows streamlines to connect to multiple target volumes.")
     directional = traits.List(traits.Int, desc = 'Splits the streamlines at the seed point and computes separate connection probabilities for each segment. Streamline segments are grouped according to their dot product with the vector (X, Y, Z). The ideal vector will be tangential to the streamline trajectory at the seed, such that the streamline projects from the seed along (X, Y, Z) and -(X, Y, Z). However, it is only necessary for the streamline trajectory to not be orthogonal to (X, Y, Z).',
-                 argstr='-directional %s', minlen=3, maxlen=3,
-                 units='NA')
+                              argstr='-directional %s', minlen=3, maxlen=3,
+                              units='NA')
     waypointfile = File(exists=False, argstr='-waypointfile %s',
-                    desc='Image containing waypoints. Waypoints are defined as regions of the image with the same intensity, where 0 is background and any value > 0 is a waypoint.')
+                        desc='Image containing waypoints. Waypoints are defined as regions of the image with the same intensity, where 0 is background and any value > 0 is a waypoint.')
     truncateloops = traits.Bool(argstr='-truncateloops', desc="This option allows streamlines to enter a waypoint exactly once. After the streamline leaves the waypoint, it is truncated upon a second entry to the waypoint.")
     discardloops = traits.Bool(argstr='-discardloops', desc="This option allows streamlines to enter a waypoint exactly once. After the streamline leaves the waypoint, the entire streamline is discarded upon a second entry to the waypoint.")
     exclusionfile = File(exists=False, argstr='-exclusionfile %s',
-                    desc='Image containing exclusion ROIs. This should be an Analyze 7.5 header / image file.hdr and file.img.')
+                         desc='Image containing exclusion ROIs. This should be an Analyze 7.5 header / image file.hdr and file.img.')
     truncateinexclusion = traits.Bool(argstr='-truncateinexclusion', desc="Retain segments of a streamline before entry to an exclusion ROI.")
 
     endpointfile = File(exists=False, argstr='-endpointfile %s',
-                    desc='Image containing endpoint ROIs. This should be an Analyze 7.5 header / image file.hdr and file.img.')
+                        desc='Image containing endpoint ROIs. This should be an Analyze 7.5 header / image file.hdr and file.img.')
 
     resamplestepsize = traits.Float(argstr='-resamplestepsize %d', units='NA',
-                desc="Each point on a streamline is tested for entry into target, exclusion or waypoint volumes. If the length between points on a tract is not much smaller than the voxel length, then streamlines may pass through part of a voxel without being counted. To avoid this, the program resamples streamlines such that the step size is one tenth of the smallest voxel dimension in the image. This increases the size of raw or oogl streamline output and incurs some performance penalty. The resample resolution can be controlled with this option or disabled altogether by passing a negative step size or by passing the -noresample option.")
+                                    desc="Each point on a streamline is tested for entry into target, exclusion or waypoint volumes. If the length between points on a tract is not much smaller than the voxel length, then streamlines may pass through part of a voxel without being counted. To avoid this, the program resamples streamlines such that the step size is one tenth of the smallest voxel dimension in the image. This increases the size of raw or oogl streamline output and incurs some performance penalty. The resample resolution can be controlled with this option or disabled altogether by passing a negative step size or by passing the -noresample option.")
 
     noresample = traits.Bool(argstr='-noresample', desc="Disables resampling of input streamlines. Resampling is automatically disabled if the input model is voxels.")
 
     outputtracts = traits.Bool(argstr='-outputtracts', desc="Output streamlines in raw binary format.")
 
     outputroot = File(exists=False, argstr='-outputroot %s',
-                    desc='Prepended onto all output file names.')
+                      desc='Prepended onto all output file names.')
 
     gzip = traits.Bool(argstr='-gzip', desc="save the output image in gzip format")
     outputcp = traits.Bool(argstr='-outputcp', desc="output the connection probability map (Analyze image, float)",
@@ -301,13 +301,13 @@ class TractShredderInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=-2, desc='tract file')
 
     offset = traits.Int(argstr='%d', units='NA',
-        desc='initial offset of offset tracts', position=1)
+                        desc='initial offset of offset tracts', position=1)
 
     bunchsize = traits.Int(argstr='%d', units='NA',
-        desc='reads and outputs a group of bunchsize tracts', position=2)
+                           desc='reads and outputs a group of bunchsize tracts', position=2)
 
     space = traits.Int(argstr='%d', units='NA',
-        desc='skips space tracts', position=3)
+                       desc='skips space tracts', position=3)
 
 class TractShredderOutputSpec(TraitedSpec):
     shredded = File(exists=True, desc='Shredded tract file')
@@ -348,13 +348,13 @@ class TractShredder(StdOutCommandLine):
 
 class DT2NIfTIInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1,
-        desc='tract file')
+                   desc='tract file')
 
     output_root = File(argstr='-outputroot %s', position=2, genfile=True,
-        desc='filename root prepended onto the names of three output files.')
+                       desc='filename root prepended onto the names of three output files.')
 
     header_file = File(exists=True, argstr='-header %s', mandatory=True, position=3,
-        desc=' A Nifti .nii or .hdr file containing the header information')
+                       desc=' A Nifti .nii or .hdr file containing the header information')
 
 class DT2NIfTIOutputSpec(TraitedSpec):
     dt = File(exists=True, desc='diffusion tensors in NIfTI format')
@@ -399,32 +399,32 @@ class DT2NIfTI(CommandLine):
 
 class NIfTIDT2CaminoInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1,
-        desc='A NIFTI-1 dataset containing diffusion tensors. The tensors are assumed to be '
-        'in lower-triangular order as specified by the NIFTI standard for the storage of '
-        'symmetric matrices. This file should be either a .nii or a .hdr file.')
+                   desc='A NIFTI-1 dataset containing diffusion tensors. The tensors are assumed to be '
+                   'in lower-triangular order as specified by the NIFTI standard for the storage of '
+                   'symmetric matrices. This file should be either a .nii or a .hdr file.')
 
     s0_file = File(argstr='-s0 %s', exists=True,
-        desc='File containing the unweighted signal for each voxel, may be a raw binary '
-        'file (specify type with -inputdatatype) or a supported image file.')
+                   desc='File containing the unweighted signal for each voxel, may be a raw binary '
+                   'file (specify type with -inputdatatype) or a supported image file.')
 
     lns0_file = File(argstr='-lns0 %s', exists=True,
-        desc='File containing the log of the unweighted signal for each voxel, may be a '
-        'raw binary file (specify type with -inputdatatype) or a supported image file.')
+                     desc='File containing the log of the unweighted signal for each voxel, may be a '
+                     'raw binary file (specify type with -inputdatatype) or a supported image file.')
 
     bgmask = File(argstr='-bgmask %s', exists=True,
-        desc='Binary valued brain / background segmentation, may be a raw binary file '
-        '(specify type with -maskdatatype) or a supported image file.')
+                  desc='Binary valued brain / background segmentation, may be a raw binary file '
+                  '(specify type with -maskdatatype) or a supported image file.')
 
     scaleslope = traits.Float(argstr='-scaleslope %s',
-        desc='A value v in the diffusion tensor is scaled to v * s + i. This is '
-        'applied after any scaling specified by the input image. Default is 1.0.')
+                              desc='A value v in the diffusion tensor is scaled to v * s + i. This is '
+                              'applied after any scaling specified by the input image. Default is 1.0.')
 
     scaleinter = traits.Float(argstr='-scaleinter %s',
-        desc='A value v in the diffusion tensor is scaled to v * s + i. This is '
-        'applied after any scaling specified by the input image. Default is 0.0.')
+                              desc='A value v in the diffusion tensor is scaled to v * s + i. This is '
+                              'applied after any scaling specified by the input image. Default is 0.0.')
 
     uppertriangular = traits.Bool(argstr='-uppertriangular %s',
-        desc = 'Specifies input in upper-triangular (VTK style) order.')
+                                  desc = 'Specifies input in upper-triangular (VTK style) order.')
 
 class NIfTIDT2CaminoOutputSpec(TraitedSpec):
     out_file = File(desc='diffusion tensors data in Camino format')
@@ -618,13 +618,13 @@ class ShredderInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=-2, desc='raw binary data file')
 
     offset = traits.Int(argstr='%d', units='NA',
-        desc='initial offset of offset bytes', position=1)
+                        desc='initial offset of offset bytes', position=1)
 
     chunksize = traits.Int(argstr='%d', units='NA',
-        desc='reads and outputs a chunk of chunksize bytes', position=2)
+                           desc='reads and outputs a chunk of chunksize bytes', position=2)
 
     space = traits.Int(argstr='%d', units='NA',
-        desc='skips space bytes', position=3)
+                       desc='skips space bytes', position=3)
 
 class ShredderOutputSpec(TraitedSpec):
     shredded = File(exists=True, desc='Shredded binary data file')

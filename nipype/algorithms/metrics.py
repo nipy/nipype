@@ -100,7 +100,7 @@ class Distance(BaseInterface):
         (point1, point2) = np.unravel_index(
             np.argmin(dist_matrix), dist_matrix.shape)
         return (euclidean(set1_coordinates.T[point1, :],
-                set2_coordinates.T[point2, :]),
+                          set2_coordinates.T[point2, :]),
                 set1_coordinates.T[point1, :],
                 set2_coordinates.T[point2, :])
 
@@ -117,7 +117,7 @@ class Distance(BaseInterface):
 
         for i in range(n_labels):
             cogs[:3, i] = np.array(center_of_mass(origdata2,
-                                   labeled_data, i + 1))
+                                                  labeled_data, i + 1))
 
         cogs_coor = np.dot(nii2.get_affine(), cogs)[:3, :]
 
@@ -312,7 +312,7 @@ class Overlap(BaseInterface):
 
         for l in labels:
             res.append(self._bool_vec_dissimilarity(data1 == l,
-                       data2 == l, method='jaccard'))
+                                                    data2 == l, method='jaccard'))
             volumes1.append(scale * len(data1[data1 == l]))
             volumes2.append(scale * len(data2[data2 == l]))
 
@@ -331,7 +331,7 @@ class Overlap(BaseInterface):
         both_data[(data1 - data2) != 0] = 1
 
         nb.save(nb.Nifti1Image(both_data, nii1.get_affine(),
-                nii1.get_header()), self.inputs.out_file)
+                               nii1.get_header()), self.inputs.out_file)
 
         self._labels = labels
         self._ove_rois = results
@@ -360,9 +360,9 @@ class Overlap(BaseInterface):
 
 class FuzzyOverlapInputSpec(BaseInterfaceInputSpec):
     in_ref = InputMultiPath( File(exists=True), mandatory=True,
-                   desc='Reference image. Requires the same dimensions as in_tst.')
+                             desc='Reference image. Requires the same dimensions as in_tst.')
     in_tst = InputMultiPath( File(exists=True), mandatory=True,
-                   desc='Test image. Requires the same dimensions as in_ref.')
+                             desc='Test image. Requires the same dimensions as in_ref.')
     weighting = traits.Enum('none', 'volume', 'squared_vol', usedefault=True,
                             desc=('\'none\': no class-overlap weighting is '
                                   'performed. \'volume\': computed class-'
@@ -455,7 +455,7 @@ class FuzzyOverlap(BaseInterface):
             diff+= w* ch
 
         nb.save(nb.Nifti1Image(diff, nb.load( self.inputs.in_ref[0]).get_affine(),
-                nb.load(self.inputs.in_ref[0]).get_header()), self.inputs.out_file)
+                               nb.load(self.inputs.in_ref[0]).get_header()), self.inputs.out_file)
 
 
         return runtime
@@ -584,8 +584,8 @@ class SimilarityInputSpec(BaseInterfaceInputSpec):
     mask1 = File(exists=True, desc="3D volume")
     mask2 = File(exists=True, desc="3D volume")
     metric = traits.Either(traits.Enum('cc', 'cr', 'crl1', 'mi', 'nmi', 'slr'),
-                          traits.Callable(),
-                         desc="""str or callable
+                           traits.Callable(),
+                           desc="""str or callable
 Cost-function for assessing image similarity. If a string,
 one of 'cc': correlation coefficient, 'cr': correlation
 ratio, 'crl1': L1-norm based correlation ratio, 'mi': mutual

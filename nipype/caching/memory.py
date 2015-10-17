@@ -93,9 +93,9 @@ class PipeFunc(object):
 
     def __repr__(self):
         return '%s(%s.%s, base_dir=%s)' % (self.__class__.__name__,
-                           self.interface.__module__,
-                           self.interface.__name__,
-                           self.base_dir)
+                                           self.interface.__module__,
+                                           self.interface.__name__,
+                                           self.base_dir)
 
 ################################################################################
 # Memory manager: provide some tracking about what is computed when, to
@@ -225,7 +225,7 @@ class Memory(object):
         # immediately to avoid race conditions in parallel computing:
         # file appends are atomic
         open(os.path.join(base_dir, 'log.current'),
-            'a').write('%s/%s\n' % (dir_name, job_name))
+             'a').write('%s/%s\n' % (dir_name, job_name))
         t = time.localtime()
         year_dir = os.path.join(base_dir, 'log.%i' % t.tm_year)
         try:
@@ -238,7 +238,7 @@ class Memory(object):
         except OSError:
             "Dir exists"
         open(os.path.join(month_dir, '%02i.log' % t.tm_mday),
-            'a').write('%s/%s\n' % (dir_name, job_name))
+             'a').write('%s/%s\n' % (dir_name, job_name))
 
     def clear_previous_runs(self, warn=True):
         """ Remove all the cache that where not used in the latest run of
@@ -274,7 +274,7 @@ class Memory(object):
         year = year if year is not None else t.tm_year
         base_dir = self.base_dir
         cut_off_file = '%s/log.%i/%02i/%02i.log' % (base_dir,
-                    year, month, day)
+                                                    year, month, day)
         logs_to_flush = list()
         recent_runs = dict()
         for log_name in glob.glob('%s/log.*/*/*.log' % base_dir):
@@ -297,5 +297,5 @@ class Memory(object):
 
     def __repr__(self):
         return '%s(base_dir=%s)' % (self.__class__.__name__,
-                           self.base_dir)
+                                    self.base_dir)
 

@@ -491,7 +491,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     mask_size = traits.Int(argstr='-ms %d',
                            desc="susan mask size")
     brightness_threshold = traits.Range(low=0, argstr='-epith %d',
-                                      desc='susan brightness threshold, otherwise it is estimated')
+                                        desc='susan brightness threshold, otherwise it is estimated')
     full_data = traits.Bool(argstr='-v', desc='output full data')
     _estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
                      'multitaper_product', 'use_pava', 'autocorr_noestimate']
@@ -524,8 +524,8 @@ class FILMGLSInputSpec505(FSLCommandInputSpec):
                                   desc='Smooth auto corr estimates')
     mask_size = traits.Int(argstr='--ms=%d', desc="susan mask size")
     brightness_threshold = traits.Range(low=0, argstr='--epith=%d',
-                                      desc=('susan brightness threshold, '
-                                            'otherwise it is estimated'))
+                                        desc=('susan brightness threshold, '
+                                              'otherwise it is estimated'))
     full_data = traits.Bool(argstr='-v', desc='output full data')
     _estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
                      'multitaper_product', 'use_pava', 'autocorr_noestimate']
@@ -983,7 +983,7 @@ class ContrastMgrInputSpec(FSLCommandInputSpec):
                          copyfile=False, mandatory=True,
                          desc='summary of residuals, See Woolrich, et. al., 2001')
     contrast_num = traits.Range(low=1, argstr='-cope',
-                              desc='contrast number to start labeling copes from')
+                                desc='contrast number to start labeling copes from')
     suffix = traits.Str(argstr='-suffix %s',
                         desc='suffix to put on the end of the cope filename before the contrast number, default is nothing')
 

@@ -205,7 +205,7 @@ class ModifyAffine(BaseInterface):
             affine = np.dot(self.inputs.transformation_matrix, affine)
 
             nb.save(nb.Nifti1Image(img.get_data(), affine,
-                    img.get_header()), self._gen_output_filename(fname))
+                                   img.get_header()), self._gen_output_filename(fname))
 
         return runtime
 
@@ -979,13 +979,13 @@ class AddNoiseInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='input image that will be corrupted with noise')
     in_mask = File(exists=True, desc=('input mask, voxels outside this mask '
-                   'will be considered background'))
+                                      'will be considered background'))
     snr = traits.Float(10.0, desc='desired output SNR in dB', usedefault=True)
     dist = traits.Enum('normal', 'rician', usedefault=True, mandatory=True,
                        desc=('desired noise distribution'))
     bg_dist = traits.Enum('normal', 'rayleigh', usedefault=True, mandatory=True,
                           desc=('desired noise distribution, currently '
-                          'only normal is implemented'))
+                                'only normal is implemented'))
     out_file = File(desc='desired output filename')
 
 
@@ -1080,14 +1080,14 @@ class AddNoise(BaseInterface):
             im_noise = np.sqrt((image + stde_1)**2 + (stde_2)**2)
         else:
             raise NotImplementedError(('Only normal and rician distributions '
-                                      'are supported'))
+                                       'are supported'))
 
         return im_noise
 
 
 class NormalizeProbabilityMapSetInputSpec(TraitedSpec):
     in_files = InputMultiPath(File(exists=True, mandatory=True,
-                              desc='The tpms to be normalized'))
+                                   desc='The tpms to be normalized'))
     in_mask = File(exists=True,
                    desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
 
@@ -1419,8 +1419,8 @@ def merge_rois(in_files, in_idxs, in_ref,
                 data[idata, ...] = cdata[0:nels, ...]
             except:
                 print(('Consistency between indexes and chunks was '
-                      'lost: data=%s, chunk=%s') % (str(data.shape),
-                      str(cdata.shape)))
+                       'lost: data=%s, chunk=%s') % (str(data.shape),
+                                                     str(cdata.shape)))
                 raise
 
         hdr.set_data_shape(newshape)
@@ -1466,7 +1466,7 @@ class Distance(nam.Distance):
     def __init__(self, **inputs):
         super(nam.Distance, self).__init__(**inputs)
         warnings.warn(("This interface has been deprecated since 0.10.0,"
-                      " please use nipype.algorithms.metrics.Distance"),
+                       " please use nipype.algorithms.metrics.Distance"),
                       DeprecationWarning)
 
 
@@ -1479,7 +1479,7 @@ class Overlap(nam.Overlap):
     def __init__(self, **inputs):
         super(nam.Overlap, self).__init__(**inputs)
         warnings.warn(("This interface has been deprecated since 0.10.0,"
-                      " please use nipype.algorithms.metrics.Overlap"),
+                       " please use nipype.algorithms.metrics.Overlap"),
                       DeprecationWarning)
 
 
@@ -1493,5 +1493,5 @@ class FuzzyOverlap(nam.FuzzyOverlap):
     def __init__(self, **inputs):
         super(nam.FuzzyOverlap, self).__init__(**inputs)
         warnings.warn(("This interface has been deprecated since 0.10.0,"
-                      " please use nipype.algorithms.metrics.FuzzyOverlap"),
+                       " please use nipype.algorithms.metrics.FuzzyOverlap"),
                       DeprecationWarning)

@@ -81,19 +81,19 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
     l1pipeline.connect([(subj_infosource, datasource,[('subject_id', 'subject_id')])])
     l1pipeline.connect([(subj_infosource, conmapper,[('subject_id', 'inputnode.subject_id')])])
     l1pipeline.connect([(datasource, conmapper, [("dwi", "inputnode.dwi"),
-                                              ("bvals", "inputnode.bvals"),
-                                              ("bvecs", "inputnode.bvecs"),
+                                                 ("bvals", "inputnode.bvals"),
+                                                 ("bvecs", "inputnode.bvecs"),
                                               ])])
     l1pipeline.connect([(conmapper, datasink, [("outputnode.connectome", "@l1output.cff"),
-                                              ("outputnode.fa", "@l1output.fa"),
-                                              ("outputnode.tracts", "@l1output.tracts"),
-                                              ("outputnode.trace", "@l1output.trace"),
-                                              ("outputnode.cmatrix", "@l1output.cmatrix"),
-                                              ("outputnode.rois", "@l1output.rois"),
-                                              ("outputnode.struct", "@l1output.struct"),
-                                              ("outputnode.networks", "@l1output.networks"),
-                                              ("outputnode.mean_fiber_length", "@l1output.mean_fiber_length"),
-                                              ("outputnode.fiber_length_std", "@l1output.fiber_length_std"),
+                                               ("outputnode.fa", "@l1output.fa"),
+                                               ("outputnode.tracts", "@l1output.tracts"),
+                                               ("outputnode.trace", "@l1output.trace"),
+                                               ("outputnode.cmatrix", "@l1output.cmatrix"),
+                                               ("outputnode.rois", "@l1output.rois"),
+                                               ("outputnode.struct", "@l1output.struct"),
+                                               ("outputnode.networks", "@l1output.networks"),
+                                               ("outputnode.mean_fiber_length", "@l1output.mean_fiber_length"),
+                                               ("outputnode.fiber_length_std", "@l1output.fiber_length_std"),
                                                ])])
     l1pipeline.connect([(group_infosource, datasink,[('group_id','@group_id')])])
     return l1pipeline

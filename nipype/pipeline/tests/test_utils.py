@@ -121,8 +121,8 @@ def test_outputs_removal():
     n1.needed_outputs = ['file2']
     n1.run()
     yield assert_false, os.path.exists(os.path.join(out_dir,
-                                                   n1.name,
-                                                   'file1.txt'))
+                                                    n1.name,
+                                                    'file1.txt'))
     yield assert_true, os.path.exists(os.path.join(out_dir,
                                                    n1.name,
                                                    'file2.txt'))
@@ -170,8 +170,8 @@ def test_inputs_removal():
     n1.overwrite = True
     n1.run()
     yield assert_false, os.path.exists(os.path.join(out_dir,
-                                                   n1.name,
-                                                   'file1.txt'))
+                                                    n1.name,
+                                                    'file1.txt'))
     rmtree(out_dir)
 
 
@@ -210,21 +210,21 @@ def test_outputs_removal_wf():
 
     for plugin in ('Linear',):#, 'MultiProc'):
         n1 = pe.Node(niu.Function(input_names=['arg1'],
-                              output_names=['out_file1', 'out_file2', 'dir'],
-                              function=test_function),
-                 name='n1')
+                                  output_names=['out_file1', 'out_file2', 'dir'],
+                                  function=test_function),
+                     name='n1')
         n1.inputs.arg1 = 1
 
         n2 = pe.Node(niu.Function(input_names=['in_file', 'arg'],
-                              output_names=['out_file1', 'out_file2', 'n'],
-                              function=test_function2),
-                 name='n2')
+                                  output_names=['out_file1', 'out_file2', 'n'],
+                                  function=test_function2),
+                     name='n2')
         n2.inputs.arg = 2
 
         n3 = pe.Node(niu.Function(input_names=['arg'],
-                              output_names=['n'],
-                              function=test_function3),
-                 name='n3')
+                                  output_names=['n'],
+                                  function=test_function3),
+                     name='n3')
 
         wf = pe.Workflow(name="node_rem_test" + plugin, base_dir=out_dir)
         wf.connect(n1, "out_file1", n2, "in_file")
@@ -301,14 +301,14 @@ def fwhm(fwhm):
 def create_wf(name):
     pipe = pe.Workflow(name=name)
     process = pe.Node(niu.Function(input_names=['fwhm'],
-                            output_names=['fwhm'],
-                            function=fwhm),
-                   name='proc')
-    process.iterables = ('fwhm', [0])
-    process2 = pe.Node(niu.Function(input_names=['fwhm'],
                                    output_names=['fwhm'],
                                    function=fwhm),
-                      name='proc2')
+                      name='proc')
+    process.iterables = ('fwhm', [0])
+    process2 = pe.Node(niu.Function(input_names=['fwhm'],
+                                    output_names=['fwhm'],
+                                    function=fwhm),
+                       name='proc2')
     process2.iterables = ('fwhm', [0])
     pipe.connect(process, 'fwhm', process2, 'fwhm')
     return pipe

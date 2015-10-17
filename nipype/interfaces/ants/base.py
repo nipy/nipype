@@ -4,7 +4,7 @@
 
 # Local imports
 from ..base import (CommandLine, CommandLineInputSpec, traits,
-isdefined)
+                    isdefined)
 
 from ... import logging
 logger = logging.getLogger('interface')

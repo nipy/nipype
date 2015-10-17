@@ -17,13 +17,13 @@ if __name__ == "__main__":
                     'de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation']
 
     modules_from_chris = ['edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010',
-                         'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmMipavReorient',
-                         'edu.jhu.ece.iacl.plugins.utilities.math.MedicAlgorithmImageCalculator',
-                         'de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation',
-                         'de.mpg.cbs.jist.brain.JistBrainPartialVolumeFilter',
-                         'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmThresholdToBinaryMask',
-                         #'de.mpg.cbs.jist.cortex.JistCortexFullCRUISE', # waiting for http://www.nitrc.org/tracker/index.php?func=detail&aid=7236&group_id=228&atid=942 to be fixed
-                         'de.mpg.cbs.jist.cortex.JistCortexSurfaceMeshInflation']
+                          'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmMipavReorient',
+                          'edu.jhu.ece.iacl.plugins.utilities.math.MedicAlgorithmImageCalculator',
+                          'de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation',
+                          'de.mpg.cbs.jist.brain.JistBrainPartialVolumeFilter',
+                          'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmThresholdToBinaryMask',
+                          #'de.mpg.cbs.jist.cortex.JistCortexFullCRUISE', # waiting for http://www.nitrc.org/tracker/index.php?func=detail&aid=7236&group_id=228&atid=942 to be fixed
+                          'de.mpg.cbs.jist.cortex.JistCortexSurfaceMeshInflation']
 
     modules_from_julia = ['de.mpg.cbs.jist.intensity.JistIntensityMp2rageMasking',
                           'edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010']

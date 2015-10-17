@@ -563,11 +563,11 @@ class BaseTraitedSpec(traits.HasTraits):
                               and not has_metadata(trait.trait_type,
                                                    "name_source"))
                 dict_nofilename.append((name,
-                    self._get_sorteddict(val, hash_method=hash_method,
-                                         hash_files=hash_files)))
+                                        self._get_sorteddict(val, hash_method=hash_method,
+                                                             hash_files=hash_files)))
                 dict_withhash.append((name,
-                    self._get_sorteddict(val, True, hash_method=hash_method,
-                                         hash_files=hash_files)))
+                                      self._get_sorteddict(val, True, hash_method=hash_method,
+                                                           hash_files=hash_files)))
         return dict_withhash, md5(str(dict_nofilename).encode()).hexdigest()
 
     def _get_sorteddict(self, object, dictwithhash=False, hash_method=None,
@@ -577,9 +577,9 @@ class BaseTraitedSpec(traits.HasTraits):
             for key, val in sorted(object.items()):
                 if isdefined(val):
                     out.append((key,
-                        self._get_sorteddict(val, dictwithhash,
-                                             hash_method=hash_method,
-                                             hash_files=hash_files)))
+                                self._get_sorteddict(val, dictwithhash,
+                                                     hash_method=hash_method,
+                                                     hash_files=hash_files)))
         elif isinstance(object, (list, tuple)):
             out = []
             for val in object:
@@ -932,7 +932,7 @@ class BaseInterface(Interface):
             if isdefined(value):
                 self._check_requires(spec, name, value)
         for name, spec in list(self.inputs.traits(mandatory=None,
-                                             transient=None).items()):
+                                                  transient=None).items()):
             self._check_requires(spec, name, getattr(self.inputs, name))
 
     def _check_version_requirements(self, trait_object, raise_exception=True):
@@ -1568,7 +1568,7 @@ class CommandLine(BaseInterface):
 
             if not isinstance(ns, string_types):
                 raise ValueError(('name_source of \'%s\' trait sould be an '
-                                 'input trait name') % name)
+                                  'input trait name') % name)
 
             if isdefined(getattr(self.inputs, ns)):
                 name_source = ns

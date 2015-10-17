@@ -153,8 +153,8 @@ def create_camino_dti_pipeline(name="dtiproc"):
     """
 
     tractography.connect([(inputnode1, image2voxel, [("dwi", "in_file")]),
-                  (inputnode1, fsl2scheme, [("bvecs", "bvec_file"),
-                                           ("bvals", "bval_file")])
+                          (inputnode1, fsl2scheme, [("bvecs", "bvec_file"),
+                                                    ("bvals", "bval_file")])
                   ])
 
     """
@@ -162,7 +162,7 @@ def create_camino_dti_pipeline(name="dtiproc"):
     """
 
     tractography.connect([(image2voxel, dtifit,[['voxel_order','in_file']]),
-                  (fsl2scheme, dtifit,[['scheme','scheme_file']])
+                          (fsl2scheme, dtifit,[['scheme','scheme_file']])
                  ])
 
     """
@@ -202,7 +202,7 @@ def create_camino_dti_pipeline(name="dtiproc"):
     tractography.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
     tractography.connect([(fa, analyzeheader_fa,[("fa","in_file")])])
     tractography.connect([(inputnode1, analyzeheader_fa,[(('dwi', get_vox_dims), 'voxel_dims'),
-                                (('dwi', get_data_dims), 'data_dims')])])
+                                                         (('dwi', get_data_dims), 'data_dims')])])
     tractography.connect([(fa, fa2nii,[('fa','data_file')])])
     tractography.connect([(inputnode1, fa2nii,[(('dwi', get_affine), 'affine')])])
     tractography.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
@@ -211,7 +211,7 @@ def create_camino_dti_pipeline(name="dtiproc"):
     tractography.connect([(dtifit, trace,[("tensor_fitted","in_file")])])
     tractography.connect([(trace, analyzeheader_trace,[("trace","in_file")])])
     tractography.connect([(inputnode1, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
-                                (('dwi', get_data_dims), 'data_dims')])])
+                                                            (('dwi', get_data_dims), 'data_dims')])])
     tractography.connect([(trace, trace2nii,[('trace','data_file')])])
     tractography.connect([(inputnode1, trace2nii,[(('dwi', get_affine), 'affine')])])
     tractography.connect([(analyzeheader_trace, trace2nii,[('header', 'header_file')])])
@@ -221,33 +221,33 @@ def create_camino_dti_pipeline(name="dtiproc"):
     tractography.connect([(trackpico, cam2trk_pico, [('tracked','in_file')])])
     tractography.connect([(trackdt, cam2trk_dt, [('tracked','in_file')])])
     tractography.connect([(inputnode1, cam2trk_pico,[(('dwi', get_vox_dims), 'voxel_dims'),
-                                            (('dwi', get_data_dims), 'data_dims')])])
+                                                     (('dwi', get_data_dims), 'data_dims')])])
 
     tractography.connect([(inputnode1, cam2trk_dt,[(('dwi', get_vox_dims), 'voxel_dims'),
-                                          (('dwi', get_data_dims), 'data_dims')])])
+                                                   (('dwi', get_data_dims), 'data_dims')])])
 
 
     inputnode= pe.Node(interface = util.IdentityInterface(fields=["dwi", "bvecs", "bvals"]), name="inputnode")
 
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["fa",
-                                                                "trace",
-                                                                "tracts_pico",
-                                                                "tracts_dt",
-                                                                "tensors"]),
+                                                                    "trace",
+                                                                    "tracts_pico",
+                                                                    "tracts_dt",
+                                                                    "tensors"]),
                          name="outputnode")
 
     workflow = pe.Workflow(name=name)
     workflow.base_output_dir=name
 
     workflow.connect([(inputnode, tractography, [("dwi", "inputnode1.dwi"),
-                                              ("bvals", "inputnode1.bvals"),
-                                              ("bvecs", "inputnode1.bvecs")])])
+                                                 ("bvals", "inputnode1.bvals"),
+                                                 ("bvecs", "inputnode1.bvecs")])])
 
     workflow.connect([(tractography, outputnode, [("cam2trk_dt.trackvis", "tracts_dt"),
-        ("cam2trk_pico.trackvis", "tracts_pico"),
-        ("fa2nii.nifti_file", "fa"),
-        ("trace2nii.nifti_file", "trace"),
-        ("dtifit.tensor_fitted", "tensors")])
+                                                  ("cam2trk_pico.trackvis", "tracts_pico"),
+                                                  ("fa2nii.nifti_file", "fa"),
+                                                  ("trace2nii.nifti_file", "trace"),
+                                                  ("dtifit.tensor_fitted", "tensors")])
         ])
 
     return workflow

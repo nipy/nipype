@@ -134,7 +134,7 @@ preproc.connect([(realign,coregister,[('mean_image', 'target')]),
                                              (('bias_corrected_image', get_vox_dims), 'write_voxel_sizes')]),
                  (realign, slice_timing, [('realigned_files', 'in_files')]),
                  (slice_timing, normalize_func, [('timecorrected_files', 'apply_to_files'),
-                                            (('timecorrected_files', get_vox_dims), 'write_voxel_sizes')]),
+                                                 (('timecorrected_files', get_vox_dims), 'write_voxel_sizes')]),
                  (normalize_func, smooth, [('normalized_files', 'in_files')]),
                  ])
 
@@ -179,12 +179,12 @@ def pickfirst(l):
     return l[0]
 
 l1analysis.connect([(modelspec,level1design,[('session_info','session_info')]),
-                  (level1design,level1estimate,[('spm_mat_file','spm_mat_file')]),
-                  (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
-                                                  ('beta_images','beta_images'),
-                                                  ('residual_image','residual_image')]),
-                  (contrastestimate, threshold,[('spm_mat_file','spm_mat_file'),
-                                                (('spmT_images', pickfirst), 'stat_image')]),
+                    (level1design,level1estimate,[('spm_mat_file','spm_mat_file')]),
+                    (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
+                                                      ('beta_images','beta_images'),
+                                                      ('residual_image','residual_image')]),
+                    (contrastestimate, threshold,[('spm_mat_file','spm_mat_file'),
+                                                  (('spmT_images', pickfirst), 'stat_image')]),
                   ])
 
 """
@@ -398,8 +398,8 @@ paramanalysis.inputs.contrastestimate.contrasts = paramcontrasts
 paramanalysis.inputs.contrastestimate.use_derivs = False
 
 l1pipeline.connect([(preproc, paramanalysis, [('realign.realignment_parameters',
-                                            'modelspec.realignment_parameters'),
-                                            (('smooth.smoothed_files',makelist),
+                                               'modelspec.realignment_parameters'),
+                                              (('smooth.smoothed_files',makelist),
                                                 'modelspec.functional_runs')])])
 
 """

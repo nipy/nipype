@@ -24,7 +24,7 @@ class DWI2SphericalHarmonicsImageInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='Diffusion-weighted images')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
     encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=1,
-    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
+                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     maximum_harmonic_order = traits.Float(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     normalise = traits.Bool(argstr='-normalise', position=3, desc="normalise the DW signal to the b=0 image")
 
@@ -94,14 +94,14 @@ class DWI2SphericalHarmonicsImage(CommandLine):
 class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3, desc='diffusion-weighted image')
     response_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-    desc='the diffusion-weighted signal response function for a single fibre population (see EstimateResponse)')
+                         desc='the diffusion-weighted signal response function for a single fibre population (see EstimateResponse)')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
     mask_image = File(exists=True, argstr='-mask %s', position=2, desc='only perform computation within the specified binary brain mask image')
     encoding_file = File(exists=True, argstr='-grad %s', position=1,
-    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
+                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     filter_file = File(exists=True, argstr='-filter %s', position=-2,
-    desc='a text file containing the filtering coefficients for each even harmonic order.' \
-    'the linear frequency filtering parameters used for the initial linear spherical deconvolution step (default = [ 1 1 1 0 0 ]).')
+                       desc='a text file containing the filtering coefficients for each even harmonic order.' \
+                       'the linear frequency filtering parameters used for the initial linear spherical deconvolution step (default = [ 1 1 1 0 0 ]).')
 
     lambda_value = traits.Float(argstr='-lambda %s', desc='the regularisation parameter lambda that controls the strength of the constraint (default = 1.0).')
     maximum_harmonic_order = traits.Int(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
@@ -109,7 +109,7 @@ class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     iterations = traits.Int(argstr='-niter %s', desc='the maximum number of iterations to perform for each voxel (default = 50)')
     debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
     directions_file = File(exists=True, argstr='-directions %s', position=-2,
-    desc='a text file containing the [ el az ] pairs for the directions: Specify the directions over which to apply the non-negativity constraint (by default, the built-in 300 direction set is used)')
+                           desc='a text file containing the [ el az ] pairs for the directions: Specify the directions over which to apply the non-negativity constraint (by default, the built-in 300 direction set is used)')
 
     normalise = traits.Bool(argstr='-normalise', position=3, desc="normalise the DW signal to the b=0 image")
 
@@ -175,7 +175,7 @@ class EstimateResponseForSHInputSpec(CommandLineInputSpec):
     mask_image = File(exists=True, mandatory=True, argstr='%s', position=-2, desc='only perform computation within the specified binary brain mask image')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
     encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=1,
-    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
+                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     maximum_harmonic_order = traits.Int(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     normalise = traits.Bool(argstr='-normalise', desc='normalise the DW signal to the b=0 image')
     quiet = traits.Bool(argstr='-quiet', desc='Do not display information messages or progress status.')
@@ -255,7 +255,7 @@ class FSL2MRTrixInputSpec(TraitedSpec):
 
 class FSL2MRTrixOutputSpec(TraitedSpec):
     encoding_file = File(desc='The gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient' \
-        'and b gives the b-value in units (1000 s/mm^2).')
+                         'and b gives the b-value in units (1000 s/mm^2).')
 
 class FSL2MRTrix(BaseInterface):
     """

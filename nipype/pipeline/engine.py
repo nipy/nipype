@@ -796,7 +796,7 @@ connected.
                 for sourceinfo, field in sorted(data['connect']):
                     node.input_source[field] = \
                         (op.join(edge[0].output_dir(),
-                         'result_%s.pklz' % edge[0].name),
+                                 'result_%s.pklz' % edge[0].name),
                          sourceinfo)
 
     def _check_nodes(self, nodes):
@@ -1039,7 +1039,7 @@ connected.
                     dotlist.append(('%s[label="%s", shape=box3d,'
                                     'style=filled, color=black, colorscheme'
                                     '=greys7 fillcolor=2];') % (nodename,
-                                                            node_class_name))
+                                                                node_class_name))
                 else:
                     if colored:
                         dotlist.append(('%s[label="%s", style=filled,'
@@ -1380,7 +1380,7 @@ class Node(WorkflowBase):
                 cannot_rerun = (str2bool(
                     self.config['execution']['stop_on_first_rerun'])
                     and not (self.overwrite is None
-                         and self._interface.always_run))
+                             and self._interface.always_run))
                 if cannot_rerun:
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
                                      "is set to True"))
@@ -1401,12 +1401,12 @@ class Node(WorkflowBase):
                     outdircont = os.listdir(outdir)
                     if ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) == 0)):
                         logger.warn(('An exception was raised trying to remove old %s, '
-                                    'but the path seems empty. Is it an NFS mount?. '
-                                    'Passing the exception.') % outdir)
+                                     'but the path seems empty. Is it an NFS mount?. '
+                                     'Passing the exception.') % outdir)
                         pass
                     elif ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) != 0)):
                         logger.debug(('Folder contents (%d items): '
-                                     '%s') % (len(outdircont), outdircont))
+                                      '%s') % (len(outdircont), outdircont))
                         raise ex
                     else:
                         raise ex
@@ -1822,7 +1822,7 @@ class JoinNode(Node):
     """
 
     def __init__(self, interface, name, joinsource, joinfield=None,
-            unique=False, **kwargs):
+                 unique=False, **kwargs):
         """
 
         Parameters
@@ -2015,8 +2015,8 @@ class JoinNode(Node):
             return getattr(self._inputs, slot_field)
         except AttributeError as e:
             raise AttributeError("The join node %s does not have a slot field %s"
-                         " to hold the %s value at index %d: %s"
-                         % (self, slot_field, field, index, e))
+                                 " to hold the %s value at index %d: %s"
+                                 % (self, slot_field, field, index, e))
 
 class MapNode(Node):
     """Wraps interface objects that need to be iterated on a list of inputs.
@@ -2325,7 +2325,7 @@ class MapNode(Node):
         if execute:
             if self.nested:
                 nitems = len(filename_to_list(flatten(getattr(self.inputs,
-                                                      self.iterfield[0]))))
+                                                              self.iterfield[0]))))
             else:
                 nitems = len(filename_to_list(getattr(self.inputs,
                                                       self.iterfield[0])))

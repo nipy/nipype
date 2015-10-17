@@ -73,8 +73,8 @@ one functional run we use a MapNode to convert each run.
 """
 
 img2float = pe.MapNode(interface=fsl.ImageMaths(out_data_type='float',
-                                             op_string = '',
-                                             suffix='_dtype'),
+                                                op_string = '',
+                                                suffix='_dtype'),
                        iterfield=['in_file'],
                        name='img2float')
 preproc.connect(inputnode, 'func', img2float, 'in_file')
@@ -129,8 +129,8 @@ Plot the estimated motion parameters
 """
 
 plot_motion = pe.MapNode(interface=fsl.PlotMotionParams(in_source='fsl'),
-                        name='plot_motion',
-                        iterfield=['in_file'])
+                         name='plot_motion',
+                         iterfield=['in_file'])
 plot_motion.iterables = ('plot_type', ['rotations', 'translations'])
 preproc.connect(motion_correct, 'par_file', plot_motion, 'in_file')
 
@@ -430,8 +430,8 @@ copemerge    = pe.MapNode(interface=fsl.Merge(dimension='t'),
                           name="copemerge")
 
 varcopemerge = pe.MapNode(interface=fsl.Merge(dimension='t'),
-                       iterfield=['in_files'],
-                       name="varcopemerge")
+                          iterfield=['in_files'],
+                          name="varcopemerge")
 
 """
 Use :class:`nipype.interfaces.fsl.L2Model` to generate subject and condition

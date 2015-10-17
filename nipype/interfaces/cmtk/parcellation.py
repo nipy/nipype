@@ -348,34 +348,34 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     # lateral ventricles, thalamus proper and caudate
     # the latter two removed for better erosion, but put back afterwards
     idx = np.where((asegd == 4) |
-                  (asegd == 43) |
-                  (asegd == 11) |
-                  (asegd == 50) |
-                  (asegd == 31) |
-                  (asegd == 63) |
-                  (asegd == 10) |
-                  (asegd == 49))
+                   (asegd == 43) |
+                   (asegd == 11) |
+                   (asegd == 50) |
+                   (asegd == 31) |
+                   (asegd == 63) |
+                   (asegd == 10) |
+                   (asegd == 49))
     csfA[idx] = 1
     csfA = imerode(imerode(csfA, se1), se)
 
     # thalmus proper and cuadate are put back because they are not lateral ventricles
     idx = np.where((asegd == 11) |
-                  (asegd == 50) |
-                  (asegd == 10) |
-                  (asegd == 49))
+                   (asegd == 50) |
+                   (asegd == 10) |
+                   (asegd == 49))
     csfA[idx] = 0
 
     # REST CSF, IE 3RD AND 4TH VENTRICULE AND EXTRACEREBRAL CSF
     idx = np.where((asegd == 5) |
-                  (asegd == 14) |
-                  (asegd == 15) |
-                  (asegd == 24) |
-                  (asegd == 44) |
-                  (asegd == 72) |
-                  (asegd == 75) |
-                  (asegd == 76) |
-                  (asegd == 213) |
-                  (asegd == 221))
+                   (asegd == 14) |
+                   (asegd == 15) |
+                   (asegd == 24) |
+                   (asegd == 44) |
+                   (asegd == 72) |
+                   (asegd == 75) |
+                   (asegd == 76) |
+                   (asegd == 213) |
+                   (asegd == 221))
     # 43 ??, 4??  213?, 221?
     # more to discuss.
     for i in [5, 14, 15, 24, 44, 72, 75, 76, 213, 221]:
@@ -462,10 +462,10 @@ def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, 
     ]
 
     ds.append((op.abspath('ROI_%s.nii.gz' % parcellation_name),
-              op.abspath('ROI_HR_th.nii.gz')))
+               op.abspath('ROI_HR_th.nii.gz')))
     if(dilation==True):
         ds.append((op.abspath('ROIv_%s.nii.gz' % parcellation_name),
-            op.abspath('ROIv_HR_th.nii.gz')))
+                   op.abspath('ROIv_HR_th.nii.gz')))
     orig = op.join(fs_dir, 'mri', 'orig', '001.mgz')
     for d in ds:
         iflogger.info("Processing %s:" % d[0])
@@ -533,7 +533,7 @@ class ParcellateOutputSpec(TraitedSpec):
         desc='Image file with regions labelled as unknown cortical structures',
                     exists=True)
     ribbon_file = File(desc='Image file detailing the cortical ribbon',
-                    exists=True)
+                       exists=True)
     aseg_file = File(
         desc='Automated segmentation file converted from Freesurfer "subjects" directory',
                     exists=True)

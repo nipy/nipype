@@ -289,7 +289,7 @@ class ProvStore(object):
         except AttributeError:
             pass
         a0 = self.g.activity(get_id(), runtime.startTime, runtime.endTime,
-                        a0_attrs)
+                             a0_attrs)
         # environment
         id = get_id()
         env_collection = self.g.collection(id)
@@ -377,7 +377,7 @@ class ProvStore(object):
             agent_attr.update({nipype_ns[key]: safe_encode(value)})
         software_agent = self.g.agent(get_attr_id(agent_attr), agent_attr)
         self.g.wasAssociatedWith(a0, user_agent, None, None,
-                            {pm.PROV["hadRole"]: nipype_ns["LoggedInUser"]})
+                                 {pm.PROV["hadRole"]: nipype_ns["LoggedInUser"]})
         self.g.wasAssociatedWith(a0, software_agent)
         return self.g
 

@@ -37,7 +37,7 @@ def test_normalize_tpms():
         mapdata.append( data.copy() )
 
         nb.Nifti1Image(2.0 * (data * mskdata), im.get_affine(),
-                    im.get_header() ).to_filename(filename)
+                       im.get_header() ).to_filename(filename)
         in_files.append( filename )
 
     normalize_tpms( in_files, in_mask, out_files=out_files )
