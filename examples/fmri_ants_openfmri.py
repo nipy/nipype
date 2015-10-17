@@ -737,7 +737,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
         for row in contrast_def:
             if row[0] != 'task%03d' % task_id:
                 continue
-            con = [row[1], 'T', ['cond%03d' % (i + 1)  for i in range(len(conds))],
+            con = [row[1], 'T', ['cond%03d' % (i + 1) for i in range(len(conds))],
                    row[2:].astype(float).tolist()]
             contrasts.append(con)
         # add auto contrasts for each column
