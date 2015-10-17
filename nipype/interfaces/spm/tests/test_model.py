@@ -25,14 +25,14 @@ def create_files_in_directory():
     outdir = mkdtemp()
     cwd = os.getcwd()
     os.chdir(outdir)
-    filelist = ['a.nii','b.nii']
+    filelist = ['a.nii', 'b.nii']
     for f in filelist:
         hdr = nb.Nifti1Header()
-        shape = (3,3,3,4)
+        shape = (3, 3, 3, 4)
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img,np.eye(4),hdr),
-                os.path.join(outdir,f))
+        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
+                os.path.join(outdir, f))
     return filelist, outdir, cwd
 
 def clean_directory(outdir, old_wd):

@@ -92,7 +92,7 @@ def sort_copes(files):
     numelements = len(files[0])
     outfiles = []
     for i in range(numelements):
-        outfiles.insert(i,[])
+        outfiles.insert(i, [])
         for j, elements in enumerate(files):
             outfiles[i].append(elements[i])
     return outfiles
@@ -142,8 +142,8 @@ data_dir = os.path.abspath('data')
 # Specify the subject directories
 subject_list = ['s1'] #, 's3']
 # Map field names to individual subject runs.
-info = dict(func=[['subject_id', ['f3','f5','f7','f10']]],
-            struct=[['subject_id','struct']])
+info = dict(func=[['subject_id', ['f3', 'f5', 'f7', 'f10']]],
+            struct=[['subject_id', 'struct']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
@@ -181,7 +181,7 @@ iterables on this node to perform two different extents of smoothing.
 """
 
 inputnode = level1_workflow.get_node('featpreproc.inputspec')
-inputnode.iterables = ('fwhm', [5.,10.])
+inputnode.iterables = ('fwhm', [5., 10.])
 
 hpcutoff = 120.
 TR = 3.
@@ -201,9 +201,9 @@ def subjectinfo(subject_id):
     from copy import deepcopy
     print("Subject ID: %s\n" %str(subject_id))
     output = []
-    names = ['Task-Odd','Task-Even']
+    names = ['Task-Odd', 'Task-Even']
     for r in range(4):
-        onsets = [list(range(15,240,60)),list(range(45,240,60))]
+        onsets = [list(range(15, 240, 60)), list(range(45, 240, 60))]
         output.insert(r,
                       Bunch(conditions=names,
                             onsets=deepcopy(onsets),
@@ -218,17 +218,17 @@ condition names must match the `names` listed in the `subjectinfo` function
 described above.
 """
 
-cont1 = ['Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5]]
-cont2 = ['Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1]]
-cont3 = ['Task','F', [cont1, cont2]]
-contrasts = [cont1,cont2]
+cont1 = ['Task>Baseline', 'T', ['Task-Odd', 'Task-Even'], [0.5, 0.5]]
+cont2 = ['Task-Odd>Task-Even', 'T', ['Task-Odd', 'Task-Even'], [1, -1]]
+cont3 = ['Task', 'F', [cont1, cont2]]
+contrasts = [cont1, cont2]
 
 modelspec.inputs.input_units = 'secs'
 modelspec.inputs.time_repetition = TR
 modelspec.inputs.high_pass_filter_cutoff = hpcutoff
 
 modelfit.inputs.inputspec.interscan_interval = TR
-modelfit.inputs.inputspec.bases = {'dgamma':{'derivs': False}}
+modelfit.inputs.inputspec.bases = {'dgamma': {'derivs': False}}
 modelfit.inputs.inputspec.contrasts = contrasts
 modelfit.inputs.inputspec.model_serial_correlations = True
 modelfit.inputs.inputspec.film_threshold = 1000

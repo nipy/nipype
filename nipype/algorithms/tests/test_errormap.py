@@ -52,14 +52,14 @@ def test_errormap():
 	## Multi-Spectual
 	volume3 = np.array([[[1.0, 6.0], [0.0, 3.0]], [[1.0, 9.0], [3.0, 6.0]]]) # Raymond Vahan Damadian's birthday
 
-	msvolume1 = np.zeros(shape=(2,2,2,2))
-	msvolume1[:,:,:,0] = volume1
-	msvolume1[:,:,:,1] = volume3
+	msvolume1 = np.zeros(shape=(2, 2, 2, 2))
+	msvolume1[:, :, :, 0] = volume1
+	msvolume1[:, :, :, 1] = volume3
 	msimg1 = nib.Nifti1Image(msvolume1, np.eye(4))
 
-	msvolume2 = np.zeros(shape=(2,2,2,2))
-	msvolume2[:,:,:,0] = volume3
-	msvolume2[:,:,:,1] = volume1
+	msvolume2 = np.zeros(shape=(2, 2, 2, 2))
+	msvolume2[:, :, :, 0] = volume3
+	msvolume2[:, :, :, 1] = volume1
 	msimg2 = nib.Nifti1Image(msvolume2, np.eye(4))
 
 	nib.save(msimg1, os.path.join(tempdir, 'von-ray.nii.gz'))

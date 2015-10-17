@@ -59,10 +59,10 @@ def test_FSLCommand2():
 @skipif(no_fsl)#skip if fsl not installed)
 def test_gen_fname():
     # Test _gen_fname method of FSLCommand
-    cmd = fsl.FSLCommand(command = 'junk',output_type = 'NIFTI_GZ')
+    cmd = fsl.FSLCommand(command = 'junk', output_type = 'NIFTI_GZ')
     pth = os.getcwd()
     # just the filename
-    fname = cmd._gen_fname('foo.nii.gz',suffix='_fsl')
+    fname = cmd._gen_fname('foo.nii.gz', suffix='_fsl')
     desired = os.path.join(pth, 'foo_fsl.nii.gz')
     yield assert_equal, fname, desired
     # filename with suffix

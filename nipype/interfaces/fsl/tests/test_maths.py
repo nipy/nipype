@@ -33,14 +33,14 @@ def create_files_in_directory():
     origdir = os.getcwd()
     os.chdir(testdir)
 
-    filelist = ['a.nii','b.nii']
+    filelist = ['a.nii', 'b.nii']
     for f in filelist:
         hdr = nb.Nifti1Header()
-        shape = (3,3,3,4)
+        shape = (3, 3, 3, 4)
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
-        nb.save(nb.Nifti1Image(img,np.eye(4),hdr),
-                os.path.join(testdir,f))
+        nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
+                os.path.join(testdir, f))
 
     out_ext = Info.output_type_to_ext(Info.output_type())
     return filelist, testdir, origdir, out_ext
@@ -73,7 +73,7 @@ def test_maths_base(fsl_output_type=None):
     yield assert_equal, maths.cmdline, "fslmaths a.nii %s" %os.path.join(testdir, out_file)
 
     # Now test that we can set the various data types
-    dtypes = ["float","char","int","short","double","input"]
+    dtypes = ["float", "char", "int", "short", "double", "input"]
     int_cmdline = "fslmaths -dt %s a.nii " + os.path.join(testdir, out_file)
     out_cmdline = "fslmaths a.nii " + os.path.join(testdir, out_file) + " -odt %s"
     duo_cmdline = "fslmaths -dt %s a.nii " + os.path.join(testdir, out_file) + " -odt %s"
@@ -115,10 +115,10 @@ def test_changedt(fsl_output_type=None):
     yield assert_raises, ValueError, cdt.run
 
     # Now test that we can set the various data types
-    dtypes = ["float","char","int","short","double","input"]
+    dtypes = ["float", "char", "int", "short", "double", "input"]
     cmdline = "fslmaths a.nii b.nii -odt %s"
     for dtype in dtypes:
-        foo = fsl.MathsCommand(in_file="a.nii",out_file="b.nii",output_datatype=dtype)
+        foo = fsl.MathsCommand(in_file="a.nii", out_file="b.nii", output_datatype=dtype)
         yield assert_equal, foo.cmdline, cmdline %dtype
 
     # Clean up our mess
@@ -131,7 +131,7 @@ def test_threshold(fsl_output_type=None):
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
-    thresh = fsl.Threshold(in_file="a.nii",out_file="b.nii")
+    thresh = fsl.Threshold(in_file="a.nii", out_file="b.nii")
 
     # Test the underlying command
     yield assert_equal, thresh.cmd, "fslmaths"
@@ -146,11 +146,11 @@ def test_threshold(fsl_output_type=None):
         yield assert_equal, thresh.cmdline, cmdline %"-thr %.10f" %val
 
     val = "%.10f" %42
-    thresh = fsl.Threshold(in_file="a.nii",out_file="b.nii",thresh=42,use_robust_range=True)
+    thresh = fsl.Threshold(in_file="a.nii", out_file="b.nii", thresh=42, use_robust_range=True)
     yield assert_equal, thresh.cmdline, cmdline %("-thrp "+val)
     thresh.inputs.use_nonzero_voxels = True
     yield assert_equal, thresh.cmdline, cmdline %("-thrP "+val)
-    thresh = fsl.Threshold(in_file="a.nii",out_file="b.nii",thresh=42,direction="above")
+    thresh = fsl.Threshold(in_file="a.nii", out_file="b.nii", thresh=42, direction="above")
     yield assert_equal, thresh.cmdline, cmdline %("-uthr "+val)
     thresh.inputs.use_robust_range = True
     yield assert_equal, thresh.cmdline, cmdline %("-uthrp "+val)
@@ -168,7 +168,7 @@ def test_meanimage(fsl_output_type=None):
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
-    meaner = fsl.MeanImage(in_file="a.nii",out_file="b.nii")
+    meaner = fsl.MeanImage(in_file="a.nii", out_file="b.nii")
 
     # Test the underlying command
     yield assert_equal, meaner.cmd, "fslmaths"
@@ -178,7 +178,7 @@ def test_meanimage(fsl_output_type=None):
 
     # Test the other dimensions
     cmdline = "fslmaths a.nii -%smean b.nii"
-    for dim in ["X","Y","Z","T"]:
+    for dim in ["X", "Y", "Z", "T"]:
         meaner.inputs.dimension = dim
         yield assert_equal, meaner.cmdline, cmdline %dim
 
@@ -196,7 +196,7 @@ def test_maximage(fsl_output_type=None):
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
-    maxer = fsl.MaxImage(in_file="a.nii",out_file="b.nii")
+    maxer = fsl.MaxImage(in_file="a.nii", out_file="b.nii")
 
     # Test the underlying command
     yield assert_equal, maxer.cmd, "fslmaths"
@@ -206,7 +206,7 @@ def test_maximage(fsl_output_type=None):
 
     # Test the other dimensions
     cmdline = "fslmaths a.nii -%smax b.nii"
-    for dim in ["X","Y","Z","T"]:
+    for dim in ["X", "Y", "Z", "T"]:
         maxer.inputs.dimension = dim
         yield assert_equal, maxer.cmdline, cmdline %dim
 
@@ -224,7 +224,7 @@ def test_smooth(fsl_output_type=None):
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
-    smoother = fsl.IsotropicSmooth(in_file="a.nii",out_file="b.nii")
+    smoother = fsl.IsotropicSmooth(in_file="a.nii", out_file="b.nii")
 
     # Test the underlying command
     yield assert_equal, smoother.cmd, "fslmaths"
@@ -235,9 +235,9 @@ def test_smooth(fsl_output_type=None):
     # Test smoothing kernels
     cmdline = "fslmaths a.nii -s %.5f b.nii"
     for val in [0, 1., 1, 25, 0.5, 8 / 3.]:
-        smoother = fsl.IsotropicSmooth(in_file="a.nii",out_file="b.nii",sigma=val)
+        smoother = fsl.IsotropicSmooth(in_file="a.nii", out_file="b.nii", sigma=val)
         yield assert_equal, smoother.cmdline, cmdline %val
-        smoother = fsl.IsotropicSmooth(in_file="a.nii",out_file="b.nii",fwhm=val)
+        smoother = fsl.IsotropicSmooth(in_file="a.nii", out_file="b.nii", fwhm=val)
         val = float(val) / np.sqrt(8 * np.log(2))
         yield assert_equal, smoother.cmdline, cmdline %val
 
@@ -255,7 +255,7 @@ def test_mask(fsl_output_type=None):
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
-    masker = fsl.ApplyMask(in_file="a.nii",out_file="c.nii")
+    masker = fsl.ApplyMask(in_file="a.nii", out_file="c.nii")
 
     # Test the underlying command
     yield assert_equal, masker.cmd, "fslmaths"
@@ -268,7 +268,7 @@ def test_mask(fsl_output_type=None):
     yield assert_equal, masker.cmdline, "fslmaths a.nii -mas b.nii c.nii"
 
     # Test auto name generation
-    masker = fsl.ApplyMask(in_file="a.nii",mask_file="b.nii")
+    masker = fsl.ApplyMask(in_file="a.nii", mask_file="b.nii")
     yield assert_equal, masker.cmdline, "fslmaths a.nii -mas b.nii "+os.path.join(testdir, "a_masked%s" % out_ext)
 
     # Clean up our mess
@@ -282,7 +282,7 @@ def test_dilation(fsl_output_type=None):
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
-    diller = fsl.DilateImage(in_file="a.nii",out_file="b.nii")
+    diller = fsl.DilateImage(in_file="a.nii", out_file="b.nii")
 
     # Test the underlying command
     yield assert_equal, diller.cmd, "fslmaths"
@@ -304,7 +304,7 @@ def test_dilation(fsl_output_type=None):
             yield assert_equal, diller.cmdline, "fslmaths a.nii -kernel %s %.4f -dilF b.nii" %(k, size)
 
     # Test that we can use a file kernel
-    f = open("kernel.txt","w").close()
+    f = open("kernel.txt", "w").close()
     del f # Shut pyflakes up
     diller.inputs.kernel_shape = "file"
     diller.inputs.kernel_size = Undefined
@@ -325,7 +325,7 @@ def test_erosion(fsl_output_type=None):
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
-    erode = fsl.ErodeImage(in_file="a.nii",out_file="b.nii")
+    erode = fsl.ErodeImage(in_file="a.nii", out_file="b.nii")
 
     # Test the underlying command
     yield assert_equal, erode.cmd, "fslmaths"
@@ -351,7 +351,7 @@ def test_spatial_filter(fsl_output_type=None):
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
-    filter = fsl.SpatialFilter(in_file="a.nii",out_file="b.nii")
+    filter = fsl.SpatialFilter(in_file="a.nii", out_file="b.nii")
 
     # Test the underlying command
     yield assert_equal, filter.cmd, "fslmaths"
@@ -379,7 +379,7 @@ def test_unarymaths(fsl_output_type=None):
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
-    maths = fsl.UnaryMaths(in_file="a.nii",out_file="b.nii")
+    maths = fsl.UnaryMaths(in_file="a.nii", out_file="b.nii")
 
     # Test the underlying command
     yield assert_equal, maths.cmd, "fslmaths"
@@ -409,7 +409,7 @@ def test_binarymaths(fsl_output_type=None):
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
-    maths = fsl.BinaryMaths(in_file="a.nii",out_file="c.nii")
+    maths = fsl.BinaryMaths(in_file="a.nii", out_file="c.nii")
 
     # Test the underlying command
     yield assert_equal, maths.cmd, "fslmaths"
@@ -434,7 +434,7 @@ def test_binarymaths(fsl_output_type=None):
     # Test that we don't need to ask for an out file
     for op in ops:
         maths = fsl.BinaryMaths(in_file="a.nii", operation=op, operand_file="b.nii")
-        yield assert_equal, maths.cmdline, "fslmaths a.nii -%s b.nii %s" %(op,os.path.join(testdir, "a_maths%s" % out_ext))
+        yield assert_equal, maths.cmdline, "fslmaths a.nii -%s b.nii %s" %(op, os.path.join(testdir, "a_maths%s" % out_ext))
 
     # Clean up our mess
     clean_directory(testdir, origdir)
@@ -447,7 +447,7 @@ def test_multimaths(fsl_output_type=None):
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
-    maths = fsl.MultiImageMaths(in_file="a.nii",out_file="c.nii")
+    maths = fsl.MultiImageMaths(in_file="a.nii", out_file="c.nii")
 
     # Test the underlying command
     yield assert_equal, maths.cmd, "fslmaths"
@@ -480,7 +480,7 @@ def test_tempfilt(fsl_output_type=None):
     files, testdir, origdir, out_ext = create_files_in_directory()
 
     # Get the command
-    filt = fsl.TemporalFilter(in_file="a.nii",out_file="b.nii")
+    filt = fsl.TemporalFilter(in_file="a.nii", out_file="b.nii")
 
     # Test the underlying command
     yield assert_equal, filt.cmd, "fslmaths"
@@ -498,7 +498,7 @@ def test_tempfilt(fsl_output_type=None):
     # Test that we don't need to ask for an out file
     filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma = 64)
     yield assert_equal, filt.cmdline, \
-        "fslmaths a.nii -bptf 64.000000 -1.000000 %s" %os.path.join(testdir,"a_filt%s" % out_ext)
+        "fslmaths a.nii -bptf 64.000000 -1.000000 %s" %os.path.join(testdir, "a_filt%s" % out_ext)
 
     # Clean up our mess
     clean_directory(testdir, origdir)

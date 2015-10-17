@@ -414,7 +414,7 @@ class Surface2VolTransformInputSpec(FSTraitedSpec):
     subjects_dir = traits.Str(argstr='--sd %s',
                               desc=('freesurfer subjects directory defaults to '
                                     '$SUBJECTS_DIR'))
-    subject_id = traits.Str(argstr='--identity %s',desc='subject id',
+    subject_id = traits.Str(argstr='--identity %s', desc='subject id',
                             xor=['reg_file'])
 
 

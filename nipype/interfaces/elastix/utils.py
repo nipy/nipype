@@ -22,12 +22,12 @@ class EditTransformInputSpec(BaseInterfaceInputSpec):
     reference_image = File(exists=True,
                            desc=('set a new reference image to change the '
                                  'target coordinate system.'))
-    interpolation = traits.Enum('cubic','linear','nearest', usedefault=True,
+    interpolation = traits.Enum('cubic', 'linear', 'nearest', usedefault=True,
                                 argstr='FinalBSplineInterpolationOrder',
                                 desc='set a new interpolator for transformation')
 
-    output_type = traits.Enum('float', 'unsigned char', 'unsigned short','short',
-                              'unsigned long','long','double',
+    output_type = traits.Enum('float', 'unsigned char', 'unsigned short', 'short',
+                              'unsigned long', 'long', 'double',
                               argstr='ResultImagePixelType',
                               desc='set a new output pixel type for resampled images')
     output_format = traits.Enum('nii.gz', 'nii', 'mhd', 'hdr', 'vtk',
@@ -110,12 +110,12 @@ class EditTransform(BaseInterface):
             contents = p.sub(rep, contents)
 
             itkmat = np.eye(4)
-            itkmat[0,0] = -1
-            itkmat[1,1] = -1
+            itkmat[0, 0] = -1
+            itkmat[1, 1] = -1
 
             affine = np.dot(itkmat, im.get_affine())
-            dirs = ' '.join(['%0.4f' % f for f in affine[0:3,0:3].reshape(-1)])
-            orig = ' '.join(['%0.4f' % f for f in affine[0:3,3].reshape(-1)])
+            dirs = ' '.join(['%0.4f' % f for f in affine[0:3, 0:3].reshape(-1)])
+            orig = ' '.join(['%0.4f' % f for f in affine[0:3, 3].reshape(-1)])
 
             #p = re.compile((self._pattern % 'Direction').decode('string-escape'))
             #rep = '(\g<entry>%s\g<3>' % dirs
@@ -137,12 +137,12 @@ class EditTransform(BaseInterface):
         return outputs
 
     def _get_outfile(self):
-        val = getattr(self,'_out_file')
+        val = getattr(self, '_out_file')
         if not val is None and not val == '':
             return val
 
         if isdefined(self.inputs.output_file):
-            setattr(self,'_out_file',self.inputs.output_file)
+            setattr(self, '_out_file', self.inputs.output_file)
             return self.inputs.output_file
 
         out_file = op.abspath(op.basename(self.inputs.transform_file))

@@ -30,23 +30,23 @@ from nipype.workflows.smri.ants import antsRegistrationTemplateBuildSingleIterat
 
 import urllib.request, urllib.error, urllib.parse
 homeDir = os.getenv("HOME")
-requestedPath = os.path.join(homeDir,'nipypeTestPath')
+requestedPath = os.path.join(homeDir, 'nipypeTestPath')
 mydatadir = os.path.realpath(requestedPath)
 if not os.path.exists(mydatadir):
     os.makedirs(mydatadir)
 print(mydatadir)
 
 MyFileURLs = [
-           ('http://slicer.kitware.com/midas3/download?bitstream=13121','01_T1_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13122','02_T1_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13124','03_T1_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13128','01_T1_inv_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13123','02_T1_inv_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13125','03_T1_inv_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13121', '01_T1_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13122', '02_T1_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13124', '03_T1_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13128', '01_T1_inv_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13123', '02_T1_inv_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13125', '03_T1_inv_half.nii.gz'),
            ]
 for tt in MyFileURLs:
     myURL = tt[0]
-    localFilename = os.path.join(mydatadir,tt[1])
+    localFilename = os.path.join(mydatadir, tt[1])
     if not os.path.exists(localFilename):
         remotefile = urllib.request.urlopen(myURL)
 
@@ -65,14 +65,14 @@ co-aligned images for that one scan session
 """
 
 ListOfImagesDictionaries = [
-    {'T1':os.path.join(mydatadir,'01_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
-    {'T1':os.path.join(mydatadir,'02_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
-    {'T1':os.path.join(mydatadir,'03_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
+    {'T1': os.path.join(mydatadir, '01_T1_half.nii.gz'), 'INV_T1': os.path.join(mydatadir, '01_T1_inv_half.nii.gz'), 'LABEL_MAP': os.path.join(mydatadir, '01_T1_inv_half.nii.gz')},
+    {'T1': os.path.join(mydatadir, '02_T1_half.nii.gz'), 'INV_T1': os.path.join(mydatadir, '02_T1_inv_half.nii.gz'), 'LABEL_MAP': os.path.join(mydatadir, '02_T1_inv_half.nii.gz')},
+    {'T1': os.path.join(mydatadir, '03_T1_half.nii.gz'), 'INV_T1': os.path.join(mydatadir, '03_T1_inv_half.nii.gz'), 'LABEL_MAP': os.path.join(mydatadir, '03_T1_inv_half.nii.gz')}
 ]
 input_passive_images = [
-    {'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
-    {'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
-    {'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
+    {'INV_T1': os.path.join(mydatadir, '01_T1_inv_half.nii.gz')},
+    {'INV_T1': os.path.join(mydatadir, '02_T1_inv_half.nii.gz')},
+    {'INV_T1': os.path.join(mydatadir, '03_T1_inv_half.nii.gz')}
 ]
 
 """
@@ -90,7 +90,7 @@ image type is not listed, it will be linearly interpolated.
 { 'labelmap':'NearestNeighbor', 'FLAIR':'WindowedSinc' }
 """
 
-interpolationMapping = {'INV_T1':'LanczosWindowedSinc','LABEL_MAP':'NearestNeighbor','T1':'Linear'}
+interpolationMapping = {'INV_T1': 'LanczosWindowedSinc', 'LABEL_MAP': 'NearestNeighbor', 'T1': 'Linear'}
 
 """
 3. Define the workflow and its working directory
@@ -107,7 +107,7 @@ InitialTemplateInputs = [mdict['T1'] for mdict in ListOfImagesDictionaries]
 
 datasource = pe.Node(interface=util.IdentityInterface(fields=
                                                       ['InitialTemplateInputs', 'ListOfImagesDictionaries',
-                                                       'registrationImageTypes','interpolationMapping']),
+                                                       'registrationImageTypes', 'interpolationMapping']),
                      run_without_submitting=True,
                      name='InputImages')
 datasource.inputs.InitialTemplateInputs = InitialTemplateInputs
@@ -164,9 +164,9 @@ tbuilder.connect(datasource, 'interpolationMapping', buildTemplateIteration2, 'i
 datasink = pe.Node(io.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.join(requestedPath, "results")
 
-tbuilder.connect(buildTemplateIteration2, 'outputspec.template',datasink,'PrimaryTemplate')
-tbuilder.connect(buildTemplateIteration2, 'outputspec.passive_deformed_templates',datasink,'PassiveTemplate')
-tbuilder.connect(initAvg, 'output_average_image', datasink,'PreRegisterAverage')
+tbuilder.connect(buildTemplateIteration2, 'outputspec.template', datasink, 'PrimaryTemplate')
+tbuilder.connect(buildTemplateIteration2, 'outputspec.passive_deformed_templates', datasink, 'PassiveTemplate')
+tbuilder.connect(initAvg, 'output_average_image', datasink, 'PreRegisterAverage')
 
 """
 9. Run the workflow

@@ -233,13 +233,13 @@ class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
 
     gzip = traits.Bool(argstr='-gzip', desc="save the output image in gzip format")
     outputcp = traits.Bool(argstr='-outputcp', desc="output the connection probability map (Analyze image, float)",
-                           requires=['outputroot','seedfile'])
+                           requires=['outputroot', 'seedfile'])
     outputsc = traits.Bool(argstr='-outputsc', desc="output the connection probability map (raw streamlines, int)",
-                           requires=['outputroot','seedfile'])
+                           requires=['outputroot', 'seedfile'])
     outputacm = traits.Bool(argstr='-outputacm', desc="output all tracts in a single connection probability map (Analyze image)",
-                            requires=['outputroot','seedfile'])
+                            requires=['outputroot', 'seedfile'])
     outputcbs = traits.Bool(argstr='-outputcbs', desc="outputs connectivity-based segmentation maps; requires target outputfile",
-                            requires=['outputroot','targetfile','seedfile'])
+                            requires=['outputroot', 'targetfile', 'seedfile'])
 
 class ProcStreamlinesOutputSpec(TraitedSpec):
     proc = File(exists=True, desc='Processed Streamlines')
@@ -277,7 +277,7 @@ class ProcStreamlines(StdOutCommandLine):
             if not os.path.exists(base):
                 os.makedirs(base)
             new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
-            self.outputroot_files = glob.glob(os.path.join(os.getcwd(),actual_outputroot+'*'))
+            self.outputroot_files = glob.glob(os.path.join(os.getcwd(), actual_outputroot+'*'))
             return new_runtime
         else:
             new_runtime = super(ProcStreamlines, self)._run_interface(runtime)

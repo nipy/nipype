@@ -133,12 +133,12 @@ voxel sizes.
 """
 
 if merge_to_4d:
-    preproc.connect([(merge, realign,[('merged_file', 'in_files')])])
+    preproc.connect([(merge, realign, [('merged_file', 'in_files')])])
 
-preproc.connect([(realign,coregister,[('mean_image', 'target')]),
-                 (coregister, segment,[('coregistered_source','data')]),
-                 (segment, normalize_func, [('transformation_mat','parameter_file')]),
-                 (segment, normalize_struc, [('transformation_mat','parameter_file'),
+preproc.connect([(realign, coregister, [('mean_image', 'target')]),
+                 (coregister, segment, [('coregistered_source', 'data')]),
+                 (segment, normalize_func, [('transformation_mat', 'parameter_file')]),
+                 (segment, normalize_struc, [('transformation_mat', 'parameter_file'),
                                              ('modulated_input_image', 'apply_to_files'),
                                              (('modulated_input_image', get_vox_dims), 'write_voxel_sizes')]),
                  (realign, normalize_func, [('realigned_files', 'apply_to_files'),
@@ -166,7 +166,7 @@ modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
 """
 
 level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
-level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
+level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
 
 """Use :class:`nipype.interfaces.spm.EstimateModel` to determine the
 parameters of the model.
@@ -184,12 +184,12 @@ first level contrasts specified in a few steps above.
 
 contrastestimate = pe.Node(interface = spm.EstimateContrast(), name="contrastestimate")
 
-l1analysis.connect([(modelspec,level1design,[('session_info','session_info')]),
-                    (level1design,level1estimate,[('spm_mat_file','spm_mat_file')]),
-                    (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
-                                                      ('beta_images','beta_images'),
-                                                      ('residual_image','residual_image')]),
-                    (contrastestimate, threshold,[('spm_mat_file','spm_mat_file'),
+l1analysis.connect([(modelspec, level1design, [('session_info', 'session_info')]),
+                    (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
+                    (level1estimate, contrastestimate, [('spm_mat_file', 'spm_mat_file'),
+                                                      ('beta_images', 'beta_images'),
+                                                      ('residual_image', 'residual_image')]),
+                    (contrastestimate, threshold, [('spm_mat_file', 'spm_mat_file'),
                                                   ('spmT_images', 'stat_image')]),
                   ])
 
@@ -216,7 +216,7 @@ if merge_to_4d:
 else:
     def makelist(item):
         return [item]
-    l1pipeline.connect([(preproc, l1analysis, [(('smooth.smoothed_files',makelist),
+    l1pipeline.connect([(preproc, l1analysis, [(('smooth.smoothed_files', makelist),
                                                 'modelspec.functional_runs')])])
 
 
@@ -239,7 +239,7 @@ data_dir = os.path.abspath('spm_auditory_data')
 # Specify the subject directories
 subject_list = ['M00223']
 # Map field names to individual subject runs.
-info = dict(func=[['f', 'subject_id', 'f', 'subject_id', list(range(16,100))]],
+info = dict(func=[['f', 'subject_id', 'f', 'subject_id', list(range(16, 100))]],
             struct=[['s', 'subject_id', 's', 'subject_id', 2]])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), name="infosource")
@@ -284,7 +284,7 @@ necessary to generate an SPM design matrix.
 
 from nipype.interfaces.base import Bunch
 subjectinfo = [Bunch(conditions=['Task'],
-                     onsets=[list(range(6,84,12))],
+                     onsets=[list(range(6, 84, 12))],
                      durations=[[6]])]
 
 """Setup the contrast structure that needs to be evaluated. This is a
@@ -294,7 +294,7 @@ those conditions]. The condition names must match the `names` listed
 in the `subjectinfo` function described above.
 """
 
-cont1 = ('active > rest','T', ['Task'],[1])
+cont1 = ('active > rest', 'T', ['Task'], [1])
 contrasts = [cont1]
 
 # set up node specific inputs
@@ -340,12 +340,12 @@ level1 = pe.Workflow(name="level1")
 level1.base_dir = os.path.abspath('spm_auditory_tutorial/workingdir')
 
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                (datasource,l1pipeline,[('struct', 'preproc.coregister.source')])
+                (datasource, l1pipeline, [('struct', 'preproc.coregister.source')])
                 ])
 if merge_to_4d:
-    level1.connect([(datasource,l1pipeline,[('func','preproc.merge.in_files')])])
+    level1.connect([(datasource, l1pipeline, [('func', 'preproc.merge.in_files')])])
 else:
-    level1.connect([(datasource,l1pipeline,[('func','preproc.realign.in_files')])])
+    level1.connect([(datasource, l1pipeline, [('func', 'preproc.realign.in_files')])])
 
 
 """
@@ -373,13 +373,13 @@ datasink.inputs.base_directory = os.path.abspath('spm_auditory_tutorial/l1output
 
 def getstripdir(subject_id):
     import os
-    return os.path.join(os.path.abspath('spm_auditory_tutorial/workingdir'),'_subject_id_%s' % subject_id)
+    return os.path.join(os.path.abspath('spm_auditory_tutorial/workingdir'), '_subject_id_%s' % subject_id)
 
 # store relevant outputs from various stages of the 1st level analysis
-level1.connect([(infosource, datasink,[('subject_id','container'),
-                                       (('subject_id', getstripdir),'strip_dir')]),
-                (l1pipeline, datasink,[('analysis.contrastestimate.con_images','contrasts.@con'),
-                                       ('analysis.contrastestimate.spmT_images','contrasts.@T')]),
+level1.connect([(infosource, datasink, [('subject_id', 'container'),
+                                       (('subject_id', getstripdir), 'strip_dir')]),
+                (l1pipeline, datasink, [('analysis.contrastestimate.con_images', 'contrasts.@con'),
+                                       ('analysis.contrastestimate.spmT_images', 'contrasts.@T')]),
                 ])
 
 

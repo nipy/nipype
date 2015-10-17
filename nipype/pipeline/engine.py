@@ -1024,8 +1024,8 @@ connected.
             prefix = '  '
         if hierarchy is None:
             hierarchy = []
-        colorset = ['#FFFFC8','#0000FF','#B4B4FF','#E6E6FF','#FF0000',
-                    '#FFB4B4','#FFE6E6','#00A300','#B4FFB4','#E6FFE6']
+        colorset = ['#FFFFC8', '#0000FF', '#B4B4FF', '#E6E6FF', '#FF0000',
+                    '#FFB4B4', '#FFE6E6', '#00A300', '#B4FFB4', '#E6FFE6']
 
         dotlist = ['%slabel="%s";' % (prefix, self.name)]
         for node in nx.topological_sort(self._graph):
@@ -1044,11 +1044,11 @@ connected.
                     if colored:
                         dotlist.append(('%s[label="%s", style=filled,'
                                         ' fillcolor="%s"];')
-                                       % (nodename,node_class_name,
+                                       % (nodename, node_class_name,
                                            colorset[level]))
                     else:
                         dotlist.append(('%s[label="%s"];')
-                                       % (nodename,node_class_name))
+                                       % (nodename, node_class_name))
 
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
@@ -1064,7 +1064,7 @@ connected.
                                              colored=colored,
                                              simple_form=simple_form, level=level+3))
                 dotlist.append('}')
-                if level == 6:level = 2
+                if level == 6: level = 2
             else:
                 for subnode in self._graph.successors_iter(node):
                     if node._hierarchy != subnode._hierarchy:

@@ -48,7 +48,7 @@ class CFFConverterInputSpec(BaseInterfaceInputSpec):
     rights = traits.Str(desc='Rights')
     references = traits.Str(desc='References')
     relation = traits.Str(desc='Relation')
-    species = traits.Str('Homo sapiens',desc='Species',usedefault=True)
+    species = traits.Str('Homo sapiens', desc='Species', usedefault=True)
     description = traits.Str('Created with the Nipype CFF converter', desc='Description', usedefault=True)
 
     out_file = File('connectome.cff', usedefault = True, desc='Output connectome file')
@@ -146,7 +146,7 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.gifti_surfaces):
             for surf in self.inputs.gifti_surfaces:
                 _, surf_name, _ = split_filename(surf)
-                csurf = cf.CSurface.create_from_gifti("Surface %d - %s" % (count,surf_name), surf)
+                csurf = cf.CSurface.create_from_gifti("Surface %d - %s" % (count, surf_name), surf)
                 csurf.fileformat = 'Gifti'
                 csurf.dtype = 'Surfaceset'
                 a.add_connectome_surface(csurf)
@@ -156,7 +156,7 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.gifti_labels):
             for label in self.inputs.gifti_labels:
                 _, label_name, _ = split_filename(label)
-                csurf = cf.CSurface.create_from_gifti("Surface Label %d - %s" % (count,label_name), label)
+                csurf = cf.CSurface.create_from_gifti("Surface Label %d - %s" % (count, label_name), label)
                 csurf.fileformat = 'Gifti'
                 csurf.dtype = 'Labels'
                 a.add_connectome_surface(csurf)
@@ -165,7 +165,7 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.nifti_volumes):
             for vol in self.inputs.nifti_volumes:
                 _, vol_name, _ = split_filename(vol)
-                cvol = cf.CVolume.create_from_nifti(vol_name,vol)
+                cvol = cf.CVolume.create_from_nifti(vol_name, vol)
                 a.add_connectome_volume(cvol)
 
         if isdefined(self.inputs.script_files):
@@ -178,11 +178,11 @@ class CFFConverter(BaseInterface):
             for data in self.inputs.data_files:
                 _, data_name, _ = split_filename(data)
                 cda = cf.CData(name=data_name, src=data, fileformat='NumPy')
-                if not string.find(data_name,'lengths') == -1:
+                if not string.find(data_name, 'lengths') == -1:
                     cda.dtype = 'FinalFiberLengthArray'
-                if not string.find(data_name,'endpoints') == -1:
+                if not string.find(data_name, 'endpoints') == -1:
                     cda.dtype = 'FiberEndpoints'
-                if not string.find(data_name,'labels') == -1:
+                if not string.find(data_name, 'labels') == -1:
                     cda.dtype = 'FinalFiberLabels'
                 a.add_connectome_data(cda)
 
@@ -190,7 +190,7 @@ class CFFConverter(BaseInterface):
         _, name, ext = split_filename(self.inputs.out_file)
         if not ext == '.cff':
             ext = '.cff'
-        cf.save_to_cff(a,op.abspath(name + ext))
+        cf.save_to_cff(a, op.abspath(name + ext))
 
         return runtime
 

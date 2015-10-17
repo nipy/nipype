@@ -1388,22 +1388,22 @@ class TCorr1DInputSpec(AFNICommandInputSpec):
     pearson = traits.Bool(desc='Correlation is the normal' +
                           ' Pearson correlation coefficient',
                           argstr=' -pearson',
-                          xor=['spearman','quadrant','ktaub'],
+                          xor=['spearman', 'quadrant', 'ktaub'],
                           position=1)
     spearman = traits.Bool(desc='Correlation is the' +
                            ' Spearman (rank) correlation coefficient',
                            argstr=' -spearman',
-                           xor=['pearson','quadrant','ktaub'],
+                           xor=['pearson', 'quadrant', 'ktaub'],
                            position=1)
     quadrant = traits.Bool(desc='Correlation is the' +
                            ' quadrant correlation coefficient',
                            argstr=' -quadrant',
-                           xor=['pearson','spearman','ktaub'],
+                           xor=['pearson', 'spearman', 'ktaub'],
                            position=1)
     ktaub = traits.Bool(desc='Correlation is the' +
                         ' Kendall\'s tau_b correlation coefficient',
                         argstr=' -ktaub',
-                        xor=['pearson','spearman','quadrant'],
+                        xor=['pearson', 'spearman', 'quadrant'],
                         position=1)
 
 

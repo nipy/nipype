@@ -23,7 +23,7 @@ from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 class HARDIMatInputSpec(CommandLineInputSpec):
     bvecs = File(exists=True, desc = 'b vectors file',
                  argstr='%s', position=1, mandatory=True)
-    bvals = File(exists=True,desc = 'b values file', mandatory=True)
+    bvals = File(exists=True, desc = 'b values file', mandatory=True)
     out_file = File("recon_mat.dat", desc = 'output matrix file', argstr='%s', usedefault=True, position=2)
     order = traits.Int(argstr='-order %s', desc="""maximum order of spherical harmonics. must be even number. default
         is 4""")
@@ -90,7 +90,7 @@ class HARDIMat(CommandLine):
         return outputs
 
 class ODFReconInputSpec(CommandLineInputSpec):
-    DWI = File(desc='Input raw data', argstr='%s',exists=True, mandatory=True,position=1)
+    DWI = File(desc='Input raw data', argstr='%s', exists=True, mandatory=True, position=1)
     n_directions = traits.Int(desc='Number of directions', argstr='%s', mandatory=True, position=2)
     n_output_directions = traits.Int(desc='Number of output directions', argstr='%s', mandatory=True, position=3)
     out_prefix = traits.Str("odf", desc='Output file prefix', argstr='%s', usedefault=True, position=4)
@@ -159,7 +159,7 @@ class ODFTrackerInputSpec(CommandLineInputSpec):
         default tracking method is non-interpolate streamline""")
     step_length = traits.Float(argstr='-l %f', desc="""set step length, in the unit of minimum voxel size.
         default value is 0.1.""")
-    angle_threshold = traits.Float(argstr='-at %f',desc="""set angle threshold. default value is 35 degree for
+    angle_threshold = traits.Float(argstr='-at %f', desc="""set angle threshold. default value is 35 degree for
         default tracking method and 25 for rk2""")
     random_seed = traits.Int(argstr='-rseed %s', desc="""use random location in a voxel instead of the center of the voxel
         to seed. can also define number of seed per voxel. default is 1""")

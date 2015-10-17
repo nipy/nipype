@@ -33,7 +33,7 @@ def MakeTransformListWithGradientWarps(averageAffineTranform, gradientStepWarp):
     return [averageAffineTranform, gradientStepWarp, gradientStepWarp, gradientStepWarp, gradientStepWarp]
 
 
-def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes,interpolationMapping):
+def RenestDeformedPassiveImages(deformedPassiveImages, flattened_image_nametypes, interpolationMapping):
     import os
     """ Now make a list of lists of images where the outter list is per image type,
     and the inner list is the same size as the number of subjects to be averaged.
@@ -49,11 +49,11 @@ def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes,
     ## make empty_list, this is not efficient, but it works
     for name in flattened_image_nametypes:
         image_dictionary_of_lists[name] = list()
-    for index in range(0,all_images_size):
+    for index in range(0, all_images_size):
         curr_name = flattened_image_nametypes[index]
         curr_file = deformedPassiveImages[index]
         image_dictionary_of_lists[curr_name].append(curr_file)
-    for image_type,image_list in list(image_dictionary_of_lists.items()):
+    for image_type, image_list in list(image_dictionary_of_lists.items()):
         nested_imagetype_list.append(image_list)
         outputAverageImageName_list.append('AVG_'+image_type+'.nii.gz')
         image_type_list.append('WARP_AVG_'+image_type)
@@ -66,7 +66,7 @@ def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes,
     print("HACK: ", outputAverageImageName_list)
     print("HACK: ", image_type_list)
     print("HACK: ", nested_interpolation_type)
-    return nested_imagetype_list,outputAverageImageName_list,image_type_list,nested_interpolation_type
+    return nested_imagetype_list, outputAverageImageName_list, image_type_list, nested_interpolation_type
 
 def SplitAffineAndWarpComponents(list_of_transforms_lists):
     ### Nota bene: The outputs will include the initial_moving_transform from Registration (which depends on what
@@ -80,17 +80,17 @@ def SplitAffineAndWarpComponents(list_of_transforms_lists):
     return affine_component_list, warp_component_list
 
 ## Flatten and return equal length transform and images lists.
-def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transforms,invert_transform_flags,interpolationMapping):
+def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries, transforms, invert_transform_flags, interpolationMapping):
     import sys
     print("HACK:  DEBUG: ListOfPassiveImagesDictionaries\n{lpi}\n".format(lpi=ListOfPassiveImagesDictionaries))
     subjCount = len(ListOfPassiveImagesDictionaries)
     tranCount = len(transforms)
     if subjCount != tranCount:
-        print("ERROR:  subjCount must equal tranCount {0} != {1}".format(subjCount,tranCount))
+        print("ERROR:  subjCount must equal tranCount {0} != {1}".format(subjCount, tranCount))
         sys.exit(-1)
     invertTfmsFlagsCount = len(invert_transform_flags)
     if subjCount != invertTfmsFlagsCount:
-        print("ERROR:  subjCount must equal invertTfmsFlags {0} != {1}".format(subjCount,invertTfmsFlagsCount))
+        print("ERROR:  subjCount must equal invertTfmsFlags {0} != {1}".format(subjCount, invertTfmsFlagsCount))
         sys.exit(-1)
     flattened_images = list()
     flattened_image_nametypes = list()
@@ -98,14 +98,14 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transforms,inv
     flattened_invert_transform_flags = list()
     flattened_interpolation_type = list()
     passiveImagesCount = len(ListOfPassiveImagesDictionaries[0])
-    for subjIndex in range(0,subjCount):
+    for subjIndex in range(0, subjCount):
         #if passiveImagesCount != len(ListOfPassiveImagesDictionaries[subjIndex]):
         #    print "ERROR:  all image lengths must be equal {0} != {1}".format(passiveImagesCount,len(ListOfPassiveImagesDictionaries[subjIndex]))
         #    sys.exit(-1)
         subjImgDictionary = ListOfPassiveImagesDictionaries[subjIndex]
         subjToAtlasTransform = transforms[subjIndex]
         subjToAtlasInvertFlags = invert_transform_flags[subjIndex]
-        for imgname,img in list(subjImgDictionary.items()):
+        for imgname, img in list(subjImgDictionary.items()):
             flattened_images.append(img)
             flattened_image_nametypes.append(imgname)
             flattened_transforms.append(subjToAtlasTransform)
@@ -118,10 +118,10 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transforms,inv
     print("HACK: flattened nametypes {0}\n".format(flattened_image_nametypes))
     print("HACK: flattened txfms     {0}\n".format(flattened_transforms))
     print("HACK: flattened txfmsFlags{0}\n".format(flattened_invert_transform_flags))
-    return flattened_images,flattened_transforms,flattened_invert_transform_flags,flattened_image_nametypes,flattened_interpolation_type
+    return flattened_images, flattened_transforms, flattened_invert_transform_flags, flattened_image_nametypes, flattened_interpolation_type
 
 
-def GetMovingImages(ListOfImagesDictionaries,registrationImageTypes,interpolationMapping):
+def GetMovingImages(ListOfImagesDictionaries, registrationImageTypes, interpolationMapping):
     """ This currently ONLY works when registrationImageTypes has
         length of exactly 1.  When the new multi-variate registration
         is introduced, it will be expanded.
@@ -131,16 +131,16 @@ def GetMovingImages(ListOfImagesDictionaries,registrationImageTypes,interpolatio
         return []
     moving_images = [mdict[registrationImageTypes[0]] for mdict in ListOfImagesDictionaries]
     moving_interpolation_type = interpolationMapping[registrationImageTypes[0]]
-    return moving_images,moving_interpolation_type
+    return moving_images, moving_interpolation_type
 
-def GetPassiveImages(ListOfImagesDictionaries,registrationImageTypes):
+def GetPassiveImages(ListOfImagesDictionaries, registrationImageTypes):
     if len(registrationImageTypes) != 1:
         print("ERROR:  Multivariate imageing not supported yet!")
         return [dict()]
     passive_images = list()
     for mdict in ListOfImagesDictionaries:
         ThisSubjectPassiveImages = dict()
-        for key,value in list(mdict.items()):
+        for key, value in list(mdict.items()):
             if key not in registrationImageTypes:
                 ThisSubjectPassiveImages[key] = value
         passive_images.append(ThisSubjectPassiveImages)
@@ -171,7 +171,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
 
     inputSpec = pe.Node(interface=util.IdentityInterface(fields=[
                 'ListOfImagesDictionaries', 'registrationImageTypes',
-                'interpolationMapping','fixed_image']),
+                'interpolationMapping', 'fixed_image']),
                 run_without_submitting=True,
                 name='inputspec')
     ## HACK: TODO: Need to move all local functions to a common untility file, or at the top of the file so that
@@ -179,7 +179,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     ##             their hash to change.
     ## HACK: TODO: REMOVE 'transforms_list' it is not used.  That will change all the hashes
     ## HACK: TODO: Need to run all python files through the code beutifiers.  It has gotten pretty ugly.
-    outputSpec = pe.Node(interface=util.IdentityInterface(fields=['template','transforms_list',
+    outputSpec = pe.Node(interface=util.IdentityInterface(fields=['template', 'transforms_list',
                                                                   'passive_deformed_templates']),
                          run_without_submitting=True,
                          name='outputspec')
@@ -190,25 +190,25 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     BeginANTS.inputs.dimension = 3
     BeginANTS.inputs.output_transform_prefix = str(iterationPhasePrefix)+'_tfm'
     BeginANTS.inputs.transforms = ["Affine",          "SyN"]
-    BeginANTS.inputs.transform_parameters = [[0.9],             [0.25,3.0,0.0]]
+    BeginANTS.inputs.transform_parameters = [[0.9],             [0.25, 3.0, 0.0]]
     BeginANTS.inputs.metric = ['Mattes',          'CC']
     BeginANTS.inputs.metric_weight = [1.0,               1.0]
     BeginANTS.inputs.radius_or_number_of_bins = [32,                5]
     BeginANTS.inputs.number_of_iterations = [[1000, 1000, 1000], [50, 35, 15]]
     BeginANTS.inputs.use_histogram_matching = [True,               True]
     BeginANTS.inputs.use_estimate_learning_rate_once = [False,       False]
-    BeginANTS.inputs.shrink_factors = [[3,2,1],            [3,2,1]]
-    BeginANTS.inputs.smoothing_sigmas = [[3,2,0],            [3,2,0]]
+    BeginANTS.inputs.shrink_factors = [[3, 2, 1],            [3, 2, 1]]
+    BeginANTS.inputs.smoothing_sigmas = [[3, 2, 0],            [3, 2, 0]]
     BeginANTS.inputs.sigma_units = ["vox"]*2
 
     GetMovingImagesNode = pe.Node(interface=util.Function(function=GetMovingImages,
-                                                          input_names=['ListOfImagesDictionaries','registrationImageTypes','interpolationMapping'],
-                                                          output_names=['moving_images','moving_interpolation_type']),
+                                                          input_names=['ListOfImagesDictionaries', 'registrationImageTypes', 'interpolationMapping'],
+                                                          output_names=['moving_images', 'moving_interpolation_type']),
                                   run_without_submitting=True,
                                   name='99_GetMovingImagesNode')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'ListOfImagesDictionaries', GetMovingImagesNode, 'ListOfImagesDictionaries')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'registrationImageTypes', GetMovingImagesNode, 'registrationImageTypes')
-    TemplateBuildSingleIterationWF.connect(inputSpec, 'interpolationMapping',GetMovingImagesNode,'interpolationMapping')
+    TemplateBuildSingleIterationWF.connect(inputSpec, 'interpolationMapping', GetMovingImagesNode, 'interpolationMapping')
 
     TemplateBuildSingleIterationWF.connect(GetMovingImagesNode, 'moving_images', BeginANTS, 'moving_image')
     TemplateBuildSingleIterationWF.connect(GetMovingImagesNode, 'moving_interpolation_type', BeginANTS, 'interpolation')
@@ -216,12 +216,12 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
 
     ## Now warp all the input_images images
     wimtdeformed = pe.MapNode(interface = ApplyTransforms(),
-                              iterfield=['transforms','invert_transform_flags','input_image'],
+                              iterfield=['transforms', 'invert_transform_flags', 'input_image'],
                               name ='wimtdeformed')
     wimtdeformed.inputs.interpolation = 'Linear'
     wimtdeformed.default_value = 0
-    TemplateBuildSingleIterationWF.connect(BeginANTS,'forward_transforms',wimtdeformed,'transforms')
-    TemplateBuildSingleIterationWF.connect(BeginANTS,'forward_invert_flags',wimtdeformed,'invert_transform_flags')
+    TemplateBuildSingleIterationWF.connect(BeginANTS, 'forward_transforms', wimtdeformed, 'transforms')
+    TemplateBuildSingleIterationWF.connect(BeginANTS, 'forward_invert_flags', wimtdeformed, 'invert_transform_flags')
     TemplateBuildSingleIterationWF.connect(GetMovingImagesNode, 'moving_images', wimtdeformed, 'input_image')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'fixed_image', wimtdeformed, 'reference_image')
 
@@ -243,7 +243,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
                                                               output_names=['affine_component_list', 'warp_component_list']),
                                       run_without_submitting=True,
                                       name='99_SplitAffineAndWarpsNode')
-    TemplateBuildSingleIterationWF.connect(BeginANTS, 'forward_transforms',SplitAffineAndWarpsNode,'list_of_transforms_lists')
+    TemplateBuildSingleIterationWF.connect(BeginANTS, 'forward_transforms', SplitAffineAndWarpsNode, 'list_of_transforms_lists')
     TemplateBuildSingleIterationWF.connect(SplitAffineAndWarpsNode, 'affine_component_list', AvgAffineTransform, 'transforms')
 
     ## Now average the warp fields togther
@@ -301,45 +301,45 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     ##############################################
     ## Now warp all the ListOfPassiveImagesDictionaries images
     FlattenTransformAndImagesListNode = pe.Node(Function(function=FlattenTransformAndImagesList,
-                                                          input_names = ['ListOfPassiveImagesDictionaries','transforms',
-                                                                         'invert_transform_flags','interpolationMapping'],
-                                                          output_names = ['flattened_images','flattened_transforms','flattened_invert_transform_flags',
-                                                                          'flattened_image_nametypes','flattened_interpolation_type']),
+                                                          input_names = ['ListOfPassiveImagesDictionaries', 'transforms',
+                                                                         'invert_transform_flags', 'interpolationMapping'],
+                                                          output_names = ['flattened_images', 'flattened_transforms', 'flattened_invert_transform_flags',
+                                                                          'flattened_image_nametypes', 'flattened_interpolation_type']),
                                                  run_without_submitting=True, name="99_FlattenTransformAndImagesList")
 
     GetPassiveImagesNode = pe.Node(interface=util.Function(function=GetPassiveImages,
-                                                           input_names=['ListOfImagesDictionaries','registrationImageTypes'],
+                                                           input_names=['ListOfImagesDictionaries', 'registrationImageTypes'],
                                                            output_names=['ListOfPassiveImagesDictionaries']),
                                    run_without_submitting=True,
                                    name='99_GetPassiveImagesNode')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'ListOfImagesDictionaries', GetPassiveImagesNode, 'ListOfImagesDictionaries')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'registrationImageTypes', GetPassiveImagesNode, 'registrationImageTypes')
 
-    TemplateBuildSingleIterationWF.connect(GetPassiveImagesNode,'ListOfPassiveImagesDictionaries', FlattenTransformAndImagesListNode, 'ListOfPassiveImagesDictionaries')
-    TemplateBuildSingleIterationWF.connect(inputSpec,'interpolationMapping', FlattenTransformAndImagesListNode, 'interpolationMapping')
-    TemplateBuildSingleIterationWF.connect(BeginANTS,'forward_transforms', FlattenTransformAndImagesListNode, 'transforms')
-    TemplateBuildSingleIterationWF.connect(BeginANTS,'forward_invert_flags', FlattenTransformAndImagesListNode, 'invert_transform_flags')
+    TemplateBuildSingleIterationWF.connect(GetPassiveImagesNode, 'ListOfPassiveImagesDictionaries', FlattenTransformAndImagesListNode, 'ListOfPassiveImagesDictionaries')
+    TemplateBuildSingleIterationWF.connect(inputSpec, 'interpolationMapping', FlattenTransformAndImagesListNode, 'interpolationMapping')
+    TemplateBuildSingleIterationWF.connect(BeginANTS, 'forward_transforms', FlattenTransformAndImagesListNode, 'transforms')
+    TemplateBuildSingleIterationWF.connect(BeginANTS, 'forward_invert_flags', FlattenTransformAndImagesListNode, 'invert_transform_flags')
     wimtPassivedeformed = pe.MapNode(interface = ApplyTransforms(),
-                                     iterfield=['transforms','invert_transform_flags', 'input_image','interpolation'],
+                                     iterfield=['transforms', 'invert_transform_flags', 'input_image', 'interpolation'],
                                      name ='wimtPassivedeformed')
     wimtPassivedeformed.default_value = 0
-    TemplateBuildSingleIterationWF.connect(AvgDeformedImages, 'output_average_image',wimtPassivedeformed,'reference_image')
+    TemplateBuildSingleIterationWF.connect(AvgDeformedImages, 'output_average_image', wimtPassivedeformed, 'reference_image')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_interpolation_type', wimtPassivedeformed, 'interpolation')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_images',     wimtPassivedeformed, 'input_image')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_transforms', wimtPassivedeformed, 'transforms')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_invert_transform_flags', wimtPassivedeformed, 'invert_transform_flags')
 
     RenestDeformedPassiveImagesNode = pe.Node(Function(function=RenestDeformedPassiveImages,
-                                                        input_names = ['deformedPassiveImages','flattened_image_nametypes','interpolationMapping'],
-                                                        output_names = ['nested_imagetype_list','outputAverageImageName_list',
-                                                                        'image_type_list','nested_interpolation_type']),
+                                                        input_names = ['deformedPassiveImages', 'flattened_image_nametypes', 'interpolationMapping'],
+                                                        output_names = ['nested_imagetype_list', 'outputAverageImageName_list',
+                                                                        'image_type_list', 'nested_interpolation_type']),
                                                run_without_submitting=True, name="99_RenestDeformedPassiveImages")
     TemplateBuildSingleIterationWF.connect(inputSpec, 'interpolationMapping', RenestDeformedPassiveImagesNode, 'interpolationMapping')
     TemplateBuildSingleIterationWF.connect(wimtPassivedeformed, 'output_image', RenestDeformedPassiveImagesNode, 'deformedPassiveImages')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_image_nametypes', RenestDeformedPassiveImagesNode, 'flattened_image_nametypes')
     ## Now  Average All passive input_images deformed images together to create an updated template average
     AvgDeformedPassiveImages = pe.MapNode(interface=AverageImages(),
-                                        iterfield=['images','output_average_image'],
+                                        iterfield=['images', 'output_average_image'],
                                         name='AvgDeformedPassiveImages')
     AvgDeformedPassiveImages.inputs.dimension = 3
     AvgDeformedPassiveImages.inputs.normalize = False
@@ -348,7 +348,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
 
     ## -- TODO:  Now neeed to reshape all the passive images as well
     ReshapeAveragePassiveImageWithShapeUpdate = pe.MapNode(interface = ApplyTransforms(),
-                                                           iterfield=['input_image','reference_image','output_image','interpolation'],
+                                                           iterfield=['input_image', 'reference_image', 'output_image', 'interpolation'],
                                                            name = 'ReshapeAveragePassiveImageWithShapeUpdate')
     ReshapeAveragePassiveImageWithShapeUpdate.inputs.invert_transform_flags = [True, False, False, False, False]
     ReshapeAveragePassiveImageWithShapeUpdate.default_value = 0

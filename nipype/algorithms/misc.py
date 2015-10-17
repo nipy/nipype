@@ -1243,13 +1243,13 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
     in_files = np.atleast_1d(in_files).tolist()
 
     if len(out_files) != len(in_files):
-        for i,finname in enumerate(in_files):
-            fname,fext = op.splitext(op.basename(finname))
+        for i, finname in enumerate(in_files):
+            fname, fext = op.splitext(op.basename(finname))
             if fext == '.gz':
-                fname,fext2 = op.splitext(fname)
+                fname, fext2 = op.splitext(fname)
                 fext = fext2 + fext
 
-            out_file = op.abspath('%s_norm_%02d%s' % (fname,i,fext))
+            out_file = op.abspath('%s_norm_%02d%s' % (fname, i, fext))
             out_files += [out_file]
 
     imgs = [nib.load(fim) for fim in in_files]
@@ -1279,7 +1279,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
     msk = np.ma.masked_equal(msk, 0)
 
 
-    for i,out_file in enumerate(out_files):
+    for i, out_file in enumerate(out_files):
         data = np.ma.masked_equal(img_data[i], 0)
         probmap = data / weights
         hdr = imgs[i].get_header().copy()

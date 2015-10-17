@@ -1,7 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
-from nipype.testing import (assert_equal, assert_false,assert_raises,
+from nipype.testing import (assert_equal, assert_false, assert_raises,
                             assert_true, skipif, example_data)
 from nipype.interfaces.spm import no_spm
 import nipype.interfaces.spm.utils as spmu
@@ -17,10 +17,10 @@ def test_coreg():
     coreg.inputs.target = target
     assert_equal(coreg.inputs.matlab_cmd, 'mymatlab')
     coreg.inputs.moving = moving
-    assert_equal(isdefined(coreg.inputs.mat),False)
+    assert_equal(isdefined(coreg.inputs.mat), False)
     pth, mov, _ = split_filename(moving)
     _, tgt, _ = split_filename(target)
-    mat = os.path.join(pth, '%s_to_%s.mat' %(mov,tgt))
+    mat = os.path.join(pth, '%s_to_%s.mat' %(mov, tgt))
     invmat = fname_presuffix(mat, prefix = 'inverse_')
     scrpt = coreg._make_matlab_command(None)
     assert_equal(coreg.inputs.mat, mat)
@@ -48,14 +48,14 @@ def test_reslice():
     reslice.inputs.in_file = moving
     reslice.inputs.space_defining = space_defining
     assert_equal(reslice.inputs.interp, 0)
-    assert_raises(TraitError,reslice.inputs.trait_set,interp = 'nearest')
+    assert_raises(TraitError, reslice.inputs.trait_set, interp = 'nearest')
     assert_raises(TraitError, reslice.inputs.trait_set, interp = 10)
     reslice.inputs.interp = 1
     script = reslice._make_matlab_command(None)
     outfile = fname_presuffix(moving, prefix='r')
     assert_equal(reslice.inputs.out_file, outfile)
     expected = '\nflags.mean=0;\nflags.which=1;\nflags.mask=0;'
-    assert_equal(expected in script.replace(' ',''), True)
+    assert_equal(expected in script.replace(' ', ''), True)
     expected_interp = 'flags.interp = 1;\n'
     assert_equal(expected_interp in script, True)
     assert_equal('spm_reslice(invols, flags);' in script, True)
@@ -68,8 +68,8 @@ def test_dicom_import():
     assert_equal(di.inputs.output_dir, './converted_dicom')
     assert_equal(di.inputs.format, 'nii')
     assert_equal(di.inputs.icedims, False)
-    assert_raises(TraitError,di.inputs.trait_set,output_dir_struct = 'wrong')
-    assert_raises(TraitError,di.inputs.trait_set,format = 'FAT')
-    assert_raises(TraitError,di.inputs.trait_set,in_files = ['does_sfd_not_32fn_exist.dcm'])
+    assert_raises(TraitError, di.inputs.trait_set, output_dir_struct = 'wrong')
+    assert_raises(TraitError, di.inputs.trait_set, format = 'FAT')
+    assert_raises(TraitError, di.inputs.trait_set, in_files = ['does_sfd_not_32fn_exist.dcm'])
     di.inputs.in_files = [dicom]
     assert_equal(di.inputs.in_files, [dicom])

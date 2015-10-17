@@ -35,11 +35,11 @@ def test_debug():
     os.chdir(temp_dir)
 
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
     mod2 = pe.MapNode(interface=TestInterface(),
                       iterfield=['input1'],
                       name='mod2')
-    pipe.connect([(mod1,mod2,[('output1','input1')])])
+    pipe.connect([(mod1, mod2, [('output1', 'input1')])])
     pipe.base_dir = os.getcwd()
     mod1.inputs.input1 = 1
     run_wf = lambda: pipe.run(plugin="Debug")

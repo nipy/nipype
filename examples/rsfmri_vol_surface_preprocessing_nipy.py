@@ -55,7 +55,7 @@ CommandLine.set_default_terminal_output('allatonce')
 from dcmstack.extract import default_extractor
 from dicom import read_file
 
-from nipype.interfaces import (fsl, Function, ants, freesurfer,nipy)
+from nipype.interfaces import (fsl, Function, ants, freesurfer, nipy)
 from nipype.interfaces.c3 import C3dAffineTool
 
 fsl.FSLCommand.set_default_output_type('NIFTI_GZ')
@@ -466,7 +466,7 @@ def create_reg_workflow(name='registration'):
     convert2itk.inputs.fsl2ras = True
     convert2itk.inputs.itk_transform = True
     register.connect(bbregister, 'out_fsl_file', convert2itk, 'transform_file')
-    register.connect(inputnode, 'mean_image',convert2itk, 'source_file')
+    register.connect(inputnode, 'mean_image', convert2itk, 'source_file')
     register.connect(stripper, 'out_file', convert2itk, 'reference_file')
 
     """
@@ -506,7 +506,7 @@ def create_reg_workflow(name='registration'):
     reg.inputs.num_threads = 4
     reg.plugin_args = {'sbatch_args': '-c%d' % 4}
     register.connect(stripper, 'out_file', reg, 'moving_image')
-    register.connect(inputnode,'target_image', reg,'fixed_image')
+    register.connect(inputnode, 'target_image', reg, 'fixed_image')
 
 
     """
@@ -531,7 +531,7 @@ def create_reg_workflow(name='registration'):
     warpmean.inputs.num_threads = 4
     warpmean.plugin_args = {'sbatch_args': '-c%d' % 4}
 
-    register.connect(inputnode,'target_image', warpmean,'reference_image')
+    register.connect(inputnode, 'target_image', warpmean, 'reference_image')
     register.connect(inputnode, 'mean_image', warpmean, 'input_image')
     register.connect(merge, 'out', warpmean, 'transforms')
 
@@ -599,7 +599,7 @@ def create_workflow(files,
 
     # Comute TSNR on realigned data regressing polynomials upto order 2
     tsnr = MapNode(TSNR(regress_poly=2), iterfield=['in_file'], name='tsnr')
-    wf.connect(realign,"out_file", tsnr, "in_file")
+    wf.connect(realign, "out_file", tsnr, "in_file")
 
     # Compute the median image across runs
     calc_median = Node(Function(input_names=['in_files'],
@@ -811,7 +811,7 @@ def create_workflow(files,
         out_names = []
         for filename in files:
             path, name, _ = split_filename(filename)
-            out_names.append(os.path.join(path,name + suffix))
+            out_names.append(os.path.join(path, name + suffix))
         return list_to_filename(out_names)
 
     wf.connect(collector, ('out', get_names, '_avgwf.txt'),
@@ -879,13 +879,13 @@ def create_workflow(files,
                      ('_filtermotart_cleaned_bp_trans_masked', ''),
                      ('_filtermotart_cleaned_bp', ''),
                      ]
-    substitutions += [("_smooth%d" % i,"") for i in range(11)[::-1]]
-    substitutions += [("_ts_masker%d" % i,"") for i in range(11)[::-1]]
-    substitutions += [("_getsubcortts%d" % i,"") for i in range(11)[::-1]]
-    substitutions += [("_combiner%d" % i,"") for i in range(11)[::-1]]
-    substitutions += [("_filtermotion%d" % i,"") for i in range(11)[::-1]]
-    substitutions += [("_filter_noise_nosmooth%d" % i,"") for i in range(11)[::-1]]
-    substitutions += [("_makecompcorfilter%d" % i,"") for i in range(11)[::-1]]
+    substitutions += [("_smooth%d" % i, "") for i in range(11)[::-1]]
+    substitutions += [("_ts_masker%d" % i, "") for i in range(11)[::-1]]
+    substitutions += [("_getsubcortts%d" % i, "") for i in range(11)[::-1]]
+    substitutions += [("_combiner%d" % i, "") for i in range(11)[::-1]]
+    substitutions += [("_filtermotion%d" % i, "") for i in range(11)[::-1]]
+    substitutions += [("_filter_noise_nosmooth%d" % i, "") for i in range(11)[::-1]]
+    substitutions += [("_makecompcorfilter%d" % i, "") for i in range(11)[::-1]]
     substitutions += [("_get_aparc_tsnr%d/" % i, "run%d_" % (i + 1)) for i in range(11)[::-1]]
 
     substitutions += [("T1_out_brain_pve_0_maths_warped", "compcor_csf"),

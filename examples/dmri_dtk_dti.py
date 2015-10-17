@@ -72,8 +72,8 @@ Map field names to individual subject runs
 """
 
 info = dict(dwi=[['subject_id', 'data']],
-            bvecs=[['subject_id','bvecs']],
-            bvals=[['subject_id','bvals']])
+            bvecs=[['subject_id', 'bvecs']],
+            bvals=[['subject_id', 'bvals']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
@@ -124,7 +124,7 @@ computeTensor = pe.Workflow(name='computeTensor')
 extract the volume with b=0 (nodif_brain)
 """
 
-fslroi = pe.Node(interface=fsl.ExtractROI(),name='fslroi')
+fslroi = pe.Node(interface=fsl.ExtractROI(), name='fslroi')
 fslroi.inputs.t_min = 0
 fslroi.inputs.t_size = 1
 
@@ -132,7 +132,7 @@ fslroi.inputs.t_size = 1
 create a brain mask from the nodif_brain
 """
 
-bet = pe.Node(interface=fsl.BET(),name='bet')
+bet = pe.Node(interface=fsl.BET(), name='bet')
 bet.inputs.mask = True
 bet.inputs.frac = 0.34
 
@@ -147,15 +147,15 @@ eddycorrect.inputs.inputnode.ref_num = 0
 compute the diffusion tensor in each voxel
 """
 
-dtifit = pe.Node(interface=dtk.DTIRecon(),name='dtifit')
+dtifit = pe.Node(interface=dtk.DTIRecon(), name='dtifit')
 
 """
 connect all the nodes for this workflow
 """
 
 computeTensor.connect([
-                        (fslroi,bet,[('roi_file','in_file')]),
-                        (eddycorrect,dtifit,[('outputnode.eddy_corrected','DWI')])
+                        (fslroi, bet, [('roi_file', 'in_file')]),
+                        (eddycorrect, dtifit, [('outputnode.eddy_corrected', 'DWI')])
                       ])
 
 
@@ -186,11 +186,11 @@ tractography.connect([
 Setup data storage area
 """
 
-datasink = pe.Node(interface=nio.DataSink(),name='datasink')
+datasink = pe.Node(interface=nio.DataSink(), name='datasink')
 datasink.inputs.base_directory = os.path.abspath('dtiresults')
 
 def getstripdir(subject_id):
-    return os.path.join(os.path.abspath('data/workingdir/dwiproc'),'_subject_id_%s' % subject_id)
+    return os.path.join(os.path.abspath('data/workingdir/dwiproc'), '_subject_id_%s' % subject_id)
 
 
 """
@@ -201,13 +201,13 @@ Setup the pipeline that combines the two workflows: tractography and computeTens
 dwiproc = pe.Workflow(name="dwiproc")
 dwiproc.base_dir = os.path.abspath('dtk_dti_tutorial')
 dwiproc.connect([
-                    (infosource,datasource,[('subject_id', 'subject_id')]),
-                    (datasource,computeTensor,[('dwi','fslroi.in_file'),
-                                               ('bvals','dtifit.bvals'),
-                                               ('bvecs','dtifit.bvecs'),
-                                               ('dwi','eddycorrect.inputnode.in_file')]),
-                    (computeTensor,tractography,[('bet.mask_file','dtk_tracker.mask1_file'),
-                                                 ('dtifit.tensor','dtk_tracker.tensor_file')
+                    (infosource, datasource, [('subject_id', 'subject_id')]),
+                    (datasource, computeTensor, [('dwi', 'fslroi.in_file'),
+                                               ('bvals', 'dtifit.bvals'),
+                                               ('bvecs', 'dtifit.bvecs'),
+                                               ('dwi', 'eddycorrect.inputnode.in_file')]),
+                    (computeTensor, tractography, [('bet.mask_file', 'dtk_tracker.mask1_file'),
+                                                 ('dtifit.tensor', 'dtk_tracker.tensor_file')
                                                  ])
                 ])
 

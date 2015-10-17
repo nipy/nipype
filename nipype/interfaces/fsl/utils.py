@@ -1257,7 +1257,7 @@ class SigLossInputSpec(FSLCommandInputSpec):
                      desc='brain mask file')
     echo_time = traits.Float(argstr='--te=%f',
                              desc='echo time in seconds')
-    slice_direction = traits.Enum('x','y','z',
+    slice_direction = traits.Enum('x', 'y', 'z',
                                   argstr='-d %s',
                                   desc='slicing direction')
 class SigLossOuputSpec(TraitedSpec):
@@ -1429,11 +1429,11 @@ class ComplexInputSpec(FSLCommandInputSpec):
     phase_in_file = File(exists=True, argstr='%s', position=3)
 
     _ofs = ['complex_out_file',
-            'magnitude_out_file','phase_out_file',
-            'real_out_file','imaginary_out_file']
-    _conversion = ['real_polar','real_cartesian',
-                   'complex_cartesian','complex_polar',
-                   'complex_split','complex_merge',]
+            'magnitude_out_file', 'phase_out_file',
+            'real_out_file', 'imaginary_out_file']
+    _conversion = ['real_polar', 'real_cartesian',
+                   'complex_cartesian', 'complex_polar',
+                   'complex_split', 'complex_merge', ]
 
     complex_out_file = File(genfile=True, argstr="%s", position=-3,
                             xor=_ofs+_conversion[:2])
@@ -1466,7 +1466,7 @@ class ComplexInputSpec(FSLCommandInputSpec):
         argstr = '-complexsplit', xor = _conversion, position=1,)
 #        requires=['complex_in_file','complex_out_file'])
     complex_merge = traits.Bool(
-        argstr = '-complexmerge', xor = _conversion + ['start_vol','end_vol'],
+        argstr = '-complexmerge', xor = _conversion + ['start_vol', 'end_vol'],
         position=1,)
 #        requires=['complex_in_file','complex_in_file2','complex_out_file'])
 
@@ -1504,7 +1504,7 @@ class Complex(FSLCommand):
             skip += self.inputs._ofs[:1]+self.inputs._ofs[3:]
         else:
             skip += self.inputs._ofs[1:]
-        return super(Complex,self)._parse_inputs(skip)
+        return super(Complex, self)._parse_inputs(skip)
 
     def _gen_filename(self, name):
         if name == 'complex_out_file':
@@ -1520,15 +1520,15 @@ class Complex(FSLCommand):
         elif name == 'magnitude_out_file':
             return self._gen_fname(self.inputs.complex_in_file, suffix="_mag")
         elif name == 'phase_out_file':
-            return self._gen_fname(self.inputs.complex_in_file,suffix="_phase")
+            return self._gen_fname(self.inputs.complex_in_file, suffix="_phase")
         elif name == 'real_out_file':
             return self._gen_fname(self.inputs.complex_in_file, suffix="_real")
         elif name == 'imaginary_out_file':
             return self._gen_fname(self.inputs.complex_in_file, suffix="_imag")
         return None
 
-    def _get_output(self,name):
-        output = getattr(self.inputs,name)
+    def _get_output(self, name):
+        output = getattr(self.inputs, name)
         if not isdefined(output):
             output = self._gen_filename(name)
         return os.path.abspath(output)
@@ -1699,7 +1699,7 @@ class ConvertWarpInputSpec(FSLCommandInputSpec):
                                'subjects functional (EPI) data onto an undistorted space (i.e. a space '
                                'that corresponds to his/her true anatomy).'))
 
-    shift_direction = traits.Enum('y-','y','x','x-','z','z-',
+    shift_direction = traits.Enum('y-', 'y', 'x', 'x-', 'z', 'z-',
                                   argstr="--shiftdir=%s", requires=['shift_in_file'],
                                   desc=('Indicates the direction that the distortions from '
                                         '--shiftmap goes. It depends on the direction and '
@@ -1940,7 +1940,7 @@ class WarpPoints(CommandLine):
         elif outformat == 'trk':
             self._coords_to_trk(newpoints, out_file)
         else:
-            np.savetxt(out_file, newpoints.reshape(-1,3))
+            np.savetxt(out_file, newpoints.reshape(-1, 3))
 
         return runtime
 

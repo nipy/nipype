@@ -17,7 +17,7 @@ def run_examples(example, pipelines, plugin):
         wf.base_dir = os.path.join(os.getcwd(), 'output', example, plugin)
         if os.path.exists(wf.base_dir):
             rmtree(wf.base_dir)
-        wf.config = {'execution':{'hash_method': 'timestamp', 'stop_on_first_rerun': 'true'}}
+        wf.config = {'execution': {'hash_method': 'timestamp', 'stop_on_first_rerun': 'true'}}
         wf.run(plugin=plugin, plugin_args={'n_procs': 4})
         #run twice to check if nothing is rerunning
         wf.run(plugin=plugin)
@@ -25,8 +25,8 @@ def run_examples(example, pipelines, plugin):
 if __name__ == '__main__':
     path, file = os.path.split(__file__)
     sys.path.insert(0, os.path.realpath(os.path.join(path, '..', 'examples')))
-    examples = {'fmri_fsl_reuse':['level1_workflow'],
-                'fmri_spm_nested':['level1','l2pipeline'],
+    examples = {'fmri_fsl_reuse': ['level1_workflow'],
+                'fmri_spm_nested': ['level1', 'l2pipeline'],
                 #'fmri_spm_dartel':['level1','l2pipeline'],
                 #'fmri_fsl_feeds':['l1pipeline']
                 }

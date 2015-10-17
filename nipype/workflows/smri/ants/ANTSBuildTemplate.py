@@ -30,7 +30,7 @@ def GetFirstListElement(this_list):
 def MakeTransformListWithGradientWarps(averageAffineTranform, gradientStepWarp):
     return [averageAffineTranform, gradientStepWarp, gradientStepWarp, gradientStepWarp, gradientStepWarp]
 
-def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes):
+def RenestDeformedPassiveImages(deformedPassiveImages, flattened_image_nametypes):
     import os
     """ Now make a list of lists of images where the outter list is per image type,
     and the inner list is the same size as the number of subjects to be averaged.
@@ -45,11 +45,11 @@ def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes)
     ## make empty_list, this is not efficient, but it works
     for name in flattened_image_nametypes:
         image_dictionary_of_lists[name] = list()
-    for index in range(0,all_images_size):
+    for index in range(0, all_images_size):
         curr_name = flattened_image_nametypes[index]
         curr_file = deformedPassiveImages[index]
         image_dictionary_of_lists[curr_name].append(curr_file)
-    for image_type,image_list in list(image_dictionary_of_lists.items()):
+    for image_type, image_list in list(image_dictionary_of_lists.items()):
         nested_imagetype_list.append(image_list)
         outputAverageImageName_list.append('AVG_'+image_type+'.nii.gz')
         image_type_list.append('WARP_AVG_'+image_type)
@@ -57,7 +57,7 @@ def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes)
     print("HACK: ", nested_imagetype_list)
     print("HACK: ", outputAverageImageName_list)
     print("HACK: ", image_type_list)
-    return nested_imagetype_list,outputAverageImageName_list,image_type_list
+    return nested_imagetype_list, outputAverageImageName_list, image_type_list
 
 ## Utility Function
 ## This will make a list of list pairs for defining the concatenation of transforms
@@ -67,35 +67,35 @@ def RenestDeformedPassiveImages(deformedPassiveImages,flattened_image_nametypes)
 ## ll
 ##[['af1.mat', 'wp1.nii'], ['af2.mat', 'wp2.nii'], ['af3.mat', 'wp3.nii']]
 def MakeListsOfTransformLists(warpTransformList, AffineTransformList):
-    return list(map(list, list(zip(warpTransformList,AffineTransformList))))
+    return list(map(list, list(zip(warpTransformList, AffineTransformList))))
 
 ## Flatten and return equal length transform and images lists.
-def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries,transformation_series):
+def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries, transformation_series):
     import sys
     print("HACK:  DEBUG: ListOfPassiveImagesDictionaries\n{lpi}\n".format(lpi=ListOfPassiveImagesDictionaries))
     subjCount = len(ListOfPassiveImagesDictionaries)
     tranCount = len(transformation_series)
     if subjCount != tranCount:
-        print("ERROR:  subjCount must equal tranCount {0} != {1}".format(subjCount,tranCount))
+        print("ERROR:  subjCount must equal tranCount {0} != {1}".format(subjCount, tranCount))
         sys.exit(-1)
     flattened_images = list()
     flattened_image_nametypes = list()
     flattened_transforms = list()
     passiveImagesCount = len(ListOfPassiveImagesDictionaries[0])
-    for subjIndex in range(0,subjCount):
+    for subjIndex in range(0, subjCount):
         #if passiveImagesCount != len(ListOfPassiveImagesDictionaries[subjIndex]):
         #    print "ERROR:  all image lengths must be equal {0} != {1}".format(passiveImagesCount,len(ListOfPassiveImagesDictionaries[subjIndex]))
         #    sys.exit(-1)
         subjImgDictionary = ListOfPassiveImagesDictionaries[subjIndex]
         subjToAtlasTransform = transformation_series[subjIndex]
-        for imgname,img in list(subjImgDictionary.items()):
+        for imgname, img in list(subjImgDictionary.items()):
             flattened_images.append(img)
             flattened_image_nametypes.append(imgname)
             flattened_transforms.append(subjToAtlasTransform)
     print("HACK: flattened images    {0}\n".format(flattened_images))
     print("HACK: flattened nametypes {0}\n".format(flattened_image_nametypes))
     print("HACK: flattened txfms     {0}\n".format(flattened_transforms))
-    return flattened_images,flattened_transforms,flattened_image_nametypes
+    return flattened_images, flattened_transforms, flattened_image_nametypes
 
 def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     """
@@ -125,7 +125,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     ##             their hash to change.
     ## HACK: TODO: REMOVE 'transforms_list' it is not used.  That will change all the hashes
     ## HACK: TODO: Need to run all python files through the code beutifiers.  It has gotten pretty ugly.
-    outputSpec = pe.Node(interface=util.IdentityInterface(fields=['template','transforms_list',
+    outputSpec = pe.Node(interface=util.IdentityInterface(fields=['template', 'transforms_list',
                                                                   'passive_deformed_templates']),
                          run_without_submitting=True,
                          name='outputspec')
@@ -140,7 +140,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     BeginANTS.inputs.transformation_model = 'SyN'
     BeginANTS.inputs.gradient_step_length = 0.25
     BeginANTS.inputs.number_of_iterations = [50, 35, 15]
-    BeginANTS.inputs.number_of_affine_iterations = [10000,10000,10000,10000,10000]
+    BeginANTS.inputs.number_of_affine_iterations = [10000, 10000, 10000, 10000, 10000]
     BeginANTS.inputs.use_histogram_matching = True
     BeginANTS.inputs.mi_option = [32, 16000]
     BeginANTS.inputs.regularization = 'Gauss'
@@ -229,27 +229,27 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     ##############################################
     ## Now warp all the ListOfPassiveImagesDictionaries images
     FlattenTransformAndImagesListNode = pe.Node(Function(function=FlattenTransformAndImagesList,
-                                                          input_names = ['ListOfPassiveImagesDictionaries','transformation_series'],
-                                                          output_names = ['flattened_images','flattened_transforms','flattened_image_nametypes']),
+                                                          input_names = ['ListOfPassiveImagesDictionaries', 'transformation_series'],
+                                                          output_names = ['flattened_images', 'flattened_transforms', 'flattened_image_nametypes']),
                                                  run_without_submitting=True, name="99_FlattenTransformAndImagesList")
-    TemplateBuildSingleIterationWF.connect(inputSpec,'ListOfPassiveImagesDictionaries', FlattenTransformAndImagesListNode, 'ListOfPassiveImagesDictionaries')
-    TemplateBuildSingleIterationWF.connect(MakeTransformsLists,'out', FlattenTransformAndImagesListNode, 'transformation_series')
+    TemplateBuildSingleIterationWF.connect(inputSpec, 'ListOfPassiveImagesDictionaries', FlattenTransformAndImagesListNode, 'ListOfPassiveImagesDictionaries')
+    TemplateBuildSingleIterationWF.connect(MakeTransformsLists, 'out', FlattenTransformAndImagesListNode, 'transformation_series')
     wimtPassivedeformed = pe.MapNode(interface = WarpImageMultiTransform(),
                                      iterfield=['transformation_series', 'input_image'],
                                      name ='wimtPassivedeformed')
-    TemplateBuildSingleIterationWF.connect(AvgDeformedImages, 'output_average_image',wimtPassivedeformed,'reference_image')
+    TemplateBuildSingleIterationWF.connect(AvgDeformedImages, 'output_average_image', wimtPassivedeformed, 'reference_image')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_images',     wimtPassivedeformed, 'input_image')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_transforms', wimtPassivedeformed, 'transformation_series')
 
     RenestDeformedPassiveImagesNode = pe.Node(Function(function=RenestDeformedPassiveImages,
-                                                        input_names = ['deformedPassiveImages','flattened_image_nametypes'],
-                                                        output_names = ['nested_imagetype_list','outputAverageImageName_list','image_type_list']),
+                                                        input_names = ['deformedPassiveImages', 'flattened_image_nametypes'],
+                                                        output_names = ['nested_imagetype_list', 'outputAverageImageName_list', 'image_type_list']),
                                                run_without_submitting=True, name="99_RenestDeformedPassiveImages")
     TemplateBuildSingleIterationWF.connect(wimtPassivedeformed, 'output_image', RenestDeformedPassiveImagesNode, 'deformedPassiveImages')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_image_nametypes', RenestDeformedPassiveImagesNode, 'flattened_image_nametypes')
     ## Now  Average All passive input_images deformed images together to create an updated template average
     AvgDeformedPassiveImages = pe.MapNode(interface=AverageImages(),
-                                        iterfield=['images','output_average_image'],
+                                        iterfield=['images', 'output_average_image'],
                                         name='AvgDeformedPassiveImages')
     AvgDeformedPassiveImages.inputs.dimension = 3
     AvgDeformedPassiveImages.inputs.normalize = False
@@ -258,7 +258,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
 
     ## -- TODO:  Now neeed to reshape all the passive images as well
     ReshapeAveragePassiveImageWithShapeUpdate = pe.MapNode(interface = WarpImageMultiTransform(),
-                                                           iterfield=['input_image','reference_image','out_postfix'],
+                                                           iterfield=['input_image', 'reference_image', 'out_postfix'],
                                                            name = 'ReshapeAveragePassiveImageWithShapeUpdate')
     ReshapeAveragePassiveImageWithShapeUpdate.inputs.invert_affine = [1]
     TemplateBuildSingleIterationWF.connect(RenestDeformedPassiveImagesNode, "image_type_list", ReshapeAveragePassiveImageWithShapeUpdate, 'out_postfix')

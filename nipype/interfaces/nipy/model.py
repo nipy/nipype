@@ -92,7 +92,7 @@ class FitGLM(BaseInterface):
         else:
             mask = np.ones(nii.shape[:3]) == 1
 
-        timeseries = data.copy()[mask,:]
+        timeseries = data.copy()[mask, :]
         del data
 
         for functional_run in functional_runs[1:]:
@@ -100,7 +100,7 @@ class FitGLM(BaseInterface):
             data = nii.get_data()
             npdata = data.copy()
             del data
-            timeseries = np.concatenate((timeseries,npdata[mask,:]), axis=1)
+            timeseries = np.concatenate((timeseries, npdata[mask, :]), axis=1)
             del npdata
 
         nscans = timeseries.shape[1]
@@ -116,9 +116,9 @@ class FitGLM(BaseInterface):
         for reg in session_info[0]['regress']:
             reg_names.append(reg['name'])
 
-        reg_vals = np.zeros((nscans,len(reg_names)))
+        reg_vals = np.zeros((nscans, len(reg_names)))
         for i in range(len(reg_names)):
-            reg_vals[:,i] = np.array(session_info[0]['regress'][i]['val']).reshape(1,-1)
+            reg_vals[:, i] = np.array(session_info[0]['regress'][i]['val']).reshape(1, -1)
 
 
         frametimes = np.linspace(0, (nscans-1)*self.inputs.TR, nscans)
@@ -127,7 +127,7 @@ class FitGLM(BaseInterface):
         onsets = []
         duration = []
 
-        for i,cond in enumerate(session_info[0]['cond']):
+        for i, cond in enumerate(session_info[0]['cond']):
             onsets += cond['onset']
             conditions += [cond['name']]*len(cond['onset'])
             if len(cond['duration']) == 1:
@@ -147,9 +147,9 @@ class FitGLM(BaseInterface):
                                                        )
         if self.inputs.normalize_design_matrix:
             for i in range(len(self._reg_names)-1):
-                design_matrix[:,i] = ((design_matrix[:,i] -
-                                       design_matrix[:,i].mean()) /
-                                      design_matrix[:,i].std())
+                design_matrix[:, i] = ((design_matrix[:, i] -
+                                       design_matrix[:, i].mean()) /
+                                      design_matrix[:, i].std())
 
         if self.inputs.plot_design_matrix:
             import pylab
@@ -164,7 +164,7 @@ class FitGLM(BaseInterface):
 
         self._beta_file = os.path.abspath("beta.nii")
         beta = np.zeros(mask.shape + (glm.beta.shape[0],))
-        beta[mask,:] = glm.beta.T
+        beta[mask, :] = glm.beta.T
         nb.save(nb.Nifti1Image(beta, nii.get_affine()), self._beta_file)
 
         self._s2_file = os.path.abspath("s2.nii")
@@ -173,9 +173,9 @@ class FitGLM(BaseInterface):
         nb.save(nb.Nifti1Image(s2, nii.get_affine()), self._s2_file)
 
         if self.inputs.save_residuals:
-            explained = np.dot(design_matrix,glm.beta)
+            explained = np.dot(design_matrix, glm.beta)
             residuals = np.zeros(mask.shape + (nscans,))
-            residuals[mask,:] = timeseries - explained.T
+            residuals[mask, :] = timeseries - explained.T
             self._residuals_file = os.path.abspath("residuals.nii")
             nb.save(nb.Nifti1Image(residuals, nii.get_affine()), self._residuals_file)
 
@@ -235,9 +235,9 @@ class EstimateContrastInputSpec(BaseInterfaceInputSpec):
             session list is None or not provided, all sessions are used. For F
             contrasts, the condition list should contain previously defined
             T-contrasts.""", mandatory=True)
-    beta = File(exists=True, desc="beta coefficients of the fitted model",mandatory=True)
+    beta = File(exists=True, desc="beta coefficients of the fitted model", mandatory=True)
     nvbeta = traits.Any(mandatory=True)
-    s2 = File(exists=True, desc="squared variance of the residuals",mandatory=True)
+    s2 = File(exists=True, desc="squared variance of the residuals", mandatory=True)
     dof = traits.Any(desc="degrees of freedom", mandatory=True)
     constants = traits.Any(mandatory=True)
     axis = traits.Any(mandatory=True)
@@ -267,7 +267,7 @@ class EstimateContrast(BaseInterface):
 
         glm = GLM.glm()
         nii = nb.load(self.inputs.beta)
-        glm.beta = beta_nii.get_data().copy()[mask,:].T
+        glm.beta = beta_nii.get_data().copy()[mask, :].T
         glm.nvbeta = self.inputs.nvbeta
         glm.s2 = nb.load(self.inputs.s2).get_data().copy()[mask]
         glm.dof = self.inputs.dof

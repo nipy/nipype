@@ -21,18 +21,18 @@ import traits.api as traits
 
 def test_bunch():
     b = nib.Bunch()
-    yield assert_equal, b.__dict__,{}
-    b = nib.Bunch(a=1,b=[2,3])
-    yield assert_equal, b.__dict__,{'a': 1, 'b': [2,3]}
+    yield assert_equal, b.__dict__, {}
+    b = nib.Bunch(a=1, b=[2, 3])
+    yield assert_equal, b.__dict__, {'a': 1, 'b': [2, 3]}
 
 def test_bunch_attribute():
-    b = nib.Bunch(a=1,b=[2,3],c=None)
-    yield assert_equal, b.a,1
-    yield assert_equal, b.b, [2,3]
+    b = nib.Bunch(a=1, b=[2, 3], c=None)
+    yield assert_equal, b.a, 1
+    yield assert_equal, b.b, [2, 3]
     yield assert_equal, b.c, None
 
 def test_bunch_repr():
-    b = nib.Bunch(b=2,c=3,a=dict(n=1,m=2))
+    b = nib.Bunch(b=2, c=3, a=dict(n=1, m=2))
     yield assert_equal, repr(b), "Bunch(a={'m': 2, 'n': 1}, b=2, c=3)"
 
 def test_bunch_methods():
@@ -214,7 +214,7 @@ def test_namesource():
                        position=2)
         doo = nib.File(exists=True, argstr="%s", position=1)
         goo = traits.Int(argstr="%d", position=4)
-        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s",position=3)
+        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s", position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"

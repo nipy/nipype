@@ -442,7 +442,7 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
     nb.save(img, wm_out)
 
 
-def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, out_roi_file,dilation):
+def crop_and_move_datasets(subject_id, subjects_dir, fs_dir, parcellation_name, out_roi_file, dilation):
     fs_dir = op.join(subjects_dir, subject_id)
     cmp_config = cmp.configuration.PipelineConfiguration()
     cmp_config.parcellation_scheme = "Lausanne2008"
@@ -578,7 +578,7 @@ class Parcellate(BaseInterface):
         create_annot_label(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
         create_roi(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.dilation)
         create_wm_mask(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name)
-        crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file,self.inputs.dilation)
+        crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file, self.inputs.dilation)
         return runtime
 
     def _list_outputs(self):

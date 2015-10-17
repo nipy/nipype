@@ -72,7 +72,7 @@ class DTMetricInputSpec(CommandLineInputSpec):
     eigen_data = File(exists=True, argstr='-inputfile %s', mandatory=True,
                       desc='voxel-order data filename')
 
-    metric = traits.Enum('fa','md','rd','l1', 'l2', 'l3', 'tr', 'ra', '2dfa','cl','cp','cs',
+    metric = traits.Enum('fa', 'md', 'rd', 'l1', 'l2', 'l3', 'tr', 'ra', '2dfa', 'cl', 'cp', 'cs',
                          argstr='-stat %s', mandatory=True,
                          desc=('Specifies the metric to compute. Possible choices are: '
                                '"fa", "md", "rd", "l1", "l2", "l3", "tr", "ra", "2dfa", "cl", "cp" or "cs".'))
@@ -401,7 +401,7 @@ class TrackInputSpec(CommandLineInputSpec):
 
     inputmodel = traits.Enum('dt', 'multitensor', 'sfpeak', 'pico', 'repbs_dt',
                              'repbs_multitensor', 'ballstick', 'wildbs_dt',
-                             'bayesdirac', 'bayesdirac_dt','bedpostx_dyad',
+                             'bayesdirac', 'bayesdirac_dt', 'bedpostx_dyad',
                              'bedpostx', argstr='-inputmodel %s',
                              desc='input model type', usedefault=True)
 

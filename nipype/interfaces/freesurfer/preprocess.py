@@ -788,7 +788,7 @@ class ReconAll(CommandLine):
         for idx, step in enumerate(self._steps):
             step, outfiles = step
             if all([os.path.exists(os.path.join(subjects_dir,
-                                                self.inputs.subject_id,f)) for
+                                                self.inputs.subject_id, f)) for
                     f in outfiles]):
                 flags.append('-no%s' %step)
                 if idx > 4:

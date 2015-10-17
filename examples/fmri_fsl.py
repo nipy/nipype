@@ -64,7 +64,7 @@ Set up a node to define all inputs required for the preprocessing workflow
 """
 
 inputnode = pe.Node(interface=util.IdentityInterface(fields=['func',
-                                                             'struct',]),
+                                                             'struct', ]),
                     name='inputspec')
 
 """
@@ -107,7 +107,7 @@ def getmiddlevolume(func):
     funcfile = func
     if isinstance(func, list):
         funcfile = func[0]
-    _,_,_,timepoints = load(funcfile).get_shape()
+    _, _, _, timepoints = load(funcfile).get_shape()
     return int(timepoints / 2) - 1
 
 preproc.connect(inputnode, ('func', getmiddlevolume), extract_ref, 't_min')
@@ -238,8 +238,8 @@ Merge the median values with the mean functional images into a coupled list
 
 mergenode = pe.Node(interface=util.Merge(2, axis='hstack'),
                     name='merge')
-preproc.connect(meanfunc2,'out_file', mergenode, 'in1')
-preproc.connect(medianval,'out_stat', mergenode, 'in2')
+preproc.connect(meanfunc2, 'out_file', mergenode, 'in1')
+preproc.connect(medianval, 'out_stat', mergenode, 'in2')
 
 
 """
@@ -248,7 +248,7 @@ median value for each run and a mask constituting the mean functional
 """
 
 smooth = pe.MapNode(interface=fsl.SUSAN(),
-                    iterfield=['in_file', 'brightness_threshold','usans'],
+                    iterfield=['in_file', 'brightness_threshold', 'usans'],
                     name='smooth')
 
 """
@@ -259,7 +259,7 @@ def getbtthresh(medianvals):
     return [0.75*val for val in medianvals]
 
 def getusans(x):
-    return [[tuple([val[0],0.75*val[1]])] for val in x]
+    return [[tuple([val[0], 0.75*val[1]])] for val in x]
 
 preproc.connect(maskfunc2, 'out_file', smooth, 'in_file')
 preproc.connect(medianval, ('out_stat', getbtthresh), smooth, 'brightness_threshold')
@@ -281,7 +281,7 @@ Scale each volume of the run so that the median value of the run is set to 10000
 """
 
 intnorm = pe.MapNode(interface=fsl.ImageMaths(suffix='_intnorm'),
-                     iterfield=['in_file','op_string'],
+                     iterfield=['in_file', 'op_string'],
                      name='intnorm')
 preproc.connect(maskfunc3, 'out_file', intnorm, 'in_file')
 
@@ -341,12 +341,12 @@ art = pe.MapNode(interface=ra.ArtifactDetect(use_differences = [True, False],
                  name="art")
 
 
-preproc.connect([(inputnode, nosestrip,[('struct','in_file')]),
-                 (nosestrip, skullstrip, [('out_file','in_file')]),
-                 (skullstrip, coregister,[('out_file','in_file')]),
-                 (meanfunc2, coregister,[(('out_file',pickfirst),'reference')]),
-                 (motion_correct, art, [('par_file','realignment_parameters')]),
-                 (maskfunc2, art, [('out_file','realigned_files')]),
+preproc.connect([(inputnode, nosestrip, [('struct', 'in_file')]),
+                 (nosestrip, skullstrip, [('out_file', 'in_file')]),
+                 (skullstrip, coregister, [('out_file', 'in_file')]),
+                 (meanfunc2, coregister, [(('out_file', pickfirst), 'reference')]),
+                 (motion_correct, art, [('par_file', 'realignment_parameters')]),
+                 (maskfunc2, art, [('out_file', 'realigned_files')]),
                  (dilatemask, art, [('out_file', 'mask_file')]),
                  ])
 
@@ -389,27 +389,27 @@ modelestimate = pe.MapNode(interface=fsl.FILMGLS(smooth_autocorr=True,
                                                  mask_size=5,
                                                  threshold=1000),
                            name='modelestimate',
-                           iterfield = ['design_file','in_file'])
+                           iterfield = ['design_file', 'in_file'])
 
 """
 Use :class:`nipype.interfaces.fsl.ContrastMgr` to generate contrast estimates
 """
 
 conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
-                         iterfield = ['tcon_file','param_estimates',
+                         iterfield = ['tcon_file', 'param_estimates',
                                       'sigmasquareds', 'corrections',
                                       'dof_file'])
 
 modelfit.connect([
-   (modelspec,level1design,[('session_info','session_info')]),
-   (level1design,modelgen,[('fsf_files', 'fsf_file'),
+   (modelspec, level1design, [('session_info', 'session_info')]),
+   (level1design, modelgen, [('fsf_files', 'fsf_file'),
                            ('ev_files', 'ev_files')]),
-   (modelgen,modelestimate,[('design_file','design_file')]),
-   (modelgen,conestimate,[('con_file','tcon_file')]),
-   (modelestimate,conestimate,[('param_estimates','param_estimates'),
+   (modelgen, modelestimate, [('design_file', 'design_file')]),
+   (modelgen, conestimate, [('con_file', 'tcon_file')]),
+   (modelestimate, conestimate, [('param_estimates', 'param_estimates'),
                                ('sigmasquareds', 'sigmasquareds'),
-                               ('corrections','corrections'),
-                               ('dof_file','dof_file')]),
+                               ('corrections', 'corrections'),
+                               ('dof_file', 'dof_file')]),
    ])
 
 """
@@ -446,13 +446,13 @@ Use :class:`nipype.interfaces.fsl.FLAMEO` to estimate a second level model
 """
 
 flameo = pe.MapNode(interface=fsl.FLAMEO(run_mode='fe'), name="flameo",
-                    iterfield=['cope_file','var_cope_file'])
+                    iterfield=['cope_file', 'var_cope_file'])
 
-fixed_fx.connect([(copemerge,flameo,[('merged_file','cope_file')]),
-                  (varcopemerge,flameo,[('merged_file','var_cope_file')]),
-                  (level2model,flameo, [('design_mat','design_file'),
-                                        ('design_con','t_con_file'),
-                                        ('design_grp','cov_split_file')]),
+fixed_fx.connect([(copemerge, flameo, [('merged_file', 'cope_file')]),
+                  (varcopemerge, flameo, [('merged_file', 'var_cope_file')]),
+                  (level2model, flameo, [('design_mat', 'design_file'),
+                                        ('design_con', 't_con_file'),
+                                        ('design_grp', 'cov_split_file')]),
                   ])
 
 
@@ -466,7 +466,7 @@ def sort_copes(files):
     numelements = len(files[0])
     outfiles = []
     for i in range(numelements):
-        outfiles.insert(i,[])
+        outfiles.insert(i, [])
         for j, elements in enumerate(files):
             outfiles[i].append(elements[i])
     return outfiles
@@ -477,11 +477,11 @@ def num_copes(files):
 firstlevel = pe.Workflow(name='firstlevel')
 firstlevel.connect([(preproc, modelfit, [('highpass.out_file', 'modelspec.functional_runs'),
                                          ('art.outlier_files', 'modelspec.outlier_files'),
-                                         ('highpass.out_file','modelestimate.in_file')]),
+                                         ('highpass.out_file', 'modelestimate.in_file')]),
                     (preproc, fixed_fx, [('coregister.out_file', 'flameo.mask_file')]),
-                    (modelfit, fixed_fx,[(('conestimate.copes', sort_copes),'copemerge.in_files'),
-                                         (('conestimate.varcopes', sort_copes),'varcopemerge.in_files'),
-                                         (('conestimate.copes', num_copes),'l2model.num_copes'),
+                    (modelfit, fixed_fx, [(('conestimate.copes', sort_copes), 'copemerge.in_files'),
+                                         (('conestimate.varcopes', sort_copes), 'varcopemerge.in_files'),
+                                         (('conestimate.copes', num_copes), 'l2model.num_copes'),
                                          ])
                     ])
 
@@ -512,8 +512,8 @@ data_dir = os.path.abspath('data')
 # Specify the subject directories
 subject_list = ['s1'] #, 's3']
 # Map field names to individual subject runs.
-info = dict(func=[['subject_id', ['f3','f5','f7','f10']]],
-            struct=[['subject_id','struct']])
+info = dict(func=[['subject_id', ['f3', 'f5', 'f7', 'f10']]],
+            struct=[['subject_id', 'struct']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
@@ -552,7 +552,7 @@ iterables on this node to perform two different extents of smoothing.
 
 smoothnode = firstlevel.get_node('preproc.smooth')
 assert(str(smoothnode) == 'preproc.smooth')
-smoothnode.iterables = ('fwhm', [5.,10.])
+smoothnode.iterables = ('fwhm', [5., 10.])
 
 hpcutoff = 120
 TR = 3.  # ensure float
@@ -574,9 +574,9 @@ def subjectinfo(subject_id):
     from copy import deepcopy
     print("Subject ID: %s\n" % str(subject_id))
     output = []
-    names = ['Task-Odd','Task-Even']
+    names = ['Task-Odd', 'Task-Even']
     for r in range(4):
-        onsets = [list(range(15,240,60)),list(range(45,240,60))]
+        onsets = [list(range(15, 240, 60)), list(range(45, 240, 60))]
         output.insert(r,
                       Bunch(conditions=names,
                             onsets=deepcopy(onsets),
@@ -596,17 +596,17 @@ condition names must match the `names` listed in the `subjectinfo` function
 described above.
 """
 
-cont1 = ['Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5]]
-cont2 = ['Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1]]
-cont3 = ['Task','F', [cont1, cont2]]
-contrasts = [cont1,cont2]
+cont1 = ['Task>Baseline', 'T', ['Task-Odd', 'Task-Even'], [0.5, 0.5]]
+cont2 = ['Task-Odd>Task-Even', 'T', ['Task-Odd', 'Task-Even'], [1, -1]]
+cont3 = ['Task', 'F', [cont1, cont2]]
+contrasts = [cont1, cont2]
 
 firstlevel.inputs.modelfit.modelspec.input_units = 'secs'
 firstlevel.inputs.modelfit.modelspec.time_repetition = TR
 firstlevel.inputs.modelfit.modelspec.high_pass_filter_cutoff = hpcutoff
 
 firstlevel.inputs.modelfit.level1design.interscan_interval = TR
-firstlevel.inputs.modelfit.level1design.bases = {'dgamma':{'derivs': False}}
+firstlevel.inputs.modelfit.level1design.bases = {'dgamma': {'derivs': False}}
 firstlevel.inputs.modelfit.level1design.contrasts = contrasts
 firstlevel.inputs.modelfit.level1design.model_serial_correlations = True
 
@@ -617,11 +617,11 @@ Set up complete workflow
 
 l1pipeline = pe.Workflow(name= "level1")
 l1pipeline.base_dir = os.path.abspath('./fsl/workingdir')
-l1pipeline.config = {"execution": {"crashdump_dir":os.path.abspath('./fsl/crashdumps')}}
+l1pipeline.config = {"execution": {"crashdump_dir": os.path.abspath('./fsl/crashdumps')}}
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                     (infosource, firstlevel, [(('subject_id', subjectinfo), 'modelfit.modelspec.subject_info')]),
-                    (datasource, firstlevel, [('struct','preproc.inputspec.struct'),
+                    (datasource, firstlevel, [('struct', 'preproc.inputspec.struct'),
                                               ('func', 'preproc.inputspec.func'),
                                               ]),
                     ])

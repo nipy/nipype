@@ -58,7 +58,7 @@ def getusans(x):
     return [[tuple([val[0], 0.75 * val[1]])] for val in x]
 
 tolist = lambda x: [x]
-highpass_operand = lambda x:'-bptf %.10f -1' %x
+highpass_operand = lambda x: '-bptf %.10f -1' %x
 
 def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     """Preprocess each run with FSL independently of the others
@@ -311,8 +311,8 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
 
     concatnode = pe.Node(interface=util.Merge(2),
                          name='concat')
-    featpreproc.connect(maskfunc2,('out_file', tolist), concatnode, 'in1')
-    featpreproc.connect(maskfunc3,('out_file', tolist), concatnode, 'in2')
+    featpreproc.connect(maskfunc2, ('out_file', tolist), concatnode, 'in1')
+    featpreproc.connect(maskfunc3, ('out_file', tolist), concatnode, 'in2')
 
     """
     The following nodes select smooth or unsmoothed data depending on the
@@ -320,7 +320,7 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     voxel size of the input data if the fwhm parameter is less than 1/3 of the
     voxel size.
     """
-    selectnode = pe.Node(interface=util.Select(),name='select')
+    selectnode = pe.Node(interface=util.Select(), name='select')
 
     featpreproc.connect(concatnode, 'out', selectnode, 'inlist')
 
@@ -333,7 +333,7 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     """
 
     meanscale = pe.MapNode(interface=fsl.ImageMaths(suffix='_gms'),
-                           iterfield=['in_file','op_string'],
+                           iterfield=['in_file', 'op_string'],
                            name='meanscale')
     featpreproc.connect(selectnode, 'out', meanscale, 'in_file')
 
@@ -636,8 +636,8 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
     concatnode = pe.Node(interface=util.Merge(2),
                          name='concat')
-    featpreproc.connect(maskfunc2,('out_file', tolist), concatnode, 'in1')
-    featpreproc.connect(maskfunc3,('out_file', tolist), concatnode, 'in2')
+    featpreproc.connect(maskfunc2, ('out_file', tolist), concatnode, 'in1')
+    featpreproc.connect(maskfunc3, ('out_file', tolist), concatnode, 'in2')
 
     """
     The following nodes select smooth or unsmoothed data depending on the
@@ -645,7 +645,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     voxel size of the input data if the fwhm parameter is less than 1/3 of the
     voxel size.
     """
-    selectnode = pe.Node(interface=util.Select(),name='select')
+    selectnode = pe.Node(interface=util.Select(), name='select')
 
     featpreproc.connect(concatnode, 'out', selectnode, 'inlist')
 
@@ -658,7 +658,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     """
 
     meanscale = pe.MapNode(interface=fsl.ImageMaths(suffix='_gms'),
-                           iterfield=['in_file','op_string'],
+                           iterfield=['in_file', 'op_string'],
                            name='meanscale')
     featpreproc.connect(selectnode, 'out', meanscale, 'in_file')
 
@@ -765,7 +765,7 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     """
 
     smooth = pe.MapNode(interface=fsl.SUSAN(),
-                        iterfield=['in_file', 'brightness_threshold','usans'],
+                        iterfield=['in_file', 'brightness_threshold', 'usans'],
                         name='smooth')
 
     """
@@ -817,8 +817,8 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
 
     merge = pe.Node(interface=util.Merge(2, axis='hstack'),
                     name='merge')
-    susan_smooth.connect(meanfunc,'out_file', merge, 'in1')
-    susan_smooth.connect(median,'out_stat', merge, 'in2')
+    susan_smooth.connect(meanfunc, 'out_file', merge, 'in1')
+    susan_smooth.connect(median, 'out_stat', merge, 'in2')
 
     """
     Define a function to get the brightness threshold for SUSAN
@@ -989,7 +989,7 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     """
 
     maskflow = create_getmask_flow()
-    featpreproc.connect([(inputnode, maskflow, [('subject_id','inputspec.subject_id'),
+    featpreproc.connect([(inputnode, maskflow, [('subject_id', 'inputspec.subject_id'),
                                                 ('subjects_dir', 'inputspec.subjects_dir')])])
     maskflow.inputs.inputspec.contrast_type = 't2'
     if whichvol != 'mean':
@@ -1044,7 +1044,7 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     voxel size of the input data if the fwhm parameter is less than 1/3 of the
     voxel size.
     """
-    selectnode = pe.Node(interface=util.Select(),name='select')
+    selectnode = pe.Node(interface=util.Select(), name='select')
 
     featpreproc.connect(concatnode, 'out', selectnode, 'inlist')
 
@@ -1057,7 +1057,7 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     """
 
     meanscale = pe.MapNode(interface=fsl.ImageMaths(suffix='_gms'),
-                           iterfield=['in_file','op_string'],
+                           iterfield=['in_file', 'op_string'],
                            name='meanscale')
     featpreproc.connect(selectnode, 'out', meanscale, 'in_file')
 

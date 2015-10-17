@@ -100,8 +100,8 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
     """
 
     getmask.connect([
-        (inputnode, fssource, [('subject_id','subject_id'),
-                               ('subjects_dir','subjects_dir')]),
+        (inputnode, fssource, [('subject_id', 'subject_id'),
+                               ('subjects_dir', 'subjects_dir')]),
         (inputnode, register, [('source_file', 'source_file'),
                                ('subject_id', 'subject_id'),
                                ('subjects_dir', 'subjects_dir'),
@@ -109,8 +109,8 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
         (inputnode, voltransform, [('subjects_dir', 'subjects_dir'),
                                    ('source_file', 'source_file')]),
         (fssource, threshold, [(('aparc_aseg', get_aparc_aseg), 'in_file')]),
-        (register, voltransform, [('out_reg_file','reg_file')]),
-        (threshold, voltransform, [('binary_file','target_file')])
+        (register, voltransform, [('out_reg_file', 'reg_file')]),
+        (threshold, voltransform, [('binary_file', 'target_file')])
     ])
 
 
@@ -199,7 +199,7 @@ def create_get_stats_flow(name='getstats', withreg=False):
 
 
     statnode = pe.MapNode(fs.SegStats(),
-                          iterfield=['segmentation_file','in_file'],
+                          iterfield=['segmentation_file', 'in_file'],
                           name='segstats')
 
     """
@@ -228,11 +228,11 @@ def create_get_stats_flow(name='getstats', withreg=False):
                                           output_names = ['label_file',
                                                           'source_file'],
                                           function=switch_labels),
-                             iterfield=['transform_output','source_file'],
+                             iterfield=['transform_output', 'source_file'],
                              name='chooser')
-        getstats.connect(inputnode,'source_file', chooser, 'source_file')
-        getstats.connect(inputnode,'label_file', chooser, 'label_file')
-        getstats.connect(inputnode,'inverse', chooser, 'inverse')
+        getstats.connect(inputnode, 'source_file', chooser, 'source_file')
+        getstats.connect(inputnode, 'label_file', chooser, 'label_file')
+        getstats.connect(inputnode, 'inverse', chooser, 'inverse')
         getstats.connect(voltransform, 'transformed_file', chooser, 'transform_output')
         getstats.connect(chooser, 'label_file', statnode, 'segmentation_file')
         getstats.connect(chooser, 'source_file', statnode, 'in_file')
@@ -309,7 +309,7 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     volconvert = pe.Node(fs.MRIConvert(out_type='nii'),
                          name = 'volconvert')
     tessellate = pe.MapNode(fs.MRIMarchingCubes(),
-                            iterfield=['label_value','out_file'],
+                            iterfield=['label_value', 'out_file'],
                             name='tessellate')
     surfconvert = pe.MapNode(fs.MRIsConvert(out_datatype='stl'),
                              iterfield=['in_file'],
@@ -340,8 +340,8 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     """
 
     tessflow.connect([
-            (inputnode, fssource, [('subject_id','subject_id'),
-                                   ('subjects_dir','subjects_dir')]),
+            (inputnode, fssource, [('subject_id', 'subject_id'),
+                                   ('subjects_dir', 'subjects_dir')]),
             (fssource, volconvert, [('aseg', 'in_file')]),
             (volconvert, region_list_from_volume_node, [('out_file', 'in_file')]),
             (region_list_from_volume_node, tessellate, [('region_list', 'label_value')]),
@@ -349,8 +349,8 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
             (inputnode, id_list_from_lookup_table_node, [('lookup_file', 'lookup_file')]),
             (id_list_from_lookup_table_node, tessellate, [('id_list', 'out_file')]),
             (fssource, tessellate, [('aseg', 'in_file')]),
-            (tessellate, surfconvert, [('surface','in_file')]),
-            (surfconvert, smoother, [('converted','in_file1')]),
+            (tessellate, surfconvert, [('surface', 'in_file')]),
+            (surfconvert, smoother, [('converted', 'in_file1')]),
             ])
 
     """

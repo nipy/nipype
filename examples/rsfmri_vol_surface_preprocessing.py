@@ -484,7 +484,7 @@ def create_reg_workflow(name='registration'):
     convert2itk.inputs.fsl2ras = True
     convert2itk.inputs.itk_transform = True
     register.connect(bbregister, 'out_fsl_file', convert2itk, 'transform_file')
-    register.connect(inputnode, 'mean_image',convert2itk, 'source_file')
+    register.connect(inputnode, 'mean_image', convert2itk, 'source_file')
     register.connect(stripper, 'out_file', convert2itk, 'reference_file')
 
     """
@@ -524,7 +524,7 @@ def create_reg_workflow(name='registration'):
     reg.inputs.num_threads = 4
     reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
     register.connect(stripper, 'out_file', reg, 'moving_image')
-    register.connect(inputnode,'target_image', reg,'fixed_image')
+    register.connect(inputnode, 'target_image', reg, 'fixed_image')
 
     """
     Concatenate the affine and ants transforms into a list
@@ -546,7 +546,7 @@ def create_reg_workflow(name='registration'):
     warpmean.inputs.args = '--float'
     warpmean.inputs.num_threads = 4
 
-    register.connect(inputnode,'target_image', warpmean,'reference_image')
+    register.connect(inputnode, 'target_image', warpmean, 'reference_image')
     register.connect(inputnode, 'mean_image', warpmean, 'input_image')
     register.connect(merge, 'out', warpmean, 'transforms')
 

@@ -80,7 +80,7 @@ def create_spm_preproc(name='preproc'):
     realign = pe.Node(spm.Realign(), name='realign')
     workflow.connect(inputnode, 'functionals', realign, 'in_files')
     maskflow = create_getmask_flow()
-    workflow.connect([(inputnode, maskflow, [('subject_id','inputspec.subject_id'),
+    workflow.connect([(inputnode, maskflow, [('subject_id', 'inputspec.subject_id'),
                                              ('subjects_dir', 'inputspec.subjects_dir')])])
     maskflow.inputs.inputspec.contrast_type = 't2'
     workflow.connect(realign, 'mean_image', maskflow, 'inputspec.source_file')
@@ -89,11 +89,11 @@ def create_spm_preproc(name='preproc'):
     workflow.connect(realign, 'realigned_files', smooth, 'in_files')
     artdetect = pe.Node(ra.ArtifactDetect(mask_type='file',
                                           parameter_source='SPM',
-                                          use_differences=[True,False],
+                                          use_differences=[True, False],
                                           use_norm=True,
                                           save_plot=True),
                         name='artdetect')
-    workflow.connect([(inputnode, artdetect,[('norm_threshold', 'norm_threshold'),
+    workflow.connect([(inputnode, artdetect, [('norm_threshold', 'norm_threshold'),
                                              ('zintensity_threshold',
                                               'zintensity_threshold')])])
     workflow.connect([(realign, artdetect, [('realigned_files', 'realigned_files'),
@@ -121,9 +121,9 @@ def create_spm_preproc(name='preproc'):
             (maskflow, outputnode, [(("outputspec.mask_file", poplist), "mask_file")]),
             (realign, outputnode, [('realignment_parameters', 'realignment_parameters')]),
             (smooth, outputnode, [('smoothed_files', 'smoothed_files')]),
-            (artdetect, outputnode,[('outlier_files', 'outlier_files'),
-                                    ('statistic_files','outlier_stats'),
-                                    ('plot_files','outlier_plots')])
+            (artdetect, outputnode, [('outlier_files', 'outlier_files'),
+                                    ('statistic_files', 'outlier_stats'),
+                                    ('plot_files', 'outlier_plots')])
             ])
     return workflow
 
@@ -214,7 +214,7 @@ def create_vbm_preproc(name='vbmpreproc'):
                                                        "icv"
                                                        ]),
                          name="outputspec")
-    workflow.connect([(dartel_template, outputnode, [('outputspec.template_file','template_file')]),
+    workflow.connect([(dartel_template, outputnode, [('outputspec.template_file', 'template_file')]),
                       (norm2mni, outputnode, [("normalized_files", "normalized_files")]),
                       (calc_icv, outputnode, [("icv", "icv")]),
                       ])
@@ -259,20 +259,20 @@ def create_DARTEL_template(name='dartel_template'):
     if version:
         spm_path = version['path']
         if version['name'] == 'SPM8':
-            tissue1 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 1), 2, (True,True), (False, False))
-            tissue2 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 2), 2, (True,True), (False, False))
-            tissue3 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 3), 2, (True,False), (False, False))
-            tissue4 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 4), 3, (False,False), (False, False))
-            tissue5 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 5), 4, (False,False), (False, False))
-            tissue6 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 6), 2, (False,False), (False, False))
+            tissue1 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 1), 2, (True, True), (False, False))
+            tissue2 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 2), 2, (True, True), (False, False))
+            tissue3 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 3), 2, (True, False), (False, False))
+            tissue4 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 4), 3, (False, False), (False, False))
+            tissue5 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 5), 4, (False, False), (False, False))
+            tissue6 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 6), 2, (False, False), (False, False))
         elif version['name'] == 'SPM12':
             spm_path = version['path']
-            tissue1 = ((os.path.join(spm_path,'tpm/TPM.nii'), 1), 1, (True,True), (False, False))
-            tissue2 = ((os.path.join(spm_path,'tpm/TPM.nii'), 2), 1, (True,True), (False, False))
-            tissue3 = ((os.path.join(spm_path,'tpm/TPM.nii'), 3), 2, (True,False), (False, False))
-            tissue4 = ((os.path.join(spm_path,'tpm/TPM.nii'), 4), 3, (False,False), (False, False))
-            tissue5 = ((os.path.join(spm_path,'tpm/TPM.nii'), 5), 4, (False,False), (False, False))
-            tissue6 = ((os.path.join(spm_path,'tpm/TPM.nii'), 6), 2, (False,False), (False, False))
+            tissue1 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 1), 1, (True, True), (False, False))
+            tissue2 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 2), 1, (True, True), (False, False))
+            tissue3 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 3), 2, (True, False), (False, False))
+            tissue4 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 4), 3, (False, False), (False, False))
+            tissue5 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 5), 4, (False, False), (False, False))
+            tissue6 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 6), 2, (False, False), (False, False))
         else:
             logger.critical('Unsupported version of SPM')
 
@@ -301,7 +301,7 @@ def create_DARTEL_template(name='dartel_template'):
                                                        ]),
                          name="outputspec")
     workflow.connect([
-            (dartel, outputnode, [('final_template_file','template_file'),
+            (dartel, outputnode, [('final_template_file', 'template_file'),
                                   ('dartel_flow_fields', 'flow_fields')]),
             ])
 

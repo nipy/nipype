@@ -25,19 +25,19 @@ from nipype.interfaces.ants import Registration
 """
 
 homeDir = os.getenv("HOME")
-requestedPath = os.path.join(homeDir,'nipypeTestPath')
+requestedPath = os.path.join(homeDir, 'nipypeTestPath')
 mydatadir = os.path.realpath(requestedPath)
 if not os.path.exists(mydatadir):
     os.makedirs(mydatadir)
 print(mydatadir)
 
 MyFileURLs = [
-           ('http://slicer.kitware.com/midas3/download?bitstream=13121','01_T1_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13122','02_T1_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13121', '01_T1_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13122', '02_T1_half.nii.gz'),
            ]
 for tt in MyFileURLs:
     myURL = tt[0]
-    localFilename = os.path.join(mydatadir,tt[1])
+    localFilename = os.path.join(mydatadir, tt[1])
     if not os.path.exists(localFilename):
         remotefile = urllib.request.urlopen(myURL)
 
@@ -49,8 +49,8 @@ for tt in MyFileURLs:
         print("File previously downloaded {0}".format(localFilename))
 
 input_images = [
-    os.path.join(mydatadir,'01_T1_half.nii.gz'),
-    os.path.join(mydatadir,'02_T1_half.nii.gz'),
+    os.path.join(mydatadir, '01_T1_half.nii.gz'),
+    os.path.join(mydatadir, '02_T1_half.nii.gz'),
 ]
 
 """

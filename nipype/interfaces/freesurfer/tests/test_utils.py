@@ -24,14 +24,14 @@ def create_files_in_directory():
     outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
     os.chdir(outdir)
-    filelist = ['a.nii','b.nii']
+    filelist = ['a.nii', 'b.nii']
     for f in filelist:
         hdr = nif.Nifti1Header()
-        shape = (3,3,3,4)
+        shape = (3, 3, 3, 4)
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
-        nif.save(nif.Nifti1Image(img,np.eye(4),hdr),
-                 os.path.join(outdir,f))
+        nif.save(nif.Nifti1Image(img, np.eye(4), hdr),
+                 os.path.join(outdir, f))
     with open(os.path.join(outdir, 'reg.dat'), 'wt') as fp:
         fp.write('dummy file')
     filelist.append('reg.dat')
@@ -43,11 +43,11 @@ def create_surf_file():
     os.chdir(outdir)
     surf = 'lh.a.nii'
     hdr = nif.Nifti1Header()
-    shape = (1,100,1)
+    shape = (1, 100, 1)
     hdr.set_data_shape(shape)
     img = np.random.random(shape)
-    nif.save(nif.Nifti1Image(img,np.eye(4),hdr),
-             os.path.join(outdir,surf))
+    nif.save(nif.Nifti1Image(img, np.eye(4), hdr),
+             os.path.join(outdir, surf))
     return surf, outdir, cwd
 
 def clean_directory(outdir, old_wd):
@@ -80,10 +80,10 @@ def test_sample2surf():
     # Test a basic command line
     yield assert_equal, s2s.cmdline, ("mri_vol2surf "
                                       "--hemi lh --o %s --ref %s --reg reg.dat --projfrac 0.500 --mov %s"
-                                      % (os.path.join(cwd, "lh.a.mgz"),files[1],files[0]))
+                                      % (os.path.join(cwd, "lh.a.mgz"), files[1], files[0]))
 
     # Test identity
-    s2sish = fs.SampleToSurface(source_file = files[1], reference_file = files[0],hemi="rh")
+    s2sish = fs.SampleToSurface(source_file = files[1], reference_file = files[0], hemi="rh")
     yield assert_not_equal, s2s, s2sish
 
     # Test hits file name creation
@@ -177,7 +177,7 @@ def test_applymask():
     # Test exception with mandatory args absent
     yield assert_raises, ValueError, masker.run
     for input in ["in_file", "mask_file"]:
-        indict = {input:filelist[0]}
+        indict = {input: filelist[0]}
         willbreak = fs.ApplyMask(**indict)
         yield assert_raises, ValueError, willbreak.run
 
@@ -218,7 +218,7 @@ def test_surfshots():
     yield assert_equal, fotos.cmdline, "tksurfer fsaverage lh pial -tcl snapshots.tcl"
 
     # Test identity
-    schmotos = fs.SurfaceSnapshots(subject_id="mysubject",hemi="rh",surface="white")
+    schmotos = fs.SurfaceSnapshots(subject_id="mysubject", hemi="rh", surface="white")
     yield assert_not_equal, fotos, schmotos
 
     # Test that the tcl script gets written

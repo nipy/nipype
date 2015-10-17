@@ -156,7 +156,7 @@ class AFNICommand(CommandLine):
         if out_names:
             for name in out_names:
                 if outputs[name]:
-                    _,_,ext = split_filename(outputs[name])
+                    _, _, ext = split_filename(outputs[name])
                     if ext == "":
                         outputs[name] = outputs[name] + "+orig.BRIK"
         return outputs

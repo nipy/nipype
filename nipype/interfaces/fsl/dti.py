@@ -175,9 +175,9 @@ class FSLXCommandOutputSpec(TraitedSpec):
     mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
     mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
                                                              'distribution on f anisotropy'))
-    mean_S0samples = File(exists=True,desc=('Mean of distribution on T2w'
+    mean_S0samples = File(exists=True, desc=('Mean of distribution on T2w'
                                             'baseline signal intensity S0'))
-    mean_tausamples = File(exists=True,desc=('Mean of distribution on '
+    mean_tausamples = File(exists=True, desc=('Mean of distribution on '
                                              'tau samples (only with rician noise)'))
     phsamples = OutputMultiPath(File(exists=True), desc=('phi samples, per fiber'))
     thsamples = OutputMultiPath(File(exists=True), desc=('theta samples, per fiber'))
@@ -271,7 +271,7 @@ class BEDPOSTX5OutputSpec(TraitedSpec):
     mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
     mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
                                                              'distribution on f anisotropy'))
-    mean_S0samples = File(exists=True,desc=('Mean of distribution on T2w'
+    mean_S0samples = File(exists=True, desc=('Mean of distribution on T2w'
                                             'baseline signal intensity S0'))
     mean_phsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
                                                               'distribution on phi'))

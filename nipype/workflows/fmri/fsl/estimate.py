@@ -128,9 +128,9 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
                                   ('ev_files', 'ev_files')]),
         (modelgen, modelestimate, [('design_file', 'design_file')]),
 
-        (merge_contrasts, ztopval,[('out', 'in_file')]),
+        (merge_contrasts, ztopval, [('out', 'in_file')]),
         (ztopval, outputspec, [('out_file', 'pfiles')]),
-        (merge_contrasts, outputspec,[('out', 'zfiles')]),
+        (merge_contrasts, outputspec, [('out', 'zfiles')]),
         (modelestimate, outputspec, [('param_estimates', 'parameter_estimates'),
                                      ('dof_file', 'dof_file')]),
         ])

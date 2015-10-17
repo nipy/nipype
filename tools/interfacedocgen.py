@@ -187,7 +187,7 @@ class InterfaceHelpWriter(object):
         filename = self._uri2path(uri)
         if filename is None:
             # nothing that we could handle here.
-            return ([],[])
+            return ([], [])
         f = open(filename, 'rt')
         functions, classes = self._parse_lines(f, uri)
         f.close()
@@ -260,10 +260,10 @@ class InterfaceHelpWriter(object):
                 continue
 
             if isinstance(workflow, Workflow):
-                workflows.append((workflow,function, finst))
+                workflows.append((workflow, function, finst))
 
         if not classes and not workflows and not helper_functions:
-            print('WARNING: Empty -',uri)  # dbg
+            print('WARNING: Empty -', uri)  # dbg
             return ''
 
         # Make a shorter version of the uri that omits the package name for
@@ -326,7 +326,7 @@ class InterfaceHelpWriter(object):
             ad += '.. autofunction:: %s\n\n' % name
             """
 
-            (_,fname) = tempfile.mkstemp(suffix=".dot")
+            (_, fname) = tempfile.mkstemp(suffix=".dot")
             workflow.write_graph(dotfilename=fname, graph2use='hierarchical')
 
             ad += self._write_graph_section(fname, 'Graph') + '\n'
@@ -430,7 +430,7 @@ class InterfaceHelpWriter(object):
                     modules.append(module_uri)
         return sorted(modules)
 
-    def write_modules_api(self, modules,outdir):
+    def write_modules_api(self, modules, outdir):
         # write the list
         written_modules = []
         for m in modules:
@@ -467,7 +467,7 @@ class InterfaceHelpWriter(object):
             os.mkdir(outdir)
         # compose list of modules
         modules = self.discover_modules()
-        self.write_modules_api(modules,outdir)
+        self.write_modules_api(modules, outdir)
 
     def write_index(self, outdir, froot='gen', relative_to=None):
         """Make a reST API index file from written files
@@ -496,11 +496,11 @@ class InterfaceHelpWriter(object):
             relpath = outdir.replace(relative_to + os.path.sep, '')
         else:
             relpath = outdir
-        idx = open(path,'wt')
+        idx = open(path, 'wt')
         w = idx.write
         w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
         w('.. toctree::\n')
         w('   :maxdepth: 2\n\n')
         for f in self.written_modules:
-            w('   %s\n' % os.path.join(relpath,f))
+            w('   %s\n' % os.path.join(relpath, f))
         idx.close()

@@ -82,7 +82,7 @@ class SlicerCommandLine(CommandLine):
 
                 name = param.getElementsByTagName('name')[0].firstChild.nodeValue
 
-                typesDict = {'integer': traits.Int, 'double': traits.Float, 'float': traits.Float, 'image': File, 'transform': File, 'boolean': traits.Bool, 'string': traits.Str, 'file':File}
+                typesDict = {'integer': traits.Int, 'double': traits.Float, 'float': traits.Float, 'image': File, 'transform': File, 'boolean': traits.Bool, 'string': traits.Str, 'file': File}
 
                 if param.nodeName == 'string-enumeration':
                     type = traits.Enum
@@ -121,7 +121,7 @@ class SlicerCommandLine(CommandLine):
             return os.path.join(os.getcwd(), self._outputs_filenames[name])
         return None
 
-    def _gen_filename_from_param(self,param):
+    def _gen_filename_from_param(self, param):
         base = param.getElementsByTagName('name')[0].firstChild.nodeValue
         fileExtensions = param.getAttribute("fileExtensions")
         if fileExtensions:

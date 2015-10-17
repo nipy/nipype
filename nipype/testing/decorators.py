@@ -44,7 +44,7 @@ def make_label_dec(label, ds=None):
     >>> f.hard
     True
     """
-    if isinstance(label,str):
+    if isinstance(label, str):
         labels = [label]
     else:
         labels = label
@@ -52,11 +52,11 @@ def make_label_dec(label, ds=None):
     # dry run on a dummy function.
     tmp = lambda: None
     for label in labels:
-        setattr(tmp,label,True)
+        setattr(tmp, label, True)
     # This is the actual decorator we'll return
     def decor(f):
         for label in labels:
-            setattr(f,label,True)
+            setattr(f, label, True)
         return f
     # Apply the user's docstring
     if ds is None:

@@ -7,8 +7,8 @@ import os
 from shutil import rmtree
 from tempfile import mkdtemp
 
-from nipype.testing import (assert_equal,assert_raises,
-                            assert_almost_equal,example_data)
+from nipype.testing import (assert_equal, assert_raises,
+                            assert_almost_equal, example_data)
 
 import numpy as np
 import nibabel as nb
@@ -44,7 +44,7 @@ def test_normalize_tpms():
 
     sumdata = np.zeros_like(mskdata)
 
-    for i,tstfname in enumerate(out_files):
+    for i, tstfname in enumerate(out_files):
         normdata = nb.load(tstfname).get_data()
         sumdata += normdata
         yield assert_equal, np.all(normdata[mskdata == 0] == 0), True

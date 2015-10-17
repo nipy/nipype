@@ -77,7 +77,7 @@ class Registration(CommandLine):
         outputs['warped_files'] = []
         outputs['warped_files_flags'] = []
 
-        for i,params in enumerate(self.inputs.parameters):
+        for i, params in enumerate(self.inputs.parameters):
             config = {}
 
             with open(params, 'r') as f:
@@ -95,7 +95,7 @@ class Registration(CommandLine):
             warped_file = None
             if config['WriteResultImage']:
                 warped_file = op.join(out_dir,
-                                      'result.%01d.%s' % (i,config['ResultImageFormat']))
+                                      'result.%01d.%s' % (i, config['ResultImageFormat']))
 
             outputs['warped_files'].append(warped_file)
             outputs['warped_files_flags'].append(config['WriteResultImage'])
@@ -106,7 +106,7 @@ class Registration(CommandLine):
         return outputs
 
 
-    def _cast(self,val):
+    def _cast(self, val):
         if val.startswith('"') and val.endswith('"'):
             if val == '"true"':
                 return True
@@ -160,7 +160,7 @@ class ApplyWarp(CommandLine):
     def _list_outputs(self):
         outputs = self._outputs().get()
         out_dir = op.abspath(self.inputs.output_path)
-        outputs['warped_file'] = op.join(out_dir,'result.nii.gz')
+        outputs['warped_file'] = op.join(out_dir, 'result.nii.gz')
         return outputs
 
 
@@ -199,9 +199,9 @@ class AnalyzeWarp(CommandLine):
     def _list_outputs(self):
         outputs = self._outputs().get()
         out_dir = op.abspath(self.inputs.output_path)
-        outputs['disp_field'] = op.join(out_dir,'deformationField.nii.gz')
-        outputs['jacdet_map'] = op.join(out_dir,'spatialJacobian.nii.gz')
-        outputs['jacmat_map'] = op.join(out_dir,'fullSpatialJacobian.nii.gz')
+        outputs['disp_field'] = op.join(out_dir, 'deformationField.nii.gz')
+        outputs['jacdet_map'] = op.join(out_dir, 'spatialJacobian.nii.gz')
+        outputs['jacmat_map'] = op.join(out_dir, 'fullSpatialJacobian.nii.gz')
         return outputs
 
 
@@ -243,5 +243,5 @@ class PointsWarp(CommandLine):
 
         fname, ext = op.splitext(op.basename(self.inputs.points_file))
 
-        outputs['warped_file'] = op.join(out_dir,'outputpoints%s' % ext)
+        outputs['warped_file'] = op.join(out_dir, 'outputpoints%s' % ext)
         return outputs

@@ -279,7 +279,7 @@ def count_iterables(iterables, synchronize=False):
     if synchronize:
         op = max
     else:
-        op = lambda x,y: x*y
+        op = lambda x, y: x*y
     return reduce(op, [len(func()) for _, func in iterables.items()])
 
 def walk(children, level=0, path=None, usename=True):

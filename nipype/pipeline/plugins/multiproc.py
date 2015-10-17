@@ -18,7 +18,7 @@ def run_node(node, updatehash):
         result['result'] = node.run(updatehash=updatehash)
     except:
         etype, eval, etr = sys.exc_info()
-        result['traceback'] = format_exception(etype,eval,etr)
+        result['traceback'] = format_exception(etype, eval, etr)
         result['result'] = node.result
     return result
 

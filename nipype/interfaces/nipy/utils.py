@@ -73,7 +73,7 @@ class Similarity(BaseInterface):
         warnings.warn(("This interface is deprecated since 0.10.0."
                        " Please use nipype.algorithms.metrics.Similarity"),
                       DeprecationWarning)
-        super(Similarity,self).__init__(**inputs)
+        super(Similarity, self).__init__(**inputs)
 
     def _run_interface(self, runtime):
 

@@ -48,7 +48,7 @@ Set the default directory and lookup table (LUT) paths
 """
 
 fs_dir = os.environ['FREESURFER_HOME']
-lookup_file = op.join(fs_dir,'FreeSurferColorLUT.txt')
+lookup_file = op.join(fs_dir, 'FreeSurferColorLUT.txt')
 subjects_dir = op.join(fs_dir, 'subjects/')
 output_dir = './tessellate_tutorial'
 
@@ -99,7 +99,7 @@ Finally, create and run another pipeline that connects the workflow and datasink
 
 tesspipe = pe.Workflow(name='tessellate_tutorial')
 tesspipe.base_dir = output_dir
-tesspipe.connect([(tessflow, datasink,[('outputspec.meshes', '@meshes.all')])])
+tesspipe.connect([(tessflow, datasink, [('outputspec.meshes', '@meshes.all')])])
 
 """
 If the surfaces are to be packaged, this will connect the CFFConverter
@@ -107,7 +107,7 @@ node to the tessellation and smoothing workflow, as well as to the datasink.
 """
 
 if cff:
-    tesspipe.connect([(tessflow, cff,[('outputspec.meshes', 'gifti_surfaces')])])
-    tesspipe.connect([(cff, datasink,[('connectome_file', '@cff')])])
+    tesspipe.connect([(tessflow, cff, [('outputspec.meshes', 'gifti_surfaces')])])
+    tesspipe.connect([(cff, datasink, [('connectome_file', '@cff')])])
 
 tesspipe.run()

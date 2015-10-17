@@ -19,7 +19,7 @@ class MRConvertInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='voxel-order data filename')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
-    extract_at_axis = traits.Enum(1,2,3, argstr='-coord %s', position=1,
+    extract_at_axis = traits.Enum(1, 2, 3, argstr='-coord %s', position=1,
                                   desc='"Extract data only at the coordinates specified. This option specifies the Axis. Must be used in conjunction with extract_at_coordinate.')
     extract_at_coordinate = traits.List(traits.Float, argstr='%s', sep=',', position=2, minlen=1, maxlen=3,
                                         desc='"Extract data only at the coordinates specified. This option specifies the coordinates. Must be used in conjunction with extract_at_axis. Three comma-separated numbers giving the size of each voxel in mm.')
@@ -28,7 +28,7 @@ class MRConvertInputSpec(CommandLineInputSpec):
                              desc='Three comma-separated numbers giving the size of each voxel in mm.')
     output_datatype = traits.Enum("nii", "float", "char", "short", "int", "long", "double", argstr='-output %s', position=2,
                                   desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"') #, usedefault=True)
-    extension = traits.Enum("mif","nii", "float", "char", "short", "int", "long", "double", position=2,
+    extension = traits.Enum("mif", "nii", "float", "char", "short", "int", "long", "double", position=2,
                             desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"', usedefault=True)
     layout = traits.Enum("nii", "float", "char", "short", "int", "long", "double", argstr='-output %s', position=2,
                          desc='specify the layout of the data in memory. The actual layout produced will depend on whether the output image format can support it.')

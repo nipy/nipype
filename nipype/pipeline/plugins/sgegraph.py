@@ -69,7 +69,7 @@ class SGEGraphPlugin(GraphPluginBase):
             """
             job_name = 'j{0}_{1}'.format(jobnumber, nodeslist[jobnumber]._id)
             # Condition job_name to be a valid bash identifier (i.e. - is invalid)
-            job_name = job_name.replace('-','_').replace('.','_').replace(':','_')
+            job_name = job_name.replace('-', '_').replace('.', '_').replace(':', '_')
             return job_name
         batch_dir, _ = os.path.split(pyfiles[0])
         submitjobsfile = os.path.join(batch_dir, 'submit_jobs.sh')
@@ -97,7 +97,7 @@ class SGEGraphPlugin(GraphPluginBase):
             fp.writelines('# Condense format attempted\n')
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
-                if cache_doneness_per_node.get(idx,False):
+                if cache_doneness_per_node.get(idx, False):
                     continue
                 else:
                     template, qsub_args = self._get_args(

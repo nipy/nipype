@@ -21,12 +21,12 @@ from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 
 
 class DTIReconInputSpec(CommandLineInputSpec):
-    DWI = File(desc='Input diffusion volume', argstr='%s',exists=True, mandatory=True,position=1)
-    out_prefix = traits.Str("dti", desc='Output file prefix', argstr='%s', usedefault=True,position=2)
+    DWI = File(desc='Input diffusion volume', argstr='%s', exists=True, mandatory=True, position=1)
+    out_prefix = traits.Str("dti", desc='Output file prefix', argstr='%s', usedefault=True, position=2)
     output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-ot %s', desc='output file type', usedefault=True)
     bvecs = File(exists=True, desc = 'b vectors file',
                  argstr='-gm %s', mandatory=True)
-    bvals = File(exists=True,desc = 'b values file', mandatory=True)
+    bvals = File(exists=True, desc = 'b values file', mandatory=True)
     n_averages = traits.Int(desc='Number of averages', argstr='-nex %s')
     image_orientation_vectors = traits.List(traits.Float(), minlen=6, maxlen=6, desc="""specify image orientation vectors. if just one argument given,
         will treat it as filename and read the orientation vectors from

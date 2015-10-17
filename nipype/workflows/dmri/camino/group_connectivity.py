@@ -49,8 +49,8 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
 
     if template_args_dict == 0:
         info = dict(dwi=[['subject_id', 'dwi']],
-                    bvecs=[['subject_id','bvecs']],
-                    bvals=[['subject_id','bvals']])
+                    bvecs=[['subject_id', 'bvecs']],
+                    bvals=[['subject_id', 'bvals']])
     else:
         info = template_args_dict
 
@@ -78,8 +78,8 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
     l1pipeline = pe.Workflow(name="l1pipeline_"+group_id)
     l1pipeline.base_dir = output_dir
     l1pipeline.base_output_dir = group_id
-    l1pipeline.connect([(subj_infosource, datasource,[('subject_id', 'subject_id')])])
-    l1pipeline.connect([(subj_infosource, conmapper,[('subject_id', 'inputnode.subject_id')])])
+    l1pipeline.connect([(subj_infosource, datasource, [('subject_id', 'subject_id')])])
+    l1pipeline.connect([(subj_infosource, conmapper, [('subject_id', 'inputnode.subject_id')])])
     l1pipeline.connect([(datasource, conmapper, [("dwi", "inputnode.dwi"),
                                                  ("bvals", "inputnode.bvals"),
                                                  ("bvecs", "inputnode.bvecs"),
@@ -95,5 +95,5 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
                                                ("outputnode.mean_fiber_length", "@l1output.mean_fiber_length"),
                                                ("outputnode.fiber_length_std", "@l1output.fiber_length_std"),
                                                ])])
-    l1pipeline.connect([(group_infosource, datasink,[('group_id','@group_id')])])
+    l1pipeline.connect([(group_infosource, datasink, [('group_id', '@group_id')])])
     return l1pipeline

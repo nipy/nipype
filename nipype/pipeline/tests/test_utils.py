@@ -188,7 +188,7 @@ def test_outputs_removal_wf():
         for filename in files:
             with open(filename, 'wt') as fp:
                 fp.write('%d' % arg1)
-        return file1, file2, os.path.join(os.getcwd(),"subdir")
+        return file1, file2, os.path.join(os.getcwd(), "subdir")
 
     def test_function2(in_file, arg):
         import os

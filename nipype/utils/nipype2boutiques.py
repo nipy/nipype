@@ -39,16 +39,16 @@ def main(argv):
     json_string = generate_boutiques_descriptor(parsed.module,
                                                 parsed.interface,
                                                 parsed.ignored_template_inputs,
-                                                parsed.docker_image,parsed.docker_index,
+                                                parsed.docker_image, parsed.docker_index,
                                                 parsed.verbose,
                                                 parsed.ignore_template_numbers)
 
     # Writes JSON string to file
-    f = open(parsed.output,'w')
+    f = open(parsed.output, 'w')
     f.write(json_string)
     f.close()
 
-def generate_boutiques_descriptor(module, interface_name, ignored_template_inputs,docker_image,docker_index,verbose,ignore_template_numbers):
+def generate_boutiques_descriptor(module, interface_name, ignored_template_inputs, docker_image, docker_index, verbose, ignore_template_numbers):
     '''
     Returns a JSON string containing a JSON Boutiques description of a Nipype interface.
     Arguments:
@@ -63,7 +63,7 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
 
     # Retrieves Nipype interface
     __import__(module)
-    interface = getattr(sys.modules[module],interface_name)()
+    interface = getattr(sys.modules[module], interface_name)()
     inputs = interface.input_spec()
     outputs = interface.output_spec()
 
@@ -83,15 +83,15 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
 
     # Generates tool inputs
     for name, spec in sorted(interface.inputs.traits(transient=None).items()):
-        input = get_boutiques_input(inputs, interface, name, spec,ignored_template_inputs,verbose,ignore_template_numbers)
+        input = get_boutiques_input(inputs, interface, name, spec, ignored_template_inputs, verbose, ignore_template_numbers)
         tool_desc['inputs'].append(input)
         tool_desc['command-line'] += input['command-line-key']+" "
         if verbose:
             print("-> Adding input "+input['name'])
 
     # Generates tool outputs
-    for name,spec in sorted(outputs.traits(transient=None).items()):
-        output = get_boutiques_output(name,interface,tool_desc['inputs'],verbose)
+    for name, spec in sorted(outputs.traits(transient=None).items()):
+        output = get_boutiques_output(name, interface, tool_desc['inputs'], verbose)
         if output['path-template'] != "":
             tool_desc['outputs'].append(output)
             if verbose:
@@ -108,7 +108,7 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
 
     return simplejson.dumps(tool_desc, indent=4, separators=(',', ': '))
 
-def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs,verbose,ignore_template_numbers):
+def get_boutiques_input(inputs, interface, input_name, spec, ignored_template_inputs, verbose, ignore_template_numbers):
     """
     Returns a dictionary containing the Boutiques input corresponding to a Nipype intput.
 
@@ -129,7 +129,7 @@ def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs
 
     input = {}
     input['id'] = input_name
-    input['name'] = input_name.replace('_',' ').capitalize()
+    input['name'] = input_name.replace('_', ' ').capitalize()
     input['type'] = get_type_from_spec_info(spec_info)
     input['list'] = is_list(spec_info)
     input['command-line-key'] = "["+input_name.upper()+"]" # assumes that input names are unique
@@ -147,10 +147,10 @@ def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs
 
 
     # Create unique, temporary value.
-    temp_value = must_generate_value(input_name,input['type'],ignored_template_inputs,spec_info,spec,ignore_template_numbers)
+    temp_value = must_generate_value(input_name, input['type'], ignored_template_inputs, spec_info, spec, ignore_template_numbers)
     if temp_value:
-        tempvalue = get_unique_value(input['type'],input_name)
-        setattr(interface.inputs,input_name,tempvalue)
+        tempvalue = get_unique_value(input['type'], input_name)
+        setattr(interface.inputs, input_name, tempvalue)
         input['tempvalue'] = tempvalue
         if verbose:
             print("oo Path-template creation using "+input['id']+"="+str(tempvalue))
@@ -162,7 +162,7 @@ def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs
 
     return input
 
-def get_boutiques_output(name,interface,tool_inputs,verbose=False):
+def get_boutiques_output(name, interface, tool_inputs, verbose=False):
     """
     Returns a dictionary containing the Boutiques output corresponding to a Nipype output.
 
@@ -178,7 +178,7 @@ def get_boutiques_output(name,interface,tool_inputs,verbose=False):
       * There is a single output value (output lists are not supported).
     """
     output = {}
-    output['name'] = name.replace('_',' ').capitalize()
+    output['name'] = name.replace('_', ' ').capitalize()
     output['id'] = name
     output['type'] = "File"
     output['path-template'] = ""
@@ -187,7 +187,7 @@ def get_boutiques_output(name,interface,tool_inputs,verbose=False):
     # Path template creation.
 
     output_value = interface._list_outputs()[name]
-    if output_value != "" and isinstance(output_value,str): # FIXME: this crashes when there are multiple output values.
+    if output_value != "" and isinstance(output_value, str): # FIXME: this crashes when there are multiple output values.
         # Go find from which input value it was built
         for input in tool_inputs:
             if not input['tempvalue']:
@@ -197,7 +197,7 @@ def get_boutiques_output(name,interface,tool_inputs,verbose=False):
                 # Take the base name
                 input_value = os.path.splitext(os.path.basename(input_value))[0]
             if str(input_value) in output_value:
-                output_value = os.path.basename(output_value.replace(input_value,input['command-line-key'])) # FIXME: this only works if output is written in the current directory
+                output_value = os.path.basename(output_value.replace(input_value, input['command-line-key'])) # FIXME: this only works if output is written in the current directory
         output['path-template'] = os.path.basename(output_value)
     return output
 
@@ -224,7 +224,7 @@ def is_list(spec_info):
         return True
     return False
 
-def get_unique_value(type,id):
+def get_unique_value(type, id):
     '''
     Returns a unique value of type 'type', for input with id 'id',
     assuming id is unique.
@@ -245,7 +245,7 @@ def create_tempfile():
     fileTemp.close()
     return fileTemp.name
 
-def must_generate_value(name,type,ignored_template_inputs,spec_info,spec,ignore_template_numbers):
+def must_generate_value(name, type, ignored_template_inputs, spec_info, spec, ignore_template_numbers):
     '''
     Return True if a temporary value must be generated for this input.
     Arguments:

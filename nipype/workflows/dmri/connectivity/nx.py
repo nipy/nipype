@@ -60,25 +60,25 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     mergeNetworks = pe.Node(interface=util.Merge(2), name="mergeNetworks")
     mergeCSVs = mergeNetworks.clone("mergeCSVs")
 
-    pipeline.connect([(inputnode, ntwkMetrics,[("network_file","in_file")])])
-    pipeline.connect([(ntwkMetrics, Matlab2CSV_node,[("node_measures_matlab","in_file")])])
-    pipeline.connect([(ntwkMetrics, Matlab2CSV_global,[("global_measures_matlab","in_file")])])
+    pipeline.connect([(inputnode, ntwkMetrics, [("network_file", "in_file")])])
+    pipeline.connect([(ntwkMetrics, Matlab2CSV_node, [("node_measures_matlab", "in_file")])])
+    pipeline.connect([(ntwkMetrics, Matlab2CSV_global, [("global_measures_matlab", "in_file")])])
 
-    pipeline.connect([(Matlab2CSV_node, MergeCSVFiles_node,[("csv_files","in_files")])])
+    pipeline.connect([(Matlab2CSV_node, MergeCSVFiles_node, [("csv_files", "in_files")])])
     pipeline.connect([(inputnode, MergeCSVFiles_node, [(("extra_field", add_nodal_to_filename), "out_file")])])
-    pipeline.connect([(inputnode, MergeCSVFiles_node,[("extra_field","extra_field")])])
+    pipeline.connect([(inputnode, MergeCSVFiles_node, [("extra_field", "extra_field")])])
     pipeline.connect([(inputnode, MergeCSVFiles_node, [(("network_file", pullnodeIDs), "row_headings")])])
 
-    pipeline.connect([(Matlab2CSV_global, MergeCSVFiles_global,[("csv_files","in_files")])])
+    pipeline.connect([(Matlab2CSV_global, MergeCSVFiles_global, [("csv_files", "in_files")])])
     pipeline.connect([(Matlab2CSV_global, MergeCSVFiles_global, [(("csv_files", remove_identical_paths), "column_headings")])])
     #MergeCSVFiles_global.inputs.row_heading_title = 'metric'
     #MergeCSVFiles_global.inputs.column_headings = ['average']
 
     pipeline.connect([(inputnode, MergeCSVFiles_global, [(("extra_field", add_global_to_filename), "out_file")])])
-    pipeline.connect([(inputnode, MergeCSVFiles_global,[("extra_field","extra_field")])])
+    pipeline.connect([(inputnode, MergeCSVFiles_global, [("extra_field", "extra_field")])])
 
-    pipeline.connect([(inputnode, mergeNetworks,[("network_file","in1")])])
-    pipeline.connect([(ntwkMetrics, mergeNetworks,[("gpickled_network_files","in2")])])
+    pipeline.connect([(inputnode, mergeNetworks, [("network_file", "in1")])])
+    pipeline.connect([(ntwkMetrics, mergeNetworks, [("gpickled_network_files", "in2")])])
 
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["network_files",
                                                                     "csv_files", "matlab_files", "node_csv", "global_csv"]),
@@ -91,7 +91,7 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     pipeline.connect([(MergeCSVFiles_global, mergeCSVs, [("csv_file", "in2")])])
     pipeline.connect([(mergeNetworks, outputnode, [("out", "network_files")])])
     pipeline.connect([(mergeCSVs, outputnode, [("out", "csv_files")])])
-    pipeline.connect([(ntwkMetrics, outputnode,[("matlab_matrix_files", "matlab_files")])])
+    pipeline.connect([(ntwkMetrics, outputnode, [("matlab_matrix_files", "matlab_files")])])
     return pipeline
 
 def create_cmats_to_csv_pipeline(name="cmats_to_csv", extra_column_heading="subject"):
@@ -127,9 +127,9 @@ def create_cmats_to_csv_pipeline(name="cmats_to_csv", extra_column_heading="subj
     MergeCSVFiles = pe.Node(interface=misc.MergeCSVFiles(), name="MergeCSVFiles")
     MergeCSVFiles.inputs.extra_column_heading = extra_column_heading
 
-    pipeline.connect([(inputnode, Matlab2CSV,[("matlab_matrix_files","in_file")])])
-    pipeline.connect([(Matlab2CSV, MergeCSVFiles,[("csv_files","in_files")])])
-    pipeline.connect([(inputnode, MergeCSVFiles,[("extra_field","extra_field")])])
+    pipeline.connect([(inputnode, Matlab2CSV, [("matlab_matrix_files", "in_file")])])
+    pipeline.connect([(Matlab2CSV, MergeCSVFiles, [("csv_files", "in_files")])])
+    pipeline.connect([(inputnode, MergeCSVFiles, [("extra_field", "extra_field")])])
 
     outputnode = pe.Node(interface = util.IdentityInterface(fields=["csv_file"]),
                          name="outputnode")

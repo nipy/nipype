@@ -41,8 +41,8 @@ iflogger = logging.getLogger('interface')
 def transform_to_affine(streams, header, affine):
     rotation, scale = np.linalg.qr(affine)
     streams = move_streamlines(streams, rotation)
-    scale[0:3,0:3] = np.dot(scale[0:3,0:3], np.diag(1. / header['voxel_size']))
-    scale[0:3,3] = abs(scale[0:3,3])
+    scale[0:3, 0:3] = np.dot(scale[0:3, 0:3], np.diag(1. / header['voxel_size']))
+    scale[0:3, 3] = abs(scale[0:3, 3])
     streams = move_streamlines(streams, scale)
     return streams
 
@@ -52,7 +52,7 @@ def read_mrtrix_tracks(in_file, as_generator=True):
     return header, streamlines
 
 def read_mrtrix_header(in_file):
-    fileobj = open(in_file,'r')
+    fileobj = open(in_file, 'r')
     header = {}
     iflogger.info('Reading header data...')
     for line in fileobj:
@@ -60,21 +60,21 @@ def read_mrtrix_header(in_file):
             iflogger.info('Reached the end of the header!')
             break
         elif ': ' in line:
-            line = line.replace('\n','')
-            line = line.replace("'","")
+            line = line.replace('\n', '')
+            line = line.replace("'", "")
             key = line.split(': ')[0]
             value = line.split(': ')[1]
             header[key] = value
-            iflogger.info('...adding "{v}" to header for key "{k}"'.format(v=value,k=key))
+            iflogger.info('...adding "{v}" to header for key "{k}"'.format(v=value, k=key))
     fileobj.close()
-    header['count'] = int(header['count'].replace('\n',''))
-    header['offset'] = int(header['file'].replace('.',''))
+    header['count'] = int(header['count'].replace('\n', ''))
+    header['offset'] = int(header['file'].replace('.', ''))
     return header
 
 def read_mrtrix_streamlines(in_file, header, as_generator=True):
     offset = header['offset']
     stream_count = header['count']
-    fileobj = open(in_file,'r')
+    fileobj = open(in_file, 'r')
     fileobj.seek(offset)
     endianness = native_code
     f4dt = np.dtype(endianness + 'f4')
@@ -87,8 +87,8 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
         iflogger.info('Identifying the number of points per tract...')
         all_str = fileobj.read()
         num_triplets = int(len(all_str) / bytesize)
-        pts = np.ndarray(shape=(num_triplets,pt_cols), dtype='f4',buffer=all_str)
-        nonfinite_list = np.where(np.isfinite(pts[:,2]) == False)
+        pts = np.ndarray(shape=(num_triplets, pt_cols), dtype='f4', buffer=all_str)
+        nonfinite_list = np.where(np.isfinite(pts[:, 2]) == False)
         nonfinite_list = list(nonfinite_list[0])[0:-1] # Converts numpy array to list, removes the last value
         nonfinite_list_bytes = [offset+x*bytesize for x in nonfinite_list]
         for idx, value in enumerate(nonfinite_list):
@@ -127,7 +127,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
             if np.isfinite(nan_pt[0][0]):
                 raise ValueError
                 break
-            xyz = pts[:,:3]
+            xyz = pts[:, :3]
             yield xyz
             n_streams += 1
             if n_streams == stream_count:
@@ -184,8 +184,8 @@ class MRTrix2TrackVis(BaseInterface):
         iflogger.info(header)
         # Writes to Trackvis
         trk_header = nb.trackvis.empty_header()
-        trk_header['dim'] = [dx,dy,dz]
-        trk_header['voxel_size'] = [vx,vy,vz]
+        trk_header['dim'] = [dx, dy, dz]
+        trk_header['voxel_size'] = [vx, vy, vz]
         trk_header['n_count'] = header['count']
 
         if isdefined(self.inputs.matrix_file) and isdefined(self.inputs.registration_image_file):
@@ -199,20 +199,20 @@ class MRTrix2TrackVis(BaseInterface):
             iflogger.info('Using affine from registration image file {r}'.format(r=self.inputs.registration_image_file))
             iflogger.info(reg_affine)
             trk_header['vox_to_ras'] = reg_affine
-            trk_header['dim'] = [r_dx,r_dy,r_dz]
-            trk_header['voxel_size'] = [r_vx,r_vy,r_vz]
+            trk_header['dim'] = [r_dx, r_dy, r_dz]
+            trk_header['voxel_size'] = [r_vx, r_vy, r_vz]
 
-            affine = np.dot(affine,np.diag(1. / np.array([vx, vy, vz, 1])))
+            affine = np.dot(affine, np.diag(1. / np.array([vx, vy, vz, 1])))
             transformed_streamlines = transform_to_affine(streamlines, trk_header, affine)
 
-            aff = affine_from_fsl_mat_file(xfm, [vx,vy,vz], [r_vx,r_vy,r_vz])
+            aff = affine_from_fsl_mat_file(xfm, [vx, vy, vz], [r_vx, r_vy, r_vz])
             iflogger.info(aff)
 
             axcode = aff2axcodes(reg_affine)
             trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
 
             final_streamlines = move_streamlines(transformed_streamlines, aff)
-            trk_tracks = ((ii,None,None) for ii in final_streamlines)
+            trk_tracks = ((ii, None, None) for ii in final_streamlines)
             trk.write(out_filename, trk_tracks, trk_header)
             iflogger.info('Saving transformed Trackvis file as {out}'.format(out=out_filename))
             iflogger.info('New TrackVis Header:')
@@ -223,7 +223,7 @@ class MRTrix2TrackVis(BaseInterface):
             trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
             trk_header['vox_to_ras'] = affine
             transformed_streamlines = transform_to_affine(streamlines, trk_header, affine)
-            trk_tracks = ((ii,None,None) for ii in transformed_streamlines)
+            trk_tracks = ((ii, None, None) for ii in transformed_streamlines)
             trk.write(out_filename, trk_tracks, trk_header)
             iflogger.info('Saving Trackvis file as {out}'.format(out=out_filename))
             iflogger.info('TrackVis Header:')

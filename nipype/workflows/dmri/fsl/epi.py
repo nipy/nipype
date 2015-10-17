@@ -365,18 +365,18 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
         dimension='t'), name='dwi_merge')
 
     outputnode = pe.Node(
-        niu.IdentityInterface(fields=['epi_corrected','out_vsm']),
+        niu.IdentityInterface(fields=['epi_corrected', 'out_vsm']),
         name='outputnode')
 
     pipeline.connect([
                       (inputnode,    select_mag, [('fieldmap_mag', 'in_file')]),
-                      (inputnode,       fslprep, [('fieldmap_pha', 'in_phase'),('te_diff', 'delta_TE')]),
+                      (inputnode,       fslprep, [('fieldmap_pha', 'in_phase'), ('te_diff', 'delta_TE')]),
                       (inputnode,      mask_mag, [('in_mask', 'mask_file')]),
                       (select_mag,     mask_mag, [('roi_file', 'in_file')]),
                       (mask_mag,        fslprep, [('out_file', 'in_magnitude')]),
                       (fslprep,             vsm, [('out_fieldmap', 'phasemap_in_file')]),
                       (inputnode,           vsm, [('fieldmap_mag', 'in_file'),
-                                                  ('encoding_direction','unwarp_direction'),
+                                                  ('encoding_direction', 'unwarp_direction'),
                                                   (('te_diff', _ms2sec), 'asym_se_time'),
                                                   ('vsm_sigma', 'smooth2d'),
                                                   (('epi_echospacing', _ms2sec), 'dwell_time')]),
@@ -385,10 +385,10 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
                       (dwi_split,  dwi_applyxfm, [('out_files', 'in_file')]),
                       (mask_mag,   dwi_applyxfm, [('out_file', 'mask_file')]),
                       (vsm,        dwi_applyxfm, [('shift_out_file', 'shift_in_file')]),
-                      (inputnode,  dwi_applyxfm, [('encoding_direction','unwarp_direction')]),
+                      (inputnode,  dwi_applyxfm, [('encoding_direction', 'unwarp_direction')]),
                       (dwi_applyxfm,  dwi_merge, [('unwarped_file', 'in_files')]),
                       (dwi_merge,    outputnode, [('merged_file', 'epi_corrected')]),
-                      (vsm,          outputnode, [('shift_out_file','out_vsm')])
+                      (vsm,          outputnode, [('shift_out_file', 'out_vsm')])
                      ])
 
 
@@ -462,23 +462,23 @@ def topup_correction(name='topup_correction'):
     merged = pe.Node(fsl.Merge(dimension='t'), name='b0_comb')
 
     topup = pe.Node(fsl.TOPUP(), name='topup')
-    applytopup = pe.Node(fsl.ApplyTOPUP(in_index=[1,2]), name='applytopup')
+    applytopup = pe.Node(fsl.ApplyTOPUP(in_index=[1, 2]), name='applytopup')
 
     pipeline.connect([
-                      (inputnode,     b0_dir, [('in_file_dir','in_file'),('ref_num','t_min')]),
-                      (inputnode,     b0_rev, [('in_file_rev','in_file'),('ref_num','t_min')]),
-                      (inputnode,    combin2, [('in_file_dir','in1'),('in_file_rev','in2')]),
-                      (b0_dir,        combin, [('roi_file','in1')]),
-                      (b0_rev,        combin, [('roi_file','in2')]),
+                      (inputnode,     b0_dir, [('in_file_dir', 'in_file'), ('ref_num', 't_min')]),
+                      (inputnode,     b0_rev, [('in_file_rev', 'in_file'), ('ref_num', 't_min')]),
+                      (inputnode,    combin2, [('in_file_dir', 'in1'), ('in_file_rev', 'in2')]),
+                      (b0_dir,        combin, [('roi_file', 'in1')]),
+                      (b0_rev,        combin, [('roi_file', 'in2')]),
                       (combin,        merged, [('out', 'in_files')]),
-                      (merged,         topup, [('merged_file','in_file')]),
-                      (inputnode,      topup, [('encoding_direction','encoding_direction'),('readout_times','readout_times')]),
-                      (topup,     applytopup, [('out_fieldcoef','in_topup_fieldcoef'),('out_movpar','in_topup_movpar'),
-                                               ('out_enc_file','encoding_file')]),
-                      (combin2,   applytopup, [('out','in_files')]),
-                      (topup,     outputnode, [('out_fieldcoef','out_fieldcoef'),('out_movpar','out_movpar'),
-                                               ('out_enc_file','out_enc_file')]),
-                      (applytopup,outputnode, [('out_corrected','epi_corrected')])
+                      (merged,         topup, [('merged_file', 'in_file')]),
+                      (inputnode,      topup, [('encoding_direction', 'encoding_direction'), ('readout_times', 'readout_times')]),
+                      (topup,     applytopup, [('out_fieldcoef', 'in_topup_fieldcoef'), ('out_movpar', 'in_topup_movpar'),
+                                               ('out_enc_file', 'encoding_file')]),
+                      (combin2,   applytopup, [('out', 'in_files')]),
+                      (topup,     outputnode, [('out_fieldcoef', 'out_fieldcoef'), ('out_movpar', 'out_movpar'),
+                                               ('out_enc_file', 'out_enc_file')]),
+                      (applytopup, outputnode, [('out_corrected', 'epi_corrected')])
                      ])
 
     return pipeline

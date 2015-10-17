@@ -89,7 +89,7 @@ class CreateTiledMosaicInputSpec(ANTSCommandInputSpec):
     output_image = traits.Str('output.png', argstr = '-o %s',
                               desc = 'The output consists of the tiled mosaic image.',
                               usedefault = True)
-    tile_geometry = traits.Str(argstr = '-t %s',desc = (
+    tile_geometry = traits.Str(argstr = '-t %s', desc = (
           'The tile geometry specifies the number of rows and columns'
           'in the output image. For example, if the user specifies "5x10", '
           'then 5 rows by 10 columns of slices are rendered. If R < 0 and C > '

@@ -406,7 +406,7 @@ class FEAT(FSLCommand):
                 outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*ica'))[0]
             else:
                 outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
-        print('Outputs from FEATmodel:',outputs)
+        print('Outputs from FEATmodel:', outputs)
         return outputs
 
 

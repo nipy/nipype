@@ -530,7 +530,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
                                  'seconds. Batch dir contains crashdump file '
                                  'if node raised an exception.\n'
                                  'Node working directory: ({2}) '.format(
-                                     taskid,timeout,node_dir))
+                                     taskid, timeout, node_dir))
                 raise IOError(error_message)
             except IOError as e:
                 result_data['traceback'] = format_exc()

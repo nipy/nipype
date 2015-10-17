@@ -757,9 +757,9 @@ class Label2Vol(FSCommand):
         outfile = self.inputs.vol_label_file
         if not isdefined(outfile):
             for key in ['label_file', 'annot_file', 'seg_file']:
-                if isdefined(getattr(self.inputs,key)):
+                if isdefined(getattr(self.inputs, key)):
                     path = getattr(self.inputs, key)
-                    if isinstance(path,list):
+                    if isinstance(path, list):
                         path = path[0]
                     _, src = os.path.split(path)
             if isdefined(self.inputs.aparc_aseg):

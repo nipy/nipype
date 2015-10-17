@@ -126,10 +126,10 @@ to use 4D. Also `get_vox_dims` function is passed along the input volume of norm
 voxel sizes.
 """
 
-preproc.connect([(realign,coregister,[('mean_image', 'target')]),
-                 (coregister, segment,[('coregistered_source','data')]),
-                 (segment, normalize_func, [('transformation_mat','parameter_file')]),
-                 (segment, normalize_struc, [('transformation_mat','parameter_file'),
+preproc.connect([(realign, coregister, [('mean_image', 'target')]),
+                 (coregister, segment, [('coregistered_source', 'data')]),
+                 (segment, normalize_func, [('transformation_mat', 'parameter_file')]),
+                 (segment, normalize_struc, [('transformation_mat', 'parameter_file'),
                                              ('bias_corrected_image', 'apply_to_files'),
                                              (('bias_corrected_image', get_vox_dims), 'write_voxel_sizes')]),
                  (realign, slice_timing, [('realigned_files', 'in_files')]),
@@ -178,12 +178,12 @@ contrastestimate = pe.Node(interface = spm.EstimateContrast(), name="contrastest
 def pickfirst(l):
     return l[0]
 
-l1analysis.connect([(modelspec,level1design,[('session_info','session_info')]),
-                    (level1design,level1estimate,[('spm_mat_file','spm_mat_file')]),
-                    (level1estimate,contrastestimate,[('spm_mat_file','spm_mat_file'),
-                                                      ('beta_images','beta_images'),
-                                                      ('residual_image','residual_image')]),
-                    (contrastestimate, threshold,[('spm_mat_file','spm_mat_file'),
+l1analysis.connect([(modelspec, level1design, [('session_info', 'session_info')]),
+                    (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
+                    (level1estimate, contrastestimate, [('spm_mat_file', 'spm_mat_file'),
+                                                      ('beta_images', 'beta_images'),
+                                                      ('residual_image', 'residual_image')]),
+                    (contrastestimate, threshold, [('spm_mat_file', 'spm_mat_file'),
                                                   (('spmT_images', pickfirst), 'stat_image')]),
                   ])
 
@@ -204,7 +204,7 @@ to make one we need a helper function.
 
 def makelist(item):
     return [item]
-l1pipeline.connect([(preproc, l1analysis, [(('smooth.smoothed_files',makelist),
+l1pipeline.connect([(preproc, l1analysis, [(('smooth.smoothed_files', makelist),
                                             'modelspec.functional_runs')])])
 
 
@@ -226,7 +226,7 @@ data_dir = os.path.abspath('spm_face_data')
 # Specify the subject directories
 subject_list = ['M03953']
 # Map field names to individual subject runs.
-info = dict(func=[['RawEPI', 'subject_id', 5, ["_%04d" %i for i in range(6,357)]]],
+info = dict(func=[['RawEPI', 'subject_id', 5, ["_%04d" %i for i in range(6, 357)]]],
             struct=[['Structural', 'subject_id', 7, '']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
@@ -297,26 +297,26 @@ those conditions]. The condition names must match the `names` listed
 in the `subjectinfo` function described above.
 """
 
-cond1 = ('positive effect of condition','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[1,1,1,1])
-cond2 = ('positive effect of condition_dtemo','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,1,1,1])
-cond3 = ('positive effect of condition_ddisp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,1,1,1])
+cond1 = ('positive effect of condition', 'T', ['N1*bf(1)', 'N2*bf(1)', 'F1*bf(1)', 'F2*bf(1)'], [1, 1, 1, 1])
+cond2 = ('positive effect of condition_dtemo', 'T', ['N1*bf(2)', 'N2*bf(2)', 'F1*bf(2)', 'F2*bf(2)'], [1, 1, 1, 1])
+cond3 = ('positive effect of condition_ddisp', 'T', ['N1*bf(3)', 'N2*bf(3)', 'F1*bf(3)', 'F2*bf(3)'], [1, 1, 1, 1])
 # non-famous > famous
-fam1 = ('positive effect of Fame','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[1,1,-1,-1])
-fam2 = ('positive effect of Fame_dtemp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,1,-1,-1])
-fam3 = ('positive effect of Fame_ddisp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,1,-1,-1])
+fam1 = ('positive effect of Fame', 'T', ['N1*bf(1)', 'N2*bf(1)', 'F1*bf(1)', 'F2*bf(1)'], [1, 1, -1, -1])
+fam2 = ('positive effect of Fame_dtemp', 'T', ['N1*bf(2)', 'N2*bf(2)', 'F1*bf(2)', 'F2*bf(2)'], [1, 1, -1, -1])
+fam3 = ('positive effect of Fame_ddisp', 'T', ['N1*bf(3)', 'N2*bf(3)', 'F1*bf(3)', 'F2*bf(3)'], [1, 1, -1, -1])
 # rep1 > rep2
-rep1 = ('positive effect of Rep','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[1,-1,1,-1])
-rep2 = ('positive effect of Rep_dtemp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,-1,1,-1])
-rep3 = ('positive effect of Rep_ddisp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,-1,1,-1])
-int1 = ('positive interaction of Fame x Rep','T', ['N1*bf(1)','N2*bf(1)','F1*bf(1)','F2*bf(1)'],[-1,-1,-1,1])
-int2 = ('positive interaction of Fame x Rep_dtemp','T', ['N1*bf(2)','N2*bf(2)','F1*bf(2)','F2*bf(2)'],[1,-1,-1,1])
-int3 = ('positive interaction of Fame x Rep_ddisp','T', ['N1*bf(3)','N2*bf(3)','F1*bf(3)','F2*bf(3)'],[1,-1,-1,1])
+rep1 = ('positive effect of Rep', 'T', ['N1*bf(1)', 'N2*bf(1)', 'F1*bf(1)', 'F2*bf(1)'], [1, -1, 1, -1])
+rep2 = ('positive effect of Rep_dtemp', 'T', ['N1*bf(2)', 'N2*bf(2)', 'F1*bf(2)', 'F2*bf(2)'], [1, -1, 1, -1])
+rep3 = ('positive effect of Rep_ddisp', 'T', ['N1*bf(3)', 'N2*bf(3)', 'F1*bf(3)', 'F2*bf(3)'], [1, -1, 1, -1])
+int1 = ('positive interaction of Fame x Rep', 'T', ['N1*bf(1)', 'N2*bf(1)', 'F1*bf(1)', 'F2*bf(1)'], [-1, -1, -1, 1])
+int2 = ('positive interaction of Fame x Rep_dtemp', 'T', ['N1*bf(2)', 'N2*bf(2)', 'F1*bf(2)', 'F2*bf(2)'], [1, -1, -1, 1])
+int3 = ('positive interaction of Fame x Rep_ddisp', 'T', ['N1*bf(3)', 'N2*bf(3)', 'F1*bf(3)', 'F2*bf(3)'], [1, -1, -1, 1])
 
-contf1 = ['average effect condition','F', [cond1, cond2, cond3]]
+contf1 = ['average effect condition', 'F', [cond1, cond2, cond3]]
 contf2 = ['main effect Fam', 'F', [fam1, fam2, fam3]]
 contf3 = ['main effect Rep', 'F', [rep1, rep2, rep3]]
 contf4 = ['interaction: Fam x Rep', 'F', [int1, int2, int3]]
-contrasts = [cond1, cond2, cond3, fam1, fam2, fam3, rep1, rep2, rep3, int1, int2, int3, contf1, contf2,contf3,contf4]
+contrasts = [cond1, cond2, cond3, fam1, fam2, fam3, rep1, rep2, rep3, int1, int2, int3, contf1, contf2, contf3, contf4]
 
 """Setting up nodes inputs
 """
@@ -328,7 +328,7 @@ slice_timingref = l1pipeline.inputs.preproc.slice_timing
 slice_timingref.num_slices = num_slices
 slice_timingref.time_repetition = TR
 slice_timingref.time_acquisition = TR - TR / float(num_slices)
-slice_timingref.slice_order = list(range(num_slices,0,-1))
+slice_timingref.slice_order = list(range(num_slices, 0, -1))
 slice_timingref.ref_slice = int(num_slices / 2)
 
 l1pipeline.inputs.preproc.smooth.fwhm = [8, 8, 8]
@@ -345,7 +345,7 @@ l1designref.timing_units = modelspecref.output_units
 l1designref.interscan_interval = modelspecref.time_repetition
 l1designref.microtime_resolution = slice_timingref.num_slices
 l1designref.microtime_onset = slice_timingref.ref_slice
-l1designref.bases = {'hrf':{'derivs': [1,1]}}
+l1designref.bases = {'hrf': {'derivs': [1, 1]}}
 
 """
 The following lines automatically inform SPM to create a default set of
@@ -385,21 +385,21 @@ subjectinfo_param = [Bunch(conditions=['N1', 'N2', 'F1', 'F2'],
                            regressor_names=None,
                            regressors=None)]
 
-cont1 = ('Famous_lag1','T', ['F2xLag^1'],[1])
-cont2 = ('Famous_lag2','T', ['F2xLag^2'],[1])
+cont1 = ('Famous_lag1', 'T', ['F2xLag^1'], [1])
+cont2 = ('Famous_lag2', 'T', ['F2xLag^2'], [1])
 fcont1 = ('Famous Lag', 'F', [cont1, cont2])
 paramcontrasts = [cont1, cont2, fcont1]
 
 paramanalysis = l1analysis.clone(name='paramanalysis')
 
-paramanalysis.inputs.level1design.bases = {'hrf':{'derivs': [0,0]}}
+paramanalysis.inputs.level1design.bases = {'hrf': {'derivs': [0, 0]}}
 paramanalysis.inputs.modelspec.subject_info = subjectinfo_param
 paramanalysis.inputs.contrastestimate.contrasts = paramcontrasts
 paramanalysis.inputs.contrastestimate.use_derivs = False
 
 l1pipeline.connect([(preproc, paramanalysis, [('realign.realignment_parameters',
                                                'modelspec.realignment_parameters'),
-                                              (('smooth.smoothed_files',makelist),
+                                              (('smooth.smoothed_files', makelist),
                                                 'modelspec.functional_runs')])])
 
 """
@@ -429,8 +429,8 @@ level1 = pe.Workflow(name="level1")
 level1.base_dir = os.path.abspath('spm_face_tutorial/workingdir')
 
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                (datasource,l1pipeline,[('struct', 'preproc.coregister.source'),
-                                        ('func','preproc.realign.in_files')])
+                (datasource, l1pipeline, [('struct', 'preproc.coregister.source'),
+                                        ('func', 'preproc.realign.in_files')])
                 ])
 
 
@@ -459,15 +459,15 @@ datasink.inputs.base_directory = os.path.abspath('spm_auditory_tutorial/l1output
 
 def getstripdir(subject_id):
     import os
-    return os.path.join(os.path.abspath('spm_auditory_tutorial/workingdir'),'_subject_id_%s' % subject_id)
+    return os.path.join(os.path.abspath('spm_auditory_tutorial/workingdir'), '_subject_id_%s' % subject_id)
 
 # store relevant outputs from various stages of the 1st level analysis
-level1.connect([(infosource, datasink,[('subject_id','container'),
-                                       (('subject_id', getstripdir),'strip_dir')]),
-                (l1pipeline, datasink,[('analysis.contrastestimate.con_images','contrasts.@con'),
-                                       ('analysis.contrastestimate.spmT_images','contrasts.@T'),
-                                       ('paramanalysis.contrastestimate.con_images','paramcontrasts.@con'),
-                                       ('paramanalysis.contrastestimate.spmT_images','paramcontrasts.@T')]),
+level1.connect([(infosource, datasink, [('subject_id', 'container'),
+                                       (('subject_id', getstripdir), 'strip_dir')]),
+                (l1pipeline, datasink, [('analysis.contrastestimate.con_images', 'contrasts.@con'),
+                                       ('analysis.contrastestimate.spmT_images', 'contrasts.@T'),
+                                       ('paramanalysis.contrastestimate.con_images', 'paramcontrasts.@con'),
+                                       ('paramanalysis.contrastestimate.spmT_images', 'paramcontrasts.@T')]),
                 ])
 
 

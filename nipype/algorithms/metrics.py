@@ -450,7 +450,7 @@ class FuzzyOverlap(BaseInterface):
 
         diff = np.zeros(diff_im[0].shape)
 
-        for w,ch in zip(weights,diff_im):
+        for w, ch in zip(weights, diff_im):
             ch[msk == 0] = 0
             diff += w * ch
 
@@ -530,8 +530,8 @@ class ErrorMap(BaseInterface):
         # Flatten both volumes and make the pixel differennce
         mskvector = msk.reshape(-1)
         msk_idxs = np.where(mskvector == 1)
-        refvector = ref_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
-        tstvector = tst_data.reshape(-1,comps)[msk_idxs].astype(np.float32)
+        refvector = ref_data.reshape(-1, comps)[msk_idxs].astype(np.float32)
+        tstvector = tst_data.reshape(-1, comps)[msk_idxs].astype(np.float32)
         diffvector = (refvector-tstvector)
 
         # Scale the difference
@@ -558,9 +558,9 @@ class ErrorMap(BaseInterface):
         hdr.set_data_shape(mapshape)
 
         if not isdefined(self.inputs.out_map):
-            fname,ext = op.splitext(op.basename(self.inputs.in_tst))
+            fname, ext = op.splitext(op.basename(self.inputs.in_tst))
             if ext == '.gz':
-                fname,ext2 = op.splitext(fname)
+                fname, ext2 = op.splitext(fname)
                 ext = ext2 + ext
             self._out_file = op.abspath(fname + "_errmap" + ext)
         else:
@@ -629,7 +629,7 @@ class Similarity(BaseInterface):
             package_check('nipy')
         except Exception as e:
             self._have_nipy = False
-        super(Similarity,self).__init__(**inputs)
+        super(Similarity, self).__init__(**inputs)
 
 
     def _run_interface(self, runtime):
@@ -666,7 +666,7 @@ class Similarity(BaseInterface):
 
         self._similarity = []
 
-        for ts1,ts2 in zip(vols1, vols2):
+        for ts1, ts2 in zip(vols1, vols2):
             histreg = HistogramRegistration(from_img = ts1,
                                             to_img = ts2,
                                             similarity=self.inputs.metric,

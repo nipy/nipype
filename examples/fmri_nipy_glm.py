@@ -70,8 +70,8 @@ data_dir = os.path.abspath('data')
 # Specify the subject directories
 subject_list = ['s1']
 # Map field names to individual subject runs.
-info = dict(func=[['subject_id', ['f3','f5','f7','f10']]],
-            struct=[['subject_id','struct']])
+info = dict(func=[['subject_id', ['f3', 'f5', 'f7', 'f10']]],
+            struct=[['subject_id', 'struct']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
@@ -161,9 +161,9 @@ def subjectinfo(subject_id):
     from copy import deepcopy
     print("Subject ID: %s\n" %str(subject_id))
     output = []
-    names = ['Task-Odd','Task-Even']
+    names = ['Task-Odd', 'Task-Even']
     for r in range(4):
-        onsets = [list(range(15,240,60)),list(range(45,240,60))]
+        onsets = [list(range(15, 240, 60)), list(range(45, 240, 60))]
         output.insert(r,
                       Bunch(conditions=names,
                             onsets=deepcopy(onsets),
@@ -182,9 +182,9 @@ those conditions]. The condition names must match the `names` listed
 in the `subjectinfo` function described above.
 """
 
-cont1 = ('Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5])
-cont2 = ('Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1])
-contrasts = [cont1,cont2]
+cont1 = ('Task>Baseline', 'T', ['Task-Odd', 'Task-Even'], [0.5, 0.5])
+cont2 = ('Task-Odd>Task-Even', 'T', ['Task-Odd', 'Task-Even'], [1, -1])
+contrasts = [cont1, cont2]
 
 """Generate design information using
 :class:`nipype.interfaces.spm.SpecifyModel`. nipy accepts only design specified
@@ -211,9 +211,9 @@ for FSL and SPM
 """
 
 contrast_estimate = pe.Node(interface=EstimateContrast(), name="contrast_estimate")
-cont1 = ('Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5])
-cont2 = ('Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1])
-contrast_estimate.inputs.contrasts = [cont1,cont2]
+cont1 = ('Task>Baseline', 'T', ['Task-Odd', 'Task-Even'], [0.5, 0.5])
+cont2 = ('Task-Odd>Task-Even', 'T', ['Task-Odd', 'Task-Even'], [1, -1])
+contrast_estimate.inputs.contrasts = [cont1, cont2]
 
 """
 Setup the pipeline
@@ -242,24 +242,24 @@ l1pipeline = pe.Workflow(name="level1")
 l1pipeline.base_dir = os.path.abspath('nipy_tutorial/workingdir')
 
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                    (datasource,realign,[('func','in_files')]),
-                    (realign, compute_mask, [('mean_image','mean_volume')]),
-                    (realign, coregister,[('mean_image', 'source'),
-                                          ('realigned_files','apply_to_files')]),
-                    (datasource, coregister,[('struct', 'target')]),
+                    (datasource, realign, [('func', 'in_files')]),
+                    (realign, compute_mask, [('mean_image', 'mean_volume')]),
+                    (realign, coregister, [('mean_image', 'source'),
+                                          ('realigned_files', 'apply_to_files')]),
+                    (datasource, coregister, [('struct', 'target')]),
                     (coregister, smooth, [('coregistered_files', 'in_files')]),
-                    (realign, modelspec,[('realignment_parameters','realignment_parameters')]),
-                    (smooth, modelspec,[('smoothed_files','functional_runs')]),
-                    (realign, art,[('realignment_parameters','realignment_parameters')]),
-                    (coregister, art,[('coregistered_files','realigned_files')]),
-                    (compute_mask,art,[('brain_mask','mask_file')]),
-                    (art, modelspec,[('outlier_files','outlier_files')]),
+                    (realign, modelspec, [('realignment_parameters', 'realignment_parameters')]),
+                    (smooth, modelspec, [('smoothed_files', 'functional_runs')]),
+                    (realign, art, [('realignment_parameters', 'realignment_parameters')]),
+                    (coregister, art, [('coregistered_files', 'realigned_files')]),
+                    (compute_mask, art, [('brain_mask', 'mask_file')]),
+                    (art, modelspec, [('outlier_files', 'outlier_files')]),
                     (infosource, modelspec, [(("subject_id", subjectinfo), "subject_info")]),
-                    (modelspec, model_estimate,[('session_info','session_info')]),
-                    (compute_mask, model_estimate, [('brain_mask','mask')]),
-                    (model_estimate, contrast_estimate, [("beta","beta"),
-                                                         ("nvbeta","nvbeta"),
-                                                         ("s2","s2"),
+                    (modelspec, model_estimate, [('session_info', 'session_info')]),
+                    (compute_mask, model_estimate, [('brain_mask', 'mask')]),
+                    (model_estimate, contrast_estimate, [("beta", "beta"),
+                                                         ("nvbeta", "nvbeta"),
+                                                         ("s2", "s2"),
                                                          ("dof", "dof"),
                                                          ("axis", "axis"),
                                                          ("constants", "constants"),

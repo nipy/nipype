@@ -70,7 +70,7 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
         add them to `tests`.
         """
 
-        doctest.DocTestFinder._find(self,tests, obj, name, module,
+        doctest.DocTestFinder._find(self, tests, obj, name, module,
                                     source_lines, globs, seen)
 
         # Below we re-run pieces of the above method with manual modifications,
@@ -128,13 +128,13 @@ class NumpyOutputChecker(doctest.OutputChecker):
             # bigendian machines don't fail all the tests (and there are
             # actually some bigendian examples in the doctests). Let's try
             # making them all little endian
-            got = got.replace("'>","'<")
-            want = want.replace("'>","'<")
+            got = got.replace("'>", "'<")
+            want = want.replace("'>", "'<")
 
             # try to normalize out 32 and 64 bit default int sizes
-            for sz in [4,8]:
-                got = got.replace("'<i%d'" %sz,"int")
-                want = want.replace("'<i%d'" %sz,"int")
+            for sz in [4, 8]:
+                got = got.replace("'<i%d'" %sz, "int")
+                want = want.replace("'<i%d'" %sz, "int")
 
             ret = doctest.OutputChecker.check_output(self, want,
                                                      got, optionflags)
@@ -228,10 +228,10 @@ class NumpyDoctest(npd.Doctest):
         #
         # Note: __file__ allows the doctest in NoseTester to run
         # without producing an error
-        test.globs = {'__builtins__':__builtins__,
-                      '__file__':'__main__',
-                      '__name__':'__main__',
-                      'np':numpy}
+        test.globs = {'__builtins__': __builtins__,
+                      '__file__': '__main__',
+                      '__name__': '__main__',
+                      'np': numpy}
         # add appropriate scipy import for SciPy tests
         if 'scipy' in pkg_name:
             p = pkg_name.split('.')

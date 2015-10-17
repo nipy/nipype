@@ -42,7 +42,7 @@ def grab_doc(cmd, trap_error=True):
     stdout, stderr = proc.communicate()
 
     if trap_error and proc.returncode:
-        msg = 'Attempting to run %s. Returned Error: %s' %(cmd,stderr)
+        msg = 'Attempting to run %s. Returned Error: %s' %(cmd, stderr)
         raise IOError(msg)
 
     if stderr:
@@ -255,8 +255,8 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
     if cmd_path == '':
         raise Exception('Command %s not found' %cmd.split(' ')[0])
     if help_flag:
-        cmd = ' '.join((cmd,help_flag))
-    doc = grab_doc(cmd,trap_error)
+        cmd = ' '.join((cmd, help_flag))
+    doc = grab_doc(cmd, trap_error)
     opts = reverse_opt_map(opt_map)
     return build_doc(doc, opts)
 
@@ -283,7 +283,7 @@ def _parse_doc(doc, style=['--']):
         style = [style]
     for line in doclist:
         linelist = line.split()
-        flag = [item for i,item in enumerate(linelist) if i < 2 and \
+        flag = [item for i, item in enumerate(linelist) if i < 2 and \
                any([item.startswith(s) for s in style]) and \
                len(item) > 1]
         if flag:
@@ -293,7 +293,7 @@ def _parse_doc(doc, style=['--']):
             else:
                 style_idx = []
                 for f in flag:
-                    for i,s in enumerate(style):
+                    for i, s in enumerate(style):
                         if f.startswith(s):
                             style_idx.append(i)
                             break
@@ -329,9 +329,9 @@ def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
     if cmd_path == '':
         raise Exception('Command %s not found' %cmd.split(' ')[0])
     if help_flag:
-        cmd = ' '.join((cmd,help_flag))
-    doc = grab_doc(cmd,trap_error)
-    return _parse_doc(doc,style)
+        cmd = ' '.join((cmd, help_flag))
+    doc = grab_doc(cmd, trap_error)
+    return _parse_doc(doc, style)
 
 def replace_opts(rep_doc, opts):
     """Replace flags with parameter names.

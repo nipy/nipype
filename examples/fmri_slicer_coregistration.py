@@ -63,7 +63,7 @@ data_dir = os.path.abspath('data')
 subject_list = ['s1', 's3']
 # Map field names to individual subject runs.
 info = dict(func=[['subject_id', 'f3']],
-            struct=[['subject_id','struct']])
+            struct=[['subject_id', 'struct']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
@@ -110,11 +110,11 @@ pipeline = pe.Workflow(name="pipeline")
 pipeline.base_dir = os.path.abspath('slicer_tutorial/workingdir')
 
 pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
-                  (datasource,coregister,[('func','movingVolume')]),
-                  (datasource,coregister,[('struct','fixedVolume')]),
-                  (coregister,reslice,[('outputTransform', 'warpTransform')]),
-                  (datasource,reslice,[('func','inputVolume')]),
-                  (datasource,reslice,[('struct','referenceVolume')])
+                  (datasource, coregister, [('func', 'movingVolume')]),
+                  (datasource, coregister, [('struct', 'fixedVolume')]),
+                  (coregister, reslice, [('outputTransform', 'warpTransform')]),
+                  (datasource, reslice, [('func', 'inputVolume')]),
+                  (datasource, reslice, [('struct', 'referenceVolume')])
                   ])
 
 if __name__ == '__main__':

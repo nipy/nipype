@@ -30,23 +30,23 @@ from nipype.workflows.smri.ants import ANTSTemplateBuildSingleIterationWF
 
 import urllib.request, urllib.error, urllib.parse
 homeDir = os.getenv("HOME")
-requestedPath = os.path.join(homeDir,'nipypeTestPath')
+requestedPath = os.path.join(homeDir, 'nipypeTestPath')
 mydatadir = os.path.realpath(requestedPath)
 if not os.path.exists(mydatadir):
     os.makedirs(mydatadir)
 print(mydatadir)
 
 MyFileURLs = [
-           ('http://slicer.kitware.com/midas3/download?bitstream=13121','01_T1_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13122','02_T1_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13124','03_T1_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13128','01_T1_inv_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13123','02_T1_inv_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13125','03_T1_inv_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13121', '01_T1_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13122', '02_T1_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13124', '03_T1_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13128', '01_T1_inv_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13123', '02_T1_inv_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13125', '03_T1_inv_half.nii.gz'),
            ]
 for tt in MyFileURLs:
     myURL = tt[0]
-    localFilename = os.path.join(mydatadir,tt[1])
+    localFilename = os.path.join(mydatadir, tt[1])
     if not os.path.exists(localFilename):
         remotefile = urllib.request.urlopen(myURL)
 
@@ -58,14 +58,14 @@ for tt in MyFileURLs:
         print("File previously downloaded {0}".format(localFilename))
 
 input_images = [
-    os.path.join(mydatadir,'01_T1_half.nii.gz'),
-    os.path.join(mydatadir,'02_T1_half.nii.gz'),
-    os.path.join(mydatadir,'03_T1_half.nii.gz')
+    os.path.join(mydatadir, '01_T1_half.nii.gz'),
+    os.path.join(mydatadir, '02_T1_half.nii.gz'),
+    os.path.join(mydatadir, '03_T1_half.nii.gz')
 ]
 input_passive_images = [
-    {'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
-    {'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
-    {'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
+    {'INV_T1': os.path.join(mydatadir, '01_T1_inv_half.nii.gz')},
+    {'INV_T1': os.path.join(mydatadir, '02_T1_inv_half.nii.gz')},
+    {'INV_T1': os.path.join(mydatadir, '03_T1_inv_half.nii.gz')}
 ]
 
 
@@ -123,9 +123,9 @@ tbuilder.connect(datasource, 'passiveImagesDictionariesList', buildTemplateItera
 datasink = pe.Node(io.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.join(requestedPath, "results")
 
-tbuilder.connect(buildTemplateIteration2, 'outputspec.template',datasink,'PrimaryTemplate')
-tbuilder.connect(buildTemplateIteration2, 'outputspec.passive_deformed_templates',datasink,'PassiveTemplate')
-tbuilder.connect(initAvg, 'output_average_image', datasink,'PreRegisterAverage')
+tbuilder.connect(buildTemplateIteration2, 'outputspec.template', datasink, 'PrimaryTemplate')
+tbuilder.connect(buildTemplateIteration2, 'outputspec.passive_deformed_templates', datasink, 'PassiveTemplate')
+tbuilder.connect(initAvg, 'output_average_image', datasink, 'PreRegisterAverage')
 
 """
 8. Run the workflow

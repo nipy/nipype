@@ -18,7 +18,7 @@ import os.path as op
 
 from .base import MRTrix3BaseInputSpec, MRTrix3Base
 from ..base import (CommandLineInputSpec, CommandLine, traits, TraitedSpec,
-                    File,InputMultiPath)
+                    File, InputMultiPath)
 from ..traits_extension import isdefined
 from ...utils.filemanip import split_filename
 

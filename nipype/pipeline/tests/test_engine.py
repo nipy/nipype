@@ -44,19 +44,19 @@ def test_init():
 
 def test_connect():
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
-    mod2 = pe.Node(interface=TestInterface(),name='mod2')
-    pipe.connect([(mod1,mod2,[('output1','input1')])])
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
+    mod2 = pe.Node(interface=TestInterface(), name='mod2')
+    pipe.connect([(mod1, mod2, [('output1', 'input1')])])
 
     yield assert_true, mod1 in pipe._graph.nodes()
     yield assert_true, mod2 in pipe._graph.nodes()
-    yield assert_equal, pipe._graph.get_edge_data(mod1,mod2), {'connect':[('output1','input1')]}
+    yield assert_equal, pipe._graph.get_edge_data(mod1, mod2), {'connect': [('output1', 'input1')]}
 
 def test_add_nodes():
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
-    mod2 = pe.Node(interface=TestInterface(),name='mod2')
-    pipe.add_nodes([mod1,mod2])
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
+    mod2 = pe.Node(interface=TestInterface(), name='mod2')
+    pipe.add_nodes([mod1, mod2])
 
     yield assert_true, mod1 in pipe._graph.nodes()
     yield assert_true, mod2 in pipe._graph.nodes()
@@ -68,7 +68,7 @@ def test_add_nodes():
 
 def test1():
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
     pipe.add_nodes([mod1])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
@@ -77,8 +77,8 @@ def test1():
 
 def test2():
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
-    mod1.iterables = dict(input1=lambda:[1,2],input2=lambda:[1,2])
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
+    mod1.iterables = dict(input1=lambda: [1, 2], input2=lambda: [1, 2])
     pipe.add_nodes([mod1])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
@@ -87,11 +87,11 @@ def test2():
 
 def test3():
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
     mod1.iterables = {}
-    mod2 = pe.Node(interface=TestInterface(),name='mod2')
-    mod2.iterables = dict(input1=lambda:[1,2])
-    pipe.connect([(mod1,mod2,[('output1','input2')])])
+    mod2 = pe.Node(interface=TestInterface(), name='mod2')
+    mod2.iterables = dict(input1=lambda: [1, 2])
+    pipe.connect([(mod1, mod2, [('output1', 'input2')])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 3
@@ -99,11 +99,11 @@ def test3():
 
 def test4():
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
-    mod2 = pe.Node(interface=TestInterface(),name='mod2')
-    mod1.iterables = dict(input1=lambda:[1,2])
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
+    mod2 = pe.Node(interface=TestInterface(), name='mod2')
+    mod1.iterables = dict(input1=lambda: [1, 2])
     mod2.iterables = {}
-    pipe.connect([(mod1,mod2,[('output1','input2')])])
+    pipe.connect([(mod1, mod2, [('output1', 'input2')])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 4
@@ -111,11 +111,11 @@ def test4():
 
 def test5():
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
-    mod2 = pe.Node(interface=TestInterface(),name='mod2')
-    mod1.iterables = dict(input1=lambda:[1,2])
-    mod2.iterables = dict(input1=lambda:[1,2])
-    pipe.connect([(mod1,mod2,[('output1','input2')])])
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
+    mod2 = pe.Node(interface=TestInterface(), name='mod2')
+    mod1.iterables = dict(input1=lambda: [1, 2])
+    mod2.iterables = dict(input1=lambda: [1, 2])
+    pipe.connect([(mod1, mod2, [('output1', 'input2')])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 6
@@ -123,14 +123,14 @@ def test5():
 
 def test6():
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
-    mod2 = pe.Node(interface=TestInterface(),name='mod2')
-    mod3 = pe.Node(interface=TestInterface(),name='mod3')
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
+    mod2 = pe.Node(interface=TestInterface(), name='mod2')
+    mod3 = pe.Node(interface=TestInterface(), name='mod3')
     mod1.iterables = {}
-    mod2.iterables = dict(input1=lambda:[1,2])
+    mod2.iterables = dict(input1=lambda: [1, 2])
     mod3.iterables = {}
-    pipe.connect([(mod1,mod2,[('output1','input2')]),
-                  (mod2,mod3,[('output1','input2')])])
+    pipe.connect([(mod1, mod2, [('output1', 'input2')]),
+                  (mod2, mod3, [('output1', 'input2')])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 5
@@ -138,14 +138,14 @@ def test6():
 
 def test7():
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
-    mod2 = pe.Node(interface=TestInterface(),name='mod2')
-    mod3 = pe.Node(interface=TestInterface(),name='mod3')
-    mod1.iterables = dict(input1=lambda:[1,2])
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
+    mod2 = pe.Node(interface=TestInterface(), name='mod2')
+    mod3 = pe.Node(interface=TestInterface(), name='mod3')
+    mod1.iterables = dict(input1=lambda: [1, 2])
     mod2.iterables = {}
     mod3.iterables = {}
-    pipe.connect([(mod1,mod3,[('output1','input1')]),
-                  (mod2,mod3,[('output1','input2')])])
+    pipe.connect([(mod1, mod3, [('output1', 'input1')]),
+                  (mod2, mod3, [('output1', 'input2')])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 5
@@ -153,14 +153,14 @@ def test7():
 
 def test8():
     pipe = pe.Workflow(name='pipe')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
-    mod2 = pe.Node(interface=TestInterface(),name='mod2')
-    mod3 = pe.Node(interface=TestInterface(),name='mod3')
-    mod1.iterables = dict(input1=lambda:[1,2])
-    mod2.iterables = dict(input1=lambda:[1,2])
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
+    mod2 = pe.Node(interface=TestInterface(), name='mod2')
+    mod3 = pe.Node(interface=TestInterface(), name='mod3')
+    mod1.iterables = dict(input1=lambda: [1, 2])
+    mod2.iterables = dict(input1=lambda: [1, 2])
     mod3.iterables = {}
-    pipe.connect([(mod1,mod3,[('output1','input1')]),
-                  (mod2,mod3,[('output1','input2')])])
+    pipe.connect([(mod1, mod3, [('output1', 'input1')]),
+                  (mod2, mod3, [('output1', 'input2')])])
     pipe._flatgraph = pipe._create_flat_graph()
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 8
@@ -172,22 +172,22 @@ def test8():
 
 def test_expansion():
     pipe1 = pe.Workflow(name='pipe1')
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
-    mod2 = pe.Node(interface=TestInterface(),name='mod2')
-    pipe1.connect([(mod1,mod2,[('output1','input2')])])
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
+    mod2 = pe.Node(interface=TestInterface(), name='mod2')
+    pipe1.connect([(mod1, mod2, [('output1', 'input2')])])
     pipe2 = pe.Workflow(name='pipe2')
-    mod3 = pe.Node(interface=TestInterface(),name='mod3')
-    mod4 = pe.Node(interface=TestInterface(),name='mod4')
-    pipe2.connect([(mod3,mod4,[('output1','input2')])])
+    mod3 = pe.Node(interface=TestInterface(), name='mod3')
+    mod4 = pe.Node(interface=TestInterface(), name='mod4')
+    pipe2.connect([(mod3, mod4, [('output1', 'input2')])])
     pipe3 = pe.Workflow(name="pipe3")
-    pipe3.connect([(pipe1, pipe2, [('mod2.output1','mod4.input1')])])
+    pipe3.connect([(pipe1, pipe2, [('mod2.output1', 'mod4.input1')])])
     pipe4 = pe.Workflow(name="pipe4")
-    mod5 = pe.Node(interface=TestInterface(),name='mod5')
+    mod5 = pe.Node(interface=TestInterface(), name='mod5')
     pipe4.add_nodes([mod5])
     pipe5 = pe.Workflow(name="pipe5")
     pipe5.add_nodes([pipe4])
     pipe6 = pe.Workflow(name="pipe6")
-    pipe6.connect([(pipe5, pipe3, [('pipe4.mod5.output1','pipe2.mod3.input1')])])
+    pipe6.connect([(pipe5, pipe3, [('pipe4.mod5.output1', 'pipe2.mod3.input1')])])
     error_raised = False
     try:
         pipe6._flatgraph = pipe6._create_flat_graph()
@@ -198,26 +198,26 @@ def test_expansion():
 def test_iterable_expansion():
     import nipype.pipeline.engine as pe
     wf1 = pe.Workflow(name='test')
-    node1 = pe.Node(TestInterface(),name='node1')
-    node2 = pe.Node(TestInterface(),name='node2')
-    node1.iterables = ('input1',[1,2])
-    wf1.connect(node1,'output1', node2, 'input2')
+    node1 = pe.Node(TestInterface(), name='node1')
+    node2 = pe.Node(TestInterface(), name='node2')
+    node1.iterables = ('input1', [1, 2])
+    wf1.connect(node1, 'output1', node2, 'input2')
     wf3 = pe.Workflow(name='group')
-    for i in [0,1,2]:
+    for i in [0, 1, 2]:
         wf3.add_nodes([wf1.clone(name='test%d' %i)])
     wf3._flatgraph = wf3._create_flat_graph()
-    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()),12
+    yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 12
 
 def test_synchronize_expansion():
     import nipype.pipeline.engine as pe
     wf1 = pe.Workflow(name='test')
-    node1 = pe.Node(TestInterface(),name='node1')
-    node1.iterables = [('input1',[1,2]),('input2',[3,4,5])]
+    node1 = pe.Node(TestInterface(), name='node1')
+    node1.iterables = [('input1', [1, 2]), ('input2', [3, 4, 5])]
     node1.synchronize = True
-    node2 = pe.Node(TestInterface(),name='node2')
-    wf1.connect(node1,'output1', node2, 'input2')
+    node2 = pe.Node(TestInterface(), name='node2')
+    wf1.connect(node1, 'output1', node2, 'input2')
     wf3 = pe.Workflow(name='group')
-    for i in [0,1,2]:
+    for i in [0, 1, 2]:
         wf3.add_nodes([wf1.clone(name='test%d' %i)])
     wf3._flatgraph = wf3._create_flat_graph()
     # Each expanded graph clone has:
@@ -285,20 +285,20 @@ def test_itersource_expansion():
 def test_itersource_synchronize1_expansion():
     import nipype.pipeline.engine as pe
     wf1 = pe.Workflow(name='test')
-    node1 = pe.Node(TestInterface(),name='node1')
+    node1 = pe.Node(TestInterface(), name='node1')
     node1.iterables = [('input1', [1, 2]), ('input2', [3, 4])]
     node1.synchronize = True
-    node2 = pe.Node(TestInterface(),name='node2')
+    node2 = pe.Node(TestInterface(), name='node2')
     wf1.connect(node1, 'output1', node2, 'input1')
-    node3 = pe.Node(TestInterface(),name='node3')
+    node3 = pe.Node(TestInterface(), name='node3')
     node3.itersource = ('node1', ['input1', 'input2'])
     node3.iterables = [('input1', {(1, 3): [5, 6]}),
                        ('input2', {(1, 3): [7, 8], (2, 4): [9]})]
-    wf1.connect(node2,'output1', node3, 'input1')
-    node4 = pe.Node(TestInterface(),name='node4')
-    wf1.connect(node3,'output1', node4, 'input1')
+    wf1.connect(node2, 'output1', node3, 'input1')
+    node4 = pe.Node(TestInterface(), name='node4')
+    wf1.connect(node3, 'output1', node4, 'input1')
     wf3 = pe.Workflow(name='group')
-    for i in [0,1,2]:
+    for i in [0, 1, 2]:
         wf3.add_nodes([wf1.clone(name='test%d' %i)])
     wf3._flatgraph = wf3._create_flat_graph()
 
@@ -316,21 +316,21 @@ def test_itersource_synchronize2_expansion():
     import nipype.pipeline.engine as pe
     wf1 = pe.Workflow(name='test')
 
-    node1 = pe.Node(TestInterface(),name='node1')
-    node1.iterables = [('input1',[1,2]), ('input2',[3,4])]
+    node1 = pe.Node(TestInterface(), name='node1')
+    node1.iterables = [('input1', [1, 2]), ('input2', [3, 4])]
     node1.synchronize = True
-    node2 = pe.Node(TestInterface(),name='node2')
-    wf1.connect(node1,'output1', node2, 'input1')
-    node3 = pe.Node(TestInterface(),name='node3')
+    node2 = pe.Node(TestInterface(), name='node2')
+    wf1.connect(node1, 'output1', node2, 'input1')
+    node3 = pe.Node(TestInterface(), name='node3')
     node3.itersource = ('node1', ['input1', 'input2'])
     node3.synchronize = True
     node3.iterables = [('input1', 'input2'),
-                       {(1,3):[(5,7), (6,8)], (2,4):[(None,9)]}]
-    wf1.connect(node2,'output1', node3, 'input1')
-    node4 = pe.Node(TestInterface(),name='node4')
-    wf1.connect(node3,'output1', node4, 'input1')
+                       {(1, 3): [(5, 7), (6, 8)], (2, 4):[(None, 9)]}]
+    wf1.connect(node2, 'output1', node3, 'input1')
+    node4 = pe.Node(TestInterface(), name='node4')
+    wf1.connect(node3, 'output1', node4, 'input1')
     wf3 = pe.Workflow(name='group')
-    for i in [0,1,2]:
+    for i in [0, 1, 2]:
         wf3.add_nodes([wf1.clone(name='test%d' %i)])
     wf3._flatgraph = wf3._create_flat_graph()
 
@@ -347,23 +347,23 @@ def test_itersource_synchronize2_expansion():
 def test_disconnect():
     import nipype.pipeline.engine as pe
     from nipype.interfaces.utility import IdentityInterface
-    a = pe.Node(IdentityInterface(fields=['a','b']),name='a')
-    b = pe.Node(IdentityInterface(fields=['a','b']),name='b')
+    a = pe.Node(IdentityInterface(fields=['a', 'b']), name='a')
+    b = pe.Node(IdentityInterface(fields=['a', 'b']), name='b')
     flow1 = pe.Workflow(name='test')
-    flow1.connect(a,'a',b,'a')
-    flow1.disconnect(a,'a',b,'a')
+    flow1.connect(a, 'a', b, 'a')
+    flow1.disconnect(a, 'a', b, 'a')
     yield assert_equal, flow1._graph.edges(), []
 
 def test_doubleconnect():
     import nipype.pipeline.engine as pe
     from nipype.interfaces.utility import IdentityInterface
-    a = pe.Node(IdentityInterface(fields=['a','b']),name='a')
-    b = pe.Node(IdentityInterface(fields=['a','b']),name='b')
+    a = pe.Node(IdentityInterface(fields=['a', 'b']), name='a')
+    b = pe.Node(IdentityInterface(fields=['a', 'b']), name='b')
     flow1 = pe.Workflow(name='test')
-    flow1.connect(a,'a',b,'a')
-    x = lambda: flow1.connect(a,'b',b,'a')
+    flow1.connect(a, 'a', b, 'a')
+    x = lambda: flow1.connect(a, 'b', b, 'a')
     yield assert_raises, Exception, x
-    c = pe.Node(IdentityInterface(fields=['a','b']),name='c')
+    c = pe.Node(IdentityInterface(fields=['a', 'b']), name='c')
     flow1 = pe.Workflow(name='test2')
     x = lambda: flow1.connect([(a, c, [('b', 'b')]), (b, c, [('a', 'b')])])
     yield assert_raises, Exception, x
@@ -452,19 +452,19 @@ def test_node_init():
 
 def test_workflow_add():
     from nipype.interfaces.utility import IdentityInterface as ii
-    n1 = pe.Node(ii(fields=['a','b']),name='n1')
-    n2 = pe.Node(ii(fields=['c','d']),name='n2')
-    n3 = pe.Node(ii(fields=['c','d']),name='n1')
+    n1 = pe.Node(ii(fields=['a', 'b']), name='n1')
+    n2 = pe.Node(ii(fields=['c', 'd']), name='n2')
+    n3 = pe.Node(ii(fields=['c', 'd']), name='n1')
     w1 = pe.Workflow(name='test')
-    w1.connect(n1,'a',n2,'c')
+    w1.connect(n1, 'a', n2, 'c')
     yield assert_raises, IOError, w1.add_nodes, [n1]
     yield assert_raises, IOError, w1.add_nodes, [n2]
     yield assert_raises, IOError, w1.add_nodes, [n3]
-    yield assert_raises, IOError, w1.connect, [(w1,n2,[('n1.a','d')])]
+    yield assert_raises, IOError, w1.connect, [(w1, n2, [('n1.a', 'd')])]
 
 
 def test_node_get_output():
-    mod1 = pe.Node(interface=TestInterface(),name='mod1')
+    mod1 = pe.Node(interface=TestInterface(), name='mod1')
     mod1.inputs.input1 = 1
     mod1.run()
     yield assert_equal, mod1.get_output('output1'), [1, 1]
@@ -480,7 +480,7 @@ def test_mapnode_iterfield_check():
     mod1 = pe.MapNode(TestInterface(),
                       iterfield=['input1', 'input2'],
                       name='mod1')
-    mod1.inputs.input1 = [1,2]
+    mod1.inputs.input1 = [1, 2]
     mod1.inputs.input2 = 3
     yield assert_raises, ValueError, mod1._check_iterfield
 
@@ -498,10 +498,10 @@ def test_mapnode_nested():
                  iterfield=['in1'],
                  nested=True,
                  name='n1')
-    n1.inputs.in1 = [[1,[2]],3,[4,5]]
+    n1.inputs.in1 = [[1, [2]], 3, [4, 5]]
     n1.run()
     print(n1.get_output('out'))
-    yield assert_equal, n1.get_output('out'), [[2,[3]],4,[5,6]]
+    yield assert_equal, n1.get_output('out'), [[2, [3]], 4, [5, 6]]
 
     n2 = MapNode(Function(input_names=['in1'],
                           output_names=['out'],
@@ -509,7 +509,7 @@ def test_mapnode_nested():
                  iterfield=['in1'],
                  nested=False,
                  name='n1')
-    n2.inputs.in1 = [[1,[2]],3,[4,5]]
+    n2.inputs.in1 = [[1, [2]], 3, [4, 5]]
     error_raised = False
     try:
         n2.run()
@@ -538,7 +538,7 @@ def test_node_hash():
     w1 = pe.Workflow(name='test')
     modify = lambda x: x+1
     n1.inputs.a = 1
-    w1.connect(n1, ('a', modify), n2,'a')
+    w1.connect(n1, ('a', modify), n2, 'a')
     w1.base_dir = wd
     # generate outputs
     w1.run(plugin='Linear')
@@ -595,7 +595,7 @@ def test_old_config():
     w1 = pe.Workflow(name='test')
     modify = lambda x: x+1
     n1.inputs.a = 1
-    w1.connect(n1, ('a', modify), n2,'a')
+    w1.connect(n1, ('a', modify), n2, 'a')
     w1.base_dir = wd
 
     w1.config['execution']['crashdump_dir'] = wd
@@ -666,7 +666,7 @@ def test_serial_input():
                           function=func1),
                  iterfield=['in1'],
                  name='n1')
-    n1.inputs.in1 = [1,2,3]
+    n1.inputs.in1 = [1, 2, 3]
 
 
     w1 = Workflow(name='test')

@@ -54,7 +54,7 @@ class MatlabInputSpec(CommandLineInputSpec):
     script_file = File('pyscript.m', usedefault=True,
                        desc='Name of file to write m-code to')
     paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
-    prescript = traits.List(["ver,","try,"], usedefault=True,
+    prescript = traits.List(["ver,", "try,"], usedefault=True,
                             desc='prescript to be added before code')
     postscript = traits.List(["\n,catch ME,",
                               "fprintf(2,'MATLAB code threw an exception:\\n');",
@@ -81,7 +81,7 @@ class MatlabCommand(CommandLine):
         """initializes interface to matlab
         (default 'matlab -nodesktop -nosplash')
         """
-        super(MatlabCommand,self).__init__(**inputs)
+        super(MatlabCommand, self).__init__(**inputs)
         if matlab_cmd and isdefined(matlab_cmd):
             self._cmd = matlab_cmd
         elif self._default_matlab_cmd:
@@ -95,7 +95,7 @@ class MatlabCommand(CommandLine):
 
         if not isdefined(self.inputs.single_comp_thread) and \
                 not isdefined(self.inputs.uses_mcr):
-            if config.getboolean('execution','single_thread_matlab'):
+            if config.getboolean('execution', 'single_thread_matlab'):
                 self.inputs.single_comp_thread = True
         # For matlab commands force all output to be returned since matlab
         # does not have a clean way of notifying an error
@@ -134,7 +134,7 @@ class MatlabCommand(CommandLine):
         """
         cls._default_paths = paths
 
-    def _run_interface(self,runtime):
+    def _run_interface(self, runtime):
         self.inputs.terminal_output = 'allatonce'
         runtime = super(MatlabCommand, self)._run_interface(runtime)
         try:
@@ -168,9 +168,9 @@ class MatlabCommand(CommandLine):
 
         #postcript takes different default value depending on the mfile argument
         if mfile:
-            prescript.insert(0,"fprintf(1,'Executing %s at %s:\\n',mfilename,datestr(now));")
+            prescript.insert(0, "fprintf(1,'Executing %s at %s:\\n',mfilename,datestr(now));")
         else:
-            prescript.insert(0,"fprintf(1,'Executing code at %s:\\n',datestr(now));")
+            prescript.insert(0, "fprintf(1,'Executing code at %s:\\n',datestr(now));")
         for path in paths:
             prescript.append("addpath('%s');\n" % path)
 
@@ -180,10 +180,10 @@ class MatlabCommand(CommandLine):
 
         script_lines = '\n'.join(prescript)+script_lines+'\n'.join(postscript)
         if mfile:
-            with open(os.path.join(cwd,self.inputs.script_file), 'wt') as mfile:
+            with open(os.path.join(cwd, self.inputs.script_file), 'wt') as mfile:
                 mfile.write(script_lines)
             if self.inputs.uses_mcr:
-                script = '%s' % (os.path.join(cwd,self.inputs.script_file))
+                script = '%s' % (os.path.join(cwd, self.inputs.script_file))
             else:
                 script = "addpath('%s');%s" % (cwd, self.inputs.script_file.split('.')[0])
         else:
