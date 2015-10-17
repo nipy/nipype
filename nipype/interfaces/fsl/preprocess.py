@@ -1099,11 +1099,11 @@ class SUSANInputSpec(FSLCommandInputSpec):
                              desc='whether to use a local median filter in the cases where single-point noise is detected')
     usans = traits.List(
         traits.Tuple(File(exists=True), traits.Float), maxlen=2,
-                        argstr='', position=6, default=[], usedefault=True,
-             desc='determines whether the smoothing area (USAN) is to be '
-                  'found from secondary images (0, 1 or 2). A negative '
-                  'value for any brightness threshold will auto-set the '
-                  'threshold at 10% of the robust range')
+        argstr='', position=6, default=[], usedefault=True,
+        desc='determines whether the smoothing area (USAN) is to be '
+             'found from secondary images (0, 1 or 2). A negative '
+             'value for any brightness threshold will auto-set the '
+             'threshold at 10% of the robust range')
     out_file = File(argstr='%s', position=-1, genfile=True,
                     desc='output file name', hash_files=False)
 

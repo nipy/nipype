@@ -190,8 +190,8 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     l2source.inputs.template = '%s/%s'
     l2source.inputs.field_template = dict(
         CFFfiles=op.join(output_dir, '%s/cff/*/connectome.cff'),
-     CSVmatrices=op.join(output_dir, '%s/cmatrices_csv/*/*.csv'), CSVnodal=op.join(output_dir, '%s/nxcsv/*/*nodal*.csv'),
-     CSVglobal=op.join(output_dir, '%s/nxcsv/*/*global*.csv'), CSVfibers=op.join(output_dir, '%s/fiber_csv/*/*fibers*.csv'))
+        CSVmatrices=op.join(output_dir, '%s/cmatrices_csv/*/*.csv'), CSVnodal=op.join(output_dir, '%s/nxcsv/*/*nodal*.csv'),
+        CSVglobal=op.join(output_dir, '%s/nxcsv/*/*global*.csv'), CSVfibers=op.join(output_dir, '%s/fiber_csv/*/*fibers*.csv'))
     l2source.inputs.sort_filelist = True
 
     l2inputnode = pe.Node(interface=util.IdentityInterface(fields=['CFFfiles',
@@ -237,7 +237,7 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
 
     concat_csv_interface = Function(
         input_names=["in_files"], output_names=["out_name"],
-                             function=concatcsv)
+        function=concatcsv)
 
     concat_node_csvs = pe.Node(
         interface=concat_csv_interface, name='concat_node_csvs')

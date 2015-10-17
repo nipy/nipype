@@ -531,15 +531,15 @@ class ParcellateOutputSpec(TraitedSpec):
     white_matter_mask_file = File(exists=True, desc='White matter mask file')
     cc_unknown_file = File(
         desc='Image file with regions labelled as unknown cortical structures',
-                    exists=True)
+        exists=True)
     ribbon_file = File(desc='Image file detailing the cortical ribbon',
                        exists=True)
     aseg_file = File(
         desc='Automated segmentation file converted from Freesurfer "subjects" directory',
-                    exists=True)
+        exists=True)
     roi_file_in_structural_space = File(
         desc='ROI image resliced to the dimensions of the original structural image',
-                    exists=True)
+        exists=True)
     dilated_roi_file_in_structural_space = File(
         desc='dilated ROI image resliced to the dimensions of the original structural image')
 

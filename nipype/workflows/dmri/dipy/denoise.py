@@ -37,11 +37,11 @@ def nlmeans_pipeline(name='Denoise',
     wf = pe.Workflow(name=name)
     wf.connect([
          (inputnode,  nmask,       [('in_file', 'in_file'),
-                                    ('in_mask', 'in_mask')])
-        ,(inputnode,  nlmeans,     [('in_file', 'in_file'),
-                                    ('in_mask', 'in_mask')])
-        ,(nmask,      nlmeans,     [('out_file', 'noise_mask')])
-        ,(nlmeans,    outputnode,  [('out_file', 'out_file')])
+                                    ('in_mask', 'in_mask')]),
+         (inputnode,  nlmeans,     [('in_file', 'in_file'),
+                                    ('in_mask', 'in_mask')]),
+         (nmask,      nlmeans,     [('out_file', 'noise_mask')]),
+         (nlmeans,    outputnode,  [('out_file', 'out_file')])
     ])
     return wf
 

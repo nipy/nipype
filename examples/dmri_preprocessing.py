@@ -155,14 +155,14 @@ style with readability aims.
 wf = pe.Workflow(name="dMRI_Preprocessing")
 wf.base_dir = os.path.abspath('preprocessing_dmri_tutorial')
 wf.connect([
-     (infosource,   datasource,     [('subject_id', 'subject_id')])
-    ,(datasource,   prep,           [('dwi', 'inputnode.in_file'),
+     (infosource,   datasource,     [('subject_id', 'subject_id')]),
+     (datasource,   prep,           [('dwi', 'inputnode.in_file'),
                                      ('dwi_rev', 'inputnode.alt_file'),
                                      ('bvals', 'inputnode.in_bval'),
-                                     ('bvecs', 'inputnode.in_bvec')])
-    ,(prep,         bias,           [('outputnode.out_file', 'inputnode.in_file'),
-                                     ('outputnode.out_mask', 'inputnode.in_mask')])
-    ,(datasource,   bias,           [('bvals', 'inputnode.in_bval')])
+                                     ('bvecs', 'inputnode.in_bvec')]),
+     (prep,         bias,           [('outputnode.out_file', 'inputnode.in_file'),
+                                     ('outputnode.out_mask', 'inputnode.in_mask')]),
+     (datasource,   bias,           [('bvals', 'inputnode.in_bval')])
 ])
 
 

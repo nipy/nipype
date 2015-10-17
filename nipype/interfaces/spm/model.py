@@ -275,7 +275,7 @@ class EstimateContrastInputSpec(SPMCommandInputSpec):
             session list is None or not provided, all sessions are used. For F
             contrasts, the condition list should contain previously defined
             T-contrasts.""",
-            mandatory=True)
+        mandatory=True)
     beta_images = InputMultiPath(File(exists=True),
                                  desc='Parameter estimates of the design matrix',
                                  copyfile=False,
