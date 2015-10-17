@@ -20,6 +20,7 @@ class Reader(object):
     """A line-based string reader.
 
     """
+
     def __init__(self, data):
         """
         Parameters
@@ -71,6 +72,7 @@ class Reader(object):
 
     def read_to_next_empty_line(self):
         self.seek_next_non_empty_line()
+
         def is_empty(line):
             return not line.strip()
         return self.read_to_condition(is_empty)
@@ -193,6 +195,7 @@ class NumpyDocString(object):
 
     _name_rgx = re.compile(r"^\s*(:(?P<role>\w+):`(?P<name>[a-zA-Z0-9_.-]+)`|"
                            r" (?P<name2>[a-zA-Z0-9_.-]+))\s*", re.X)
+
     def _parse_see_also(self, content):
         """
         func_name : Descriptive text

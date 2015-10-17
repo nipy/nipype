@@ -662,6 +662,7 @@ def generate_expanded_graph(graph_in):
             iter_dict = dict([(field, lookup[key]) for field, lookup in
                               inode.iterables if key in lookup])
             # convert the iterables to the standard {field: function} format
+
             def make_field_func(*pair):
                 return pair[0], lambda: pair[1]
 

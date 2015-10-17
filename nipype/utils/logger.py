@@ -22,6 +22,7 @@ class Logging(object):
     fmt = ('%(asctime)s,%(msecs)d %(name)-2s '
            '%(levelname)-2s:\n\t %(message)s')
     datefmt = '%y%m%d-%H:%M:%S'
+
     def __init__(self, config):
         self._config = config
         logging.basicConfig(format=self.fmt, datefmt=self.datefmt,

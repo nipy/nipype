@@ -79,6 +79,7 @@ class MRConvert(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         if isdefined(self.inputs.out_filename):
@@ -187,6 +188,7 @@ class Tensor2Vector(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_vector.mif'
@@ -232,6 +234,7 @@ class Tensor2FractionalAnisotropy(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_FA.mif'
@@ -277,6 +280,7 @@ class Tensor2ApparentDiffusion(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_ADC.mif'
@@ -323,6 +327,7 @@ class MRMultiply(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_files[0])
         return name + '_MRMult.mif'
@@ -423,6 +428,7 @@ class GenerateWhiteMatterMask(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_WMProb.mif'
@@ -469,6 +475,7 @@ class Erode(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_erode.mif'
@@ -523,6 +530,7 @@ class Threshold(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_thresh.mif'
@@ -568,6 +576,7 @@ class MedianFilter3D(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_median3D.mif'
@@ -622,6 +631,7 @@ class MRTransform(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_files[0])
         return name + '_MRTransform.mif'

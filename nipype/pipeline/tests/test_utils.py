@@ -50,6 +50,7 @@ def test_clean_working_directory():
     class OutputSpec(nib.TraitedSpec):
         files = nib.traits.List(nib.File)
         others = nib.File()
+
     class InputSpec(nib.TraitedSpec):
         infile = nib.File()
     outputs = OutputSpec()

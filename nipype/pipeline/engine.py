@@ -755,6 +755,7 @@ connected.
         save_json(graph_file, json_dict)
         graph_file = op.join(report_dir, 'graph.json')
         template = '%%0%dd_' % np.ceil(np.log10(len(nodes))).astype(int)
+
         def getname(u, i):
             name_parts = u.fullname.split('.')
             # return '.'.join(name_parts[:-1] + [template % i + name_parts[-1]])

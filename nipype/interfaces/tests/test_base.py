@@ -123,8 +123,10 @@ def test_TraitedSpec_logic():
         kung = nib.traits.Float(requires=('foo',),
                                 position=0,
                                 desc='kung foo')
+
     class out3(nib.TraitedSpec):
         output = nib.traits.Int
+
     class MyInterface(nib.BaseInterface):
         input_spec = spec3
         output_spec = out3
@@ -339,6 +341,7 @@ def test_TraitedSpec_withFile():
     tmp_infile = setup_file()
     tmpd, nme = os.path.split(tmp_infile)
     yield assert_true, os.path.exists(tmp_infile)
+
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True)
         doo = nib.traits.List(nib.File(exists=True))
@@ -354,6 +357,7 @@ def test_TraitedSpec_withNoFileHashing():
     pwd = os.getcwd()
     os.chdir(tmpd)
     yield assert_true, os.path.exists(tmp_infile)
+
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True, hash_files=False)
         doo = nib.traits.List(nib.File(exists=True))
@@ -407,8 +411,10 @@ def test_BaseInterface():
         hoo = nib.traits.Int(desc='a random int', usedefault=True)
         zoo = nib.File(desc='a file', copyfile=False)
         woo = nib.File(desc='a file', copyfile=True)
+
     class OutputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
+
     class DerivedInterface(nib.BaseInterface):
         input_spec = InputSpec
 
@@ -427,6 +433,7 @@ def test_BaseInterface():
 
     class DerivedInterface2(DerivedInterface):
         output_spec = OutputSpec
+
         def _run_interface(self, runtime):
             return runtime
 
@@ -444,6 +451,7 @@ def assert_not_raises(fn, *args, **kwargs):
 def test_input_version():
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
     obj = DerivedInterface1()
@@ -453,8 +461,10 @@ def test_input_version():
     yield assert_raises, Exception, obj._check_version_requirements, obj.inputs
 
     config.set_default_config()
+
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.8'
@@ -464,6 +474,7 @@ def test_input_version():
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.10'
@@ -472,6 +483,7 @@ def test_input_version():
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.9'
@@ -482,6 +494,7 @@ def test_input_version():
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', max_ver='0.7')
+
     class DerivedInterface2(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.8'
@@ -491,6 +504,7 @@ def test_input_version():
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', max_ver='0.9')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.9'
@@ -502,8 +516,10 @@ def test_input_version():
 def test_output_version():
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
+
     class OutputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         output_spec = OutputSpec
@@ -513,24 +529,31 @@ def test_output_version():
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
+
     class OutputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.11')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         output_spec = OutputSpec
         _version = '0.10'
     obj = DerivedInterface1()
     yield assert_equal, obj._check_version_requirements(obj._outputs()), ['foo']
+
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
+
     class OutputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.11')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         output_spec = OutputSpec
         _version = '0.10'
+
         def _run_interface(self, runtime):
             return runtime
+
         def _list_outputs(self):
             return {'foo': 1}
     obj = DerivedInterface1()
@@ -584,6 +607,7 @@ def test_Commandline():
 
     class DerivedClass(nib.CommandLine):
         input_spec = CommandLineInputSpec2
+
         def _gen_filename(self, name):
             return 'filename'
 

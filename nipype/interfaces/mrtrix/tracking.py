@@ -118,6 +118,7 @@ class Tracks2Prob(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_TDI.mif'

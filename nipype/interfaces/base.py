@@ -57,6 +57,7 @@ __docformat__ = 'restructuredtext'
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
 
@@ -137,6 +138,7 @@ class Bunch(object):
            Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
 
     """
+
     def __init__(self, *args, **kwargs):
         self.__dict__.update(*args, **kwargs)
 
@@ -619,6 +621,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
     This class is a workaround for add_traits and clone_traits not
     functioning well together.
     """
+
     def __deepcopy__(self, memo):
         """ bug in deepcopy for HasTraits results in weird cloning behavior for
         added traits
@@ -1723,6 +1726,7 @@ class SEMLikeCommandLine(CommandLine):
     used but only for the reduced (by excluding those that do not have
     corresponding inputs list of outputs.
     """
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         return self._outputs_from_inputs(outputs)

@@ -54,6 +54,7 @@ def make_label_dec(label, ds=None):
     for label in labels:
         setattr(tmp, label, True)
     # This is the actual decorator we'll return
+
     def decor(f):
         for label in labels:
             setattr(f, label, True)

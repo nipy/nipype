@@ -80,6 +80,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
     f4dt = np.dtype(endianness + 'f4')
     pt_cols = 3
     bytesize = pt_cols*4
+
     def points_per_track(offset):
         n_streams = 0
         n_points = 0
@@ -240,6 +241,7 @@ class MRTrix2TrackVis(BaseInterface):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '.trk'

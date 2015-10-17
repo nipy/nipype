@@ -490,6 +490,7 @@ def test_mapnode_nested():
     wd = mkdtemp()
     os.chdir(wd)
     from nipype import MapNode, Function
+
     def func1(in1):
         return in1 + 1
     n1 = MapNode(Function(input_names=['in1'],
@@ -523,8 +524,10 @@ def test_node_hash():
     wd = mkdtemp()
     os.chdir(wd)
     from nipype.interfaces.utility import Function
+
     def func1():
         return 1
+
     def func2(a):
         return a+1
     n1 = pe.Node(Function(input_names=[],
@@ -549,6 +552,7 @@ def test_node_hash():
     error_raised = False
     # create dummy distributed plugin class
     from nipype.pipeline.plugins.base import DistributedPluginBase
+
     class RaiseError(DistributedPluginBase):
         def _submit_job(self, node, updatehash=False):
             raise Exception('Submit called')
@@ -580,8 +584,10 @@ def test_old_config():
     wd = mkdtemp()
     os.chdir(wd)
     from nipype.interfaces.utility import Function
+
     def func1():
         return 1
+
     def func2(a):
         return a+1
     n1 = pe.Node(Function(input_names=[],
@@ -618,6 +624,7 @@ def test_mapnode_json():
     wd = mkdtemp()
     os.chdir(wd)
     from nipype import MapNode, Function, Workflow
+
     def func1(in1):
         return in1 + 1
     n1 = MapNode(Function(input_names=['in1'],
@@ -659,6 +666,7 @@ def test_serial_input():
     wd = mkdtemp()
     os.chdir(wd)
     from nipype import MapNode, Function, Workflow
+
     def func1(in1):
         return in1
     n1 = MapNode(Function(input_names=['in1'],

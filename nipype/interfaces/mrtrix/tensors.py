@@ -87,6 +87,7 @@ class DWI2SphericalHarmonicsImage(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_SH.mif'
@@ -166,6 +167,7 @@ class ConstrainedSphericalDeconvolution(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_CSD.mif'
@@ -216,6 +218,7 @@ class EstimateResponseForSH(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_ER.txt'

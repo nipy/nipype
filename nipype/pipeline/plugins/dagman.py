@@ -49,6 +49,7 @@ error = %(basename)s.err
 log = %(basename)s.log
 getenv = True
 """
+
     def _get_str_or_file(self, arg):
         if os.path.isfile(arg):
             content = open(arg).read()

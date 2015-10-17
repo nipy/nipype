@@ -70,6 +70,7 @@ def test_use_mfile():
 
 def test_find_mlab_cmd_defaults():
     saved_env = dict(os.environ)
+
     class TestClass(spm.SPMCommand):
         pass
     # test without FORCE_SPMMCR, SPMMCRCMD set
