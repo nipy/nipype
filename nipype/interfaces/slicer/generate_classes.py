@@ -317,8 +317,8 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x =
 
 
 def grab_xml(module, launcher, mipav_hacks=False):
-#        cmd = CommandLine(command = "Slicer3", args="--launch %s --xml"%module)
-#        ret = cmd.run()
+    #        cmd = CommandLine(command = "Slicer3", args="--launch %s --xml"%module)
+    #        ret = cmd.run()
     command_list = launcher[:]  # force copy to preserve original
     command_list.extend([module, "--xml"])
     final_command = " ".join(command_list)

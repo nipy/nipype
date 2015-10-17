@@ -1558,7 +1558,7 @@ class VBMSegment(SPMCommand):
                 os.path.join(pth, "%s_seg8.mat" % base))
 
             for i, tis in enumerate(['gm', 'wm', 'csf']):
-            # native space
+                # native space
 
                 if getattr(self.inputs, '%s_native' % tis):
                     outputs['native_class_images'][i].append(

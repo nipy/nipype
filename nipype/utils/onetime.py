@@ -50,11 +50,11 @@ class OneTimeProperty(object):
 
 
 def setattr_on_read(func):
-# XXX - beetter names for this?
-# - cor_property (copy on read property)
-# - sor_property (set on read property)
-# - prop2attr_on_read
-#... ?
+    # XXX - beetter names for this?
+    # - cor_property (copy on read property)
+    # - sor_property (set on read property)
+    # - prop2attr_on_read
+    #... ?
 
     """Decorator to create OneTimeProperty attributes.
 
