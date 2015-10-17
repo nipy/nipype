@@ -138,7 +138,7 @@ def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs
     input['description']       = spec_info.capitalize()+". "+spec.desc.capitalize()
     if not input['description'].endswith('.'):
         input['description']    += '.'
-    if not (hasattr(spec, "mandatory") and spec.mandatory ):
+    if not (hasattr(spec, "mandatory") and spec.mandatory):
         input['optional']        = True
     else:
         input['optional']        = False

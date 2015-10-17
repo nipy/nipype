@@ -265,7 +265,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
         fiberlabels[i, 0] = startROI
         fiberlabels[i, 1] = endROI
 
-        final_fiberlabels.append([startROI, endROI ])
+        final_fiberlabels.append([startROI, endROI])
         final_fibers_idx.append(i)
 
         # Add edge to graph

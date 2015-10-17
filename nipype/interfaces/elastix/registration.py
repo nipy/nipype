@@ -70,7 +70,7 @@ class Registration(CommandLine):
 
         out_dir = op.abspath(self.inputs.output_path)
 
-        opts = ['WriteResultImage', 'ResultImageFormat' ]
+        opts = ['WriteResultImage', 'ResultImageFormat']
         regex = re.compile(r'^\((\w+)\s(.+)\)$')
 
         outputs['transform'] = []
@@ -90,7 +90,7 @@ class Registration(CommandLine):
                             config[m.group(1).strip()] = value
 
             outputs['transform'].append(op.join(out_dir,
-                                                'TransformParameters.%01d.txt' % i ))
+                                                'TransformParameters.%01d.txt' % i))
 
             warped_file = None
             if config['WriteResultImage']:

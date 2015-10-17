@@ -18,14 +18,14 @@ def node_completed_status(checknode):
     """ TODO: place this in the base.py file and refactor """
     node_state_does_not_require_overwrite = (checknode.overwrite == False or
                                               (checknode.overwrite == None and
-                                               not checknode._interface.always_run )
+                                               not checknode._interface.always_run)
     )
     hash_exists = False
     try:
         hash_exists, _, _, _ = checknode.hash_exists()
     except Exception:
         hash_exists = False
-    return (hash_exists and node_state_does_not_require_overwrite )
+    return (hash_exists and node_state_does_not_require_overwrite)
 
 
 class SLURMGraphPlugin(GraphPluginBase):

@@ -31,7 +31,7 @@ def test_apply_transform():
     moving = example_data(infile = 'functional.nii')
     mat = example_data(infile = 'trans.mat')
     applymat = spmu.ApplyTransform(matlab_cmd = 'mymatlab')
-    assert_equal(applymat.inputs.matlab_cmd, 'mymatlab' )
+    assert_equal(applymat.inputs.matlab_cmd, 'mymatlab')
     applymat.inputs.in_file = moving
     applymat.inputs.mat = mat
     scrpt = applymat._make_matlab_command(None)

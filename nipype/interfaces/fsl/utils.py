@@ -1855,7 +1855,7 @@ class WarpPoints(CommandLine):
                                                             delete=False).name
             second_args = self._tmpfile
 
-        return first_args + [second_args ]
+        return first_args + [second_args]
 
     def _vtk_to_coords(self, in_file, out_file=None):
         import os.path as op

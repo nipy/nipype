@@ -61,7 +61,7 @@ class EditTransform(BaseInterface):
     _out_file = ''
     _pattern = '\((?P<entry>%s\s\"?)([-\.\s\w]+)(\"?\))'
 
-    _interp = {'nearest': 0, 'linear': 1, 'cubic': 3 }
+    _interp = {'nearest': 0, 'linear': 1, 'cubic': 3}
 
     def _run_interface(self, runtime):
         import re
@@ -94,12 +94,12 @@ class EditTransform(BaseInterface):
             if len(im.get_header().get_zooms()) == 4:
                 im = nb.func.four_to_three(im)[0]
 
-            size = ' '.join(["%01d" % s for s in im.get_shape() ])
+            size = ' '.join(["%01d" % s for s in im.get_shape()])
             p = re.compile((self._pattern % 'Size').decode('string-escape'))
             rep = '(\g<entry>%s\g<3>' % size
             contents = p.sub(rep, contents)
 
-            index = ' '.join(["0" for s in im.get_shape() ])
+            index = ' '.join(["0" for s in im.get_shape()])
             p = re.compile((self._pattern % 'Index').decode('string-escape'))
             rep = '(\g<entry>%s\g<3>' % index
             contents = p.sub(rep, contents)
@@ -113,7 +113,7 @@ class EditTransform(BaseInterface):
             itkmat[0,0] = -1
             itkmat[1,1] = -1
 
-            affine = np.dot(itkmat, im.get_affine() )
+            affine = np.dot(itkmat, im.get_affine())
             dirs = ' '.join(['%0.4f' % f for f in affine[0:3,0:3].reshape(-1)])
             orig = ' '.join(['%0.4f' % f for f in affine[0:3,3].reshape(-1)])
 

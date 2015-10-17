@@ -34,4 +34,4 @@ if __name__ == "__main__":
 
     modules_list = list(set(modules_list).union(modules_from_chris).union(modules_from_leonie).union(modules_from_julia).union(modules_from_yasinyazici).union(modules_list))
 
-    generate_all_classes(modules_list=modules_list,launcher=["java edu.jhu.ece.iacl.jist.cli.run" ], redirect_x=True, mipav_hacks=True)
+    generate_all_classes(modules_list=modules_list,launcher=["java edu.jhu.ece.iacl.jist.cli.run"], redirect_x=True, mipav_hacks=True)

@@ -86,7 +86,7 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
             for valname, val in list(obj.__dict__.items()):
                 valname1 = '%s.%s' % (name, valname)
                 if ((isroutine(val) or isclass(val))
-                     and self._from_module(module, val) ):
+                     and self._from_module(module, val)):
 
                     self._find(tests, val, valname1, module, source_lines,
                                globs, seen)

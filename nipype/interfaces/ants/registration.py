@@ -553,7 +553,7 @@ class Registration(ANTSCommand):
                 else:
                     temp["moving_image"] = self.inputs.moving_image[i]
 
-                specs.append(temp )
+                specs.append(temp)
         else:
             specs = [stage_inputs]
 

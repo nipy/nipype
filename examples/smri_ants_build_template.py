@@ -83,7 +83,7 @@ tbuilder.base_dir=requestedPath
 datasource = pe.Node(interface=util.IdentityInterface(fields=
                                                       ['imageList', 'passiveImagesDictionariesList']),
                      run_without_submitting=True,
-                     name='InputImages' )
+                     name='InputImages')
 datasource.inputs.imageList=input_images
 datasource.inputs.passiveImagesDictionariesList=input_passive_images
 datasource.inputs.sort_filelist = True

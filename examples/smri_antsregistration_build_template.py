@@ -103,13 +103,13 @@ tbuilder.base_dir=requestedPath
 4. Define data sources. In real life these would be replace by DataGrabbers
 """
 
-InitialTemplateInputs=[mdict['T1'] for mdict in ListOfImagesDictionaries ]
+InitialTemplateInputs=[mdict['T1'] for mdict in ListOfImagesDictionaries]
 
 datasource = pe.Node(interface=util.IdentityInterface(fields=
                                                       ['InitialTemplateInputs', 'ListOfImagesDictionaries',
                                                        'registrationImageTypes','interpolationMapping']),
                      run_without_submitting=True,
-                     name='InputImages' )
+                     name='InputImages')
 datasource.inputs.InitialTemplateInputs=InitialTemplateInputs
 datasource.inputs.ListOfImagesDictionaries=ListOfImagesDictionaries
 datasource.inputs.registrationImageTypes=registrationImageTypes

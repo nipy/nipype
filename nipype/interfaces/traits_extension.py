@@ -26,7 +26,7 @@ from traits.trait_handlers import TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
 from traits.trait_base import _Undefined
 
-class BaseFile (traits.BaseStr ):
+class BaseFile (traits.BaseStr):
     """ Defines a trait whose value must be the name of a file.
     """
 
@@ -34,7 +34,7 @@ class BaseFile (traits.BaseStr ):
     info_text = 'a file name'
 
     def __init__ (self, value = '', filter = None, auto_set = False,
-                   entries = 0, exists = False, **metadata ):
+                   entries = 0, exists = False, **metadata):
         """ Creates a File trait.
 
         Parameters
@@ -63,29 +63,29 @@ class BaseFile (traits.BaseStr ):
         if exists:
             self.info_text = 'an existing file name'
 
-        super(BaseFile, self ).__init__(value, **metadata )
+        super(BaseFile, self).__init__(value, **metadata)
 
-    def validate (self, object, name, value ):
+    def validate (self, object, name, value):
         """ Validates that a specified value is valid for this trait.
 
             Note: The 'fast validator' version performs this check in C.
         """
-        validated_value = super(BaseFile, self ).validate(object, name, value )
+        validated_value = super(BaseFile, self).validate(object, name, value)
         if not self.exists:
             return validated_value
-        elif os.path.isfile(value ):
+        elif os.path.isfile(value):
             return validated_value
 
-        self.error(object, name, value )
+        self.error(object, name, value)
 
 
-class File (BaseFile ):
+class File (BaseFile):
     """ Defines a trait whose value must be the name of a file using a C-level
         fast validator.
     """
 
     def __init__ (self, value = '', filter = None, auto_set = False,
-                   entries = 0, exists = False, **metadata ):
+                   entries = 0, exists = False, **metadata):
         """ Creates a File trait.
 
         Parameters
@@ -108,16 +108,16 @@ class File (BaseFile ):
         """
         if not exists:
             # Define the C-level fast validator to use:
-            fast_validate = (11, str )
+            fast_validate = (11, str)
 
-        super(File, self ).__init__(value, filter, auto_set, entries, exists,
-                                      **metadata )
+        super(File, self).__init__(value, filter, auto_set, entries, exists,
+                                      **metadata)
 
 #-------------------------------------------------------------------------------
 #  'BaseDirectory' and 'Directory' traits:
 #-------------------------------------------------------------------------------
 
-class BaseDirectory (traits.BaseStr ):
+class BaseDirectory (traits.BaseStr):
     """ Defines a trait whose value must be the name of a directory.
     """
 
@@ -125,7 +125,7 @@ class BaseDirectory (traits.BaseStr ):
     info_text = 'a directory name'
 
     def __init__ (self, value = '', auto_set = False, entries = 0,
-                   exists = False, **metadata ):
+                   exists = False, **metadata):
         """ Creates a BaseDirectory trait.
 
         Parameters
@@ -150,30 +150,30 @@ class BaseDirectory (traits.BaseStr ):
         if exists:
             self.info_text = 'an existing directory name'
 
-        super(BaseDirectory, self ).__init__(value, **metadata )
+        super(BaseDirectory, self).__init__(value, **metadata)
 
-    def validate (self, object, name, value ):
+    def validate (self, object, name, value):
         """ Validates that a specified value is valid for this trait.
 
             Note: The 'fast validator' version performs this check in C.
         """
-        validated_value = super(BaseDirectory, self ).validate(object, name, value )
+        validated_value = super(BaseDirectory, self).validate(object, name, value)
         if not self.exists:
             return validated_value
 
-        if os.path.isdir(value ):
+        if os.path.isdir(value):
             return validated_value
 
-        self.error(object, name, value )
+        self.error(object, name, value)
 
 
-class Directory (BaseDirectory ):
+class Directory (BaseDirectory):
     """ Defines a trait whose value must be the name of a directory using a
         C-level fast validator.
     """
 
     def __init__ (self, value = '', auto_set = False, entries = 0,
-                   exists = False, **metadata ):
+                   exists = False, **metadata):
         """ Creates a Directory trait.
 
         Parameters
@@ -194,10 +194,10 @@ class Directory (BaseDirectory ):
         # Define the C-level fast validator to use if the directory existence
         # test is not required:
         if not exists:
-            self.fast_validate = (11, str )
+            self.fast_validate = (11, str)
 
-        super(Directory, self ).__init__(value, auto_set, entries, exists,
-                                           **metadata )
+        super(Directory, self).__init__(value, auto_set, entries, exists,
+                                           **metadata)
 
 
 """

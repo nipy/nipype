@@ -320,7 +320,7 @@ class DataSink(IOBase):
                 else:
                     raise(inst)
         use_hardlink = str2bool(config.get('execution',
-                                           'try_hard_link_datasink') )
+                                           'try_hard_link_datasink'))
         for key, files in list(self.inputs._outputs.items()):
             if not isdefined(files):
                 continue

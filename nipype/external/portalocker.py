@@ -133,7 +133,7 @@ if __name__ == '__main__':
     portalocker.lock(log, portalocker.LOCK_EX)
 
     timestamp = strftime('%m/%d/%Y %H:%M:%S\n', localtime(time()))
-    log.write(timestamp )
+    log.write(timestamp)
 
     print('Wrote lines. Hit enter to release lock.')
     dummy = sys.stdin.readline()

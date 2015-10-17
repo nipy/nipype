@@ -114,7 +114,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     """
 
 
-    TemplateBuildSingleIterationWF = pe.Workflow(name = 'ANTSTemplateBuildSingleIterationWF_'+str(str(iterationPhasePrefix)) )
+    TemplateBuildSingleIterationWF = pe.Workflow(name = 'ANTSTemplateBuildSingleIterationWF_'+str(str(iterationPhasePrefix)))
 
     inputSpec = pe.Node(interface=util.IdentityInterface(fields=['images', 'fixed_image',
                                                                  'ListOfPassiveImagesDictionaries']),
@@ -232,8 +232,8 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
                                                           input_names = ['ListOfPassiveImagesDictionaries','transformation_series'],
                                                           output_names = ['flattened_images','flattened_transforms','flattened_image_nametypes']),
                                                  run_without_submitting=True, name="99_FlattenTransformAndImagesList")
-    TemplateBuildSingleIterationWF.connect(inputSpec,'ListOfPassiveImagesDictionaries', FlattenTransformAndImagesListNode, 'ListOfPassiveImagesDictionaries' )
-    TemplateBuildSingleIterationWF.connect(MakeTransformsLists ,'out', FlattenTransformAndImagesListNode, 'transformation_series' )
+    TemplateBuildSingleIterationWF.connect(inputSpec,'ListOfPassiveImagesDictionaries', FlattenTransformAndImagesListNode, 'ListOfPassiveImagesDictionaries')
+    TemplateBuildSingleIterationWF.connect(MakeTransformsLists ,'out', FlattenTransformAndImagesListNode, 'transformation_series')
     wimtPassivedeformed = pe.MapNode(interface = WarpImageMultiTransform(),
                                      iterfield=['transformation_series', 'input_image'],
                                      name ='wimtPassivedeformed')
