@@ -43,8 +43,10 @@ class FilterTracksInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
+
 class FilterTracksOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='the output filtered tracks')
+
 
 class FilterTracks(CommandLine):
     """
@@ -80,8 +82,10 @@ class Tracks2ProbInputSpec(CommandLineInputSpec):
                             units='mm', desc='resample the tracks at regular intervals using Hermite interpolation. If omitted, the program will select an appropriate interpolation factor automatically.')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='output data file')
 
+
 class Tracks2ProbOutputSpec(TraitedSpec):
     tract_image = File(exists=True, desc='Output tract count or track density image')
+
 
 class Tracks2Prob(CommandLine):
     """
@@ -122,6 +126,7 @@ class Tracks2Prob(CommandLine):
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_TDI.mif'
+
 
 class StreamlineTrackInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the image containing the source data.' \
@@ -182,8 +187,10 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
     out_file = File(argstr='%s', position=-1, name_source=['in_file'], name_template='%s_tracked.tck',
                     output_name='tracked', desc='output data file')
 
+
 class StreamlineTrackOutputSpec(TraitedSpec):
     tracked = File(exists=True, desc='output file containing reconstructed tracts')
+
 
 class StreamlineTrack(CommandLine):
     """
@@ -214,6 +221,7 @@ class DiffusionTensorStreamlineTrackInputSpec(StreamlineTrackInputSpec):
     gradient_encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=-2,
                                   desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
 
+
 class DiffusionTensorStreamlineTrack(StreamlineTrack):
     """
     Specialized interface to StreamlineTrack. This interface is used for
@@ -236,9 +244,11 @@ class DiffusionTensorStreamlineTrack(StreamlineTrack):
         inputs["inputmodel"] = "DT_STREAM"
         return super(DiffusionTensorStreamlineTrack, self).__init__(command, **inputs)
 
+
 class ProbabilisticSphericallyDeconvolutedStreamlineTrackInputSpec(StreamlineTrackInputSpec):
     maximum_number_of_trials = traits.Int(argstr='-trials %s',
                                           desc="Set the maximum number of sampling trials at each point (only used for probabilistic tracking).")
+
 
 class ProbabilisticSphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     """
@@ -262,6 +272,7 @@ class ProbabilisticSphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "SD_PROB"
         return super(ProbabilisticSphericallyDeconvolutedStreamlineTrack, self).__init__(command, **inputs)
+
 
 class SphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     """

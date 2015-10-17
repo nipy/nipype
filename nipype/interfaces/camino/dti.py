@@ -30,8 +30,10 @@ class DTIFitInputSpec(StdOutCommandLineInputSpec):
     non_linear = traits.Bool(argstr='-nonlinear', position=3,
                              desc="Use non-linear fitting instead of the default linear regression to the log measurements. ")
 
+
 class DTIFitOutputSpec(TraitedSpec):
     tensor_fitted = File(exists=True, desc='path/name of 4D volume in voxel order')
+
 
 class DTIFit(StdOutCommandLine):
     """
@@ -68,6 +70,7 @@ class DTIFit(StdOutCommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_DT.Bdouble'
 
+
 class DTMetricInputSpec(CommandLineInputSpec):
     eigen_data = File(exists=True, argstr='-inputfile %s', mandatory=True,
                       desc='voxel-order data filename')
@@ -100,8 +103,10 @@ class DTMetricInputSpec(CommandLineInputSpec):
                       desc=('Output name. Output will be a .nii.gz file if data_header is provided and'
                             'in voxel order with outputdatatype datatype (default: double) otherwise.'))
 
+
 class DTMetricOutputSpec(TraitedSpec):
     metric_stats = File(exists=True, desc='Diffusion Tensor statistics of the chosen metric')
+
 
 class DTMetric(CommandLine):
     """
@@ -167,6 +172,7 @@ class DTMetric(CommandLine):
                 filename = name + '_' + metric + '.B' + datatype
         return filename
 
+
 class ModelFitInputSpec(StdOutCommandLineInputSpec):
     def _gen_model_options():  # @NoSelf
         """
@@ -216,8 +222,10 @@ class ModelFitInputSpec(StdOutCommandLineInputSpec):
 
     tau = traits.Float(argstr='-tau %G', desc='Sets the diffusion time separately. This overrides the diffusion time specified in a scheme file or by a scheme index for both the acquisition scheme and in the data synthesis.')
 
+
 class ModelFitOutputSpec(TraitedSpec):
     fitted_data = File(exists=True, desc='output file of 4D volume in voxel order')
+
 
 class ModelFit(StdOutCommandLine):
     """
@@ -251,6 +259,7 @@ class ModelFit(StdOutCommandLine):
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_fit.Bdouble'
+
 
 class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
     lrange = traits.List(traits.Float, desc='Index to one-tensor LUTs. This is the ratio L1/L3 and L2 / L3.' \
@@ -293,8 +302,10 @@ class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
     scheme_file = File(argstr='-schemefile %s', mandatory=True, position=2,
                        desc='The scheme file of the images to be processed using this LUT.')
 
+
 class DTLUTGenOutputSpec(TraitedSpec):
     dtLUT = File(exists=True, desc='Lookup Table')
+
 
 class DTLUTGen(StdOutCommandLine):
     """
@@ -331,6 +342,7 @@ class DTLUTGen(StdOutCommandLine):
         _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '.dat'
 
+
 class PicoPDFsInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
                    desc='voxel-order data filename')
@@ -362,8 +374,10 @@ class PicoPDFsInputSpec(StdOutCommandLineInputSpec):
                         'This means that the data file may be large enough to accomodate three or more PDs,'\
                         'but does not mean that any of the voxels are classified as containing three or more PDs.')
 
+
 class PicoPDFsOutputSpec(TraitedSpec):
     pdfs = File(exists=True, desc='path/name of 4D volume in voxel order')
+
 
 class PicoPDFs(StdOutCommandLine):
     """
@@ -391,6 +405,7 @@ class PicoPDFs(StdOutCommandLine):
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_pdfs.Bdouble'
+
 
 class TrackInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', position=1,
@@ -523,8 +538,10 @@ class TrackInputSpec(CommandLineInputSpec):
     output_root = File(exists=False, argstr='-outputroot %s', position=-1,
                        desc='root directory for output')
 
+
 class TrackOutputSpec(TraitedSpec):
     tracked = File(exists=True, desc='output file containing reconstructed tracts')
+
 
 class Track(CommandLine):
     """
@@ -570,6 +587,7 @@ class Track(CommandLine):
             _, name, _ = split_filename(self.inputs.in_file)
         return name + '_tracked'
 
+
 class TrackDT(Track):
     """
     Performs streamline tractography using tensor data
@@ -588,10 +606,12 @@ class TrackDT(Track):
         inputs["inputmodel"] = "dt"
         return super(TrackDT, self).__init__(command, **inputs)
 
+
 class TrackPICoInputSpec(TrackInputSpec):
     pdf = traits.Enum('bingham', 'watson', 'acg', argstr='-pdf %s', desc='Specifies the model for PICo parameters. The default is "bingham.')
 
     iterations = traits.Int(argstr='-iterations %d', units='NA', desc="Number of streamlines to generate at each seed point. The default is 5000.")
+
 
 class TrackPICo(Track):
     """
@@ -613,6 +633,7 @@ class TrackPICo(Track):
         inputs["inputmodel"] = "pico"
         return super(TrackPICo, self).__init__(command, **inputs)
 
+
 class TrackBedpostxDeterInputSpec(TrackInputSpec):
     bedpostxdir = Directory(argstr='-bedpostxdir %s', mandatory=True, exists=True,
                             desc=('Directory containing bedpostx output'))
@@ -621,6 +642,7 @@ class TrackBedpostxDeterInputSpec(TrackInputSpec):
                                 desc=("Zeros out compartments in bedpostx data "
                                       "with a mean volume fraction f of less than "
                                       "min_vol_frac.  The default is 0.01."))
+
 
 class TrackBedpostxDeter(Track):
     """
@@ -652,6 +674,7 @@ class TrackBedpostxDeter(Track):
         inputs["inputmodel"] = "bedpostx_dyad"
         return super(TrackBedpostxDeter, self).__init__(command, **inputs)
 
+
 class TrackBedpostxProbaInputSpec(TrackInputSpec):
     bedpostxdir = Directory(argstr='-bedpostxdir %s', mandatory=True, exists=True,
                             desc=('Directory containing bedpostx output'))
@@ -664,6 +687,7 @@ class TrackBedpostxProbaInputSpec(TrackInputSpec):
     iterations = traits.Int(argstr='-iterations %d', units='NA',
                             desc=("Number of streamlines to generate at each "
                                   "seed point. The default is 1."))
+
 
 class TrackBedpostxProba(Track):
     """
@@ -700,6 +724,7 @@ class TrackBedpostxProba(Track):
         inputs["inputmodel"] = "bedpostx_dyad"
         return super(TrackBedpostxProba, self).__init__(command, **inputs)
 
+
 class TrackBayesDiracInputSpec(TrackInputSpec):
     scheme_file = File(argstr='-schemefile %s', mandatory=True, exists=True,
                        desc=('The scheme file corresponding to the data being '
@@ -723,6 +748,7 @@ class TrackBayesDiracInputSpec(TrackInputSpec):
 
     extpriordatatype = traits.Enum('float', 'double', argstr='-extpriordatatype %s', desc='Datatype of the prior image. The default is "double".')
 
+
 class TrackBayesDirac(Track):
     """
     Performs streamline tractography using a Bayesian tracking with Dirac priors
@@ -744,6 +770,7 @@ class TrackBayesDirac(Track):
         inputs["inputmodel"] = "bayesdirac"
         return super(TrackBayesDirac, self).__init__(command, **inputs)
 
+
 class TrackBallStick(Track):
     """
     Performs streamline tractography using ball-stick fitted data
@@ -762,6 +789,7 @@ class TrackBallStick(Track):
         inputs["inputmodel"] = "ballstick"
         return super(TrackBallStick, self).__init__(command, **inputs)
 
+
 class TrackBootstrapInputSpec(TrackInputSpec):
     scheme_file = File(argstr='-schemefile %s', mandatory=True, exists=True, desc='The scheme file corresponding to the data being processed.')
 
@@ -772,6 +800,7 @@ class TrackBootstrapInputSpec(TrackInputSpec):
     bsdatafiles = traits.List(File(exists=True), mandatory=True, argstr='-bsdatafile %s', desc='Specifies files containing raw data for repetition bootstrapping. Use -inputfile for wild bootstrap data.')
 
     bgmask = File(argstr='-bgmask %s', exists=True, desc='Provides the name of a file containing a background mask computed using, for example, FSL\'s bet2 program. The mask file contains zero in background voxels and non-zero in foreground.')
+
 
 class TrackBootstrap(Track):
     """
@@ -793,6 +822,7 @@ class TrackBootstrap(Track):
 
     def __init__(self, command=None, **inputs):
         return super(TrackBootstrap, self).__init__(command, **inputs)
+
 
 class ComputeMeanDiffusivityInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
@@ -820,8 +850,10 @@ class ComputeMeanDiffusivityInputSpec(CommandLineInputSpec):
                                  desc='Specifies the data type of the output data. The data type can be any of the' \
                                  'following strings: "char", "short", "int", "long", "float" or "double".')
 
+
 class ComputeMeanDiffusivityOutputSpec(TraitedSpec):
     md = File(exists=True, desc='Mean Diffusivity Map')
+
 
 class ComputeMeanDiffusivity(StdOutCommandLine):
     """
@@ -849,6 +881,7 @@ class ComputeMeanDiffusivity(StdOutCommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + "_MD.img"  # Need to change to self.inputs.outputdatatype
 
+
 class ComputeFractionalAnisotropyInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
                    desc='Tensor-fitted data filename')
@@ -873,8 +906,10 @@ class ComputeFractionalAnisotropyInputSpec(StdOutCommandLineInputSpec):
                                  desc='Specifies the data type of the output data. The data type can be any of the' \
                                  'following strings: "char", "short", "int", "long", "float" or "double".')
 
+
 class ComputeFractionalAnisotropyOutputSpec(TraitedSpec):
     fa = File(exists=True, desc='Fractional Anisotropy Map')
+
 
 class ComputeFractionalAnisotropy(StdOutCommandLine):
     """
@@ -908,6 +943,7 @@ class ComputeFractionalAnisotropy(StdOutCommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_FA.Bdouble'  # Need to change to self.inputs.outputdatatype
 
+
 class ComputeTensorTraceInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
                    desc='Tensor-fitted data filename')
@@ -932,8 +968,10 @@ class ComputeTensorTraceInputSpec(StdOutCommandLineInputSpec):
                                  desc='Specifies the data type of the output data. The data type can be any of the' \
                                  'following strings: "char", "short", "int", "long", "float" or "double".')
 
+
 class ComputeTensorTraceOutputSpec(TraitedSpec):
     trace = File(exists=True, desc='Trace of the diffusion tensor')
+
 
 class ComputeTensorTrace(StdOutCommandLine):
     """
@@ -991,8 +1029,10 @@ class ComputeEigensystemInputSpec(StdOutCommandLineInputSpec):
                                        '"char", "short", "int", "long", "float" or "double".'
                                        'Default is double data type'))
 
+
 class ComputeEigensystemOutputSpec(TraitedSpec):
     eigen = File(exists=True, desc='Trace of the diffusion tensor')
+
 
 class ComputeEigensystem(StdOutCommandLine):
     """

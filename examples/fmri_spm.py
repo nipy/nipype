@@ -317,6 +317,7 @@ the mean image would be copied to that directory.
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.abspath('spm_tutorial/l1output')
 
+
 def getstripdir(subject_id):
     import os
     return os.path.join(os.path.abspath('spm_tutorial/workingdir'), '_subject_id_%s' % subject_id)

@@ -14,11 +14,13 @@ from nipype.interfaces.base import TraitError
 
 import nipype.interfaces.freesurfer as fs
 
+
 def no_freesurfer():
     if fs.Info().version is None:
         return True
     else:
         return False
+
 
 def create_files_in_directory():
     outdir = os.path.realpath(mkdtemp())
@@ -37,6 +39,7 @@ def create_files_in_directory():
     filelist.append('reg.dat')
     return filelist, outdir, cwd
 
+
 def create_surf_file():
     outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
@@ -50,10 +53,12 @@ def create_surf_file():
              os.path.join(outdir, surf))
     return surf, outdir, cwd
 
+
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
         rmtree(outdir)
     os.chdir(old_wd)
+
 
 @skipif(no_freesurfer)
 def test_sample2surf():
@@ -98,6 +103,7 @@ def test_sample2surf():
     # Clean up our mess
     clean_directory(cwd, oldwd)
 
+
 @skipif(no_freesurfer)
 def test_surfsmooth():
 
@@ -132,6 +138,7 @@ def test_surfsmooth():
     # Clean up
     clean_directory(cwd, oldwd)
 
+
 @skipif(no_freesurfer)
 def test_surfxfm():
 
@@ -165,6 +172,7 @@ def test_surfxfm():
     # Clean up
     clean_directory(cwd, oldwd)
 
+
 @skipif(no_freesurfer)
 def test_applymask():
     masker = fs.ApplyMask()
@@ -194,6 +202,7 @@ def test_applymask():
 
     # Now clean up
     clean_directory(testdir, origdir)
+
 
 @skipif(no_freesurfer)
 def test_surfshots():

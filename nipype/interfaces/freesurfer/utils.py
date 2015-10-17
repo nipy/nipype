@@ -869,6 +869,7 @@ class MRIsConvert(FSCommand):
 
         return name + ext + "_converted." + self.inputs.out_datatype
 
+
 class MRITessellateInputSpec(FSTraitedSpec):
     """
     Uses Freesurfer's mri_tessellate to create surfaces by tessellating a given input volume
@@ -880,6 +881,7 @@ class MRITessellateInputSpec(FSTraitedSpec):
     out_file = File(argstr='./%s', position=-1, genfile=True, desc='output filename or True to generate one')
     tesselate_all_voxels = traits.Bool(argstr='-a', desc='Tessellate the surface of all voxels with different labels')
     use_real_RAS_coordinates = traits.Bool(argstr='-n', desc='Saves surface with real RAS coordinates where c_(r,a,s) != 0')
+
 
 class MRITessellateOutputSpec(TraitedSpec):
     """
@@ -945,6 +947,7 @@ class MRIPretessInputSpec(FSTraitedSpec):
                                                     'mri_pretess. The value of the voxel is set to that of an ON-edited WM, '
                                                     'so it should be kept with -keep. The output will NOT be saved.'))
 
+
 class MRIPretessOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='output file after mri_pretess')
 
@@ -1007,6 +1010,7 @@ class MRIMarchingCubesInputSpec(FSTraitedSpec):
                                     desc='Alter the marching cubes connectivity: 1=6+,2=18,3=6,4=26 (default=1)')
     out_file = File(argstr='./%s', position=-2, genfile=True, desc='output filename or True to generate one')
 
+
 class MRIMarchingCubesOutputSpec(TraitedSpec):
     """
     Uses Freesurfer's mri_mc to create surfaces by tessellating a given input volume
@@ -1050,6 +1054,7 @@ class MRIMarchingCubes(FSCommand):
             _, name, ext = split_filename(self.inputs.in_file)
             return os.path.abspath(name + ext + '_' + str(self.inputs.label_value))
 
+
 class SmoothTessellationInputSpec(FSTraitedSpec):
     """
     This program smooths the tessellation of a surface using 'mris_smooth'
@@ -1072,6 +1077,7 @@ class SmoothTessellationInputSpec(FSTraitedSpec):
     out_file = File(argstr='%s', position=2, genfile=True, desc='output filename or True to generate one')
     out_curvature_file = File(argstr='-c %s', desc='Write curvature to ?h.curvname (default "curv")')
     out_area_file = File(argstr='-b %s', desc='Write area to ?h.areaname (default "area")')
+
 
 class SmoothTessellationOutputSpec(TraitedSpec):
     """
@@ -1163,6 +1169,7 @@ class MakeAverageSubject(FSCommand):
         outputs['average_subject_name'] = self.inputs.out_name
         return outputs
 
+
 class ExtractMainComponentInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, mandatory=True, argstr='%s', position=1,
                    desc='input surface file')
@@ -1170,8 +1177,10 @@ class ExtractMainComponentInputSpec(CommandLineInputSpec):
                     argstr='%s', position=2,
                     desc='surface containing main component')
 
+
 class ExtractMainComponentOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='surface containing main component')
+
 
 class ExtractMainComponent(CommandLine):
     """Extract the main component of a tesselated surface

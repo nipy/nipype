@@ -975,6 +975,7 @@ class ApplyVolTransformInputSpec(FSTraitedSpec):
                                      'non-linear morph to resample the input '
                                      'volume. To be used by --m3z.'))
 
+
 class ApplyVolTransformOutputSpec(TraitedSpec):
     transformed_file = File(exists=True, desc='Path to output file if used normally')
 
@@ -1024,6 +1025,7 @@ class ApplyVolTransform(FSCommand):
         if name == 'transformed_file':
             return self._get_outfile()
         return None
+
 
 class SmoothInputSpec(FSTraitedSpec):
     in_file = File(exists=True, desc='source volume',

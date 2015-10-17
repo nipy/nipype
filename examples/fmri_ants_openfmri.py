@@ -58,6 +58,7 @@ imports = ['import os',
            'from scipy.special import legendre'
            ]
 
+
 def median(in_files):
     """Computes an average of the median of each realigned timeseries
 
@@ -286,12 +287,14 @@ def create_reg_workflow(name='registration'):
 
     return register
 
+
 def get_aparc_aseg(files):
     """Return the aparc+aseg.mgz file"""
     for name in files:
         if 'aparc+aseg.mgz' in name:
             return name
     raise ValueError('aparc+aseg.mgz not found')
+
 
 def create_fs_reg_workflow(name='registration'):
     """Create a FEAT preprocessing workflow together with freesurfer
@@ -516,6 +519,7 @@ def create_fs_reg_workflow(name='registration'):
 Get info for a given subject
 """
 
+
 def get_subjectinfo(subject_id, base_dir, task_id, model_id):
     """Get info for a given subject
 
@@ -588,6 +592,7 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
 """
 Analyzes an open fmri dataset
 """
+
 
 def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                              task_id=None, output_dir=None, subj_prefix='*',

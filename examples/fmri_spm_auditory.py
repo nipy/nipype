@@ -118,6 +118,7 @@ the voxel sizes of the target volume. There is no need to set it manually since 
 using the following function:
 """
 
+
 def get_vox_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):
@@ -370,6 +371,7 @@ the mean image would be copied to that directory.
 
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.abspath('spm_auditory_tutorial/l1output')
+
 
 def getstripdir(subject_id):
     import os

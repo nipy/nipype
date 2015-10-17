@@ -140,6 +140,7 @@ def test_run_multiproc_nondaemon_false():
         shouldHaveFailed = True
     yield assert_true, shouldHaveFailed
 
+
 def test_run_multiproc_nondaemon_true():
     # with nondaemon_flag = True, the execution should succeed
     result = run_multiproc_nondaemon_with_flag(True)

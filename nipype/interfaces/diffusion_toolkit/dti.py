@@ -57,6 +57,7 @@ class DTIReconOutputSpec(TraitedSpec):
     V2 = File(exists=True)
     V3 = File(exists=True)
 
+
 class DTIRecon(CommandLine):
     """Use dti_recon to generate tensors and other maps
     """
@@ -106,6 +107,7 @@ class DTIRecon(CommandLine):
 
         return outputs
 
+
 class DTITrackerInputSpec(CommandLineInputSpec):
     tensor_file = File(exists=True, desc="reconstructed tensor file")
     input_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', desc="""input and output file type. accepted values are:
@@ -143,9 +145,11 @@ class DTITrackerInputSpec(CommandLineInputSpec):
     output_mask = File(desc="output a binary mask file in analyze format", argstr="-om %s")
     primary_vector = traits.Enum('v2', 'v3', desc="which vector to use for fibre tracking: v2 or v3. If not set use v1", argstr="-%s")
 
+
 class DTITrackerOutputSpec(TraitedSpec):
     track_file = File(exists=True)
     mask_file = File(exists=True)
+
 
 class DTITracker(CommandLine):
     input_spec = DTITrackerInputSpec

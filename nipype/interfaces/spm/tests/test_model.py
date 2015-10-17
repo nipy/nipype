@@ -35,34 +35,42 @@ def create_files_in_directory():
                 os.path.join(outdir, f))
     return filelist, outdir, cwd
 
+
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
         rmtree(outdir)
     os.chdir(old_wd)
 
+
 def test_level1design():
     yield assert_equal, spm.Level1Design._jobtype, 'stats'
     yield assert_equal, spm.Level1Design._jobname, 'fmri_spec'
+
 
 def test_estimatemodel():
     yield assert_equal, spm.EstimateModel._jobtype, 'stats'
     yield assert_equal, spm.EstimateModel._jobname, 'fmri_est'
 
+
 def test_estimatecontrast():
     yield assert_equal, spm.EstimateContrast._jobtype, 'stats'
     yield assert_equal, spm.EstimateContrast._jobname, 'con'
+
 
 def test_threshold():
     yield assert_equal, spm.Threshold._jobtype, 'basetype'
     yield assert_equal, spm.Threshold._jobname, 'basename'
 
+
 def test_factorialdesign():
     yield assert_equal, spm.FactorialDesign._jobtype, 'stats'
     yield assert_equal, spm.FactorialDesign._jobname, 'factorial_design'
 
+
 def test_onesamplettestdesign():
     yield assert_equal, spm.OneSampleTTestDesign._jobtype, 'stats'
     yield assert_equal, spm.OneSampleTTestDesign._jobname, 'factorial_design'
+
 
 def test_twosamplettestdesign():
     yield assert_equal, spm.TwoSampleTTestDesign._jobtype, 'stats'

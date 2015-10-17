@@ -50,6 +50,8 @@ Examples
 figure_basename = None
 
 # We must change the show command to save instead
+
+
 def show():
     allfm = Gcf.get_all_fig_managers()
     for fcount, fm in enumerate(allfm):

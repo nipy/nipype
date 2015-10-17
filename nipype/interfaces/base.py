@@ -54,6 +54,7 @@ iflogger = logging.getLogger('interface')
 
 __docformat__ = 'restructuredtext'
 
+
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
         self.value = value
@@ -70,6 +71,7 @@ def _unlock_display(ndisplay):
         return False
 
     return True
+
 
 def _exists_in_path(cmd, environ):
     '''
@@ -89,6 +91,7 @@ def _exists_in_path(cmd, environ):
             if os.path.exists(filename):
                 return True, filename
     return False, None
+
 
 def load_template(name):
     """Load a template from the script_templates directory

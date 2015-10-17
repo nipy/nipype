@@ -63,6 +63,7 @@ __all__ = [
 
 import os
 
+
 class LockException(Exception):
     # Error codes:
     LOCK_FAILED = 1

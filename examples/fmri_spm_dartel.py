@@ -297,6 +297,7 @@ dartel_workflow.inputs.inputspec.template_prefix = "template"
 """This function will allow to pick the right field flow for each subject
 """
 
+
 def pickFieldFlow(dartel_flow_fields, subject_id):
     from nipype.utils.filemanip import split_filename
     for f in dartel_flow_fields:
@@ -322,6 +323,7 @@ about the experimental paradigm. This is used by the
 necessary to generate an SPM design matrix. In this tutorial, the same
 paradigm was used for every participant.
 """
+
 
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
@@ -440,6 +442,7 @@ datasink.inputs.base_directory = os.path.abspath('spm_dartel_tutorial/l1output')
 report = pe.Node(interface=nio.DataSink(), name='report')
 report.inputs.base_directory = os.path.abspath('spm_dartel_tutorial/report')
 report.inputs.parameterization = False
+
 
 def getstripdir(subject_id):
     import os

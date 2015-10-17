@@ -88,6 +88,7 @@ Set up first-level workflow
 
 """
 
+
 def sort_copes(files):
     numelements = len(files[0])
     outfiles = []
@@ -96,6 +97,7 @@ def sort_copes(files):
         for j, elements in enumerate(files):
             outfiles[i].append(elements[i])
     return outfiles
+
 
 def num_copes(files):
     return len(files)
@@ -195,6 +197,7 @@ to generate an SPM design matrix. In this tutorial, the same paradigm was used
 for every participant. Other examples of this function are available in the
 `doc/examples` folder. Note: Python knowledge required here.
 """
+
 
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch

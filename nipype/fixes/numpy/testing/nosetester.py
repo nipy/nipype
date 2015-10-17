@@ -55,6 +55,7 @@ def get_package_name(filepath):
 
     return '.'.join(pkg_name)
 
+
 def import_nose():
     """ Import nose only when needed.
     """
@@ -77,6 +78,7 @@ def import_nose():
         raise ImportError(msg)
 
     return nose
+
 
 def run_module_suite(file_to_run=None):
     if file_to_run is None:

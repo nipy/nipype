@@ -262,11 +262,13 @@ def _get_valid_pathstr(pathstr):
     pathstr = pathstr.replace(',', '.')
     return pathstr
 
+
 def expand_iterables(iterables, synchronize=False):
     if synchronize:
         return synchronize_iterables(iterables)
     else:
         return list(walk(list(iterables.items())))
+
 
 def count_iterables(iterables, synchronize=False):
     """Return the number of iterable expansion nodes.
@@ -281,6 +283,7 @@ def count_iterables(iterables, synchronize=False):
     else:
         op = lambda x, y: x*y
     return reduce(op, [len(func()) for _, func in iterables.items()])
+
 
 def walk(children, level=0, path=None, usename=True):
     """Generate all the full paths in a tree, as a dict.
@@ -313,6 +316,7 @@ def walk(children, level=0, path=None, usename=True):
         # Recurse into the next level
         for child_paths in walk(tail, level + 1, path, usename):
             yield child_paths
+
 
 def synchronize_iterables(iterables):
     """Synchronize the given iterables in item-wise order.
@@ -347,6 +351,7 @@ def synchronize_iterables(iterables):
             break
 
     return out_list
+
 
 def evaluate_connect_function(function_source, args, first_arg):
     func = create_function_from_source(function_source)
@@ -479,6 +484,7 @@ def _connect_nodes(graph, srcnode, destnode, connection_info):
     else:
         data['connect'].extend(connection_info)
 
+
 def _remove_nonjoin_identity_nodes(graph, keep_iterables=False):
     """Remove non-join identity nodes from the given graph
 
@@ -492,6 +498,7 @@ def _remove_nonjoin_identity_nodes(graph, keep_iterables=False):
             _remove_identity_node(graph, node)
     return graph
 
+
 def _identity_nodes(graph, include_iterables):
     """Return the IdentityInterface nodes in the graph
 
@@ -502,6 +509,7 @@ def _identity_nodes(graph, include_iterables):
     return [node for node in nx.topological_sort(graph)
             if isinstance(node._interface, IdentityInterface) and
             (include_iterables or getattr(node, 'iterables') is None)]
+
 
 def _remove_identity_node(graph, node):
     """Remove identity nodes from an execution graph
@@ -515,6 +523,7 @@ def _remove_identity_node(graph, node):
             _propagate_root_output(graph, node, field, connections)
     graph.remove_nodes_from([node])
     logger.debug("Removed the identity node %s from the graph." % node)
+
 
 def _node_ports(graph, node):
     """Return the given node's input and output ports
@@ -542,6 +551,7 @@ def _node_ports(graph, node):
             portoutputs[srcport].append((v, dest, src))
     return (portinputs, portoutputs)
 
+
 def _propagate_root_output(graph, node, field, connections):
     """Propagates the given graph root node output port
     field connections to the out-edge destination nodes."""
@@ -551,6 +561,7 @@ def _propagate_root_output(graph, node, field, connections):
             value = evaluate_connect_function(src[1], src[2],
                                               value)
         destnode.set_input(inport, value)
+
 
 def _propagate_internal_output(graph, node, field, connections, portinputs):
     """Propagates the given graph internal node output port
@@ -580,6 +591,7 @@ def _propagate_internal_output(graph, node, field, connections, portinputs):
             if isinstance(src, tuple):
                 value = evaluate_connect_function(src[1], src[2], value)
             destnode.set_input(inport, value)
+
 
 def generate_expanded_graph(graph_in):
     """Generates an expanded graph based on node parameterization
@@ -768,6 +780,7 @@ def generate_expanded_graph(graph_in):
 
     return _remove_nonjoin_identity_nodes(graph_in)
 
+
 def _iterable_nodes(graph_in):
     """Returns the iterable nodes in the given graph and their join
     dependencies.
@@ -797,6 +810,7 @@ def _iterable_nodes(graph_in):
     inodes_src = [node for node in inodes if node.itersource]
     inodes_no_src.reverse()
     return inodes_no_src + inodes_src
+
 
 def _standardize_iterables(node):
     """Converts the given iterables to a {field: function} dictionary,
@@ -836,6 +850,7 @@ def _standardize_iterables(node):
             iterables = dict(iter_items)
     node.iterables = iterables
 
+
 def _validate_iterables(node, iterables, fields):
     """
     Raise TypeError if an iterables member is not iterable.
@@ -863,6 +878,7 @@ def _validate_iterables(node, iterables, fields):
             raise ValueError("The %s iterables field is unrecognized: %s"
                              % (node.name, field))
 
+
 def _transpose_iterables(fields, values):
     """
     Converts the given fields and tuple values into a standardized
@@ -884,6 +900,7 @@ def _transpose_iterables(fields, values):
     else:
         return list(zip(fields, [[v for v in list(transpose) if v != None]
                                  for transpose in zip(*values)]))
+
 
 def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                  show_connectinfo=False, dotfilename='graph.dot', format='png',
@@ -1118,6 +1135,7 @@ def merge_bundles(g1, g2):
         g1._add_record(rec)
     return g1
 
+
 def write_workflow_prov(graph, filename=None, format='turtle'):
     """Write W3C PROV Model JSON file
     """
@@ -1180,6 +1198,7 @@ def write_workflow_prov(graph, filename=None, format='turtle'):
             with open(filename + '.json', 'wt') as fp:
                 pm.json.dump(ps.g, fp, cls=pm.ProvBundle.JSONEncoder)
     return ps.g
+
 
 def topological_sort(graph, depth_first=False):
     """Returns a depth first sorted order if depth_first is True

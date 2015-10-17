@@ -9,6 +9,7 @@ from nipype.testing import (assert_raises, assert_equal, assert_true,
                             assert_false, skipif)
 import nipype.pipeline.plugins.base as pb
 
+
 def test_scipy_sparse():
     foo = ssp.lil_matrix(np.eye(3, k=1))
     goo = foo.getrowview(0)

@@ -16,6 +16,7 @@ except Exception as e:
 else:
     import cmp
 
+
 def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_dir, output_dir, template_args_dict=0):
     """Creates a pipeline that performs MRtrix structural connectivity processing
     on groups of subjects. Given a diffusion-weighted image, and text files containing

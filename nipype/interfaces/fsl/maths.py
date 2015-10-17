@@ -34,6 +34,7 @@ class MathsInput(FSLCommandInputSpec):
     nan2zeros = traits.Bool(position=3, argstr='-nan',
                             desc='change NaNs to zeros before doing anything')
 
+
 class MathsOutput(TraitedSpec):
 
     out_file = File(exists=True, desc="image written after calculations")
@@ -123,6 +124,7 @@ class MeanImage(MathsCommand):
     """
     input_spec = MeanImageInput
     _suffix = "_mean"
+
 
 class MaxImageInput(MathsInput):
 

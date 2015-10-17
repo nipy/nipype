@@ -17,6 +17,7 @@ from distutils.version import LooseVersion
 
 from .fixes.numpy.testing import nosetester
 
+
 class _NoseTester(nosetester.NoseTester):
     """ Subclass numpy's NoseTester to add doctests by default
     """

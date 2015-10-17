@@ -8,8 +8,10 @@ from nipype.interfaces.base import (CommandLine, CommandLineInputSpec,
                                     DynamicTraitedSpec, traits, Undefined,
                                     File, isdefined)
 
+
 class SlicerCommandLineInputSpec(DynamicTraitedSpec, CommandLineInputSpec):
     module = traits.Str(desc="name of the Slicer command line module you want to use")
+
 
 class SlicerCommandLine(CommandLine):
     """Experimental Slicer wrapper. Work in progress.

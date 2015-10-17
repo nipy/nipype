@@ -5,15 +5,18 @@ from ....algorithms import misc as misc
 from ....algorithms.misc import remove_identical_paths
 from .group_connectivity import pullnodeIDs
 
+
 def add_global_to_filename(in_file):
     from nipype.utils.filemanip import split_filename
     path, name, ext = split_filename(in_file)
     return name + '_global' + ext
 
+
 def add_nodal_to_filename(in_file):
     from nipype.utils.filemanip import split_filename
     path, name, ext = split_filename(in_file)
     return name + '_nodal' + ext
+
 
 def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     """Creates a workflow to calculate various graph measures (via NetworkX) on
@@ -93,6 +96,7 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     pipeline.connect([(mergeCSVs, outputnode, [("out", "csv_files")])])
     pipeline.connect([(ntwkMetrics, outputnode, [("matlab_matrix_files", "matlab_files")])])
     return pipeline
+
 
 def create_cmats_to_csv_pipeline(name="cmats_to_csv", extra_column_heading="subject"):
     """Creates a workflow to convert the outputs from CreateMatrix into a single

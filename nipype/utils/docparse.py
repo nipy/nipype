@@ -52,6 +52,7 @@ def grab_doc(cmd, trap_error=True):
         return stderr
     return stdout
 
+
 def reverse_opt_map(opt_map):
     """Reverse the key/value pairs of the option map in the interface classes.
 
@@ -122,6 +123,7 @@ def format_params(paramlist, otherlist=None):
         otherparams = '\n'.join(otherlist)
         doc = ''.join([doc, otherparams])
     return doc
+
 
 def insert_doc(doc, new_items):
     """Insert ``new_items`` into the beginning of the ``doc``
@@ -229,6 +231,7 @@ def build_doc(doc, opts):
                 flags_doc.append(line)
     return format_params(newdoc, flags_doc)
 
+
 def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
     """Get the docstring from our command and options map.
 
@@ -259,6 +262,7 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
     doc = grab_doc(cmd, trap_error)
     opts = reverse_opt_map(opt_map)
     return build_doc(doc, opts)
+
 
 def _parse_doc(doc, style=['--']):
     """Parses a help doc for inputs
@@ -302,6 +306,7 @@ def _parse_doc(doc, style=['--']):
             optmap[flag.split(style[style_idx])[1]] = '%s %%s' %flag
     return optmap
 
+
 def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
     """Auto-generate option map from command line help
 
@@ -332,6 +337,7 @@ def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
         cmd = ' '.join((cmd, help_flag))
     doc = grab_doc(cmd, trap_error)
     return _parse_doc(doc, style)
+
 
 def replace_opts(rep_doc, opts):
     """Replace flags with parameter names.

@@ -24,6 +24,7 @@ LOCAL_DEFAULT_NUMBER_OF_THREADS = 1
 PREFERED_ITKv4_THREAD_LIMIT_VARIABLE = 'NSLOTS'
 ALT_ITKv4_THREAD_LIMIT_VARIABLE = 'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS'
 
+
 class ANTSCommandInputSpec(CommandLineInputSpec):
     """Base Input Specification for all ANTS Commands
     """

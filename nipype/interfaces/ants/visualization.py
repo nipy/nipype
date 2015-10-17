@@ -41,8 +41,10 @@ class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
     maximum_RGB_output = traits.Int(255, usedefault=True,
                                     argstr='%d', desc='', position=9)
 
+
 class ConvertScalarImageToRGBOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc='converted RGB image')
+
 
 class ConvertScalarImageToRGB(ANTSCommand):
     """
@@ -122,6 +124,7 @@ class CreateTiledMosaicInputSpec(ANTSCommandInputSpec):
 
 class CreateTiledMosaicOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc='image file')
+
 
 class CreateTiledMosaic(ANTSCommand):
     """The program CreateTiledMosaic in conjunction with ConvertScalarImageToRGB

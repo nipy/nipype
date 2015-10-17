@@ -6,6 +6,7 @@ import os
 
 from nipype.interfaces import matlab
 
+
 def grab_doc(task_name):
     """Grab the SPM documentation for the given SPM task named `task_name`
 

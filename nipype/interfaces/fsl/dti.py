@@ -53,6 +53,7 @@ class DTIFitInputSpec(FSLCommandInputSpec):
     gradnonlin = File(exists=True, argstr='--gradnonlin=%s',
                       desc='gradient non linearities')
 
+
 class DTIFitOutputSpec(TraitedSpec):
     V1 = File(exists=True, desc='path/name of file with the 1st eigenvector')
     V2 = File(exists=True, desc='path/name of file with the 2nd eigenvector')

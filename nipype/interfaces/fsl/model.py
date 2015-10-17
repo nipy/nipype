@@ -513,6 +513,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     results_dir = Directory('results', argstr='-rn %s', usedefault=True,
                             desc='directory to store results in')
 
+
 class FILMGLSInputSpec505(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, position=-3,
                    argstr='--in=%s', desc='input data file')
@@ -550,6 +551,7 @@ class FILMGLSInputSpec505(FSLCommandInputSpec):
     results_dir = Directory('results', argstr='--rn=%s', usedefault=True,
                             desc='directory to store results in')
 
+
 class FILMGLSInputSpec507(FILMGLSInputSpec505):
     threshold = traits.Float(default=-1000., argstr='--thr=%f',
                              position=-1, usedefault=True,
@@ -563,6 +565,7 @@ class FILMGLSInputSpec507(FILMGLSInputSpec505):
     surface = File(exists=True, argstr="--in2=%s",
                    desc=("input surface for autocorr smoothing in "
                          "surface-based analyses"))
+
 
 class FILMGLSOutputSpec(TraitedSpec):
     param_estimates = OutputMultiPath(File(exists=True),

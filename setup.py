@@ -51,6 +51,7 @@ from distutils.version import LooseVersion
 from distutils.command.build_py import build_py
 from distutils import log
 
+
 def get_comrec_build(pkg_dir, build_cmd=build_py):
     """ Return extended build command class for recording commit
 
@@ -277,6 +278,7 @@ custom_dateutil_messages = {'missing opt': ('Missing optional package "%s"'
                                             '"python-dateutil"')}
 pkg_chk('dateutil', DATEUTIL_MIN_VERSION,
         messages=custom_dateutil_messages)
+
 
 def main(**extra_args):
     setup(name=NAME,

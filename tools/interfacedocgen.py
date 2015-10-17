@@ -37,6 +37,8 @@ from nipype.utils.misc import trim
 from github import get_file_url
 
 # Functions and classes
+
+
 class InterfaceHelpWriter(object):
     ''' Class for automatic detection and parsing of API docs
     to Sphinx-parsable reST format'''

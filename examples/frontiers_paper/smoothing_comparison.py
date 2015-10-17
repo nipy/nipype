@@ -91,6 +91,7 @@ select_smoothed_files = pe.Node(interface=util.Select(),
 preprocessing.connect(merge_smoothed_files, 'out', select_smoothed_files,
                       'inlist')
 
+
 def chooseindex(roi):
     return {'isotropic_voxel': list(range(0, 4)), 'anisotropic_voxel': list(range(4, 8)),
             'isotropic_surface': list(range(8, 12))}[roi]

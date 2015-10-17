@@ -73,6 +73,7 @@ def length(xyz, along=False):
         return np.cumsum(dists)
     return np.sum(dists)
 
+
 def get_rois_crossed(pointsmm, roiData, voxelSize):
     n_points = len(pointsmm)
     rois_crossed = []
@@ -86,6 +87,7 @@ def get_rois_crossed(pointsmm, roiData, voxelSize):
     rois_crossed = list(dict.fromkeys(rois_crossed).keys())  # Removed duplicates from the list
     return rois_crossed
 
+
 def get_connectivity_matrix(n_rois, list_of_roi_crossed_lists):
     connectivity_matrix = np.zeros((n_rois, n_rois), dtype=np.uint)
     for rois_crossed in list_of_roi_crossed_lists:
@@ -96,6 +98,7 @@ def get_connectivity_matrix(n_rois, list_of_roi_crossed_lists):
                         connectivity_matrix[roi_i - 1, roi_j - 1] += 1
     connectivity_matrix = connectivity_matrix + connectivity_matrix.T
     return connectivity_matrix
+
 
 def create_allpoints_cmat(streamlines, roiData, voxelSize, n_rois):
     """ Create the intersection arrays for each fiber
@@ -121,6 +124,7 @@ def create_allpoints_cmat(streamlines, roiData, voxelSize, n_rois):
     iflogger.info("Valid fibers: %i (%f percent)" % (n_fib - dis, 100 - dis * 100.0 / n_fib))
     iflogger.info('Returning the intersecting point connectivity matrix')
     return connectivity_matrix, final_fiber_ids
+
 
 def create_endpoints_array(fib, voxelSize):
     """ Create the endpoints arrays for each fiber
@@ -166,6 +170,7 @@ def create_endpoints_array(fib, voxelSize):
     # Return the matrices
     iflogger.info('Returning the endpoint matrix')
     return (endpoints, endpointsmm)
+
 
 def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_name, endpoint_name, intersections=False):
     """ Create the connection matrix for each resolution using fibers and ROIs. """
@@ -387,6 +392,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
     iflogger.info("Saving matrix creation statistics as %s" % out_stats_file)
     sio.savemat(out_stats_file, stats)
 
+
 def save_fibers(oldhdr, oldfib, fname, indices):
     """ Stores a new trackvis file fname using only given indices """
     hdrnew = oldhdr.copy()
@@ -398,6 +404,7 @@ def save_fibers(oldhdr, oldfib, fname, indices):
     iflogger.info("Writing final non-orphan fibers as %s" % fname)
     nb.trackvis.write(fname, outstreams, hdrnew)
     return n_fib_out
+
 
 class CreateMatrixInputSpec(TraitedSpec):
     roi_file = File(exists=True, mandatory=True, desc='Freesurfer aparc+aseg file')
@@ -411,6 +418,7 @@ class CreateMatrixInputSpec(TraitedSpec):
     out_fiber_length_std_matrix_mat_file = File(genfile=True, desc='Matlab matrix describing the deviation in fiber lengths connecting each node.')
     out_intersection_matrix_mat_file = File(genfile=True, desc='Matlab connectivity matrix if all region/fiber intersections are counted.')
     out_endpoint_array_name = File(genfile=True, desc='Name for the generated endpoint arrays')
+
 
 class CreateMatrixOutputSpec(TraitedSpec):
     matrix_file = File(desc='NetworkX graph describing the connectivity', exists=True)
@@ -431,6 +439,7 @@ class CreateMatrixOutputSpec(TraitedSpec):
     filtered_tractography_by_intersections = File(desc='TrackVis file containing all fibers which connect two regions', exists=True)
     filtered_tractographies = OutputMultiPath(File(desc='TrackVis file containing only those fibers originate in one and terminate in another region', exists=True))
     stats_file = File(desc='Saved Matlab .mat file with the number of fibers saved at each stage', exists=True)
+
 
 class CreateMatrix(BaseInterface):
     """
@@ -568,6 +577,7 @@ class CreateMatrix(BaseInterface):
             _, name, _ = split_filename(self.inputs.tract_file)
         return name + ext
 
+
 class ROIGenInputSpec(BaseInterfaceInputSpec):
     aparc_aseg_file = File(exists=True, mandatory=True, desc='Freesurfer aparc+aseg file')
     LUT_file = File(exists=True, xor=['use_freesurfer_LUT'], desc='Custom lookup table (cf. FreeSurferColorLUT.txt)')
@@ -576,9 +586,11 @@ class ROIGenInputSpec(BaseInterfaceInputSpec):
     out_roi_file = File(genfile=True, desc='Region of Interest file for connectivity mapping')
     out_dict_file = File(genfile=True, desc='Label dictionary saved in Pickle format')
 
+
 class ROIGenOutputSpec(TraitedSpec):
     roi_file = File(desc='Region of Interest file for connectivity mapping')
     dict_file = File(desc='Label dictionary saved in Pickle format')
+
 
 class ROIGen(BaseInterface):
     """
@@ -728,6 +740,7 @@ class ROIGen(BaseInterface):
             prefix = 'hardcoded'
         return prefix + '_' + name + '.' + ext
 
+
 def create_nodes(roi_file, resolution_network_file, out_filename):
     G = nx.Graph()
     gp = nx.read_graphml(resolution_network_file)
@@ -741,13 +754,16 @@ def create_nodes(roi_file, resolution_network_file, out_filename):
     nx.write_gpickle(G, out_filename)
     return out_filename
 
+
 class CreateNodesInputSpec(BaseInterfaceInputSpec):
     roi_file = File(exists=True, mandatory=True, desc='Region of interest file')
     resolution_network_file = File(exists=True, mandatory=True, desc='Parcellation file from Connectome Mapping Toolkit')
     out_filename = File('nodenetwork.pck', usedefault=True, desc='Output gpickled network with the nodes defined.')
 
+
 class CreateNodesOutputSpec(TraitedSpec):
     node_network = File(desc='Output gpickled network with the nodes defined.')
+
 
 class CreateNodes(BaseInterface):
     """

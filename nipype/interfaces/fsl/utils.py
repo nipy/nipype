@@ -44,8 +44,10 @@ class CopyGeomInputSpec(FSLCommandInputSpec):
     ignore_dims = traits.Bool(desc=('Do not copy image dimensions'),
                               argstr='-d', position="-1")
 
+
 class CopyGeomOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="image with new geometry header")
+
 
 class CopyGeom(FSLCommand):
     """Use fslcpgeom to copy the header geometry information to another image.
@@ -1260,9 +1262,12 @@ class SigLossInputSpec(FSLCommandInputSpec):
     slice_direction = traits.Enum('x', 'y', 'z',
                                   argstr='-d %s',
                                   desc='slicing direction')
+
+
 class SigLossOuputSpec(TraitedSpec):
     out_file = File(exists=True,
                     desc='signal loss estimate file')
+
 
 class SigLoss(FSLCommand):
     """Estimates signal loss from a field map (in rad/s)
@@ -1419,6 +1424,7 @@ class InvWarp(FSLCommand):
 
     _cmd = 'invwarp'
 
+
 class ComplexInputSpec(FSLCommandInputSpec):
     complex_in_file = File(exists=True, argstr="%s", position=2)
     complex_in_file2 = File(exists=True, argstr="%s", position=3)
@@ -1469,6 +1475,7 @@ class ComplexInputSpec(FSLCommandInputSpec):
         argstr='-complexmerge', xor=_conversion + ['start_vol', 'end_vol'],
         position=1,)
 #        requires=['complex_in_file','complex_in_file2','complex_out_file'])
+
 
 class ComplexOuputSpec(TraitedSpec):
     magnitude_out_file = File()
@@ -1603,6 +1610,7 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
                                     'useful for interfacing with software that cannot decode '
                                     'FSL/fnirt coefficient-files (where the affine transform is '
                                     'stored separately from the displacements).'))
+
 
 class WarpUtilsOutputSpec(TraitedSpec):
     out_file = File(desc=('Name of output file, containing the warp as field or coefficients.'))
@@ -1783,6 +1791,7 @@ class WarpPointsBaseInputSpec(CommandLineInputSpec):
     out_file = File(name_source='in_coords',
                     name_template='%s_warped', output_name='out_file',
                     desc='output file name')
+
 
 class WarpPointsInputSpec(WarpPointsBaseInputSpec):
     src_file = File(exists=True, argstr='-src %s', mandatory=True,
@@ -2003,6 +2012,7 @@ fdrms - FD with RMS matrix calculation")
                              keep_extension=True, desc='output metric values (DVARS etc.) file name', hash_files=False)
     out_metric_plot = File(argstr="-p %s", name_source='in_file', name_template='%s_metrics.png',
                            keep_extension=True, desc='output metric values plot (DVARS etc.) file name', hash_files=False)
+
 
 class MotionOutliersOutputSpec(TraitedSpec):
     out_file = File(exists=True)

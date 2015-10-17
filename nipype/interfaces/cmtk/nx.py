@@ -355,6 +355,7 @@ class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
     out_edge_metrics_matlab = File(genfile=True, desc='Output edge metrics in MATLAB .mat format')
     out_pickled_extra_measures = File('extra_measures', usedefault=True, desc='Network measures for group 1 that return dictionaries stored as a Pickle.')
 
+
 class NetworkXMetricsOutputSpec(TraitedSpec):
     gpickled_network_files = OutputMultiPath(File(desc='Output gpickled network files'))
     matlab_matrix_files = OutputMultiPath(File(desc='Output network metrics in MATLAB .mat format'))
@@ -369,6 +370,7 @@ class NetworkXMetricsOutputSpec(TraitedSpec):
     k_crust = File(desc='Computed k-crust network stored as a NetworkX pickle.')
     pickled_extra_measures = File(desc='Network measures for the group that return dictionaries, stored as a Pickle.')
     matlab_dict_measures = OutputMultiPath(File(desc='Network measures for the group that return dictionaries, stored as matlab matrices.'))
+
 
 class NetworkXMetrics(BaseInterface):
     """
@@ -500,6 +502,7 @@ class NetworkXMetrics(BaseInterface):
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext
 
+
 class AverageNetworksInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for a group of subjects')
     resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
@@ -508,10 +511,12 @@ class AverageNetworksInputSpec(BaseInterfaceInputSpec):
     out_gpickled_groupavg = File(desc='Average network saved as a NetworkX .pck')
     out_gexf_groupavg = File(desc='Average network saved as a .gexf file')
 
+
 class AverageNetworksOutputSpec(TraitedSpec):
     gpickled_groupavg = File(desc='Average network saved as a NetworkX .pck')
     gexf_groupavg = File(desc='Average network saved as a .gexf file')
     matlab_groupavgs = OutputMultiPath(File(desc='Average network saved as a .gexf file'))
+
 
 class AverageNetworks(BaseInterface):
     """

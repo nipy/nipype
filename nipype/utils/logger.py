@@ -16,6 +16,7 @@ except ImportError:
 from .misc import str2bool
 from .config import NipypeConfig
 
+
 class Logging(object):
     """Nipype logging class
     """

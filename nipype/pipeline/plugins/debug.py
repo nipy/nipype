@@ -6,6 +6,7 @@
 from .base import (PluginBase, logger)
 from ..utils import (nx)
 
+
 class DebugPlugin(PluginBase):
     """Execute workflow in series
     """

@@ -775,6 +775,7 @@ if sys.version_info[0:2] < (3, 4):
 else:
     wraps = functools.wraps
 
+
 def with_metaclass(meta, *bases):
     """Create a base class with a metaclass."""
     # This requires a bit of explanation: the basic idea is to make a dummy

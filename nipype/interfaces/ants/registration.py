@@ -376,6 +376,7 @@ class RegistrationOutputSpec(TraitedSpec):
     inverse_warped_image = File(desc="Outputs the inverse of the warped image")
     save_state = File(desc="The saved registration state to be restored")
 
+
 class Registration(ANTSCommand):
 
     """

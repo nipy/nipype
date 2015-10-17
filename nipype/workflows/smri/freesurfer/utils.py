@@ -146,6 +146,7 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
     ])
     return getmask
 
+
 def create_get_stats_flow(name='getstats', withreg=False):
     """Retrieves stats from labels
 

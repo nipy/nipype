@@ -714,6 +714,7 @@ def _compute_dwelltime(dwell_time=0.68, pi_factor=1.0, is_reverse_encoding=False
 
     return dwell_time
 
+
 def _effective_echospacing(dwell_time, pi_factor=1.0):
     dwelltime = 1.0e-3 * dwell_time * (1.0 / pi_factor)
     return dwelltime

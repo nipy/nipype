@@ -2019,6 +2019,7 @@ class JoinNode(Node):
                                  " to hold the %s value at index %d: %s"
                                  % (self, slot_field, field, index, e))
 
+
 class MapNode(Node):
     """Wraps interface objects that need to be iterated on a list of inputs.
 

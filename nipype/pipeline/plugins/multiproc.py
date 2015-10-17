@@ -12,6 +12,7 @@ import sys
 
 from .base import (DistributedPluginBase, report_crash)
 
+
 def run_node(node, updatehash):
     result = dict(result=None, traceback=None)
     try:
@@ -21,6 +22,7 @@ def run_node(node, updatehash):
         result['traceback'] = format_exception(etype, eval, etr)
         result['result'] = node.result
     return result
+
 
 class NonDaemonProcess(Process):
     """A non-daemon process to support internal multiprocessing.
@@ -33,10 +35,12 @@ class NonDaemonProcess(Process):
 
     daemon = property(_get_daemon, _set_daemon)
 
+
 class NonDaemonPool(pool.Pool):
     """A process pool with non-daemon processes.
     """
     Process = NonDaemonProcess
+
 
 class MultiProcPlugin(DistributedPluginBase):
     """Execute workflow with multiprocessing

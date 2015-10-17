@@ -25,15 +25,18 @@ def test_bunch():
     b = nib.Bunch(a=1, b=[2, 3])
     yield assert_equal, b.__dict__, {'a': 1, 'b': [2, 3]}
 
+
 def test_bunch_attribute():
     b = nib.Bunch(a=1, b=[2, 3], c=None)
     yield assert_equal, b.a, 1
     yield assert_equal, b.b, [2, 3]
     yield assert_equal, b.c, None
 
+
 def test_bunch_repr():
     b = nib.Bunch(b=2, c=3, a=dict(n=1, m=2))
     yield assert_equal, repr(b), "Bunch(a={'m': 2, 'n': 1}, b=2, c=3)"
+
 
 def test_bunch_methods():
     b = nib.Bunch(a=2)
@@ -45,6 +48,7 @@ def test_bunch_methods():
     yield assert_not_equal, b, newb
     yield assert_equal, type(dict()), type(newb)
     yield assert_equal, newb['a'], 3
+
 
 def test_bunch_hash():
     # NOTE: Since the path to the json file is included in the Bunch,
@@ -76,6 +80,7 @@ def setup_file():
         fp.writelines(['123456789'])
     return tmp_infile
 
+
 def teardown_file(tmp_dir):
     shutil.rmtree(tmp_dir)
 
@@ -99,6 +104,7 @@ def test_TraitedSpec():
     # yield assert_equal, infields.hashval[1], hashval[1]
     yield assert_equal, infields.__repr__(), '\nfoo = 1\ngoo = 0.0\n'
 
+
 @skip
 def test_TraitedSpec_dynamic():
     from pickle import dumps, loads
@@ -111,6 +117,7 @@ def test_TraitedSpec_dynamic():
     unpkld_a = loads(pkld_a)
     assign_a_again = lambda: setattr(unpkld_a, 'foo', 'a')
     yield assert_raises, Exception, assign_a_again
+
 
 def test_TraitedSpec_logic():
     class spec3(nib.TraitedSpec):
@@ -140,6 +147,7 @@ def test_TraitedSpec_logic():
     yield assert_equal, myif.inputs.foo, 1
     myif.inputs.kung = 2
     yield assert_equal, myif.inputs.kung, 2.0
+
 
 def test_deprecation():
     with warnings.catch_warnings(record=True) as w:
@@ -289,6 +297,7 @@ def test_cycle_namesource1():
     os.chdir(pwd)
     teardown_file(tmpd)
 
+
 def test_cycle_namesource2():
     tmp_infile = setup_file()
     tmpd, nme, ext = split_filename(tmp_infile)
@@ -336,6 +345,7 @@ def checknose():
     else:
         return 1
 
+
 @skipif(checknose)
 def test_TraitedSpec_withFile():
     tmp_infile = setup_file()
@@ -349,6 +359,7 @@ def test_TraitedSpec_withFile():
     hashval = infields.get_hashval(hash_method='content')
     yield assert_equal, hashval[1], 'a00e9ee24f5bfa9545a515b7a759886b'
     teardown_file(tmpd)
+
 
 @skipif(checknose)
 def test_TraitedSpec_withNoFileHashing():
@@ -381,6 +392,7 @@ def test_TraitedSpec_withNoFileHashing():
     os.chdir(pwd)
     teardown_file(tmpd)
 
+
 def test_Interface():
     yield assert_equal, nib.Interface.input_spec, None
     yield assert_equal, nib.Interface.output_spec, None
@@ -399,6 +411,7 @@ def test_Interface():
     yield assert_raises, NotImplementedError, nif.aggregate_outputs
     yield assert_raises, NotImplementedError, nif._list_outputs
     yield assert_raises, NotImplementedError, nif._get_filecopy_info
+
 
 def test_BaseInterface():
     yield assert_equal, nib.BaseInterface.help(), None
@@ -444,9 +457,11 @@ def test_BaseInterface():
     nib.BaseInterface.input_spec = None
     yield assert_raises, Exception, nib.BaseInterface
 
+
 def assert_not_raises(fn, *args, **kwargs):
     fn(*args, **kwargs)
     return True
+
 
 def test_input_version():
     class InputSpec(nib.TraitedSpec):
@@ -513,6 +528,7 @@ def test_input_version():
     not_raised = True
     yield assert_not_raises, obj._check_version_requirements, obj.inputs
 
+
 def test_output_version():
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
@@ -558,6 +574,7 @@ def test_output_version():
             return {'foo': 1}
     obj = DerivedInterface1()
     yield assert_raises, KeyError, obj.run
+
 
 def test_Commandline():
     yield assert_raises, Exception, nib.CommandLine
@@ -630,6 +647,7 @@ def test_Commandline_environ():
     res = ci3.run()
     yield assert_equal, res.runtime.environ['DISPLAY'], ':2'
 
+
 def test_CommandLine_output():
     tmp_infile = setup_file()
     tmpd, name = os.path.split(tmp_infile)
@@ -655,6 +673,7 @@ def test_CommandLine_output():
     yield assert_true, 'stdout.nipype' in res.runtime.stdout
     os.chdir(pwd)
     teardown_file(tmpd)
+
 
 def test_global_CommandLine_output():
     tmp_infile = setup_file()

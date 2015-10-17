@@ -16,6 +16,7 @@ import nipype.interfaces.utility as niu
 from ... import config
 from ..utils import merge_dict, clean_working_directory
 
+
 def test_identitynode_removal():
 
     def test_function(arg1, arg2, arg3):
@@ -89,6 +90,7 @@ def test_clean_working_directory():
     config.set_default_config()
     rmtree(wd)
 
+
 def test_outputs_removal():
 
     def test_function(arg1):
@@ -133,8 +135,10 @@ def test_outputs_removal():
 class InputSpec(nib.TraitedSpec):
     in_file = nib.File(exists=True, copyfile=True)
 
+
 class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
+
 
 class TestInterface(nib.BaseInterface):
     input_spec = InputSpec
@@ -148,6 +152,7 @@ class TestInterface(nib.BaseInterface):
         outputs = self._outputs().get()
         outputs['output1'] = [1]
         return outputs
+
 
 def test_inputs_removal():
     out_dir = mkdtemp()
@@ -296,8 +301,10 @@ def test_outputs_removal_wf():
 
     rmtree(out_dir)
 
+
 def fwhm(fwhm):
     return fwhm
+
 
 def create_wf(name):
     pipe = pe.Workflow(name=name)
@@ -313,6 +320,7 @@ def create_wf(name):
     process2.iterables = ('fwhm', [0])
     pipe.connect(process, 'fwhm', process2, 'fwhm')
     return pipe
+
 
 def test_multi_disconnected_iterable():
     out_dir = mkdtemp()

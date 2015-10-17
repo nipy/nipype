@@ -683,7 +683,6 @@ class EpiReg(FSLCommand):
         return outputs
 
 
-
 #######################################
 # deprecated interfaces
 #######################################

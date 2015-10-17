@@ -446,6 +446,7 @@ necessary to generate an SPM design matrix. In this tutorial, the same
 paradigm was used for every participant.
 """
 
+
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
@@ -536,6 +537,7 @@ datasink = pe.Node(interface=nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.abspath('volsurf_tutorial/l1out')
 datasink.inputs.substitutions = []
 
+
 def getsubs(subject_id):
     subs = [('_subject_id_%s/' %subject_id, '')]
     return subs
@@ -603,6 +605,7 @@ Merge contrast images and registration files
 mergenode = pe.Node(interface=util.Merge(2, axis='hstack'),
                     name='merge')
 
+
 def ordersubjects(files, subj_list):
     outlist = []
     for s in subj_list:
@@ -623,6 +626,7 @@ Concatenate contrast images projected to fsaverage
 l2concat = pe.Node(interface=fs.MRISPreproc(), name='concat')
 l2concat.inputs.target = 'fsaverage'
 l2concat.inputs.fwhm = 5
+
 
 def list2tuple(listoflist):
     return [tuple(x) for x in listoflist]

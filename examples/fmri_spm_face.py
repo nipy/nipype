@@ -112,6 +112,7 @@ the voxel sizes of the target volume. There is no need to set it manually since 
 using the following function:
 """
 
+
 def get_vox_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):
@@ -175,6 +176,7 @@ first level contrasts specified in a few steps above.
 
 contrastestimate = pe.Node(interface=spm.EstimateContrast(), name="contrastestimate")
 
+
 def pickfirst(l):
     return l[0]
 
@@ -201,6 +203,7 @@ l1pipeline.connect([(preproc, l1analysis, [('realign.realignment_parameters',
 Every run can be a 4D file or a list of 3D files. Therefore for 3D analysis we need a list of lists and
 to make one we need a helper function.
 """
+
 
 def makelist(item):
     return [item]
@@ -456,6 +459,7 @@ the mean image would be copied to that directory.
 
 datasink = pe.Node(interface=nio.DataSink(), name="datasink")
 datasink.inputs.base_directory = os.path.abspath('spm_auditory_tutorial/l1output')
+
 
 def getstripdir(subject_id):
     import os

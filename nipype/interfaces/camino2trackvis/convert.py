@@ -45,8 +45,10 @@ class Camino2TrackvisInputSpec(CommandLineInputSpec):
     nifti_file = File(argstr='--nifti %s', exists=True,
                       position=7, desc='Read coordinate system from a NIfTI file.')
 
+
 class Camino2TrackvisOutputSpec(TraitedSpec):
     trackvis = File(exists=True, desc='The filename to which to write the .trk (trackvis) file.')
+
 
 class Camino2Trackvis(CommandLine):
     """ Wraps camino_to_trackvis from Camino-Trackvis
@@ -86,6 +88,7 @@ class Camino2Trackvis(CommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '.trk'
 
+
 class Trackvis2CaminoInputSpec(CommandLineInputSpec):
     """ Wraps trackvis_to_camino from Camino-Trackvis
 
@@ -111,8 +114,10 @@ class Trackvis2CaminoInputSpec(CommandLineInputSpec):
     append_file = File(exists=True, argstr='-a %s',
                        position=2, desc='A file to which the append the .Bfloat data. ')
 
+
 class Trackvis2CaminoOutputSpec(TraitedSpec):
     camino = File(exists=True, desc='The filename to which to write the .Bfloat (camino).')
+
 
 class Trackvis2Camino(CommandLine):
     _cmd = 'trackvis_to_camino'

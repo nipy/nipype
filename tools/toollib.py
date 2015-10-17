@@ -19,6 +19,8 @@ cd = os.chdir
 # -----------------------------------------------------------------------------
 # Functions
 # -----------------------------------------------------------------------------
+
+
 def sh(cmd):
     """Execute command in a subshell, return status code."""
     return check_call(cmd, shell=True)

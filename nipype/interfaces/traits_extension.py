@@ -26,6 +26,7 @@ from traits.trait_handlers import TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
 from traits.trait_base import _Undefined
 
+
 class BaseFile (traits.BaseStr):
     """ Defines a trait whose value must be the name of a file.
     """
@@ -116,6 +117,7 @@ class File (BaseFile):
 # -------------------------------------------------------------------------------
 #  'BaseDirectory' and 'Directory' traits:
 # -------------------------------------------------------------------------------
+
 
 class BaseDirectory (traits.BaseStr):
     """ Defines a trait whose value must be the name of a directory.
@@ -216,6 +218,7 @@ So... in order to keep the same type but add the missing method, I
 monkey patched.
 """
 
+
 def length(self):
     return 0
 
@@ -226,8 +229,10 @@ _Undefined.__len__ = length
 
 Undefined = _Undefined()
 
+
 def isdefined(object):
     return not isinstance(object, _Undefined)
+
 
 def has_metadata(trait, metadata, value=None, recursive=True):
     '''

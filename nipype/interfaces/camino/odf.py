@@ -34,8 +34,10 @@ class QBallMXInputSpec(StdOutCommandLineInputSpec):
                                   desc=('Specific to rbf. Sets the width of the smoothing basis functions. '
                                         'The default value is 0.1309 (7.5 degrees).'))
 
+
 class QBallMXOutputSpec(TraitedSpec):
     qmat = File(exists=True, desc='Q-Ball reconstruction matrix')
+
 
 class QBallMX(StdOutCommandLine):
     """
@@ -106,8 +108,10 @@ class LinReconInputSpec(StdOutCommandLineInputSpec):
                             'measurements themselves'))
     bgmask = File(exists=True, argstr='-bgmask %s', desc='background mask')
 
+
 class LinReconOutputSpec(TraitedSpec):
     recon_data = File(exists=True, desc='Transformed data')
+
 
 class LinRecon(StdOutCommandLine):
     """
@@ -165,6 +169,7 @@ class LinRecon(StdOutCommandLine):
         _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_recondata.Bdouble'
 
+
 class MESDInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1,
                    desc='voxel-order data filename')
@@ -193,8 +198,10 @@ class MESDInputSpec(StdOutCommandLineInputSpec):
                                       '"float" or "double". The input file must have BIG-ENDIAN ordering.'
                                       'By default, the input type is "float".'))
 
+
 class MESDOutputSpec(TraitedSpec):
     mesd_data = File(exists=True, desc='MESD data')
+
 
 class MESD(StdOutCommandLine):
     """
@@ -286,6 +293,7 @@ class MESD(StdOutCommandLine):
         _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_MESD.Bdouble'
 
+
 class SFPeaksInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True,
                    desc='Voxel-order data of spherical functions')
@@ -336,8 +344,10 @@ class SFPeaksInputSpec(StdOutCommandLineInputSpec):
                                 desc=('This is the number of standard deviations of the function to be added to the '
                                       '"pdthresh" attribute in the peak directions pruning.'))
 
+
 class SFPeaksOutputSpec(TraitedSpec):
     peaks = File(exists=True, desc='Peaks of the spherical functions.')
+
 
 class SFPeaks(StdOutCommandLine):
     """

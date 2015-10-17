@@ -1,6 +1,7 @@
 from nipype.testing import assert_equal
 from nipype.interfaces.fsl.model import FILMGLS, FILMGLSInputSpec
 
+
 def test_filmgls():
     input_map = dict(args=dict(argstr='%s',),
                      autocorr_estimate_only=dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'], argstr='-ac',),

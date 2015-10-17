@@ -31,8 +31,10 @@ class Image2VoxelInputSpec(StdOutCommandLineInputSpec):
     out_type = traits.Enum("float", "char", "short", "int", "long", "double", argstr='-outputdatatype %s', position=2,
                            desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"', usedefault=True)
 
+
 class Image2VoxelOutputSpec(TraitedSpec):
     voxel_order = File(exists=True, desc='path/name of 4D volume in voxel order')
+
 
 class Image2Voxel(StdOutCommandLine):
     """
@@ -63,6 +65,7 @@ class Image2Voxel(StdOutCommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '.B' + self.inputs.out_type
 
+
 class FSL2SchemeInputSpec(StdOutCommandLineInputSpec):
     bvec_file = File(exists=True, argstr='-bvecfile %s',
                      mandatory=True, position=1,
@@ -88,8 +91,10 @@ class FSL2SchemeInputSpec(StdOutCommandLineInputSpec):
     flipz = traits.Bool(argstr='-flipz', desc="Negate the z component of all the vectors.")
     usegradmod = traits.Bool(argstr='-usegradmod', desc="Use the gradient magnitude to scale b. This option has no effect if your gradient directions have unit magnitude.")
 
+
 class FSL2SchemeOutputSpec(TraitedSpec):
     scheme = File(exists=True, desc='Scheme file')
+
 
 class FSL2Scheme(StdOutCommandLine):
     """
@@ -118,6 +123,7 @@ class FSL2Scheme(StdOutCommandLine):
         _, name, _ = split_filename(self.inputs.bvec_file)
         return name + '.scheme'
 
+
 class VtkStreamlinesInputSpec(StdOutCommandLineInputSpec):
     inputmodel = traits.Enum('raw', 'voxels', argstr='-inputmodel %s', desc='input model type (raw or voxels)', usedefault=True)
 
@@ -142,8 +148,10 @@ class VtkStreamlinesInputSpec(StdOutCommandLineInputSpec):
     interpolatescalars = traits.Bool(argstr='-interpolatescalars', desc="the scalar value at each point on the streamline is calculated by trilinear interpolation")
     interpolate = traits.Bool(argstr='-interpolate', desc="the scalar value at each point on the streamline is calculated by trilinear interpolation")
 
+
 class VtkStreamlinesOutputSpec(TraitedSpec):
     vtk = File(exists=True, desc='Streamlines in VTK format')
+
 
 class VtkStreamlines(StdOutCommandLine):
     """
@@ -170,6 +178,7 @@ class VtkStreamlines(StdOutCommandLine):
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '.vtk'
+
 
 class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
     inputmodel = traits.Enum('raw', 'voxels', argstr='-inputmodel %s', desc='input model type (raw or voxels)', usedefault=True)
@@ -241,9 +250,11 @@ class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
     outputcbs = traits.Bool(argstr='-outputcbs', desc="outputs connectivity-based segmentation maps; requires target outputfile",
                             requires=['outputroot', 'targetfile', 'seedfile'])
 
+
 class ProcStreamlinesOutputSpec(TraitedSpec):
     proc = File(exists=True, desc='Processed Streamlines')
     outputroot_files = OutputMultiPath(File(exists=True))
+
 
 class ProcStreamlines(StdOutCommandLine):
     """
@@ -297,6 +308,7 @@ class ProcStreamlines(StdOutCommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_proc'
 
+
 class TractShredderInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=-2, desc='tract file')
 
@@ -309,8 +321,10 @@ class TractShredderInputSpec(StdOutCommandLineInputSpec):
     space = traits.Int(argstr='%d', units='NA',
                        desc='skips space tracts', position=3)
 
+
 class TractShredderOutputSpec(TraitedSpec):
     shredded = File(exists=True, desc='Shredded tract file')
+
 
 class TractShredder(StdOutCommandLine):
     """
@@ -346,6 +360,7 @@ class TractShredder(StdOutCommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + "_shredded"
 
+
 class DT2NIfTIInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1,
                    desc='tract file')
@@ -355,6 +370,7 @@ class DT2NIfTIInputSpec(CommandLineInputSpec):
 
     header_file = File(exists=True, argstr='-header %s', mandatory=True, position=3,
                        desc=' A Nifti .nii or .hdr file containing the header information')
+
 
 class DT2NIfTIOutputSpec(TraitedSpec):
     dt = File(exists=True, desc='diffusion tensors in NIfTI format')
@@ -397,6 +413,7 @@ class DT2NIfTI(CommandLine):
             filename = filename + "_"
         return filename
 
+
 class NIfTIDT2CaminoInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True, position=1,
                    desc='A NIFTI-1 dataset containing diffusion tensors. The tensors are assumed to be '
@@ -426,8 +443,10 @@ class NIfTIDT2CaminoInputSpec(StdOutCommandLineInputSpec):
     uppertriangular = traits.Bool(argstr='-uppertriangular %s',
                                   desc='Specifies input in upper-triangular (VTK style) order.')
 
+
 class NIfTIDT2CaminoOutputSpec(TraitedSpec):
     out_file = File(desc='diffusion tensors data in Camino format')
+
 
 class NIfTIDT2Camino(CommandLine):
     """
@@ -463,6 +482,7 @@ class NIfTIDT2Camino(CommandLine):
         if name == 'out_file':
             _, filename, _ = split_filename(self.inputs.in_file)
         return filename
+
 
 class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
@@ -574,8 +594,10 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
                                          "(big-endian). This is the default "
                                          "for new headers."))
 
+
 class AnalyzeHeaderOutputSpec(TraitedSpec):
     header = File(exists=True, desc='Analyze header')
+
 
 class AnalyzeHeader(StdOutCommandLine):
     """
@@ -614,6 +636,7 @@ class AnalyzeHeader(StdOutCommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + ".hdr"
 
+
 class ShredderInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=-2, desc='raw binary data file')
 
@@ -626,8 +649,10 @@ class ShredderInputSpec(StdOutCommandLineInputSpec):
     space = traits.Int(argstr='%d', units='NA',
                        desc='skips space bytes', position=3)
 
+
 class ShredderOutputSpec(TraitedSpec):
     shredded = File(exists=True, desc='Shredded binary data file')
+
 
 class Shredder(StdOutCommandLine):
     """

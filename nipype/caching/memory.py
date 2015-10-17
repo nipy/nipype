@@ -26,6 +26,7 @@ from ..pipeline.utils import modify_paths
 ################################################################################
 # PipeFunc object: callable interface to nipype.interface objects
 
+
 class PipeFunc(object):
     """ Callable interface to nipype.interface objects
 
@@ -100,6 +101,7 @@ class PipeFunc(object):
 ################################################################################
 # Memory manager: provide some tracking about what is computed when, to
 # be able to flush the disk
+
 
 def read_log(filename, run_dict=None):
     if run_dict is None:

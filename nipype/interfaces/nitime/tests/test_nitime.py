@@ -12,6 +12,7 @@ import nipype.interfaces.nitime as nitime
 no_nitime = not nitime.analysis.have_nitime
 display_available = 'DISPLAY' in os.environ and os.environ['DISPLAY']
 
+
 @skipif(no_nitime)
 def test_read_csv():
     """Test that reading the data from csv file gives you back a reasonable

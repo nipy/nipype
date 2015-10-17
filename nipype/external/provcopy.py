@@ -186,6 +186,7 @@ _normalise_attributes = lambda attr: (str(attr[0]), str(attr[1]))
 #  Datatypes
 attr2rdf = lambda attr: PROV[PROV_ID_ATTRIBUTES_MAP[attr].split('prov:')[1]].rdf_representation()
 
+
 def _parse_xsd_dateTime(s):
     return dateutil.parser.parse(s)
 
@@ -326,6 +327,7 @@ class Literal(object):
         else:
             return RDFLiteral(self._value, datatype=self._datatype.get_uri())
 
+
 class Identifier(object):
     def __init__(self, uri):
         self._uri = str(uri)  # Ensure this is a unicode string
@@ -353,6 +355,7 @@ class Identifier(object):
 
     def rdf_representation(self):
         return URIRef(self.get_uri())
+
 
 class QName(Identifier):
     def __init__(self, namespace, localpart):
@@ -873,12 +876,14 @@ class ProvRelation(ProvRecord):
 
 #  ## Component 1: Entities and Activities
 
+
 class ProvEntity(ProvElement):
     def get_type(self):
         return PROV_REC_ENTITY
 
     def get_prov_type(self):
         return PROV['Entity']
+
 
 class ProvActivity(ProvElement):
     def get_type(self):

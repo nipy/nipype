@@ -16,6 +16,7 @@ import nipype.testing as nit
 
 from nipype.algorithms.misc import normalize_tpms
 
+
 def test_normalize_tpms():
     tempdir = mkdtemp()
 

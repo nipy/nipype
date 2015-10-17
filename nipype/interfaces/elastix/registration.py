@@ -123,6 +123,7 @@ class Registration(CommandLine):
             except ValueError:
                 return val
 
+
 class ApplyWarpInputSpec(ElastixBaseInputSpec):
     transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
                           desc='transform-parameter file, only 1')
@@ -134,6 +135,7 @@ class ApplyWarpInputSpec(ElastixBaseInputSpec):
 
 class ApplyWarpOutputSpec(TraitedSpec):
     warped_file = File(desc='input moving image warped to fixed image')
+
 
 class ApplyWarp(CommandLine):
     """
@@ -173,6 +175,7 @@ class AnalyzeWarpOutputSpec(TraitedSpec):
     disp_field = File(desc='displacements field')
     jacdet_map = File(desc='det(Jacobian) map')
     jacmat_map = File(desc='Jacobian matrix map')
+
 
 class AnalyzeWarp(CommandLine):
     """
@@ -215,6 +218,7 @@ class PointsWarpInputSpec(ElastixBaseInputSpec):
 
 class PointsWarpOutputSpec(TraitedSpec):
     warped_file = File(desc='input points displaced in fixed image domain')
+
 
 class PointsWarp(CommandLine):
     """Use ``transformix`` to apply a transform on an input point set.

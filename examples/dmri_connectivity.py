@@ -71,6 +71,7 @@ aparc.a2009s+aseg.mgz, one would also have to write/obtain a network resolution 
 regions.
 """
 
+
 def get_vox_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):
@@ -79,6 +80,7 @@ def get_vox_dims(volume):
     hdr = nii.get_header()
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
+
 
 def get_data_dims(volume):
     import nibabel as nb
@@ -89,16 +91,19 @@ def get_data_dims(volume):
     datadims = hdr.get_data_shape()
     return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
 
+
 def get_affine(volume):
     import nibabel as nb
     nii = nb.load(volume)
     return nii.get_affine()
+
 
 def select_aparc(list_of_files):
     for in_file in list_of_files:
         if 'aparc+aseg.mgz' in in_file:
             idx = list_of_files.index(in_file)
     return list_of_files[idx]
+
 
 def select_aparc_annot(list_of_files):
     for in_file in list_of_files:

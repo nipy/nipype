@@ -107,6 +107,7 @@ class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                        desc='direction in which to merge, hstack requires same number of elements in each input')
     no_flatten = traits.Bool(False, usedefault=True, desc='append to outlist instead of extending in vstack mode')
 
+
 class MergeOutputSpec(TraitedSpec):
     out = traits.List(desc='Merged output')
 

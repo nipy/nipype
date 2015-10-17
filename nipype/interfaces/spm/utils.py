@@ -10,11 +10,14 @@ from nipype.utils.filemanip import split_filename, fname_presuffix, filename_to_
 import os
 import numpy as np
 
+
 class Analyze2niiInputSpec(SPMCommandInputSpec):
     analyze_file = File(exists=True, mandatory=True)
 
+
 class Analyze2niiOutputSpec(SPMCommandInputSpec):
     nifti_file = File(exists=True)
+
 
 class Analyze2nii(SPMCommand):
 
@@ -35,6 +38,7 @@ class Analyze2nii(SPMCommand):
         outputs = self._outputs().get()
         outputs['nifti_file'] = self.output_name
         return outputs
+
 
 class CalcCoregAffineInputSpec(SPMCommandInputSpec):
     target = File(exists=True, mandatory=True,
@@ -116,6 +120,7 @@ class CalcCoregAffine(SPMCommand):
         outputs['invmat'] = os.path.abspath(self.inputs.invmat)
         return outputs
 
+
 class ApplyTransformInputSpec(SPMCommandInputSpec):
     in_file = File(exists=True, mandatory=True, copyfile=True,
                     desc='file to apply transform to, (only updates header)')
@@ -123,6 +128,7 @@ class ApplyTransformInputSpec(SPMCommandInputSpec):
                 desc='file holding transform to apply')
     out_file = File(desc="output file name for transformed data",
                     genfile=True)
+
 
 class ApplyTransformOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Transformed image file')
@@ -179,6 +185,7 @@ class ApplyTransform(SPMCommand):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_trans.nii'
 
+
 class ResliceInputSpec(SPMCommandInputSpec):
     in_file = File(exists=True, mandatory=True,
                     desc='file to apply transform to, (only updates header)')
@@ -192,8 +199,10 @@ class ResliceInputSpec(SPMCommandInputSpec):
 
     out_file = File(desc='Optional file to save resliced volume')
 
+
 class ResliceOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='resliced volume')
+
 
 class Reslice(SPMCommand):
     """ uses  spm_reslice to resample in_file into space of space_defining"""
@@ -223,6 +232,7 @@ class Reslice(SPMCommand):
         outputs = self._outputs().get()
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
 
 class ApplyInverseDeformationInput(SPMCommandInputSpec):
     in_files = InputMultiPath(
@@ -375,6 +385,7 @@ class ResliceToReference(SPMCommand):
             outputs['out_files'].append(os.path.realpath('w%s' % fname))
         return outputs
 
+
 class DicomImportInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(
         File(exists=True),
@@ -403,9 +414,11 @@ class DicomImportInputSpec(SPMCommandInputSpec):
               Use this only if there would be multiple volumes with\
               exactly the same file names.')
 
+
 class DicomImportOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True),
                                 desc='converted files')
+
 
 class DicomImport(SPMCommand):
     """ Uses spm to convert DICOM files to nii or img+hdr.

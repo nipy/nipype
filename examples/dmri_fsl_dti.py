@@ -239,6 +239,7 @@ Setup data storage area
 datasink = pe.Node(interface=nio.DataSink(), name='datasink')
 datasink.inputs.base_directory = os.path.abspath('dtiresults')
 
+
 def getstripdir(subject_id):
     import os
     return os.path.join(os.path.abspath('data/workingdir/dwiproc'), '_subject_id_%s' % subject_id)

@@ -24,6 +24,7 @@ from nipype.interfaces.base import CommandLineInputSpec, CommandLine,\
 
 warn = warnings.warn
 
+
 class SVMTrainInputSpec(AFNICommandInputSpec):
     # training options
     ttype = traits.Str(desc='tname: classification or regression',
@@ -70,10 +71,12 @@ class SVMTrainInputSpec(AFNICommandInputSpec):
                         argstr='-wout')
     options = traits.Str(desc='additional options for SVM-light', argstr='%s')
 
+
 class SVMTrainOutputSpec(TraitedSpec):
     out_file = File(desc='sum of weighted linear support vectors file name')
     model = File(desc='brik containing the SVM model file name')
     alphas = File(desc='output alphas file name')
+
 
 class SVMTrain(AFNICommand):
     """Temporally predictive modeling with the support vector machine
@@ -104,6 +107,7 @@ class SVMTrain(AFNICommand):
     def _format_arg(self, name, trait_spec, value):
         return super(SVMTrain, self)._format_arg(name, trait_spec, value)
 
+
 class SVMTestInputSpec(AFNICommandInputSpec):
     # testing options
     model = traits.Str(desc='modname is the basename for the brik containing the SVM model',
@@ -128,6 +132,7 @@ class SVMTestInputSpec(AFNICommandInputSpec):
     multiclass = traits.Bool(desc='Specifies multiclass algorithm for classification',
                              argstr='-multiclass %s')
     options = traits.Str(desc='additional options for SVM-light', argstr='%s')
+
 
 class SVMTest(AFNICommand):
     """Temporally predictive modeling with the support vector machine

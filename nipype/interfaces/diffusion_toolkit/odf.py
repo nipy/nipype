@@ -50,6 +50,7 @@ class HARDIMatInputSpec(CommandLineInputSpec):
         adjust gradient accordingly, thus it requires adjustment for correct
         diffusion tensor calculation""", argstr="-oc")
 
+
 class HARDIMatOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='output matrix file')
 
@@ -89,6 +90,7 @@ class HARDIMat(CommandLine):
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
 
+
 class ODFReconInputSpec(CommandLineInputSpec):
     DWI = File(desc='Input raw data', argstr='%s', exists=True, mandatory=True, position=1)
     n_directions = traits.Int(desc='Number of directions', argstr='%s', mandatory=True, position=2)
@@ -126,6 +128,7 @@ class ODFReconOutputSpec(TraitedSpec):
     ODF = File(exists=True)
     entropy = File()
 
+
 class ODFRecon(CommandLine):
     """Use odf_recon to generate tensors and other maps
     """
@@ -148,6 +151,7 @@ class ODFRecon(CommandLine):
             outputs['entropy'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_entropy.' + output_type))
 
         return outputs
+
 
 class ODFTrackerInputSpec(CommandLineInputSpec):
     max = File(exists=True, mandatory=True)
@@ -202,8 +206,10 @@ class ODFTrackerInputSpec(CommandLineInputSpec):
         in the track file and is essential for track display to map onto
         the right coordinates""")
 
+
 class ODFTrackerOutputSpec(TraitedSpec):
     track_file = File(exists=True, desc='output track file')
+
 
 class ODFTracker(CommandLine):
     """Use odf_tracker to generate track file

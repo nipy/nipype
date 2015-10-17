@@ -33,8 +33,10 @@ def test_cont_to_str():
     # no reason why they shouldn't work.
     yield assert_true, (container_to_string(123) == '123')
 
+
 def _func1(x):
     return x**3
+
 
 def test_func_to_str():
 
@@ -47,6 +49,7 @@ def test_func_to_str():
         f_recreated = create_function_from_source(f_src)
         yield assert_equal, f(2.3), f_recreated(2.3)
 
+
 def test_str2bool():
     yield assert_true, str2bool("yes")
     yield assert_true, str2bool("true")
@@ -57,6 +60,7 @@ def test_str2bool():
     yield assert_false, str2bool("n")
     yield assert_false, str2bool("f")
     yield assert_false, str2bool("0")
+
 
 def test_flatten():
     in_list = [[1, 2, 3], [4], [[5, 6], 7], 8]

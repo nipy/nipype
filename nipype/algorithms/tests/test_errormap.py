@@ -8,6 +8,7 @@ import numpy as np
 from tempfile import mkdtemp
 import os
 
+
 def test_errormap():
 
 	tempdir = mkdtemp()

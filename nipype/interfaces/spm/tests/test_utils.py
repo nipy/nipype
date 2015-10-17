@@ -9,6 +9,7 @@ from nipype.interfaces.base import isdefined
 from nipype.utils.filemanip import split_filename, fname_presuffix
 from nipype.interfaces.base import TraitError
 
+
 def test_coreg():
     moving = example_data(infile='functional.nii')
     target = example_data(infile='T1.nii')
@@ -40,6 +41,7 @@ def test_apply_transform():
     expected = 'V.mat = transform.M * V.mat;'
     assert_equal(expected in scrpt, True)
 
+
 def test_reslice():
     moving = example_data(infile='functional.nii')
     space_defining = example_data(infile='T1.nii')
@@ -59,6 +61,7 @@ def test_reslice():
     expected_interp = 'flags.interp = 1;\n'
     assert_equal(expected_interp in script, True)
     assert_equal('spm_reslice(invols, flags);' in script, True)
+
 
 def test_dicom_import():
     dicom = example_data(infile='dicomdir/123456-1-1.dcm')

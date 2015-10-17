@@ -1794,6 +1794,7 @@ class TCorrMap(AFNICommand):
         else:
             return super(TCorrMap, self)._format_arg(name, trait_spec, value)
 
+
 class AutoboxInputSpec(AFNICommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr='-input %s',
                    desc='input file', copyfile=False)
@@ -1859,6 +1860,7 @@ class Autobox(AFNICommand):
         if name == 'out_file' and (not isdefined(self.inputs.out_file)):
             return Undefined
         return super(Autobox, self)._gen_filename(name)
+
 
 class RetroicorInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dretroicor',
@@ -1940,6 +1942,7 @@ class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
                     argstr='-prefix %s', name_source="in_file")
     hash_files = False
 
+
 class AFNItoNIFTI(AFNICommand):
     """Changes AFNI format files to NIFTI format using 3dAFNItoNIFTI
 
@@ -1971,6 +1974,7 @@ class AFNItoNIFTI(AFNICommand):
     def _gen_filename(self, name):
         return os.path.abspath(super(AFNItoNIFTI, self)._gen_filename(name))
 
+
 class EvalInputSpec(AFNICommandInputSpec):
     in_file_a = File(desc='input file to 1deval',
                      argstr='-a %s', position=0, mandatory=True, exists=True)
@@ -1990,6 +1994,7 @@ class EvalInputSpec(AFNICommandInputSpec):
                           requires=['start_idx'])
     single_idx = traits.Int(desc='volume index for in_file_a')
     other = File(desc='other options', argstr='')
+
 
 class Eval(AFNICommand):
     """Evaluates an expression that may include columns of data from one or more text files
@@ -2032,6 +2037,7 @@ class Eval(AFNICommand):
         return super(Eval, self)._parse_inputs(
             skip=('start_idx', 'stop_idx', 'out1D', 'other'))
 
+
 class MeansInputSpec(AFNICommandInputSpec):
     in_file_a = File(desc='input file to 3dMean',
                      argstr='%s',
@@ -2052,6 +2058,7 @@ class MeansInputSpec(AFNICommandInputSpec):
     count = traits.Bool(desc='compute count of non-zero voxels', argstr='-count')
     mask_inter = traits.Bool(desc='create intersection mask', argstr='-mask_inter')
     mask_union = traits.Bool(desc='create union mask', argstr='-mask_union')
+
 
 class Means(AFNICommand):
     """Takes the voxel-by-voxel mean of all input datasets using 3dMean

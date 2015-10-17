@@ -16,6 +16,7 @@ from .base import (CommandLine, CommandLineInputSpec,
 import os.path as op
 from ..utils.filemanip import split_filename
 
+
 class MeshFixInputSpec(CommandLineInputSpec):
     number_of_biggest_shells = traits.Int(argstr='--shells %d', desc="Only the N biggest shells are kept")
 
@@ -71,8 +72,10 @@ class MeshFixInputSpec(CommandLineInputSpec):
     output_type = traits.Enum('off', ['stl', 'msh', 'wrl', 'vrml', 'fs', 'off'], usedefault=True, desc='The output type to save the file as.')
     out_filename = File(genfile=True, argstr="-o %s", desc='The output filename for the fixed mesh file')
 
+
 class MeshFixOutputSpec(TraitedSpec):
     mesh_file = File(exists=True, desc='The output mesh file')
+
 
 class MeshFix(CommandLine):
     """

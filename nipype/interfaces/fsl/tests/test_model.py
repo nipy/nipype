@@ -16,6 +16,7 @@ tmp_infile = None
 tmp_dir = None
 cwd = None
 
+
 @skipif(no_fsl)
 def setup_infile():
     global tmp_infile, tmp_dir, cwd
@@ -27,9 +28,11 @@ def setup_infile():
     os.chdir(tmp_dir)
     return tmp_infile, tmp_dir
 
+
 def teardown_infile(tmp_dir):
     os.chdir(cwd)
     shutil.rmtree(tmp_dir)
+
 
 @skipif(no_fsl)
 def test_MultipleRegressDesign():

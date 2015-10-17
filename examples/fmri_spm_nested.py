@@ -286,6 +286,7 @@ necessary to generate an SPM design matrix. In this tutorial, the same
 paradigm was used for every participant.
 """
 
+
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
@@ -394,6 +395,7 @@ datasink.inputs.base_directory = os.path.abspath('spm_tutorial2/l1output')
 report = pe.Node(interface=nio.DataSink(), name='report')
 report.inputs.base_directory = os.path.abspath('spm_tutorial2/report')
 report.inputs.parameterization = False
+
 
 def getstripdir(subject_id):
     import os

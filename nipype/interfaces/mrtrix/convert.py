@@ -38,6 +38,7 @@ from nibabel.orientations import aff2axcodes
 from ... import logging
 iflogger = logging.getLogger('interface')
 
+
 def transform_to_affine(streams, header, affine):
     rotation, scale = np.linalg.qr(affine)
     streams = move_streamlines(streams, rotation)
@@ -46,10 +47,12 @@ def transform_to_affine(streams, header, affine):
     streams = move_streamlines(streams, scale)
     return streams
 
+
 def read_mrtrix_tracks(in_file, as_generator=True):
     header = read_mrtrix_header(in_file)
     streamlines = read_mrtrix_streamlines(in_file, header, as_generator)
     return header, streamlines
+
 
 def read_mrtrix_header(in_file):
     fileobj = open(in_file, 'r')
@@ -70,6 +73,7 @@ def read_mrtrix_header(in_file):
     header['count'] = int(header['count'].replace('\n', ''))
     header['offset'] = int(header['file'].replace('.', ''))
     return header
+
 
 def read_mrtrix_streamlines(in_file, header, as_generator=True):
     offset = header['offset']
@@ -144,6 +148,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
         streamlines = list(streamlines)
     return streamlines
 
+
 class MRTrix2TrackVisInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='The input file for the tracks in MRTrix (.tck) format')
@@ -152,8 +157,10 @@ class MRTrix2TrackVisInputSpec(TraitedSpec):
     registration_image_file = File(exists=True, desc='The final image the tracks should be registered to.')
     out_filename = File('converted.trk', genfile=True, usedefault=True, desc='The output filename for the tracks in TrackVis (.trk) format')
 
+
 class MRTrix2TrackVisOutputSpec(TraitedSpec):
     out_file = File(exists=True)
+
 
 class MRTrix2TrackVis(BaseInterface):
     """

@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from nipype.external.six import PY2, PY3, StringIO
 from nipype.utils import nipype_cmd
 
+
 @contextmanager
 def capture_sys_output():
     caputure_out, capture_err = StringIO(), StringIO()

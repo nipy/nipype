@@ -31,6 +31,7 @@ def human_order_sorted(l):
 
     return sorted(l, key=natural_keys)
 
+
 def trim(docstring, marker=None):
     if not docstring:
         return ''
@@ -62,10 +63,12 @@ def trim(docstring, marker=None):
     # Return a single string:
     return '\n'.join(trimmed)
 
+
 def getsource(function):
     """Returns the source code of a function"""
     src = dedent(inspect.getsource(function))
     return src
+
 
 def create_function_from_source(function_source, imports=None):
     """Return a function object from a function source
@@ -101,10 +104,12 @@ def create_function_from_source(function_source, imports=None):
     func = ns[funcname]
     return func
 
+
 def find_indices(condition):
     "Return the indices where ravel(condition) is true"
     res, = np.nonzero(np.ravel(condition))
     return res
+
 
 def is_container(item):
     """Checks if item is a container (list, tuple, dict, set)
@@ -126,6 +131,7 @@ def is_container(item):
         return True
     else:
         return False
+
 
 def container_to_string(cont):
     """Convert a container to a command line string.
@@ -204,6 +210,7 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     if checker(have_version) < checker(version):
         raise exc_failed_check(msg)
 
+
 def str2bool(v):
     if isinstance(v, bool):
         return v
@@ -215,12 +222,14 @@ def str2bool(v):
     else:
         raise ValueError("%s cannot be converted to bool" % v)
 
+
 def flatten(S):
     if S == []:
         return S
     if isinstance(S[0], list):
         return flatten(S[0]) + flatten(S[1:])
     return S[:1] + flatten(S[1:])
+
 
 def unflatten(in_list, prev_structure):
     if not isinstance(in_list, Iterator):

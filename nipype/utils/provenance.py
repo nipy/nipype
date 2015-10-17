@@ -35,11 +35,13 @@ crypto = pm.Namespace("crypto",
                        "cryptographicHashFunctions/"))
 get_id = lambda: niiri[uuid1().hex]
 
+
 def get_attr_id(attr, skip=None):
     dictwithhash, hashval = get_hashval(attr, skip=skip)
     return niiri[hashval]
 
 max_text_len = 1024000
+
 
 def get_hashval(inputdict, skip=None):
     """Return a dictionary of our items with hashes for each file.
@@ -84,6 +86,7 @@ def get_hashval(inputdict, skip=None):
         dict_nofilename[outname] = _get_sorteddict(val)
         dict_withhash[outname] = _get_sorteddict(val, True)
     return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
+
 
 def _get_sorteddict(object, dictwithhash=False):
     if isinstance(object, dict):

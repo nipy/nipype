@@ -18,6 +18,7 @@ __docformat__ = 'restructuredtext'
 import re
 from nipype.interfaces.base import CommandLine
 
+
 class Info(object):
     """ Handle dtk output type and version information.
 

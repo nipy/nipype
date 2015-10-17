@@ -3,6 +3,7 @@ from ....pipeline import engine as pe          # pypeline engine
 from ....interfaces import fsl as fsl
 from ....interfaces import mrtrix as mrtrix
 
+
 def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type='probabilistic'):
     """Creates a pipeline that does the same diffusion processing as in the
     :doc:`../../users/examples/dmri_mrtrix_dti` example script. Given a diffusion-weighted image,

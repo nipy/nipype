@@ -152,6 +152,7 @@ def test_generate_job():
     out = dc._generate_job(prefix='test', contents=contents)
     yield assert_equal, out, 'test.onsets = {...\n[1, 2, 3, 4];...\n};\n'
 
+
 def test_bool():
     class TestClassInputSpec(SPMCommandInputSpec):
         test_in = include_intercept = traits.Bool(field='testfield')
@@ -167,6 +168,7 @@ def test_bool():
     dc.inputs.use_v8struct = False
     out = dc._make_matlab_command(dc._parse_inputs())
     yield assert_equal, out.find('jobs{1}.jobtype{1}.jobname{1}.testfield = 1;') > 0, 1
+
 
 def test_make_matlab_command():
     class TestClass(spm.SPMCommand):

@@ -33,6 +33,7 @@ pipeline to be flexible enough to accept and process images of varying size. The
 (fmri_spm_face.py) also implements this inferral of voxel size from the data.
 """
 
+
 def get_vox_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):
@@ -42,6 +43,7 @@ def get_vox_dims(volume):
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
 
+
 def get_data_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):
@@ -50,6 +52,7 @@ def get_data_dims(volume):
     hdr = nii.get_header()
     datadims = hdr.get_data_shape()
     return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
+
 
 def get_affine(volume):
     import nibabel as nb

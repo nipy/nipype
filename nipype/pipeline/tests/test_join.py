@@ -13,12 +13,15 @@ import nipype.pipeline.engine as pe
 from nipype.interfaces.utility import IdentityInterface
 from nipype.interfaces.base import traits, File
 
+
 class PickFirstSpec(nib.TraitedSpec):
     in_files = traits.List(File(exists=True), argstr="%s", position=2,
                            mandatory=True)
 
+
 class PickFirstOutSpec(nib.TraitedSpec):
     output1 = File(exists=True)
+
 
 class PickFirst(nib.BaseInterface):
     input_spec = PickFirstSpec
@@ -38,8 +41,10 @@ class IncrementInputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(mandatory=True, desc='input')
     inc = nib.traits.Int(usedefault=True, default_value=1, desc='increment')
 
+
 class IncrementOutputSpec(nib.TraitedSpec):
     output1 = nib.traits.Int(desc='ouput')
+
 
 class IncrementInterface(nib.BaseInterface):
     input_spec = IncrementInputSpec
@@ -58,12 +63,15 @@ _sums = []
 
 _sum_operands = []
 
+
 class SumInputSpec(nib.TraitedSpec):
     input1 = nib.traits.List(nib.traits.Int, mandatory=True, desc='input')
+
 
 class SumOutputSpec(nib.TraitedSpec):
     output1 = nib.traits.Int(desc='ouput')
     operands = nib.traits.List(nib.traits.Int, desc='operands')
+
 
 class SumInterface(nib.BaseInterface):
     input_spec = SumInputSpec
@@ -87,11 +95,14 @@ class SumInterface(nib.BaseInterface):
 _set_len = None
 """The Set interface execution result."""
 
+
 class SetInputSpec(nib.TraitedSpec):
     input1 = nib.traits.Set(nib.traits.Int, mandatory=True, desc='input')
 
+
 class SetOutputSpec(nib.TraitedSpec):
     output1 = nib.traits.Int(desc='ouput')
+
 
 class SetInterface(nib.BaseInterface):
     input_spec = SetInputSpec
@@ -111,12 +122,15 @@ class SetInterface(nib.BaseInterface):
 _products = []
 """The Products interface execution results."""
 
+
 class ProductInputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(mandatory=True, desc='input1')
     input2 = nib.traits.Int(mandatory=True, desc='input2')
 
+
 class ProductOutputSpec(nib.TraitedSpec):
     output1 = nib.traits.Int(mandatory=True, desc='output')
+
 
 class ProductInterface(nib.BaseInterface):
     input_spec = ProductInputSpec
@@ -132,6 +146,7 @@ class ProductInterface(nib.BaseInterface):
         outputs['output1'] = self.inputs.input1 * self.inputs.input2
         _products.append(outputs['output1'])
         return outputs
+
 
 def test_join_expansion():
     cwd = os.getcwd()
@@ -184,6 +199,7 @@ def test_join_expansion():
     os.chdir(cwd)
     rmtree(wd)
 
+
 def test_node_joinsource():
     """Test setting the joinsource to a Node."""
     cwd = os.getcwd()
@@ -205,6 +221,7 @@ def test_node_joinsource():
 
     os.chdir(cwd)
     rmtree(wd)
+
 
 def test_set_join_node():
     """Test collecting join inputs to a set."""
@@ -234,6 +251,7 @@ def test_set_join_node():
     os.chdir(cwd)
     rmtree(wd)
 
+
 def test_unique_join_node():
     """Test join with the ``unique`` flag set to True."""
     global _sum_operands
@@ -262,6 +280,7 @@ def test_unique_join_node():
 
     os.chdir(cwd)
     rmtree(wd)
+
 
 def test_multiple_join_nodes():
     """Test two join nodes, one downstream of the other."""
@@ -320,6 +339,7 @@ def test_multiple_join_nodes():
     os.chdir(cwd)
     rmtree(wd)
 
+
 def test_identity_join_node():
     """Test an IdentityInterface join."""
     global _sum_operands
@@ -358,6 +378,7 @@ def test_identity_join_node():
 
     os.chdir(cwd)
     rmtree(wd)
+
 
 def test_multifield_join_node():
     """Test join on several fields."""
@@ -403,6 +424,7 @@ def test_multifield_join_node():
     os.chdir(cwd)
     rmtree(wd)
 
+
 def test_synchronize_join_node():
     """Test join on an input node which has the ``synchronize`` flag set to True."""
     global _products
@@ -445,6 +467,7 @@ def test_synchronize_join_node():
 
     os.chdir(cwd)
     rmtree(wd)
+
 
 def test_itersource_join_source_node():
     """Test join on an input node which has an ``itersource``."""
@@ -503,6 +526,7 @@ def test_itersource_join_source_node():
     os.chdir(cwd)
     rmtree(wd)
 
+
 def test_itersource_two_join_nodes():
     """Test join with a midstream ``itersource`` and an upstream
     iterable."""
@@ -547,6 +571,7 @@ def test_itersource_two_join_nodes():
 
     os.chdir(cwd)
     rmtree(wd)
+
 
 def test_set_join_node_file_input():
     """Test collecting join inputs to a set."""

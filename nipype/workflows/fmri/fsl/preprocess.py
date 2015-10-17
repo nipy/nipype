@@ -12,14 +12,17 @@ from ....interfaces import spm as spm
 from ...smri.freesurfer.utils import create_getmask_flow
 from .... import LooseVersion
 
+
 def getthreshop(thresh):
     return ['-thr %.10f -Tmin -bin' %(0.1*val[1]) for val in thresh]
+
 
 def pickfirst(files):
     if isinstance(files, list):
         return files[0]
     else:
         return files
+
 
 def pickmiddle(files):
     from nibabel import load
@@ -28,6 +31,7 @@ def pickmiddle(files):
     for f in files:
         middlevol.append(int(np.ceil(load(f).get_shape()[3] / 2)))
     return middlevol
+
 
 def pickvol(filenames, fileidx, which):
     from nibabel import load
@@ -42,8 +46,10 @@ def pickvol(filenames, fileidx, which):
         raise Exception('unknown value for volume selection : %s' % which)
     return idx
 
+
 def getbtthresh(medianvals):
     return [0.75*val for val in medianvals]
+
 
 def chooseindex(fwhm):
     if fwhm < 1:
@@ -51,14 +57,17 @@ def chooseindex(fwhm):
     else:
         return [1]
 
+
 def getmeanscale(medianvals):
     return ['-mul %.10f' % (10000. / val) for val in medianvals]
+
 
 def getusans(x):
     return [[tuple([val[0], 0.75 * val[1]])] for val in x]
 
 tolist = lambda x: [x]
 highpass_operand = lambda x: '-bptf %.10f -1' %x
+
 
 def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     """Preprocess each run with FSL independently of the others
@@ -372,6 +381,7 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
 
 
     return featpreproc
+
 
 def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle'):
     """Create a FEAT preprocessing workflow with registration to one volume of the first run
@@ -1094,6 +1104,7 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     featpreproc.connect(maskflow, 'outputspec.reg_cost', outputnode, 'reg_cost')
 
     return featpreproc
+
 
 def create_reg_workflow(name='registration'):
     """Create a FEAT preprocessing workflow

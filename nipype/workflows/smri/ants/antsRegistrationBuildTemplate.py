@@ -22,12 +22,15 @@ from ....interfaces.ants import (
                                  AverageImages, MultiplyImages,
                                  AverageAffineTransform)
 
+
 def makeListOfOneElement(inputFile):
     outputList = [inputFile]
     return outputList
 
+
 def GetFirstListElement(this_list):
     return this_list[0]
+
 
 def MakeTransformListWithGradientWarps(averageAffineTranform, gradientStepWarp):
     return [averageAffineTranform, gradientStepWarp, gradientStepWarp, gradientStepWarp, gradientStepWarp]
@@ -68,6 +71,7 @@ def RenestDeformedPassiveImages(deformedPassiveImages, flattened_image_nametypes
     print("HACK: ", nested_interpolation_type)
     return nested_imagetype_list, outputAverageImageName_list, image_type_list, nested_interpolation_type
 
+
 def SplitAffineAndWarpComponents(list_of_transforms_lists):
     # Nota bene: The outputs will include the initial_moving_transform from Registration (which depends on what
     # the invert_initial_moving_transform is set to)
@@ -80,6 +84,8 @@ def SplitAffineAndWarpComponents(list_of_transforms_lists):
     return affine_component_list, warp_component_list
 
 # Flatten and return equal length transform and images lists.
+
+
 def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries, transforms, invert_transform_flags, interpolationMapping):
     import sys
     print("HACK:  DEBUG: ListOfPassiveImagesDictionaries\n{lpi}\n".format(lpi=ListOfPassiveImagesDictionaries))
@@ -133,6 +139,7 @@ def GetMovingImages(ListOfImagesDictionaries, registrationImageTypes, interpolat
     moving_interpolation_type = interpolationMapping[registrationImageTypes[0]]
     return moving_images, moving_interpolation_type
 
+
 def GetPassiveImages(ListOfImagesDictionaries, registrationImageTypes):
     if len(registrationImageTypes) != 1:
         print("ERROR:  Multivariate imageing not supported yet!")
@@ -151,6 +158,8 @@ def GetPassiveImages(ListOfImagesDictionaries, registrationImageTypes):
 # 'SINGLE_IMAGE' is quick shorthand when you are building an atlas with a single subject, then registration can
 # be short-circuted
 # any other string indicates the normal mode that you would expect and replicates the shell script build_template_parallel.sh
+
+
 def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     """
 

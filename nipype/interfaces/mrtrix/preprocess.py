@@ -39,8 +39,10 @@ class MRConvertInputSpec(CommandLineInputSpec):
     replace_NaN_with_zero = traits.Bool(argstr='-zero', position=3, desc="Replace all NaN values with zero.")
     prs = traits.Bool(argstr='-prs', position=3, desc="Assume that the DW gradients are specified in the PRS frame (Siemens DICOM only).")
 
+
 class MRConvertOutputSpec(TraitedSpec):
     converted = File(exists=True, desc='path/name of 4D volume in voxel order')
+
 
 class MRConvert(CommandLine):
     """
@@ -87,6 +89,7 @@ class MRConvert(CommandLine):
         else:
             outname = name + '_mrconvert.' + self.inputs.extension
         return outname
+
 
 class DWI2TensorInputSpec(CommandLineInputSpec):
     in_file = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
@@ -147,6 +150,7 @@ class DWI2Tensor(CommandLine):
     input_spec = DWI2TensorInputSpec
     output_spec = DWI2TensorOutputSpec
 
+
 class Tensor2VectorInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='Diffusion tensor image')
@@ -154,8 +158,10 @@ class Tensor2VectorInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
+
 class Tensor2VectorOutputSpec(TraitedSpec):
     vector = File(exists=True, desc='the output image of the major eigenvectors of the diffusion tensor image.')
+
 
 class Tensor2Vector(CommandLine):
     """
@@ -193,6 +199,7 @@ class Tensor2Vector(CommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_vector.mif'
 
+
 class Tensor2FractionalAnisotropyInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='Diffusion tensor image')
@@ -200,8 +207,10 @@ class Tensor2FractionalAnisotropyInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
+
 class Tensor2FractionalAnisotropyOutputSpec(TraitedSpec):
     FA = File(exists=True, desc='the output image of the major eigenvectors of the diffusion tensor image.')
+
 
 class Tensor2FractionalAnisotropy(CommandLine):
     """
@@ -239,6 +248,7 @@ class Tensor2FractionalAnisotropy(CommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_FA.mif'
 
+
 class Tensor2ApparentDiffusionInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='Diffusion tensor image')
@@ -246,8 +256,10 @@ class Tensor2ApparentDiffusionInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
+
 class Tensor2ApparentDiffusionOutputSpec(TraitedSpec):
     ADC = File(exists=True, desc='the output image of the major eigenvectors of the diffusion tensor image.')
+
 
 class Tensor2ApparentDiffusion(CommandLine):
     """
@@ -285,6 +297,7 @@ class Tensor2ApparentDiffusion(CommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_ADC.mif'
 
+
 class MRMultiplyInputSpec(CommandLineInputSpec):
     in_files = InputMultiPath(File(exists=True),
                               argstr='%s', mandatory=True, position=-2,
@@ -293,8 +306,10 @@ class MRMultiplyInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
+
 class MRMultiplyOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='the output image of the multiplication')
+
 
 class MRMultiply(CommandLine):
     """
@@ -332,6 +347,7 @@ class MRMultiply(CommandLine):
         _, name, _ = split_filename(self.inputs.in_files[0])
         return name + '_MRMult.mif'
 
+
 class MRTrixViewerInputSpec(CommandLineInputSpec):
     in_files = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
                               position=-2,
@@ -339,8 +355,10 @@ class MRTrixViewerInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
+
 class MRTrixViewerOutputSpec(TraitedSpec):
     pass
+
 
 class MRTrixViewer(CommandLine):
     """
@@ -362,12 +380,15 @@ class MRTrixViewer(CommandLine):
     def _list_outputs(self):
         return
 
+
 class MRTrixInfoInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='Input images to be read')
 
+
 class MRTrixInfoOutputSpec(TraitedSpec):
     pass
+
 
 class MRTrixInfo(CommandLine):
     """
@@ -389,6 +410,7 @@ class MRTrixInfo(CommandLine):
     def _list_outputs(self):
         return
 
+
 class GenerateWhiteMatterMaskInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3, desc='Diffusion-weighted images')
     binary_mask = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='Binary brain mask')
@@ -397,8 +419,10 @@ class GenerateWhiteMatterMaskInputSpec(CommandLineInputSpec):
                          desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     noise_level_margin = traits.Float(argstr='-margin %s', desc='Specify the width of the margin on either side of the image to be used to estimate the noise level (default = 10)')
 
+
 class GenerateWhiteMatterMaskOutputSpec(TraitedSpec):
     WMprobabilitymap = File(exists=True, desc='WMprobabilitymap')
+
 
 class GenerateWhiteMatterMask(CommandLine):
     """
@@ -433,6 +457,7 @@ class GenerateWhiteMatterMask(CommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_WMProb.mif'
 
+
 class ErodeInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='Input mask image to be eroded')
@@ -442,8 +467,10 @@ class ErodeInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
+
 class ErodeOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='the output image')
+
 
 class Erode(CommandLine):
     """
@@ -480,6 +507,7 @@ class Erode(CommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_erode.mif'
 
+
 class ThresholdInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='The input image to be thresholded')
@@ -491,8 +519,10 @@ class ThresholdInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
+
 class ThresholdOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='The output binary image mask.')
+
 
 class Threshold(CommandLine):
     """
@@ -535,6 +565,7 @@ class Threshold(CommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_thresh.mif'
 
+
 class MedianFilter3DInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='Input images to be smoothed')
@@ -542,8 +573,10 @@ class MedianFilter3DInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
+
 class MedianFilter3DOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='the output image')
+
 
 class MedianFilter3D(CommandLine):
     """
@@ -581,6 +614,7 @@ class MedianFilter3D(CommandLine):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_median3D.mif'
 
+
 class MRTransformInputSpec(CommandLineInputSpec):
     in_files = InputMultiPath(File(exists=True), argstr='%s', mandatory=True,
                               position=-2,
@@ -598,8 +632,10 @@ class MRTransformInputSpec(CommandLineInputSpec):
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")
 
+
 class MRTransformOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='the output image of the transformation')
+
 
 class MRTransform(CommandLine):
     """

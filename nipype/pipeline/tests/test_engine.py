@@ -21,8 +21,10 @@ class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
     input2 = nib.traits.Int(desc='a random int')
 
+
 class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
+
 
 class TestInterface(nib.BaseInterface):
     input_spec = InputSpec
@@ -37,10 +39,12 @@ class TestInterface(nib.BaseInterface):
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
 
+
 def test_init():
     yield assert_raises, Exception, pe.Workflow
     pipe = pe.Workflow(name='pipe')
     yield assert_equal, type(pipe._graph), nx.DiGraph
+
 
 def test_connect():
     pipe = pe.Workflow(name='pipe')
@@ -51,6 +55,7 @@ def test_connect():
     yield assert_true, mod1 in pipe._graph.nodes()
     yield assert_true, mod2 in pipe._graph.nodes()
     yield assert_equal, pipe._graph.get_edge_data(mod1, mod2), {'connect': [('output1', 'input1')]}
+
 
 def test_add_nodes():
     pipe = pe.Workflow(name='pipe')
@@ -66,6 +71,7 @@ def test_add_nodes():
 # XXX - SG I'll create a graphical version of these tests and actually
 # ensure that all connections are tested later
 
+
 def test1():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(), name='mod1')
@@ -74,6 +80,7 @@ def test1():
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 1
     yield assert_equal, len(pipe._execgraph.edges()), 0
+
 
 def test2():
     pipe = pe.Workflow(name='pipe')
@@ -84,6 +91,7 @@ def test2():
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 4
     yield assert_equal, len(pipe._execgraph.edges()), 0
+
 
 def test3():
     pipe = pe.Workflow(name='pipe')
@@ -97,6 +105,7 @@ def test3():
     yield assert_equal, len(pipe._execgraph.nodes()), 3
     yield assert_equal, len(pipe._execgraph.edges()), 2
 
+
 def test4():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(), name='mod1')
@@ -109,6 +118,7 @@ def test4():
     yield assert_equal, len(pipe._execgraph.nodes()), 4
     yield assert_equal, len(pipe._execgraph.edges()), 2
 
+
 def test5():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(), name='mod1')
@@ -120,6 +130,7 @@ def test5():
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 6
     yield assert_equal, len(pipe._execgraph.edges()), 4
+
 
 def test6():
     pipe = pe.Workflow(name='pipe')
@@ -136,6 +147,7 @@ def test6():
     yield assert_equal, len(pipe._execgraph.nodes()), 5
     yield assert_equal, len(pipe._execgraph.edges()), 4
 
+
 def test7():
     pipe = pe.Workflow(name='pipe')
     mod1 = pe.Node(interface=TestInterface(), name='mod1')
@@ -150,6 +162,7 @@ def test7():
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 5
     yield assert_equal, len(pipe._execgraph.edges()), 4
+
 
 def test8():
     pipe = pe.Workflow(name='pipe')
@@ -169,6 +182,7 @@ def test8():
                        len(pipe._execgraph.out_edges(node))) \
                       for node in pipe._execgraph.nodes()])
     yield assert_true, edgenum[0] > 0
+
 
 def test_expansion():
     pipe1 = pe.Workflow(name='pipe1')
@@ -195,6 +209,7 @@ def test_expansion():
         error_raised = True
     yield assert_false, error_raised
 
+
 def test_iterable_expansion():
     import nipype.pipeline.engine as pe
     wf1 = pe.Workflow(name='test')
@@ -207,6 +222,7 @@ def test_iterable_expansion():
         wf3.add_nodes([wf1.clone(name='test%d' %i)])
     wf3._flatgraph = wf3._create_flat_graph()
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 12
+
 
 def test_synchronize_expansion():
     import nipype.pipeline.engine as pe
@@ -227,6 +243,7 @@ def test_synchronize_expansion():
     # => 18 nodes in the group
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 18
 
+
 def test_synchronize_tuples_expansion():
     import nipype.pipeline.engine as pe
     wf1 = pe.Workflow(name='test')
@@ -246,6 +263,7 @@ def test_synchronize_tuples_expansion():
     wf3._flatgraph = wf3._create_flat_graph()
     # Identical to test_synchronize_expansion
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 18
+
 
 def test_itersource_expansion():
     import nipype.pipeline.engine as pe
@@ -282,6 +300,7 @@ def test_itersource_expansion():
     # => 3 * 14 = 42 nodes in the group
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 42
 
+
 def test_itersource_synchronize1_expansion():
     import nipype.pipeline.engine as pe
     wf1 = pe.Workflow(name='test')
@@ -311,6 +330,7 @@ def test_itersource_synchronize1_expansion():
     # => 2 + 2 + (2 + 3) + 5 = 14 nodes per expanded graph clone
     # => 3 * 14 = 42 nodes in the group
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 42
+
 
 def test_itersource_synchronize2_expansion():
     import nipype.pipeline.engine as pe
@@ -344,6 +364,7 @@ def test_itersource_synchronize2_expansion():
     # => 3 * 10 = 30 nodes in the group
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()), 30
 
+
 def test_disconnect():
     import nipype.pipeline.engine as pe
     from nipype.interfaces.utility import IdentityInterface
@@ -353,6 +374,7 @@ def test_disconnect():
     flow1.connect(a, 'a', b, 'a')
     flow1.disconnect(a, 'a', b, 'a')
     yield assert_equal, flow1._graph.edges(), []
+
 
 def test_doubleconnect():
     import nipype.pipeline.engine as pe
@@ -440,6 +462,8 @@ workflow.run()
 '''
 
 # Node
+
+
 def test_node_init():
     yield assert_raises, Exception, pe.Node
     try:
@@ -449,6 +473,7 @@ def test_node_init():
     else:
         exception = False
     yield assert_true, exception
+
 
 def test_workflow_add():
     from nipype.interfaces.utility import IdentityInterface as ii
@@ -519,6 +544,7 @@ def test_mapnode_nested():
         error_raised = True
     yield assert_true, error_raised
 
+
 def test_node_hash():
     cwd = os.getcwd()
     wd = mkdtemp()
@@ -578,6 +604,7 @@ def test_node_hash():
     yield assert_false, error_raised
     os.chdir(cwd)
     rmtree(wd)
+
 
 def test_old_config():
     cwd = os.getcwd()
@@ -660,6 +687,7 @@ def test_mapnode_json():
     yield assert_false, error_raised
     os.chdir(cwd)
     rmtree(wd)
+
 
 def test_serial_input():
     cwd = os.getcwd()

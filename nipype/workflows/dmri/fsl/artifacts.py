@@ -15,6 +15,7 @@ from .utils import (b0_indices, time_avg, apply_all_corrections, b0_average,
                     cleanup_edge_pipeline, add_empty_vol, vsm2warp,
                     compute_readout,)
 
+
 def all_fmb_pipeline(name='hmc_sdc_ecc', fugue_params=dict(smooth3d=2.0)):
     """
     Builds a pipeline including three artifact corrections: head-motion

@@ -28,6 +28,7 @@ def set_output_type(fsl_output_type):
 
     return prev_output_type
 
+
 def create_files_in_directory():
     testdir = os.path.realpath(mkdtemp())
     origdir = os.getcwd()
@@ -44,6 +45,7 @@ def create_files_in_directory():
 
     out_ext = Info.output_type_to_ext(Info.output_type())
     return filelist, testdir, origdir, out_ext
+
 
 def clean_directory(testdir, origdir):
     if os.path.exists(testdir):
@@ -93,6 +95,7 @@ def test_maths_base(fsl_output_type=None):
     clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
+
 @skipif(no_fsl)
 def test_changedt(fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
@@ -124,6 +127,7 @@ def test_changedt(fsl_output_type=None):
     # Clean up our mess
     clean_directory(testdir, origdir)
     set_output_type(prev_type)
+
 
 @skipif(no_fsl)
 def test_threshold(fsl_output_type=None):
@@ -190,6 +194,7 @@ def test_meanimage(fsl_output_type=None):
     clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
+
 @skipif(no_fsl)
 def test_maximage(fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
@@ -217,6 +222,7 @@ def test_maximage(fsl_output_type=None):
     # Clean up our mess
     clean_directory(testdir, origdir)
     set_output_type(prev_type)
+
 
 @skipif(no_fsl)
 def test_smooth(fsl_output_type=None):
@@ -248,6 +254,7 @@ def test_smooth(fsl_output_type=None):
     # Clean up our mess
     clean_directory(testdir, origdir)
     set_output_type(prev_type)
+
 
 @skipif(no_fsl)
 def test_mask(fsl_output_type=None):
@@ -319,6 +326,7 @@ def test_dilation(fsl_output_type=None):
     clean_directory(testdir, origdir)
     set_output_type(prev_type)
 
+
 @skipif(no_fsl)
 def test_erosion(fsl_output_type=None):
     prev_type = set_output_type(fsl_output_type)
@@ -344,6 +352,7 @@ def test_erosion(fsl_output_type=None):
     # Clean up our mess
     clean_directory(testdir, origdir)
     set_output_type(prev_type)
+
 
 @skipif(no_fsl)
 def test_spatial_filter(fsl_output_type=None):
@@ -503,6 +512,7 @@ def test_tempfilt(fsl_output_type=None):
     # Clean up our mess
     clean_directory(testdir, origdir)
     set_output_type(prev_type)
+
 
 @skipif(no_fsl)
 def test_all_again():

@@ -27,8 +27,10 @@ from ....interfaces.ants import (ANTS,
 def GetFirstListElement(this_list):
     return this_list[0]
 
+
 def MakeTransformListWithGradientWarps(averageAffineTranform, gradientStepWarp):
     return [averageAffineTranform, gradientStepWarp, gradientStepWarp, gradientStepWarp, gradientStepWarp]
+
 
 def RenestDeformedPassiveImages(deformedPassiveImages, flattened_image_nametypes):
     import os
@@ -66,10 +68,14 @@ def RenestDeformedPassiveImages(deformedPassiveImages, flattened_image_nametypes
 # ll=map(list,zip(af,wp))
 # ll
 # #[['af1.mat', 'wp1.nii'], ['af2.mat', 'wp2.nii'], ['af3.mat', 'wp3.nii']]
+
+
 def MakeListsOfTransformLists(warpTransformList, AffineTransformList):
     return list(map(list, list(zip(warpTransformList, AffineTransformList))))
 
 # Flatten and return equal length transform and images lists.
+
+
 def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries, transformation_series):
     import sys
     print("HACK:  DEBUG: ListOfPassiveImagesDictionaries\n{lpi}\n".format(lpi=ListOfPassiveImagesDictionaries))
@@ -96,6 +102,7 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries, transformatio
     print("HACK: flattened nametypes {0}\n".format(flattened_image_nametypes))
     print("HACK: flattened txfms     {0}\n".format(flattened_transforms))
     return flattened_images, flattened_transforms, flattened_image_nametypes
+
 
 def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     """

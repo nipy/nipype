@@ -19,6 +19,7 @@ except:
 
 from .base import (DistributedPluginBase, logger, report_crash)
 
+
 def execute_task(pckld_task, node_config, updatehash):
     from socket import gethostname
     from traceback import format_exc
@@ -38,6 +39,7 @@ def execute_task(pckld_task, node_config, updatehash):
         result = task.result
     os.chdir(cwd)
     return result, traceback, gethostname()
+
 
 class IPythonPlugin(DistributedPluginBase):
     """Execute workflow with ipython

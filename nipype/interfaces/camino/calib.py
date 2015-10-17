@@ -58,9 +58,11 @@ class SFPICOCalibDataInputSpec(StdOutCommandLineInputSpec):
     seed = traits.Float(argstr='-seed %f', units='NA',
                         desc='Specifies the random seed to use for noise generation in simulation trials.')
 
+
 class SFPICOCalibDataOutputSpec(TraitedSpec):
     PICOCalib = File(exists=True, desc='Calibration dataset')
     calib_info = File(exists=True, desc='Calibration dataset')
+
 
 class SFPICOCalibData(StdOutCommandLine):
     """
@@ -168,9 +170,11 @@ class SFLUTGenInputSpec(StdOutCommandLineInputSpec):
                        desc=('The order of the polynomial fitting the surface. Order 1 is linear. '
                              'Order 2 (default) is quadratic.'))
 
+
 class SFLUTGenOutputSpec(TraitedSpec):
     lut_one_fibre = File(exists=True, desc='PICo lut for one-fibre model')
     lut_two_fibres = File(exists=True, desc='PICo lut for two-fibre model')
+
 
 class SFLUTGen(StdOutCommandLine):
     """

@@ -15,6 +15,7 @@ except:
 
 from .base import (DistributedPluginBase, logger, report_crash)
 
+
 class IPythonXPlugin(DistributedPluginBase):
     """Execute workflow with ipython
     """

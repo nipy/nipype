@@ -6,12 +6,15 @@ from shutil import rmtree
 from nipype.testing import assert_equal
 import nipype.pipeline.engine as pe
 
+
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
     input2 = nib.traits.Int(desc='a random int')
 
+
 class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
+
 
 class TestInterface(nib.BaseInterface):
     input_spec = InputSpec
@@ -25,6 +28,7 @@ class TestInterface(nib.BaseInterface):
         outputs = self._outputs().get()
         outputs['output1'] = [1, self.inputs.input1]
         return outputs
+
 
 def test_run_multiproc():
     cur_dir = os.getcwd()

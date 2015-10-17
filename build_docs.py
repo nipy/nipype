@@ -29,6 +29,8 @@ DOC_DOCTREES_DIR = os.path.join('doc', '_build', 'doctrees')
 
 ################################################################################
 # Distutils Command class for installing nipype to a temporary location.
+
+
 class TempInstall(Command):
     temp_install_dir = os.path.join('build', 'install')
 
@@ -166,6 +168,8 @@ else:
 
 ################################################################################
 # Distutils Command class to clean
+
+
 class Clean(clean):
 
     def run(self):

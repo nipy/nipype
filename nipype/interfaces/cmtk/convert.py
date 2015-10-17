@@ -53,8 +53,10 @@ class CFFConverterInputSpec(BaseInterfaceInputSpec):
 
     out_file = File('connectome.cff', usedefault=True, desc='Output connectome file')
 
+
 class CFFConverterOutputSpec(TraitedSpec):
     connectome_file = File(exists=True, desc='Output connectome file')
+
 
 class CFFConverter(BaseInterface):
     """
@@ -202,12 +204,15 @@ class CFFConverter(BaseInterface):
         outputs['connectome_file'] = op.abspath(name + ext)
         return outputs
 
+
 class MergeCNetworksInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='List of CFF files to extract networks from')
     out_file = File('merged_network_connectome.cff', usedefault=True, desc='Output CFF file with all the networks added')
 
+
 class MergeCNetworksOutputSpec(TraitedSpec):
     connectome_file = File(exists=True, desc='Output CFF file with all the networks added')
+
 
 class MergeCNetworks(BaseInterface):
     """ Merges networks from multiple CFF files into one new CFF file.

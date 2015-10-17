@@ -90,6 +90,7 @@ extract_ref = pe.Node(interface=fsl.ExtractROI(t_size=1),
 Define a function to pick the first file from a list of files
 """
 
+
 def pickfirst(files):
     if isinstance(files, list):
         return files[0]
@@ -101,6 +102,7 @@ preproc.connect(img2float, ('out_file', pickfirst), extract_ref, 'in_file')
 """
 Define a function to return the 1 based index of the middle volume
 """
+
 
 def getmiddlevolume(func):
     from nibabel import load
@@ -188,6 +190,7 @@ preproc.connect(maskfunc, ('out_file', pickfirst), threshold, 'in_file')
 Define a function to get 10% of the intensity
 """
 
+
 def getthreshop(thresh):
     return '-thr %.10f -Tmin -bin' %(0.1*thresh[0][1])
 preproc.connect(getthresh, ('out_stat', getthreshop), threshold, 'op_string')
@@ -255,8 +258,10 @@ smooth = pe.MapNode(interface=fsl.SUSAN(),
 Define a function to get the brightness threshold for SUSAN
 """
 
+
 def getbtthresh(medianvals):
     return [0.75*val for val in medianvals]
+
 
 def getusans(x):
     return [[tuple([val[0], 0.75*val[1]])] for val in x]
@@ -288,6 +293,7 @@ preproc.connect(maskfunc3, 'out_file', intnorm, 'in_file')
 """
 Define a function to get the scaling factor for intensity normalization
 """
+
 
 def getinormscale(medianvals):
     return ['-mul %.10f' % (10000. / val) for val in medianvals]
@@ -462,6 +468,7 @@ Set up first-level workflow
 
 """
 
+
 def sort_copes(files):
     numelements = len(files[0])
     outfiles = []
@@ -470,6 +477,7 @@ def sort_copes(files):
         for j, elements in enumerate(files):
             outfiles[i].append(elements[i])
     return outfiles
+
 
 def num_copes(files):
     return len(files)
@@ -568,6 +576,7 @@ to generate an SPM design matrix. In this tutorial, the same paradigm was used
 for every participant. Other examples of this function are available in the
 `doc/examples` folder. Note: Python knowledge required here.
 """
+
 
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch

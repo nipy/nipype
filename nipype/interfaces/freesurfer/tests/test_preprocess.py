@@ -9,11 +9,13 @@ from nipype.testing import (assert_equal, assert_false, assert_true,
                             assert_raises, skipif)
 import nipype.interfaces.freesurfer as freesurfer
 
+
 def no_freesurfer():
     if freesurfer.Info().version is None:
         return True
     else:
         return False
+
 
 def create_files_in_directory():
     outdir = os.path.realpath(mkdtemp())
@@ -29,10 +31,12 @@ def create_files_in_directory():
                  os.path.join(outdir, f))
     return filelist, outdir, cwd
 
+
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
         rmtree(outdir)
     os.chdir(old_wd)
+
 
 @skipif(no_freesurfer)
 def test_robustregister():
@@ -61,6 +65,7 @@ def test_robustregister():
                                        % (os.path.join(outdir, filelist[1][:-4]), filelist[0], filelist[1]))
     clean_directory(outdir, cwd)
 
+
 @skipif(no_freesurfer)
 def test_fitmsparams():
     filelist, outdir, cwd = create_files_in_directory()
@@ -84,6 +89,7 @@ def test_fitmsparams():
                                        % (1.500, 20.0, filelist[0], 3.500, 30.0, filelist[1], outdir))
 
     clean_directory(outdir, cwd)
+
 
 @skipif(no_freesurfer)
 def test_synthesizeflash():

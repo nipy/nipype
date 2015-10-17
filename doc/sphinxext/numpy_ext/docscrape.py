@@ -411,9 +411,11 @@ def indent(str, indent=4):
     lines = str.split('\n')
     return '\n'.join(indent_str + l for l in lines)
 
+
 def dedent_lines(lines):
     """Deindent a list of lines maximally"""
     return textwrap.dedent("\n".join(lines)).split("\n")
+
 
 def header(text, style='-'):
     return text + '\n' + style*len(text) + '\n'

@@ -14,6 +14,7 @@ from nipype.testing import (assert_equal, assert_not_equal,
 import nipype.interfaces.fsl.epi as fsl
 from nipype.interfaces.fsl import no_fsl
 
+
 def create_files_in_directory():
     outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
@@ -27,6 +28,7 @@ def create_files_in_directory():
         nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
                 os.path.join(outdir, f))
     return filelist, outdir, cwd
+
 
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):

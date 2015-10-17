@@ -956,6 +956,7 @@ def create_workflow(files,
 Creates the full workflow including getting information from dicom files
 """
 
+
 def create_resting_workflow(args, name=None):
     TR = args.TR
     slice_times = args.slice_times

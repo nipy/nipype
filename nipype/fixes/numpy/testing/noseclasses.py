@@ -25,6 +25,8 @@ import inspect
 # -----------------------------------------------------------------------------
 # Modified version of the one in the stdlib, that fixes a python bug (doctests
 # not found in extension modules, http://bugs.python.org/issue3158)
+
+
 class NumpyDocTestFinder(doctest.DocTestFinder):
 
     def _from_module(self, module, object):
@@ -157,6 +159,7 @@ class NumpyDocTestCase(npd.DocTestCase):
 
 
 print_state = numpy.get_printoptions()
+
 
 class NumpyDoctest(npd.Doctest):
     name = 'numpydoctest'   # call nosetests with --with-numpydoctest

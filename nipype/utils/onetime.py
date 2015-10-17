@@ -19,6 +19,7 @@ Hettinger. http://users.rcn.com/python/download/Descriptor.htm
 
 from builtins import object
 
+
 class OneTimeProperty(object):
     """A descriptor to make special properties that become normal attributes.
     """

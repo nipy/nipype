@@ -471,6 +471,7 @@ def test_tbss_skeleton():
     # Looks good; clean up
     clean_directory(newdir, olddir)
 
+
 @skipif(no_fsl)
 def test_distancemap():
     mapper = fsl.DistanceMap()

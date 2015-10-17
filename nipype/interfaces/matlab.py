@@ -27,6 +27,7 @@ def get_matlab_command():
 
 no_matlab = get_matlab_command() is None
 
+
 class MatlabInputSpec(CommandLineInputSpec):
     """ Basic expected inputs to Matlab interface """
 
@@ -61,6 +62,7 @@ class MatlabInputSpec(CommandLineInputSpec):
                               "fprintf(2,'%s\\n',ME.message);",
                               "if length(ME.stack) ~= 0, fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);, end;",
                               "end;"], desc='script added after code', usedefault=True)
+
 
 class MatlabCommand(CommandLine):
     """Interface that runs matlab code

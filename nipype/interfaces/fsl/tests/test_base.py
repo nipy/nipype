@@ -17,6 +17,7 @@ def test_fslversion():
         ver = ver.split('.')
         yield assert_true, ver[0] in ['4', '5']
 
+
 @skipif(no_fsl)  # skip if fsl not installed)
 def test_fsloutputtype():
     types = list(fsl.Info.ftypes.keys())
@@ -31,6 +32,7 @@ def test_outputtype_to_ext():
 
     yield assert_raises, KeyError, fsl.Info.output_type_to_ext, 'JUNK'
 
+
 @skipif(no_fsl)  # skip if fsl not installed)
 def test_FSLCommand():
     # Most methods in FSLCommand are tested in the subclasses.  Only
@@ -38,6 +40,7 @@ def test_FSLCommand():
     cmd = fsl.FSLCommand(command='ls')
     res = cmd.run()
     yield assert_equal, type(res), InterfaceResult
+
 
 @skipif(no_fsl)  # skip if fsl not installed)
 def test_FSLCommand2():
@@ -55,6 +58,7 @@ def test_FSLCommand2():
         if out_type != fsl.Info.output_type():
             #  Setting class outputtype should not effect existing instances
             yield assert_not_equal, cmdinst.inputs.output_type, out_type
+
 
 @skipif(no_fsl)  # skip if fsl not installed)
 def test_gen_fname():

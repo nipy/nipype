@@ -6,6 +6,7 @@ import sys
 from nipype.interfaces.base import Interface, InputMultiPath, traits
 from nipype.utils.misc import str2bool
 
+
 def listClasses(module=None):
     if module:
         __import__(module)
@@ -14,6 +15,7 @@ def listClasses(module=None):
         for k, v in sorted(list(pkg.__dict__.items())):
             if inspect.isclass(v) and issubclass(v, Interface):
                 print("\t%s" %k)
+
 
 def add_options(parser=None, module=None, function=None):
     interface = None
@@ -39,6 +41,7 @@ def add_options(parser=None, module=None, function=None):
                 parser.add_argument("--%s" %name, dest=name,
                                     help=desc, **args)
     return parser, interface
+
 
 def run_instance(interface, options):
     if interface:

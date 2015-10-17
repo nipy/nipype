@@ -12,6 +12,7 @@ from ...smri.freesurfer.utils import create_getmask_flow
 
 logger = pe.logger
 
+
 def create_spm_preproc(name='preproc'):
     """Create an spm preprocessing workflow with freesurfer registration and
     artifact detection.
@@ -220,6 +221,7 @@ def create_vbm_preproc(name='vbmpreproc'):
                       ])
 
     return workflow
+
 
 def create_DARTEL_template(name='dartel_template'):
     """Create a vbm workflow that generates DARTEL-based template

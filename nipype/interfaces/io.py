@@ -1873,6 +1873,7 @@ class MySQLSink(IOBase):
         c.close()
         return None
 
+
 class SSHDataGrabberInputSpec(DataGrabberInputSpec):
     hostname = traits.Str(mandatory=True, desc='Server hostname.')
     username = traits.Str(desc='Server username.')

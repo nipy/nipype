@@ -31,8 +31,10 @@ class ImageStatsInputSpec(CommandLineInputSpec):
                        desc=('Filename root prepended onto the names of the output '
                              ' files. The extension will be determined from the input.'))
 
+
 class ImageStatsOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Path of the file computed with the statistic chosen')
+
 
 class ImageStats(CommandLine):
     """

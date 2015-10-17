@@ -20,6 +20,7 @@ import tempfile
 
 from nipype.interfaces.base import Interface
 
+
 def main(argv):
 
     # Parses arguments
@@ -47,6 +48,7 @@ def main(argv):
     f = open(parsed.output, 'w')
     f.write(json_string)
     f.close()
+
 
 def generate_boutiques_descriptor(module, interface_name, ignored_template_inputs, docker_image, docker_index, verbose, ignore_template_numbers):
     '''
@@ -108,6 +110,7 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
 
     return simplejson.dumps(tool_desc, indent=4, separators=(',', ': '))
 
+
 def get_boutiques_input(inputs, interface, input_name, spec, ignored_template_inputs, verbose, ignore_template_numbers):
     """
     Returns a dictionary containing the Boutiques input corresponding to a Nipype intput.
@@ -162,6 +165,7 @@ def get_boutiques_input(inputs, interface, input_name, spec, ignored_template_in
 
     return input
 
+
 def get_boutiques_output(name, interface, tool_inputs, verbose=False):
     """
     Returns a dictionary containing the Boutiques output corresponding to a Nipype output.
@@ -201,6 +205,7 @@ def get_boutiques_output(name, interface, tool_inputs, verbose=False):
         output['path-template'] = os.path.basename(output_value)
     return output
 
+
 def get_type_from_spec_info(spec_info):
     '''
     Returns an input type from the spec info. There must be a better
@@ -214,6 +219,7 @@ def get_type_from_spec_info(spec_info):
         return "Boolean"
     return "String"
 
+
 def is_list(spec_info):
     '''
     Returns True if the spec info looks like it describes a list
@@ -223,6 +229,7 @@ def is_list(spec_info):
     if "a list" in spec_info:
         return True
     return False
+
 
 def get_unique_value(type, id):
     '''
@@ -236,6 +243,7 @@ def get_unique_value(type, id):
       "String": id
     }[type]
 
+
 def create_tempfile():
     '''
     Creates a temp file and returns its name.
@@ -244,6 +252,7 @@ def create_tempfile():
     fileTemp.write("hello")
     fileTemp.close()
     return fileTemp.name
+
 
 def must_generate_value(name, type, ignored_template_inputs, spec_info, spec, ignore_template_numbers):
     '''

@@ -37,6 +37,7 @@ def extract_noise_components(realigned_file, noise_mask_file, num_components):
     np.savetxt(components_file, components, fmt="%.10f")
     return components_file
 
+
 def select_volume(filename, which):
     """Return the middle index of a file
     """
@@ -49,6 +50,7 @@ def select_volume(filename, which):
     else:
         raise Exception('unknown value for volume selection : %s' %which)
     return idx
+
 
 def create_realign_flow(name='realign'):
     """Realign a time series to the middle volume using spline interpolation
@@ -90,6 +92,7 @@ def create_realign_flow(name='realign'):
     realignflow.connect(warper, 'out_file', joiner, 'in_files')
     realignflow.connect(joiner, 'merged_file', outputnode, 'realigned_file')
     return realignflow
+
 
 def create_resting_preproc(name='restpreproc'):
     """Create a "resting" time series preprocessing workflow

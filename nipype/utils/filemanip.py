@@ -404,6 +404,7 @@ def load_json(filename):
         data = simplejson.load(fp)
     return data
 
+
 def loadcrash(infile, *args):
     if '.pkl' in infile:
         return loadpkl(infile)
@@ -419,6 +420,7 @@ def loadcrash(infile, *args):
         return out
     else:
         raise ValueError('Only pickled crashfiles are supported')
+
 
 def loadpkl(infile):
     """Load a zipped or plain cPickled file

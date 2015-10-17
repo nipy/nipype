@@ -100,6 +100,7 @@ class AFNICommandInputSpec(CommandLineInputSpec):
                     argstr='-prefix %s',
                     name_source=["in_file"])
 
+
 class AFNICommandOutputSpec(TraitedSpec):
     out_file = File(desc='output file',
                     exists=True)
