@@ -259,7 +259,7 @@ def create_eddy_correct_pipeline(name='eddy_correct'):
                      ,(pick_ref, coregistration, [('out', 'reference')])
                      ,(coregistration, merge, [('out_file', 'in_files')])
                      ,(merge, outputnode, [('merged_file', 'eddy_corrected')])
-                    ])
+                     ])
     return pipeline
 
 
@@ -329,8 +329,8 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
                         'epi_echospacing',
                         'vsm_sigma',
                         'encoding_direction'
-                        ]), name='inputnode'
-                       )
+                                ]), name='inputnode'
+                        )
 
     pipeline = pe.Workflow(name=name)
 
@@ -390,7 +390,7 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
                     ,(dwi_applyxfm,  dwi_merge, [('unwarped_file', 'in_files')])
                     ,(dwi_merge,    outputnode, [('merged_file', 'epi_corrected')])
                     ,(vsm,          outputnode, [('shift_out_file','out_vsm') ])
-                    ])
+                     ])
 
 
     return pipeline
@@ -445,16 +445,16 @@ def topup_correction( name='topup_correction' ):
                                 'encoding_direction',
                                 'readout_times',
                                 'ref_num'
-                        ]), name='inputnode'
-                       )
+                                ]), name='inputnode'
+                        )
 
     outputnode = pe.Node( niu.IdentityInterface(
                           fields=['out_fieldcoef',
                                   'out_movpar',
                                   'out_enc_file',
                                   'epi_corrected'
-                          ]), name='outputnode'
-                        )
+                                  ]), name='outputnode'
+                          )
 
     b0_dir = pe.Node( fsl.ExtractROI( t_size=1 ), name='b0_1' )
     b0_rev = pe.Node( fsl.ExtractROI( t_size=1 ), name='b0_2' )
@@ -551,7 +551,7 @@ def create_epidewarp_pipeline(name='epidewarp', fieldmap_registration=False):
                                                                    'vsm_sigma',
                                                                    'ref_num',
                                                                    'unwarp_direction'
-                                                                   ]), name='inputnode')
+                                                      ]), name='inputnode')
 
     pipeline = pe.Workflow(name=name)
 
@@ -621,7 +621,7 @@ def create_epidewarp_pipeline(name='epidewarp', fieldmap_registration=False):
                     ,(dwi_split,  dwi_applyxfm, [('out_files', 'in_file')])
                     ,(dwi_applyxfm,  dwi_merge, [('unwarped_file', 'in_files')])
                     ,(dwi_merge,    outputnode, [('merged_file', 'epi_corrected')])
-                    ])
+                     ])
 
     if fieldmap_registration:
         """ Register magfw to example epi. There are some parameters here that may need to be tweaked. Should probably strip the mag

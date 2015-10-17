@@ -184,7 +184,7 @@ tractography.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")
 tractography.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
                                            (dwi2tensor, tensor2adc,[['tensor','in_file']]),
                                            (dwi2tensor, tensor2fa,[['tensor','in_file']]),
-                                          ])
+                      ])
 tractography.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
 
 """
@@ -253,7 +253,7 @@ dwiproc.connect([
                     (datasource,tractography,[('dwi','inputnode.dwi'),
                                                ('bvals','inputnode.bvals'),
                                                ('bvecs','inputnode.bvecs')
-                                               ])
+                                              ])
                 ])
 
 if __name__ == '__main__':

@@ -372,7 +372,7 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
     tbss4.connect([
             (projectfa, outputnode, [('projected_data', 'projectedfa_file'),
                                     ('skeleton_file', 'skeleton_file')
-                                    ]),
+                                     ]),
             (distancemap, outputnode, [('distance_map', 'distance_map')]),
             (skeletonmask, outputnode, [('out_file', 'skeleton_mask')])
             ])
@@ -463,18 +463,18 @@ def create_tbss_all(name='tbss_all', estimate_skeleton=True):
                                     ('outputnode.mergefa_file', 'mergefa_file'),
                                     ('outputnode.groupmask', 'groupmask'),
                                     ('outputnode.skeleton_file', 'skeleton_file3'),
-                                    ]),
+                                     ]),
                 (tbss4, outputnode, [('outputnode.projectedfa_file', 'projectedfa_file'),
                                     ('outputnode.skeleton_file', 'skeleton_file4'),
                                     ('outputnode.skeleton_mask', 'skeleton_mask'),
                                     ('outputnode.distance_map', 'distance_map'),
-                                    ]),
+                                     ]),
 
                 (tbss1, outputall_node, [('outputnode.fa_list', 'fa_list1'),
                                     ('outputnode.mask_list', 'mask_list1'),
                                     ]),
                 (tbss2, outputall_node, [('outputnode.field_list', 'field_list2'),
-                                        ]),
+                                         ]),
                 (tbss3, outputall_node, [
                                     ('outputnode.meanfa_file', 'meanfa_file3'),
                                     ('outputnode.mergefa_file', 'mergefa_file3'),
@@ -550,7 +550,7 @@ def create_tbss_non_FA(name='tbss_non_FA'):
     projectfa = pe.Node(fsl.TractSkeleton(project_data=True,
                                         #projected_data = 'test.nii.gz',
                                         use_cingulum_mask=True
-                                      ),
+                                          ),
                         name="projectfa")
 
     tbss_non_FA = pe.Workflow(name=name)
@@ -578,6 +578,6 @@ def create_tbss_non_FA(name='tbss_non_FA'):
                          name='outputnode')
     tbss_non_FA.connect([
             (projectfa, outputnode, [('projected_data', 'projected_nonFA_file'),
-                                    ]),
+                                     ]),
             ])
     return tbss_non_FA

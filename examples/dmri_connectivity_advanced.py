@@ -425,7 +425,7 @@ mapping.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
 mapping.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
                        (dwi2tensor, tensor2adc,[['tensor','in_file']]),
                        (dwi2tensor, tensor2fa,[['tensor','in_file']]),
-                      ])
+                 ])
 mapping.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
 mapping.connect([(tensor2fa, MRconvert_fa,[("FA","in_file")])])
 
@@ -582,7 +582,7 @@ connectivity.connect([
                     (datasource,mapping,[('dwi','inputnode.dwi'),
                                                ('bvals','inputnode.bvals'),
                                                ('bvecs','inputnode.bvecs')
-                                               ]),
+                                         ]),
         (infosource,mapping,[('subject_id','inputnode.subject_id')])
                 ])
 

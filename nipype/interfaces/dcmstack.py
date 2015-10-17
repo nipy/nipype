@@ -209,7 +209,7 @@ class LookupMetaInputSpec(TraitedSpec):
                               desc=("List of meta data keys to lookup, or a "
                               "dict where keys specify the meta data keys to "
                               "lookup and the values specify the output names")
-                             )
+                              )
 
 
 class LookupMeta(BaseInterface):
@@ -299,12 +299,12 @@ class CopyMeta(BaseInterface):
             classes = [cls
                        for cls in classes
                        if cls in self.inputs.include_classes
-                      ]
+                       ]
         if self.inputs.exclude_classes:
             classes = [cls
                        for cls in classes
                        if not cls in self.inputs.exclude_classes
-                      ]
+                       ]
 
         for cls in classes:
             src_dict = src.meta_ext.get_class_dict(cls)
@@ -359,10 +359,10 @@ class MergeNifti(NiftiGeneratorBase):
     def _run_interface(self, runtime):
         niis = [nb.load(fn)
                 for fn in self.inputs.in_files
-               ]
+                ]
         nws = [NiftiWrapper(nii, make_empty=True)
                for nii in niis
-              ]
+               ]
         if self.inputs.sort_order:
             sort_order = self.inputs.sort_order
             if isinstance(sort_order, string_types):

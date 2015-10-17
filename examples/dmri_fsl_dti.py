@@ -229,7 +229,7 @@ tractography.connect([(bedpostx,probtrackx,[('outputnode.thsamples','thsamples')
                                             ]),
                       (probtrackx,findthebiggest,[('targets','in_files')]),
                       (flirt, probtrackx, [('out_matrix_file','xfm')])
-                     ])
+                      ])
 
 
 """

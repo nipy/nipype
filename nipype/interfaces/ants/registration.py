@@ -309,7 +309,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
           'stages linear transform; this allows multiple linear stages to be run where '
           'each stage directly updates the estimated linear transform from the previous '
           'stage. (e.g. Translation -> Rigid -> Affine). '
-          ))
+              ))
     # NOTE: Even though only 0=False and 1=True are allowed, ants uses integer
     # values instead of booleans
     float = traits.Bool(

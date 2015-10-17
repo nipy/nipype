@@ -997,12 +997,12 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                   ('varcopes', 'varcopes'),
                                   ('zstats', 'zstats'),
                                   ('tstats', 'tstats')])
-                                 ])
+                ])
     wf.connect([(modelfit.get_node('modelgen'), datasink,
                                  [('design_cov', 'qa.model'),
                                   ('design_image', 'qa.model.@matrix_image'),
                                   ('design_file', 'qa.model.@matrix'),
-                                 ])])
+                                  ])])
     wf.connect([(preproc, datasink, [('outputspec.motion_parameters',
                                       'qa.motion'),
                                      ('outputspec.motion_plots',

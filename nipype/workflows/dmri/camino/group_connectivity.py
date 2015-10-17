@@ -94,6 +94,6 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
                                               ("outputnode.networks", "@l1output.networks"),
                                               ("outputnode.mean_fiber_length", "@l1output.mean_fiber_length"),
                                               ("outputnode.fiber_length_std", "@l1output.fiber_length_std"),
-                                              ])])
+                                               ])])
     l1pipeline.connect([(group_infosource, datasink,[('group_id','@group_id')])])
     return l1pipeline

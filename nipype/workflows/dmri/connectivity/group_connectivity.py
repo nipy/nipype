@@ -176,8 +176,7 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
     group_infosource.inputs.group_id = group_id
 
     l2infosource = pe.Node(interface=util.IdentityInterface(fields=['group_id',
-    'merged',
-    ]), name='l2infosource')
+        'merged']), name='l2infosource')
 
     l2source = pe.Node(
         nio.DataGrabber(

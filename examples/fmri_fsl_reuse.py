@@ -79,7 +79,7 @@ level1_workflow.connect([(preproc, art, [('outputspec.motion_parameters',
                          (art, modelspec, [('outlier_files', 'outlier_files')]),
                          (modelspec, modelfit, [('session_info', 'inputspec.session_info')]),
                          (preproc, modelfit, [('outputspec.highpassed_files', 'inputspec.functional_data')])
-                        ])
+                         ])
 
 
 """
@@ -240,7 +240,7 @@ level1_workflow.connect([(infosource, datasource, [('subject_id', 'subject_id')]
                          (infosource, modelspec, [(('subject_id', subjectinfo),
                                                    'subject_info')]),
                          (datasource, preproc, [('func', 'inputspec.func')]),
-                    ])
+                         ])
 
 """
 Execute the pipeline

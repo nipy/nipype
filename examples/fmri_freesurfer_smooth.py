@@ -362,7 +362,7 @@ l1pipeline.connect([(preproc, volnorm, [('fssource.orig','convert2nii.in_file'),
                     (volanalysis, volnorm, [('contrastestimate.con_images',
                                              'convertimg2nii.in_file'),
                                             ])
-                  ])
+                    ])
 
 
 """

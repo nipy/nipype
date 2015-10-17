@@ -375,8 +375,8 @@ class DistributedPluginBase(PluginBase):
                                  (self.procs[jobid].overwrite == False or
                                    (self.procs[jobid].overwrite == None and
                                     not self.procs[jobid]._interface.always_run)
-                                 )
-                               ):
+                                  )
+                                ):
                                 continue_with_submission = False
                                 self._task_finished_cb(jobid)
                                 self._remove_node_dirs()

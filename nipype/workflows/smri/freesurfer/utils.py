@@ -137,7 +137,7 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
     outputnode = pe.Node(niu.IdentityInterface(fields=["mask_file",
                                                        "reg_file",
                                                        "reg_cost"
-    ]),
+                                                       ]),
         name="outputspec")
     getmask.connect([
         (register, outputnode, [("out_reg_file", "reg_file")]),
@@ -245,7 +245,7 @@ def create_get_stats_flow(name='getstats', withreg=False):
     """
 
     outputnode = pe.Node(niu.IdentityInterface(fields=["stats_file"
-                                                        ]),
+                                                       ]),
                          name="outputspec")
     getstats.connect([
             (statnode, outputnode, [("summary_file", "stats_file")]),

@@ -514,13 +514,13 @@ class ArtifactDetect(BaseInterface):
                        'min': np.min(mc_in, axis=0).tolist(),
                        'max': np.max(mc_in, axis=0).tolist(),
                        'std': np.std(mc_in, axis=0).tolist()},
-                      ]},
+                     ]},
          {'intensity': [{'using differences': self.inputs.use_differences[1]},
                          {'mean': np.mean(gz, axis=0).tolist(),
                           'min': np.min(gz, axis=0).tolist(),
                           'max': np.max(gz, axis=0).tolist(),
                           'std': np.std(gz, axis=0).tolist()},
-                         ]},
+                        ]},
                  ]
         if self.inputs.use_norm:
             stats.insert(3, {'motion_norm':

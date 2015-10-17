@@ -109,7 +109,7 @@ def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilisti
     workflow.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
                            (dwi2tensor, tensor2adc,[['tensor','in_file']]),
                            (dwi2tensor, tensor2fa,[['tensor','in_file']]),
-                          ])
+                      ])
 
     workflow.connect([(inputnode, MRconvert,[("dwi","in_file")])])
     workflow.connect([(MRconvert, threshold_b0,[("converted","in_file")])])

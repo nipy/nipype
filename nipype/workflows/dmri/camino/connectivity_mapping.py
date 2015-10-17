@@ -59,7 +59,7 @@ def create_connectivity_pipeline(name="connectivity"):
                                                                   "bvals",
                                                                   "subjects_dir",
                                                                   "resolution_network_file",
-                                                                  ]),
+                                                                        ]),
                          name="inputnode_within")
 
     FreeSurferSource = pe.Node(interface=nio.FreeSurferSource(), name='fssource')
@@ -279,7 +279,7 @@ def create_connectivity_pipeline(name="connectivity"):
                                                     ("bvals", "bval_file")]),
                            (image2voxel, dtifit,[['voxel_order','in_file']]),
                            (fsl2scheme, dtifit,[['scheme','scheme_file']])
-                          ])
+                     ])
 
     """
     Nifti conversions for the subject's stripped brain image from Freesurfer:
@@ -372,7 +372,7 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(track, camino2trackvis, [('tracked','in_file')]),
                            (track, vtkstreamlines,[['tracked','in_file']]),
                            (camino2trackvis, trk2camino,[['trackvis','in_file']])
-                          ])
+                     ])
     mapping.connect([(inputnode_within, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dims'),
         (('dwi', get_data_dims), 'data_dims')])])
 
@@ -475,7 +475,7 @@ def create_connectivity_pipeline(name="connectivity"):
                                               ("subject_id", "inputnode_within.subject_id"),
                                               ("subjects_dir", "inputnode_within.subjects_dir"),
                                               ("resolution_network_file", "inputnode_within.resolution_network_file")])
-                                              ])
+                          ])
 
     connectivity.connect([(mapping, outputnode, [("camino2trackvis.trackvis", "tracts"),
         ("CFFConverter.connectome_file", "connectome"),

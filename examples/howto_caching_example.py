@@ -36,7 +36,7 @@ threshold = [mem.cache(fsl.Threshold)(in_file=f, thresh=i)
 # Merge all these files along the time dimension
 out_merge = mem.cache(fsl.Merge)(dimension="t",
                             in_files=[t.outputs.out_file for t in threshold],
-                        )
+                                 )
 # And finally compute the mean
 out_mean = mem.cache(fsl.MeanImage)(in_file=out_merge.outputs.merged_file)
 

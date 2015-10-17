@@ -29,7 +29,7 @@ class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
             desc=('Possible colormaps: grey, red, green, '
                 'blue, copper, jet, hsv, spring, summer, '
                 'autumn, winter, hot, cool, overunder, custom '
-                ), mandatory = True, position = 4)
+                  ), mandatory = True, position = 4)
     custom_color_map_file=traits.Str('none', argstr='%s', usedefault=True,
             desc = 'custom color map file', position = 5)
     minimum_input = traits.Int(argstr='%d', desc='minimum input',
@@ -110,14 +110,14 @@ class CreateTiledMosaicInputSpec(ANTSCommandInputSpec):
           'value (default = 0). If a mask is specified, the user can use '
           'the mask to define the region, by using the keyword "mask"'
           ' plus an offset, e.g. "-p mask+3".'
-        )
+                             )
     slices = traits.Str(argstr='-s %s',
         desc = ('Number of slices to increment Slice1xSlice2xSlice3'
         '[numberOfSlicesToIncrement,<minSlice=0>,<maxSlice=lastSlice>]'))
     flip_slice = traits.Str(argstr = '-f %s',
         desc = ('flipXxflipY'))
     permute_axes = traits.Bool(argstr = '-g', desc = 'doPermute'
-        )
+                               )
 
 
 class CreateTiledMosaicOutputSpec(TraitedSpec):

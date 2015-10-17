@@ -424,11 +424,11 @@ def main(**extra_args):
                            pjoin('external', 'd3.js'),
                            pjoin('interfaces', 'script_templates', '*'),
                            pjoin('interfaces', 'tests', 'realign_json.json')
-                          ]},
+                           ]},
           scripts      = glob('bin/*'),
           cmdclass = cmdclass,
           **extra_args
-         )
+          )
 
 if __name__ == "__main__":
     main(**extra_setuptools_args)

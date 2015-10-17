@@ -303,7 +303,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                         'inputspec.varcopes'),
                                        (('outputspec.copes', num_copes),
                                         'l2model.num_copes'),
-                                       ])
+                                      ])
                 ])
 
     wf.connect(preproc, 'outputspec.mean', registration, 'inputspec.mean_image')
@@ -398,7 +398,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                   ('varcopes', 'varcopes'),
                                   ('zstats', 'zstats'),
                                   ('tstats', 'tstats')])
-                                 ])
+                ])
     wf.connect([(splitfunc, datasink,
                  [('copes', 'copes.mni'),
                   ('varcopes', 'varcopes.mni'),

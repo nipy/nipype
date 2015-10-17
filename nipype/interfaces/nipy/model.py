@@ -144,7 +144,7 @@ class FitGLM(BaseInterface):
                hrf_model=self.inputs.hrf_model,
                add_regs=reg_vals,
                add_reg_names=reg_names
-               )
+                                                       )
         if self.inputs.normalize_design_matrix:
             for i in range(len(self._reg_names)-1):
                 design_matrix[:,i] = ((design_matrix[:,i] -

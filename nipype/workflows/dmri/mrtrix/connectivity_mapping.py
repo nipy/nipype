@@ -363,7 +363,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     mapping.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
                            (dwi2tensor, tensor2adc,[['tensor','in_file']]),
                            (dwi2tensor, tensor2fa,[['tensor','in_file']]),
-                          ])
+                     ])
     mapping.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
     mapping.connect([(tensor2fa, MRconvert_fa,[("FA","in_file")])])
 
@@ -549,7 +549,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
                                               ("bvecs", "inputnode_within.bvecs"),
                                               ("subject_id", "inputnode_within.subject_id"),
                                               ("subjects_dir", "inputnode_within.subjects_dir")])
-                                              ])
+                          ])
 
     connectivity.connect([(mapping, outputnode, [("tck2trk.out_file", "tracts"),
         ("CFFConverter.connectome_file", "connectome"),

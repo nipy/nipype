@@ -230,7 +230,7 @@ Tensor fitting
 
 tractography.connect([(image2voxel, dtifit,[['voxel_order','in_file']]),
                       (fsl2scheme, dtifit,[['scheme','scheme_file']])
-                     ])
+                      ])
 
 """
 Workflow for applying DT streamline tractogpahy
@@ -302,8 +302,8 @@ workflow.connect([(infosource,datasource,[('subject_id', 'subject_id')]),
                   (datasource,tractography,[('dwi','inputnode.dwi'),
                                             ('bvals','inputnode.bvals'),
                                             ('bvecs','inputnode.bvecs')
-                                           ])
-                 ])
+                                            ])
+                  ])
 """
 The following functions run the whole workflow and produce a .dot and .png graph of the processing pipeline.
 """

@@ -903,7 +903,7 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
                                                                   'highpassed_files',
                                                                   'reg_file',
                                                                   'reg_cost'
-                                                                  ]),
+                                                                      ]),
                          name='outputspec')
     else:
         inputnode = pe.Node(interface=util.IdentityInterface(fields=['func',
@@ -920,7 +920,7 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
                                                                   'smoothed_files',
                                                                   'reg_file',
                                                                   'reg_cost'
-                                                                  ]),
+                                                                      ]),
                          name='outputspec')
 
     """
@@ -1137,7 +1137,7 @@ def create_reg_workflow(name='registration'):
                                                               'anat2target_transform',
                                                               'transformed_files',
                                                               'transformed_mean',
-                                                              ]),
+                                                                  ]),
                      name='outputspec')
 
     """

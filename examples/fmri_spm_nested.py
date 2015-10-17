@@ -213,7 +213,7 @@ l1pipeline.connect([(preproc, l1analysis, [('realign.realignment_parameters',
                                             'level1design.mask_image'),
                                            ('normalize.normalized_source',
                                             'overlaystats.background_image')]),
-                  ])
+                    ])
 
 
 """

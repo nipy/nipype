@@ -198,7 +198,7 @@ dwiproc.connect([
                     (compute_ODF,tractography,[('bet.mask_file','odf_tracker.mask1_file'),
                                                  ('odf_recon.ODF','odf_tracker.ODF'),
                                                  ('odf_recon.max','odf_tracker.max')
-                                                 ])
+                                               ])
                 ])
 
 dwiproc.inputs.compute_ODF.hardi_mat.oblique_correction = True

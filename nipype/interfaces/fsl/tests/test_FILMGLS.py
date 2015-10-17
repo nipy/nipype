@@ -21,7 +21,7 @@ def test_filmgls():
                     threshold = dict(argstr='%f',),
                     tukey_window = dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'],argstr='-tukey %d',),
                     use_pava = dict(argstr='-pava',),
-                    )
+                     )
     input_map2 = dict(args = dict(argstr='%s',),
                      autocorr_estimate_only = dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'],argstr='--ac',),
                      autocorr_noestimate = dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'],argstr='--noest',),
