@@ -74,9 +74,9 @@ def test_maths_base(fsl_output_type=None):
 
     # Now test that we can set the various data types
     dtypes = ["float","char","int","short","double","input"]
-    int_cmdline =  "fslmaths -dt %s a.nii " + os.path.join(testdir, out_file)
-    out_cmdline =  "fslmaths a.nii " + os.path.join(testdir, out_file) + " -odt %s"
-    duo_cmdline =  "fslmaths -dt %s a.nii " + os.path.join(testdir, out_file) + " -odt %s"
+    int_cmdline = "fslmaths -dt %s a.nii " + os.path.join(testdir, out_file)
+    out_cmdline = "fslmaths a.nii " + os.path.join(testdir, out_file) + " -odt %s"
+    duo_cmdline = "fslmaths -dt %s a.nii " + os.path.join(testdir, out_file) + " -odt %s"
     for dtype in dtypes:
         foo = fsl.MathsCommand(in_file="a.nii", internal_datatype=dtype)
         yield assert_equal, foo.cmdline, int_cmdline%dtype
@@ -116,7 +116,7 @@ def test_changedt(fsl_output_type=None):
 
     # Now test that we can set the various data types
     dtypes = ["float","char","int","short","double","input"]
-    cmdline =  "fslmaths a.nii b.nii -odt %s"
+    cmdline = "fslmaths a.nii b.nii -odt %s"
     for dtype in dtypes:
         foo = fsl.MathsCommand(in_file="a.nii",out_file="b.nii",output_datatype=dtype)
         yield assert_equal, foo.cmdline, cmdline%dtype

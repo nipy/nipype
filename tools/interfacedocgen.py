@@ -326,7 +326,7 @@ class InterfaceHelpWriter(object):
             ad += '.. autofunction:: %s\n\n' % name
             """
 
-            (_,fname) =  tempfile.mkstemp(suffix=".dot")
+            (_,fname) = tempfile.mkstemp(suffix=".dot")
             workflow.write_graph(dotfilename=fname, graph2use='hierarchical')
 
             ad += self._write_graph_section(fname, 'Graph') + '\n'

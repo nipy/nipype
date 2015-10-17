@@ -29,7 +29,7 @@ def test_normalize_tpms():
 
     for i in range(3):
         mapname = example_data('tpm_%02d.nii.gz' % i)
-        filename =  os.path.join(tempdir, 'modtpm_%02d.nii.gz' % i)
+        filename = os.path.join(tempdir, 'modtpm_%02d.nii.gz' % i)
         out_files.append(os.path.join(tempdir, 'normtpm_%02d.nii.gz' % i))
 
         im = nb.load(mapname)

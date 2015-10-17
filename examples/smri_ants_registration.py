@@ -58,7 +58,7 @@ input_images=[
 """
 
 reg = Registration()
-reg.inputs.fixed_image =  input_images[0]
+reg.inputs.fixed_image = input_images[0]
 reg.inputs.moving_image = input_images[1]
 reg.inputs.output_transform_prefix = 'thisTransform'
 reg.inputs.output_warped_image = 'INTERNAL_WARPED.nii.gz'

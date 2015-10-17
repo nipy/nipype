@@ -185,7 +185,7 @@ class GroupAndStack(DcmStack):
         for key, stack in stacks.items():
             nw = NiftiWrapper(stack.to_nifti(embed_meta=True))
             const_meta = nw.meta_ext.get_class_dict(('global', 'const'))
-            out_path =  self._get_out_path(const_meta)
+            out_path = self._get_out_path(const_meta)
             if not self.inputs.embed_meta:
                 nw.remove_extension()
             nb.save(nw.nii_img, out_path)

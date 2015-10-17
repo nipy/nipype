@@ -189,17 +189,17 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     BeginANTS=pe.MapNode(interface=Registration(), name = 'BeginANTS', iterfield=['moving_image'])
     BeginANTS.inputs.dimension = 3
     BeginANTS.inputs.output_transform_prefix = str(iterationPhasePrefix)+'_tfm'
-    BeginANTS.inputs.transforms =               ["Affine",          "SyN"]
-    BeginANTS.inputs.transform_parameters =     [[0.9],             [0.25,3.0,0.0]]
-    BeginANTS.inputs.metric =                   ['Mattes',          'CC']
-    BeginANTS.inputs.metric_weight =            [1.0,               1.0]
+    BeginANTS.inputs.transforms = ["Affine",          "SyN"]
+    BeginANTS.inputs.transform_parameters = [[0.9],             [0.25,3.0,0.0]]
+    BeginANTS.inputs.metric = ['Mattes',          'CC']
+    BeginANTS.inputs.metric_weight = [1.0,               1.0]
     BeginANTS.inputs.radius_or_number_of_bins = [32,                5]
     BeginANTS.inputs.number_of_iterations = [[1000, 1000, 1000], [50, 35, 15]]
-    BeginANTS.inputs.use_histogram_matching =   [True,               True]
+    BeginANTS.inputs.use_histogram_matching = [True,               True]
     BeginANTS.inputs.use_estimate_learning_rate_once = [False,       False]
-    BeginANTS.inputs.shrink_factors =           [[3,2,1],            [3,2,1]]
-    BeginANTS.inputs.smoothing_sigmas =         [[3,2,0],            [3,2,0]]
-    BeginANTS.inputs.sigma_units =         ["vox"]*2
+    BeginANTS.inputs.shrink_factors = [[3,2,1],            [3,2,1]]
+    BeginANTS.inputs.smoothing_sigmas = [[3,2,0],            [3,2,0]]
+    BeginANTS.inputs.sigma_units = ["vox"]*2
 
     GetMovingImagesNode = pe.Node(interface=util.Function(function=GetMovingImages,
                                                           input_names=['ListOfImagesDictionaries','registrationImageTypes','interpolationMapping'],

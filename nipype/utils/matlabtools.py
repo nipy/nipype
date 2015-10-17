@@ -56,7 +56,7 @@ def mlab_tempfile(dir=None):
         f = tempfile.NamedTemporaryFile(suffix='.m',prefix='tmp_matlab_',
                                         dir=dir)
         # Check the file name for matlab compilance
-        fname =  os.path.splitext(os.path.basename(f.name))[0]
+        fname = os.path.splitext(os.path.basename(f.name))[0]
         if valid_name.match(fname):
             break
         # Close the temp file we just made if its name is not valid; the

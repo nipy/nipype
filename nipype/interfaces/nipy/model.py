@@ -137,7 +137,7 @@ class FitGLM(BaseInterface):
 
 
         if conditions:
-            paradigm =  BlockParadigm(con_id=conditions, onset=onsets, duration=duration)
+            paradigm = BlockParadigm(con_id=conditions, onset=onsets, duration=duration)
         else:
             paradigm = None
         design_matrix, self._reg_names = dm.dmtx_light(frametimes, paradigm, drift_model=drift_model, hfcut=hpf,
