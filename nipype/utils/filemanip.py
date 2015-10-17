@@ -400,7 +400,7 @@ def load_json(filename):
 
     """
 
-    with open (filename, 'r') as fp:
+    with open(filename, 'r') as fp:
         data = simplejson.load(fp)
     return data
 

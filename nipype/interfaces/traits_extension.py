@@ -33,7 +33,7 @@ class BaseFile (traits.BaseStr):
     # A description of the type of value this trait accepts:
     info_text = 'a file name'
 
-    def __init__ (self, value = '', filter = None, auto_set = False,
+    def __init__(self, value = '', filter = None, auto_set = False,
                    entries = 0, exists = False, **metadata):
         """ Creates a File trait.
 
@@ -65,7 +65,7 @@ class BaseFile (traits.BaseStr):
 
         super(BaseFile, self).__init__(value, **metadata)
 
-    def validate (self, object, name, value):
+    def validate(self, object, name, value):
         """ Validates that a specified value is valid for this trait.
 
             Note: The 'fast validator' version performs this check in C.
@@ -84,7 +84,7 @@ class File (BaseFile):
         fast validator.
     """
 
-    def __init__ (self, value = '', filter = None, auto_set = False,
+    def __init__(self, value = '', filter = None, auto_set = False,
                    entries = 0, exists = False, **metadata):
         """ Creates a File trait.
 
@@ -124,7 +124,7 @@ class BaseDirectory (traits.BaseStr):
     # A description of the type of value this trait accepts:
     info_text = 'a directory name'
 
-    def __init__ (self, value = '', auto_set = False, entries = 0,
+    def __init__(self, value = '', auto_set = False, entries = 0,
                    exists = False, **metadata):
         """ Creates a BaseDirectory trait.
 
@@ -152,7 +152,7 @@ class BaseDirectory (traits.BaseStr):
 
         super(BaseDirectory, self).__init__(value, **metadata)
 
-    def validate (self, object, name, value):
+    def validate(self, object, name, value):
         """ Validates that a specified value is valid for this trait.
 
             Note: The 'fast validator' version performs this check in C.
@@ -172,7 +172,7 @@ class Directory (BaseDirectory):
         C-level fast validator.
     """
 
-    def __init__ (self, value = '', auto_set = False, entries = 0,
+    def __init__(self, value = '', auto_set = False, entries = 0,
                    exists = False, **metadata):
         """ Creates a Directory trait.
 

@@ -182,7 +182,7 @@ class ApplyTransform(SPMCommand):
 class ResliceInputSpec(SPMCommandInputSpec):
     in_file = File(exists = True, mandatory=True,
                     desc='file to apply transform to, (only updates header)')
-    space_defining = File (exists = True, mandatory = True,
+    space_defining = File(exists = True, mandatory = True,
                             desc = 'Volume defining space to slice in_file into')
 
     interp = traits.Range(low = 0, high = 7, usedefault = True,
