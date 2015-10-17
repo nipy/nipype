@@ -49,7 +49,7 @@ def test_errormap():
 	result = errmap.run()
 	yield assert_equal, result.outputs.distance, 1.0
 
-	## Multi-Spectual
+	# Multi-Spectual
 	volume3 = np.array([[[1.0, 6.0], [0.0, 3.0]], [[1.0, 9.0], [3.0, 6.0]]])  # Raymond Vahan Damadian's birthday
 
 	msvolume1 = np.zeros(shape=(2, 2, 2, 2))

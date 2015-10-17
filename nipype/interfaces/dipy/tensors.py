@@ -171,7 +171,7 @@ class TensorMode(BaseInterface):
         ten_fit = tensor_fitting(self.inputs.in_file, self.inputs.bvals, self.inputs.bvecs,
                                  self.inputs.mask_file)
 
-        ## Write as a 3D Nifti image with the original affine
+        # Write as a 3D Nifti image with the original affine
         img = nb.Nifti1Image(tenfit.mode, affine)
         out_file = op.abspath(self._gen_outfilename())
         nb.save(img, out_file)

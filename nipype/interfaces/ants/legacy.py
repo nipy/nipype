@@ -1,7 +1,7 @@
-## NOTE:  This implementation has been superceeded buy the antsApplyTransform
-##        implmeentation that more closely follows the strucutre and capabilities
-##        of the antsApplyTransform program.  This implementation is here
-##        for backwards compatibility.
+# NOTE:  This implementation has been superceeded buy the antsApplyTransform
+#        implmeentation that more closely follows the strucutre and capabilities
+#        of the antsApplyTransform program.  This implementation is here
+#        for backwards compatibility.
 """ANTS Apply Transforms interface
 
    Change directory to provide relative paths for doctests
@@ -122,7 +122,7 @@ class antsIntroduction(ANTSCommand):
 
         return outputs
 
-## How do we make a pass through so that GenWarpFields is just an alias for  antsIntroduction ?
+# How do we make a pass through so that GenWarpFields is just an alias for  antsIntroduction ?
 class GenWarpFields(antsIntroduction):
     pass
 

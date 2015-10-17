@@ -50,15 +50,15 @@ class ANTSCommand(CommandLine):
 
     def _num_threads_update(self):
         self._num_threads = self.inputs.num_threads
-        ## ONLY SET THE ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS if requested
-        ## by the end user.  The default setting did not allow for
-        ## overwriting the default values.
-        ## In ITKv4 (the version used for all ANTS programs), ITK respects
-        ## the SGE controlled $NSLOTS environmental variable.
-        ## If user specifies -1, then that indicates that the system
-        ## default behavior should be the one specified by ITKv4 rules
-        ## (i.e. respect SGE $NSLOTS or environmental variables of threads, or
-        ## user environmental settings)
+        # ONLY SET THE ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS if requested
+        # by the end user.  The default setting did not allow for
+        # overwriting the default values.
+        # In ITKv4 (the version used for all ANTS programs), ITK respects
+        # the SGE controlled $NSLOTS environmental variable.
+        # If user specifies -1, then that indicates that the system
+        # default behavior should be the one specified by ITKv4 rules
+        # (i.e. respect SGE $NSLOTS or environmental variables of threads, or
+        # user environmental settings)
         if (self.inputs.num_threads == -1):
             if (ALT_ITKv4_THREAD_LIMIT_VARIABLE in self.inputs.environ):
                 del self.inputs.environ[ALT_ITKv4_THREAD_LIMIT_VARIABLE]
