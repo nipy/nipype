@@ -196,7 +196,6 @@ class ResliceInputSpec(SPMCommandInputSpec):
                           desc='degree of b-spline used for interpolation'\
                           '0 is nearest neighbor (default)')
 
-
     out_file = File(desc='Optional file to save resliced volume')
 
 

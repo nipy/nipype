@@ -1407,7 +1407,6 @@ class TCorr1DInputSpec(AFNICommandInputSpec):
                         position=1)
 
 
-
 class TCorr1DOutputSpec(TraitedSpec):
     out_file = File(desc='output file containing correlations',
                     exists=True)

@@ -939,7 +939,6 @@ class MRIPretessInputSpec(FSTraitedSpec):
     out_file = File(position=-1, argstr='%s', genfile=True,
                     desc=('the output file after mri_pretess.'))
 
-
     nocorners = traits.Bool(False, argstr='-nocorners', desc=('do not remove corner configurations'
                                                               ' in addition to edge ones.'))
     keep = traits.Bool(False, argstr='-keep', desc=('keep WM edits'))

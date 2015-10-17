@@ -1278,7 +1278,6 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
 
     msk = np.ma.masked_equal(msk, 0)
 
-
     for i, out_file in enumerate(out_files):
         data = np.ma.masked_equal(img_data[i], 0)
         probmap = data / weights

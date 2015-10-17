@@ -54,7 +54,6 @@ preprocessing.connect(compute_mask, "brain_mask", anisotropic_voxel_smooth,
                       'inputnode.mask_file')
 
 
-
 recon_all = pe.Node(interface=fs.ReconAll(), name="recon_all")
 
 surfregister = pe.Node(interface=fs.BBRegister(), name='surfregister')

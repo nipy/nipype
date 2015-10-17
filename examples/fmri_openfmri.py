@@ -350,7 +350,6 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect(registration, 'outputspec.transformed_files',
                splitfunc, 'in_files')
 
-
     """
     Connect to a datasink
     """

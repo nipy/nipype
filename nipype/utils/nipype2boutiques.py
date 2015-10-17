@@ -148,7 +148,6 @@ def get_boutiques_input(inputs, interface, input_name, spec, ignored_template_in
     if spec.usedefault:
         input['default-value'] = spec.default_value()[1]
 
-
     # Create unique, temporary value.
     temp_value = must_generate_value(input_name, input['type'], ignored_template_inputs, spec_info, spec, ignore_template_numbers)
     if temp_value:

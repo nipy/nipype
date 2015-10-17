@@ -281,7 +281,6 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x=F
                              'xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)']
         inputTraits += compulsory_inputs
 
-
     input_spec_code = "class " + module_name + "InputSpec(CommandLineInputSpec):\n"
     for trait in inputTraits:
         input_spec_code += "    " + trait + "\n"
@@ -309,7 +308,6 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x=F
     _cmd = "%launcher% %name% "
     %output_filenames_code%\n"""
     template += "    _redirect_x = {0}\n".format(str(redirect_x))
-
 
     main_class = template.replace('%class_str%', class_string).replace("%module_name%", module_name).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%", " ".join(launcher))
 

@@ -124,7 +124,6 @@ elif os.name == 'posix':
         fcntl.flock(file.fileno(), fcntl.LOCK_UN)
 
 
-
 if __name__ == '__main__':
     from time import time, strftime, localtime
     import sys

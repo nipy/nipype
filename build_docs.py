@@ -72,7 +72,6 @@ class APIDocs(TempInstall):
         ('None', None, 'this command has no options'),
         ]
 
-
     def run(self):
         # First build the project and install it to a temporary location.
         TempInstall.run(self)
@@ -157,7 +156,6 @@ else:
                         zf.write(os.path.join(root, f),
                                  os.path.join(relative, 'html_docs', f))
             zf.close()
-
 
         def finalize_options(self):
             """ Override the default for the documentation build

@@ -646,7 +646,6 @@ class ReconAll(CommandLine):
     output_spec = ReconAllIOutputSpec
     _can_resume = True
 
-
     _steps = [
         # autorecon1
         ('motioncor', ['mri/rawavg.mgz', 'mri/orig.mgz']),

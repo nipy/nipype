@@ -5,7 +5,6 @@ from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
 from nipype.external.six import string_types
 
 
-
 class SphinxDocString(NumpyDocString):
     def __init__(self, docstring, config={}):
         self.use_plots = config.get('use_plots', False)

@@ -125,7 +125,6 @@ class EditTransform(BaseInterface):
             rep = '(\g<entry>%s\g<3>' % orig
             contents = p.sub(rep, contents)
 
-
         with open(self._get_outfile(), 'w') as of:
             of.write(contents)
 

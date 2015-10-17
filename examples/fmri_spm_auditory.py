@@ -87,7 +87,6 @@ coregister = pe.Node(interface=spm.Coregister(), name="coregister")
 coregister.inputs.jobtype = 'estimate'
 
 
-
 segment = pe.Node(interface=spm.Segment(), name="segment")
 
 """Uncomment the following line for faster execution
@@ -201,7 +200,6 @@ Preproc + Analysis pipeline
 """
 
 
-
 l1pipeline = pe.Workflow(name='firstlevel')
 l1pipeline.connect([(preproc, l1analysis, [('realign.realignment_parameters',
                                             'modelspec.realignment_parameters')])])
@@ -219,7 +217,6 @@ else:
         return [item]
     l1pipeline.connect([(preproc, l1analysis, [(('smooth.smoothed_files', makelist),
                                                 'modelspec.functional_runs')])])
-
 
 
 """

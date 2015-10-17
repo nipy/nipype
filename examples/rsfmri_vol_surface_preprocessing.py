@@ -634,7 +634,6 @@ def create_workflow(files,
     registration.inputs.inputspec.subjects_dir = subjects_dir
     registration.inputs.inputspec.target_image = target_file
 
-
     """Use :class:`nipype.algorithms.rapidart` to determine which of the
     images in the functional series are outliers based on deviations in
     intensity or movement.
@@ -647,7 +646,6 @@ def create_workflow(files,
     art.inputs.zintensity_threshold = 9
     art.inputs.mask_type = 'spm_global'
     art.inputs.parameter_source = 'SPM'
-
 
     """Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
     to use 4D. Also `get_vox_dims` function is passed along the input volume of normalise to set the optimal
@@ -698,7 +696,6 @@ def create_workflow(files,
     wf.connect(art, 'norm_files', createfilter1, 'comp_norm')
     wf.connect(art, 'outlier_files', createfilter1, 'outliers')
 
-
     filter1 = MapNode(fsl.GLM(out_f_name='F_mcart.nii',
                               out_pf_name='pF_mcart.nii',
                               demean=True),
@@ -709,7 +706,6 @@ def create_workflow(files,
     wf.connect(slice_timing, ('timecorrected_files', rename, '_filtermotart'),
                filter1, 'out_res_name')
     wf.connect(createfilter1, 'out_files', filter1, 'design')
-
 
     createfilter2 = MapNode(Function(input_names=['realigned_file', 'mask_file',
                                                   'num_components',
@@ -725,7 +721,6 @@ def create_workflow(files,
     wf.connect(filter1, 'out_res', createfilter2, 'realigned_file')
     wf.connect(registration, ('outputspec.segmentation_files', selectindex, [0, 2]),
                createfilter2, 'mask_file')
-
 
     filter2 = MapNode(fsl.GLM(out_f_name='F.nii',
                               out_pf_name='pF.nii',

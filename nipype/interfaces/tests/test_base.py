@@ -93,7 +93,6 @@ def test_TraitedSpec():
         foo = nib.traits.Int
         goo = nib.traits.Float(usedefault=True)
 
-
     yield assert_equal, spec().foo, Undefined
     yield assert_equal, spec().goo, 0.0
     specfunc = lambda x: spec(hoo=x)
@@ -303,7 +302,6 @@ def test_cycle_namesource2():
     tmpd, nme, ext = split_filename(tmp_infile)
     pwd = os.getcwd()
     os.chdir(tmpd)
-
 
     class spec3(nib.CommandLineInputSpec):
         moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",

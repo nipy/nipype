@@ -1343,7 +1343,6 @@ class Reorient2Std(FSLCommand):
         return outputs
 
 
-
 class InvWarpInputSpec(FSLCommandInputSpec):
     warp = File(exists=True, argstr='--warp=%s', mandatory=True,
                 desc=('Name of file containing warp-coefficients/fields. This '
@@ -1552,7 +1551,6 @@ class Complex(FSLCommand):
             outputs['magnitude_out_file'] = self._get_output('magnitude_out_file')
             outputs['phase_out_file'] = self._get_output('phase_out_file')
         return outputs
-
 
 
 class WarpUtilsInputSpec(FSLCommandInputSpec):
@@ -1840,7 +1838,6 @@ class WarpPoints(CommandLine):
         self._outformat = None
 
         super(WarpPoints, self).__init__(command=command, **inputs)
-
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'out_file':

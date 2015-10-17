@@ -45,7 +45,6 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
     wf.connect(inputnode, "subjects_dir", autorecon1, "subjects_dir")
     wf.connect(inputnode, "subject_id", autorecon1, "subject_id")
 
-
     def link_masks(subjects_dir, subject_id):
         import os
         os.symlink(os.path.join(subjects_dir, subject_id, "mri", "T1.mgz"),
@@ -60,7 +59,6 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
 
     wf.connect(autorecon1, "subjects_dir", masks, "subjects_dir")
     wf.connect(autorecon1, "subject_id", masks, "subject_id")
-
 
     autorecon_resume = pe.Node(fs.ReconAll(), name="autorecon_resume")
     autorecon_resume.plugin_args = {'submit_specs': 'request_memory = 2500'}

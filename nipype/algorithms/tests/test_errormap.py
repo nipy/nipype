@@ -26,7 +26,6 @@ def test_errormap():
 	nib.save(img2, os.path.join(tempdir, 'alan.nii.gz'))
 	nib.save(maskimg, os.path.join(tempdir, 'mask.nii.gz'))
 
-
 	# Default metric
 	errmap = ErrorMap()
 	errmap.inputs.in_tst = os.path.join(tempdir, 'von.nii.gz')

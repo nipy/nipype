@@ -292,7 +292,6 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     Here we connect our processing pipeline.
     """
 
-
     """
     Connecting the inputs, FreeSurfer nodes, and conversions
     --------------------------------------------------------
@@ -346,7 +345,6 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     mapping.connect([(FreeSurferSourceRH, mris_convertRHlabels, [('pial', 'in_file')])])
     mapping.connect([(FreeSurferSourceLH, mris_convertLHlabels, [(('annot', select_aparc_annot), 'annot_file')])])
     mapping.connect([(FreeSurferSourceRH, mris_convertRHlabels, [(('annot', select_aparc_annot), 'annot_file')])])
-
 
     """
     Diffusion Processing
@@ -506,7 +504,6 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     mapping.connect([(creatematrix, nfibs_to_csv, [("stats_file", "in_file")])])
     mapping.connect([(nfibs_to_csv, merge_nfib_csvs, [("csv_files", "in_files")])])
     mapping.connect([(inputnode_within, merge_nfib_csvs, [("subject_id", "extra_field")])])
-
 
     """
     Create a higher-level workflow

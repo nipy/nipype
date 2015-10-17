@@ -41,7 +41,6 @@ def create_camino_dti_pipeline(name="dtiproc"):
 
     inputnode1 = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bvals"]), name="inputnode1")
 
-
     """
     Setup for Diffusion Tensor Computation
     --------------------------------------
@@ -119,7 +118,6 @@ def create_camino_dti_pipeline(name="dtiproc"):
     # procstreamlines = pe.Node(interface=camino.ProcStreamlines(), name="procstreamlines")
     # procstreamlines.inputs.outputtracts = 'oogl'
 
-
     """
     We can also produce a variety of scalar values from our fitted tensors. The following nodes generate        the fractional anisotropy and diffusivity trace maps and their associated headers.
     """
@@ -182,7 +180,6 @@ def create_camino_dti_pipeline(name="dtiproc"):
     tractography.connect([(dtifit, picopdfs, [("tensor_fitted", "in_file")])])
     tractography.connect([(picopdfs, trackpico, [("pdfs", "in_file")])])
 
-
     # Mean diffusivity still appears broken
     # tractography.connect([(dtifit, md,[("tensor_fitted","in_file")])])
     # tractography.connect([(md, analyzeheader_md,[("md","in_file")])])
@@ -190,7 +187,6 @@ def create_camino_dti_pipeline(name="dtiproc"):
     # (('dwi', get_data_dims), 'data_dims')])])
     # This line is commented out because the ProcStreamlines node keeps throwing memory errors
     # tractography.connect([(track, procstreamlines,[("tracked","in_file")])])
-
 
     """
     Connecting the Fractional Anisotropy and Trace nodes is simple, as they obtain their input from the
@@ -206,7 +202,6 @@ def create_camino_dti_pipeline(name="dtiproc"):
     tractography.connect([(fa, fa2nii, [('fa', 'data_file')])])
     tractography.connect([(inputnode1, fa2nii, [(('dwi', get_affine), 'affine')])])
     tractography.connect([(analyzeheader_fa, fa2nii, [('header', 'header_file')])])
-
 
     tractography.connect([(dtifit, trace, [("tensor_fitted", "in_file")])])
     tractography.connect([(trace, analyzeheader_trace, [("trace", "in_file")])])
@@ -225,7 +220,6 @@ def create_camino_dti_pipeline(name="dtiproc"):
 
     tractography.connect([(inputnode1, cam2trk_dt, [(('dwi', get_vox_dims), 'voxel_dims'),
                                                    (('dwi', get_data_dims), 'data_dims')])])
-
 
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bvals"]), name="inputnode")
 

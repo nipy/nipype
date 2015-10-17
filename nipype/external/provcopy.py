@@ -319,7 +319,6 @@ class Literal(object):
                 #  Assuming it is a valid identifier
                 return {'$': str(self._value), 'type': self._datatype.get_uri()}
 
-
     def rdf_representation(self):
         if self._langtag:
             # a langtag can only goes with string

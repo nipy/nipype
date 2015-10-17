@@ -234,7 +234,6 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     featpreproc.connect(motion_correct, 'out_file', maskfunc, 'in_file')
     featpreproc.connect(meanfuncmask, 'mask_file', maskfunc, 'in_file2')
 
-
     """
     Determine the 2nd and 98th percentile intensities of each functional run
     """
@@ -243,7 +242,6 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
                            iterfield=['in_file'],
                            name='getthreshold')
     featpreproc.connect(maskfunc, 'out_file', getthresh, 'in_file')
-
 
     """
     Threshold the first run of the functional data at 10% of the 98th percentile
@@ -317,7 +315,6 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
 
     featpreproc.connect(dilatemask, 'out_file', maskfunc3, 'in_file2')
 
-
     concatnode = pe.Node(interface=util.Merge(2),
                          name='concat')
     featpreproc.connect(maskfunc2, ('out_file', tolist), concatnode, 'in1')
@@ -335,7 +332,6 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
 
     featpreproc.connect(inputnode, ('fwhm', chooseindex), selectnode, 'index')
     featpreproc.connect(selectnode, 'out', outputnode, 'smoothed_files')
-
 
     """
     Scale the median value of the run is set to 10000
@@ -378,7 +374,6 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
         featpreproc.connect(meanscale, 'out_file', meanfunc3, 'in_file')
 
     featpreproc.connect(meanfunc3, 'out_file', outputnode, 'mean')
-
 
     return featpreproc
 
@@ -479,7 +474,6 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     run.
     """
 
-
     img2float = pe.MapNode(interface=fsl.ImageMaths(out_data_type='float',
                                                     op_string='',
                                                     suffix='_dtype'),
@@ -498,7 +492,6 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
         featpreproc.connect(img2float, ('out_file', pickfirst), extract_ref, 'in_file')
         featpreproc.connect(img2float, ('out_file', pickvol, 0, whichvol), extract_ref, 't_min')
         featpreproc.connect(extract_ref, 'roi_file', outputnode, 'reference')
-
 
     """
     Realign the functional runs to the reference (`whichvol` volume of first run)
@@ -560,7 +553,6 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     featpreproc.connect(motion_correct, 'out_file', maskfunc, 'in_file')
     featpreproc.connect(meanfuncmask, 'mask_file', maskfunc, 'in_file2')
 
-
     """
     Determine the 2nd and 98th percentile intensities of each functional run
     """
@@ -569,7 +561,6 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
                            iterfield=['in_file'],
                            name='getthreshold')
     featpreproc.connect(maskfunc, 'out_file', getthresh, 'in_file')
-
 
     """
     Threshold the first run of the functional data at 10% of the 98th percentile
@@ -643,7 +634,6 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
     featpreproc.connect(dilatemask, 'out_file', maskfunc3, 'in_file2')
 
-
     concatnode = pe.Node(interface=util.Merge(2),
                          name='concat')
     featpreproc.connect(maskfunc2, ('out_file', tolist), concatnode, 'in1')
@@ -662,7 +652,6 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     featpreproc.connect(inputnode, ('fwhm', chooseindex), selectnode, 'index')
     featpreproc.connect(selectnode, 'out', outputnode, 'smoothed_files')
 
-
     """
     Scale the median value of the run is set to 10000
     """
@@ -677,7 +666,6 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     """
 
     featpreproc.connect(medianval, ('out_stat', getmeanscale), meanscale, 'op_string')
-
 
     """
     Generate a mean functional image from the first run
@@ -781,7 +769,6 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     """
     Determine the median value of the functional runs using the mask
     """
-
 
     if separate_masks:
         median = pe.MapNode(interface=fsl.ImageStats(op_string='-k %s -p 50'),
@@ -951,7 +938,6 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
                            name='img2float')
     featpreproc.connect(inputnode, 'func', img2float, 'in_file')
 
-
     """
     Extract the first volume of the first run as the reference
     """
@@ -963,7 +949,6 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
         featpreproc.connect(img2float, ('out_file', pickfirst), extract_ref, 'in_file')
         featpreproc.connect(img2float, ('out_file', pickvol, 0, whichvol), extract_ref, 't_min')
         featpreproc.connect(extract_ref, 'roi_file', outputnode, 'reference')
-
 
     """
     Realign the functional runs to the reference (1st volume of first run)
@@ -1007,7 +992,6 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     else:
         featpreproc.connect(motion_correct, ('mean_img', pickfirst), maskflow, 'inputspec.source_file')
 
-
     """
     Mask the functional runs with the extracted mask
     """
@@ -1042,7 +1026,6 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     featpreproc.connect(smooth, 'outputnode.smoothed_files', maskfunc3, 'in_file')
     featpreproc.connect(maskflow, ('outputspec.mask_file', pickfirst), maskfunc3, 'in_file2')
 
-
     concatnode = pe.Node(interface=util.Merge(2),
                          name='concat')
     featpreproc.connect(maskfunc, ('out_file', tolist), concatnode, 'in1')
@@ -1060,7 +1043,6 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
 
     featpreproc.connect(inputnode, ('fwhm', chooseindex), selectnode, 'index')
     featpreproc.connect(selectnode, 'out', outputnode, 'smoothed_files')
-
 
     """
     Scale the median value of the run is set to 10000

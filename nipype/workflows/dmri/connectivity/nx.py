@@ -59,7 +59,6 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     MergeCSVFiles_global = MergeCSVFiles_node.clone(name="MergeCSVFiles_global")
     MergeCSVFiles_global.inputs.extra_column_heading = extra_column_heading
 
-
     mergeNetworks = pe.Node(interface=util.Merge(2), name="mergeNetworks")
     mergeCSVs = mergeNetworks.clone("mergeCSVs")
 

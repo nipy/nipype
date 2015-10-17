@@ -19,7 +19,6 @@ class DebugPlugin(PluginBase):
         else:
             raise ValueError('plugin_args must contain a callable function')
 
-
     def run(self, graph, config, updatehash=False):
         """Executes a pre-defined pipeline in a serial order.
 

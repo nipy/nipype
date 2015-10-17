@@ -89,7 +89,6 @@ class FitGLM(BaseInterface):
         nii = nb.load(functional_runs[0])
         data = nii.get_data()
 
-
         if isdefined(self.inputs.mask):
             mask = nb.load(self.inputs.mask).get_data() > 0
         else:
@@ -123,7 +122,6 @@ class FitGLM(BaseInterface):
         for i in range(len(reg_names)):
             reg_vals[:, i] = np.array(session_info[0]['regress'][i]['val']).reshape(1, -1)
 
-
         frametimes = np.linspace(0, (nscans-1)*self.inputs.TR, nscans)
 
         conditions = []
@@ -137,7 +135,6 @@ class FitGLM(BaseInterface):
                 duration += cond['duration']*len(cond['onset'])
             else:
                 duration += cond['duration']
-
 
         if conditions:
             paradigm = BlockParadigm(con_id=conditions, onset=onsets, duration=duration)
@@ -163,7 +160,6 @@ class FitGLM(BaseInterface):
 
         glm = GLM.glm()
         glm.fit(timeseries.T, design_matrix, method=self.inputs.method, model=self.inputs.model)
-
 
         self._beta_file = os.path.abspath("beta.nii")
         beta = np.zeros(mask.shape + (glm.beta.shape[0],))
@@ -269,7 +265,6 @@ class EstimateContrast(BaseInterface):
             mask = nb.load(self.inputs.mask).get_data() > 0
         else:
             mask = np.ones(beta_nii.shape[:3]) == 1
-
 
         glm = GLM.glm()
         nii = nb.load(self.inputs.beta)

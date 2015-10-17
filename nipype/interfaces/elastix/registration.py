@@ -105,7 +105,6 @@ class Registration(CommandLine):
 
         return outputs
 
-
     def _cast(self, val):
         if val.startswith('"') and val.endswith('"'):
             if val == '"true"':
@@ -130,7 +129,6 @@ class ApplyWarpInputSpec(ElastixBaseInputSpec):
 
     moving_image = File(exists=True, argstr='-in %s', mandatory=True,
                         desc='input image to deform')
-
 
 
 class ApplyWarpOutputSpec(TraitedSpec):
@@ -213,7 +211,6 @@ class PointsWarpInputSpec(ElastixBaseInputSpec):
                        desc='input points (accepts .vtk triangular meshes).')
     transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
                           desc='transform-parameter file, only 1')
-
 
 
 class PointsWarpOutputSpec(TraitedSpec):

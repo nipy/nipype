@@ -1993,7 +1993,6 @@ class SSHDataGrabber(DataGrabber):
         ):
             self.inputs.template += '$'
 
-
     def _list_outputs(self):
         try:
             paramiko

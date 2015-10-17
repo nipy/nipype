@@ -131,7 +131,6 @@ class SFPICOCalibData(StdOutCommandLine):
         return name + '_PICOCalib.Bfloat'
 
 
-
 class SFLUTGenInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-inputfile %s', mandatory=True,
                    desc='Voxel-order data of the spherical functions peaks.')

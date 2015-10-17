@@ -9,7 +9,6 @@ from ....interfaces import utility as niu
 from ....interfaces import fsl as fsl
 
 
-
 def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fieldmap_registration=False):
     """
     Creates a workflow that chains the necessary pipelines to
@@ -262,8 +261,6 @@ def create_eddy_correct_pipeline(name='eddy_correct'):
     return pipeline
 
 
-
-
 def fieldmap_correction(name='fieldmap_correction', nocheck=False):
     """
 
@@ -390,7 +387,6 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
                       (dwi_merge,    outputnode, [('merged_file', 'epi_corrected')]),
                       (vsm,          outputnode, [('shift_out_file', 'out_vsm')])
                      ])
-
 
     return pipeline
 

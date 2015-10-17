@@ -120,7 +120,6 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
            outputspec.passive_deformed_templates :
     """
 
-
     TemplateBuildSingleIterationWF = pe.Workflow(name='ANTSTemplateBuildSingleIterationWF_'+str(str(iterationPhasePrefix)))
 
     inputSpec = pe.Node(interface=util.IdentityInterface(fields=['images', 'fixed_image',

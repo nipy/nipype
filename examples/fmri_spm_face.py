@@ -80,7 +80,6 @@ coregister = pe.Node(interface=spm.Coregister(), name="coregister")
 coregister.inputs.jobtype = 'estimate'
 
 
-
 segment = pe.Node(interface=spm.Segment(), name="segment")
 segment.inputs.save_bias_corrected = True
 

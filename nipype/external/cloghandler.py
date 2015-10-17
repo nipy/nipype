@@ -65,7 +65,6 @@ except ImportError:
     codecs = None
 
 
-
 # Question/TODO: Should we have a fallback mode if we can't load portalocker /
 # we should still be better off than with the standard RotattingFileHandler
 # class, right? We do some rename checking... that should prevent some file

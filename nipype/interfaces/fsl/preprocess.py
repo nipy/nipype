@@ -1231,8 +1231,6 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                                      desc='saves the unmasked fieldmap when using --savefmap')
 
 
-
-
 class FUGUEOutputSpec(TraitedSpec):
     unwarped_file = File(desc='unwarped file')
     warped_file = File(desc='forward warped file')

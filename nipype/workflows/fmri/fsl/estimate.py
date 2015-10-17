@@ -110,7 +110,6 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
                                                         'parameter_estimates']),
                          name='outputspec')
 
-
     """
     Setup the connections
     """

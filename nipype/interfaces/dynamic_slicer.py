@@ -21,8 +21,6 @@ class SlicerCommandLine(CommandLine):
     input_spec = SlicerCommandLineInputSpec
     output_spec = DynamicTraitedSpec
 
-
-
     def _grab_xml(self, module):
         cmd = CommandLine(command="Slicer3", args="--launch %s --xml" %module)
         ret = cmd.run()
@@ -65,7 +63,6 @@ class SlicerCommandLine(CommandLine):
                     traitsParams["argstr"] = "--" + longFlagNode[0].firstChild.nodeValue + " "
                 else:
                     traitsParams["argstr"] = "--" + name + " "
-
 
                 argsDict = {'file': '%s', 'integer': "%d", 'double': "%f", 'float': "%f", 'image': "%s", 'transform': "%s", 'boolean': '', 'string-enumeration': '%s', 'string': "%s"}
 
@@ -116,7 +113,6 @@ class SlicerCommandLine(CommandLine):
         for name in list(undefined_traits.keys()):
             _ = getattr(self.inputs, name)
         # self._outputs().trait_set(trait_change_notify=False, **undefined_output_traits)
-
 
     def _gen_filename(self, name):
         if name in self._outputs_filenames:

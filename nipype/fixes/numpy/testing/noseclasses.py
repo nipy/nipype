@@ -93,7 +93,6 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
                     self._find(tests, val, valname1, module, source_lines,
                                globs, seen)
 
-
         # Look for tests in a class's contained objects.
         if isclass(obj) and self._recurse:
             # print 'RECURSE into class:',obj  # dbg

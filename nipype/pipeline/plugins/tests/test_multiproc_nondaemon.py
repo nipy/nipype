@@ -56,7 +56,6 @@ def mytestFunction(insum=0):
         # fire up the job
         t[n].start()
 
-
     # block until all processes are done
     allDone = False
     while not allDone:

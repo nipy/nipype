@@ -29,7 +29,6 @@ import nipype.algorithms.modelgen as model   # model generation
 import nipype.algorithms.rapidart as ra      # artifact detection
 
 
-
 """
 Preliminaries
 -------------

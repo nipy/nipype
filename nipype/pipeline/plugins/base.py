@@ -629,15 +629,12 @@ class GraphPluginBase(PluginBase):
         """
         raise NotImplementedError
 
-
-
     def _get_result(self, taskid):
         if taskid not in self._pending:
             raise Exception('Task %d not found' % taskid)
         if self._is_pending(taskid):
             return None
         node_dir = self._pending[taskid]
-
 
         logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
                                                               '..'))))

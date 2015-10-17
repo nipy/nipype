@@ -24,7 +24,6 @@ from ..base import (CommandLine, Directory,
 from ...utils.filemanip import fname_presuffix
 
 
-
 class Info(object):
     """ Freesurfer subject directory and version information.
 

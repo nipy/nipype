@@ -382,7 +382,6 @@ class ApplyTransformsToPoints(ANTSCommand):
     input_spec = ApplyTransformsToPointsInputSpec
     output_spec = ApplyTransformsToPointsOutputSpec
 
-
     def _getTransformFileNames(self):
         retval = []
         for ii in range(len(self.inputs.transforms)):

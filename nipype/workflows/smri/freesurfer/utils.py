@@ -113,7 +113,6 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
         (threshold, voltransform, [('binary_file', 'target_file')])
     ])
 
-
     """
     Add remaining nodes and connections
 
@@ -197,7 +196,6 @@ def create_get_stats_flow(name='getstats', withreg=False):
         inputnode = pe.Node(niu.IdentityInterface(fields=['source_file',
                                                           'label_file']),
                             name='inputspec')
-
 
     statnode = pe.MapNode(fs.SegStats(),
                           iterfield=['segmentation_file', 'in_file'],

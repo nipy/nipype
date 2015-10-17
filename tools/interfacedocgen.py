@@ -218,7 +218,6 @@ class InterfaceHelpWriter(object):
         classes.sort()
         return functions, classes
 
-
     def _write_graph_section(self, fname, title):
         ad = '\n%s\n%s\n\n' % (title, self.rst_section_levels[3] * len(title))
         ad += '.. graphviz::\n\n'

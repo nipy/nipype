@@ -16,8 +16,6 @@ from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 from nipype.interfaces.base import CommandLine
 
 
-
-
 class SLURMPlugin(SGELikeBatchManagerBase):
     '''
     Execute using SLURM
@@ -31,7 +29,6 @@ class SLURMPlugin(SGELikeBatchManagerBase):
 
 
     '''
-
 
     def __init__(self, **kwargs):
 

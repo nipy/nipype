@@ -2058,7 +2058,6 @@ class MapNode(Node):
         See Node docstring for additional keyword arguments.
         """
 
-
         super(MapNode, self).__init__(interface, name, **kwargs)
         if isinstance(iterfield, string_types):
             iterfield = [iterfield]

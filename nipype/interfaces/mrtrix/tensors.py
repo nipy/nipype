@@ -387,7 +387,6 @@ class FindShPeaks(CommandLine):
     output_spec = FindShPeaksOutputSpec
 
 
-
 class Directions2AmplitudeInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the input directions image. Each volume corresponds to the x, y & z component of each direction vector in turn.')
     peaks_image = File(exists=True, argstr='-peaks %s', desc='the program will try to find the peaks that most closely match those in the image provided')

@@ -111,7 +111,6 @@ class AFNICommand(CommandLine):
     input_spec = AFNICommandInputSpec
     _outputtype = None
 
-
     def __init__(self, **inputs):
         super(AFNICommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'outputtype')

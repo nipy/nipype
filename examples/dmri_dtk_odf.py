@@ -160,7 +160,6 @@ compute_ODF.connect([
                       ])
 
 
-
 """
 Setup for Tracktography
 -----------------------

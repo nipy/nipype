@@ -508,7 +508,6 @@ def create_reg_workflow(name='registration'):
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode, 'target_image', reg, 'fixed_image')
 
-
     """
     Concatenate the affine and ants transforms into a list
     """
@@ -516,7 +515,6 @@ def create_reg_workflow(name='registration'):
     merge = Node(Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
     register.connect(reg, 'composite_transform', merge, 'in1')
-
 
     """
     Transform the mean image. First to anatomical and then to target
@@ -534,7 +532,6 @@ def create_reg_workflow(name='registration'):
     register.connect(inputnode, 'target_image', warpmean, 'reference_image')
     register.connect(inputnode, 'mean_image', warpmean, 'input_image')
     register.connect(merge, 'out', warpmean, 'transforms')
-
 
     """
     Assign all the output files
@@ -596,7 +593,6 @@ def create_workflow(files,
     realign.inputs.slice_info = 2
     realign.plugin_args = {'sbatch_args': '-c%d' % 4}
 
-
     # Comute TSNR on realigned data regressing polynomials upto order 2
     tsnr = MapNode(TSNR(regress_poly=2), iterfield=['in_file'], name='tsnr')
     wf.connect(realign, "out_file", tsnr, "in_file")
@@ -639,7 +635,6 @@ def create_workflow(files,
     art.inputs.zintensity_threshold = 9
     art.inputs.mask_type = 'spm_global'
     art.inputs.parameter_source = 'NiPy'
-
 
     """Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
     to use 4D. Also `get_vox_dims` function is passed along the input volume of normalise to set the optimal
@@ -689,7 +684,6 @@ def create_workflow(files,
     wf.connect(art, 'norm_files', createfilter1, 'comp_norm')
     wf.connect(art, 'outlier_files', createfilter1, 'outliers')
 
-
     filter1 = MapNode(fsl.GLM(out_f_name='F_mcart.nii.gz',
                               out_pf_name='pF_mcart.nii.gz',
                               demean=True),
@@ -700,7 +694,6 @@ def create_workflow(files,
     wf.connect(realign, ('out_file', rename, '_filtermotart'),
                filter1, 'out_res_name')
     wf.connect(createfilter1, 'out_files', filter1, 'design')
-
 
     createfilter2 = MapNode(Function(input_names=['realigned_file', 'mask_file',
                                                   'num_components',
@@ -716,7 +709,6 @@ def create_workflow(files,
     wf.connect(filter1, 'out_res', createfilter2, 'realigned_file')
     wf.connect(registration, ('outputspec.segmentation_files', selectindex, [0, 2]),
                createfilter2, 'mask_file')
-
 
     filter2 = MapNode(fsl.GLM(out_f_name='F.nii.gz',
                               out_pf_name='pF.nii.gz',

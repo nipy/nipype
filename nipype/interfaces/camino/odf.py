@@ -92,7 +92,6 @@ class QBallMX(StdOutCommandLine):
         return name + '_qmat.Bdouble'
 
 
-
 class LinReconInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=1,
                    desc='voxel-order data filename')

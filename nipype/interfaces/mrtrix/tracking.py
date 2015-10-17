@@ -31,14 +31,12 @@ class FilterTracksInputSpec(CommandLineInputSpec):
     minimum_tract_length = traits.Float(argstr='-minlength %s', units='mm',
                                         desc="Sets the minimum length of any track in millimeters (default is 10 mm).")
 
-
     out_file = File(argstr='%s', position=-1, desc='Output filtered track filename',
                     name_source=['in_file'], hash_files=False, name_template='%s_filt')
 
     no_mask_interpolation = traits.Bool(argstr='-nomaskinterp', desc="Turns off trilinear interpolation of mask images.")
     invert = traits.Bool(argstr='-invert', desc="invert the matching process, so that tracks that would" \
                          "otherwise have been included are now excluded and vice-versa.")
-
 
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
     debug = traits.Bool(argstr='-debug', position=1, desc="Display debugging messages.")

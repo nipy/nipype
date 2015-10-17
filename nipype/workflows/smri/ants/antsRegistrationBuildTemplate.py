@@ -193,7 +193,6 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
                          run_without_submitting=True,
                          name='outputspec')
 
-
     # NOTE MAP NODE! warp each of the original images to the provided fixed_image as the template
     BeginANTS = pe.MapNode(interface=Registration(), name='BeginANTS', iterfield=['moving_image'])
     BeginANTS.inputs.dimension = 3

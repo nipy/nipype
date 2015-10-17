@@ -292,7 +292,6 @@ class InterfaceChecker(object):
                         bad_specs.append([uri, c, 'Outputs', traitname, key])
         return bad_specs
 
-
     def _survives_exclude(self, matchstr, match_type):
         ''' Returns True if *matchstr* does not match patterns
 

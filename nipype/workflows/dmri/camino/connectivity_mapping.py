@@ -260,7 +260,6 @@ def create_connectivity_pipeline(name="connectivity"):
     FreeSurfer input nodes:
     """
 
-
     mapping.connect([(inputnode_within, FreeSurferSource, [("subjects_dir", "subjects_dir")])])
     mapping.connect([(inputnode_within, FreeSurferSource, [("subject_id", "subject_id")])])
 
@@ -284,7 +283,6 @@ def create_connectivity_pipeline(name="connectivity"):
     """
     Nifti conversions for the subject's stripped brain image from Freesurfer:
     """
-
 
     mapping.connect([(FreeSurferSource, mri_convert_Brain, [('brain', 'in_file')])])
 
@@ -352,7 +350,6 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(fa, fa2nii, [('fa', 'data_file')])])
     mapping.connect([(inputnode_within, fa2nii, [(('dwi', get_affine), 'affine')])])
     mapping.connect([(analyzeheader_fa, fa2nii, [('header', 'header_file')])])
-
 
     mapping.connect([(dtifit, trace, [("tensor_fitted", "in_file")])])
     mapping.connect([(trace, analyzeheader_trace, [("trace", "in_file")])])

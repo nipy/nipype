@@ -368,7 +368,6 @@ class BEDPOSTX5(FSLXCommand):
         for k in single_out:
             outputs[k] = self._gen_fname(k, cwd=self._out_dir)
 
-
         for k in multi_out:
             outputs[k] = []
 

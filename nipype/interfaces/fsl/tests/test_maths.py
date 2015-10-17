@@ -439,7 +439,6 @@ def test_binarymaths(fsl_output_type=None):
                 maths.inputs.operand_value = ent
                 yield assert_equal, maths.cmdline, "fslmaths a.nii -%s %.8f c.nii" %(op, ent)
 
-
     # Test that we don't need to ask for an out file
     for op in ops:
         maths = fsl.BinaryMaths(in_file="a.nii", operation=op, operand_file="b.nii")

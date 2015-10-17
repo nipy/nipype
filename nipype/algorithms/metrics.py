@@ -412,7 +412,6 @@ class FuzzyOverlap(BaseInterface):
         img_ref = np.array([nb.load(fname).get_data() for fname in self.inputs.in_ref])
         img_tst = np.array([nb.load(fname).get_data() for fname in self.inputs.in_tst])
 
-
         msk = np.sum(img_ref, axis=0)
         msk[msk > 0] = 1.0
         tst_msk = np.sum(img_tst, axis=0)
@@ -447,7 +446,6 @@ class FuzzyOverlap(BaseInterface):
         setattr(self, '_jaccard',  np.sum(weights * self._jaccards))
         setattr(self, '_dice', np.sum(weights * self._dices))
 
-
         diff = np.zeros(diff_im[0].shape)
 
         for w, ch in zip(weights, diff_im):
@@ -456,7 +454,6 @@ class FuzzyOverlap(BaseInterface):
 
         nb.save(nb.Nifti1Image(diff, nb.load(self.inputs.in_ref[0]).get_affine(),
                                nb.load(self.inputs.in_ref[0]).get_header()), self.inputs.out_file)
-
 
         return runtime
 
@@ -630,7 +627,6 @@ class Similarity(BaseInterface):
         except Exception as e:
             self._have_nipy = False
         super(Similarity, self).__init__(**inputs)
-
 
     def _run_interface(self, runtime):
         if not self._have_nipy:

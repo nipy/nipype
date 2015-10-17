@@ -704,7 +704,6 @@ def test_serial_input():
                  name='n1')
     n1.inputs.in1 = [1, 2, 3]
 
-
     w1 = Workflow(name='test')
     w1.base_dir = wd
     w1.add_nodes([n1])
