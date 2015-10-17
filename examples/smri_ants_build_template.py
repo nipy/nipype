@@ -58,14 +58,14 @@ for tt in MyFileURLs:
         print("File previously downloaded {0}".format(localFilename))
 
 input_images=[
-os.path.join(mydatadir,'01_T1_half.nii.gz'),
-os.path.join(mydatadir,'02_T1_half.nii.gz'),
-os.path.join(mydatadir,'03_T1_half.nii.gz')
+    os.path.join(mydatadir,'01_T1_half.nii.gz'),
+    os.path.join(mydatadir,'02_T1_half.nii.gz'),
+    os.path.join(mydatadir,'03_T1_half.nii.gz')
 ]
 input_passive_images=[
-{'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
-{'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
-{'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
+    {'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
+    {'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
+    {'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
 ]
 
 

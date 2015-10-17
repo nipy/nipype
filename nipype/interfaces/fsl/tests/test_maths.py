@@ -467,7 +467,7 @@ def test_multimaths(fsl_output_type=None):
     # Test that we don't need to ask for an out file
     maths = fsl.MultiImageMaths(in_file="a.nii", op_string="-add %s -mul 5", operand_files=["b.nii"])
     yield assert_equal, maths.cmdline, \
-    "fslmaths a.nii -add b.nii -mul 5 %s"%os.path.join(testdir, "a_maths%s" % out_ext)
+        "fslmaths a.nii -add b.nii -mul 5 %s"%os.path.join(testdir, "a_maths%s" % out_ext)
 
     # Clean up our mess
     clean_directory(testdir, origdir)
@@ -498,7 +498,7 @@ def test_tempfilt(fsl_output_type=None):
     # Test that we don't need to ask for an out file
     filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma = 64)
     yield assert_equal, filt.cmdline, \
-    "fslmaths a.nii -bptf 64.000000 -1.000000 %s"%os.path.join(testdir,"a_filt%s" % out_ext)
+        "fslmaths a.nii -bptf 64.000000 -1.000000 %s"%os.path.join(testdir,"a_filt%s" % out_ext)
 
     # Clean up our mess
     clean_directory(testdir, origdir)

@@ -683,7 +683,7 @@ def generate_expanded_graph(graph_in):
             if prior_prefix[-1] == 'z':
                 raise ValueError('Too many iterables in the workflow')
             iterable_prefix =\
-            allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
+                allprefixes[allprefixes.index(prior_prefix[-1]) + 1]
         logger.debug(('subnodes:', subnodes))
 
         # append a suffix to the iterable node id

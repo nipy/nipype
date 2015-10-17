@@ -68,19 +68,19 @@ this option for FILMGLS by setting autocorr_noestimate to True", mandatory=True)
                                    traits.List(
                                        traits.Either(traits.Tuple(traits.Str,
                                                                   traits.Enum(
-                                                                  'T'),
+                                                                      'T'),
                                                                   traits.List(
-                                                                  traits.Str),
+                                                                      traits.Str),
                                                                   traits.List(
                                                                       traits.Float)),
                                                      traits.Tuple(
                                                      traits.Str,
                                                      traits.Enum(
-                                                     'T'),
+                                                         'T'),
                                                      traits.List(
-                                                     traits.Str),
+                                                         traits.Str),
                                                      traits.List(
-                                                     traits.Float),
+                                                         traits.Float),
                                                      traits.List(
                                                          traits.Float)))))),
         desc="List of contrasts with each contrast being a list of the form - \

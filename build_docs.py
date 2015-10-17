@@ -64,7 +64,7 @@ class TempInstall(Command):
 # Distutils Command class for API generation
 class APIDocs(TempInstall):
     description = \
-    """generate API docs """
+        """generate API docs """
 
     user_options = [
         ('None', None, 'this command has no options'),

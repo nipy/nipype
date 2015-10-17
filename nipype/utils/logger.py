@@ -7,7 +7,7 @@ import os
 import sys
 try:
     from ..external.cloghandler import ConcurrentRotatingFileHandler as \
-    RFHandler
+        RFHandler
 except ImportError:
     # Next 2 lines are optional:  issue a warning to the user
     from warnings import warn

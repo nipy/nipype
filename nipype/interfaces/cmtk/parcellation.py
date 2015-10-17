@@ -590,7 +590,7 @@ class Parcellate(BaseInterface):
                 self._gen_outfilename('nii.gz', 'ROI'))
         if(self.inputs.dilation==True):
             outputs['roiv_file'] = op.abspath(self._gen_outfilename(
-            'nii.gz', 'ROIv'))
+                'nii.gz', 'ROIv'))
         outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
         outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
         outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
@@ -599,7 +599,7 @@ class Parcellate(BaseInterface):
             'ROI_HR_th.nii.gz')
         if(self.inputs.dilation==True):
             outputs['dilated_roi_file_in_structural_space'] = op.abspath(
-            'ROIv_HR_th.nii.gz')
+                'ROIv_HR_th.nii.gz')
         return outputs
 
     def _gen_outfilename(self, ext, prefix='ROI'):

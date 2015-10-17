@@ -440,7 +440,7 @@ def test_tbss_skeleton():
     # First by implicit argument
     skeletor.inputs.skeleton_file = True
     yield assert_equal, skeletor.cmdline, \
-    "tbss_skeleton -i a.nii -o %s"%os.path.join(newdir, "a_skeleton.nii")
+        "tbss_skeleton -i a.nii -o %s"%os.path.join(newdir, "a_skeleton.nii")
 
     # Now with a specific name
     skeletor.inputs.skeleton_file = "old_boney.nii"
@@ -459,14 +459,14 @@ def test_tbss_skeleton():
 
     # Now we get a command line
     yield assert_equal, bones.cmdline, \
-    "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s"%(Info.standard_image("LowerCingulum_1mm.nii.gz"),
+        "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s"%(Info.standard_image("LowerCingulum_1mm.nii.gz"),
                                                          os.path.join(newdir, "b_skeletonised.nii"))
 
     # Can we specify a mask?
     bones.inputs.use_cingulum_mask = Undefined
     bones.inputs.search_mask_file = "a.nii"
     yield assert_equal, bones.cmdline, \
-    "tbss_skeleton -i a.nii -p 0.200 b.nii a.nii b.nii %s"%os.path.join(newdir, "b_skeletonised.nii")
+        "tbss_skeleton -i a.nii -p 0.200 b.nii a.nii b.nii %s"%os.path.join(newdir, "b_skeletonised.nii")
 
     # Looks good; clean up
     clean_directory(newdir, olddir)

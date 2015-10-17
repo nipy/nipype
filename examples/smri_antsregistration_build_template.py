@@ -65,14 +65,14 @@ co-aligned images for that one scan session
 """
 
 ListOfImagesDictionaries=[
-{'T1':os.path.join(mydatadir,'01_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
-{'T1':os.path.join(mydatadir,'02_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
-{'T1':os.path.join(mydatadir,'03_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
+    {'T1':os.path.join(mydatadir,'01_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
+    {'T1':os.path.join(mydatadir,'02_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
+    {'T1':os.path.join(mydatadir,'03_T1_half.nii.gz'),'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz'),'LABEL_MAP':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
 ]
 input_passive_images=[
-{'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
-{'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
-{'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
+    {'INV_T1':os.path.join(mydatadir,'01_T1_inv_half.nii.gz')},
+    {'INV_T1':os.path.join(mydatadir,'02_T1_inv_half.nii.gz')},
+    {'INV_T1':os.path.join(mydatadir,'03_T1_inv_half.nii.gz')}
 ]
 
 """

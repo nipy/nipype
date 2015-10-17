@@ -49,8 +49,8 @@ for tt in MyFileURLs:
         print("File previously downloaded {0}".format(localFilename))
 
 input_images=[
-os.path.join(mydatadir,'01_T1_half.nii.gz'),
-os.path.join(mydatadir,'02_T1_half.nii.gz'),
+    os.path.join(mydatadir,'01_T1_half.nii.gz'),
+    os.path.join(mydatadir,'02_T1_half.nii.gz'),
 ]
 
 """

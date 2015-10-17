@@ -69,7 +69,7 @@ description  = 'Neuroimaging in Python: Pipelines and Interfaces'
 # README.txt, so that it shows up nicely on PyPI.  So please remember to edit
 # it only in one place and sync it correctly.
 long_description = \
-"""
+    """
 ========================================================
 NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 ========================================================

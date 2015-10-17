@@ -311,7 +311,7 @@ class DistributedPluginBase(PluginBase):
         self.procs.extend(mapnodesubids)
         self.depidx = ssp.vstack((self.depidx,
                                   ssp.lil_matrix(np.zeros(
-                                  (numnodes, self.depidx.shape[1])))),
+                                      (numnodes, self.depidx.shape[1])))),
                                  'lil')
         self.depidx = ssp.hstack((self.depidx,
                                   ssp.lil_matrix(
@@ -530,7 +530,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
                                  'seconds. Batch dir contains crashdump file '
                                  'if node raised an exception.\n'
                                  'Node working directory: ({2}) '.format(
-                                 taskid,timeout,node_dir) )
+                                     taskid,timeout,node_dir) )
                 raise IOError(error_message)
             except IOError as e:
                 result_data['traceback'] = format_exc()

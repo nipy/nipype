@@ -254,7 +254,7 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x =
                         "%s = traits.Either(traits.Bool, %s(%s), %s)" % (name,
                                                                          type,
                                                                          parse_values(
-                                                                         values).replace("exists=True", ""),
+                                                                             values).replace("exists=True", ""),
                                                                          parse_params(traitsParams)))
                     traitsParams["exists"] = True
                     traitsParams.pop("argstr")

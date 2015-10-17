@@ -545,13 +545,13 @@ class CreateMatrix(BaseInterface):
         if self.inputs.count_region_intersections:
             outputs['matrix_files'] = [out_matrix_file, out_intersection_matrix_file]
             outputs['matlab_matrix_files'] = [outputs['matrix_mat_file'],
-            outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'],
-            outputs['fiber_length_std_matrix_mat_file'], outputs['intersection_matrix_mat_file']]
+                outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'],
+                outputs['fiber_length_std_matrix_mat_file'], outputs['intersection_matrix_mat_file']]
         else:
             outputs['matrix_files'] = [out_matrix_file]
             outputs['matlab_matrix_files'] = [outputs['matrix_mat_file'],
-            outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'],
-            outputs['fiber_length_std_matrix_mat_file']]
+                outputs['mean_fiber_length_matrix_mat_file'], outputs['median_fiber_length_matrix_mat_file'],
+                outputs['fiber_length_std_matrix_mat_file']]
 
         outputs['filtered_tractography'] = op.abspath(endpoint_name + '_streamline_final.trk')
         outputs['filtered_tractography_by_intersections'] = op.abspath(endpoint_name + '_intersections_streamline_final.trk')
