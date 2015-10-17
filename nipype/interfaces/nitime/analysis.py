@@ -172,8 +172,8 @@ class CoherenceAnalyzer(BaseInterface):
 
         #if isdefined(self.inputs.output_csv_file):
 
-            #write to a csv file and assign a value to self.coherence_file (a
-            #file name + path)
+        #write to a csv file and assign a value to self.coherence_file (a
+        #file name + path)
 
         #Always defined (the arrays):
         outputs['coherence_array'] = self.coherence
