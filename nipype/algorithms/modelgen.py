@@ -364,7 +364,7 @@ class SpecifyModel(BaseInterface):
                 for j, scanno in enumerate(out):
                     colidx = len(sessinfo[i]['regress'])
                     sessinfo[i]['regress'].insert(colidx, dict(name='', val=[]))
-                    sessinfo[i]['regress'][colidx]['name'] = 'Outlier%d'%(j+1)
+                    sessinfo[i]['regress'][colidx]['name'] = 'Outlier%d' %(j+1)
                     sessinfo[i]['regress'][colidx]['val'] = \
                         np.zeros((1, numscans))[0].tolist()
                     sessinfo[i]['regress'][colidx]['val'][int(scanno)] = 1
@@ -782,7 +782,7 @@ class SpecifySparseModel(SpecifyModel):
                 if hasattr(infoout[i], 'regressors') and infoout[i].regressors:
                     if not infoout[i].regressor_names:
                         infoout[i].regressor_names = \
-                            ['R%d'%j for j in range(len(infoout[i].regressors))]
+                            ['R%d' %j for j in range(len(infoout[i].regressors))]
                 else:
                     infoout[i].regressors = []
                     infoout[i].regressor_names = []

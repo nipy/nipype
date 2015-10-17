@@ -301,7 +301,7 @@ def pickFieldFlow(dartel_flow_fields, subject_id):
     from nipype.utils.filemanip import split_filename
     for f in dartel_flow_fields:
         _, name, _ = split_filename(f)
-        if name.find("subject_id_%s"%subject_id):
+        if name.find("subject_id_%s" %subject_id):
             return f
 
     raise Exception
@@ -326,7 +326,7 @@ paradigm was used for every participant.
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print("Subject ID: %s\n"%str(subject_id))
+    print("Subject ID: %s\n" %str(subject_id))
     output = []
     names = ['Task-Odd','Task-Even']
     for r in range(4):

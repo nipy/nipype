@@ -189,7 +189,7 @@ Define a function to get 10% of the intensity
 """
 
 def getthreshop(thresh):
-    return '-thr %.10f -Tmin -bin'%(0.1*thresh[0][1])
+    return '-thr %.10f -Tmin -bin' %(0.1*thresh[0][1])
 preproc.connect(getthresh, ('out_stat', getthreshop), threshold, 'op_string')
 
 """

@@ -13,7 +13,7 @@ def listClasses(module=None):
         print("Available Interfaces:")
         for k, v in sorted(list(pkg.__dict__.items())):
             if inspect.isclass(v) and issubclass(v, Interface):
-                print("\t%s"%k)
+                print("\t%s" %k)
 
 def add_options(parser=None, module=None, function=None):
     interface = None
@@ -36,7 +36,7 @@ def add_options(parser=None, module=None, function=None):
             else:
                 if spec.is_trait_type(InputMultiPath):
                     args["nargs"] = "*"
-                parser.add_argument("--%s"%name, dest=name,
+                parser.add_argument("--%s" %name, dest=name,
                                     help=desc, **args)
     return parser, interface
 
@@ -62,7 +62,7 @@ def run_instance(interface, options):
                     setattr(interface.inputs, input_name,
                             value)
                 except ValueError as e:
-                    print("Error when setting the value of %s: '%s'"%(input_name, str(e)))
+                    print("Error when setting the value of %s: '%s'" %(input_name, str(e)))
 
         print(interface.inputs)
         res = interface.run()
@@ -81,7 +81,7 @@ def main(argv):
     parsed = parser.parse_args(args=argv[1:3])
 
     _, prog = os.path.split(argv[0])
-    interface_parser = argparse.ArgumentParser(description="Run %s"%parsed.interface, prog=" ".join([prog] + argv[1:3]))
+    interface_parser = argparse.ArgumentParser(description="Run %s" %parsed.interface, prog=" ".join([prog] + argv[1:3]))
     interface_parser, interface = add_options(interface_parser, parsed.module, parsed.interface)
     args = interface_parser.parse_args(args=argv[3:])
     run_instance(interface, args)

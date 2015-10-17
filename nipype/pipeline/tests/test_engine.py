@@ -204,7 +204,7 @@ def test_iterable_expansion():
     wf1.connect(node1,'output1', node2, 'input2')
     wf3 = pe.Workflow(name='group')
     for i in [0,1,2]:
-        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+        wf3.add_nodes([wf1.clone(name='test%d' %i)])
     wf3._flatgraph = wf3._create_flat_graph()
     yield assert_equal, len(pe.generate_expanded_graph(wf3._flatgraph).nodes()),12
 
@@ -218,7 +218,7 @@ def test_synchronize_expansion():
     wf1.connect(node1,'output1', node2, 'input2')
     wf3 = pe.Workflow(name='group')
     for i in [0,1,2]:
-        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+        wf3.add_nodes([wf1.clone(name='test%d' %i)])
     wf3._flatgraph = wf3._create_flat_graph()
     # Each expanded graph clone has:
     # 3 node1 expansion nodes and
@@ -241,7 +241,7 @@ def test_synchronize_tuples_expansion():
 
     wf3 = pe.Workflow(name='group')
     for i in [0, 1, 2]:
-        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+        wf3.add_nodes([wf1.clone(name='test%d' %i)])
 
     wf3._flatgraph = wf3._create_flat_graph()
     # Identical to test_synchronize_expansion
@@ -268,7 +268,7 @@ def test_itersource_expansion():
 
     wf3 = pe.Workflow(name='group')
     for i in [0, 1, 2]:
-        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+        wf3.add_nodes([wf1.clone(name='test%d' %i)])
 
     wf3._flatgraph = wf3._create_flat_graph()
 
@@ -299,7 +299,7 @@ def test_itersource_synchronize1_expansion():
     wf1.connect(node3,'output1', node4, 'input1')
     wf3 = pe.Workflow(name='group')
     for i in [0,1,2]:
-        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+        wf3.add_nodes([wf1.clone(name='test%d' %i)])
     wf3._flatgraph = wf3._create_flat_graph()
 
     # each expanded graph clone has:
@@ -331,7 +331,7 @@ def test_itersource_synchronize2_expansion():
     wf1.connect(node3,'output1', node4, 'input1')
     wf3 = pe.Workflow(name='group')
     for i in [0,1,2]:
-        wf3.add_nodes([wf1.clone(name='test%d'%i)])
+        wf3.add_nodes([wf1.clone(name='test%d' %i)])
     wf3._flatgraph = wf3._create_flat_graph()
 
     # each expanded graph clone has:

@@ -226,7 +226,7 @@ data_dir = os.path.abspath('spm_face_data')
 # Specify the subject directories
 subject_list = ['M03953']
 # Map field names to individual subject runs.
-info = dict(func=[['RawEPI', 'subject_id', 5, ["_%04d"%i for i in range(6,357)]]],
+info = dict(func=[['RawEPI', 'subject_id', 5, ["_%04d" %i for i in range(6,357)]]],
             struct=[['Structural', 'subject_id', 7, '']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),

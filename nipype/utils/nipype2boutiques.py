@@ -133,7 +133,7 @@ def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs
     input['type'] = get_type_from_spec_info(spec_info)
     input['list'] = is_list(spec_info)
     input['command-line-key'] = "["+input_name.upper()+"]" # assumes that input names are unique
-    input['command-line-flag'] = ("--%s"%input_name+" ").strip()
+    input['command-line-flag'] = ("--%s" %input_name+" ").strip()
     input['tempvalue'] = None
     input['description'] = spec_info.capitalize()+". "+spec.desc.capitalize()
     if not input['description'].endswith('.'):

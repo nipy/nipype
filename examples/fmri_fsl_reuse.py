@@ -199,7 +199,7 @@ for every participant. Other examples of this function are available in the
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print("Subject ID: %s\n"%str(subject_id))
+    print("Subject ID: %s\n" %str(subject_id))
     output = []
     names = ['Task-Odd','Task-Even']
     for r in range(4):
