@@ -60,7 +60,7 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
             return module.__name__ == object.__module__
         elif isinstance(object, property):
             #print '_fm C6'  # dbg
-            return True # [XX] no way not be sure.
+            return True  # [XX] no way not be sure.
         else:
             raise ValueError("object must be a class or function")
 
@@ -160,7 +160,7 @@ print_state = numpy.get_printoptions()
 
 class NumpyDoctest(npd.Doctest):
     name = 'numpydoctest'   # call nosetests with --with-numpydoctest
-    score = 1000 # load late, after doctest builtin
+    score = 1000  # load late, after doctest builtin
 
     # always use whitespace and ellipsis options for doctests
     doctest_optflags = doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS
@@ -286,8 +286,8 @@ class Unplugger(object):
     By default it removes the "doctest" plugin.
     """
     name = 'unplugger'
-    enabled = True # always enabled
-    score = 4000 # load late in order to be after builtins
+    enabled = True  # always enabled
+    score = 4000  # load late in order to be after builtins
 
     def __init__(self, to_unplug='doctest'):
         self.to_unplug = to_unplug

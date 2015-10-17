@@ -544,11 +544,11 @@ class ErrorMap(BaseInterface):
         elif self.inputs.metric == 'euclidean':
             errvector = np.linalg.norm(diffvector, axis=1)
 
-        errvectorexp = np.zeros_like(mskvector, dtype=np.float32) # The default type is uint8
+        errvectorexp = np.zeros_like(mskvector, dtype=np.float32)  # The default type is uint8
         errvectorexp[msk_idxs] = errvector
 
         # Get averaged error
-        self._distance = np.average(errvector) # Only average the masked voxels
+        self._distance = np.average(errvector)  # Only average the masked voxels
 
         errmap = errvectorexp.reshape(mapshape)
 

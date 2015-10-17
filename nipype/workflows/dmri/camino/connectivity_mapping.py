@@ -1,7 +1,7 @@
 import inspect
 import os.path as op
 
-from ....interfaces import io as nio # Data i/o
+from ....interfaces import io as nio  # Data i/o
 from ....interfaces import utility as util     # utility
 from ....pipeline import engine as pe          # pypeline engine
 from ....interfaces import camino as camino
@@ -319,7 +319,7 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     mapping.connect([(inputnode_within, b0Strip, [('dwi', 'in_file')])])
-    mapping.connect([(inputnode_within, b0Strip, [('dwi', 't2_guided')])]) # Added to improve damaged brain extraction
+    mapping.connect([(inputnode_within, b0Strip, [('dwi', 't2_guided')])])  # Added to improve damaged brain extraction
     mapping.connect([(b0Strip, coregister, [('out_file', 'in_file')])])
     mapping.connect([(mri_convert_Brain, coregister, [('out_file', 'reference')])])
     mapping.connect([(coregister, convertxfm, [('out_matrix_file', 'in_file')])])

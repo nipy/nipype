@@ -305,7 +305,7 @@ def test_dilation(fsl_output_type=None):
 
     # Test that we can use a file kernel
     f = open("kernel.txt", "w").close()
-    del f # Shut pyflakes up
+    del f  # Shut pyflakes up
     diller.inputs.kernel_shape = "file"
     diller.inputs.kernel_size = Undefined
     diller.inputs.kernel_file = "kernel.txt"

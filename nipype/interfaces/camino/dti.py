@@ -168,7 +168,7 @@ class DTMetric(CommandLine):
         return filename
 
 class ModelFitInputSpec(StdOutCommandLineInputSpec):
-    def _gen_model_options(): #@NoSelf
+    def _gen_model_options():  # @NoSelf
         """
         Generate all possible permutations of < multi - tensor > < single - tensor > options
         """
@@ -847,7 +847,7 @@ class ComputeMeanDiffusivity(StdOutCommandLine):
 
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
-        return name + "_MD.img" #Need to change to self.inputs.outputdatatype
+        return name + "_MD.img"  # Need to change to self.inputs.outputdatatype
 
 class ComputeFractionalAnisotropyInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
@@ -906,7 +906,7 @@ class ComputeFractionalAnisotropy(StdOutCommandLine):
 
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
-        return name + '_FA.Bdouble' #Need to change to self.inputs.outputdatatype
+        return name + '_FA.Bdouble'  # Need to change to self.inputs.outputdatatype
 
 class ComputeTensorTraceInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='< %s', mandatory=True, position=1,
@@ -967,7 +967,7 @@ class ComputeTensorTrace(StdOutCommandLine):
 
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
-        return name + '_TrD.img' #Need to change to self.inputs.outputdatatype
+        return name + '_TrD.img'  # Need to change to self.inputs.outputdatatype
 
 
 class ComputeEigensystemInputSpec(StdOutCommandLineInputSpec):

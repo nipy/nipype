@@ -173,7 +173,7 @@ def get_documented_in_lines(lines, module=None, filename=None):
                     continue
 
                 if line.strip().startswith(':'):
-                    continue # skip options
+                    continue  # skip options
 
                 m = autosummary_item_re.match(line)
                 if m:

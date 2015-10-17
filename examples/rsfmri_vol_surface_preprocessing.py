@@ -903,7 +903,7 @@ def create_workflow(files,
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
     datasink.inputs.substitutions = substitutions
-    datasink.inputs.regexp_substitutions = regex_subs #(r'(/_.*(\d+/))', r'/run\2')
+    datasink.inputs.regexp_substitutions = regex_subs  # (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(realign, 'realignment_parameters', datasink, 'resting.qa.motion')
     wf.connect(art, 'norm_files', datasink, 'resting.qa.art.@norm')
     wf.connect(art, 'intensity_files', datasink, 'resting.qa.art.@intensity')
@@ -934,7 +934,7 @@ def create_workflow(files,
     datasink2.inputs.base_directory = sink_directory
     datasink2.inputs.container = subject_id
     datasink2.inputs.substitutions = substitutions
-    datasink2.inputs.regexp_substitutions = regex_subs #(r'(/_.*(\d+/))', r'/run\2')
+    datasink2.inputs.regexp_substitutions = regex_subs  # (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(combiner, 'out_file',
                datasink2, 'resting.parcellations.grayo.@surface')
     return wf

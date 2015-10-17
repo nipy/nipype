@@ -60,7 +60,7 @@ def RenestDeformedPassiveImages(deformedPassiveImages, flattened_image_nametypes
         if image_type in interpolationMapping:
             nested_interpolation_type.append(interpolationMapping[image_type])
         else:
-            nested_interpolation_type.append('Linear') #Linear is the default.
+            nested_interpolation_type.append('Linear')  # Linear is the default.
     print("\n"*10)
     print("HACK: ", nested_imagetype_list)
     print("HACK: ", outputAverageImageName_list)
@@ -113,7 +113,7 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries, transforms, i
             if imgname in interpolationMapping:
                 flattened_interpolation_type.append(interpolationMapping[imgname])
             else:
-                flattened_interpolation_type.append('Linear') #Linear is the default.
+                flattened_interpolation_type.append('Linear')  # Linear is the default.
     print("HACK: flattened images    {0}\n".format(flattened_images))
     print("HACK: flattened nametypes {0}\n".format(flattened_image_nametypes))
     print("HACK: flattened txfms     {0}\n".format(flattened_transforms))

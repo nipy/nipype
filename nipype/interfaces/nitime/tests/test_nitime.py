@@ -17,7 +17,7 @@ def test_read_csv():
     """Test that reading the data from csv file gives you back a reasonable
     time-series object """
     CA = nitime.CoherenceAnalyzer()
-    CA.inputs.TR = 1.89 # bogus value just to pass traits test
+    CA.inputs.TR = 1.89  # bogus value just to pass traits test
     CA.inputs.in_file = example_data('fmri_timeseries_nolabels.csv')
     yield assert_raises, ValueError, CA._read_csv
 
@@ -69,7 +69,7 @@ def test_coherence_analysis():
                         (C.frequencies < CA.inputs.frequency_range[1]))[0]
 
     #Extract the coherence and average across these frequency bands:
-    coh = np.mean(C.coherence[:, :, freq_idx], -1) #Averaging on the last dimension
+    coh = np.mean(C.coherence[:, :, freq_idx], -1)  # Averaging on the last dimension
 
     yield assert_equal, o.outputs.coherence_array, coh
 

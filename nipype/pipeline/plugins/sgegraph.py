@@ -75,7 +75,7 @@ class SGEGraphPlugin(GraphPluginBase):
         submitjobsfile = os.path.join(batch_dir, 'submit_jobs.sh')
 
         cache_doneness_per_node = dict()
-        if self._dont_resubmit_completed_jobs: ## A future parameter for controlling this behavior could be added here
+        if self._dont_resubmit_completed_jobs:  # A future parameter for controlling this behavior could be added here
             for idx, pyscript in enumerate(pyfiles):
                 node = nodes[idx]
                 node_status_done = node_completed_status(node)
@@ -123,7 +123,7 @@ class SGEGraphPlugin(GraphPluginBase):
                             ## Avoid dependancies of done jobs
                             if not self._dont_resubmit_completed_jobs or cache_doneness_per_node[jobid] == False:
                                 values += "${{{0}}},".format(make_job_name(jobid, nodes))
-                        if values != ' ': # i.e. if some jobs were added to dependency list
+                        if values != ' ':  # i.e. if some jobs were added to dependency list
                             values = values.rstrip(',')
                             deps = '-hold_jid%s' % values
                     jobname = make_job_name(idx, nodes)

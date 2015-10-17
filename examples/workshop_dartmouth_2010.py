@@ -131,7 +131,7 @@ motion_correct = pe.Node(interface=fsl.MCFLIRT(in_file=os.path.abspath('data/s1/
 smooth = pe.Node(interface=fsl.Smooth(fwhm=6), name="smooth")
 
 motion_correct_and_smooth = pe.Workflow(name="motion_correct_and_smooth")
-motion_correct_and_smooth.base_dir = os.path.abspath('.') # define where will be the root folder for the workflow
+motion_correct_and_smooth.base_dir = os.path.abspath('.')  # define where will be the root folder for the workflow
 motion_correct_and_smooth.connect([
                                    (motion_correct, smooth, [('out_file', 'in_file')])
                                    ])

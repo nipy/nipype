@@ -587,7 +587,7 @@ class S3DataGrabber(IOBase):
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
                     key in self.inputs.field_template:
-                template = self.inputs.field_template[key] # template override for multiple outfields
+                template = self.inputs.field_template[key]  # template override for multiple outfields
             if isdefined(self.inputs.bucket_path):
                 template = os.path.join(self.inputs.bucket_path, template)
             if not args:

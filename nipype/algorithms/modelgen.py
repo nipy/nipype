@@ -623,9 +623,9 @@ class SpecifySparseModel(SpecifyModel):
             import matplotlib.pyplot as plt
         TR = np.round(self.inputs.time_repetition * 1000)  # in ms
         if self.inputs.time_acquisition:
-            TA = np.round(self.inputs.time_acquisition * 1000) # in ms
+            TA = np.round(self.inputs.time_acquisition * 1000)  # in ms
         else:
-            TA = TR # in ms
+            TA = TR  # in ms
         nvol = self.inputs.volumes_in_cluster
         SCANONSET = np.round(self.inputs.scan_onset * 1000)
         total_time = TR * (nscans - nvol) / nvol + TA * nvol + SCANONSET

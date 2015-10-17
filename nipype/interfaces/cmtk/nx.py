@@ -228,7 +228,7 @@ def compute_node_measures(ntwk, calculate_cliques=False):
     isolate_list = nx.isolates(ntwk)
     binarized = np.zeros((ntwk.number_of_nodes(), 1))
     for value in isolate_list:
-        value = value - 1 # Zero indexing
+        value = value - 1  # Zero indexing
         binarized[value] = 1
     measures['isolates'] = binarized
     if calculate_cliques:
@@ -274,7 +274,7 @@ def compute_singlevalued_measures(ntwk, weighted=True, calculate_cliques=False):
     iflogger.info('...Computing degree assortativity (pearson number) ...')
     try:
         measures['degree_pearsonr'] = nx.degree_pearsonr(ntwk)
-    except AttributeError: # For NetworkX 1.6
+    except AttributeError:  # For NetworkX 1.6
         measures['degree_pearsonr'] = nx.degree_pearson_correlation_coefficient(ntwk)
     iflogger.info('...Computing degree assortativity...')
     try:
@@ -301,7 +301,7 @@ def compute_singlevalued_measures(ntwk, weighted=True, calculate_cliques=False):
         measures['average_shortest_path_length'] = nx.average_shortest_path_length(nx.connected_component_subgraphs(ntwk)[0], weighted)
     if calculate_cliques:
         iflogger.info('...Computing graph clique number...')
-        measures['graph_clique_number'] = nx.graph_clique_number(ntwk) #out of memory error
+        measures['graph_clique_number'] = nx.graph_clique_number(ntwk)  # out of memory error
     return measures
 
 

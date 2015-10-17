@@ -88,7 +88,7 @@ def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fiel
     motion = create_motion_correct_pipeline()
     eddy = create_eddy_correct_pipeline()
 
-    if use_fieldmap: # we have a fieldmap, so lets use it (yay!)
+    if use_fieldmap:  # we have a fieldmap, so lets use it (yay!)
         susceptibility = create_epidewarp_pipeline(
                          fieldmap_registration=fieldmap_registration)
 
@@ -110,7 +110,7 @@ def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fiel
                          (motion, outputnode, [('outputnode.out_bvec', 'bvec_rotated')]),
                          (susceptibility, outputnode, [('outputnode.epi_corrected', 'dmri_corrected')])
                          ])
-    else: # we don't have a fieldmap, so we just carry on without it :(
+    else:  # we don't have a fieldmap, so we just carry on without it :(
         pipeline.connect([
                          (inputnode, motion, [('in_file', 'inputnode.in_file'),
                                               ('in_bvec', 'inputnode.in_bvec'),
@@ -678,12 +678,12 @@ def _rotate_bvecs(in_bvec, in_matrix):
         name, _ = os.path.splitext(name)
     out_file = os.path.abspath('./%s_rotated.bvec' % name)
     bvecs = np.loadtxt(in_bvec)
-    new_bvecs = np.zeros(shape=bvecs.T.shape) #pre-initialise array, 3 col format
+    new_bvecs = np.zeros(shape=bvecs.T.shape)  # pre-initialise array, 3 col format
 
-    for i, vol_matrix in enumerate(in_matrix[0::]): #start index at 0
+    for i, vol_matrix in enumerate(in_matrix[0::]):  # start index at 0
         bvec = np.matrix(bvecs[:, i])
         rot = np.matrix(np.loadtxt(vol_matrix)[0:3, 0:3])
-        new_bvecs[i] = (np.array(rot * bvec.T).T)[0] #fill each volume with x,y,z as we go along
+        new_bvecs[i] = (np.array(rot * bvec.T).T)[0]  # fill each volume with x,y,z as we go along
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
     return out_file
 

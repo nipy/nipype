@@ -83,7 +83,7 @@ def get_rois_crossed(pointsmm, roiData, voxelSize):
         z = int(pointsmm[j, 2] / float(voxelSize[2]))
         if not roiData[x, y, z] == 0:
             rois_crossed.append(roiData[x, y, z])
-    rois_crossed = list(dict.fromkeys(rois_crossed).keys()) #Removed duplicates from the list
+    rois_crossed = list(dict.fromkeys(rois_crossed).keys())  # Removed duplicates from the list
     return rois_crossed
 
 def get_connectivity_matrix(n_rois, list_of_roi_crossed_lists):
@@ -228,7 +228,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
         intersection_matrix = np.matrix(intersection_matrix)
         I = G.copy()
         H = nx.from_numpy_matrix(np.matrix(intersection_matrix))
-        H = nx.relabel_nodes(H, lambda x: x + 1) #relabel nodes so they start at 1
+        H = nx.relabel_nodes(H, lambda x: x + 1)  # relabel nodes so they start at 1
         I.add_weighted_edges_from(((u, v, d['weight']) for u, v, d in H.edges(data=True)))
 
     dis = 0
@@ -313,7 +313,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
             di['fiber_length_mean'] = 0
             di['fiber_length_median'] = 0
             di['fiber_length_std'] = 0
-        if not u == v: #Fix for self loop problem
+        if not u == v:  # Fix for self loop problem
             G.add_edge(u, v, di)
             if 'fiblist' in d:
                 numfib.add_edge(u, v, weight=di['number_of_fibers'])

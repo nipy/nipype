@@ -206,7 +206,7 @@ def build_doc(doc, opts):
             # Probably an empty line
             continue
         # For lines we care about, the first item is the flag
-        if ',' in linelist[0]: #sometimes flags are only seperated by comma
+        if ',' in linelist[0]:  # sometimes flags are only seperated by comma
             flag = linelist[0].split(',')[0]
         else:
             flag = linelist[0]

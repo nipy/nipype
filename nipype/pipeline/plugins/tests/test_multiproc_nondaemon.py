@@ -50,7 +50,7 @@ def mytestFunction(insum=0):
 
         # create a temp file to use as the data exchange container
         tmpFile = tempfile.mkstemp('.txt', 'test_engine_')[1]
-        f[n] = tmpFile # keep track of the temp file
+        f[n] = tmpFile  # keep track of the temp file
         t[n] = multiprocessing.Process(target=dummyFunction,
                                        args=(tmpFile,))
         # fire up the job
@@ -143,5 +143,5 @@ def test_run_multiproc_nondaemon_false():
 def test_run_multiproc_nondaemon_true():
     # with nondaemon_flag = True, the execution should succeed
     result = run_multiproc_nondaemon_with_flag(True)
-    yield assert_equal, result, 180 # n_procs (2) * numberOfThreads (2) * 45 == 180
+    yield assert_equal, result, 180  # n_procs (2) * numberOfThreads (2) * 45 == 180
 

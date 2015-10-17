@@ -27,7 +27,7 @@ class MRConvertInputSpec(CommandLineInputSpec):
                              position=3, minlen=3, maxlen=3,
                              desc='Three comma-separated numbers giving the size of each voxel in mm.')
     output_datatype = traits.Enum("nii", "float", "char", "short", "int", "long", "double", argstr='-output %s', position=2,
-                                  desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"') #, usedefault=True)
+                                  desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"')  # , usedefault=True)
     extension = traits.Enum("mif", "nii", "float", "char", "short", "int", "long", "double", position=2,
                             desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"', usedefault=True)
     layout = traits.Enum("nii", "float", "char", "short", "int", "long", "double", argstr='-output %s', position=2,

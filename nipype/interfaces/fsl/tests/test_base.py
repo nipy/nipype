@@ -9,7 +9,7 @@ from nipype.interfaces.base import InterfaceResult
 from nipype.interfaces.fsl import check_fsl, no_fsl
 
 
-@skipif(no_fsl)#skip if fsl not installed)
+@skipif(no_fsl)  # skip if fsl not installed)
 def test_fslversion():
     ver = fsl.Info.version()
     if ver:
@@ -17,7 +17,7 @@ def test_fslversion():
         ver = ver.split('.')
         yield assert_true, ver[0] in ['4', '5']
 
-@skipif(no_fsl)#skip if fsl not installed)
+@skipif(no_fsl)  # skip if fsl not installed)
 def test_fsloutputtype():
     types = list(fsl.Info.ftypes.keys())
     orig_out_type = fsl.Info.output_type()
@@ -31,7 +31,7 @@ def test_outputtype_to_ext():
 
     yield assert_raises, KeyError, fsl.Info.output_type_to_ext, 'JUNK'
 
-@skipif(no_fsl)#skip if fsl not installed)
+@skipif(no_fsl)  # skip if fsl not installed)
 def test_FSLCommand():
     # Most methods in FSLCommand are tested in the subclasses.  Only
     # testing the one item that is not.
@@ -39,7 +39,7 @@ def test_FSLCommand():
     res = cmd.run()
     yield assert_equal, type(res), InterfaceResult
 
-@skipif(no_fsl)#skip if fsl not installed)
+@skipif(no_fsl)  # skip if fsl not installed)
 def test_FSLCommand2():
     # Check default output type and environ
     cmd = fsl.FSLCommand(command='junk')
@@ -56,7 +56,7 @@ def test_FSLCommand2():
             #  Setting class outputtype should not effect existing instances
             yield assert_not_equal, cmdinst.inputs.output_type, out_type
 
-@skipif(no_fsl)#skip if fsl not installed)
+@skipif(no_fsl)  # skip if fsl not installed)
 def test_gen_fname():
     # Test _gen_fname method of FSLCommand
     cmd = fsl.FSLCommand(command='junk', output_type='NIFTI_GZ')

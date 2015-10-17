@@ -132,7 +132,7 @@ def get_boutiques_input(inputs, interface, input_name, spec, ignored_template_in
     input['name'] = input_name.replace('_', ' ').capitalize()
     input['type'] = get_type_from_spec_info(spec_info)
     input['list'] = is_list(spec_info)
-    input['command-line-key'] = "["+input_name.upper()+"]" # assumes that input names are unique
+    input['command-line-key'] = "["+input_name.upper()+"]"  # assumes that input names are unique
     input['command-line-flag'] = ("--%s" %input_name+" ").strip()
     input['tempvalue'] = None
     input['description'] = spec_info.capitalize()+". "+spec.desc.capitalize()
@@ -182,12 +182,12 @@ def get_boutiques_output(name, interface, tool_inputs, verbose=False):
     output['id'] = name
     output['type'] = "File"
     output['path-template'] = ""
-    output['optional'] = True # no real way to determine if an output is always produced, regardless of the input values.
+    output['optional'] = True  # no real way to determine if an output is always produced, regardless of the input values.
 
     # Path template creation.
 
     output_value = interface._list_outputs()[name]
-    if output_value != "" and isinstance(output_value, str): # FIXME: this crashes when there are multiple output values.
+    if output_value != "" and isinstance(output_value, str):  # FIXME: this crashes when there are multiple output values.
         # Go find from which input value it was built
         for input in tool_inputs:
             if not input['tempvalue']:
@@ -197,7 +197,7 @@ def get_boutiques_output(name, interface, tool_inputs, verbose=False):
                 # Take the base name
                 input_value = os.path.splitext(os.path.basename(input_value))[0]
             if str(input_value) in output_value:
-                output_value = os.path.basename(output_value.replace(input_value, input['command-line-key'])) # FIXME: this only works if output is written in the current directory
+                output_value = os.path.basename(output_value.replace(input_value, input['command-line-key']))  # FIXME: this only works if output is written in the current directory
         output['path-template'] = os.path.basename(output_value)
     return output
 
@@ -232,7 +232,7 @@ def get_unique_value(type, id):
     return {
       "File": os.path.abspath(create_tempfile()),
       "Boolean": True,
-      "Number": abs(hash(id)), # abs in case input param must be positive...
+      "Number": abs(hash(id)),  # abs in case input param must be positive...
       "String": id
     }[type]
 

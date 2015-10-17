@@ -455,7 +455,7 @@ def test_tbss_skeleton():
     # But we can set what we need
     bones.inputs.threshold = 0.2
     bones.inputs.distance_map = "b.nii"
-    bones.inputs.data_file = "b.nii" # Even though that's silly
+    bones.inputs.data_file = "b.nii"  # Even though that's silly
 
     # Now we get a command line
     yield assert_equal, bones.cmdline, \

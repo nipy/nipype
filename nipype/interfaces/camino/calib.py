@@ -22,7 +22,7 @@ class SFPICOCalibDataInputSpec(StdOutCommandLineInputSpec):
                        desc='Specifies the scheme file for the diffusion MRI data')
     info_file = File(desc='The name to be given to the information output filename.',
                      argstr='-infooutputfile %s', mandatory=True, genfile=True,
-                     hash_files=False) # Genfile and hash_files?
+                     hash_files=False)  # Genfile and hash_files?
     trace = traits.Float(argstr='-trace %f', units='NA',
                          desc='Trace of the diffusion tensor(s) used in the test function.')
     onedtfarange = traits.List(traits.Float, argstr='-onedtfarange %s',
