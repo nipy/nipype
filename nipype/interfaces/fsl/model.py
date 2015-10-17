@@ -397,7 +397,7 @@ class FEAT(FSLCommand):
                     try:
                         outputdir_spec=line.split('"')[-2]
                         if os.path.exists(outputdir_spec):
-                           outputs['feat_dir']=outputdir_spec
+                            outputs['feat_dir']=outputdir_spec
 
                     except:
                         pass

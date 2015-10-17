@@ -54,7 +54,7 @@ def test_coherence_analysis():
     data = np.zeros((len(roi_names),n_samples))
 
     for n_idx, roi in enumerate(roi_names):
-       data[n_idx] = data_rec[roi]
+        data[n_idx] = data_rec[roi]
 
     T = ts.TimeSeries(data,sampling_interval=TR)
 

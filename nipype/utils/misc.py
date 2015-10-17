@@ -102,55 +102,55 @@ def create_function_from_source(function_source, imports=None):
     return func
 
 def find_indices(condition):
-   "Return the indices where ravel(condition) is true"
-   res, = np.nonzero(np.ravel(condition))
-   return res
+    "Return the indices where ravel(condition) is true"
+    res, = np.nonzero(np.ravel(condition))
+    return res
 
 def is_container(item):
-   """Checks if item is a container (list, tuple, dict, set)
+    """Checks if item is a container (list, tuple, dict, set)
 
-   Parameters
-   ----------
-   item : object
-       object to check for .__iter__
+    Parameters
+    ----------
+    item : object
+        object to check for .__iter__
 
-   Returns
-   -------
-   output : Boolean
-       True if container
-       False if not (eg string)
-   """
-   if isinstance(item, string_types):
-       return False
-   elif hasattr(item, '__iter__'):
-      return True
-   else:
-      return False
+    Returns
+    -------
+    output : Boolean
+        True if container
+        False if not (eg string)
+    """
+    if isinstance(item, string_types):
+        return False
+    elif hasattr(item, '__iter__'):
+        return True
+    else:
+        return False
 
 def container_to_string(cont):
-   """Convert a container to a command line string.
+    """Convert a container to a command line string.
 
-   Elements of the container are joined with a space between them,
-   suitable for a command line parameter.
+    Elements of the container are joined with a space between them,
+    suitable for a command line parameter.
 
-   If the container `cont` is only a sequence, like a string and not a
-   container, it is returned unmodified.
+    If the container `cont` is only a sequence, like a string and not a
+    container, it is returned unmodified.
 
-   Parameters
-   ----------
-   cont : container
-      A container object like a list, tuple, dict, or a set.
+    Parameters
+    ----------
+    cont : container
+       A container object like a list, tuple, dict, or a set.
 
-   Returns
-   -------
-   cont_str : string
-       Container elements joined into a string.
+    Returns
+    -------
+    cont_str : string
+        Container elements joined into a string.
 
-   """
-   if hasattr(cont, '__iter__') and not isinstance(cont, string_types):
-      return str(' '.join(cont))
+    """
+    if hasattr(cont, '__iter__') and not isinstance(cont, string_types):
+        return str(' '.join(cont))
 
-   return str(cont)
+    return str(cont)
 
 
 # Dependency checks.  Copied this from Nipy, with some modificiations
@@ -190,7 +190,7 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     else:
         msg = 'Nipype requires %s' % pkg_name
     if version:
-      msg += ' with version >= %s' % (version,)
+        msg += ' with version >= %s' % (version,)
     try:
         mod = __import__(pkg_name)
     except ImportError:
