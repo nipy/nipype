@@ -422,7 +422,7 @@ def test_binarymaths(fsl_output_type=None):
     operands = ["b.nii", -2, -0.5, 0, .123456, np.pi, 500]
     for op in ops:
         for ent in operands:
-            maths = fsl.BinaryMaths(in_file="a.nii", out_file="c.nii", operation = op)
+            maths = fsl.BinaryMaths(in_file="a.nii", out_file="c.nii", operation=op)
             if ent == "b.nii":
                 maths.inputs.operand_file = ent
                 yield assert_equal, maths.cmdline, "fslmaths a.nii -%s b.nii c.nii" %op
@@ -496,7 +496,7 @@ def test_tempfilt(fsl_output_type=None):
         yield assert_equal, filt.cmdline, "fslmaths a.nii -bptf %.6f %.6f b.nii" %win
 
     # Test that we don't need to ask for an out file
-    filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma = 64)
+    filt = fsl.TemporalFilter(in_file="a.nii", highpass_sigma=64)
     yield assert_equal, filt.cmdline, \
         "fslmaths a.nii -bptf 64.000000 -1.000000 %s" %os.path.join(testdir, "a_filt%s" % out_ext)
 

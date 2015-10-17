@@ -74,7 +74,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
 
     datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                    outfields=list(info.keys())),
-                         name = 'datasource')
+                         name='datasource')
 
     datasource.inputs.template = "%s/%s"
     datasource.inputs.base_directory = data_dir

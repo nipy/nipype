@@ -798,7 +798,7 @@ class SpecifySparseModel(SpecifyModel):
         else:
             infolist = gen_info(self.inputs.event_files)
         sparselist = self._generate_clustered_design(infolist)
-        super(SpecifySparseModel, self)._generate_design(infolist = sparselist)
+        super(SpecifySparseModel, self)._generate_design(infolist=sparselist)
 
     def _list_outputs(self):
         outputs = self._outputs().get()

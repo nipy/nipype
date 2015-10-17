@@ -10,10 +10,10 @@ from nipype.utils.filemanip import split_filename, fname_presuffix
 from nipype.interfaces.base import TraitError
 
 def test_coreg():
-    moving = example_data(infile = 'functional.nii')
-    target = example_data(infile = 'T1.nii')
-    mat = example_data(infile = 'trans.mat')
-    coreg = spmu.CalcCoregAffine(matlab_cmd = 'mymatlab')
+    moving = example_data(infile='functional.nii')
+    target = example_data(infile='T1.nii')
+    mat = example_data(infile='trans.mat')
+    coreg = spmu.CalcCoregAffine(matlab_cmd='mymatlab')
     coreg.inputs.target = target
     assert_equal(coreg.inputs.matlab_cmd, 'mymatlab')
     coreg.inputs.moving = moving
@@ -21,16 +21,16 @@ def test_coreg():
     pth, mov, _ = split_filename(moving)
     _, tgt, _ = split_filename(target)
     mat = os.path.join(pth, '%s_to_%s.mat' %(mov, tgt))
-    invmat = fname_presuffix(mat, prefix = 'inverse_')
+    invmat = fname_presuffix(mat, prefix='inverse_')
     scrpt = coreg._make_matlab_command(None)
     assert_equal(coreg.inputs.mat, mat)
     assert_equal(coreg.inputs.invmat, invmat)
 
 
 def test_apply_transform():
-    moving = example_data(infile = 'functional.nii')
-    mat = example_data(infile = 'trans.mat')
-    applymat = spmu.ApplyTransform(matlab_cmd = 'mymatlab')
+    moving = example_data(infile='functional.nii')
+    mat = example_data(infile='trans.mat')
+    applymat = spmu.ApplyTransform(matlab_cmd='mymatlab')
     assert_equal(applymat.inputs.matlab_cmd, 'mymatlab')
     applymat.inputs.in_file = moving
     applymat.inputs.mat = mat
@@ -41,15 +41,15 @@ def test_apply_transform():
     assert_equal(expected in scrpt, True)
 
 def test_reslice():
-    moving = example_data(infile = 'functional.nii')
-    space_defining = example_data(infile = 'T1.nii')
-    reslice = spmu.Reslice(matlab_cmd = 'mymatlab_version')
+    moving = example_data(infile='functional.nii')
+    space_defining = example_data(infile='T1.nii')
+    reslice = spmu.Reslice(matlab_cmd='mymatlab_version')
     assert_equal(reslice.inputs.matlab_cmd, 'mymatlab_version')
     reslice.inputs.in_file = moving
     reslice.inputs.space_defining = space_defining
     assert_equal(reslice.inputs.interp, 0)
-    assert_raises(TraitError, reslice.inputs.trait_set, interp = 'nearest')
-    assert_raises(TraitError, reslice.inputs.trait_set, interp = 10)
+    assert_raises(TraitError, reslice.inputs.trait_set, interp='nearest')
+    assert_raises(TraitError, reslice.inputs.trait_set, interp=10)
     reslice.inputs.interp = 1
     script = reslice._make_matlab_command(None)
     outfile = fname_presuffix(moving, prefix='r')
@@ -61,15 +61,15 @@ def test_reslice():
     assert_equal('spm_reslice(invols, flags);' in script, True)
 
 def test_dicom_import():
-    dicom = example_data(infile = 'dicomdir/123456-1-1.dcm')
-    di = spmu.DicomImport(matlab_cmd = 'mymatlab')
+    dicom = example_data(infile='dicomdir/123456-1-1.dcm')
+    di = spmu.DicomImport(matlab_cmd='mymatlab')
     assert_equal(di.inputs.matlab_cmd, 'mymatlab')
     assert_equal(di.inputs.output_dir_struct, 'flat')
     assert_equal(di.inputs.output_dir, './converted_dicom')
     assert_equal(di.inputs.format, 'nii')
     assert_equal(di.inputs.icedims, False)
-    assert_raises(TraitError, di.inputs.trait_set, output_dir_struct = 'wrong')
-    assert_raises(TraitError, di.inputs.trait_set, format = 'FAT')
-    assert_raises(TraitError, di.inputs.trait_set, in_files = ['does_sfd_not_32fn_exist.dcm'])
+    assert_raises(TraitError, di.inputs.trait_set, output_dir_struct='wrong')
+    assert_raises(TraitError, di.inputs.trait_set, format='FAT')
+    assert_raises(TraitError, di.inputs.trait_set, in_files=['does_sfd_not_32fn_exist.dcm'])
     di.inputs.in_files = [dicom]
     assert_equal(di.inputs.in_files, [dicom])

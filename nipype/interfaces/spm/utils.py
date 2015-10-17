@@ -37,17 +37,17 @@ class Analyze2nii(SPMCommand):
         return outputs
 
 class CalcCoregAffineInputSpec(SPMCommandInputSpec):
-    target = File(exists = True, mandatory = True,
-                   desc = 'target for generating affine transform')
-    moving = File(exists = True, mandatory = True, copyfile=False,
-                   desc = 'volume transform can be applied to register with target')
-    mat = File(desc = 'Filename used to store affine matrix')
-    invmat = File(desc = 'Filename used to store inverse affine matrix')
+    target = File(exists=True, mandatory=True,
+                   desc='target for generating affine transform')
+    moving = File(exists=True, mandatory=True, copyfile=False,
+                   desc='volume transform can be applied to register with target')
+    mat = File(desc='Filename used to store affine matrix')
+    invmat = File(desc='Filename used to store inverse affine matrix')
 
 
 class CalcCoregAffineOutputSpec(TraitedSpec):
-    mat = File(exists = True, desc = 'Matlab file holding transform')
-    invmat = File(desc = 'Matlab file holding inverse transform')
+    mat = File(exists=True, desc='Matlab file holding transform')
+    invmat = File(desc='Matlab file holding inverse transform')
 
 
 class CalcCoregAffine(SPMCommand):
@@ -78,7 +78,7 @@ class CalcCoregAffine(SPMCommand):
 
     def _make_inv_file(self):
         """ makes filename to hold inverse transform if not specified"""
-        invmat = fname_presuffix(self.inputs.mat, prefix = 'inverse_')
+        invmat = fname_presuffix(self.inputs.mat, prefix='inverse_')
         return invmat
 
     def _make_mat_file(self):
@@ -117,15 +117,15 @@ class CalcCoregAffine(SPMCommand):
         return outputs
 
 class ApplyTransformInputSpec(SPMCommandInputSpec):
-    in_file = File(exists = True, mandatory = True, copyfile=True,
+    in_file = File(exists=True, mandatory=True, copyfile=True,
                     desc='file to apply transform to, (only updates header)')
-    mat = File(exists = True, mandatory = True,
+    mat = File(exists=True, mandatory=True,
                 desc='file holding transform to apply')
     out_file = File(desc="output file name for transformed data",
                     genfile=True)
 
 class ApplyTransformOutputSpec(TraitedSpec):
-    out_file = File(exists = True, desc = 'Transformed image file')
+    out_file = File(exists=True, desc='Transformed image file')
 
 
 class ApplyTransform(SPMCommand):
@@ -180,20 +180,20 @@ class ApplyTransform(SPMCommand):
         return name + '_trans.nii'
 
 class ResliceInputSpec(SPMCommandInputSpec):
-    in_file = File(exists = True, mandatory=True,
+    in_file = File(exists=True, mandatory=True,
                     desc='file to apply transform to, (only updates header)')
-    space_defining = File(exists = True, mandatory = True,
-                            desc = 'Volume defining space to slice in_file into')
+    space_defining = File(exists=True, mandatory=True,
+                            desc='Volume defining space to slice in_file into')
 
-    interp = traits.Range(low = 0, high = 7, usedefault = True,
+    interp = traits.Range(low=0, high=7, usedefault=True,
                           desc='degree of b-spline used for interpolation'\
                           '0 is nearest neighbor (default)')
 
 
-    out_file = File(desc = 'Optional file to save resliced volume')
+    out_file = File(desc='Optional file to save resliced volume')
 
 class ResliceOutputSpec(TraitedSpec):
-    out_file = File(exists = True, desc = 'resliced volume')
+    out_file = File(exists=True, desc='resliced volume')
 
 class Reslice(SPMCommand):
     """ uses  spm_reslice to resample in_file into space of space_defining"""
@@ -205,7 +205,7 @@ class Reslice(SPMCommand):
         """ generates script"""
         if not isdefined(self.inputs.out_file):
             self.inputs.out_file = fname_presuffix(self.inputs.in_file,
-                                                   prefix = 'r')
+                                                   prefix='r')
         script = """
         flags.mean = 0;
         flags.which = 1;

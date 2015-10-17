@@ -307,7 +307,7 @@ class GenerateDirectionsInputSpec(CommandLineInputSpec):
     quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
     out_file = File(name_source=['num_dirs'], name_template='directions_%d.txt', argstr='%s', hash_files=False,
-                    position= -1, desc='the text file to write the directions to, as [ az el ] pairs.')
+                    position=-1, desc='the text file to write the directions to, as [ az el ] pairs.')
 
 class GenerateDirectionsOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='directions file')
@@ -342,7 +342,7 @@ class FindShPeaksInputSpec(CommandLineInputSpec):
     display_info = traits.Bool(argstr='-info', desc='Display information messages.')
     quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
-    out_file = File(name_template="%s_peak_dirs.mif", keep_extension=False, argstr='%s', hash_files=False, position= -1,
+    out_file = File(name_template="%s_peak_dirs.mif", keep_extension=False, argstr='%s', hash_files=False, position=-1,
                     desc='the output image. Each volume corresponds to the x, y & z component of each peak direction vector in turn', name_source=["in_file"])
 
 class FindShPeaksOutputSpec(TraitedSpec):
@@ -379,7 +379,7 @@ class Directions2AmplitudeInputSpec(CommandLineInputSpec):
     display_info = traits.Bool(argstr='-info', desc='Display information messages.')
     quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
-    out_file = File(name_template="%s_amplitudes.mif", keep_extension=False, argstr='%s', hash_files=False, position= -1,
+    out_file = File(name_template="%s_amplitudes.mif", keep_extension=False, argstr='%s', hash_files=False, position=-1,
                     desc='the output amplitudes image', name_source=["in_file"])
 
 class Directions2AmplitudeOutputSpec(TraitedSpec):

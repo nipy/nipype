@@ -29,9 +29,9 @@ class MeshFixInputSpec(CommandLineInputSpec):
 
     dont_clean = traits.Bool(argstr='--no-clean', desc="Don't Clean")
 
-    save_as_stl = traits.Bool(xor= ['save_as_vmrl', 'save_as_freesurfer_mesh'], argstr='--stl', desc="Result is saved in stereolithographic format (.stl)")
-    save_as_vmrl = traits.Bool(argstr='--wrl', xor= ['save_as_stl', 'save_as_freesurfer_mesh'], desc="Result is saved in VRML1.0 format (.wrl)")
-    save_as_freesurfer_mesh = traits.Bool(argstr='--fsmesh', xor= ['save_as_vrml', 'save_as_stl'], desc="Result is saved in freesurfer mesh format")
+    save_as_stl = traits.Bool(xor=['save_as_vmrl', 'save_as_freesurfer_mesh'], argstr='--stl', desc="Result is saved in stereolithographic format (.stl)")
+    save_as_vmrl = traits.Bool(argstr='--wrl', xor=['save_as_stl', 'save_as_freesurfer_mesh'], desc="Result is saved in VRML1.0 format (.wrl)")
+    save_as_freesurfer_mesh = traits.Bool(argstr='--fsmesh', xor=['save_as_vrml', 'save_as_stl'], desc="Result is saved in freesurfer mesh format")
 
     remove_handles = traits.Bool(argstr='--remove-handles', desc="Remove handles")
 
@@ -56,7 +56,7 @@ class MeshFixInputSpec(CommandLineInputSpec):
 
     finetuning_inwards = traits.Bool(argstr='--fineTuneIn ', requires=['finetuning_distance', 'finetuning_substeps'])
     finetuning_outwards = traits.Bool(argstr='--fineTuneIn ', requires=['finetuning_distance', 'finetuning_substeps'], xor=['finetuning_inwards'],
-                                      desc = 'Similar to finetuning_inwards, but ensures minimal distance in the other direction')
+                                      desc='Similar to finetuning_inwards, but ensures minimal distance in the other direction')
     finetuning_distance = traits.Float(argstr='%f', requires=['finetuning_substeps'], desc="Used to fine-tune the minimal distance between surfaces." \
                                        "A minimal distance d is ensured, and reached in n substeps. When using the surfaces for subsequent volume meshing by gmsh, this step prevent too flat tetrahedra2)")
     finetuning_substeps = traits.Int(argstr='%d', requires=['finetuning_distance'], desc="Used to fine-tune the minimal distance between surfaces." \

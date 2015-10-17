@@ -114,7 +114,7 @@ def generate_all_classes(modules_list=[], launcher=[], redirect_x=False, mipav_h
         print("=" * 80)
         print("Generating Definition for module {0}".format(module))
         print("^" * 80)
-        package, code, module = generate_class(module, launcher, redirect_x = redirect_x, mipav_hacks=mipav_hacks)
+        package, code, module = generate_class(module, launcher, redirect_x=redirect_x, mipav_hacks=mipav_hacks)
         cur_package = all_code
         module_name = package.strip().split(" ")[0].split(".")[-1]
         for package in package.strip().split(" ")[0].split(".")[:-1]:
@@ -129,7 +129,7 @@ def generate_all_classes(modules_list=[], launcher=[], redirect_x=False, mipav_h
     crawl_code_struct(all_code, os.getcwd())
 
 
-def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x = False, mipav_hacks=False):
+def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x=False, mipav_hacks=False):
     dom = grab_xml(module, launcher, mipav_hacks=mipav_hacks)
     if strip_module_name_prefix:
         module_name = module.split(".")[-1]

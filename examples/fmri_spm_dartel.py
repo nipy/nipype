@@ -134,14 +134,14 @@ l1analysis = pe.Workflow(name='analysis')
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
 
-modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
+modelspec = pe.Node(interface=model.SpecifySPMModel(), name="modelspec")
 modelspec.inputs.concatenate_runs = True
 
 """Generate a first level SPM.mat file for analysis
 :class:`nipype.interfaces.spm.Level1Design`.
 """
 
-level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
+level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
 level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
 
 """Use :class:`nipype.interfaces.spm.EstimateModel` to determine the
@@ -155,7 +155,7 @@ level1estimate.inputs.estimation_method = {'Classical': 1}
 first level contrasts specified in a few steps above.
 """
 
-contrastestimate = pe.Node(interface = spm.EstimateContrast(), name="contrastestimate")
+contrastestimate = pe.Node(interface=spm.EstimateContrast(), name="contrastestimate")
 
 """Use :class: `nipype.interfaces.utility.Select` to select each contrast for
 reporting.
@@ -262,7 +262,7 @@ functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
-                     name = 'datasource')
+                     name='datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
@@ -273,8 +273,8 @@ datasource.inputs.sort_filelist = True
 
 datasource_dartel = pe.MapNode(interface=nio.DataGrabber(infields=['subject_id'],
                                                          outfields=['struct']),
-                               name = 'datasource_dartel',
-                               iterfield = ['subject_id'])
+                               name='datasource_dartel',
+                               iterfield=['subject_id'])
 datasource_dartel.inputs.base_directory = data_dir
 datasource_dartel.inputs.template = '%s/%s.nii'
 datasource_dartel.inputs.template_args = dict(struct=[['subject_id', 'struct']])
@@ -287,7 +287,7 @@ This way we will be able to pick the right field flows later.
 
 rename_dartel = pe.MapNode(util.Rename(format_string="subject_id_%(subject_id)s_struct"),
                            iterfield=['in_file', 'subject_id'],
-                           name = 'rename_dartel')
+                           name='rename_dartel')
 rename_dartel.inputs.subject_id = subject_list
 rename_dartel.inputs.keep_ext = True
 
@@ -309,8 +309,8 @@ def pickFieldFlow(dartel_flow_fields, subject_id):
 pick_flow = pe.Node(util.Function(input_names=['dartel_flow_fields',
                                                'subject_id'],
                                   output_names=['dartel_flow_field'],
-                                  function = pickFieldFlow),
-                    name = "pick_flow")
+                                  function=pickFieldFlow),
+                    name="pick_flow")
 
 """
 Experimental paradigm specific components
@@ -501,7 +501,7 @@ subjects (n=2 in this example).
 onesamplettestdes = pe.Node(interface=spm.OneSampleTTestDesign(), name="onesampttestdes")
 l2estimate = pe.Node(interface=spm.EstimateModel(), name="level2estimate")
 l2estimate.inputs.estimation_method = {'Classical': 1}
-l2conestimate = pe.Node(interface = spm.EstimateContrast(), name="level2conestimate")
+l2conestimate = pe.Node(interface=spm.EstimateContrast(), name="level2conestimate")
 cont1 = ('Group', 'T', ['mean'], [1])
 l2conestimate.inputs.contrasts = [cont1]
 l2conestimate.inputs.group_contrast = True

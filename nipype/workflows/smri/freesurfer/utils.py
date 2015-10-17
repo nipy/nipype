@@ -85,7 +85,7 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
     """
 
     fssource = pe.Node(nio.FreeSurferSource(),
-                       name = 'fssource')
+                       name='fssource')
     threshold = pe.Node(fs.Binarize(min=0.5, out_type='nii'),
                         name='threshold')
     register = pe.MapNode(fs.BBRegister(init='fsl'),
@@ -221,11 +221,11 @@ def create_get_stats_flow(name='getstats', withreg=False):
             else:
                 return label_file, transform_output
 
-        chooser = pe.MapNode(niu.Function(input_names = ['inverse',
+        chooser = pe.MapNode(niu.Function(input_names=['inverse',
                                                          'transform_output',
                                                          'source_file',
                                                          'label_file'],
-                                          output_names = ['label_file',
+                                          output_names=['label_file',
                                                           'source_file'],
                                           function=switch_labels),
                              iterfield=['transform_output', 'source_file'],
@@ -305,9 +305,9 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     """
 
     fssource = pe.Node(nio.FreeSurferSource(),
-                       name = 'fssource')
+                       name='fssource')
     volconvert = pe.Node(fs.MRIConvert(out_type='nii'),
-                         name = 'volconvert')
+                         name='volconvert')
     tessellate = pe.MapNode(fs.MRIMarchingCubes(),
                             iterfield=['label_value', 'out_file'],
                             name='tessellate')

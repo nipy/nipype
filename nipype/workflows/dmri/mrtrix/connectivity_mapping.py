@@ -187,7 +187,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     thresholding it at a reasonably high level.
     """
 
-    bet = pe.Node(interface=fsl.BET(mask = True), name = 'bet_b0')
+    bet = pe.Node(interface=fsl.BET(mask=True), name='bet_b0')
     gen_WM_mask = pe.Node(interface=mrtrix.GenerateWhiteMatterMask(), name='gen_WM_mask')
     threshold_wmmask = pe.Node(interface=mrtrix.Threshold(), name='threshold_wmmask')
     threshold_wmmask.inputs.absolute_threshold_value = 0.4
@@ -232,7 +232,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     so that they are in the same space as the regions of interest.
     """
 
-    coregister = pe.Node(interface=fsl.FLIRT(dof=6), name = 'coregister')
+    coregister = pe.Node(interface=fsl.FLIRT(dof=6), name='coregister')
     coregister.inputs.cost = ('normmi')
 
     """
@@ -518,7 +518,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
 
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["subject_id", "dwi", "bvecs", "bvals", "subjects_dir"]), name="inputnode")
 
-    outputnode = pe.Node(interface = util.IdentityInterface(fields=["fa",
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["fa",
                                                                     "struct",
                                                                     "tracts",
                                                                     "tracks2prob",

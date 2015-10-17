@@ -254,11 +254,11 @@ if 'setuptools' in sys.modules:
         tests_require=['nose'],
         test_suite='nose.collector',
         zip_safe=False,
-        extras_require = dict(
+        extras_require=dict(
             doc='Sphinx>=0.3',
             test='nose>=0.10.1'),
     )
-    pkg_chk = partial(package_check, setuptools_args = extra_setuptools_args)
+    pkg_chk = partial(package_check, setuptools_args=extra_setuptools_args)
 else:
     extra_setuptools_args = {}
     pkg_chk = package_check
@@ -276,7 +276,7 @@ custom_dateutil_messages = {'missing opt': ('Missing optional package "%s"'
                                             ' provided by package '
                                             '"python-dateutil"')}
 pkg_chk('dateutil', DATEUTIL_MIN_VERSION,
-        messages = custom_dateutil_messages)
+        messages=custom_dateutil_messages)
 
 def main(**extra_args):
     setup(name=NAME,
@@ -294,7 +294,7 @@ def main(**extra_args):
           version=VERSION,
           install_requires=REQUIRES,
           provides=PROVIDES,
-          packages = ['nipype',
+          packages=['nipype',
                            'nipype.algorithms',
                            'nipype.algorithms.tests',
                            'nipype.caching',
@@ -414,7 +414,7 @@ def main(**extra_args):
           # above, but distutils is surely the worst piece of code in all of
           # python -- duplicating things into MANIFEST.in but this is admittedly
           # only a workaround to get things started -- not a solution
-          package_data = {'nipype':
+          package_data={'nipype':
                           [pjoin('testing', 'data', '*'),
                            pjoin('testing', 'data', 'dicomdir', '*'),
                            pjoin('testing', 'data', 'bedpostxout', '*'),
@@ -425,8 +425,8 @@ def main(**extra_args):
                            pjoin('interfaces', 'script_templates', '*'),
                            pjoin('interfaces', 'tests', 'realign_json.json')
                            ]},
-          scripts = glob('bin/*'),
-          cmdclass = cmdclass,
+          scripts=glob('bin/*'),
+          cmdclass=cmdclass,
           **extra_args
           )
 

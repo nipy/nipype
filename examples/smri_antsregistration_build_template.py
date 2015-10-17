@@ -105,8 +105,7 @@ tbuilder.base_dir = requestedPath
 
 InitialTemplateInputs = [mdict['T1'] for mdict in ListOfImagesDictionaries]
 
-datasource = pe.Node(interface=util.IdentityInterface(fields=
-                                                      ['InitialTemplateInputs', 'ListOfImagesDictionaries',
+datasource = pe.Node(interface=util.IdentityInterface(fields=['InitialTemplateInputs', 'ListOfImagesDictionaries',
                                                        'registrationImageTypes', 'interpolationMapping']),
                      run_without_submitting=True,
                      name='InputImages')
@@ -121,7 +120,7 @@ datasource.inputs.sort_filelist = True
    any reference image could be used (i.e. a previously created template)
 """
 
-initAvg = pe.Node(interface=ants.AverageImages(), name ='initAvg')
+initAvg = pe.Node(interface=ants.AverageImages(), name='initAvg')
 initAvg.inputs.dimension = 3
 initAvg.inputs.normalize = True
 

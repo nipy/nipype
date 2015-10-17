@@ -22,7 +22,7 @@ class SlicerCommandLine(CommandLine):
 
 
     def _grab_xml(self, module):
-        cmd = CommandLine(command = "Slicer3", args="--launch %s --xml" %module)
+        cmd = CommandLine(command="Slicer3", args="--launch %s --xml" %module)
         ret = cmd.run()
         if ret.runtime.returncode == 0:
             return xml.dom.minidom.parseString(ret.runtime.stdout)
@@ -33,7 +33,7 @@ class SlicerCommandLine(CommandLine):
         base = super(SlicerCommandLine, self)._outputs()
         undefined_output_traits = {}
         for key in [node.getElementsByTagName('name')[0].firstChild.nodeValue for node in self._outputs_nodes]:
-            base.add_trait(key, File(exists = True))
+            base.add_trait(key, File(exists=True))
             undefined_output_traits[key] = Undefined
 
         base.trait_set(trait_change_notify=False, **undefined_output_traits)
@@ -42,7 +42,7 @@ class SlicerCommandLine(CommandLine):
     def __init__(self, module, **inputs):
         warnings.warn('slicer is Not fully implemented',
                       RuntimeWarning)
-        super(SlicerCommandLine, self).__init__(command= "Slicer3 --launch %s " %module, name= module, **inputs)
+        super(SlicerCommandLine, self).__init__(command="Slicer3 --launch %s " %module, name=module, **inputs)
         dom = self._grab_xml(module)
         self._outputs_filenames = {}
 

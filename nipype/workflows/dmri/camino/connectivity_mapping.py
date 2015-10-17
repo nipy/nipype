@@ -82,7 +82,7 @@ def create_connectivity_pipeline(name="connectivity"):
     FSL's Brain Extraction tool is used to create a mask from the b0 image
     """
 
-    b0Strip = pe.Node(interface=fsl.BET(mask = True), name = 'bet_b0')
+    b0Strip = pe.Node(interface=fsl.BET(mask=True), name='bet_b0')
 
     """
     FSL's FLIRT function is used to coregister the b0 mask and the structural image.
@@ -90,16 +90,16 @@ def create_connectivity_pipeline(name="connectivity"):
     FLIRT is used once again to apply the inverse transformation to the parcellated brain image.
     """
 
-    coregister = pe.Node(interface=fsl.FLIRT(dof=6), name = 'coregister')
+    coregister = pe.Node(interface=fsl.FLIRT(dof=6), name='coregister')
     coregister.inputs.cost = ('normmi')
 
-    convertxfm = pe.Node(interface=fsl.ConvertXFM(), name = 'convertxfm')
+    convertxfm = pe.Node(interface=fsl.ConvertXFM(), name='convertxfm')
     convertxfm.inputs.invert_xfm = True
 
-    inverse = pe.Node(interface=fsl.FLIRT(), name = 'inverse')
+    inverse = pe.Node(interface=fsl.FLIRT(), name='inverse')
     inverse.inputs.interp = ('nearestneighbour')
 
-    inverse_AparcAseg = pe.Node(interface=fsl.FLIRT(), name = 'inverse_AparcAseg')
+    inverse_AparcAseg = pe.Node(interface=fsl.FLIRT(), name='inverse_AparcAseg')
     inverse_AparcAseg.inputs.interp = ('nearestneighbour')
 
     """
@@ -453,7 +453,7 @@ def create_connectivity_pipeline(name="connectivity"):
 
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["subject_id", "dwi", "bvecs", "bvals", "subjects_dir", "resolution_network_file"]), name="inputnode")
 
-    outputnode = pe.Node(interface = util.IdentityInterface(fields=["fa",
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["fa",
                                                                     "struct",
                                                                     "trace",
                                                                     "tracts",

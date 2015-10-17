@@ -42,7 +42,7 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
         outputnode.matlab_files
 
     """
-    inputnode = pe.Node(interface = util.IdentityInterface(fields=["extra_field", "network_file"]),
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["extra_field", "network_file"]),
                         name="inputnode")
 
     pipeline = pe.Workflow(name=name)
@@ -80,7 +80,7 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     pipeline.connect([(inputnode, mergeNetworks, [("network_file", "in1")])])
     pipeline.connect([(ntwkMetrics, mergeNetworks, [("gpickled_network_files", "in2")])])
 
-    outputnode = pe.Node(interface = util.IdentityInterface(fields=["network_files",
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["network_files",
                                                                     "csv_files", "matlab_files", "node_csv", "global_csv"]),
                          name="outputnode")
 
@@ -118,7 +118,7 @@ def create_cmats_to_csv_pipeline(name="cmats_to_csv", extra_column_heading="subj
         outputnode.csv_file
 
     """
-    inputnode = pe.Node(interface = util.IdentityInterface(fields=["extra_field", "matlab_matrix_files"]),
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["extra_field", "matlab_matrix_files"]),
                         name="inputnode")
 
     pipeline = pe.Workflow(name=name)
@@ -131,7 +131,7 @@ def create_cmats_to_csv_pipeline(name="cmats_to_csv", extra_column_heading="subj
     pipeline.connect([(Matlab2CSV, MergeCSVFiles, [("csv_files", "in_files")])])
     pipeline.connect([(inputnode, MergeCSVFiles, [("extra_field", "extra_field")])])
 
-    outputnode = pe.Node(interface = util.IdentityInterface(fields=["csv_file"]),
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["csv_file"]),
                          name="outputnode")
 
     pipeline.connect([(MergeCSVFiles, outputnode, [("csv_file", "csv_file")])])

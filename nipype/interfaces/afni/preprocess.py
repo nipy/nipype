@@ -1369,22 +1369,22 @@ class TCorrelate(AFNICommand):
 
 
 class TCorr1DInputSpec(AFNICommandInputSpec):
-    xset = File(desc = '3d+time dataset input',
-                argstr = ' %s',
-                position = -2,
-                mandatory = True,
-                exists = True,
+    xset = File(desc='3d+time dataset input',
+                argstr=' %s',
+                position=-2,
+                mandatory=True,
+                exists=True,
                 copyfile=False)
-    y_1d = File(desc = '1D time series file input',
-                argstr = ' %s',
-                position = -1,
-                mandatory = True,
-                exists = True)
-    out_file = File(desc = 'output filename prefix',
+    y_1d = File(desc='1D time series file input',
+                argstr=' %s',
+                position=-1,
+                mandatory=True,
+                exists=True)
+    out_file = File(desc='output filename prefix',
                     name_template='%s_correlation.nii.gz',
-                    argstr = '-prefix %s',
-                    name_source = 'xset',
-                    keep_extension = True)
+                    argstr='-prefix %s',
+                    name_source='xset',
+                    keep_extension=True)
     pearson = traits.Bool(desc='Correlation is the normal' +
                           ' Pearson correlation coefficient',
                           argstr=' -pearson',
@@ -1409,8 +1409,8 @@ class TCorr1DInputSpec(AFNICommandInputSpec):
 
 
 class TCorr1DOutputSpec(TraitedSpec):
-    out_file = File(desc = 'output file containing correlations',
-                    exists = True)
+    out_file = File(desc='output file containing correlations',
+                    exists=True)
 
 
 class TCorr1D(AFNICommand):

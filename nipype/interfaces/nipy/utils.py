@@ -90,11 +90,11 @@ class Similarity(BaseInterface):
         else:
             mask2 = None
 
-        histreg = HistogramRegistration(from_img = vol1_nii,
-                                        to_img = vol2_nii,
+        histreg = HistogramRegistration(from_img=vol1_nii,
+                                        to_img=vol2_nii,
                                         similarity=self.inputs.metric,
-                                        from_mask = mask1,
-                                        to_mask = mask2)
+                                        from_mask=mask1,
+                                        to_mask=mask2)
         self._similarity = histreg.eval(Affine())
 
         return runtime

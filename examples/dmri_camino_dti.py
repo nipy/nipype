@@ -92,7 +92,7 @@ functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=list(info.keys())),
-                     name = 'datasource')
+                     name='datasource')
 
 datasource.inputs.template = "%s/%s"
 
@@ -200,7 +200,7 @@ fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(), name='fa')
 trace = pe.Node(interface=camino.ComputeTensorTrace(), name='trace')
 dteig = pe.Node(interface=camino.ComputeEigensystem(), name='dteig')
 
-analyzeheader_fa = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_fa")
+analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(), name="analyzeheader_fa")
 analyzeheader_fa.inputs.datatype = "double"
 analyzeheader_trace = analyzeheader_fa.clone('analyzeheader_trace')
 

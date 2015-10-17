@@ -56,12 +56,12 @@ Add artifact detection and model specification nodes between the preprocessing
 and modelfitting workflows.
 """
 
-art = pe.MapNode(interface=ra.ArtifactDetect(use_differences = [True, False],
-                                             use_norm = True,
-                                             norm_threshold = 1,
-                                             zintensity_threshold = 3,
-                                             parameter_source = 'FSL',
-                                             mask_type = 'file'),
+art = pe.MapNode(interface=ra.ArtifactDetect(use_differences=[True, False],
+                                             use_norm=True,
+                                             norm_threshold=1,
+                                             zintensity_threshold=3,
+                                             parameter_source='FSL',
+                                             mask_type='file'),
                  iterfield=['realigned_files', 'realignment_parameters', 'mask_file'],
                  name="art")
 
@@ -169,7 +169,7 @@ functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
-                     name = 'datasource')
+                     name='datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info

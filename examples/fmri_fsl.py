@@ -73,7 +73,7 @@ one functional run we use a MapNode to convert each run.
 """
 
 img2float = pe.MapNode(interface=fsl.ImageMaths(out_data_type='float',
-                                                op_string = '',
+                                                op_string='',
                                                 suffix='_dtype'),
                        iterfield=['in_file'],
                        name='img2float')
@@ -84,7 +84,7 @@ Extract the middle volume of the first run as the reference
 """
 
 extract_ref = pe.Node(interface=fsl.ExtractROI(t_size=1),
-                      name = 'extractref')
+                      name='extractref')
 
 """
 Define a function to pick the first file from a list of files
@@ -116,10 +116,10 @@ preproc.connect(inputnode, ('func', getmiddlevolume), extract_ref, 't_min')
 Realign the functional runs to the middle volume of the first run
 """
 
-motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_mats = True,
-                                                  save_plots = True),
+motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_mats=True,
+                                                  save_plots=True),
                             name='realign',
-                            iterfield = ['in_file'])
+                            iterfield=['in_file'])
 preproc.connect(img2float, 'out_file', motion_correct, 'in_file')
 preproc.connect(extract_ref, 'roi_file', motion_correct, 'ref_file')
 
@@ -138,7 +138,7 @@ preproc.connect(motion_correct, 'par_file', plot_motion, 'in_file')
 Extract the mean volume of the first functional run
 """
 
-meanfunc = pe.Node(interface=fsl.ImageMaths(op_string = '-Tmean',
+meanfunc = pe.Node(interface=fsl.ImageMaths(op_string='-Tmean',
                                             suffix='_mean'),
                    name='meanfunc')
 preproc.connect(motion_correct, ('out_file', pickfirst), meanfunc, 'in_file')
@@ -147,10 +147,10 @@ preproc.connect(motion_correct, ('out_file', pickfirst), meanfunc, 'in_file')
 Strip the skull from the mean functional to generate a mask
 """
 
-meanfuncmask = pe.Node(interface=fsl.BET(mask = True,
+meanfuncmask = pe.Node(interface=fsl.BET(mask=True,
                                          no_output=True,
-                                         frac = 0.3),
-                       name = 'meanfuncmask')
+                                         frac=0.3),
+                       name='meanfuncmask')
 preproc.connect(meanfunc, 'out_file', meanfuncmask, 'in_file')
 
 """
@@ -160,7 +160,7 @@ Mask the functional runs with the extracted mask
 maskfunc = pe.MapNode(interface=fsl.ImageMaths(suffix='_bet',
                                                op_string='-mas'),
                       iterfield=['in_file'],
-                      name = 'maskfunc')
+                      name='maskfunc')
 preproc.connect(motion_correct, 'out_file', maskfunc, 'in_file')
 preproc.connect(meanfuncmask, 'mask_file', maskfunc, 'in_file2')
 
@@ -170,7 +170,7 @@ Determine the 2nd and 98th percentile intensities of each functional run
 """
 
 getthresh = pe.MapNode(interface=fsl.ImageStats(op_string='-p 2 -p 98'),
-                       iterfield = ['in_file'],
+                       iterfield=['in_file'],
                        name='getthreshold')
 preproc.connect(maskfunc, 'out_file', getthresh, 'in_file')
 
@@ -197,7 +197,7 @@ Determine the median value of the functional runs using the mask
 """
 
 medianval = pe.MapNode(interface=fsl.ImageStats(op_string='-k %s -p 50'),
-                       iterfield = ['in_file'],
+                       iterfield=['in_file'],
                        name='medianval')
 preproc.connect(motion_correct, 'out_file', medianval, 'in_file')
 preproc.connect(threshold, 'out_file', medianval, 'mask_file')
@@ -318,12 +318,12 @@ structural image
 """
 
 nosestrip = pe.Node(interface=fsl.BET(frac=0.3),
-                    name = 'nosestrip')
-skullstrip = pe.Node(interface=fsl.BET(mask = True),
-                     name = 'stripstruct')
+                    name='nosestrip')
+skullstrip = pe.Node(interface=fsl.BET(mask=True),
+                     name='stripstruct')
 
 coregister = pe.Node(interface=fsl.FLIRT(dof=6),
-                     name = 'coregister')
+                     name='coregister')
 
 """
 Use :class:`nipype.algorithms.rapidart` to determine which of the
@@ -331,12 +331,12 @@ images in the functional series are outliers based on deviations in
 intensity and/or movement.
 """
 
-art = pe.MapNode(interface=ra.ArtifactDetect(use_differences = [True, False],
-                                             use_norm = True,
-                                             norm_threshold = 1,
-                                             zintensity_threshold = 3,
-                                             parameter_source = 'FSL',
-                                             mask_type = 'file'),
+art = pe.MapNode(interface=ra.ArtifactDetect(use_differences=[True, False],
+                                             use_norm=True,
+                                             norm_threshold=1,
+                                             zintensity_threshold=3,
+                                             parameter_source='FSL',
+                                             mask_type='file'),
                  iterfield=['realigned_files', 'realignment_parameters'],
                  name="art")
 
@@ -377,7 +377,7 @@ file for use by FILMGLS
 """
 
 modelgen = pe.MapNode(interface=fsl.FEATModel(), name='modelgen',
-                      iterfield = ['fsf_file', 'ev_files'])
+                      iterfield=['fsf_file', 'ev_files'])
 
 
 """
@@ -389,14 +389,14 @@ modelestimate = pe.MapNode(interface=fsl.FILMGLS(smooth_autocorr=True,
                                                  mask_size=5,
                                                  threshold=1000),
                            name='modelestimate',
-                           iterfield = ['design_file', 'in_file'])
+                           iterfield=['design_file', 'in_file'])
 
 """
 Use :class:`nipype.interfaces.fsl.ContrastMgr` to generate contrast estimates
 """
 
 conestimate = pe.MapNode(interface=fsl.ContrastMgr(), name='conestimate',
-                         iterfield = ['tcon_file', 'param_estimates',
+                         iterfield=['tcon_file', 'param_estimates',
                                       'sigmasquareds', 'corrections',
                                       'dof_file'])
 
@@ -539,7 +539,7 @@ functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
-                     name = 'datasource')
+                     name='datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
@@ -615,7 +615,7 @@ Set up complete workflow
 ========================
 """
 
-l1pipeline = pe.Workflow(name= "level1")
+l1pipeline = pe.Workflow(name="level1")
 l1pipeline.base_dir = os.path.abspath('./fsl/workingdir')
 l1pipeline.config = {"execution": {"crashdump_dir": os.path.abspath('./fsl/crashdumps')}}
 

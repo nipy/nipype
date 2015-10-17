@@ -21,10 +21,10 @@ from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 
 
 class HARDIMatInputSpec(CommandLineInputSpec):
-    bvecs = File(exists=True, desc = 'b vectors file',
+    bvecs = File(exists=True, desc='b vectors file',
                  argstr='%s', position=1, mandatory=True)
-    bvals = File(exists=True, desc = 'b values file', mandatory=True)
-    out_file = File("recon_mat.dat", desc = 'output matrix file', argstr='%s', usedefault=True, position=2)
+    bvals = File(exists=True, desc='b values file', mandatory=True)
+    out_file = File("recon_mat.dat", desc='output matrix file', argstr='%s', usedefault=True, position=2)
     order = traits.Int(argstr='-order %s', desc="""maximum order of spherical harmonics. must be even number. default
         is 4""")
     odf_file = File(exists=True, argstr='-odf %s', desc="""filename that contains the reconstruction points on a HEMI-sphere.
@@ -153,7 +153,7 @@ class ODFTrackerInputSpec(CommandLineInputSpec):
     max = File(exists=True, mandatory=True)
     ODF = File(exists=True, mandatory=True)
     input_data_prefix = traits.Str("odf", desc='recon data prefix', argstr='%s', usedefault=True, position=0)
-    out_file = File("tracks.trk", desc = 'output track file', argstr='%s', usedefault=True, position=1)
+    out_file = File("tracks.trk", desc='output track file', argstr='%s', usedefault=True, position=1)
     input_output_type = traits.Enum('nii', 'analyze', 'ni1', 'nii.gz', argstr='-it %s', desc='input and output file type', usedefault=True)
     runge_kutta2 = traits.Bool(argstr='-rk2', desc="""use 2nd order runge-kutta method for tracking.
         default tracking method is non-interpolate streamline""")

@@ -167,7 +167,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
            outputspec.transforms_list :
            outputspec.passive_deformed_templates :
     """
-    TemplateBuildSingleIterationWF = pe.Workflow(name = 'antsRegistrationTemplateBuildSingleIterationWF_'+str(iterationPhasePrefix))
+    TemplateBuildSingleIterationWF = pe.Workflow(name='antsRegistrationTemplateBuildSingleIterationWF_'+str(iterationPhasePrefix))
 
     inputSpec = pe.Node(interface=util.IdentityInterface(fields=[
                 'ListOfImagesDictionaries', 'registrationImageTypes',
@@ -186,7 +186,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
 
 
     ### NOTE MAP NODE! warp each of the original images to the provided fixed_image as the template
-    BeginANTS = pe.MapNode(interface=Registration(), name = 'BeginANTS', iterfield=['moving_image'])
+    BeginANTS = pe.MapNode(interface=Registration(), name='BeginANTS', iterfield=['moving_image'])
     BeginANTS.inputs.dimension = 3
     BeginANTS.inputs.output_transform_prefix = str(iterationPhasePrefix)+'_tfm'
     BeginANTS.inputs.transforms = ["Affine",          "SyN"]
@@ -215,9 +215,9 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     TemplateBuildSingleIterationWF.connect(inputSpec, 'fixed_image', BeginANTS, 'fixed_image')
 
     ## Now warp all the input_images images
-    wimtdeformed = pe.MapNode(interface = ApplyTransforms(),
+    wimtdeformed = pe.MapNode(interface=ApplyTransforms(),
                               iterfield=['transforms', 'invert_transform_flags', 'input_image'],
-                              name ='wimtdeformed')
+                              name='wimtdeformed')
     wimtdeformed.inputs.interpolation = 'Linear'
     wimtdeformed.default_value = 0
     TemplateBuildSingleIterationWF.connect(BeginANTS, 'forward_transforms', wimtdeformed, 'transforms')
@@ -234,7 +234,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     TemplateBuildSingleIterationWF.connect(wimtdeformed, "output_image", AvgDeformedImages, 'images')
 
     ## Now average all affine transforms together
-    AvgAffineTransform = pe.Node(interface=AverageAffineTransform(), name = 'AvgAffineTransform')
+    AvgAffineTransform = pe.Node(interface=AverageAffineTransform(), name='AvgAffineTransform')
     AvgAffineTransform.inputs.dimension = 3
     AvgAffineTransform.inputs.output_affine_transform = 'Avererage_'+str(iterationPhasePrefix)+'_Affine.mat'
 
@@ -263,7 +263,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     TemplateBuildSingleIterationWF.connect(AvgWarpImages, 'output_average_image', GradientStepWarpImage, 'first_input')
 
     ## Now create the new template shape based on the average of all deformed images
-    UpdateTemplateShape = pe.Node(interface = ApplyTransforms(), name = 'UpdateTemplateShape')
+    UpdateTemplateShape = pe.Node(interface=ApplyTransforms(), name='UpdateTemplateShape')
     UpdateTemplateShape.inputs.invert_transform_flags = [True]
     UpdateTemplateShape.inputs.interpolation = 'Linear'
     UpdateTemplateShape.default_value = 0
@@ -282,7 +282,7 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     TemplateBuildSingleIterationWF.connect(AvgAffineTransform, 'affine_transform', ApplyInvAverageAndFourTimesGradientStepWarpImage, 'averageAffineTranform')
     TemplateBuildSingleIterationWF.connect(UpdateTemplateShape, 'output_image', ApplyInvAverageAndFourTimesGradientStepWarpImage, 'gradientStepWarp')
 
-    ReshapeAverageImageWithShapeUpdate = pe.Node(interface = ApplyTransforms(), name = 'ReshapeAverageImageWithShapeUpdate')
+    ReshapeAverageImageWithShapeUpdate = pe.Node(interface=ApplyTransforms(), name='ReshapeAverageImageWithShapeUpdate')
     ReshapeAverageImageWithShapeUpdate.inputs.invert_transform_flags = [True, False, False, False, False]
     ReshapeAverageImageWithShapeUpdate.inputs.interpolation = 'Linear'
     ReshapeAverageImageWithShapeUpdate.default_value = 0
@@ -301,9 +301,9 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     ##############################################
     ## Now warp all the ListOfPassiveImagesDictionaries images
     FlattenTransformAndImagesListNode = pe.Node(Function(function=FlattenTransformAndImagesList,
-                                                          input_names = ['ListOfPassiveImagesDictionaries', 'transforms',
+                                                          input_names=['ListOfPassiveImagesDictionaries', 'transforms',
                                                                          'invert_transform_flags', 'interpolationMapping'],
-                                                          output_names = ['flattened_images', 'flattened_transforms', 'flattened_invert_transform_flags',
+                                                          output_names=['flattened_images', 'flattened_transforms', 'flattened_invert_transform_flags',
                                                                           'flattened_image_nametypes', 'flattened_interpolation_type']),
                                                  run_without_submitting=True, name="99_FlattenTransformAndImagesList")
 
@@ -319,9 +319,9 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     TemplateBuildSingleIterationWF.connect(inputSpec, 'interpolationMapping', FlattenTransformAndImagesListNode, 'interpolationMapping')
     TemplateBuildSingleIterationWF.connect(BeginANTS, 'forward_transforms', FlattenTransformAndImagesListNode, 'transforms')
     TemplateBuildSingleIterationWF.connect(BeginANTS, 'forward_invert_flags', FlattenTransformAndImagesListNode, 'invert_transform_flags')
-    wimtPassivedeformed = pe.MapNode(interface = ApplyTransforms(),
+    wimtPassivedeformed = pe.MapNode(interface=ApplyTransforms(),
                                      iterfield=['transforms', 'invert_transform_flags', 'input_image', 'interpolation'],
-                                     name ='wimtPassivedeformed')
+                                     name='wimtPassivedeformed')
     wimtPassivedeformed.default_value = 0
     TemplateBuildSingleIterationWF.connect(AvgDeformedImages, 'output_average_image', wimtPassivedeformed, 'reference_image')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_interpolation_type', wimtPassivedeformed, 'interpolation')
@@ -330,8 +330,8 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_invert_transform_flags', wimtPassivedeformed, 'invert_transform_flags')
 
     RenestDeformedPassiveImagesNode = pe.Node(Function(function=RenestDeformedPassiveImages,
-                                                        input_names = ['deformedPassiveImages', 'flattened_image_nametypes', 'interpolationMapping'],
-                                                        output_names = ['nested_imagetype_list', 'outputAverageImageName_list',
+                                                        input_names=['deformedPassiveImages', 'flattened_image_nametypes', 'interpolationMapping'],
+                                                        output_names=['nested_imagetype_list', 'outputAverageImageName_list',
                                                                         'image_type_list', 'nested_interpolation_type']),
                                                run_without_submitting=True, name="99_RenestDeformedPassiveImages")
     TemplateBuildSingleIterationWF.connect(inputSpec, 'interpolationMapping', RenestDeformedPassiveImagesNode, 'interpolationMapping')
@@ -347,9 +347,9 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     TemplateBuildSingleIterationWF.connect(RenestDeformedPassiveImagesNode, "outputAverageImageName_list", AvgDeformedPassiveImages, 'output_average_image')
 
     ## -- TODO:  Now neeed to reshape all the passive images as well
-    ReshapeAveragePassiveImageWithShapeUpdate = pe.MapNode(interface = ApplyTransforms(),
+    ReshapeAveragePassiveImageWithShapeUpdate = pe.MapNode(interface=ApplyTransforms(),
                                                            iterfield=['input_image', 'reference_image', 'output_image', 'interpolation'],
-                                                           name = 'ReshapeAveragePassiveImageWithShapeUpdate')
+                                                           name='ReshapeAveragePassiveImageWithShapeUpdate')
     ReshapeAveragePassiveImageWithShapeUpdate.inputs.invert_transform_flags = [True, False, False, False, False]
     ReshapeAveragePassiveImageWithShapeUpdate.default_value = 0
     TemplateBuildSingleIterationWF.connect(RenestDeformedPassiveImagesNode, 'nested_interpolation_type', ReshapeAveragePassiveImageWithShapeUpdate, 'interpolation')

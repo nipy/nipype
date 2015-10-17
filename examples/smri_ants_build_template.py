@@ -80,8 +80,7 @@ tbuilder.base_dir = requestedPath
 4. Define data sources. In real life these would be replace by DataGrabbers
 """
 
-datasource = pe.Node(interface=util.IdentityInterface(fields=
-                                                      ['imageList', 'passiveImagesDictionariesList']),
+datasource = pe.Node(interface=util.IdentityInterface(fields=['imageList', 'passiveImagesDictionariesList']),
                      run_without_submitting=True,
                      name='InputImages')
 datasource.inputs.imageList = input_images
@@ -92,7 +91,7 @@ datasource.inputs.sort_filelist = True
 5. Template is initialized by a simple average
 """
 
-initAvg = pe.Node(interface=ants.AverageImages(), name ='initAvg')
+initAvg = pe.Node(interface=ants.AverageImages(), name='initAvg')
 initAvg.inputs.dimension = 3
 initAvg.inputs.normalize = True
 

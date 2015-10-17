@@ -63,7 +63,7 @@ def test_check_forhash():
 
 def _temp_analyze_files():
     """Generate temporary analyze file pair."""
-    fd, orig_img = mkstemp(suffix = '.img')
+    fd, orig_img = mkstemp(suffix='.img')
     orig_hdr = orig_img[:-4] + '.hdr'
     fp = open(orig_hdr, 'w+')
     fp.close()

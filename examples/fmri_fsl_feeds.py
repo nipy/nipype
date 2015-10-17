@@ -62,7 +62,7 @@ additional housekeeping and pipeline specific functionality.
 """
 
 datasource = pe.Node(interface=nio.DataGrabber(outfields=['func', 'struct']),
-                     name = 'datasource')
+                     name='datasource')
 datasource.inputs.base_directory = feeds_data_dir
 datasource.inputs.template = '%s.nii.gz'
 datasource.inputs.template_args = info
@@ -106,7 +106,7 @@ Set up complete workflow
 ========================
 """
 
-l1pipeline = pe.Workflow(name= "level1")
+l1pipeline = pe.Workflow(name="level1")
 l1pipeline.base_dir = os.path.abspath('./fsl_feeds/workingdir')
 l1pipeline.config = {"execution": {"crashdump_dir": os.path.abspath('./fsl_feeds/crashdumps')}}
 

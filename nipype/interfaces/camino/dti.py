@@ -253,14 +253,14 @@ class ModelFit(StdOutCommandLine):
         return name + '_fit.Bdouble'
 
 class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
-    lrange = traits.List(traits.Float, desc = 'Index to one-tensor LUTs. This is the ratio L1/L3 and L2 / L3.' \
+    lrange = traits.List(traits.Float, desc='Index to one-tensor LUTs. This is the ratio L1/L3 and L2 / L3.' \
                          'The LUT is square, with half the values calculated (because L2 / L3 cannot be less than L1 / L3 by definition).' \
                          'The minimum must be >= 1. For comparison, a ratio L1 / L3 = 10 with L2 / L3 = 1 corresponds to an FA of 0.891, '\
                          'and L1 / L3 = 15 with L2 / L3 = 1 corresponds to an FA of 0.929. The default range is 1 to 10.', \
                          argstr='-lrange %s', minlen=2, maxlen=2, position=1,
                          units='NA')
 
-    frange = traits.List(traits.Float, desc = 'Index to two-tensor LUTs. This is the fractional anisotropy \
+    frange = traits.List(traits.Float, desc='Index to two-tensor LUTs. This is the fractional anisotropy \
         of the two tensors. The default is 0.3 to 0.94', \
                          argstr='-frange %s', minlen=2, maxlen=2, position=1,
                          units='NA')
@@ -517,10 +517,10 @@ class TrackInputSpec(CommandLineInputSpec):
     outputtracts = traits.Enum('float', 'double', 'oogl', argstr='-outputtracts %s',
                                desc='output tract file type')
 
-    out_file = File(argstr='-outputfile %s', position= -1, genfile=True,
+    out_file = File(argstr='-outputfile %s', position=-1, genfile=True,
                     desc='output data file')
 
-    output_root = File(exists=False, argstr='-outputroot %s', position= -1,
+    output_root = File(exists=False, argstr='-outputroot %s', position=-1,
                        desc='root directory for output')
 
 class TrackOutputSpec(TraitedSpec):
@@ -767,11 +767,11 @@ class TrackBootstrapInputSpec(TrackInputSpec):
 
     iterations = traits.Int(argstr='-iterations %d', units='NA', desc="Number of streamlines to generate at each seed point.")
 
-    inversion = traits.Int(argstr='-inversion %s', desc = 'Tensor reconstruction algorithm for repetition bootstrapping. Default is 1 (linear reconstruction, single tensor).')
+    inversion = traits.Int(argstr='-inversion %s', desc='Tensor reconstruction algorithm for repetition bootstrapping. Default is 1 (linear reconstruction, single tensor).')
 
     bsdatafiles = traits.List(File(exists=True), mandatory=True, argstr='-bsdatafile %s', desc='Specifies files containing raw data for repetition bootstrapping. Use -inputfile for wild bootstrap data.')
 
-    bgmask = File(argstr='-bgmask %s', exists=True, desc = 'Provides the name of a file containing a background mask computed using, for example, FSL\'s bet2 program. The mask file contains zero in background voxels and non-zero in foreground.')
+    bgmask = File(argstr='-bgmask %s', exists=True, desc='Provides the name of a file containing a background mask computed using, for example, FSL\'s bet2 program. The mask file contains zero in background voxels and non-zero in foreground.')
 
 class TrackBootstrap(Track):
     """

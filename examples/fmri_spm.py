@@ -110,7 +110,7 @@ functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
-                     name = 'datasource')
+                     name='datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
@@ -156,7 +156,7 @@ coregister.inputs.jobtype = 'estimate'
 includes the template image, T1.nii.
 """
 
-normalize = pe.Node(interface=spm.Normalize(), name = "normalize")
+normalize = pe.Node(interface=spm.Normalize(), name="normalize")
 normalize.inputs.template = os.path.abspath('data/T1.nii')
 
 
@@ -164,7 +164,7 @@ normalize.inputs.template = os.path.abspath('data/T1.nii')
 :class:`nipype.interfaces.spm.Smooth`.
 """
 
-smooth = pe.Node(interface=spm.Smooth(), name = "smooth")
+smooth = pe.Node(interface=spm.Smooth(), name="smooth")
 fwhmlist = [4]
 smooth.iterables = ('fwhm', fwhmlist)
 
@@ -209,7 +209,7 @@ contrasts = [cont1, cont2]
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
 
-modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
+modelspec = pe.Node(interface=model.SpecifySPMModel(), name="modelspec")
 modelspec.inputs.concatenate_runs = False
 modelspec.inputs.input_units = 'secs'
 modelspec.inputs.output_units = 'secs'
@@ -220,7 +220,7 @@ modelspec.inputs.high_pass_filter_cutoff = 120
 :class:`nipype.interfaces.spm.Level1Design`.
 """
 
-level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
+level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
 level1design.inputs.timing_units = modelspec.inputs.output_units
 level1design.inputs.interscan_interval = modelspec.inputs.time_repetition
 level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
@@ -237,7 +237,7 @@ level1estimate.inputs.estimation_method = {'Classical': 1}
 first level contrasts specified in a few steps above.
 """
 
-contrastestimate = pe.Node(interface = spm.EstimateContrast(), name="contrastestimate")
+contrastestimate = pe.Node(interface=spm.EstimateContrast(), name="contrastestimate")
 contrastestimate.inputs.contrasts = contrasts
 contrastestimate.overwrite = True
 contrastestimate.config = {'execution': {'remove_unnecessary_outputs': False}}
@@ -369,7 +369,7 @@ subjects (n=2 in this example).
 onesamplettestdes = pe.Node(interface=spm.OneSampleTTestDesign(), name="onesampttestdes")
 l2estimate = pe.Node(interface=spm.EstimateModel(), name="level2estimate")
 l2estimate.inputs.estimation_method = {'Classical': 1}
-l2conestimate = pe.Node(interface = spm.EstimateContrast(), name="level2conestimate")
+l2conestimate = pe.Node(interface=spm.EstimateContrast(), name="level2conestimate")
 cont1 = ('Group', 'T', ['mean'], [1])
 l2conestimate.inputs.contrasts = [cont1]
 l2conestimate.inputs.group_contrast = True

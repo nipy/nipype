@@ -163,8 +163,8 @@ surface smoothing, the rest of the volume is smoothed with a 3d gaussian kernel.
 
 """
 
-volsmooth = pe.Node(interface=spm.Smooth(), name = "volsmooth")
-surfsmooth = pe.MapNode(interface=fs.Smooth(proj_frac_avg=(0, 1, 0.1)), name = "surfsmooth",
+volsmooth = pe.Node(interface=spm.Smooth(), name="volsmooth")
+surfsmooth = pe.MapNode(interface=fs.Smooth(proj_frac_avg=(0, 1, 0.1)), name="surfsmooth",
                         iterfield=['in_file'])
 
 """
@@ -198,7 +198,7 @@ Generate SPM-specific design information using
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
 
-modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
+modelspec = pe.Node(interface=model.SpecifySPMModel(), name="modelspec")
 modelspec.inputs.concatenate_runs = True
 
 """
@@ -206,7 +206,7 @@ Generate a first level SPM.mat file for analysis
 :class:`nipype.interfaces.spm.Level1Design`.
 """
 
-level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
+level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
 level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
 
 """
@@ -222,7 +222,7 @@ Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate the
 first level contrasts specified in a few steps above.
 """
 
-contrastestimate = pe.Node(interface = spm.EstimateContrast(), name="contrastestimate")
+contrastestimate = pe.Node(interface=spm.EstimateContrast(), name="contrastestimate")
 
 volanalysis.connect([(modelspec, level1design, [('session_info', 'session_info')]),
                      (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
@@ -417,7 +417,7 @@ functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
-                     name = 'datasource')
+                     name='datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info

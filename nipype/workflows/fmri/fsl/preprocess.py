@@ -151,7 +151,7 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     """
 
     img2float = pe.MapNode(interface=fsl.ImageMaths(out_data_type='float',
-                                                    op_string = '',
+                                                    op_string='',
                                                     suffix='_dtype'),
                            iterfield=['in_file'],
                            name='img2float')
@@ -163,7 +163,7 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
 
     extract_ref = pe.MapNode(interface=fsl.ExtractROI(t_size=1),
                              iterfield=['in_file', 't_min'],
-                             name = 'extractref')
+                             name='extractref')
 
     featpreproc.connect(img2float, 'out_file', extract_ref, 'in_file')
     featpreproc.connect(img2float, ('out_file', pickmiddle), extract_ref, 't_min')
@@ -173,10 +173,10 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     Realign the functional runs to the reference (1st volume of first run)
     """
 
-    motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_mats = True,
-                                                      save_plots = True),
+    motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_mats=True,
+                                                      save_plots=True),
                                 name='realign',
-                                iterfield = ['in_file', 'ref_file'])
+                                iterfield=['in_file', 'ref_file'])
     featpreproc.connect(img2float, 'out_file', motion_correct, 'in_file')
     featpreproc.connect(extract_ref, 'roi_file', motion_correct, 'ref_file')
     featpreproc.connect(motion_correct, 'par_file', outputnode, 'motion_parameters')
@@ -197,7 +197,7 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     Extract the mean volume of the first functional run
     """
 
-    meanfunc = pe.MapNode(interface=fsl.ImageMaths(op_string = '-Tmean',
+    meanfunc = pe.MapNode(interface=fsl.ImageMaths(op_string='-Tmean',
                                                    suffix='_mean'),
                           iterfield=['in_file'],
                           name='meanfunc')
@@ -207,11 +207,11 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     Strip the skull from the mean functional to generate a mask
     """
 
-    meanfuncmask = pe.MapNode(interface=fsl.BET(mask = True,
+    meanfuncmask = pe.MapNode(interface=fsl.BET(mask=True,
                                                 no_output=True,
-                                                frac = 0.3),
+                                                frac=0.3),
                               iterfield=['in_file'],
-                              name = 'meanfuncmask')
+                              name='meanfuncmask')
     featpreproc.connect(meanfunc, 'out_file', meanfuncmask, 'in_file')
 
     """
@@ -221,7 +221,7 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     maskfunc = pe.MapNode(interface=fsl.ImageMaths(suffix='_bet',
                                                    op_string='-mas'),
                           iterfield=['in_file', 'in_file2'],
-                          name = 'maskfunc')
+                          name='maskfunc')
     featpreproc.connect(motion_correct, 'out_file', maskfunc, 'in_file')
     featpreproc.connect(meanfuncmask, 'mask_file', maskfunc, 'in_file2')
 
@@ -231,7 +231,7 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     """
 
     getthresh = pe.MapNode(interface=fsl.ImageStats(op_string='-p 2 -p 98'),
-                           iterfield = ['in_file'],
+                           iterfield=['in_file'],
                            name='getthreshold')
     featpreproc.connect(maskfunc, 'out_file', getthresh, 'in_file')
 
@@ -257,7 +257,7 @@ def create_parallelfeat_preproc(name='featpreproc', highpass=True):
     """
 
     medianval = pe.MapNode(interface=fsl.ImageStats(op_string='-k %s -p 50'),
-                           iterfield = ['in_file', 'mask_file'],
+                           iterfield=['in_file', 'mask_file'],
                            name='medianval')
     featpreproc.connect(motion_correct, 'out_file', medianval, 'in_file')
     featpreproc.connect(threshold, 'out_file', medianval, 'mask_file')
@@ -471,7 +471,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
 
     img2float = pe.MapNode(interface=fsl.ImageMaths(out_data_type='float',
-                                                    op_string = '',
+                                                    op_string='',
                                                     suffix='_dtype'),
                            iterfield=['in_file'],
                            name='img2float')
@@ -484,7 +484,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     if whichvol != 'mean':
         extract_ref = pe.Node(interface=fsl.ExtractROI(t_size=1),
                               iterfield=['in_file'],
-                              name = 'extractref')
+                              name='extractref')
         featpreproc.connect(img2float, ('out_file', pickfirst), extract_ref, 'in_file')
         featpreproc.connect(img2float, ('out_file', pickvol, 0, whichvol), extract_ref, 't_min')
         featpreproc.connect(extract_ref, 'roi_file', outputnode, 'reference')
@@ -494,11 +494,11 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     Realign the functional runs to the reference (`whichvol` volume of first run)
     """
 
-    motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_mats = True,
-                                                      save_plots = True,
-                                                      interpolation = 'spline'),
+    motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_mats=True,
+                                                      save_plots=True,
+                                                      interpolation='spline'),
                                 name='realign',
-                                iterfield = ['in_file'])
+                                iterfield=['in_file'])
     featpreproc.connect(img2float, 'out_file', motion_correct, 'in_file')
     if whichvol != 'mean':
         featpreproc.connect(extract_ref, 'roi_file', motion_correct, 'ref_file')
@@ -524,7 +524,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     Extract the mean volume of the first functional run
     """
 
-    meanfunc = pe.Node(interface=fsl.ImageMaths(op_string = '-Tmean',
+    meanfunc = pe.Node(interface=fsl.ImageMaths(op_string='-Tmean',
                                                 suffix='_mean'),
                        name='meanfunc')
     featpreproc.connect(motion_correct, ('out_file', pickfirst), meanfunc, 'in_file')
@@ -533,10 +533,10 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     Strip the skull from the mean functional to generate a mask
     """
 
-    meanfuncmask = pe.Node(interface=fsl.BET(mask = True,
+    meanfuncmask = pe.Node(interface=fsl.BET(mask=True,
                                              no_output=True,
-                                             frac = 0.3),
-                           name = 'meanfuncmask')
+                                             frac=0.3),
+                           name='meanfuncmask')
     featpreproc.connect(meanfunc, 'out_file', meanfuncmask, 'in_file')
 
     """
@@ -546,7 +546,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     maskfunc = pe.MapNode(interface=fsl.ImageMaths(suffix='_bet',
                                                    op_string='-mas'),
                           iterfield=['in_file'],
-                          name = 'maskfunc')
+                          name='maskfunc')
     featpreproc.connect(motion_correct, 'out_file', maskfunc, 'in_file')
     featpreproc.connect(meanfuncmask, 'mask_file', maskfunc, 'in_file2')
 
@@ -556,7 +556,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     """
 
     getthresh = pe.MapNode(interface=fsl.ImageStats(op_string='-p 2 -p 98'),
-                           iterfield = ['in_file'],
+                           iterfield=['in_file'],
                            name='getthreshold')
     featpreproc.connect(maskfunc, 'out_file', getthresh, 'in_file')
 
@@ -582,7 +582,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     """
 
     medianval = pe.MapNode(interface=fsl.ImageStats(op_string='-k %s -p 50'),
-                           iterfield = ['in_file', 'mask_file'],
+                           iterfield=['in_file', 'mask_file'],
                            name='medianval')
     featpreproc.connect(motion_correct, 'out_file', medianval, 'in_file')
     featpreproc.connect(threshold, 'out_file', medianval, 'mask_file')
@@ -775,11 +775,11 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
 
     if separate_masks:
         median = pe.MapNode(interface=fsl.ImageStats(op_string='-k %s -p 50'),
-                            iterfield = ['in_file', 'mask_file'],
+                            iterfield=['in_file', 'mask_file'],
                             name='median')
     else:
         median = pe.MapNode(interface=fsl.ImageStats(op_string='-k %s -p 50'),
-                            iterfield = ['in_file'],
+                            iterfield=['in_file'],
                             name='median')
     susan_smooth.connect(inputnode, 'in_files', median, 'in_file')
     susan_smooth.connect(inputnode, 'mask_file', median, 'mask_file')
@@ -935,7 +935,7 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     """
 
     img2float = pe.MapNode(interface=fsl.ImageMaths(out_data_type='float',
-                                                    op_string = '',
+                                                    op_string='',
                                                     suffix='_dtype'),
                            iterfield=['in_file'],
                            name='img2float')
@@ -949,7 +949,7 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     if whichvol != 'mean':
         extract_ref = pe.Node(interface=fsl.ExtractROI(t_size=1),
                               iterfield=['in_file'],
-                              name = 'extractref')
+                              name='extractref')
         featpreproc.connect(img2float, ('out_file', pickfirst), extract_ref, 'in_file')
         featpreproc.connect(img2float, ('out_file', pickvol, 0, whichvol), extract_ref, 't_min')
         featpreproc.connect(extract_ref, 'roi_file', outputnode, 'reference')
@@ -959,11 +959,11 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     Realign the functional runs to the reference (1st volume of first run)
     """
 
-    motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_mats = True,
-                                                      save_plots = True,
-                                                      interpolation = 'sinc'),
+    motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_mats=True,
+                                                      save_plots=True,
+                                                      interpolation='sinc'),
                                 name='realign',
-                                iterfield = ['in_file'])
+                                iterfield=['in_file'])
     featpreproc.connect(img2float, 'out_file', motion_correct, 'in_file')
     if whichvol != 'mean':
         featpreproc.connect(extract_ref, 'roi_file', motion_correct, 'ref_file')
@@ -1005,7 +1005,7 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     maskfunc = pe.MapNode(interface=fsl.ImageMaths(suffix='_bet',
                                                    op_string='-mas'),
                           iterfield=['in_file'],
-                          name = 'maskfunc')
+                          name='maskfunc')
     featpreproc.connect(motion_correct, 'out_file', maskfunc, 'in_file')
     featpreproc.connect(maskflow, ('outputspec.mask_file', pickfirst), maskfunc, 'in_file2')
 
@@ -1066,7 +1066,7 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     """
 
     medianval = pe.MapNode(interface=fsl.ImageStats(op_string='-k %s -p 50'),
-                           iterfield = ['in_file'],
+                           iterfield=['in_file'],
                            name='medianval')
     featpreproc.connect(motion_correct, 'out_file', medianval, 'in_file')
     featpreproc.connect(maskflow, ('outputspec.mask_file', pickfirst), medianval, 'mask_file')

@@ -94,10 +94,10 @@ segment.inputs.save_bias_corrected = True
 includes the template image, T1.nii.
 """
 
-normalize_func = pe.Node(interface=spm.Normalize(), name = "normalize_func")
+normalize_func = pe.Node(interface=spm.Normalize(), name="normalize_func")
 normalize_func.inputs.jobtype = "write"
 
-normalize_struc = pe.Node(interface=spm.Normalize(), name = "normalize_struc")
+normalize_struc = pe.Node(interface=spm.Normalize(), name="normalize_struc")
 normalize_struc.inputs.jobtype = "write"
 
 
@@ -105,7 +105,7 @@ normalize_struc.inputs.jobtype = "write"
 :class:`nipype.interfaces.spm.Smooth`.
 """
 
-smooth = pe.Node(interface=spm.Smooth(), name = "smooth")
+smooth = pe.Node(interface=spm.Smooth(), name="smooth")
 
 """`write_voxel_sizes` is the input of the normalize interface that is recommended to be set to
 the voxel sizes of the target volume. There is no need to set it manually since we van infer it from data
@@ -151,13 +151,13 @@ l1analysis = pe.Workflow(name='analysis')
 :class:`nipype.interfaces.spm.SpecifyModel`.
 """
 
-modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
+modelspec = pe.Node(interface=model.SpecifySPMModel(), name="modelspec")
 
 """Generate a first level SPM.mat file for analysis
 :class:`nipype.interfaces.spm.Level1Design`.
 """
 
-level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
+level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
 
 """Use :class:`nipype.interfaces.spm.EstimateModel` to determine the
 parameters of the model.
@@ -173,7 +173,7 @@ threshold = pe.Node(interface=spm.Threshold(), name="threshold")
 first level contrasts specified in a few steps above.
 """
 
-contrastestimate = pe.Node(interface = spm.EstimateContrast(), name="contrastestimate")
+contrastestimate = pe.Node(interface=spm.EstimateContrast(), name="contrastestimate")
 
 def pickfirst(l):
     return l[0]
@@ -253,7 +253,7 @@ functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
-                     name = 'datasource')
+                     name='datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/s%s_%04d%s.img'
 datasource.inputs.template_args = info

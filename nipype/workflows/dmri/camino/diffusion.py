@@ -129,7 +129,7 @@ def create_camino_dti_pipeline(name="dtiproc"):
     trace = pe.Node(interface=camino.ComputeTensorTrace(), name='trace')
     dteig = pe.Node(interface=camino.ComputeEigensystem(), name='dteig')
 
-    analyzeheader_fa = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_fa")
+    analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(), name="analyzeheader_fa")
     analyzeheader_fa.inputs.datatype = "double"
     analyzeheader_trace = analyzeheader_fa.clone('analyzeheader_trace')
 
@@ -227,9 +227,9 @@ def create_camino_dti_pipeline(name="dtiproc"):
                                                    (('dwi', get_data_dims), 'data_dims')])])
 
 
-    inputnode = pe.Node(interface = util.IdentityInterface(fields=["dwi", "bvecs", "bvals"]), name="inputnode")
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi", "bvecs", "bvals"]), name="inputnode")
 
-    outputnode = pe.Node(interface = util.IdentityInterface(fields=["fa",
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=["fa",
                                                                     "trace",
                                                                     "tracts_pico",
                                                                     "tracts_dt",

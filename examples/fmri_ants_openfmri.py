@@ -370,7 +370,7 @@ def create_fs_reg_workflow(name='registration'):
     binarize = Node(fs.Binarize(min=0.5, out_type="nii.gz", dilate=1), name="binarize_aparc")
     register.connect(fssource, ("aparc_aseg", get_aparc_aseg), binarize, "in_file")
 
-    stripper = Node(fsl.ApplyMask(), name ='stripper')
+    stripper = Node(fsl.ApplyMask(), name='stripper')
     register.connect(binarize, "binary_file", stripper, "mask_file")
     register.connect(convert, 'out_file', stripper, 'in_file')
 

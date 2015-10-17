@@ -74,8 +74,8 @@ Map field names to individual subject runs
 info = dict(dwi=[['subject_id', 'data']],
             bvecs=[['subject_id', 'bvecs']],
             bvals=[['subject_id', 'bvals']],
-            seed_file = [['subject_id', 'MASK_average_thal_right']],
-            target_masks = [['subject_id', ['MASK_average_M1_right',
+            seed_file=[['subject_id', 'MASK_average_thal_right']],
+            target_masks=[['subject_id', ['MASK_average_M1_right',
                                            'MASK_average_S1_right',
                                            'MASK_average_occipital_right',
                                            'MASK_average_pfc_right',
@@ -108,7 +108,7 @@ functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=list(info.keys())),
-                     name = 'datasource')
+                     name='datasource')
 
 datasource.inputs.template = "%s/%s"
 

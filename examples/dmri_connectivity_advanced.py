@@ -115,7 +115,7 @@ Templates for the associated images are used to obtain the correct images.
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=list(info.keys())),
-                     name = 'datasource')
+                     name='datasource')
 
 datasource.inputs.template = "%s/%s"
 datasource.inputs.base_directory = data_dir
@@ -244,7 +244,7 @@ This is created by generating a white matter mask, given a brainmask, and
 thresholding it at a reasonably high level.
 """
 
-bet = pe.Node(interface=fsl.BET(mask = True), name = 'bet_b0')
+bet = pe.Node(interface=fsl.BET(mask=True), name='bet_b0')
 gen_WM_mask = pe.Node(interface=mrtrix.GenerateWhiteMatterMask(), name='gen_WM_mask')
 threshold_wmmask = pe.Node(interface=mrtrix.Threshold(), name='threshold_wmmask')
 threshold_wmmask.inputs.absolute_threshold_value = 0.4
@@ -287,7 +287,7 @@ image and the structural image. This transformation is then applied to the tract
 so that they are in the same space as the regions of interest.
 """
 
-coregister = pe.Node(interface=fsl.FLIRT(dof=6), name = 'coregister')
+coregister = pe.Node(interface=fsl.FLIRT(dof=6), name='coregister')
 coregister.inputs.cost = ('normmi')
 
 """

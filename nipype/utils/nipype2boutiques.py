@@ -240,7 +240,7 @@ def create_tempfile():
     '''
     Creates a temp file and returns its name.
     '''
-    fileTemp = tempfile.NamedTemporaryFile(delete = False)
+    fileTemp = tempfile.NamedTemporaryFile(delete=False)
     fileTemp.write("hello")
     fileTemp.close()
     return fileTemp.name

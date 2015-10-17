@@ -117,13 +117,13 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
                                 stream_count, n_streams))
                 break
             pts = np.ndarray(
-                shape = (n_pts, pt_cols),
-                dtype = f4dt,
-                buffer = pts_str)
+                shape=(n_pts, pt_cols),
+                dtype=f4dt,
+                buffer=pts_str)
             nan_pt = np.ndarray(
-                shape = (1, pt_cols),
-                dtype = f4dt,
-                buffer = nan_str)
+                shape=(1, pt_cols),
+                dtype=f4dt,
+                buffer=nan_str)
             if np.isfinite(nan_pt[0][0]):
                 raise ValueError
                 break

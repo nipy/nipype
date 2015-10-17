@@ -28,7 +28,7 @@ realign_estwrite = pe.Node(interface=spm.Realign(), name='realign_estwrite')
 realign_estwrite.inputs.jobtype = "estwrite"
 realign_estwrite.inputs.register_to_mean = True
 
-smooth = pe.Node(interface=spm.Smooth(), name = 'smooth')
+smooth = pe.Node(interface=spm.Smooth(), name='smooth')
 smooth.inputs.fwhm = [6, 6, 6]
 
 workflow3d = pe.Workflow(name='test_3d')
@@ -62,7 +62,7 @@ realign_write.inputs.jobtype = "write"
 realign_estwrite = pe.Node(interface=spm.Realign(), name='realign_estwrite')
 realign_estwrite.inputs.jobtype = "estwrite"
 
-smooth = pe.Node(interface=spm.Smooth(), name = 'smooth')
+smooth = pe.Node(interface=spm.Smooth(), name='smooth')
 smooth.inputs.fwhm = [6, 6, 6]
 
 workflow4d = pe.Workflow(name='test_4d')

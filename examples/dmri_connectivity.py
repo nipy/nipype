@@ -147,7 +147,7 @@ The data are assumed to lie in data_dir/subject_id/.
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=list(info.keys())),
-                     name = 'datasource')
+                     name='datasource')
 
 datasource.inputs.template = "%s/%s"
 datasource.inputs.base_directory = data_dir
@@ -185,7 +185,7 @@ fsl2scheme.inputs.usegradmod = True
 FSL's Brain Extraction tool is used to create a mask from the b0 image
 """
 
-b0Strip = pe.Node(interface=fsl.BET(mask = True), name = 'bet_b0')
+b0Strip = pe.Node(interface=fsl.BET(mask=True), name='bet_b0')
 
 """
 FSL's FLIRT function is used to coregister the b0 mask and the structural image.
@@ -193,16 +193,16 @@ A convert_xfm node is then used to obtain the inverse of the transformation matr
 FLIRT is used once again to apply the inverse transformation to the parcellated brain image.
 """
 
-coregister = pe.Node(interface=fsl.FLIRT(dof=6), name = 'coregister')
+coregister = pe.Node(interface=fsl.FLIRT(dof=6), name='coregister')
 coregister.inputs.cost = ('corratio')
 
-convertxfm = pe.Node(interface=fsl.ConvertXFM(), name = 'convertxfm')
+convertxfm = pe.Node(interface=fsl.ConvertXFM(), name='convertxfm')
 convertxfm.inputs.invert_xfm = True
 
-inverse = pe.Node(interface=fsl.FLIRT(), name = 'inverse')
+inverse = pe.Node(interface=fsl.FLIRT(), name='inverse')
 inverse.inputs.interp = ('nearestneighbour')
 
-inverse_AparcAseg = pe.Node(interface=fsl.FLIRT(), name = 'inverse_AparcAseg')
+inverse_AparcAseg = pe.Node(interface=fsl.FLIRT(), name='inverse_AparcAseg')
 inverse_AparcAseg.inputs.interp = ('nearestneighbour')
 
 """
@@ -334,7 +334,7 @@ Freesurfer LUT (/freesurfer/FreeSurferColorLUT.txt).
 """
 
 roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
-cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
+cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme="NativeFreesurfer")
 cmp_config.parcellation_scheme = "NativeFreesurfer"
 roigen.inputs.LUT_file = cmp_config.get_freeview_lut("NativeFreesurfer")['freesurferaparc']
 roigen_structspace = roigen.clone('ROIGen_structspace')

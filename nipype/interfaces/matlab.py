@@ -60,7 +60,7 @@ class MatlabInputSpec(CommandLineInputSpec):
                               "fprintf(2,'MATLAB code threw an exception:\\n');",
                               "fprintf(2,'%s\\n',ME.message);",
                               "if length(ME.stack) ~= 0, fprintf(2,'File:%s\\nName:%s\\nLine:%d\\n',ME.stack.file,ME.stack.name,ME.stack.line);, end;",
-                              "end;"], desc='script added after code', usedefault = True)
+                              "end;"], desc='script added after code', usedefault=True)
 
 class MatlabCommand(CommandLine):
     """Interface that runs matlab code
@@ -77,7 +77,7 @@ class MatlabCommand(CommandLine):
     _default_paths = None
     input_spec = MatlabInputSpec
 
-    def __init__(self, matlab_cmd = None, **inputs):
+    def __init__(self, matlab_cmd=None, **inputs):
         """initializes interface to matlab
         (default 'matlab -nodesktop -nosplash')
         """

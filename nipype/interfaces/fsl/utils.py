@@ -1450,23 +1450,23 @@ class ComplexInputSpec(FSLCommandInputSpec):
     end_vol = traits.Int(position=-1, argstr='%d')
 
     real_polar = traits.Bool(
-        argstr = '-realpolar', xor = _conversion, position=1,)
+        argstr='-realpolar', xor=_conversion, position=1,)
 #        requires=['complex_in_file','magnitude_out_file','phase_out_file'])
     real_cartesian = traits.Bool(
-        argstr = '-realcartesian', xor = _conversion, position=1,)
+        argstr='-realcartesian', xor=_conversion, position=1,)
 #        requires=['complex_in_file','real_out_file','imaginary_out_file'])
     complex_cartesian = traits.Bool(
-        argstr = '-complex', xor = _conversion, position=1,)
+        argstr='-complex', xor=_conversion, position=1,)
 #        requires=['real_in_file','imaginary_in_file','complex_out_file'])
     complex_polar = traits.Bool(
-        argstr = '-complexpolar', xor = _conversion, position=1,)
+        argstr='-complexpolar', xor=_conversion, position=1,)
 #        requires=['magnitude_in_file','phase_in_file',
 #                  'magnitude_out_file','phase_out_file'])
     complex_split = traits.Bool(
-        argstr = '-complexsplit', xor = _conversion, position=1,)
+        argstr='-complexsplit', xor=_conversion, position=1,)
 #        requires=['complex_in_file','complex_out_file'])
     complex_merge = traits.Bool(
-        argstr = '-complexmerge', xor = _conversion + ['start_vol', 'end_vol'],
+        argstr='-complexmerge', xor=_conversion + ['start_vol', 'end_vol'],
         position=1,)
 #        requires=['complex_in_file','complex_in_file2','complex_out_file'])
 
@@ -1583,7 +1583,7 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
                               desc=('Alternative (to --warpres) specification of the resolution of '
                                     'the output spline-field.'))
 
-    out_file = File(argstr='--out=%s', position=-1, name_source = ['in_file'], output_name='out_file',
+    out_file = File(argstr='--out=%s', position=-1, name_source=['in_file'], output_name='out_file',
                     desc=('Name of output file. The format of the output depends on what other '
                           'parameters are set. The default format is a (4D) field-file. If the '
                           '--outformat is set to spline the format will be a (4D) file of spline '

@@ -3,7 +3,7 @@ from ....pipeline import engine as pe          # pypeline engine
 from ....interfaces import fsl as fsl
 from ....interfaces import mrtrix as mrtrix
 
-def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilistic'):
+def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type='probabilistic'):
     """Creates a pipeline that does the same diffusion processing as in the
     :doc:`../../users/examples/dmri_mrtrix_dti` example script. Given a diffusion-weighted image,
     b-values, and b-vectors, the workflow will return the tractography
@@ -34,7 +34,7 @@ def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilisti
 
     """
 
-    inputnode = pe.Node(interface = util.IdentityInterface(fields=["dwi",
+    inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi",
                                                                    "bvecs",
                                                                    "bvals"]),
                         name="inputnode")
@@ -150,7 +150,7 @@ def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilisti
     output_fields = ["fa", "tracts_trk", "csdeconv", "tracts_tck"]
     if tractography_type == 'probabilistic':
         output_fields.append("tdi")
-    outputnode = pe.Node(interface = util.IdentityInterface(fields=output_fields),
+    outputnode = pe.Node(interface=util.IdentityInterface(fields=output_fields),
                          name="outputnode")
 
     workflow.connect([(CSDstreamtrack, outputnode, [("tracked", "tracts_tck")]),

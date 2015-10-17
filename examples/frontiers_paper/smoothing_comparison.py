@@ -55,7 +55,7 @@ preprocessing.connect(compute_mask, "brain_mask", anisotropic_voxel_smooth,
 
 
 
-recon_all = pe.Node(interface=fs.ReconAll(), name = "recon_all")
+recon_all = pe.Node(interface=fs.ReconAll(), name="recon_all")
 
 surfregister = pe.Node(interface=fs.BBRegister(), name='surfregister')
 surfregister.inputs.init = 'fsl'
@@ -113,7 +113,7 @@ specify_model.inputs.subject_info = [Bunch(conditions=['Task-Odd', 'Task-Even'],
                                                    list(range(45, 240, 60))],
                                            durations=[[15], [15]])]*4
 
-level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
+level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
 level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
 level1design.inputs.timing_units = 'secs'
 level1design.inputs.interscan_interval = specify_model.inputs.time_repetition
@@ -121,7 +121,7 @@ level1design.inputs.interscan_interval = specify_model.inputs.time_repetition
 level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
 level1estimate.inputs.estimation_method = {'Classical': 1}
 
-contrastestimate = pe.Node(interface = spm.EstimateContrast(),
+contrastestimate = pe.Node(interface=spm.EstimateContrast(),
                            name="contrastestimate")
 contrastestimate.inputs.contrasts = [('Task>Baseline', 'T',
                                       ['Task-Odd', 'Task-Even'], [0.5, 0.5])]
@@ -146,7 +146,7 @@ main_workflow.connect(preprocessing, "compute_mask.brain_mask",
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
-                     name = 'datasource')
+                     name='datasource')
 datasource.inputs.base_directory = os.path.abspath('data')
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info = dict(func=[['subject_id',

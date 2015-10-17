@@ -667,11 +667,11 @@ class Similarity(BaseInterface):
         self._similarity = []
 
         for ts1, ts2 in zip(vols1, vols2):
-            histreg = HistogramRegistration(from_img = ts1,
-                                            to_img = ts2,
+            histreg = HistogramRegistration(from_img=ts1,
+                                            to_img=ts2,
                                             similarity=self.inputs.metric,
-                                            from_mask = mask1,
-                                            to_mask = mask2)
+                                            from_mask=mask1,
+                                            to_mask=mask2)
             self._similarity.append(histreg.eval(Affine()))
 
         return runtime

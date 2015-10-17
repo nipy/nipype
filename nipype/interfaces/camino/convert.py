@@ -80,7 +80,7 @@ class FSL2SchemeInputSpec(StdOutCommandLineInputSpec):
     bscale = traits.Float(argstr='-bscale %d', units='NA',
                           desc="Scaling factor to convert the b-values into different units. Default is 10^6.")
 
-    diffusiontime = traits.Float(argstr = '-diffusiontime %f', units = 'NA',
+    diffusiontime = traits.Float(argstr='-diffusiontime %f', units='NA',
                                  desc="Diffusion time")
 
     flipx = traits.Bool(argstr='-flipx', desc="Negate the x component of all the vectors.")
@@ -125,7 +125,7 @@ class VtkStreamlinesInputSpec(StdOutCommandLineInputSpec):
                    mandatory=True, position=-2,
                    desc='data file')
 
-    voxeldims = traits.List(traits.Int, desc = 'voxel dimensions in mm',
+    voxeldims = traits.List(traits.Int, desc='voxel dimensions in mm',
                             argstr='-voxeldims %s', minlen=3, maxlen=3, position=4,
                             units='mm')
 
@@ -186,16 +186,16 @@ class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
                                desc="maximum length of tracts")
     mintractlength = traits.Int(argstr='-mintractlength %d', units='mm',
                                desc="minimum length of tracts")
-    datadims = traits.List(traits.Int, desc = 'data dimensions in voxels',
+    datadims = traits.List(traits.Int, desc='data dimensions in voxels',
                            argstr='-datadims %s', minlen=3, maxlen=3,
                            units='voxels')
-    voxeldims = traits.List(traits.Int, desc = 'voxel dimensions in mm',
+    voxeldims = traits.List(traits.Int, desc='voxel dimensions in mm',
                             argstr='-voxeldims %s', minlen=3, maxlen=3,
                             units='mm')
-    seedpointmm = traits.List(traits.Int, desc = 'The coordinates of a single seed point for tractography in mm',
+    seedpointmm = traits.List(traits.Int, desc='The coordinates of a single seed point for tractography in mm',
                               argstr='-seedpointmm %s', minlen=3, maxlen=3,
                               units='mm')
-    seedpointvox = traits.List(traits.Int, desc = 'The coordinates of a single seed point for tractography in voxels',
+    seedpointvox = traits.List(traits.Int, desc='The coordinates of a single seed point for tractography in voxels',
                                argstr='-seedpointvox %s', minlen=3, maxlen=3,
                                units='voxels')
     seedfile = File(exists=False, argstr='-seedfile %s',
@@ -207,7 +207,7 @@ class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
     targetfile = File(exists=False, argstr='-targetfile %s',
                       desc='Image containing target volumes.')
     allowmultitargets = traits.Bool(argstr='-allowmultitargets', desc="Allows streamlines to connect to multiple target volumes.")
-    directional = traits.List(traits.Int, desc = 'Splits the streamlines at the seed point and computes separate connection probabilities for each segment. Streamline segments are grouped according to their dot product with the vector (X, Y, Z). The ideal vector will be tangential to the streamline trajectory at the seed, such that the streamline projects from the seed along (X, Y, Z) and -(X, Y, Z). However, it is only necessary for the streamline trajectory to not be orthogonal to (X, Y, Z).',
+    directional = traits.List(traits.Int, desc='Splits the streamlines at the seed point and computes separate connection probabilities for each segment. Streamline segments are grouped according to their dot product with the vector (X, Y, Z). The ideal vector will be tangential to the streamline trajectory at the seed, such that the streamline projects from the seed along (X, Y, Z) and -(X, Y, Z). However, it is only necessary for the streamline trajectory to not be orthogonal to (X, Y, Z).',
                               argstr='-directional %s', minlen=3, maxlen=3,
                               units='NA')
     waypointfile = File(exists=False, argstr='-waypointfile %s',
@@ -424,7 +424,7 @@ class NIfTIDT2CaminoInputSpec(StdOutCommandLineInputSpec):
                               'applied after any scaling specified by the input image. Default is 0.0.')
 
     uppertriangular = traits.Bool(argstr='-uppertriangular %s',
-                                  desc = 'Specifies input in upper-triangular (VTK style) order.')
+                                  desc='Specifies input in upper-triangular (VTK style) order.')
 
 class NIfTIDT2CaminoOutputSpec(TraitedSpec):
     out_file = File(desc='diffusion tensors data in Camino format')
@@ -510,11 +510,11 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
                                 'combination of fields in the new header by '
                                 'specifying subsequent options.'))
 
-    data_dims = traits.List(traits.Int, desc = 'data dimensions in voxels',
+    data_dims = traits.List(traits.Int, desc='data dimensions in voxels',
                             argstr='-datadims %s', minlen=3, maxlen=3,
                             units='voxels')
 
-    voxel_dims = traits.List(traits.Float, desc = 'voxel dimensions in mm',
+    voxel_dims = traits.List(traits.Float, desc='voxel dimensions in mm',
                              argstr='-voxeldims %s', minlen=3, maxlen=3,
                              units='mm')
 

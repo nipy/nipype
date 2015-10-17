@@ -51,9 +51,9 @@ def test_bunch_hash():
     # the hash will be unique to each machine.
     pth = os.path.split(os.path.abspath(__file__))[0]
     json_pth = os.path.join(pth, 'realign_json.json')
-    b = nib.Bunch(infile = json_pth,
-                  otherthing = 'blue',
-                  yat = True)
+    b = nib.Bunch(infile=json_pth,
+                  otherthing='blue',
+                  yat=True)
     newbdict, bhash = b._get_bunch_hash()
     yield assert_equal, bhash, 'ddcc7b4ec5675df8cf317a48bd1857fa'
     # Make sure the hash stored in the json file for `infile` is correct.
@@ -116,13 +116,13 @@ def test_TraitedSpec_logic():
     class spec3(nib.TraitedSpec):
         _xor_inputs = ('foo', 'bar')
 
-        foo = nib.traits.Int(xor = _xor_inputs,
-                             desc = 'foo or bar, not both')
-        bar = nib.traits.Int(xor = _xor_inputs,
-                             desc = 'bar or foo, not both')
-        kung = nib.traits.Float(requires = ('foo',),
-                                position = 0,
-                                desc = 'kung foo')
+        foo = nib.traits.Int(xor=_xor_inputs,
+                             desc='foo or bar, not both')
+        bar = nib.traits.Int(xor=_xor_inputs,
+                             desc='bar or foo, not both')
+        kung = nib.traits.Float(requires=('foo',),
+                                position=0,
+                                desc='kung foo')
     class out3(nib.TraitedSpec):
         output = nib.traits.Int
     class MyInterface(nib.BaseInterface):

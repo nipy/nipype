@@ -63,10 +63,10 @@ except:
     result = task.result
 """
         task = self.ipyclient.StringTask(cmdstr,
-                                         push = dict(task=node,
+                                         push=dict(task=node,
                                                      updatehash=updatehash),
-                                         pull = ['result', 'traceback'])
-        return self.taskclient.run(task, block = False)
+                                         pull=['result', 'traceback'])
+        return self.taskclient.run(task, block=False)
 
     def _report_crash(self, node, result=None):
         if result and result['traceback']:

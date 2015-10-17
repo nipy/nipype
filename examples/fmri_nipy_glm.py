@@ -100,7 +100,7 @@ functionality.
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func', 'struct']),
-                     name = 'datasource')
+                     name='datasource')
 datasource.inputs.base_directory = data_dir
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = info
@@ -141,7 +141,7 @@ coregister.inputs.jobtype = 'estimate'
 :class:`nipype.interfaces.spm.Smooth`.
 """
 
-smooth = pe.Node(interface=spm.Smooth(), name = "smooth")
+smooth = pe.Node(interface=spm.Smooth(), name="smooth")
 smooth.inputs.fwhm = 4
 
 """
@@ -191,7 +191,7 @@ contrasts = [cont1, cont2]
 in seconds so "output_units" has always have to be set to "secs".
 """
 
-modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
+modelspec = pe.Node(interface=model.SpecifySPMModel(), name="modelspec")
 modelspec.inputs.concatenate_runs = True
 modelspec.inputs.input_units = 'secs'
 modelspec.inputs.output_units = 'secs'

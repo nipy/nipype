@@ -19,14 +19,14 @@ class FilterTracksInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
                    desc='input tracks to be filtered')
     include_xor = ['include_file', 'include_spec']
-    include_file = File(exists=True, argstr='-include %s', desc='inclusion file', xor = include_xor)
+    include_file = File(exists=True, argstr='-include %s', desc='inclusion file', xor=include_xor)
     include_spec = traits.List(traits.Float, desc='inclusion specification in mm and radius (x y z r)', position=2,
-                               argstr='-include %s', minlen=4, maxlen=4, sep=',', units='mm', xor = include_xor)
+                               argstr='-include %s', minlen=4, maxlen=4, sep=',', units='mm', xor=include_xor)
 
     exclude_xor = ['exclude_file', 'exclude_spec']
-    exclude_file = File(exists=True, argstr='-exclude %s', desc='exclusion file', xor = exclude_xor)
+    exclude_file = File(exists=True, argstr='-exclude %s', desc='exclusion file', xor=exclude_xor)
     exclude_spec = traits.List(traits.Float, desc='exclusion specification in mm and radius (x y z r)', position=2,
-                               argstr='-exclude %s', minlen=4, maxlen=4, sep=',', units='mm', xor = exclude_xor)
+                               argstr='-exclude %s', minlen=4, maxlen=4, sep=',', units='mm', xor=exclude_xor)
 
     minimum_tract_length = traits.Float(argstr='-minlength %s', units='mm',
                                         desc="Sets the minimum length of any track in millimeters (default is 10 mm).")
@@ -78,7 +78,7 @@ class Tracks2ProbInputSpec(CommandLineInputSpec):
                                   desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"') #, usedefault=True)
     resample = traits.Float(argstr='-resample %d', position=3,
                             units='mm', desc='resample the tracks at regular intervals using Hermite interpolation. If omitted, the program will select an appropriate interpolation factor automatically.')
-    out_filename = File(genfile=True, argstr='%s', position= -1, desc='output data file')
+    out_filename = File(genfile=True, argstr='%s', position=-1, desc='output data file')
 
 class Tracks2ProbOutputSpec(TraitedSpec):
     tract_image = File(exists=True, desc='Output tract count or track density image')
@@ -128,24 +128,24 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
                    'the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.')
 
     seed_xor = ['seed_file', 'seed_spec']
-    seed_file = File(exists=True, argstr='-seed %s', desc='seed file', xor = seed_xor)
+    seed_file = File(exists=True, argstr='-seed %s', desc='seed file', xor=seed_xor)
     seed_spec = traits.List(traits.Float, desc='seed specification in mm and radius (x y z r)', position=2,
-                            argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm', xor = seed_xor)
+                            argstr='-seed %s', minlen=4, maxlen=4, sep=',', units='mm', xor=seed_xor)
 
     include_xor = ['include_file', 'include_spec']
-    include_file = File(exists=True, argstr='-include %s', desc='inclusion file', xor = include_xor)
+    include_file = File(exists=True, argstr='-include %s', desc='inclusion file', xor=include_xor)
     include_spec = traits.List(traits.Float, desc='inclusion specification in mm and radius (x y z r)', position=2,
-                               argstr='-include %s', minlen=4, maxlen=4, sep=',', units='mm', xor = include_xor)
+                               argstr='-include %s', minlen=4, maxlen=4, sep=',', units='mm', xor=include_xor)
 
     exclude_xor = ['exclude_file', 'exclude_spec']
-    exclude_file = File(exists=True, argstr='-exclude %s', desc='exclusion file', xor = exclude_xor)
+    exclude_file = File(exists=True, argstr='-exclude %s', desc='exclusion file', xor=exclude_xor)
     exclude_spec = traits.List(traits.Float, desc='exclusion specification in mm and radius (x y z r)', position=2,
-                               argstr='-exclude %s', minlen=4, maxlen=4, sep=',', units='mm', xor = exclude_xor)
+                               argstr='-exclude %s', minlen=4, maxlen=4, sep=',', units='mm', xor=exclude_xor)
 
     mask_xor = ['mask_file', 'mask_spec']
-    mask_file = File(exists=True, argstr='-mask %s', desc='mask file. Only tracks within mask.', xor = mask_xor)
+    mask_file = File(exists=True, argstr='-mask %s', desc='mask file. Only tracks within mask.', xor=mask_xor)
     mask_spec = traits.List(traits.Float, desc='Mask specification in mm and radius (x y z r). Tracks will be terminated when they leave the ROI.', position=2,
-                            argstr='-mask %s', minlen=4, maxlen=4, sep=',', units='mm', xor = mask_xor)
+                            argstr='-mask %s', minlen=4, maxlen=4, sep=',', units='mm', xor=mask_xor)
 
     inputmodel = traits.Enum('DT_STREAM', 'SD_PROB', 'SD_STREAM',
                              argstr='%s', desc='input model type', usedefault=True, position=-3)
@@ -178,7 +178,7 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
 
     initial_direction = traits.List(traits.Int, desc='Specify the initial tracking direction as a vector',
                                     argstr='-initdirection %s', minlen=2, maxlen=2, units='voxels')
-    out_file = File(argstr='%s', position= -1, name_source = ['in_file'], name_template='%s_tracked.tck',
+    out_file = File(argstr='%s', position=-1, name_source=['in_file'], name_template='%s_tracked.tck',
                     output_name='tracked', desc='output data file')
 
 class StreamlineTrackOutputSpec(TraitedSpec):

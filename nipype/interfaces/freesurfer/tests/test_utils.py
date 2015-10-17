@@ -83,7 +83,7 @@ def test_sample2surf():
                                       % (os.path.join(cwd, "lh.a.mgz"), files[1], files[0]))
 
     # Test identity
-    s2sish = fs.SampleToSurface(source_file = files[1], reference_file = files[0], hemi="rh")
+    s2sish = fs.SampleToSurface(source_file=files[1], reference_file=files[0], hemi="rh")
     yield assert_not_equal, s2s, s2sish
 
     # Test hits file name creation

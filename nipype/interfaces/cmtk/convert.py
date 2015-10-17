@@ -51,7 +51,7 @@ class CFFConverterInputSpec(BaseInterfaceInputSpec):
     species = traits.Str('Homo sapiens', desc='Species', usedefault=True)
     description = traits.Str('Created with the Nipype CFF converter', desc='Description', usedefault=True)
 
-    out_file = File('connectome.cff', usedefault = True, desc='Output connectome file')
+    out_file = File('connectome.cff', usedefault=True, desc='Output connectome file')
 
 class CFFConverterOutputSpec(TraitedSpec):
     connectome_file = File(exists=True, desc='Output connectome file')
@@ -129,7 +129,7 @@ class CFFConverter(BaseInterface):
             for ntwk in self.inputs.gpickled_networks:
                 _, ntwk_name, _ = split_filename(ntwk)
                 unpickled = nx.read_gpickle(ntwk)
-                cnet = cf.CNetwork(name = ntwk_name)
+                cnet = cf.CNetwork(name=ntwk_name)
                 cnet.set_with_nxgraph(unpickled)
                 a.add_connectome_network(cnet)
                 count += 1
@@ -204,7 +204,7 @@ class CFFConverter(BaseInterface):
 
 class MergeCNetworksInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='List of CFF files to extract networks from')
-    out_file = File('merged_network_connectome.cff', usedefault = True, desc='Output CFF file with all the networks added')
+    out_file = File('merged_network_connectome.cff', usedefault=True, desc='Output CFF file with all the networks added')
 
 class MergeCNetworksOutputSpec(TraitedSpec):
     connectome_file = File(exists=True, desc='Output CFF file with all the networks added')
@@ -240,7 +240,7 @@ class MergeCNetworks(BaseInterface):
                 extracted_networks.append(ne)
 
         # Add networks to new connectome
-        newcon = cf.connectome(title = 'All CNetworks', connectome_network = extracted_networks)
+        newcon = cf.connectome(title='All CNetworks', connectome_network=extracted_networks)
         # Setting additional metadata
         metadata = newcon.get_connectome_meta()
         metadata.set_creator('My Name')

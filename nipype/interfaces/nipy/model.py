@@ -37,7 +37,7 @@ class FitGLMInputSpec(BaseInterfaceInputSpec):
                                   "function it can be 'Canonical', 'Canonical "
                                   "With Derivative' or 'FIR'"), usedefault=True)
     drift_model = traits.Enum("Cosine", "Polynomial", "Blank",
-                              desc = ("string that specifies the desired drift "
+                              desc=("string that specifies the desired drift "
                                       "model, to be chosen among 'Polynomial', "
                                       "'Cosine', 'Blank'"), usedefault=True)
     TR = traits.Float(mandatory=True)

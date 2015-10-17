@@ -78,7 +78,7 @@ def import_nose():
 
     return nose
 
-def run_module_suite(file_to_run = None):
+def run_module_suite(file_to_run=None):
     if file_to_run is None:
         f = sys._getframe(1)
         file_to_run = f.f_locals.get('__file__', None)

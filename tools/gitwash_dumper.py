@@ -73,7 +73,7 @@ def copy_replace(replace_pairs,
                  out_path,
                  cp_globs=('*',),
                  rep_globs=('*',),
-                 renames = ()):
+                 renames=()):
     out_fnames = cp_files(repo_path, cp_globs, out_path)
     renames = [(re.compile(in_exp), out_exp) for in_exp, out_exp in renames]
     fnames = []
