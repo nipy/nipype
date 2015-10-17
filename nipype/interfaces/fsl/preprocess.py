@@ -240,11 +240,11 @@ class FASTInputSpec(FSLCommandInputSpec):
                           argstr='-N')
     use_priors = traits.Bool(desc='use priors throughout',
                              argstr='-P')   # must also set -a!,
-                                              # mutually inclusive??
-                                              # No, conditional
-                                              # mandatory... need to
-                                              # figure out how to
-                                              # handle with traits.
+                                            # mutually inclusive??
+                                            # No, conditional
+                                            # mandatory... need to
+                                            # figure out how to
+                                            # handle with traits.
     segment_iters = traits.Range(low=1, high=50,
                                  desc='number of segmentation-initialisation'
                                  ' iterations',
