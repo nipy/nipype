@@ -102,12 +102,12 @@ intensity or movement.
 """
 
 art = pe.Node(interface=ra.ArtifactDetect(), name="art")
-art.inputs.use_differences      = [True, False]
-art.inputs.use_norm             = True
-art.inputs.norm_threshold       = 1
+art.inputs.use_differences = [True, False]
+art.inputs.use_norm = True
+art.inputs.norm_threshold = 1
 art.inputs.zintensity_threshold = 3
-art.inputs.mask_type            = 'file'
-art.inputs.parameter_source     = 'SPM'
+art.inputs.mask_type = 'file'
+art.inputs.parameter_source = 'SPM'
 
 """
 Use :class:`nipype.interfaces.freesurfer.BBRegister` to coregister the mean
@@ -199,7 +199,7 @@ Generate SPM-specific design information using
 """
 
 modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
-modelspec.inputs.concatenate_runs        = True
+modelspec.inputs.concatenate_runs = True
 
 """
 Generate a first level SPM.mat file for analysis
@@ -207,7 +207,7 @@ Generate a first level SPM.mat file for analysis
 """
 
 level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
-level1design.inputs.bases              = {'hrf':{'derivs': [0,0]}}
+level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
 
 """
 Use :class:`nipype.interfaces.spm.EstimateModel` to determine the
@@ -481,21 +481,21 @@ volume-based analysis.
 """
 
 modelspecref = l1pipeline.inputs.volanalysis.modelspec
-modelspecref.input_units             = 'secs'
-modelspecref.time_repetition         = 3.
+modelspecref.input_units = 'secs'
+modelspecref.time_repetition = 3.
 modelspecref.high_pass_filter_cutoff = 120
 
 modelspecref = l1pipeline.inputs.surfanalysis.modelspec
-modelspecref.input_units             = 'secs'
-modelspecref.time_repetition         = 3.
+modelspecref.input_units = 'secs'
+modelspecref.time_repetition = 3.
 modelspecref.high_pass_filter_cutoff = 120
 
 l1designref = l1pipeline.inputs.volanalysis.level1design
-l1designref.timing_units       = modelspecref.output_units
+l1designref.timing_units = modelspecref.output_units
 l1designref.interscan_interval = modelspecref.time_repetition
 
 l1designref = l1pipeline.inputs.surfanalysis.level1design
-l1designref.timing_units       = modelspecref.output_units
+l1designref.timing_units = modelspecref.output_units
 l1designref.interscan_interval = modelspecref.time_repetition
 
 l1pipeline.inputs.inputnode.contrasts = contrasts

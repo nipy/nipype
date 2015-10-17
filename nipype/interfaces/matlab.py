@@ -30,7 +30,7 @@ no_matlab = get_matlab_command() is None
 class MatlabInputSpec(CommandLineInputSpec):
     """ Basic expected inputs to Matlab interface """
 
-    script  = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
+    script = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
                          mandatory=True, position=-1)
     uses_mcr = traits.Bool(desc='use MCR interface',
                            xor=['nodesktop', 'nosplash',
@@ -49,11 +49,11 @@ class MatlabInputSpec(CommandLineInputSpec):
                                      desc="force single threaded operation",
                                      nohash=True)
     # non-commandline options
-    mfile   = traits.Bool(True, desc='Run m-code using m-file',
+    mfile = traits.Bool(True, desc='Run m-code using m-file',
                           usedefault=True)
     script_file = File('pyscript.m', usedefault=True,
                        desc='Name of file to write m-code to')
-    paths   = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
+    paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
     prescript = traits.List(["ver,","try,"], usedefault=True,
                             desc='prescript to be added before code')
     postscript = traits.List(["\n,catch ME,",

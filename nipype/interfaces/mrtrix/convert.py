@@ -62,7 +62,7 @@ def read_mrtrix_header(in_file):
         elif ': ' in line:
             line = line.replace('\n','')
             line = line.replace("'","")
-            key  = line.split(': ')[0]
+            key = line.split(': ')[0]
             value = line.split(': ')[1]
             header[key] = value
             iflogger.info('...adding "{v}" to header for key "{k}"'.format(v=value,k=key))

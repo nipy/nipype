@@ -82,6 +82,6 @@ def main(argv):
 
     _, prog = os.path.split(argv[0])
     interface_parser = argparse.ArgumentParser(description="Run %s"%parsed.interface, prog=" ".join([prog] + argv[1:3]))
-    interface_parser, interface  = add_options(interface_parser, parsed.module, parsed.interface)
+    interface_parser, interface = add_options(interface_parser, parsed.module, parsed.interface)
     args = interface_parser.parse_args(args=argv[3:])
     run_instance(interface, args)

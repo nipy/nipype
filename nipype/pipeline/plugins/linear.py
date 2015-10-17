@@ -28,7 +28,7 @@ class LinearPlugin(PluginBase):
         old_wd = os.getcwd()
         notrun = []
         donotrun = []
-        nodes, _  = topological_sort(graph)
+        nodes, _ = topological_sort(graph)
         for node in nodes:
             try:
                 if node in donotrun:

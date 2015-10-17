@@ -77,12 +77,12 @@ intensity or movement.
 """
 
 art = pe.Node(interface=ra.ArtifactDetect(), name="art")
-art.inputs.use_differences      = [True, False]
-art.inputs.use_norm             = True
-art.inputs.norm_threshold       = 1
+art.inputs.use_differences = [True, False]
+art.inputs.use_norm = True
+art.inputs.norm_threshold = 1
 art.inputs.zintensity_threshold = 3
-art.inputs.mask_type            = 'file'
-art.inputs.parameter_source     = 'SPM'
+art.inputs.mask_type = 'file'
+art.inputs.parameter_source = 'SPM'
 
 """Skull strip structural images using
 :class:`nipype.interfaces.fsl.BET`.
@@ -135,14 +135,14 @@ l1analysis = pe.Workflow(name='analysis')
 """
 
 modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
-modelspec.inputs.concatenate_runs        = True
+modelspec.inputs.concatenate_runs = True
 
 """Generate a first level SPM.mat file for analysis
 :class:`nipype.interfaces.spm.Level1Design`.
 """
 
 level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
-level1design.inputs.bases              = {'hrf':{'derivs': [0,0]}}
+level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
 
 """Use :class:`nipype.interfaces.spm.EstimateModel` to determine the
 parameters of the model.
@@ -355,13 +355,13 @@ contrasts = [cont1,cont2]
 
 # set up node specific inputs
 modelspecref = l1pipeline.inputs.analysis.modelspec
-modelspecref.input_units             = 'secs'
-modelspecref.output_units            = 'secs'
-modelspecref.time_repetition         = 3.
+modelspecref.input_units = 'secs'
+modelspecref.output_units = 'secs'
+modelspecref.time_repetition = 3.
 modelspecref.high_pass_filter_cutoff = 120
 
 l1designref = l1pipeline.inputs.analysis.level1design
-l1designref.timing_units       = modelspecref.output_units
+l1designref.timing_units = modelspecref.output_units
 l1designref.interscan_interval = modelspecref.time_repetition
 
 

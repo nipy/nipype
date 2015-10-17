@@ -121,12 +121,12 @@ intensity or movement.
 """
 
 art = pe.Node(interface=ra.ArtifactDetect(), name="art")
-art.inputs.use_differences      = [True, False]
-art.inputs.use_norm             = True
-art.inputs.norm_threshold       = 1
+art.inputs.use_differences = [True, False]
+art.inputs.use_norm = True
+art.inputs.norm_threshold = 1
 art.inputs.zintensity_threshold = 3
-art.inputs.mask_type            = 'file'
-art.inputs.parameter_source     = 'SPM'
+art.inputs.mask_type = 'file'
+art.inputs.parameter_source = 'SPM'
 
 
 """Use :class:`nipype.interfaces.spm.Coregister` to perform a rigid
@@ -192,10 +192,10 @@ in seconds so "output_units" has always have to be set to "secs".
 """
 
 modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
-modelspec.inputs.concatenate_runs        = True
-modelspec.inputs.input_units             = 'secs'
-modelspec.inputs.output_units            = 'secs'
-modelspec.inputs.time_repetition         = 3.
+modelspec.inputs.concatenate_runs = True
+modelspec.inputs.input_units = 'secs'
+modelspec.inputs.output_units = 'secs'
+modelspec.inputs.time_repetition = 3.
 modelspec.inputs.high_pass_filter_cutoff = 120
 
 """Fit the GLM model using nipy and ordinary least square method

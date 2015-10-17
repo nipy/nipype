@@ -64,17 +64,17 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
     # Retrieves Nipype interface
     __import__(module)
     interface = getattr(sys.modules[module],interface_name)()
-    inputs    = interface.input_spec()
-    outputs   = interface.output_spec()
+    inputs = interface.input_spec()
+    outputs = interface.output_spec()
 
     # Tool description
     tool_desc = {}
-    tool_desc['name']           = interface_name
-    tool_desc['command-line']   = "nipype_cmd "+str(module)+" "+interface_name+" "
-    tool_desc['description']    = interface_name+", as implemented in Nipype (module: "+str(module)+", interface: "+interface_name+")."
-    tool_desc['inputs']         = []
-    tool_desc['outputs']        = []
-    tool_desc['tool-version']   = interface.version
+    tool_desc['name'] = interface_name
+    tool_desc['command-line'] = "nipype_cmd "+str(module)+" "+interface_name+" "
+    tool_desc['description'] = interface_name+", as implemented in Nipype (module: "+str(module)+", interface: "+interface_name+")."
+    tool_desc['inputs'] = []
+    tool_desc['outputs'] = []
+    tool_desc['tool-version'] = interface.version
     tool_desc['schema-version'] = '0.2-snapshot'
     if docker_image:
         tool_desc['docker-image'] = docker_image
@@ -125,25 +125,25 @@ def get_boutiques_input(inputs,interface,input_name,spec,ignored_template_inputs
     """
     if not spec.desc:
         spec.desc = "No description provided."
-    spec_info         = spec.full_info(inputs, input_name, None)
+    spec_info = spec.full_info(inputs, input_name, None)
 
-    input     = {}
-    input['id']                = input_name
-    input['name']              = input_name.replace('_',' ').capitalize()
-    input['type']              = get_type_from_spec_info(spec_info)
-    input['list']              = is_list(spec_info)
-    input['command-line-key']  = "["+input_name.upper()+"]" # assumes that input names are unique
+    input = {}
+    input['id'] = input_name
+    input['name'] = input_name.replace('_',' ').capitalize()
+    input['type'] = get_type_from_spec_info(spec_info)
+    input['list'] = is_list(spec_info)
+    input['command-line-key'] = "["+input_name.upper()+"]" # assumes that input names are unique
     input['command-line-flag'] = ("--%s"%input_name+" ").strip()
-    input['tempvalue']         = None
-    input['description']       = spec_info.capitalize()+". "+spec.desc.capitalize()
+    input['tempvalue'] = None
+    input['description'] = spec_info.capitalize()+". "+spec.desc.capitalize()
     if not input['description'].endswith('.'):
-        input['description']    += '.'
+        input['description'] += '.'
     if not (hasattr(spec, "mandatory") and spec.mandatory):
-        input['optional']        = True
+        input['optional'] = True
     else:
-        input['optional']        = False
+        input['optional'] = False
     if spec.usedefault:
-        input['default-value']   = spec.default_value()[1]
+        input['default-value'] = spec.default_value()[1]
 
 
     # Create unique, temporary value.
@@ -178,11 +178,11 @@ def get_boutiques_output(name,interface,tool_inputs,verbose=False):
       * There is a single output value (output lists are not supported).
     """
     output = {}
-    output['name']             = name.replace('_',' ').capitalize()
-    output['id']               = name
-    output['type']             = "File"
-    output['path-template']    = ""
-    output['optional']         = True # no real way to determine if an output is always produced, regardless of the input values.
+    output['name'] = name.replace('_',' ').capitalize()
+    output['id'] = name
+    output['type'] = "File"
+    output['path-template'] = ""
+    output['optional'] = True # no real way to determine if an output is always produced, regardless of the input values.
 
     # Path template creation.
 

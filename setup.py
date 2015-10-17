@@ -294,7 +294,7 @@ def main(**extra_args):
           version=VERSION,
           install_requires=REQUIRES,
           provides=PROVIDES,
-          packages     = ['nipype',
+          packages = ['nipype',
                            'nipype.algorithms',
                            'nipype.algorithms.tests',
                            'nipype.caching',
@@ -425,7 +425,7 @@ def main(**extra_args):
                            pjoin('interfaces', 'script_templates', '*'),
                            pjoin('interfaces', 'tests', 'realign_json.json')
                            ]},
-          scripts      = glob('bin/*'),
+          scripts = glob('bin/*'),
           cmdclass = cmdclass,
           **extra_args
           )

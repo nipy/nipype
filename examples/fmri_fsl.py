@@ -425,7 +425,7 @@ Use :class:`nipype.interfaces.fsl.Merge` to merge the copes and
 varcopes for each condition
 """
 
-copemerge    = pe.MapNode(interface=fsl.Merge(dimension='t'),
+copemerge = pe.MapNode(interface=fsl.Merge(dimension='t'),
                           iterfield=['in_files'],
                           name="copemerge")
 

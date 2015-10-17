@@ -63,8 +63,8 @@ and sparse designs. Contrasts provided to ContrastEstimate are defined using
 the same names of regressors as defined in the SpecifyModel."""
 
 specify_model = pe.Node(interface=model.SpecifyModel(), name="specify_model")
-specify_model.inputs.input_units             = 'secs'
-specify_model.inputs.time_repetition         = 3.
+specify_model.inputs.input_units = 'secs'
+specify_model.inputs.time_repetition = 3.
 specify_model.inputs.high_pass_filter_cutoff = 120
 specify_model.inputs.subject_info = [Bunch(conditions=['Task-Odd','Task-Even'],
                                            onsets=[list(range(15,240,60)),

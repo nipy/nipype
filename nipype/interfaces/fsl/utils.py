@@ -1869,7 +1869,7 @@ class WarpPoints(CommandLine):
         points = reader.output.points
 
         if out_file is None:
-            out_file, _ = op.splitext(in_file)  + '.txt'
+            out_file, _ = op.splitext(in_file) + '.txt'
 
         np.savetxt(out_file, points)
         return out_file

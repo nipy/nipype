@@ -166,7 +166,7 @@ modelspec = pe.Node(interface=model.SpecifySPMModel(), name= "modelspec")
 """
 
 level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
-level1design.inputs.bases              = {'hrf':{'derivs': [0,0]}}
+level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
 
 """Use :class:`nipype.interfaces.spm.EstimateModel` to determine the
 parameters of the model.
@@ -299,13 +299,13 @@ contrasts = [cont1]
 
 # set up node specific inputs
 modelspecref = l1pipeline.inputs.analysis.modelspec
-modelspecref.input_units             = 'scans'
-modelspecref.output_units            = 'scans'
-modelspecref.time_repetition         = 7
+modelspecref.input_units = 'scans'
+modelspecref.output_units = 'scans'
+modelspecref.time_repetition = 7
 modelspecref.high_pass_filter_cutoff = 120
 
 l1designref = l1pipeline.inputs.analysis.level1design
-l1designref.timing_units       = modelspecref.output_units
+l1designref.timing_units = modelspecref.output_units
 l1designref.interscan_interval = modelspecref.time_repetition
 
 l1pipeline.inputs.preproc.smooth.fwhm = [6, 6, 6]

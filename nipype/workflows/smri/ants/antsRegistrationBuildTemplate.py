@@ -72,7 +72,7 @@ def SplitAffineAndWarpComponents(list_of_transforms_lists):
     ### Nota bene: The outputs will include the initial_moving_transform from Registration (which depends on what
     ###            the invert_initial_moving_transform is set to)
     affine_component_list = []
-    warp_component_list   = []
+    warp_component_list = []
     for transform in list_of_transforms_lists:
         affine_component_list.append(transform[0])
         warp_component_list.append(transform[1])

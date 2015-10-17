@@ -335,13 +335,13 @@ l1pipeline.inputs.preproc.smooth.fwhm = [8, 8, 8]
 
 # set up node specific inputs
 modelspecref = l1pipeline.inputs.analysis.modelspec
-modelspecref.input_units             = 'scans'
-modelspecref.output_units            = 'scans'
-modelspecref.time_repetition         = TR
+modelspecref.input_units = 'scans'
+modelspecref.output_units = 'scans'
+modelspecref.time_repetition = TR
 modelspecref.high_pass_filter_cutoff = 120
 
 l1designref = l1pipeline.inputs.analysis.level1design
-l1designref.timing_units       = modelspecref.output_units
+l1designref.timing_units = modelspecref.output_units
 l1designref.interscan_interval = modelspecref.time_repetition
 l1designref.microtime_resolution = slice_timingref.num_slices
 l1designref.microtime_onset = slice_timingref.ref_slice

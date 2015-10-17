@@ -36,11 +36,11 @@ class TempInstall(Command):
         """ build and install nipype in a temporary location. """
         install = self.distribution.get_command_obj('install')
         install.install_scripts = self.temp_install_dir
-        install.install_base    = self.temp_install_dir
+        install.install_base = self.temp_install_dir
         install.install_platlib = self.temp_install_dir
         install.install_purelib = self.temp_install_dir
-        install.install_data    = self.temp_install_dir
-        install.install_lib     = self.temp_install_dir
+        install.install_data = self.temp_install_dir
+        install.install_lib = self.temp_install_dir
         install.install_headers = self.temp_install_dir
         install.run()
 
