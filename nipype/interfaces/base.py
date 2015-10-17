@@ -1732,7 +1732,7 @@ class SEMLikeCommandLine(CommandLine):
             corresponding_input = getattr(self.inputs, name)
             if isdefined(corresponding_input):
                 if (isinstance(corresponding_input, bool) and
-                    corresponding_input):
+                        corresponding_input):
                     outputs[name] = \
                         os.path.abspath(self._outputs_filenames[name])
                 else:

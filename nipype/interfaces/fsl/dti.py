@@ -647,8 +647,7 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
         return outputs
 
 
-if (Info.version() and
-    LooseVersion(Info.version()) >= LooseVersion('5.0.0')):
+if (Info.version() and LooseVersion(Info.version()) >= LooseVersion('5.0.0')):
     CurrentXFibres = XFibres5
     CurrentBEDPOST = BEDPOSTX5
 else:
