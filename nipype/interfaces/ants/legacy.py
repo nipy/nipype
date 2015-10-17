@@ -250,7 +250,7 @@ class buildtemplateparallel(ANTSCommand):
 
             outputs['template_files'].append(os.path.realpath(file_))
             outputs['final_template_file'] = \
-            os.path.realpath('%stemplate.nii.gz' %
+                os.path.realpath('%stemplate.nii.gz' %
                              self.inputs.out_prefix)
         outputs['subject_outfiles'] = []
         for filename in self.inputs.in_files:

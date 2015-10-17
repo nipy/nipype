@@ -859,7 +859,7 @@ def create_workflow(files,
                      iterfield=['timeseries_file'],
                      name='getsubcortts')
     ts2txt.inputs.indices = [8] + list(range(10, 14)) + [17, 18, 26, 47] +\
-    list(range(49, 55)) + [58]
+        list(range(49, 55)) + [58]
     ts2txt.inputs.label_file = \
         os.path.abspath(('OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_'
                          '2mm_v2.nii.gz'))

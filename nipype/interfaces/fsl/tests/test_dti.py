@@ -169,7 +169,7 @@ def test_randomise2():
     results = rand3.run(input_4D='infile3',
                         output_rootname='outfile3')
     yield assert_equal, results.runtime.cmdline, \
-    'randomise -i infile3 -o outfile3'
+        'randomise -i infile3 -o outfile3'
 
     # test arguments for opt_map
     opt_map = {'demean_data':                        ('-D', True),
@@ -252,7 +252,7 @@ def test_Randomise_parallel():
     results = rand3.run(input_4D='infile3',
                         output_rootname='outfile3')
     yield assert_equal, results.runtime.cmdline, \
-    'randomise_parallel -i infile3 -o outfile3'
+        'randomise_parallel -i infile3 -o outfile3'
 
     # test arguments for opt_map
     opt_map = {'demean_data':                        ('-D', True),
@@ -371,7 +371,7 @@ def test_Vec_reg():
                        affineTmat='tmat3.mat',)
 
     yield assert_equal, results.runtime.cmdline, \
-    'vecreg -i infile3 -o outfile3 -r MNI152 -t tmat3.mat'
+        'vecreg -i infile3 -o outfile3 -r MNI152 -t tmat3.mat'
     yield assert_not_equal, results.runtime.returncode, 0
     yield assert_equal, results.interface.inputs.infile, 'infile3'
     yield assert_equal, results.interface.inputs.outfile, 'outfile3'

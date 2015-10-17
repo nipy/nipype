@@ -81,7 +81,7 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
 
         # Local shorthands
         from inspect import isroutine, isclass, ismodule, isfunction, \
-        ismethod
+            ismethod
 
         # Look for tests in a module's contained objects.
         if ismodule(obj) and self._recurse:

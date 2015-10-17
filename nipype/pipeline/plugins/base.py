@@ -233,7 +233,7 @@ class DistributedPluginBase(PluginBase):
         # setup polling - TODO: change to threaded model
         notrun = []
         while np.any(self.proc_done == False) | \
-        np.any(self.proc_pending == True):
+            np.any(self.proc_pending == True):
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:

@@ -46,7 +46,7 @@ def mangle_docstrings(app, what, name, obj, options, lines,
         lines[:] = str(doc).split(u"\n")
 
     if app.config.numpydoc_edit_link and hasattr(obj, '__name__') and \
-    obj.__name__:
+        obj.__name__:
         if hasattr(obj, '__module__'):
             v = dict(full_name=u"%s.%s" % (obj.__module__, obj.__name__))
         else:
