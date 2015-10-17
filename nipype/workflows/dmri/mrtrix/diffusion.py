@@ -102,13 +102,13 @@ def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilisti
     workflow.base_output_dir=name
 
     workflow.connect([(inputnode, fsl2mrtrix, [("bvecs", "bvec_file"),
-                                                    ("bvals", "bval_file")])])
+                                               ("bvals", "bval_file")])])
     workflow.connect([(inputnode, dwi2tensor,[("dwi","in_file")])])
     workflow.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
 
     workflow.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
-                           (dwi2tensor, tensor2adc,[['tensor','in_file']]),
-                           (dwi2tensor, tensor2fa,[['tensor','in_file']]),
+                      (dwi2tensor, tensor2adc,[['tensor','in_file']]),
+                      (dwi2tensor, tensor2fa,[['tensor','in_file']]),
                       ])
 
     workflow.connect([(inputnode, MRconvert,[("dwi","in_file")])])
@@ -151,7 +151,7 @@ def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type = 'probabilisti
     if tractography_type == 'probabilistic':
         output_fields.append("tdi")
     outputnode = pe.Node(interface = util.IdentityInterface(fields=output_fields),
-                                        name="outputnode")
+                         name="outputnode")
 
     workflow.connect([(CSDstreamtrack, outputnode, [("tracked", "tracts_tck")]),
                       (csdeconv, outputnode, [("spherical_harmonics_image", "csdeconv")]),

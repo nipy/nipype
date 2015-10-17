@@ -55,8 +55,8 @@ def create_skullstripped_recon_flow(name="skullstripped_recon_all"):
         return subjects_dir, subject_id
 
     masks = pe.Node(niu.Function(input_names=['subjects_dir', 'subject_id'],
-                                  output_names=['subjects_dir', 'subject_id'],
-                                  function=link_masks), name="link_masks")
+                                 output_names=['subjects_dir', 'subject_id'],
+                                 function=link_masks), name="link_masks")
 
     wf.connect(autorecon1, "subjects_dir", masks, "subjects_dir")
     wf.connect(autorecon1, "subject_id", masks, "subject_id")

@@ -361,8 +361,8 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     mapping.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
 
     mapping.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
-                           (dwi2tensor, tensor2adc,[['tensor','in_file']]),
-                           (dwi2tensor, tensor2fa,[['tensor','in_file']]),
+                     (dwi2tensor, tensor2adc,[['tensor','in_file']]),
+                     (dwi2tensor, tensor2fa,[['tensor','in_file']]),
                      ])
     mapping.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
     mapping.connect([(tensor2fa, MRconvert_fa,[("FA","in_file")])])
@@ -538,7 +538,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
                                                                 "mean_fiber_length",
                                                                 "median_fiber_length",
                                                                 "fiber_length_std"]),
-                                        name="outputnode")
+                         name="outputnode")
 
     connectivity = pe.Workflow(name="connectivity")
     connectivity.base_output_dir=name

@@ -17,8 +17,8 @@ class WatershedBEMInputSpec(FSTraitedSpec):
     subjects_dir = Directory(exists=True, mandatory=True, usedefault=True,
                            desc='Path to Freesurfer subjects directory')
     volume = traits.Enum('T1', 'aparc+aseg', 'aseg', 'brain', 'orig', 'brainmask', 'ribbon',
-                           argstr='--volume %s', usedefault=True,
-                           desc='The volume from the "mri" directory to use (defaults to T1)')
+                         argstr='--volume %s', usedefault=True,
+                         desc='The volume from the "mri" directory to use (defaults to T1)')
     overwrite = traits.Bool(True, usedefault=True, argstr='--overwrite',
                             desc='Overwrites the existing files')
     atlas_mode = traits.Bool(argstr='--atlas',
@@ -30,7 +30,7 @@ class WatershedBEMOutputSpec(TraitedSpec):
                            desc=('Paths to the output meshes (brain, inner '
                                  'skull, outer skull, outer skin)'))
     brain_surface = File(exists=True, loc='bem/watershed',
-                           desc='Brain surface (in Freesurfer format)')
+                         desc='Brain surface (in Freesurfer format)')
     inner_skull_surface = File(exists=True, loc='bem/watershed',
                            desc='Inner skull surface (in Freesurfer format)')
     outer_skull_surface = File(exists=True, loc='bem/watershed',
@@ -38,7 +38,7 @@ class WatershedBEMOutputSpec(TraitedSpec):
     outer_skin_surface = File(exists=True, loc='bem/watershed',
                            desc='Outer skin surface (in Freesurfer format)')
     fif_file = File(exists=True, loc='bem', altkey='fif',
-                           desc='"fif" format file for EEG processing in MNE')
+                    desc='"fif" format file for EEG processing in MNE')
     cor_files = OutputMultiPath(File(exists=True), loc='bem/watershed/ws',
                                 altkey='COR', desc='"COR" format files')
 

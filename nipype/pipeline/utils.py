@@ -510,7 +510,7 @@ def _remove_identity_node(graph, node):
     for field, connections in list(portoutputs.items()):
         if portinputs:
             _propagate_internal_output(graph, node, field, connections,
-                                            portinputs)
+                                       portinputs)
         else:
             _propagate_root_output(graph, node, field, connections)
     graph.remove_nodes_from([node])
@@ -563,8 +563,8 @@ def _propagate_internal_output(graph, node, field, connections, portinputs):
                 raise ValueError(("Does not support two inline functions "
                                   "in series (\'%s\'  and \'%s\'). "
                                   "Please use a Function node") %
-                                  (srcport[1].split("\\n")[0][6:-1],
-                                   src[1].split("\\n")[0][6:-1]))
+                                 (srcport[1].split("\\n")[0][6:-1],
+                                  src[1].split("\\n")[0][6:-1]))
             connect = graph.get_edge_data(srcnode, destnode,
                                           default={'connect': []})
             if isinstance(src, tuple):

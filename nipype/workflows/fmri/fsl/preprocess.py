@@ -483,8 +483,8 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
     if whichvol != 'mean':
         extract_ref = pe.Node(interface=fsl.ExtractROI(t_size=1),
-                                 iterfield=['in_file'],
-                                 name = 'extractref')
+                              iterfield=['in_file'],
+                              name = 'extractref')
         featpreproc.connect(img2float, ('out_file', pickfirst), extract_ref, 'in_file')
         featpreproc.connect(img2float, ('out_file', pickvol, 0, whichvol), extract_ref, 't_min')
         featpreproc.connect(extract_ref, 'roi_file', outputnode, 'reference')
@@ -525,8 +525,8 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     """
 
     meanfunc = pe.Node(interface=fsl.ImageMaths(op_string = '-Tmean',
-                                                   suffix='_mean'),
-                          name='meanfunc')
+                                                suffix='_mean'),
+                       name='meanfunc')
     featpreproc.connect(motion_correct, ('out_file', pickfirst), meanfunc, 'in_file')
 
     """
@@ -536,7 +536,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     meanfuncmask = pe.Node(interface=fsl.BET(mask = True,
                                              no_output=True,
                                              frac = 0.3),
-                              name = 'meanfuncmask')
+                           name = 'meanfuncmask')
     featpreproc.connect(meanfunc, 'out_file', meanfuncmask, 'in_file')
 
     """
@@ -674,9 +674,9 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     """
 
     meanfunc3 = pe.Node(interface=fsl.ImageMaths(op_string='-Tmean',
-                                                    suffix='_mean'),
-                           iterfield=['in_file'],
-                          name='meanfunc3')
+                                                 suffix='_mean'),
+                        iterfield=['in_file'],
+                        name='meanfunc3')
 
     featpreproc.connect(meanscale, ('out_file', pickfirst), meanfunc3, 'in_file')
     featpreproc.connect(meanfunc3, 'out_file', outputnode, 'mean')
@@ -806,9 +806,9 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     """
 
     meanfunc = pe.MapNode(interface=fsl.ImageMaths(op_string='-Tmean',
-                                                    suffix='_mean'),
-                           iterfield=['in_file'],
-                           name='meanfunc2')
+                                                   suffix='_mean'),
+                          iterfield=['in_file'],
+                          name='meanfunc2')
     susan_smooth.connect(mask, 'out_file', meanfunc, 'in_file')
 
     """
@@ -816,7 +816,7 @@ def create_susan_smooth(name="susan_smooth", separate_masks=True):
     """
 
     merge = pe.Node(interface=util.Merge(2, axis='hstack'),
-                        name='merge')
+                    name='merge')
     susan_smooth.connect(meanfunc,'out_file', merge, 'in1')
     susan_smooth.connect(median,'out_stat', merge, 'in2')
 
@@ -948,8 +948,8 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
 
     if whichvol != 'mean':
         extract_ref = pe.Node(interface=fsl.ExtractROI(t_size=1),
-                                 iterfield=['in_file'],
-                                 name = 'extractref')
+                              iterfield=['in_file'],
+                              name = 'extractref')
         featpreproc.connect(img2float, ('out_file', pickfirst), extract_ref, 'in_file')
         featpreproc.connect(img2float, ('out_file', pickvol, 0, whichvol), extract_ref, 't_min')
         featpreproc.connect(extract_ref, 'roi_file', outputnode, 'reference')

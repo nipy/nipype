@@ -34,7 +34,7 @@ filetypes = ['cor', 'mgh', 'mgz', 'minc', 'analyze',
 class SampleToSurfaceInputSpec(FSTraitedSpec):
 
     source_file = File(exists=True, mandatory=True, argstr="--mov %s",
-                         desc="volume to sample values from")
+                       desc="volume to sample values from")
     reference_file = File(exists=True, argstr="--ref %s",
                           desc="reference volume (default is orig.mgz)")
 
@@ -567,7 +567,7 @@ class SurfaceSnapshotsInputSpec(FSTraitedSpec):
     stem_template_args = traits.List(traits.String, requires=["screenshot_stem"],
                     desc="input names to use as arguments for a string-formated stem template")
     tcl_script = File(exists=True, argstr="%s", genfile=True,
-                             desc="override default screenshot script")
+                      desc="override default screenshot script")
 
 
 class SurfaceSnapshotsOutputSpec(TraitedSpec):

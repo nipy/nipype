@@ -978,8 +978,8 @@ class ComputeEigensystemInputSpec(StdOutCommandLineInputSpec):
     maxcomponents = traits.Int(argstr='-maxcomponents %d', desc='The maximum number of tensor components in a voxel of the input data.')
 
     inputdatatype = traits.Enum('double', 'float', 'long', 'int', 'short', 'char',
-                                 argstr='-inputdatatype %s', usedefault=True,
-                                 desc=('Specifies the data type of the input data. '
+                                argstr='-inputdatatype %s', usedefault=True,
+                                desc=('Specifies the data type of the input data. '
                                        'The data type can be any of the following strings: '
                                        '"char", "short", "int", "long", "float" or "double".'
                                        'Default is double data type'))

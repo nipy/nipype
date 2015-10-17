@@ -7,14 +7,14 @@ if __name__ == "__main__":
     ##        AND calling the module with --xml must be supported and compliant.
     modules_list = ['edu.jhu.bme.smile.demo.RandomVol',
                     'de.mpg.cbs.jist.laminar.JistLaminarProfileCalculator',
-                     'de.mpg.cbs.jist.laminar.JistLaminarProfileSampling',
-                     'de.mpg.cbs.jist.laminar.JistLaminarROIAveraging',
-                     'de.mpg.cbs.jist.laminar.JistLaminarVolumetricLayering',
-                     'de.mpg.cbs.jist.laminar.JistLaminarProfileGeometry',
-                     'de.mpg.cbs.jist.brain.JistBrainMgdmSegmentation',
-                     'de.mpg.cbs.jist.brain.JistBrainMp2rageSkullStripping',
-                     'de.mpg.cbs.jist.brain.JistBrainPartialVolumeFilter',
-                     'de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation']
+                    'de.mpg.cbs.jist.laminar.JistLaminarProfileSampling',
+                    'de.mpg.cbs.jist.laminar.JistLaminarROIAveraging',
+                    'de.mpg.cbs.jist.laminar.JistLaminarVolumetricLayering',
+                    'de.mpg.cbs.jist.laminar.JistLaminarProfileGeometry',
+                    'de.mpg.cbs.jist.brain.JistBrainMgdmSegmentation',
+                    'de.mpg.cbs.jist.brain.JistBrainMp2rageSkullStripping',
+                    'de.mpg.cbs.jist.brain.JistBrainPartialVolumeFilter',
+                    'de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation']
 
     modules_from_chris = ['edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010',
                          'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmMipavReorient',

@@ -51,7 +51,7 @@ class PipeFunc(object):
                 is called.
         """
         if not (isinstance(interface, type)
-                                and issubclass(interface, BaseInterface)):
+                and issubclass(interface, BaseInterface)):
             raise ValueError('the interface argument should be a nipype '
                              'interface class, but %s (type %s) was passed.' %
                              (interface, type(interface)))
@@ -61,7 +61,7 @@ class PipeFunc(object):
             raise ValueError('base_dir should be an existing directory')
         self.base_dir = base_dir
         doc = '%s\n%s' % (self.interface.__doc__,
-                            self.interface.help(returnhelp=True))
+                          self.interface.help(returnhelp=True))
         self.__doc__ = doc
         self.callback = callback
 

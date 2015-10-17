@@ -208,7 +208,7 @@ def package_check(pkg_name, version=None,
         log.warn(msgs['version too old'] % (have_version,
                                             pkg_name,
                                             version)
-                    + msgs['opt suffix'])
+                 + msgs['opt suffix'])
         return
     # setuptools mode
     if optional_tf and not isinstance(optional, string_types):

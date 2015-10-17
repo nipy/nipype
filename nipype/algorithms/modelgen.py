@@ -315,10 +315,10 @@ class SpecifyModel(BaseInterface):
                         sessinfo[i]['cond'][cid]['amplitudes'] = \
                             info.amplitudes[cid]
                     if hasattr(info, 'tmod') and info.tmod and \
-                                    len(info.tmod) > cid:
+                    len(info.tmod) > cid:
                         sessinfo[i]['cond'][cid]['tmod'] = info.tmod[cid]
                     if hasattr(info, 'pmod') and info.pmod and \
-                                    len(info.pmod) > cid:
+                    len(info.pmod) > cid:
                         if info.pmod[cid]:
                             sessinfo[i]['cond'][cid]['pmod'] = []
                             for j, name in enumerate(info.pmod[cid].name):
@@ -334,7 +334,7 @@ class SpecifyModel(BaseInterface):
                 for j, r in enumerate(info.regressors):
                     sessinfo[i]['regress'].insert(j, dict(name='', val=[]))
                     if hasattr(info, 'regressor_names') and \
-                                    info.regressor_names is not None:
+                    info.regressor_names is not None:
                         sessinfo[i]['regress'][j]['name'] = \
                             info.regressor_names[j]
                     else:

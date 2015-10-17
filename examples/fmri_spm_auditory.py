@@ -190,7 +190,7 @@ l1analysis.connect([(modelspec,level1design,[('session_info','session_info')]),
                                                   ('beta_images','beta_images'),
                                                   ('residual_image','residual_image')]),
                   (contrastestimate, threshold,[('spm_mat_file','spm_mat_file'),
-                                                    ('spmT_images', 'stat_image')]),
+                                                ('spmT_images', 'stat_image')]),
                   ])
 
 """
@@ -284,8 +284,8 @@ necessary to generate an SPM design matrix.
 
 from nipype.interfaces.base import Bunch
 subjectinfo = [Bunch(conditions=['Task'],
-                            onsets=[list(range(6,84,12))],
-                            durations=[[6]])]
+                     onsets=[list(range(6,84,12))],
+                     durations=[[6]])]
 
 """Setup the contrast structure that needs to be evaluated. This is a
 list of lists. The inner list specifies the contrasts and has the

@@ -284,8 +284,8 @@ def _parse_doc(doc, style=['--']):
     for line in doclist:
         linelist = line.split()
         flag =[item for i,item in enumerate(linelist) if i<2 and \
-                   any([item.startswith(s) for s in style]) and \
-                   len(item)>1]
+               any([item.startswith(s) for s in style]) and \
+               len(item)>1]
         if flag:
             if len(flag)==1:
                 style_idx = [flag[0].startswith(s) for s in style].index(True)

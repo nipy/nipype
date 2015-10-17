@@ -307,7 +307,7 @@ class GenerateDirectionsInputSpec(CommandLineInputSpec):
     quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
     out_file = File(name_source=['num_dirs'], name_template='directions_%d.txt', argstr='%s', hash_files=False,
-                     position= -1, desc='the text file to write the directions to, as [ az el ] pairs.')
+                    position= -1, desc='the text file to write the directions to, as [ az el ] pairs.')
 
 class GenerateDirectionsOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='directions file')

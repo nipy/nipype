@@ -18,8 +18,8 @@ from ...utils.filemanip import split_filename
 
 class Image2VoxelInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-4dimage %s',
-                    mandatory=True, position=1,
-                    desc='4d image file')
+                   mandatory=True, position=1,
+                   desc='4d image file')
 #TODO convert list of files on the fly
 #    imagelist = File(exists=True, argstr='-imagelist %s',
 #                    mandatory=True, position=1,
@@ -122,8 +122,8 @@ class VtkStreamlinesInputSpec(StdOutCommandLineInputSpec):
     inputmodel = traits.Enum('raw', 'voxels', argstr='-inputmodel %s', desc='input model type (raw or voxels)', usedefault=True)
 
     in_file = File(exists=True, argstr=' < %s',
-                    mandatory=True, position=-2,
-                    desc='data file')
+                   mandatory=True, position=-2,
+                   desc='data file')
 
     voxeldims = traits.List(traits.Int, desc = 'voxel dimensions in mm',
                  argstr='-voxeldims %s', minlen=3, maxlen=3, position=4,
@@ -175,8 +175,8 @@ class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
     inputmodel = traits.Enum('raw', 'voxels', argstr='-inputmodel %s', desc='input model type (raw or voxels)', usedefault=True)
 
     in_file = File(exists=True, argstr='-inputfile %s',
-                    mandatory=True, position=1,
-                    desc='data file')
+                   mandatory=True, position=1,
+                   desc='data file')
 
     maxtractpoints= traits.Int(argstr='-maxtractpoints %d', units='NA',
                 desc="maximum number of tract points")

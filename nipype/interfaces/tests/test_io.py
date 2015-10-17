@@ -195,9 +195,9 @@ def test_datasink_substitutions():
     setattr(ds.inputs, '@outdir', files)
     ds.run()
     yield assert_equal, \
-          sorted([os.path.basename(x) for
-                  x in glob.glob(os.path.join(outdir, '*'))]), \
-          ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
+    sorted([os.path.basename(x) for
+            x in glob.glob(os.path.join(outdir, '*'))]), \
+    ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
     shutil.rmtree(indir)
     shutil.rmtree(outdir)
 
@@ -221,8 +221,8 @@ def test_s3datasink_substitutions():
         raise ose
 
     conn = S3Connection(anon=True, is_secure=False, port=4567,
-                          host='localhost',
-                          calling_format=OrdinaryCallingFormat())
+                        host='localhost',
+                        calling_format=OrdinaryCallingFormat())
     conn.create_bucket('test')
 
     ds = nio.S3DataSink(
@@ -243,9 +243,9 @@ def test_s3datasink_substitutions():
     setattr(ds.inputs, '@outdir', files)
     ds.run()
     yield assert_equal, \
-          sorted([os.path.basename(x) for
-                  x in glob.glob(os.path.join(outdir, '*'))]), \
-          ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
+    sorted([os.path.basename(x) for
+            x in glob.glob(os.path.join(outdir, '*'))]), \
+    ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
 
     bkt = conn.get_bucket(ds.inputs.bucket)
     bkt_files = list(k for k in bkt.list())

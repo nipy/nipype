@@ -234,7 +234,7 @@ def create_camino_dti_pipeline(name="dtiproc"):
                                                                 "tracts_pico",
                                                                 "tracts_dt",
                                                                 "tensors"]),
-                                        name="outputnode")
+                         name="outputnode")
 
     workflow = pe.Workflow(name=name)
     workflow.base_output_dir=name

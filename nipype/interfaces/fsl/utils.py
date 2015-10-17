@@ -1599,10 +1599,10 @@ class WarpUtilsInputSpec(FSLCommandInputSpec):
     with_affine = traits.Bool(False, argstr='--withaff',
                               desc=('Specifies that the affine transform (i.e. that which was '
                                     'specified for the --aff parameter in fnirt) should be '
-                                     'included as displacements in the --out file. That can be '
-                                     'useful for interfacing with software that cannot decode '
-                                     'FSL/fnirt coefficient-files (where the affine transform is '
-                                     'stored separately from the displacements).'))
+                                    'included as displacements in the --out file. That can be '
+                                    'useful for interfacing with software that cannot decode '
+                                    'FSL/fnirt coefficient-files (where the affine transform is '
+                                    'stored separately from the displacements).'))
 
 class WarpUtilsOutputSpec(TraitedSpec):
     out_file = File(desc=('Name of output file, containing the warp as field or coefficients.'))
@@ -2002,7 +2002,7 @@ fdrms - FD with RMS matrix calculation")
     out_metric_values = File(argstr="-s %s", name_source='in_file', name_template='%s_metrics.txt',
                              keep_extension=True, desc='output metric values (DVARS etc.) file name', hash_files=False)
     out_metric_plot = File(argstr="-p %s", name_source='in_file', name_template='%s_metrics.png',
-                             keep_extension=True, desc='output metric values plot (DVARS etc.) file name', hash_files=False)
+                           keep_extension=True, desc='output metric values plot (DVARS etc.) file name', hash_files=False)
 
 class MotionOutliersOutputSpec(TraitedSpec):
     out_file = File(exists=True)

@@ -16,13 +16,13 @@ from ...utils.filemanip import split_filename
 
 class QBallMXInputSpec(StdOutCommandLineInputSpec):
     basistype = traits.Enum('rbf', 'sh', argstr='-basistype %s',
-                             desc=('Basis function type. "rbf" to use radial basis functions '
+                            desc=('Basis function type. "rbf" to use radial basis functions '
                                   '"sh" to use spherical harmonics'), usedefault=True)
     scheme_file = File(exists=True, argstr='-schemefile %s', mandatory=True,
                        desc='Specifies the scheme file for the diffusion MRI data')
     order = traits.Int(argstr='-order %d', units='NA',
-                             desc=('Specific to sh. Maximum order of the spherical harmonic series. '
-                                   'Default is 4.'))
+                       desc=('Specific to sh. Maximum order of the spherical harmonic series. '
+                             'Default is 4.'))
     rbfpointset = traits.Int(argstr='-rbfpointset %d', units='NA',
                              desc=('Specific to rbf. Sets the number of radial basis functions to use. '
                                    'The value specified must be present in the Pointsets directory. '
@@ -171,10 +171,10 @@ class MESDInputSpec(StdOutCommandLineInputSpec):
     inverter = traits.Enum('SPIKE', 'PAS', argstr='-filter %s', position=2, mandatory=True,
                            desc=('The inversion index specifies the type of inversion to perform on the data.'
                                  'The currently available choices are:'
-                                  'Inverter name  | Inverter parameters'
-                                  '---------------|------------------'
-                                  'SPIKE          | bd (b-value x diffusivity along the fibre.)'
-                                  'PAS            | r'))
+                                 'Inverter name  | Inverter parameters'
+                                 '---------------|------------------'
+                                 'SPIKE          | bd (b-value x diffusivity along the fibre.)'
+                                 'PAS            | r'))
     inverter_param = traits.Float(argstr='%f', units='NA', position=3, mandatory=True,
                                   desc=('Parameter associated with the inverter. Cf. inverter description for'
                                         'more information.'))

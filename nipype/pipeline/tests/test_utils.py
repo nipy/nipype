@@ -238,14 +238,14 @@ def test_outputs_removal_wf():
             wf.run(plugin=plugin)
 
             yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                            wf.name,
-                                                            n1.name,
-                                                            'file2.txt')) != remove_unnecessary_outputs
+                                                           wf.name,
+                                                           n1.name,
+                                                           'file2.txt')) != remove_unnecessary_outputs
             yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                            wf.name,
-                                                            n1.name,
-                                                            "subdir",
-                                                            'file1.txt')) != remove_unnecessary_outputs
+                                                           wf.name,
+                                                           n1.name,
+                                                           "subdir",
+                                                           'file1.txt')) != remove_unnecessary_outputs
             yield assert_true, os.path.exists(os.path.join(wf.base_dir,
                                                            wf.name,
                                                            n1.name,
@@ -281,17 +281,17 @@ def test_outputs_removal_wf():
                 rmtree(os.path.join(wf.base_dir, wf.name))
                 wf.run(plugin=plugin)
                 yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                                   wf.name,
-                                                                   n2.name,
-                                                                   'file1.txt'))
+                                                               wf.name,
+                                                               n2.name,
+                                                               'file1.txt'))
                 yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                                   wf.name,
-                                                                   n2.name,
-                                                                   'file2.txt')) != remove_unnecessary_outputs
+                                                               wf.name,
+                                                               n2.name,
+                                                               'file2.txt')) != remove_unnecessary_outputs
                 yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                                   wf.name,
-                                                                   n4.name,
-                                                                   'file1.txt')) == keep_inputs
+                                                               wf.name,
+                                                               n4.name,
+                                                               'file1.txt')) == keep_inputs
 
     rmtree(out_dir)
 

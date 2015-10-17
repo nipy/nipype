@@ -176,14 +176,14 @@ In this section we connect the nodes for the diffusion processing.
 tractography = pe.Workflow(name='tractography')
 
 tractography.connect([(inputnode, fsl2mrtrix, [("bvecs", "bvec_file"),
-                                                                                                ("bvals", "bval_file")])])
+                                               ("bvals", "bval_file")])])
 tractography.connect([(inputnode, gunzip,[("dwi","in_file")])])
 tractography.connect([(gunzip, dwi2tensor,[("out_file","in_file")])])
 tractography.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
 
 tractography.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
-                                           (dwi2tensor, tensor2adc,[['tensor','in_file']]),
-                                           (dwi2tensor, tensor2fa,[['tensor','in_file']]),
+                      (dwi2tensor, tensor2adc,[['tensor','in_file']]),
+                      (dwi2tensor, tensor2fa,[['tensor','in_file']]),
                       ])
 tractography.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
 
@@ -251,8 +251,8 @@ dwiproc.base_dir = os.path.abspath('dmri_mrtrix_dti')
 dwiproc.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,tractography,[('dwi','inputnode.dwi'),
-                                               ('bvals','inputnode.bvals'),
-                                               ('bvecs','inputnode.bvecs')
+                                              ('bvals','inputnode.bvals'),
+                                              ('bvecs','inputnode.bvecs')
                                               ])
                 ])
 

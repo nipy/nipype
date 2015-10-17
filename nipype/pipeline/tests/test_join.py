@@ -385,7 +385,7 @@ def test_multifield_join_node():
     wf.connect(inc2, 'output1', join, 'vector2')
     # a post-join node
     prod = pe.MapNode(ProductInterface(), name='prod',
-                       iterfield=['input1', 'input2'])
+                      iterfield=['input1', 'input2'])
     wf.connect(join, 'vector1', prod, 'input1')
     wf.connect(join, 'vector2', prod, 'input2')
 
@@ -496,9 +496,9 @@ def test_itersource_join_source_node():
     # the post-join nodes execution order is indeterminate;
     # therefore, compare the lists item-wise.
     assert_true([16, 19] in _sum_operands,
-                 "The join Sum input is incorrect: %s." % _sum_operands)
+                "The join Sum input is incorrect: %s." % _sum_operands)
     assert_true([7, 9] in _sum_operands,
-                 "The join Sum input is incorrect: %s." % _sum_operands)
+                "The join Sum input is incorrect: %s." % _sum_operands)
 
     os.chdir(cwd)
     rmtree(wd)

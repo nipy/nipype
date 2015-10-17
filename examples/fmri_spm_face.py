@@ -184,7 +184,7 @@ l1analysis.connect([(modelspec,level1design,[('session_info','session_info')]),
                                                   ('beta_images','beta_images'),
                                                   ('residual_image','residual_image')]),
                   (contrastestimate, threshold,[('spm_mat_file','spm_mat_file'),
-                                                    (('spmT_images', pickfirst), 'stat_image')]),
+                                                (('spmT_images', pickfirst), 'stat_image')]),
                   ])
 
 """
@@ -282,13 +282,13 @@ sot = mat['sot'][0]
 itemlag = mat['itemlag'][0]
 
 subjectinfo = [Bunch(conditions=['N1', 'N2', 'F1', 'F2'],
-                            onsets=[sot[0], sot[1], sot[2], sot[3]],
-                            durations=[[0], [0], [0], [0]],
-                            amplitudes=None,
-                            tmod=None,
-                            pmod=None,
-                            regressor_names=None,
-                            regressors=None)]
+                     onsets=[sot[0], sot[1], sot[2], sot[3]],
+                     durations=[[0], [0], [0], [0]],
+                     amplitudes=None,
+                     tmod=None,
+                     pmod=None,
+                     regressor_names=None,
+                     regressors=None)]
 
 """Setup the contrast structure that needs to be evaluated. This is a
 list of lists. The inner list specifies the contrasts and has the
@@ -370,20 +370,20 @@ Setting up parametricvariation of the model
 """
 
 subjectinfo_param = [Bunch(conditions=['N1', 'N2', 'F1', 'F2'],
-                            onsets=[sot[0], sot[1], sot[2], sot[3]],
-                            durations=[[0], [0], [0], [0]],
-                            amplitudes=None,
-                            tmod=None,
-                            pmod=[None,
-                                  Bunch(name=['Lag'],
-                                        param=itemlag[1].tolist(),
-                                        poly=[2]),
-                                  None,
-                                  Bunch(name=['Lag'],
-                                        param=itemlag[3].tolist(),
-                                        poly=[2])],
-                            regressor_names=None,
-                            regressors=None)]
+                           onsets=[sot[0], sot[1], sot[2], sot[3]],
+                           durations=[[0], [0], [0], [0]],
+                           amplitudes=None,
+                           tmod=None,
+                           pmod=[None,
+                                 Bunch(name=['Lag'],
+                                       param=itemlag[1].tolist(),
+                                       poly=[2]),
+                                 None,
+                                 Bunch(name=['Lag'],
+                                       param=itemlag[3].tolist(),
+                                       poly=[2])],
+                           regressor_names=None,
+                           regressors=None)]
 
 cont1 = ('Famous_lag1','T', ['F2xLag^1'],[1])
 cont2 = ('Famous_lag2','T', ['F2xLag^2'],[1])

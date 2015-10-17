@@ -85,10 +85,10 @@ class CoherenceAnalyzerOutputSpec(TraitedSpec):
                                          'ROIs (in seconds)'))
 
     coherence_csv = File(desc=('A csv file containing the pairwise '
-                                        'coherence values'))
+                               'coherence values'))
 
     timedelay_csv = File(desc=('A csv file containing the pairwise '
-                                        'time delay values'))
+                               'time delay values'))
 
     coherence_fig = File(desc=('Figure representing coherence values'))
     timedelay_fig = File(desc=('Figure representing coherence values'))

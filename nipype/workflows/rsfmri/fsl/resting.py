@@ -141,14 +141,14 @@ def create_resting_preproc(name='restpreproc'):
     realigner = create_realign_flow()
     tsnr = pe.Node(TSNR(regress_poly=2), name='tsnr')
     getthresh = pe.Node(interface=fsl.ImageStats(op_string='-p 98'),
-                           name='getthreshold')
+                        name='getthreshold')
     threshold_stddev = pe.Node(fsl.Threshold(), name='threshold')
     compcor = pe.Node(util.Function(input_names=['realigned_file',
                                                  'noise_mask_file',
                                                  'num_components'],
-                                     output_names=['noise_components'],
-                                     function=extract_noise_components),
-                       name='compcorr')
+                                    output_names=['noise_components'],
+                                    function=extract_noise_components),
+                      name='compcorr')
     remove_noise = pe.Node(fsl.FilterRegressor(filter_all=True),
                            name='remove_noise')
     bandpass_filter = pe.Node(fsl.TemporalFilter(),

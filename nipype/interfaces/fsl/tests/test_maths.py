@@ -40,7 +40,7 @@ def create_files_in_directory():
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
         nb.save(nb.Nifti1Image(img,np.eye(4),hdr),
-                 os.path.join(testdir,f))
+                os.path.join(testdir,f))
 
     out_ext = Info.output_type_to_ext(Info.output_type())
     return filelist, testdir, origdir, out_ext

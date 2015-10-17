@@ -31,8 +31,8 @@ import scipy.io as sio
 
 from ..external.six import string_types
 from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
-                                    OutputMultiPath, TraitedSpec, File,
-                                    BaseInterfaceInputSpec, isdefined)
+                               OutputMultiPath, TraitedSpec, File,
+                               BaseInterfaceInputSpec, isdefined)
 from ..utils.filemanip import filename_to_list, save_json, split_filename
 from ..utils.misc import find_indices
 from .. import logging, config
@@ -377,7 +377,7 @@ class ArtifactDetect(BaseInterface):
                     vol = data[:, :, :, t0]
                     # Use an SPM like approach
                     mask_tmp = vol > \
-                               (_nanmean(vol) / self.inputs.global_threshold)
+                    (_nanmean(vol) / self.inputs.global_threshold)
                     mask = mask * mask_tmp
                 for t0 in range(timepoints):
                     vol = data[:, :, :, t0]
@@ -391,7 +391,7 @@ class ArtifactDetect(BaseInterface):
                 for t0 in range(timepoints):
                     vol = data[:, :, :, t0]
                     mask_tmp = vol > \
-                                 (_nanmean(vol) / self.inputs.global_threshold)
+                    (_nanmean(vol) / self.inputs.global_threshold)
                     mask[:, :, :, t0] = mask_tmp
                     g[t0] = np.nansum(vol * mask_tmp) / np.nansum(mask_tmp)
         elif masktype == 'file':  # uses a mask image to determine intensity
@@ -510,24 +510,24 @@ class ArtifactDetect(BaseInterface):
                   'motion_outliers': len(np.setdiff1d(motion_outliers, iidx)),
                   },
          {'motion': [{'using differences': self.inputs.use_differences[0]},
-                      {'mean': np.mean(mc_in, axis=0).tolist(),
-                       'min': np.min(mc_in, axis=0).tolist(),
-                       'max': np.max(mc_in, axis=0).tolist(),
-                       'std': np.std(mc_in, axis=0).tolist()},
+                     {'mean': np.mean(mc_in, axis=0).tolist(),
+                      'min': np.min(mc_in, axis=0).tolist(),
+                      'max': np.max(mc_in, axis=0).tolist(),
+                      'std': np.std(mc_in, axis=0).tolist()},
                      ]},
          {'intensity': [{'using differences': self.inputs.use_differences[1]},
-                         {'mean': np.mean(gz, axis=0).tolist(),
-                          'min': np.min(gz, axis=0).tolist(),
-                          'max': np.max(gz, axis=0).tolist(),
-                          'std': np.std(gz, axis=0).tolist()},
+                        {'mean': np.mean(gz, axis=0).tolist(),
+                         'min': np.min(gz, axis=0).tolist(),
+                         'max': np.max(gz, axis=0).tolist(),
+                         'std': np.std(gz, axis=0).tolist()},
                         ]},
                  ]
         if self.inputs.use_norm:
             stats.insert(3, {'motion_norm':
-                                 {'mean': np.mean(normval, axis=0).tolist(),
-                                  'min': np.min(normval, axis=0).tolist(),
-                                  'max': np.max(normval, axis=0).tolist(),
-                                  'std': np.std(normval, axis=0).tolist(),
+                             {'mean': np.mean(normval, axis=0).tolist(),
+                              'min': np.min(normval, axis=0).tolist(),
+                              'max': np.max(normval, axis=0).tolist(),
+                              'std': np.std(normval, axis=0).tolist(),
                                   }})
         save_json(statsfile, stats)
 

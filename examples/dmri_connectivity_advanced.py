@@ -417,14 +417,14 @@ Now we connect the tensor computations:
 """
 
 mapping.connect([(inputnode, fsl2mrtrix, [("bvecs", "bvec_file"),
-                                                ("bvals", "bval_file")])])
+                                          ("bvals", "bval_file")])])
 mapping.connect([(inputnode, eddycorrect,[("dwi","inputnode.in_file")])])
 mapping.connect([(eddycorrect, dwi2tensor,[("outputnode.eddy_corrected","in_file")])])
 mapping.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
 
 mapping.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
-                       (dwi2tensor, tensor2adc,[['tensor','in_file']]),
-                       (dwi2tensor, tensor2fa,[['tensor','in_file']]),
+                 (dwi2tensor, tensor2adc,[['tensor','in_file']]),
+                 (dwi2tensor, tensor2fa,[['tensor','in_file']]),
                  ])
 mapping.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
 mapping.connect([(tensor2fa, MRconvert_fa,[("FA","in_file")])])
@@ -580,8 +580,8 @@ connectivity.base_dir = op.abspath('dmri_connectivity_advanced')
 connectivity.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,mapping,[('dwi','inputnode.dwi'),
-                                               ('bvals','inputnode.bvals'),
-                                               ('bvecs','inputnode.bvecs')
+                                         ('bvals','inputnode.bvals'),
+                                         ('bvecs','inputnode.bvecs')
                                          ]),
         (infosource,mapping,[('subject_id','inputnode.subject_id')])
                 ])

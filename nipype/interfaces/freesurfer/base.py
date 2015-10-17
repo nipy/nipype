@@ -111,7 +111,7 @@ class FSCommand(CommandLine):
     def _subjects_dir_update(self):
         if self.inputs.subjects_dir:
             self.inputs.environ.update({'SUBJECTS_DIR':
-                                            self.inputs.subjects_dir})
+                                        self.inputs.subjects_dir})
 
     @classmethod
     def set_default_subjects_dir(cls, subjects_dir):

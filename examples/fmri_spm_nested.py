@@ -365,7 +365,7 @@ level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                                         ('struct', 'preproc.coregister.target'),
                                         ('struct', 'preproc.normalize.source')]),
                 (infosource,l1pipeline,[(('subject_id', subjectinfo),
-                                          'analysis.modelspec.subject_info')]),
+                                         'analysis.modelspec.subject_info')]),
                 ])
 
 

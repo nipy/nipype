@@ -1494,7 +1494,7 @@ class CommandLine(BaseInterface):
         runtime = run_command(runtime, output=self.inputs.terminal_output,
                               redirect_x=self._redirect_x)
         if runtime.returncode is None or \
-                        runtime.returncode not in correct_return_codes:
+        runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
 
         return runtime
@@ -1732,7 +1732,7 @@ class SEMLikeCommandLine(CommandLine):
             corresponding_input = getattr(self.inputs, name)
             if isdefined(corresponding_input):
                 if (isinstance(corresponding_input, bool) and
-                            corresponding_input):
+                    corresponding_input):
                     outputs[name] = \
                         os.path.abspath(self._outputs_filenames[name])
                 else:

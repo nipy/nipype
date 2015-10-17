@@ -32,7 +32,7 @@ def create_files_in_directory():
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
         nb.save(nb.Nifti1Image(img,np.eye(4),hdr),
-                 os.path.join(outdir,f))
+                os.path.join(outdir,f))
     return filelist, outdir, cwd
 
 def clean_directory(outdir, old_wd):

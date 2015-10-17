@@ -52,7 +52,7 @@ class MatlabInputSpec(CommandLineInputSpec):
     mfile   = traits.Bool(True, desc='Run m-code using m-file',
                           usedefault=True)
     script_file = File('pyscript.m', usedefault=True,
-                              desc='Name of file to write m-code to')
+                       desc='Name of file to write m-code to')
     paths   = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
     prescript = traits.List(["ver,","try,"], usedefault=True,
                             desc='prescript to be added before code')

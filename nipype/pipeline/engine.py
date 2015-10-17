@@ -706,7 +706,7 @@ connected.
         datestr = datetime.utcnow().strftime('%Y%m%dT%H%M%S')
         if str2bool(self.config['execution']['write_provenance']):
             prov_base = op.join(self.base_dir,
-                                     'workflow_provenance_%s' % datestr)
+                                'workflow_provenance_%s' % datestr)
             logger.info('Provenance file prefix: %s' % prov_base)
             write_workflow_prov(execgraph, prov_base, format='all')
         return execgraph
@@ -720,10 +720,10 @@ connected.
         if not op.exists(report_dir):
             os.makedirs(report_dir)
         shutil.copyfile(op.join(op.dirname(__file__),
-                                     'report_template.html'),
+                                'report_template.html'),
                         op.join(report_dir, 'index.html'))
         shutil.copyfile(op.join(op.dirname(__file__),
-                                     '..', 'external', 'd3.js'),
+                                '..', 'external', 'd3.js'),
                         op.join(report_dir, 'd3.js'))
         nodes, groups = topological_sort(graph, depth_first=True)
         graph_file = op.join(report_dir, 'graph1.json')
@@ -1044,11 +1044,11 @@ connected.
                     if colored:
                         dotlist.append(('%s[label="%s", style=filled,'
                                         ' fillcolor="%s"];')
-                                        % (nodename,node_class_name,
+                                       % (nodename,node_class_name,
                                            colorset[level]))
                     else:
                         dotlist.append(('%s[label="%s"];')
-                                        % (nodename,node_class_name))
+                                       % (nodename,node_class_name))
 
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
@@ -1262,7 +1262,7 @@ class Node(WorkflowBase):
             else:
                 outputdir = op.join(outputdir, *self.parameterization)
         return op.abspath(op.join(outputdir,
-                                            self.name))
+                                  self.name))
 
     def set_input(self, parameter, val):
         """ Set interface input value"""
@@ -1385,8 +1385,8 @@ class Node(WorkflowBase):
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
                                      "is set to True"))
             hashfile_unfinished = op.join(outdir,
-                                               '_0x%s_unfinished.json' %
-                                               hashvalue)
+                                          '_0x%s_unfinished.json' %
+                                          hashvalue)
             if op.exists(hashfile):
                 os.remove(hashfile)
             rm_outdir = (op.exists(outdir)
@@ -2257,10 +2257,10 @@ class MapNode(Node):
                 nodename = '_' + self.name + str(i)
                 subnode_report_files.insert(i, 'subnode %d' % i + ' : ' +
                                                op.join(cwd,
-                                                            'mapflow',
-                                                            nodename,
-                                                            '_report',
-                                                            'report.rst'))
+                                                       'mapflow',
+                                                       nodename,
+                                                       '_report',
+                                                       'report.rst'))
             fp.writelines(write_rst_list(subnode_report_files))
             fp.close()
 

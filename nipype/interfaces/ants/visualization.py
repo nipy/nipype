@@ -16,13 +16,13 @@ from ...utils.filemanip import split_filename
 
 class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
     dimension=traits.Enum(3, 2, argstr= '%d', usedefault=True,
-                           desc='image dimension (2 or 3)', mandatory=True,
-                           position = 0)
+                          desc='image dimension (2 or 3)', mandatory=True,
+                          position = 0)
     input_image=File(argstr='%s', exists=True,
             desc='Main input is a 3-D grayscale image.', mandatory=True,
             position = 1)
     output_image=traits.Str('rgb.nii.gz', argstr='%s', usedefault=True,
-                             desc=('rgb output image'), position = 2)
+                            desc=('rgb output image'), position = 2)
     mask_image=File('none', argstr='%s', exists=True,
                     desc = 'mask image', position = 3, usedefault = True)
     colormap=traits.Str(argstr='%s', usedefault=True,

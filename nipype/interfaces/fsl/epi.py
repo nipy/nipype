@@ -398,8 +398,8 @@ class EddyInputSpec(FSLCommandInputSpec):
                    desc=('File containing the b-values for all volumes in '
                          '--imain'))
     out_base = traits.Str('eddy_corrected', argstr='--out=%s',
-                              usedefault=True,
-                              desc=('basename for output (warped) image'))
+                          usedefault=True,
+                          desc=('basename for output (warped) image'))
     session = File(exists=True, argstr='--session=%s',
                    desc=('File containing session indices for all volumes in '
                          '--imain'))
@@ -597,7 +597,7 @@ class EpiRegOutputSpec(TraitedSpec):
     out_file = File(exists=True,
                     desc='unwarped and coregistered epi input')
     out_1vol = File(exists=True,
-                          desc='unwarped and coregistered single volume')
+                    desc='unwarped and coregistered single volume')
     fmap2str_mat = File(exists=True,
                         desc='rigid fieldmap-to-structural transform')
     fmap2epi_mat = File(exists=True,

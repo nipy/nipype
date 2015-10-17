@@ -1027,7 +1027,7 @@ class ApplyVolTransform(FSCommand):
 
 class SmoothInputSpec(FSTraitedSpec):
     in_file = File(exists=True, desc='source volume',
-                     argstr='--i %s', mandatory=True)
+                   argstr='--i %s', mandatory=True)
     reg_file = File(desc='registers volume to surface anatomical ',
                    argstr='--reg %s', mandatory=True,
                    exists=True)
@@ -1242,7 +1242,7 @@ class FitMSParamsInputSpec(FSTraitedSpec):
     xfm_list = traits.List(File(exists=True),
                            desc="list of transform files to apply to each FLASH image")
     out_dir = Directory(argstr="%s", position=-1, genfile=True,
-                              desc="directory to store output in")
+                        desc="directory to store output in")
 
 
 class FitMSParamsOutputSpec(TraitedSpec):
@@ -1348,7 +1348,7 @@ class SynthesizeFLASH(FSCommand):
             outputs["out_file"] = self.inputs.out_file
         else:
             outputs["out_file"] = self._gen_fname("synth-flash_%02d.mgz" % self.inputs.flip_angle,
-                                                   suffix="")
+                                                  suffix="")
         return outputs
 
     def _gen_filename(self, name):

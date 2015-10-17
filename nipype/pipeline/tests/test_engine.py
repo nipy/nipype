@@ -166,8 +166,8 @@ def test8():
     yield assert_equal, len(pipe._execgraph.nodes()), 8
     yield assert_equal, len(pipe._execgraph.edges()), 8
     edgenum = sorted([(len(pipe._execgraph.in_edges(node)) + \
-                           len(pipe._execgraph.out_edges(node))) \
-                          for node in pipe._execgraph.nodes()])
+                       len(pipe._execgraph.out_edges(node))) \
+                      for node in pipe._execgraph.nodes()])
     yield assert_true, edgenum[0]>0
 
 def test_expansion():

@@ -382,15 +382,15 @@ class DataSink(IOBase):
 
 class S3DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     testing = traits.Bool(False, usedefault=True,
-                                   desc='Flag for using local fakes3 server.'
-                                        ' (for testing purposes only)')
+                          desc='Flag for using local fakes3 server.'
+                          ' (for testing purposes only)')
     anon = traits.Bool(False, usedefault=True,
-                                   desc='Use anonymous connection to s3')
+                       desc='Use anonymous connection to s3')
     bucket = traits.Str(mandatory=True,
                         desc='Amazon S3 bucket where your data is stored')
     bucket_path = traits.Str('', usedefault=True,
                              desc='Location within your bucket to store '
-                                   'data.')
+                             'data.')
     base_directory = Directory(
         desc='Path to the base directory for storing data.')
     container = traits.Str(
@@ -475,16 +475,16 @@ class S3DataSink(DataSink):
 
 class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     anon = traits.Bool(False, usedefault=True,
-                                   desc='Use anonymous connection to s3')
+                       desc='Use anonymous connection to s3')
     region = traits.Str('us-east-1', usedefault=True,
-                             desc='Region of s3 bucket')
+                        desc='Region of s3 bucket')
     bucket = traits.Str(mandatory=True,
                         desc='Amazon S3 bucket where your data is stored')
     bucket_path = traits.Str('', usedefault=True,
                              desc='Location within your bucket for subject data.')
     local_directory = Directory(exists=True,
                                 desc='Path to the local directory for subject data to be downloaded '
-                                    'and accessed. Should be on HDFS for Spark jobs.')
+                                'and accessed. Should be on HDFS for Spark jobs.')
     raise_on_empty = traits.Bool(True, usedefault=True,
                                  desc='Generate exception if list is empty for a given field')
     sort_filelist = traits.Bool(mandatory=True,
@@ -1878,7 +1878,7 @@ class SSHDataGrabberInputSpec(DataGrabberInputSpec):
     username = traits.Str(desc='Server username.')
     password = traits.Password(desc='Server password.')
     download_files = traits.Bool(True, usedefault=True,
-                                    desc='If false it will return the file names without downloading them')
+                                 desc='If false it will return the file names without downloading them')
     base_directory = traits.Str(mandatory=True,
                                desc='Path to the base directory consisting of subject data.')
     template_expression = traits.Enum(['fnmatch', 'regexp'], usedefault=True,

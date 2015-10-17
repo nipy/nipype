@@ -66,7 +66,7 @@ class ANTSCommand(CommandLine):
                 del self.inputs.environ[PREFERED_ITKv4_THREAD_LIMIT_VARIABLE]
         else:
             self.inputs.environ.update({PREFERED_ITKv4_THREAD_LIMIT_VARIABLE:
-                                            '%s' % self.inputs.num_threads})
+                                        '%s' % self.inputs.num_threads})
 
     @staticmethod
     def _format_xarray(val):

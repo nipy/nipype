@@ -275,10 +275,10 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     mapping.connect([(inputnode_within, image2voxel, [("dwi", "in_file")]),
-                           (inputnode_within, fsl2scheme, [("bvecs", "bvec_file"),
+                     (inputnode_within, fsl2scheme, [("bvecs", "bvec_file"),
                                                     ("bvals", "bval_file")]),
-                           (image2voxel, dtifit,[['voxel_order','in_file']]),
-                           (fsl2scheme, dtifit,[['scheme','scheme_file']])
+                     (image2voxel, dtifit,[['voxel_order','in_file']]),
+                     (fsl2scheme, dtifit,[['scheme','scheme_file']])
                      ])
 
     """
@@ -370,8 +370,8 @@ def create_connectivity_pipeline(name="connectivity"):
     """
 
     mapping.connect([(track, camino2trackvis, [('tracked','in_file')]),
-                           (track, vtkstreamlines,[['tracked','in_file']]),
-                           (camino2trackvis, trk2camino,[['trackvis','in_file']])
+                     (track, vtkstreamlines,[['tracked','in_file']]),
+                     (camino2trackvis, trk2camino,[['trackvis','in_file']])
                      ])
     mapping.connect([(inputnode_within, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dims'),
         (('dwi', get_data_dims), 'data_dims')])])
@@ -464,7 +464,7 @@ def create_connectivity_pipeline(name="connectivity"):
                                                                 "mean_fiber_length",
                                                                 "fiber_length_std",
                                                                 "tensors"]),
-                                        name="outputnode")
+                         name="outputnode")
 
     connectivity = pe.Workflow(name="connectivity")
     connectivity.base_output_dir=name

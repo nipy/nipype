@@ -31,7 +31,7 @@ mem = Memory('.')
 
 # Apply an arbitrary (and pointless, here) threshold to the files)
 threshold = [mem.cache(fsl.Threshold)(in_file=f, thresh=i)
-                        for i, f in enumerate(in_files)]
+             for i, f in enumerate(in_files)]
 
 # Merge all these files along the time dimension
 out_merge = mem.cache(fsl.Merge)(dimension="t",

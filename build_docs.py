@@ -141,12 +141,12 @@ else:
             # require zlib.
             try:
                 zf = zipfile.ZipFile(target_file, 'w',
-                                            compression=zipfile.ZIP_DEFLATED)
+                                     compression=zipfile.ZIP_DEFLATED)
             except RuntimeError:
                 warnings.warn('zlib not installed, storing the docs '
-                                'without compression')
+                              'without compression')
                 zf = zipfile.ZipFile(target_file, 'w',
-                                            compression=zipfile.ZIP_STORED)
+                                     compression=zipfile.ZIP_STORED)
 
             for root, dirs, files in os.walk(DOC_BUILD_DIR):
                 relative = relative_path(root)

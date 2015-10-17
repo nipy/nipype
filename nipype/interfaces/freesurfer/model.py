@@ -24,7 +24,7 @@ class MRISPreprocInputSpec(FSTraitedSpec):
     out_file = File(argstr='--out %s', genfile=True,
                    desc='output filename')
     target = traits.Str(argstr='--target %s', mandatory=True,
-                         desc='target subject name')
+                        desc='target subject name')
     hemi = traits.Enum('lh', 'rh', argstr='--hemi %s',
                        mandatory=True,
                        desc='hemisphere for source and target')
@@ -725,7 +725,7 @@ class Label2VolInputSpec(FSTraitedSpec):
     vol_label_file = File(argstr='--o %s', genfile=True,
                           desc='output volume')
     label_hit_file = File(argstr='--hits %s',
-                           desc='file with each frame is nhits for a label')
+                          desc='file with each frame is nhits for a label')
     map_label_stat = File(argstr='--label-stat %s',
                     desc='map the label stats field into the vol')
     native_vox2ras = traits.Bool(argstr='--native-vox2ras',

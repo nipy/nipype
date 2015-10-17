@@ -129,9 +129,9 @@ getenv = True
                 if not wrapper_cmd is None:
                     specs['executable'] = wrapper_cmd
                     specs['nodescript'] = \
-                            '%s %s %s' % (wrapper_args % specs, # give access to variables
-                                          sys.executable,
-                                          pyscript)
+                    '%s %s %s' % (wrapper_args % specs, # give access to variables
+                                  sys.executable,
+                                  pyscript)
                 submitspec = template % specs
                 # write submit spec for this job
                 submitfile = os.path.join(batch_dir,

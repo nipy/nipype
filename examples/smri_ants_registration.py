@@ -67,7 +67,7 @@ reg.inputs.output_transform_prefix = "output_"
 reg.inputs.transforms = ['Translation', 'Rigid', 'Affine', 'SyN']
 reg.inputs.transform_parameters = [(0.1,), (0.1,), (0.1,), (0.2, 3.0, 0.0)]
 reg.inputs.number_of_iterations = ([[10000, 111110, 11110]]*3 +
-                                    [[100, 50, 30]])
+                                   [[100, 50, 30]])
 reg.inputs.dimension = 3
 reg.inputs.write_composite_transform = True
 reg.inputs.collapse_output_transforms = False

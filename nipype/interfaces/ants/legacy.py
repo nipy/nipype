@@ -25,7 +25,7 @@ from ...utils.filemanip import split_filename
 
 class antsIntroductionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
-                             desc='image dimension (2 or 3)', position=1)
+                            desc='image dimension (2 or 3)', position=1)
     reference_image = File(exists=True,
                            argstr='-r %s', desc='template file to warp to',
                            mandatory=True, copyfile=True)
@@ -61,8 +61,8 @@ class antsIntroductionInputSpec(ANTSCommandInputSpec):
                      'exponential, DD = diffeomorphic demons style exponential '
                      'mapping, RI = purely rigid, RA = affine rigid'))
     out_prefix = traits.Str('ants_', argstr='-o %s', usedefault=True,
-                             desc=('Prefix that is prepended to all output '
-                                   'files (default = ants_)'))
+                            desc=('Prefix that is prepended to all output '
+                                  'files (default = ants_)'))
     quality_check = traits.Bool(argstr='-q 1',
                              desc='Perform a quality check of the result')
 
@@ -128,13 +128,13 @@ class GenWarpFields(antsIntroduction):
 
 class buildtemplateparallelInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
-                             desc='image dimension (2 or 3)', position=1)
+                            desc='image dimension (2 or 3)', position=1)
     out_prefix = traits.Str('antsTMPL_', argstr='-o %s', usedefault=True,
-                             desc=('Prefix that is prepended to all output '
-                                   'files (default = antsTMPL_)'))
+                            desc=('Prefix that is prepended to all output '
+                                  'files (default = antsTMPL_)'))
     in_files = traits.List(File(exists=True), mandatory=True,
-                             desc='list of images to generate template from',
-                             argstr='%s', position=-1)
+                           desc='list of images to generate template from',
+                           argstr='%s', position=-1)
     parallelization = traits.Enum(0, 1, 2, argstr='-c %d', usedefault=True,
                              desc=('control for parallel processing (0 = '
                                    'serial, 1 = use PBS, 2 = use PEXEC, 3 = '
@@ -247,8 +247,8 @@ class buildtemplateparallel(ANTSCommand):
 
             outputs['template_files'].append(os.path.realpath(file_))
             outputs['final_template_file'] = \
-                  os.path.realpath('%stemplate.nii.gz' %
-                                   self.inputs.out_prefix)
+            os.path.realpath('%stemplate.nii.gz' %
+                             self.inputs.out_prefix)
         outputs['subject_outfiles'] = []
         for filename in self.inputs.in_files:
             _, base, _ = split_filename(filename)

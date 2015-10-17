@@ -8,7 +8,7 @@
 """
 
 from .base import (CommandLineInputSpec, traits, TraitedSpec,
-                       File, SEMLikeCommandLine)
+                   File, SEMLikeCommandLine)
 
 
 class C3dAffineToolInputSpec(CommandLineInputSpec):

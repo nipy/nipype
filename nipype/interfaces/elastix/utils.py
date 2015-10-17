@@ -11,7 +11,7 @@ import os.path as op
 import re
 
 from ..base import (BaseInterface, BaseInterfaceInputSpec, isdefined,
-                     TraitedSpec, File, traits, InputMultiPath)
+                    TraitedSpec, File, traits, InputMultiPath)
 from ... import logging
 logger = logging.getLogger('interface')
 

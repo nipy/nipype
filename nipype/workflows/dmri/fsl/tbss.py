@@ -51,8 +51,8 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
 
     # Prep the FA images
     prepfa = pe.MapNode(fsl.ImageMaths(suffix="_prep"),
-                                    name="prepfa",
-                                    iterfield=['in_file', 'op_string'])
+                        name="prepfa",
+                        iterfield=['in_file', 'op_string'])
 
     # Slicer
     slicer = pe.MapNode(fsl.Slicer(all_axial=True, image_width=1280),
@@ -120,8 +120,8 @@ def create_tbss_2_reg(name="tbss_2_reg"):
 
     # Define the inputnode
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["fa_list",
-                                                                   "mask_list",
-                                                                   "target"]),
+                                                                 "mask_list",
+                                                                 "target"]),
                         name="inputnode")
 
     # Flirt the FA image to the target
@@ -137,7 +137,7 @@ def create_tbss_2_reg(name="tbss_2_reg"):
         warn('NO FSL found')
     else:
         config_file = os.path.join(os.environ["FSLDIR"],
-                                    "etc/flirtsch/FA_2_FMRIB58_1mm.cnf")
+                                   "etc/flirtsch/FA_2_FMRIB58_1mm.cnf")
         fnirt.inputs.config_file=config_file
 
     # Define the registration workflow
@@ -240,8 +240,8 @@ def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton=True):
     if estimate_skeleton:
         # Take the mean over the fourth dimension
         meanfa = pe.Node(fsl.ImageMaths(op_string="-Tmean",
-                                         suffix="_mean"),
-                          name="meanfa")
+                                        suffix="_mean"),
+                         name="meanfa")
 
         # Use the mean FA volume to generate a tract skeleton
         makeskeleton = pe.Node(fsl.TractSkeleton(skeleton_file=True),
@@ -257,8 +257,8 @@ def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton=True):
     else:
         #$FSLDIR/bin/fslmaths $FSLDIR/data/standard/FMRIB58_FA_1mm -mas mean_FA_mask mean_FA
         maskstd = pe.Node(fsl.ImageMaths(op_string="-mas",
-                                           suffix="_masked"),
-                            name="maskstd")
+                                         suffix="_masked"),
+                          name="maskstd")
         maskstd.inputs.in_file = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
 
         #$FSLDIR/bin/fslmaths mean_FA -bin mean_FA_mask
@@ -353,7 +353,7 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
         (inputnode, invertmask, [("groupmask", "in_file")]),
         (inputnode, skeletonmask, [("skeleton_file", "in_file"),
                                 (('skeleton_thresh', tbss4_op_string),
-                                                        'op_string')]),
+                                 'op_string')]),
         (inputnode, projectfa, [('skeleton_thresh', 'threshold'),
                                 ("meanfa_file", "in_file"),
                                 ("mergefa_file", "data_file")]),
@@ -424,7 +424,7 @@ def create_tbss_all(name='tbss_all', estimate_skeleton=True):
                 (inputnode, tbss4, [('skeleton_thresh', 'inputnode.skeleton_thresh')]),
 
                 (tbss1, tbss2, [('outputnode.fa_list', 'inputnode.fa_list'),
-                                   ('outputnode.mask_list', 'inputnode.mask_list')]),
+                                ('outputnode.mask_list', 'inputnode.mask_list')]),
                 (tbss1, tbss3, [('outputnode.fa_list', 'inputnode.fa_list')]),
                 (tbss2, tbss3, [('outputnode.field_list', 'inputnode.field_list')]),
                 (tbss3, tbss4, [
@@ -568,7 +568,7 @@ def create_tbss_non_FA(name='tbss_non_FA'):
                     (inputnode, projectfa, [('skeleton_thresh', 'threshold'),
                                             ("meanfa_file", "in_file"),
                                             ("distance_map", "distance_map"),
-                                             ("all_FA_file", 'data_file')
+                                            ("all_FA_file", 'data_file')
                                             ]),
                 ])
 

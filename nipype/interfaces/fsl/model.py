@@ -26,9 +26,9 @@ from nibabel import load
 from ... import LooseVersion
 from .base import (FSLCommand, FSLCommandInputSpec, Info)
 from ..base import (load_template, File, traits, isdefined,
-                                    TraitedSpec, BaseInterface, Directory,
-                                    InputMultiPath, OutputMultiPath,
-                                    BaseInterfaceInputSpec)
+                    TraitedSpec, BaseInterface, Directory,
+                    InputMultiPath, OutputMultiPath,
+                    BaseInterfaceInputSpec)
 from ...utils.filemanip import (list_to_filename, filename_to_list)
 from ...utils.misc import human_order_sorted
 

@@ -251,8 +251,8 @@ def create_DARTEL_template(name='dartel_template'):
                         name='inputspec')
 
     segment = pe.MapNode(spm.NewSegment(),
-                             iterfield=['channel_files'],
-                             name='segment')
+                         iterfield=['channel_files'],
+                         name='segment')
     workflow.connect(inputnode, 'structural_files', segment, 'channel_files')
 
     version = spm.Info.version()

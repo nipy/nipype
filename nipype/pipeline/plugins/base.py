@@ -233,7 +233,7 @@ class DistributedPluginBase(PluginBase):
         # setup polling - TODO: change to threaded model
         notrun = []
         while np.any(self.proc_done == False) | \
-                    np.any(self.proc_pending == True):
+        np.any(self.proc_pending == True):
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -365,16 +365,16 @@ class DistributedPluginBase(PluginBase):
                         self._status_callback(self.procs[jobid], 'start')
                     continue_with_submission = True
                     if str2bool(self.procs[jobid].config['execution']
-                                                          ['local_hash_check']):
+                                ['local_hash_check']):
                         logger.debug('checking hash locally')
                         try:
                             hash_exists, _, _, _ = self.procs[
                                 jobid].hash_exists()
                             logger.debug('Hash exists %s' % str(hash_exists))
                             if (hash_exists and
-                                     (self.procs[jobid].overwrite == False or
-                                       (self.procs[jobid].overwrite == None and
-                                        not self.procs[jobid]._interface.always_run)
+                                (self.procs[jobid].overwrite == False or
+                                 (self.procs[jobid].overwrite == None and
+                                  not self.procs[jobid]._interface.always_run)
                                       )
                                     ):
                                 continue_with_submission = False
@@ -607,7 +607,7 @@ class GraphPluginBase(PluginBase):
                 value = open(value).read()
             if (hasattr(node, "plugin_args") and
                     isinstance(node.plugin_args, dict) and
-                        keyword in node.plugin_args):
+                keyword in node.plugin_args):
                     if (keyword == "template" and
                             os.path.isfile(node.plugin_args[keyword])):
                         tmp_value = open(node.plugin_args[keyword]).read()

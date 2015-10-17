@@ -111,11 +111,11 @@ def create_reg_workflow(name='registration'):
     register = pe.Workflow(name=name)
 
     inputnode = pe.Node(interface=niu.IdentityInterface(fields=['source_files',
-                                                                 'mean_image',
-                                                                 'anatomical_image',
-                                                                 'target_image',
-                                                                 'target_image_brain',
-                                                                 'config_file']),
+                                                                'mean_image',
+                                                                'anatomical_image',
+                                                                'target_image',
+                                                                'target_image_brain',
+                                                                'config_file']),
                         name='inputspec')
     outputnode = pe.Node(interface=niu.IdentityInterface(fields=['func2anat_transform',
                                                                  'anat2target_transform',
@@ -568,8 +568,8 @@ def get_subjectinfo(subject_id, base_dir, task_id, model_id):
         runs = [int(val[-3:]) for val in files]
         run_ids.insert(idx, runs)
     json_info = os.path.join(base_dir, subject_id, 'BOLD',
-                                 'task%03d_run%03d' % (task_id, run_ids[task_id - 1][0]),
-                                 'bold_scaninfo.json')
+                             'task%03d_run%03d' % (task_id, run_ids[task_id - 1][0]),
+                             'bold_scaninfo.json')
     if os.path.exists(json_info):
         import json
         with open(json_info, 'rt') as fp:
@@ -763,7 +763,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                      name="art")
 
     modelspec = pe.Node(interface=model.SpecifyModel(),
-                           name="modelspec")
+                        name="modelspec")
     modelspec.inputs.input_units = 'secs'
 
     def check_behav_list(behav, run_id, conds):
@@ -861,7 +861,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                          ('varcopes', 'inputspec.varcopes'),
                                          ('n_runs', 'l2model.num_copes')]),
                 (modelfit, fixed_fx, [('outputspec.dof_file',
-                                        'inputspec.dof_files'),
+                                       'inputspec.dof_files'),
                                       ])
                 ])
 
@@ -895,9 +895,9 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                    function=merge_files),
                       name='merge_files')
     wf.connect([(fixed_fx.get_node('outputspec'), mergefunc,
-                                 [('copes', 'copes'),
-                                  ('varcopes', 'varcopes'),
-                                  ('zstats', 'zstats'),
+                 [('copes', 'copes'),
+                  ('varcopes', 'varcopes'),
+                  ('zstats', 'zstats'),
                                   ])])
     wf.connect(mergefunc, 'out_files', registration, 'inputspec.source_files')
 
@@ -992,16 +992,16 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect(contrastgen, 'contrasts', subsgen, 'conds')
     wf.connect(subsgen, 'substitutions', datasink, 'substitutions')
     wf.connect([(fixed_fx.get_node('outputspec'), datasink,
-                                 [('res4d', 'res4d'),
-                                  ('copes', 'copes'),
-                                  ('varcopes', 'varcopes'),
-                                  ('zstats', 'zstats'),
-                                  ('tstats', 'tstats')])
+                 [('res4d', 'res4d'),
+                  ('copes', 'copes'),
+                  ('varcopes', 'varcopes'),
+                  ('zstats', 'zstats'),
+                  ('tstats', 'tstats')])
                 ])
     wf.connect([(modelfit.get_node('modelgen'), datasink,
-                                 [('design_cov', 'qa.model'),
-                                  ('design_image', 'qa.model.@matrix_image'),
-                                  ('design_file', 'qa.model.@matrix'),
+                 [('design_cov', 'qa.model'),
+                  ('design_image', 'qa.model.@matrix_image'),
+                  ('design_file', 'qa.model.@matrix'),
                                   ])])
     wf.connect([(preproc, datasink, [('outputspec.motion_parameters',
                                       'qa.motion'),

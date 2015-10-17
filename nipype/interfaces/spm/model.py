@@ -23,9 +23,9 @@ import scipy.io as sio
 
 # Local imports
 from .base import (SPMCommand, SPMCommandInputSpec,
-                                   scans_for_fnames)
+                   scans_for_fnames)
 from ..base import (Bunch, traits, TraitedSpec, File, Directory,
-                               OutputMultiPath, InputMultiPath, isdefined)
+                    OutputMultiPath, InputMultiPath, isdefined)
 from ...external.six import string_types
 from ...utils.filemanip import (filename_to_list, list_to_filename,
                                split_filename)
@@ -377,7 +377,7 @@ class EstimateContrast(SPMCommand):
                     except:
                         Exception("Contrast Estimate: could not get index of" \
                                   " T contrast. probably not defined prior " \
-                                      "to the F contrasts")
+                                  "to the F contrasts")
                     script += "consess{%d}.fcon.convec{%d} = consess{%d}.tcon.convec;\n" % (i + 1, cl0 + 1, tidx + 1)
         script += "jobs{1}.stats{1}.con.consess = consess;\n"
         script += "if strcmp(spm('ver'),'SPM8'), spm_jobman('initcfg');jobs=spm_jobman('spm5tospm8',{jobs});end\n"
@@ -857,7 +857,7 @@ class PairedTTestDesignInputSpec(FactorialDesignInputSpec):
     grand_mean_scaling = traits.Bool(field='des.pt.gmsca',
                             desc='Perform grand mean scaling')
     ancova = traits.Bool(field='des.pt.ancova',
-                            desc='Specify ancova-by-factor regressors')
+                         desc='Specify ancova-by-factor regressors')
 
 
 class PairedTTestDesign(FactorialDesign):

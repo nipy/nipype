@@ -258,12 +258,12 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                   (modelspec, model_estimate,[('session_info','session_info')]),
                   (compute_mask, model_estimate, [('brain_mask','mask')]),
                   (model_estimate, contrast_estimate, [("beta","beta"),
-                                                        ("nvbeta","nvbeta"),
-                                                        ("s2","s2"),
-                                                        ("dof", "dof"),
-                                                        ("axis", "axis"),
-                                                        ("constants", "constants"),
-                                                        ("reg_names", "reg_names")])
+                                                       ("nvbeta","nvbeta"),
+                                                       ("s2","s2"),
+                                                       ("dof", "dof"),
+                                                       ("axis", "axis"),
+                                                       ("constants", "constants"),
+                                                       ("reg_names", "reg_names")])
                   ])
 
 if __name__ == '__main__':

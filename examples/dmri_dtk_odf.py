@@ -192,12 +192,12 @@ dwiproc.base_dir = os.path.abspath('dtk_odf_tutorial')
 dwiproc.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,compute_ODF,[('dwi','fslroi.in_file'),
-                                               ('bvals','hardi_mat.bvals'),
-                                               ('bvecs','hardi_mat.bvecs'),
-                                               ('dwi','eddycorrect.inputnode.in_file')]),
+                                             ('bvals','hardi_mat.bvals'),
+                                             ('bvecs','hardi_mat.bvecs'),
+                                             ('dwi','eddycorrect.inputnode.in_file')]),
                     (compute_ODF,tractography,[('bet.mask_file','odf_tracker.mask1_file'),
-                                                 ('odf_recon.ODF','odf_tracker.ODF'),
-                                                 ('odf_recon.max','odf_tracker.max')
+                                               ('odf_recon.ODF','odf_tracker.ODF'),
+                                               ('odf_recon.max','odf_tracker.max')
                                                ])
                 ])
 

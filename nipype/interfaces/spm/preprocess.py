@@ -424,7 +424,7 @@ class NormalizeOutputSpec(TraitedSpec):
     normalized_source = OutputMultiPath(File(exists=True),
                                         desc='Normalized source files')
     normalized_files = OutputMultiPath(File(exists=True),
-                                        desc='Normalized other files')
+                                       desc='Normalized other files')
 
 
 class Normalize(SPMCommand):
@@ -1166,9 +1166,9 @@ class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
                                      field='mni_norm.data.subjs.flowfields',
                                      mandatory=True)
     apply_to_files = InputMultiPath(File(exists=True),
-                                     desc="Files to apply the transform to",
-                                     field='mni_norm.data.subjs.images',
-                                     mandatory=True, copyfile=False)
+                                    desc="Files to apply the transform to",
+                                    field='mni_norm.data.subjs.images',
+                                    mandatory=True, copyfile=False)
     voxel_size = traits.Tuple(traits.Float, traits.Float, traits.Float,
                               desc="Voxel sizes for output file",
                               field='mni_norm.vox')

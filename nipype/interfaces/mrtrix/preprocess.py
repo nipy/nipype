@@ -31,7 +31,7 @@ class MRConvertInputSpec(CommandLineInputSpec):
     extension = traits.Enum("mif","nii", "float", "char", "short", "int", "long", "double", position=2,
                            desc='"i.e. Bfloat". Can be "char", "short", "int", "long", "float" or "double"', usedefault=True)
     layout = traits.Enum("nii", "float", "char", "short", "int", "long", "double", argstr='-output %s', position=2,
-                           desc='specify the layout of the data in memory. The actual layout produced will depend on whether the output image format can support it.')
+                         desc='specify the layout of the data in memory. The actual layout produced will depend on whether the output image format can support it.')
     resample = traits.Float(argstr='-scale %d', position=3,
         units='mm', desc='Apply scaling to the intensity values.')
     offset_bias = traits.Float(argstr='-scale %d', position=3,

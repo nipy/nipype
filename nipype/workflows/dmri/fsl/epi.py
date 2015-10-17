@@ -96,19 +96,19 @@ def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fiel
                          (inputnode, motion, [('in_file', 'inputnode.in_file'),
                                               ('in_bvec', 'inputnode.in_bvec'),
                                               ('ref_num', 'inputnode.ref_num')]),
-                          (inputnode, eddy, [('ref_num', 'inputnode.ref_num')]),
-                          (motion, eddy, [('outputnode.motion_corrected', 'inputnode.in_file')]),
-                          (eddy, susceptibility, [('outputnode.eddy_corrected', 'inputnode.in_file')]),
-                          (inputnode, susceptibility, [('ref_num', 'inputnode.ref_num'),
-                                                        ('fieldmap_mag', 'inputnode.fieldmap_mag'),
-                                                        ('fieldmap_pha', 'inputnode.fieldmap_pha'),
-                                                        ('te_diff', 'inputnode.te_diff'),
-                                                        ('epi_echospacing', 'inputnode.epi_echospacing'),
-                                                        ('epi_rev_encoding', 'inputnode.epi_rev_encoding'),
-                                                        ('pi_accel_factor', 'inputnode.pi_accel_factor'),
-                                                        ('vsm_sigma', 'inputnode.vsm_sigma')]),
-                          (motion, outputnode, [('outputnode.out_bvec', 'bvec_rotated')]),
-                          (susceptibility, outputnode, [('outputnode.epi_corrected', 'dmri_corrected')])
+                         (inputnode, eddy, [('ref_num', 'inputnode.ref_num')]),
+                         (motion, eddy, [('outputnode.motion_corrected', 'inputnode.in_file')]),
+                         (eddy, susceptibility, [('outputnode.eddy_corrected', 'inputnode.in_file')]),
+                         (inputnode, susceptibility, [('ref_num', 'inputnode.ref_num'),
+                                                      ('fieldmap_mag', 'inputnode.fieldmap_mag'),
+                                                      ('fieldmap_pha', 'inputnode.fieldmap_pha'),
+                                                      ('te_diff', 'inputnode.te_diff'),
+                                                      ('epi_echospacing', 'inputnode.epi_echospacing'),
+                                                      ('epi_rev_encoding', 'inputnode.epi_rev_encoding'),
+                                                      ('pi_accel_factor', 'inputnode.pi_accel_factor'),
+                                                      ('vsm_sigma', 'inputnode.vsm_sigma')]),
+                         (motion, outputnode, [('outputnode.out_bvec', 'bvec_rotated')]),
+                         (susceptibility, outputnode, [('outputnode.epi_corrected', 'dmri_corrected')])
                          ])
     else: # we don't have a fieldmap, so we just carry on without it :(
         pipeline.connect([
@@ -541,16 +541,16 @@ def create_epidewarp_pipeline(name='epidewarp', fieldmap_registration=False):
                   DeprecationWarning)
 
     inputnode = pe.Node(niu.IdentityInterface(fields=['in_file',
-                                                                   'fieldmap_mag',
-                                                                   'fieldmap_pha',
-                                                                   'te_diff',
-                                                                   'epi_echospacing',
-                                                                   'epi_ph_encoding_dir',
-                                                                   'epi_rev_encoding',
-                                                                   'pi_accel_factor',
-                                                                   'vsm_sigma',
-                                                                   'ref_num',
-                                                                   'unwarp_direction'
+                                                      'fieldmap_mag',
+                                                      'fieldmap_pha',
+                                                      'te_diff',
+                                                      'epi_echospacing',
+                                                      'epi_ph_encoding_dir',
+                                                      'epi_rev_encoding',
+                                                      'pi_accel_factor',
+                                                      'vsm_sigma',
+                                                      'ref_num',
+                                                      'unwarp_direction'
                                                       ]), name='inputnode')
 
     pipeline = pe.Workflow(name=name)

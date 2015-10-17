@@ -411,7 +411,7 @@ level1.connect([(datasource_dartel, rename_dartel, [('struct', 'in_file')]),
                 (pick_flow, l1pipeline, [('dartel_flow_field', 'preproc.normalize_struct.flowfield_files'),
                                          ('dartel_flow_field', 'preproc.normalize_and_smooth_func.flowfield_files')]),
                 (infosource,l1pipeline,[(('subject_id', subjectinfo),
-                                          'analysis.modelspec.subject_info')]),
+                                         'analysis.modelspec.subject_info')]),
                 ])
 
 

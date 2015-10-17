@@ -143,7 +143,7 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
                                         ('corrections', 'corrections'),
                                         ('dof_file', 'dof_file')]),
             (conestimate, merge_contrasts, [('zstats', 'in1'),
-                                              ('zfstats', 'in2')]),
+                                            ('zfstats', 'in2')]),
             (conestimate, outputspec, [('copes', 'copes'),
                                        ('varcopes', 'varcopes')]),
             ])

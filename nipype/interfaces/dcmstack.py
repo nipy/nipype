@@ -315,7 +315,7 @@ class CopyMeta(BaseInterface):
         dest.meta_ext.shape = src.meta_ext.shape
 
         self.out_path = op.join(os.getcwd(),
-                                  op.basename(self.inputs.dest_file))
+                                op.basename(self.inputs.dest_file))
         dest.to_filename(self.out_path)
 
         return runtime

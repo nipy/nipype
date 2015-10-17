@@ -386,10 +386,10 @@ Required conversions for processing in Camino:
 """
 
 mapping.connect([(inputnode, image2voxel, [("dwi", "in_file")]),
-                       (inputnode, fsl2scheme, [("bvecs", "bvec_file"),
-                                                ("bvals", "bval_file")]),
-                       (image2voxel, dtifit,[['voxel_order','in_file']]),
-                       (fsl2scheme, dtifit,[['scheme','scheme_file']])
+                 (inputnode, fsl2scheme, [("bvecs", "bvec_file"),
+                                          ("bvals", "bval_file")]),
+                 (image2voxel, dtifit,[['voxel_order','in_file']]),
+                 (fsl2scheme, dtifit,[['scheme','scheme_file']])
                  ])
 
 """
@@ -481,8 +481,8 @@ functions defined at the beginning of the pipeline.
 """
 
 mapping.connect([(track, camino2trackvis, [('tracked','in_file')]),
-                       (track, vtkstreamlines,[['tracked','in_file']]),
-                       (camino2trackvis, trk2camino,[['trackvis','in_file']])
+                 (track, vtkstreamlines,[['tracked','in_file']]),
+                 (camino2trackvis, trk2camino,[['trackvis','in_file']])
                  ])
 mapping.connect([(inputnode, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dims'),
     (('dwi', get_data_dims), 'data_dims')])])
@@ -566,8 +566,8 @@ connectivity.base_dir = op.abspath('dmri_connectivity')
 connectivity.connect([
                     (infosource,datasource,[('subject_id', 'subject_id')]),
                     (datasource,mapping,[('dwi','inputnode.dwi'),
-                                               ('bvals','inputnode.bvals'),
-                                               ('bvecs','inputnode.bvecs')
+                                         ('bvals','inputnode.bvals'),
+                                         ('bvecs','inputnode.bvecs')
                                          ]),
         (infosource,mapping,[('subject_id','inputnode.subject_id')])
                 ])

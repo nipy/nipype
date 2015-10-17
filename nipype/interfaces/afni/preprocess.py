@@ -109,7 +109,7 @@ class TShiftInputSpec(AFNICommandInputSpec):
                          ' default = Fourier', argstr='-%s')
 
     tpattern = traits.Str(desc='use specified slice time pattern rather than one in header',
-                                    argstr='-tpattern %s')
+                          argstr='-tpattern %s')
 
     rlt = traits.Bool(desc='Before shifting, remove the mean and linear trend',
                       argstr="-rlt")
@@ -179,7 +179,7 @@ class RefitInputSpec(CommandLineInputSpec):
     space = traits.Enum('TLRC', 'MNI', 'ORIG',
                         argstr='-space %s',
                         desc='Associates the dataset with a specific' +
-                         ' template type, e.g. TLRC, MNI, ORIG')
+                        ' template type, e.g. TLRC, MNI, ORIG')
 
 
 class Refit(CommandLine):
@@ -354,9 +354,9 @@ class AutoTcorrelateInputSpec(AFNICommandInputSpec):
                                     argstr="-mask_only_targets",
                                     xor=['mask_source'])
     mask_source = File(exists=True,
-                        desc="mask for source voxels",
-                        argstr="-mask_source %s",
-                        xor=['mask_only_targets'])
+                       desc="mask for source voxels",
+                       argstr="-mask_source %s",
+                       xor=['mask_only_targets'])
 
     out_file = File(name_template="%s_similarity_matrix.1D", desc='output image file name',
                     argstr='-prefix %s', name_source="in_file")
@@ -1370,16 +1370,16 @@ class TCorrelate(AFNICommand):
 
 class TCorr1DInputSpec(AFNICommandInputSpec):
     xset = File(desc = '3d+time dataset input',
-                  argstr = ' %s',
-                  position = -2,
-                  mandatory = True,
-                  exists = True,
-                  copyfile=False)
+                argstr = ' %s',
+                position = -2,
+                mandatory = True,
+                exists = True,
+                copyfile=False)
     y_1d = File(desc = '1D time series file input',
-                   argstr = ' %s',
-                   position = -1,
-                   mandatory = True,
-                   exists = True)
+                argstr = ' %s',
+                position = -1,
+                mandatory = True,
+                exists = True)
     out_file = File(desc = 'output filename prefix',
                    name_template='%s_correlation.nii.gz',
                    argstr = '-prefix %s',

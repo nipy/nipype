@@ -204,8 +204,8 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     GetMovingImagesNode = pe.Node(interface=util.Function(function=GetMovingImages,
                                       input_names=['ListOfImagesDictionaries','registrationImageTypes','interpolationMapping'],
                                       output_names=['moving_images','moving_interpolation_type']),
-                                      run_without_submitting=True,
-                                      name='99_GetMovingImagesNode')
+                                  run_without_submitting=True,
+                                  name='99_GetMovingImagesNode')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'ListOfImagesDictionaries', GetMovingImagesNode, 'ListOfImagesDictionaries')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'registrationImageTypes', GetMovingImagesNode, 'registrationImageTypes')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'interpolationMapping',GetMovingImagesNode,'interpolationMapping')
@@ -310,8 +310,8 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     GetPassiveImagesNode = pe.Node(interface=util.Function(function=GetPassiveImages,
                                       input_names=['ListOfImagesDictionaries','registrationImageTypes'],
                                       output_names=['ListOfPassiveImagesDictionaries']),
-                                      run_without_submitting=True,
-                                      name='99_GetPassiveImagesNode')
+                                   run_without_submitting=True,
+                                   name='99_GetPassiveImagesNode')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'ListOfImagesDictionaries', GetPassiveImagesNode, 'ListOfImagesDictionaries')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'registrationImageTypes', GetPassiveImagesNode, 'registrationImageTypes')
 

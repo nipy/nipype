@@ -34,7 +34,7 @@ class BaseFile ( traits.BaseStr ):
     info_text = 'a file name'
 
     def __init__ ( self, value = '', filter = None, auto_set = False,
-                         entries = 0, exists = False, **metadata ):
+                   entries = 0, exists = False, **metadata ):
         """ Creates a File trait.
 
         Parameters
@@ -85,7 +85,7 @@ class File ( BaseFile ):
     """
 
     def __init__ ( self, value = '', filter = None, auto_set = False,
-                         entries = 0, exists = False, **metadata ):
+                   entries = 0, exists = False, **metadata ):
         """ Creates a File trait.
 
         Parameters
@@ -125,7 +125,7 @@ class BaseDirectory ( traits.BaseStr ):
     info_text = 'a directory name'
 
     def __init__ ( self, value = '', auto_set = False, entries = 0,
-                         exists = False, **metadata ):
+                   exists = False, **metadata ):
         """ Creates a BaseDirectory trait.
 
         Parameters
@@ -173,7 +173,7 @@ class Directory ( BaseDirectory ):
     """
 
     def __init__ ( self, value = '', auto_set = False, entries = 0,
-                         exists = False, **metadata ):
+                   exists = False, **metadata ):
         """ Creates a Directory trait.
 
         Parameters

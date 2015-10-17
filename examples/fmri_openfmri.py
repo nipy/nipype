@@ -236,7 +236,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                      name="art")
 
     modelspec = pe.Node(interface=model.SpecifyModel(),
-                           name="modelspec")
+                        name="modelspec")
     modelspec.inputs.input_units = 'secs'
 
     def check_behav_list(behav):
@@ -296,13 +296,13 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                       'flameo.mask_file')]),
                 (modelfit, fixed_fx, [(('outputspec.copes', sort_copes),
                                        'inputspec.copes'),
-                                       ('outputspec.dof_file',
-                                        'inputspec.dof_files'),
-                                       (('outputspec.varcopes',
-                                         sort_copes),
-                                        'inputspec.varcopes'),
-                                       (('outputspec.copes', num_copes),
-                                        'l2model.num_copes'),
+                                      ('outputspec.dof_file',
+                                       'inputspec.dof_files'),
+                                      (('outputspec.varcopes',
+                                        sort_copes),
+                                       'inputspec.varcopes'),
+                                      (('outputspec.copes', num_copes),
+                                       'l2model.num_copes'),
                                       ])
                 ])
 
@@ -329,9 +329,9 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                                    function=merge_files),
                       name='merge_files')
     wf.connect([(fixed_fx.get_node('outputspec'), mergefunc,
-                                 [('copes', 'copes'),
-                                  ('varcopes', 'varcopes'),
-                                  ('zstats', 'zstats'),
+                 [('copes', 'copes'),
+                  ('varcopes', 'varcopes'),
+                  ('zstats', 'zstats'),
                                   ])])
     wf.connect(mergefunc, 'out_files', registration, 'inputspec.source_files')
 
@@ -393,11 +393,11 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
     wf.connect(contrastgen, 'contrasts', subsgen, 'conds')
     wf.connect(subsgen, 'substitutions', datasink, 'substitutions')
     wf.connect([(fixed_fx.get_node('outputspec'), datasink,
-                                 [('res4d', 'res4d'),
-                                  ('copes', 'copes'),
-                                  ('varcopes', 'varcopes'),
-                                  ('zstats', 'zstats'),
-                                  ('tstats', 'tstats')])
+                 [('res4d', 'res4d'),
+                  ('copes', 'copes'),
+                  ('varcopes', 'varcopes'),
+                  ('zstats', 'zstats'),
+                  ('tstats', 'tstats')])
                 ])
     wf.connect([(splitfunc, datasink,
                  [('copes', 'copes.mni'),
