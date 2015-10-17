@@ -32,7 +32,7 @@ fsl.FSLCommand.set_default_output_type('NIFTI')
 """
 This needs to point to the fdt folder you can find after extracting
 
-	* http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+    * http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
 """
 
@@ -91,9 +91,9 @@ fsl2mrtrix = pe.Node(interface=mrtrix.FSL2MRTrix(),name='fsl2mrtrix')
 
 """
 Tensors are fitted to each voxel in the diffusion-weighted image and from these three maps are created:
-	* Major eigenvector in each voxel
-	* Apparent diffusion coefficient
-	* Fractional anisotropy
+    * Major eigenvector in each voxel
+    * Apparent diffusion coefficient
+    * Fractional anisotropy
 
 """
 
@@ -176,15 +176,15 @@ In this section we connect the nodes for the diffusion processing.
 tractography = pe.Workflow(name='tractography')
 
 tractography.connect([(inputnode, fsl2mrtrix, [("bvecs", "bvec_file"),
-												("bvals", "bval_file")])])
+                                                                                                ("bvals", "bval_file")])])
 tractography.connect([(inputnode, gunzip,[("dwi","in_file")])])
 tractography.connect([(gunzip, dwi2tensor,[("out_file","in_file")])])
 tractography.connect([(fsl2mrtrix, dwi2tensor,[("encoding_file","encoding_file")])])
 
 tractography.connect([(dwi2tensor, tensor2vector,[['tensor','in_file']]),
-					   (dwi2tensor, tensor2adc,[['tensor','in_file']]),
-					   (dwi2tensor, tensor2fa,[['tensor','in_file']]),
-					  ])
+                                           (dwi2tensor, tensor2adc,[['tensor','in_file']]),
+                                           (dwi2tensor, tensor2fa,[['tensor','in_file']]),
+                                          ])
 tractography.connect([(tensor2fa, MRmult_merge,[("FA","in1")])])
 
 """

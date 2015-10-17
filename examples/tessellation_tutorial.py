@@ -15,18 +15,18 @@ This example requires that the user has Freesurfer installed, and that the Frees
 
 .. seealso::
 
-	ConnectomeViewer
-		The Connectome Viewer connects Multi-Modal Multi-Scale Neuroimaging and Network Datasets For Analysis and Visualization in Python.
+    ConnectomeViewer
+        The Connectome Viewer connects Multi-Modal Multi-Scale Neuroimaging and Network Datasets For Analysis and Visualization in Python.
 
-	http://www.geuz.org/gmsh/
-		Gmsh: a three-dimensional finite element mesh generator with built-in pre- and post-processing facilities
+    http://www.geuz.org/gmsh/
+        Gmsh: a three-dimensional finite element mesh generator with built-in pre- and post-processing facilities
 
-	http://www.blender.org/
-		Blender is the free open source 3D content creation suite, available for all major operating systems under the GNU General Public License.
+    http://www.blender.org/
+        Blender is the free open source 3D content creation suite, available for all major operating systems under the GNU General Public License.
 
 .. warning::
 
-	This workflow will take several hours to finish entirely, since smoothing the larger cortical surfaces is very time consuming.
+    This workflow will take several hours to finish entirely, since smoothing the larger cortical surfaces is very time consuming.
 
 Packages and Data Setup
 =======================

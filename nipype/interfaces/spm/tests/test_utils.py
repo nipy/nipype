@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 from nipype.testing import (assert_equal, assert_false,assert_raises,
-			    assert_true, skipif, example_data)
+                            assert_true, skipif, example_data)
 from nipype.interfaces.spm import no_spm
 import nipype.interfaces.spm.utils as spmu
 from nipype.interfaces.base import isdefined

@@ -30,15 +30,15 @@ from here:
 
 .. seealso::
 
-	connectivity_tutorial.py
-		Original tutorial using Camino and the NativeFreesurfer Parcellation Scheme
+    connectivity_tutorial.py
+        Original tutorial using Camino and the NativeFreesurfer Parcellation Scheme
 
-	www.cmtk.org
-		For more info about the parcellation scheme
+    www.cmtk.org
+        For more info about the parcellation scheme
 
 .. warning::
 
-	The ConnectomeMapper (https://github.com/LTS5/cmp or www.cmtk.org) must be installed for this tutorial to function!
+    The ConnectomeMapper (https://github.com/LTS5/cmp or www.cmtk.org) must be installed for this tutorial to function!
 
 Packages and Data Setup
 =======================
@@ -75,7 +75,7 @@ else:
 This needs to point to the freesurfer subjects directory (Recon-all must have been run on subj1 from the FSL course data)
 Alternatively, the reconstructed subject data can be downloaded from:
 
-	* http://dl.dropbox.com/u/315714/subj1.zip
+    * http://dl.dropbox.com/u/315714/subj1.zip
 
 """
 
@@ -89,7 +89,7 @@ lookup_file = op.join(fs_dir,'FreeSurferColorLUT.txt')
 """
 This needs to point to the fdt folder you can find after extracting
 
-	* http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
+    * http://www.fmrib.ox.ac.uk/fslcourse/fsl_course_data2.tar.gz
 
 """
 

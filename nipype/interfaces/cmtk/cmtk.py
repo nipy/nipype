@@ -74,53 +74,53 @@ def length(xyz, along=False):
     return np.sum(dists)
 
 def get_rois_crossed(pointsmm, roiData, voxelSize):
-	n_points = len(pointsmm)
-	rois_crossed = []
-	for j in range(0, n_points):
-		# store point
-		x = int(pointsmm[j, 0] / float(voxelSize[0]))
-		y = int(pointsmm[j, 1] / float(voxelSize[1]))
-		z = int(pointsmm[j, 2] / float(voxelSize[2]))
-		if not roiData[x, y, z] == 0:
-			rois_crossed.append(roiData[x, y, z])
-	rois_crossed = list(dict.fromkeys(rois_crossed).keys()) #Removed duplicates from the list
-	return rois_crossed
+    n_points = len(pointsmm)
+    rois_crossed = []
+    for j in range(0, n_points):
+        # store point
+        x = int(pointsmm[j, 0] / float(voxelSize[0]))
+        y = int(pointsmm[j, 1] / float(voxelSize[1]))
+        z = int(pointsmm[j, 2] / float(voxelSize[2]))
+        if not roiData[x, y, z] == 0:
+            rois_crossed.append(roiData[x, y, z])
+    rois_crossed = list(dict.fromkeys(rois_crossed).keys()) #Removed duplicates from the list
+    return rois_crossed
 
 def get_connectivity_matrix(n_rois, list_of_roi_crossed_lists):
-	connectivity_matrix = np.zeros((n_rois, n_rois), dtype=np.uint)
-	for rois_crossed in list_of_roi_crossed_lists:
-		for idx_i, roi_i in enumerate(rois_crossed):
-			for idx_j, roi_j in enumerate(rois_crossed):
-				if idx_i > idx_j:
-					if not roi_i == roi_j:
-						connectivity_matrix[roi_i - 1, roi_j - 1] += 1
-	connectivity_matrix = connectivity_matrix + connectivity_matrix.T
-	return connectivity_matrix
+    connectivity_matrix = np.zeros((n_rois, n_rois), dtype=np.uint)
+    for rois_crossed in list_of_roi_crossed_lists:
+        for idx_i, roi_i in enumerate(rois_crossed):
+            for idx_j, roi_j in enumerate(rois_crossed):
+                if idx_i > idx_j:
+                    if not roi_i == roi_j:
+                        connectivity_matrix[roi_i - 1, roi_j - 1] += 1
+    connectivity_matrix = connectivity_matrix + connectivity_matrix.T
+    return connectivity_matrix
 
 def create_allpoints_cmat(streamlines, roiData, voxelSize, n_rois):
-	""" Create the intersection arrays for each fiber
-	"""
-	n_fib = len(streamlines)
-	pc = -1
-	# Computation for each fiber
-	final_fiber_ids = []
-	list_of_roi_crossed_lists = []
-	for i, fiber in enumerate(streamlines):
-		pcN = int(round(float(100 * i) / n_fib))
-		if pcN > pc and pcN % 1 == 0:
-			pc = pcN
-			print('%4.0f%%' % (pc))
-		rois_crossed = get_rois_crossed(fiber[0], roiData, voxelSize)
-		if len(rois_crossed) > 0:
-			list_of_roi_crossed_lists.append(list(rois_crossed))
-			final_fiber_ids.append(i)
+    """ Create the intersection arrays for each fiber
+    """
+    n_fib = len(streamlines)
+    pc = -1
+    # Computation for each fiber
+    final_fiber_ids = []
+    list_of_roi_crossed_lists = []
+    for i, fiber in enumerate(streamlines):
+        pcN = int(round(float(100 * i) / n_fib))
+        if pcN > pc and pcN % 1 == 0:
+            pc = pcN
+            print('%4.0f%%' % (pc))
+        rois_crossed = get_rois_crossed(fiber[0], roiData, voxelSize)
+        if len(rois_crossed) > 0:
+            list_of_roi_crossed_lists.append(list(rois_crossed))
+            final_fiber_ids.append(i)
 
-	connectivity_matrix = get_connectivity_matrix(n_rois, list_of_roi_crossed_lists)
-	dis = n_fib - len(final_fiber_ids)
-	iflogger.info("Found %i (%f percent out of %i fibers) fibers that start or terminate in a voxel which is not labeled. (orphans)" % (dis, dis * 100.0 / n_fib, n_fib))
-	iflogger.info("Valid fibers: %i (%f percent)" % (n_fib - dis, 100 - dis * 100.0 / n_fib))
-	iflogger.info('Returning the intersecting point connectivity matrix')
-	return connectivity_matrix, final_fiber_ids
+    connectivity_matrix = get_connectivity_matrix(n_rois, list_of_roi_crossed_lists)
+    dis = n_fib - len(final_fiber_ids)
+    iflogger.info("Found %i (%f percent out of %i fibers) fibers that start or terminate in a voxel which is not labeled. (orphans)" % (dis, dis * 100.0 / n_fib, n_fib))
+    iflogger.info("Valid fibers: %i (%f percent)" % (n_fib - dis, 100 - dis * 100.0 / n_fib))
+    iflogger.info('Returning the intersecting point connectivity matrix')
+    return connectivity_matrix, final_fiber_ids
 
 def create_endpoints_array(fib, voxelSize):
     """ Create the endpoints arrays for each fiber
@@ -729,17 +729,17 @@ class ROIGen(BaseInterface):
         return prefix + '_' + name + '.' + ext
 
 def create_nodes(roi_file, resolution_network_file, out_filename):
-	G = nx.Graph()
-	gp = nx.read_graphml(resolution_network_file)
-	roi_image = nb.load(roi_file)
-	roiData = roi_image.get_data()
-	nROIs = len(gp.nodes())
-	for u, d in gp.nodes_iter(data=True):
-		G.add_node(int(u), d)
-		xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])) , axis=1))
-		G.node[int(u)]['dn_position'] = tuple([xyz[0], xyz[2], -xyz[1]])
-	nx.write_gpickle(G, out_filename)
-	return out_filename
+    G = nx.Graph()
+    gp = nx.read_graphml(resolution_network_file)
+    roi_image = nb.load(roi_file)
+    roiData = roi_image.get_data()
+    nROIs = len(gp.nodes())
+    for u, d in gp.nodes_iter(data=True):
+        G.add_node(int(u), d)
+        xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])) , axis=1))
+        G.node[int(u)]['dn_position'] = tuple([xyz[0], xyz[2], -xyz[1]])
+    nx.write_gpickle(G, out_filename)
+    return out_filename
 
 class CreateNodesInputSpec(BaseInterfaceInputSpec):
     roi_file = File(exists=True, mandatory=True, desc='Region of interest file')
@@ -750,29 +750,29 @@ class CreateNodesOutputSpec(TraitedSpec):
     node_network = File(desc='Output gpickled network with the nodes defined.')
 
 class CreateNodes(BaseInterface):
-	"""
-	Generates a NetworkX graph containing nodes at the centroid of each region in the input ROI file.
-	Node data is added from the resolution network file.
+    """
+    Generates a NetworkX graph containing nodes at the centroid of each region in the input ROI file.
+    Node data is added from the resolution network file.
 
-	Example
-	-------
+    Example
+    -------
 
-	>>> import nipype.interfaces.cmtk as cmtk
-	>>> mknode = cmtk.CreateNodes()
-	>>> mknode.inputs.roi_file = 'ROI_scale500.nii.gz'
-	>>> mknode.run() # doctest: +SKIP
-	"""
+    >>> import nipype.interfaces.cmtk as cmtk
+    >>> mknode = cmtk.CreateNodes()
+    >>> mknode.inputs.roi_file = 'ROI_scale500.nii.gz'
+    >>> mknode.run() # doctest: +SKIP
+    """
 
-	input_spec = CreateNodesInputSpec
-	output_spec = CreateNodesOutputSpec
+    input_spec = CreateNodesInputSpec
+    output_spec = CreateNodesOutputSpec
 
-	def _run_interface(self, runtime):
-		iflogger.info('Creating nodes...')
-		create_nodes(self.inputs.roi_file, self.inputs.resolution_network_file, self.inputs.out_filename)
-		iflogger.info('Saving node network to {path}'.format(path=op.abspath(self.inputs.out_filename)))
-		return runtime
+    def _run_interface(self, runtime):
+        iflogger.info('Creating nodes...')
+        create_nodes(self.inputs.roi_file, self.inputs.resolution_network_file, self.inputs.out_filename)
+        iflogger.info('Saving node network to {path}'.format(path=op.abspath(self.inputs.out_filename)))
+        return runtime
 
-	def _list_outputs(self):
-		outputs = self._outputs().get()
-		outputs['node_network'] = op.abspath(self.inputs.out_filename)
-		return outputs
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['node_network'] = op.abspath(self.inputs.out_filename)
+        return outputs
