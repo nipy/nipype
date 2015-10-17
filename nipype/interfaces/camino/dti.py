@@ -65,7 +65,7 @@ class DTIFit(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_DT.Bdouble'
 
 class DTMetricInputSpec(CommandLineInputSpec):
@@ -158,7 +158,7 @@ class DTMetric(CommandLine):
 
     def _gen_filename(self, name):
         if name == 'outputfile':
-            _, name , _ = split_filename(self.inputs.eigen_data)
+            _, name, _ = split_filename(self.inputs.eigen_data)
             metric = self.inputs.metric
             datatype= self.inputs.outputdatatype
             if isdefined(self.inputs.data_header):
@@ -249,7 +249,7 @@ class ModelFit(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_fit.Bdouble'
 
 class DTLUTGenInputSpec(StdOutCommandLineInputSpec):
@@ -328,7 +328,7 @@ class DTLUTGen(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.scheme_file)
+        _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '.dat'
 
 class PicoPDFsInputSpec(StdOutCommandLineInputSpec):
@@ -389,7 +389,7 @@ class PicoPDFs(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_pdfs.Bdouble'
 
 class TrackInputSpec(CommandLineInputSpec):
@@ -567,7 +567,7 @@ class Track(CommandLine):
         if not isdefined(self.inputs.in_file):
             name = 'bedpostx'
         else:
-            _, name , _ = split_filename(self.inputs.in_file)
+            _, name, _ = split_filename(self.inputs.in_file)
         return name + '_tracked'
 
 class TrackDT(Track):
@@ -846,7 +846,7 @@ class ComputeMeanDiffusivity(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + "_MD.img" #Need to change to self.inputs.outputdatatype
 
 class ComputeFractionalAnisotropyInputSpec(StdOutCommandLineInputSpec):
@@ -905,7 +905,7 @@ class ComputeFractionalAnisotropy(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_FA.Bdouble' #Need to change to self.inputs.outputdatatype
 
 class ComputeTensorTraceInputSpec(StdOutCommandLineInputSpec):
@@ -966,7 +966,7 @@ class ComputeTensorTrace(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_TrD.img' #Need to change to self.inputs.outputdatatype
 
 
@@ -1024,6 +1024,6 @@ class ComputeEigensystem(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         datatype= self.inputs.outputdatatype
         return name + '_eig.B' + datatype

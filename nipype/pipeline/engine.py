@@ -2277,7 +2277,7 @@ class MapNode(Node):
             self._get_inputs()
             self._got_inputs = True
         self._check_iterfield()
-        if self._serial :
+        if self._serial:
             return 1
         else:
             if self.nested:

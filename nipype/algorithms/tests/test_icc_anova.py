@@ -14,7 +14,7 @@ def test_ICC_rep_anova():
                   [10, 5, 6, 9],
                   [6, 2, 4, 7]])
 
-    icc, r_var, e_var , _, dfc, dfe = ICC_rep_anova(Y)
+    icc, r_var, e_var, _, dfc, dfe = ICC_rep_anova(Y)
     #see table 4
     yield assert_equal, round(icc, 2), 0.71
     yield assert_equal, dfc, 3

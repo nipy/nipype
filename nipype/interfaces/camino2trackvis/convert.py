@@ -82,7 +82,7 @@ class Camino2Trackvis(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '.trk'
 
 class Trackvis2CaminoInputSpec(CommandLineInputSpec):
@@ -129,5 +129,5 @@ class Trackvis2Camino(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '.Bfloat'

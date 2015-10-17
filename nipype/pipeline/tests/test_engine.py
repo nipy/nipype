@@ -365,7 +365,7 @@ def test_doubleconnect():
     yield assert_raises, Exception, x
     c = pe.Node(IdentityInterface(fields=['a','b']),name='c')
     flow1 = pe.Workflow(name='test2')
-    x = lambda : flow1.connect([(a, c, [('b', 'b')]), (b, c, [('a', 'b')])])
+    x = lambda: flow1.connect([(a, c, [('b', 'b')]), (b, c, [('a', 'b')])])
     yield assert_raises, Exception, x
 
 

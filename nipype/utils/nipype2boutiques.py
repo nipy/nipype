@@ -24,14 +24,14 @@ def main(argv):
 
     # Parses arguments
     parser = argparse.ArgumentParser(description='Nipype Boutiques exporter. See Boutiques specification at https://github.com/boutiques/schema.', prog=argv[0])
-    parser.add_argument("-i" , "--interface"               , type=str, help="Name of the Nipype interface to export."                       , required=True)
-    parser.add_argument("-m" , "--module"                  , type=str, help="Module where the interface is defined."                        , required=True)
-    parser.add_argument("-o" , "--output"                  , type=str, help="JSON file name where the Boutiques descriptor will be written.", required=True)
-    parser.add_argument("-t" , "--ignored-template-inputs" , type=str, help="Interface inputs ignored in path template creations.", nargs='+')
-    parser.add_argument("-d" , "--docker-image"            , type=str, help="Name of the Docker image where the Nipype interface is available.")
-    parser.add_argument("-r"  , "--docker-index"           , type=str, help="Docker index where the Docker image is stored (e.g. http://index.docker.io).")
-    parser.add_argument("-n" , "--ignore-template-numbers" , action='store_true', default=False, help="Ignore all numbers in path template creations.")
-    parser.add_argument("-v"  , "--verbose"                , action='store_true', default=False, help="Enable verbose output.")
+    parser.add_argument("-i", "--interface", type=str, help="Name of the Nipype interface to export.", required=True)
+    parser.add_argument("-m", "--module", type=str, help="Module where the interface is defined.", required=True)
+    parser.add_argument("-o", "--output", type=str, help="JSON file name where the Boutiques descriptor will be written.", required=True)
+    parser.add_argument("-t", "--ignored-template-inputs", type=str, help="Interface inputs ignored in path template creations.", nargs='+')
+    parser.add_argument("-d", "--docker-image", type=str, help="Name of the Docker image where the Nipype interface is available.")
+    parser.add_argument("-r", "--docker-index", type=str, help="Docker index where the Docker image is stored (e.g. http://index.docker.io).")
+    parser.add_argument("-n", "--ignore-template-numbers", action='store_true', default=False, help="Ignore all numbers in path template creations.")
+    parser.add_argument("-v", "--verbose", action='store_true', default=False, help="Enable verbose output.")
 
     parsed = parser.parse_args()
 
@@ -208,7 +208,7 @@ def get_type_from_spec_info(spec_info):
     '''
     if ("an existing file name" in spec_info) or ("input volumes" in spec_info):
         return "File"
-    elif ("an integer" in spec_info or "a float" in spec_info) :
+    elif ("an integer" in spec_info or "a float" in spec_info):
         return "Number"
     elif "a boolean" in spec_info:
         return "Boolean"

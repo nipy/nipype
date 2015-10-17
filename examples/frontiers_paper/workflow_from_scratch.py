@@ -77,7 +77,7 @@ level1design.inputs.timing_units = 'secs'
 level1design.inputs.interscan_interval = specify_model.inputs.time_repetition
 
 level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
-level1estimate.inputs.estimation_method = {'Classical' : 1}
+level1estimate.inputs.estimation_method = {'Classical': 1}
 
 contrastestimate = pe.Node(interface = spm.EstimateContrast(),
                            name="contrastestimate")

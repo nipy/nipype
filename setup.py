@@ -181,7 +181,7 @@ def package_check(pkg_name, version=None,
     msgs = {
          'missing': 'Cannot import package "%s" - is it installed?',
          'missing opt': 'Missing optional package "%s"',
-         'opt suffix' : '; you may get run-time errors',
+         'opt suffix': '; you may get run-time errors',
          'version too old': 'You have version %s of package "%s"'
                             ' but we need version >= %s', }
     msgs.update(messages)

@@ -233,7 +233,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
                                                           output_names = ['flattened_images','flattened_transforms','flattened_image_nametypes']),
                                                  run_without_submitting=True, name="99_FlattenTransformAndImagesList")
     TemplateBuildSingleIterationWF.connect(inputSpec,'ListOfPassiveImagesDictionaries', FlattenTransformAndImagesListNode, 'ListOfPassiveImagesDictionaries')
-    TemplateBuildSingleIterationWF.connect(MakeTransformsLists ,'out', FlattenTransformAndImagesListNode, 'transformation_series')
+    TemplateBuildSingleIterationWF.connect(MakeTransformsLists,'out', FlattenTransformAndImagesListNode, 'transformation_series')
     wimtPassivedeformed = pe.MapNode(interface = WarpImageMultiTransform(),
                                      iterfield=['transformation_series', 'input_image'],
                                      name ='wimtPassivedeformed')

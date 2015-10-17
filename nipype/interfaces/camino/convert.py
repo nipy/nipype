@@ -60,7 +60,7 @@ class Image2Voxel(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '.B'+ self.inputs.out_type
 
 class FSL2SchemeInputSpec(StdOutCommandLineInputSpec):
@@ -115,7 +115,7 @@ class FSL2Scheme(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.bvec_file)
+        _, name, _ = split_filename(self.inputs.bvec_file)
         return name + '.scheme'
 
 class VtkStreamlinesInputSpec(StdOutCommandLineInputSpec):
@@ -168,7 +168,7 @@ class VtkStreamlines(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '.vtk'
 
 class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
@@ -294,7 +294,7 @@ class ProcStreamlines(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_proc'
 
 class TractShredderInputSpec(StdOutCommandLineInputSpec):
@@ -343,7 +343,7 @@ class TractShredder(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + "_shredded"
 
 class DT2NIfTIInputSpec(CommandLineInputSpec):
@@ -393,7 +393,7 @@ class DT2NIfTI(CommandLine):
 
     def _gen_filename(self, name):
         if name == 'output_root':
-            _, filename , _ = split_filename(self.inputs.in_file)
+            _, filename, _ = split_filename(self.inputs.in_file)
             filename = filename + "_"
         return filename
 
@@ -461,7 +461,7 @@ class NIfTIDT2Camino(CommandLine):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            _, filename , _ = split_filename(self.inputs.in_file)
+            _, filename, _ = split_filename(self.inputs.in_file)
         return filename
 
 class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
@@ -611,7 +611,7 @@ class AnalyzeHeader(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + ".hdr"
 
 class ShredderInputSpec(StdOutCommandLineInputSpec):
@@ -662,5 +662,5 @@ class Shredder(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + "_shredded"

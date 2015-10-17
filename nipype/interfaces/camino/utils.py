@@ -61,5 +61,5 @@ class ImageStats(CommandLine):
     def _gen_outfilename(self):
         output_root = self.inputs.output_root
         first_file = self.inputs.in_files[0]
-        _, _ , ext = split_filename(first_file)
+        _, _, ext = split_filename(first_file)
         return output_root + ext

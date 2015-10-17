@@ -148,7 +148,7 @@ class Conmat(CommandLine):
 
     def _gen_filename(self, name):
         if name == 'output_root':
-            _, filename , _ = split_filename(self.inputs.in_file)
+            _, filename, _ = split_filename(self.inputs.in_file)
             filename = filename + "_"
         return filename
 

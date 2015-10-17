@@ -50,7 +50,7 @@ def make_label_dec(label, ds=None):
         labels = label
     # Validate that the given label(s) are OK for use in setattr() by doing a
     # dry run on a dummy function.
-    tmp = lambda : None
+    tmp = lambda: None
     for label in labels:
         setattr(tmp,label,True)
     # This is the actual decorator we'll return
@@ -88,4 +88,4 @@ def if_datasource(ds, msg):
         ds.get_filename()
     except DataError:
         return skipif(True, msg)
-    return lambda f : f
+    return lambda f: f

@@ -88,7 +88,7 @@ class DWI2SphericalHarmonicsImage(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_SH.mif'
 
 class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
@@ -167,7 +167,7 @@ class ConstrainedSphericalDeconvolution(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_CSD.mif'
 
 class EstimateResponseForSHInputSpec(CommandLineInputSpec):
@@ -217,7 +217,7 @@ class EstimateResponseForSH(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_ER.txt'
 
 def concat_files(bvec_file, bval_file, invert_x, invert_y, invert_z):
@@ -239,8 +239,8 @@ def concat_files(bvec_file, bval_file, invert_x, invert_y, invert_z):
     iflogger.info(np.shape(bvecs))
     iflogger.info(np.shape(bvals))
     encoding = np.transpose(np.vstack((bvecs,bvals)))
-    _, bvec , _ = split_filename(bvec_file)
-    _, bval , _ = split_filename(bval_file)
+    _, bvec, _ = split_filename(bvec_file)
+    _, bval, _ = split_filename(bval_file)
     out_encoding_file = bvec + '_' + bval + '.txt'
     np.savetxt(out_encoding_file, encoding)
     return out_encoding_file
@@ -293,13 +293,13 @@ class FSL2MRTrix(BaseInterface):
             return None
 
     def _gen_outfilename(self):
-        _, bvec , _ = split_filename(self.inputs.bvec_file)
-        _, bval , _ = split_filename(self.inputs.bval_file)
+        _, bvec, _ = split_filename(self.inputs.bvec_file)
+        _, bval, _ = split_filename(self.inputs.bval_file)
         return bvec + '_' + bval + '.txt'
 
 
 class GenerateDirectionsInputSpec(CommandLineInputSpec):
-    num_dirs = traits.Int(mandatory=True, argstr='%s', position=-2 , desc='the number of directions to generate.')
+    num_dirs = traits.Int(mandatory=True, argstr='%s', position=-2, desc='the number of directions to generate.')
 
     power = traits.Float(argstr='-power %s', desc='specify exponent to use for repulsion power law.')
     niter = traits.Int(argstr='-niter %s', desc='specify the maximum number of iterations to perform.')

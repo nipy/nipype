@@ -100,7 +100,7 @@ def sort_copes(files):
 def num_copes(files):
     return len(files)
 
-pickfirst = lambda x : x[0]
+pickfirst = lambda x: x[0]
 
 level1_workflow.connect([(preproc, fixed_fx, [(('outputspec.mask', pickfirst),
                                                'flameo.mask_file')]),

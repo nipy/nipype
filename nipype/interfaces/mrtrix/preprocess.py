@@ -80,7 +80,7 @@ class MRConvert(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         if isdefined(self.inputs.out_filename):
             outname = self.inputs.out_filename
         else:
@@ -188,7 +188,7 @@ class Tensor2Vector(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_vector.mif'
 
 class Tensor2FractionalAnisotropyInputSpec(CommandLineInputSpec):
@@ -233,7 +233,7 @@ class Tensor2FractionalAnisotropy(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_FA.mif'
 
 class Tensor2ApparentDiffusionInputSpec(CommandLineInputSpec):
@@ -278,7 +278,7 @@ class Tensor2ApparentDiffusion(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_ADC.mif'
 
 class MRMultiplyInputSpec(CommandLineInputSpec):
@@ -324,7 +324,7 @@ class MRMultiply(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_files[0])
+        _, name, _ = split_filename(self.inputs.in_files[0])
         return name + '_MRMult.mif'
 
 class MRTrixViewerInputSpec(CommandLineInputSpec):
@@ -424,7 +424,7 @@ class GenerateWhiteMatterMask(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_WMProb.mif'
 
 class ErodeInputSpec(CommandLineInputSpec):
@@ -470,7 +470,7 @@ class Erode(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_erode.mif'
 
 class ThresholdInputSpec(CommandLineInputSpec):
@@ -524,7 +524,7 @@ class Threshold(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_thresh.mif'
 
 class MedianFilter3DInputSpec(CommandLineInputSpec):
@@ -569,7 +569,7 @@ class MedianFilter3D(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_median3D.mif'
 
 class MRTransformInputSpec(CommandLineInputSpec):
@@ -623,5 +623,5 @@ class MRTransform(CommandLine):
         else:
             return None
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_files[0])
+        _, name, _ = split_filename(self.inputs.in_files[0])
         return name + '_MRTransform.mif'

@@ -164,7 +164,7 @@ parameters of the model.
 """
 
 level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
-level1estimate.inputs.estimation_method = {'Classical' : 1}
+level1estimate.inputs.estimation_method = {'Classical': 1}
 
 threshold = pe.Node(interface=spm.Threshold(), name="threshold")
 

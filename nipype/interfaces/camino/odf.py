@@ -86,7 +86,7 @@ class QBallMX(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.scheme_file)
+        _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_qmat.Bdouble'
 
 
@@ -162,7 +162,7 @@ class LinRecon(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.scheme_file)
+        _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_recondata.Bdouble'
 
 class MESDInputSpec(StdOutCommandLineInputSpec):
@@ -283,7 +283,7 @@ class MESD(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.scheme_file)
+        _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_MESD.Bdouble'
 
 class SFPeaksInputSpec(StdOutCommandLineInputSpec):
@@ -427,7 +427,7 @@ class SFPeaks(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_peaks.Bdouble'
 
 

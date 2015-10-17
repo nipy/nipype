@@ -217,7 +217,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
             G.add_node(int(u), d)
             # compute a position for the node based on the mean position of the
             # ROI in voxel coordinates (segmentation volume )
-            xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])) , axis=1))
+            xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])), axis=1))
             G.node[int(u)]['dn_position'] = tuple([xyz[0], xyz[2], -xyz[1]])
 
     if intersections:
@@ -478,7 +478,7 @@ class CreateMatrix(BaseInterface):
             fiber_length_std_matrix_name = op.abspath(self._gen_outfilename('_fiber_length_std.mat'))
 
         if not isdefined(self.inputs.out_endpoint_array_name):
-            _, endpoint_name , _ = split_filename(self.inputs.tract_file)
+            _, endpoint_name, _ = split_filename(self.inputs.tract_file)
             endpoint_name = op.abspath(endpoint_name)
         else:
             endpoint_name = op.abspath(self.inputs.out_endpoint_array_name)
@@ -535,7 +535,7 @@ class CreateMatrix(BaseInterface):
             outputs['fiber_label_file'] = op.abspath(self.inputs.out_endpoint_array_name + '_filtered_fiberslabel.npy')
             outputs['fiber_labels_noorphans'] = op.abspath(self.inputs.out_endpoint_array_name + '_final_fiberslabels.npy')
         else:
-            _, endpoint_name , _ = split_filename(self.inputs.tract_file)
+            _, endpoint_name, _ = split_filename(self.inputs.tract_file)
             outputs['endpoint_file'] = op.abspath(endpoint_name + '_endpoints.npy')
             outputs['endpoint_file_mm'] = op.abspath(endpoint_name + '_endpointsmm.npy')
             outputs['fiber_length_file'] = op.abspath(endpoint_name + '_final_fiberslength.npy')
@@ -561,11 +561,11 @@ class CreateMatrix(BaseInterface):
 
     def _gen_outfilename(self, ext):
         if ext.endswith("mat") and isdefined(self.inputs.out_matrix_mat_file):
-            _, name , _ = split_filename(self.inputs.out_matrix_mat_file)
+            _, name, _ = split_filename(self.inputs.out_matrix_mat_file)
         elif isdefined(self.inputs.out_matrix_file):
-            _, name , _ = split_filename(self.inputs.out_matrix_file)
+            _, name, _ = split_filename(self.inputs.out_matrix_file)
         else:
-            _, name , _ = split_filename(self.inputs.tract_file)
+            _, name, _ = split_filename(self.inputs.tract_file)
         return name + ext
 
 class ROIGenInputSpec(BaseInterfaceInputSpec):
@@ -718,7 +718,7 @@ class ROIGen(BaseInterface):
         return outputs
 
     def _gen_outfilename(self, ext):
-        _, name , _ = split_filename(self.inputs.aparc_aseg_file)
+        _, name, _ = split_filename(self.inputs.aparc_aseg_file)
         if self.inputs.use_freesurfer_LUT:
             prefix = 'fsLUT'
         elif not self.inputs.use_freesurfer_LUT and isdefined(self.inputs.LUT_file):
@@ -736,7 +736,7 @@ def create_nodes(roi_file, resolution_network_file, out_filename):
     nROIs = len(gp.nodes())
     for u, d in gp.nodes_iter(data=True):
         G.add_node(int(u), d)
-        xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])) , axis=1))
+        xyz = tuple(np.mean(np.where(np.flipud(roiData) == int(d["dn_correspondence_id"])), axis=1))
         G.node[int(u)]['dn_position'] = tuple([xyz[0], xyz[2], -xyz[1]])
     nx.write_gpickle(G, out_filename)
     return out_filename

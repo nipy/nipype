@@ -155,7 +155,7 @@ parameters of the model.
 """
 
 level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
-level1estimate.inputs.estimation_method = {'Classical' : 1}
+level1estimate.inputs.estimation_method = {'Classical': 1}
 
 """Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate the
 first level contrasts specified in a few steps above.
@@ -454,7 +454,7 @@ subjects (n=2 in this example).
 # setup a 1-sample t-test node
 onesamplettestdes = pe.Node(interface=spm.OneSampleTTestDesign(), name="onesampttestdes")
 l2estimate = pe.Node(interface=spm.EstimateModel(), name="level2estimate")
-l2estimate.inputs.estimation_method = {'Classical' : 1}
+l2estimate.inputs.estimation_method = {'Classical': 1}
 l2conestimate = pe.Node(interface = spm.EstimateContrast(), name="level2conestimate")
 cont1 = ('Group','T', ['mean'],[1])
 l2conestimate.inputs.contrasts = [cont1]

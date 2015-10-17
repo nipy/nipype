@@ -27,7 +27,7 @@ def test_bunch():
 
 def test_bunch_attribute():
     b = nib.Bunch(a=1,b=[2,3],c=None)
-    yield assert_equal, b.a ,1
+    yield assert_equal, b.a,1
     yield assert_equal, b.b, [2,3]
     yield assert_equal, b.c, None
 
@@ -91,7 +91,7 @@ def test_TraitedSpec():
 
     yield assert_equal, spec().foo, Undefined
     yield assert_equal, spec().goo, 0.0
-    specfunc = lambda x : spec(hoo=x)
+    specfunc = lambda x: spec(hoo=x)
     yield assert_raises, nib.traits.TraitError, specfunc, 1
     infields = spec(foo=1)
     hashval = ([('foo', 1), ('goo', '0.0000000000')], 'e89433b8c9141aa0fda2f8f4d662c047')
@@ -105,11 +105,11 @@ def test_TraitedSpec_dynamic():
     a = nib.BaseTraitedSpec()
     a.add_trait('foo', nib.traits.Int)
     a.foo = 1
-    assign_a = lambda : setattr(a, 'foo', 'a')
+    assign_a = lambda: setattr(a, 'foo', 'a')
     yield assert_raises, Exception, assign_a
     pkld_a = dumps(a)
     unpkld_a = loads(pkld_a)
-    assign_a_again = lambda : setattr(unpkld_a, 'foo', 'a')
+    assign_a_again = lambda: setattr(unpkld_a, 'foo', 'a')
     yield assert_raises, Exception, assign_a_again
 
 def test_TraitedSpec_logic():
@@ -133,7 +133,7 @@ def test_TraitedSpec_logic():
     yield assert_raises, TypeError, setattr(myif.inputs, 'kung', 10.0)
     myif.inputs.foo = 1
     yield assert_equal,  myif.inputs.foo, 1
-    set_bar = lambda : setattr(myif.inputs, 'bar', 1)
+    set_bar = lambda: setattr(myif.inputs, 'bar', 1)
     yield assert_raises, IOError, set_bar
     yield assert_equal, myif.inputs.foo, 1
     myif.inputs.kung = 2
@@ -146,7 +146,7 @@ def test_deprecation():
         class DeprecationSpec1(nib.TraitedSpec):
             foo = nib.traits.Int(deprecated='0.1')
         spec_instance = DeprecationSpec1()
-        set_foo = lambda : setattr(spec_instance, 'foo', 1)
+        set_foo = lambda: setattr(spec_instance, 'foo', 1)
         yield assert_raises, nib.TraitError, set_foo
         yield assert_equal, len(w), 0, 'no warnings, just errors'
 
@@ -156,7 +156,7 @@ def test_deprecation():
         class DeprecationSpec1numeric(nib.TraitedSpec):
             foo = nib.traits.Int(deprecated='0.1')
         spec_instance = DeprecationSpec1numeric()
-        set_foo = lambda : setattr(spec_instance, 'foo', 1)
+        set_foo = lambda: setattr(spec_instance, 'foo', 1)
         yield assert_raises, nib.TraitError, set_foo
         yield assert_equal, len(w), 0, 'no warnings, just errors'
 
@@ -166,7 +166,7 @@ def test_deprecation():
         class DeprecationSpec2(nib.TraitedSpec):
             foo = nib.traits.Int(deprecated='100', new_name='bar')
         spec_instance = DeprecationSpec2()
-        set_foo = lambda : setattr(spec_instance, 'foo', 1)
+        set_foo = lambda: setattr(spec_instance, 'foo', 1)
         yield assert_raises, nib.TraitError, set_foo
         yield assert_equal, len(w), 0, 'no warnings, just errors'
 
@@ -544,7 +544,7 @@ def test_Commandline():
     ci2 = nib.CommandLine(command='which', args='ls')
     yield assert_equal, ci2.cmdline, 'which ls'
     ci3 = nib.CommandLine(command='echo')
-    ci3.inputs.environ = {'MYENV' : 'foo'}
+    ci3.inputs.environ = {'MYENV': 'foo'}
     res = ci3.run()
     yield assert_equal, res.runtime.environ['MYENV'], 'foo'
     yield assert_equal, res.outputs, None
@@ -602,7 +602,7 @@ def test_Commandline_environ():
     res = ci3.run()
     yield assert_false, 'DISPLAY' in ci3.inputs.environ
     yield assert_equal, res.runtime.environ['DISPLAY'], ':3'
-    ci3.inputs.environ = {'DISPLAY' : ':2'}
+    ci3.inputs.environ = {'DISPLAY': ':2'}
     res = ci3.run()
     yield assert_equal, res.runtime.environ['DISPLAY'], ':2'
 

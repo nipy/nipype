@@ -125,7 +125,7 @@ class SFPICOCalibData(StdOutCommandLine):
         return outputs
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.scheme_file)
+        _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_PICOCalib.Bfloat'
 
 

@@ -215,7 +215,7 @@ parameters of the model.
 """
 
 level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
-level1estimate.inputs.estimation_method = {'Classical' : 1}
+level1estimate.inputs.estimation_method = {'Classical': 1}
 
 """
 Use :class:`nipype.interfaces.spm.EstimateContrast` to estimate the

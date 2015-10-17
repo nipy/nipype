@@ -130,7 +130,7 @@ class MeshFix(CommandLine):
             return None
 
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file1)
+        _, name, _ = split_filename(self.inputs.in_file1)
         if self.inputs.save_as_freesurfer_mesh or self.inputs.output_type == 'fs':
             self.inputs.output_type = 'fs'
             self.inputs.save_as_freesurfer_mesh = True
