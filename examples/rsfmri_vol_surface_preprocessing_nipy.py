@@ -832,7 +832,7 @@ def create_workflow(files,
     samplerlh.inputs.sampling_units = "frac"
     samplerlh.inputs.interp_method = "trilinear"
     samplerlh.inputs.smooth_surf = surf_fwhm
-    #samplerlh.inputs.cortex_mask = True
+    # samplerlh.inputs.cortex_mask = True
     samplerlh.inputs.out_type = 'niigz'
     samplerlh.inputs.subjects_dir = subjects_dir
 

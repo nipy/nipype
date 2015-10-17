@@ -19,7 +19,7 @@ def run_examples(example, pipelines, plugin):
             rmtree(wf.base_dir)
         wf.config = {'execution': {'hash_method': 'timestamp', 'stop_on_first_rerun': 'true'}}
         wf.run(plugin=plugin, plugin_args={'n_procs': 4})
-        #run twice to check if nothing is rerunning
+        # run twice to check if nothing is rerunning
         wf.run(plugin=plugin)
 
 if __name__ == '__main__':
@@ -27,8 +27,8 @@ if __name__ == '__main__':
     sys.path.insert(0, os.path.realpath(os.path.join(path, '..', 'examples')))
     examples = {'fmri_fsl_reuse': ['level1_workflow'],
                 'fmri_spm_nested': ['level1', 'l2pipeline'],
-                #'fmri_spm_dartel':['level1','l2pipeline'],
-                #'fmri_fsl_feeds':['l1pipeline']
+                # 'fmri_spm_dartel':['level1','l2pipeline'],
+                # 'fmri_fsl_feeds':['l1pipeline']
                 }
     example = sys.argv[1]
     plugin = sys.argv[2]

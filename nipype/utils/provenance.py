@@ -15,9 +15,9 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 
-#try:
+# try:
 #    import prov.model as pm
-#except ImportError:
+# except ImportError:
 from ..external import provcopy as pm
 from ..external.six import string_types
 

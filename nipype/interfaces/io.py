@@ -1094,11 +1094,11 @@ class DataFinder(IOBase):
     _always_run = True
 
     def _match_path(self, target_path):
-        #Check if we should ignore the path
+        # Check if we should ignore the path
         for ignore_re in self.ignore_regexes:
             if ignore_re.search(target_path):
                 return
-        #Check if we can match the path
+        # Check if we can match the path
         match = self.match_regex.search(target_path)
         if not match is None:
             match_dict = match.groupdict()
@@ -1111,7 +1111,7 @@ class DataFinder(IOBase):
                 self.result[key].append(val)
 
     def _run_interface(self, runtime):
-        #Prepare some of the inputs
+        # Prepare some of the inputs
         if isinstance(self.inputs.root_paths, string_types):
             self.inputs.root_paths = [self.inputs.root_paths]
         self.match_regex = re.compile(self.inputs.match_regex)
@@ -1131,24 +1131,24 @@ class DataFinder(IOBase):
                  for regex in self.inputs.ignore_regexes]
         self.result = None
         for root_path in self.inputs.root_paths:
-            #Handle tilda/env variables and remove extra seperators
+            # Handle tilda/env variables and remove extra seperators
             root_path = os.path.normpath(os.path.expandvars(os.path.expanduser(root_path)))
-            #Check if the root_path is a file
+            # Check if the root_path is a file
             if os.path.isfile(root_path):
                 if min_depth == 0:
                     self._match_path(root_path)
                 continue
-            #Walk through directory structure checking paths
+            # Walk through directory structure checking paths
             for curr_dir, sub_dirs, files in os.walk(root_path):
-                #Determine the current depth from the root_path
+                # Determine the current depth from the root_path
                 curr_depth = (curr_dir.count(os.sep) -
                               root_path.count(os.sep))
-                #If the max path depth has been reached, clear sub_dirs
-                #and files
+                # If the max path depth has been reached, clear sub_dirs
+                # and files
                 if max_depth is not None and curr_depth >= max_depth:
                     sub_dirs[:] = []
                     files = []
-                #Test the path for the curr_dir and all files
+                # Test the path for the curr_dir and all files
                 if curr_depth >= min_depth:
                     self._match_path(curr_dir)
                 if curr_depth >= (min_depth - 1):
@@ -1161,7 +1161,7 @@ class DataFinder(IOBase):
             for key, vals in self.result.items():
                 self.result[key] = vals[0]
         else:
-            #sort all keys acording to out_paths
+            # sort all keys acording to out_paths
             for key in list(self.result.keys()):
                 if key == "out_paths":
                     continue
@@ -1419,7 +1419,7 @@ class XNATSource(IOBase):
                             desc="arguments that fit into query_template")
             )
             undefined_traits['field_template'] = Undefined
-            #self.inputs.remove_trait('query_template_args')
+            # self.inputs.remove_trait('query_template_args')
             outdict = {}
             for key in outfields:
                 outdict[key] = []

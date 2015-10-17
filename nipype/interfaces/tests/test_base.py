@@ -65,11 +65,11 @@ def test_bunch_hash():
 
 
 # create a temp file
-#global tmp_infile, tmp_dir
-#tmp_infile = None
-#tmp_dir = None
+# global tmp_infile, tmp_dir
+# tmp_infile = None
+# tmp_dir = None
 def setup_file():
-    #global tmp_infile, tmp_dir
+    # global tmp_infile, tmp_dir
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo.txt')
     with open(tmp_infile, 'w') as fp:
@@ -96,7 +96,7 @@ def test_TraitedSpec():
     infields = spec(foo=1)
     hashval = ([('foo', 1), ('goo', '0.0000000000')], 'e89433b8c9141aa0fda2f8f4d662c047')
     yield assert_equal, infields.get_hashval(), hashval
-    #yield assert_equal, infields.hashval[1], hashval[1]
+    # yield assert_equal, infields.hashval[1], hashval[1]
     yield assert_equal, infields.__repr__(), '\nfoo = 1\ngoo = 0.0\n'
 
 @skip

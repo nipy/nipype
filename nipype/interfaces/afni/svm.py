@@ -25,7 +25,7 @@ from nipype.interfaces.base import CommandLineInputSpec, CommandLine,\
 warn = warnings.warn
 
 class SVMTrainInputSpec(AFNICommandInputSpec):
-    #training options
+    # training options
     ttype = traits.Str(desc='tname: classification or regression',
                        argstr='-type %s',
                        mandatory=True)
@@ -105,7 +105,7 @@ class SVMTrain(AFNICommand):
         return super(SVMTrain, self)._format_arg(name, trait_spec, value)
 
 class SVMTestInputSpec(AFNICommandInputSpec):
-    #testing options
+    # testing options
     model = traits.Str(desc='modname is the basename for the brik containing the SVM model',
                        argstr='-model %s',
                        mandatory=True)

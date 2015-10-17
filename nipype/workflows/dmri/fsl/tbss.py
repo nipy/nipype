@@ -67,7 +67,7 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
                           name="getmask2",
                           iterfield=['in_file', 'operand_files'])
 
-#    $FSLDIR/bin/fslmaths FA/${f}_FA_mask -dilD -dilD -sub 1 -abs -add FA/${f}_FA_mask FA/${f}_FA_mask -odt char
+    # $FSLDIR/bin/fslmaths FA/${f}_FA_mask -dilD -dilD -sub 1 -abs -add FA/${f}_FA_mask FA/${f}_FA_mask -odt char
     # Define the tbss1 workflow
     tbss1 = pe.Workflow(name=name)
     tbss1.connect([
@@ -255,17 +255,17 @@ def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton=True):
                        (maskgroup, outputnode, [('out_file', 'mergefa_file')])
                        ])
     else:
-        #$FSLDIR/bin/fslmaths $FSLDIR/data/standard/FMRIB58_FA_1mm -mas mean_FA_mask mean_FA
+        # $FSLDIR/bin/fslmaths $FSLDIR/data/standard/FMRIB58_FA_1mm -mas mean_FA_mask mean_FA
         maskstd = pe.Node(fsl.ImageMaths(op_string="-mas",
                                          suffix="_masked"),
                           name="maskstd")
         maskstd.inputs.in_file = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
 
-        #$FSLDIR/bin/fslmaths mean_FA -bin mean_FA_mask
+        # $FSLDIR/bin/fslmaths mean_FA -bin mean_FA_mask
         binmaskstd = pe.Node(fsl.ImageMaths(op_string="-bin"),
                              name="binmaskstd")
 
-        #$FSLDIR/bin/fslmaths all_FA -mas mean_FA_mask all_FA
+        # $FSLDIR/bin/fslmaths all_FA -mas mean_FA_mask all_FA
         maskgroup2 = pe.Node(fsl.ImageMaths(op_string="-mas",
                                             suffix="_masked"),
                              name="maskgroup2")
@@ -543,12 +543,12 @@ def create_tbss_non_FA(name='tbss_non_FA'):
         applywarp.inputs.ref_file = fsl.Info.standard_image("FMRIB58_FA_1mm.nii.gz")
     # Merge the non FA files into a 4D file
     merge = pe.Node(fsl.Merge(dimension="t"), name="merge")
-    #merged_file="all_FA.nii.gz"
+    # merged_file="all_FA.nii.gz"
     maskgroup = pe.Node(fsl.ImageMaths(op_string="-mas",
                                        suffix="_masked"),
                         name="maskgroup")
     projectfa = pe.Node(fsl.TractSkeleton(project_data=True,
-                                          #projected_data = 'test.nii.gz',
+                                          # projected_data = 'test.nii.gz',
                                           use_cingulum_mask=True
                                           ),
                         name="projectfa")

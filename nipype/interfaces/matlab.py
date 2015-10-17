@@ -166,7 +166,7 @@ class MatlabCommand(CommandLine):
         prescript = self.inputs.prescript
         postscript = self.inputs.postscript
 
-        #postcript takes different default value depending on the mfile argument
+        # postcript takes different default value depending on the mfile argument
         if mfile:
             prescript.insert(0, "fprintf(1,'Executing %s at %s:\\n',mfilename,datestr(now));")
         else:
@@ -175,7 +175,7 @@ class MatlabCommand(CommandLine):
             prescript.append("addpath('%s');\n" % path)
 
         if not mfile:
-            #clean up the code of comments and replace newlines with commas
+            # clean up the code of comments and replace newlines with commas
             script_lines = ','.join([line for line in script_lines.split("\n") if not line.strip().startswith("%")])
 
         script_lines = '\n'.join(prescript)+script_lines+'\n'.join(postscript)

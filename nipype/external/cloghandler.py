@@ -285,7 +285,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                 sfn = "%s.%d" % (self.baseFilename, i)
                 dfn = "%s.%d" % (self.baseFilename, i + 1)
                 if os.path.exists(sfn):
-                    #print "%s -> %s" % (sfn, dfn)
+                    # print "%s -> %s" % (sfn, dfn)
                     if os.path.exists(dfn):
                         os.remove(dfn)
                     os.rename(sfn, dfn)
@@ -293,7 +293,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             if os.path.exists(dfn):
                 os.remove(dfn)
             os.rename(tmpname, dfn)
-            #print "%s -> %s" % (self.baseFilename, dfn)
+            # print "%s -> %s" % (self.baseFilename, dfn)
             self._degrade(False, "Rotation completed")
         finally:
             self._openFile(self.mode)

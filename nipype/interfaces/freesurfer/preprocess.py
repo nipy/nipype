@@ -163,7 +163,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
                             argstr='--in_k_direction %f %f %f',
                             desc='<R direction> <A direction> <S direction>')
     _orientations = ['LAI', 'LIA', 'ALI', 'AIL', 'ILA', 'IAL', 'LAS', 'LSA', 'ALS', 'ASL', 'SLA', 'SAL', 'LPI', 'LIP', 'PLI', 'PIL', 'ILP', 'IPL', 'LPS', 'LSP', 'PLS', 'PSL', 'SLP', 'SPL', 'RAI', 'RIA', 'ARI', 'AIR', 'IRA', 'IAR', 'RAS', 'RSA', 'ARS', 'ASR', 'SRA', 'SAR', 'RPI', 'RIP', 'PRI', 'PIR', 'IRP', 'IPR', 'RPS', 'RSP', 'PRS', 'PSR', 'SRP', 'SPR']
-    #_orientations = [comb for comb in itertools.chain(*[[''.join(c) for c in itertools.permutations(s)] for s in [a+b+c for a in 'LR' for b in 'AP' for c in 'IS']])]
+    # _orientations = [comb for comb in itertools.chain(*[[''.join(c) for c in itertools.permutations(s)] for s in [a+b+c for a in 'LR' for b in 'AP' for c in 'IS']])]
     in_orientation = traits.Enum(_orientations,
                                  argstr='--in_orientation %s',
                                  desc='specify the input orientation')
@@ -648,7 +648,7 @@ class ReconAll(CommandLine):
 
 
     _steps = [
-        #autorecon1
+        # autorecon1
         ('motioncor', ['mri/rawavg.mgz', 'mri/orig.mgz']),
         ('talairach', ['mri/transforms/talairach.auto.xfm',
                        'mri/transforms/talairach.xfm']),
@@ -657,7 +657,7 @@ class ReconAll(CommandLine):
         ('skullstrip',
          ['mri/brainmask.auto.mgz',
           'mri/brainmask.mgz']),
-        #autorecon2
+        # autorecon2
         ('gcareg', ['mri/transforms/talairach.lta']),
         ('canorm', ['mri/norm.mgz']),
         ('careg', ['mri/transforms/talairach.m3z']),
@@ -696,7 +696,7 @@ class ReconAll(CommandLine):
           'surf/rh.inflated.H',
           'surf/lh.inflated.K',
           'surf/rh.inflated.K']),
-        #autorecon3
+        # autorecon3
         ('sphere', ['surf/lh.sphere', 'surf/rh.sphere']),
         ('surfreg', ['surf/lh.sphere.reg', 'surf/rh.sphere.reg']),
         ('jacobian_white', ['surf/lh.jacobian_white',
@@ -781,7 +781,7 @@ class ReconAll(CommandLine):
         subjects_dir = self.inputs.subjects_dir
         if not isdefined(subjects_dir):
             subjects_dir = self._gen_subjects_dir()
-        #cmd = cmd.replace(' -all ', ' -make all ')
+        # cmd = cmd.replace(' -all ', ' -make all ')
         iflogger.info('Overriding recon-all directive')
         flags = []
         directive = 'all'

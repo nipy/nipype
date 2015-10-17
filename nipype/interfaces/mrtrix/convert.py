@@ -178,7 +178,7 @@ class MRTrix2TrackVis(BaseInterface):
         affine = image_file.get_affine()
         out_filename = op.abspath(self.inputs.out_filename)
 
-        #Reads MRTrix tracks
+        # Reads MRTrix tracks
         header, streamlines = read_mrtrix_tracks(self.inputs.in_file, as_generator=True)
         iflogger.info('MRTrix Header:')
         iflogger.info(header)

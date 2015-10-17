@@ -242,8 +242,8 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             newhash = hash_infile(newfile)
         fmlogger.debug("File: %s already exists,%s, copy:%d"
                        % (newfile, newhash, copy))
-    #the following seems unnecessary
-    #if os.name is 'posix' and copy:
+    # the following seems unnecessary
+    # if os.name is 'posix' and copy:
     #    if os.path.lexists(newfile) and os.path.islink(newfile):
     #        os.unlink(newfile)
     #        newhash = None

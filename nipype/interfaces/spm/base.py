@@ -489,7 +489,7 @@ class SPMCommand(BaseInterface):
                                                   (self.jobtype, self.jobname),
                                                   contents[0])
                 else:
-                    #curly brackets
+                    # curly brackets
                     mscript += self._generate_job('jobs{1}.%s{1}.%s{1}' %
                                                   (self.jobtype, self.jobname),
                                                   contents[0])

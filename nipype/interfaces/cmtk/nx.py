@@ -245,12 +245,12 @@ def compute_edge_measures(ntwk):
     """
     iflogger.info('Computing edge measures:')
     measures = {}
-    #iflogger.info('...Computing google matrix...' #Makes really large networks (500k+ edges))
-    #measures['google_matrix'] = nx.google_matrix(ntwk)
-    #iflogger.info('...Computing hub matrix...')
-    #measures['hub_matrix'] = nx.hub_matrix(ntwk)
-    #iflogger.info('...Computing authority matrix...')
-    #measures['authority_matrix'] = nx.authority_matrix(ntwk)
+    # iflogger.info('...Computing google matrix...' #Makes really large networks (500k+ edges))
+    # measures['google_matrix'] = nx.google_matrix(ntwk)
+    # iflogger.info('...Computing hub matrix...')
+    # measures['hub_matrix'] = nx.hub_matrix(ntwk)
+    # iflogger.info('...Computing authority matrix...')
+    # measures['authority_matrix'] = nx.authority_matrix(ntwk)
     return measures
 
 
@@ -307,12 +307,12 @@ def compute_singlevalued_measures(ntwk, weighted=True, calculate_cliques=False):
 
 def compute_network_measures(ntwk):
     measures = {}
-    #iflogger.info('Identifying k-core')
-    #measures['k_core'] = nx.k_core(ntwk)
-    #iflogger.info('Identifying k-shell')
-    #measures['k_shell'] = nx.k_shell(ntwk)
-    #iflogger.info('Identifying k-crust')
-    #measures['k_crust'] = nx.k_crust(ntwk)
+    # iflogger.info('Identifying k-core')
+    # measures['k_core'] = nx.k_core(ntwk)
+    # iflogger.info('Identifying k-shell')
+    # measures['k_shell'] = nx.k_shell(ntwk)
+    # iflogger.info('Identifying k-crust')
+    # measures['k_crust'] = nx.k_crust(ntwk)
     return measures
 
 

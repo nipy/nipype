@@ -20,7 +20,7 @@ class Image2VoxelInputSpec(StdOutCommandLineInputSpec):
     in_file = File(exists=True, argstr='-4dimage %s',
                    mandatory=True, position=1,
                    desc='4d image file')
-#TODO convert list of files on the fly
+# TODO convert list of files on the fly
 #    imagelist = File(exists=True, argstr='-imagelist %s',
 #                    mandatory=True, position=1,
 #                    desc='Name of a file containing a list of 3D images')
@@ -484,8 +484,8 @@ class AnalyzeHeaderInputSpec(StdOutCommandLineInputSpec):
 
     # How do we implement both file and enum (for the program) in one argument?
     # Is this option useful anyway?
-    #-printprogargs <file> <prog>
-    #Prints data dimension (and type, if relevant) arguments for a specific
+    # -printprogargs <file> <prog>
+    # Prints data dimension (and type, if relevant) arguments for a specific
     # Camino program, where prog is one of shredder, scanner2voxel,
     # vcthreshselect, pdview, track.
     printprogargs = File(exists=True, argstr='-printprogargs %s', position=3,

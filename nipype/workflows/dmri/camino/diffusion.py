@@ -115,9 +115,9 @@ def create_camino_dti_pipeline(name="dtiproc"):
     Tracts can also be converted to VTK and OOGL formats, for use in programs such as GeomView and      Paraview, using the following two nodes.
     """
 
-    #vtkstreamlines = pe.Node(interface=camino.VtkStreamlines(), name="vtkstreamlines")
-    #procstreamlines = pe.Node(interface=camino.ProcStreamlines(), name="procstreamlines")
-    #procstreamlines.inputs.outputtracts = 'oogl'
+    # vtkstreamlines = pe.Node(interface=camino.VtkStreamlines(), name="vtkstreamlines")
+    # procstreamlines = pe.Node(interface=camino.ProcStreamlines(), name="procstreamlines")
+    # procstreamlines.inputs.outputtracts = 'oogl'
 
 
     """
@@ -125,7 +125,7 @@ def create_camino_dti_pipeline(name="dtiproc"):
     """
 
     fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(), name='fa')
-    #md = pe.Node(interface=camino.MD(),name='md')
+    # md = pe.Node(interface=camino.MD(),name='md')
     trace = pe.Node(interface=camino.ComputeTensorTrace(), name='trace')
     dteig = pe.Node(interface=camino.ComputeEigensystem(), name='dteig')
 
@@ -133,9 +133,9 @@ def create_camino_dti_pipeline(name="dtiproc"):
     analyzeheader_fa.inputs.datatype = "double"
     analyzeheader_trace = analyzeheader_fa.clone('analyzeheader_trace')
 
-    #analyzeheader_md = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_md")
-    #analyzeheader_md.inputs.datatype = "double"
-    #analyzeheader_trace = analyzeheader_md.clone('analyzeheader_trace')
+    # analyzeheader_md = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_md")
+    # analyzeheader_md.inputs.datatype = "double"
+    # analyzeheader_trace = analyzeheader_md.clone('analyzeheader_trace')
 
     fa2nii = pe.Node(interface=misc.CreateNifti(), name='fa2nii')
     trace2nii = fa2nii.clone("trace2nii")
@@ -184,12 +184,12 @@ def create_camino_dti_pipeline(name="dtiproc"):
 
 
     # Mean diffusivity still appears broken
-    #tractography.connect([(dtifit, md,[("tensor_fitted","in_file")])])
-    #tractography.connect([(md, analyzeheader_md,[("md","in_file")])])
-    #tractography.connect([(inputnode, analyzeheader_md,[(('dwi', get_vox_dims), 'voxel_dims'),
-    #(('dwi', get_data_dims), 'data_dims')])])
-    #This line is commented out because the ProcStreamlines node keeps throwing memory errors
-    #tractography.connect([(track, procstreamlines,[("tracked","in_file")])])
+    # tractography.connect([(dtifit, md,[("tensor_fitted","in_file")])])
+    # tractography.connect([(md, analyzeheader_md,[("md","in_file")])])
+    # tractography.connect([(inputnode, analyzeheader_md,[(('dwi', get_vox_dims), 'voxel_dims'),
+    # (('dwi', get_data_dims), 'data_dims')])])
+    # This line is commented out because the ProcStreamlines node keeps throwing memory errors
+    # tractography.connect([(track, procstreamlines,[("tracked","in_file")])])
 
 
     """

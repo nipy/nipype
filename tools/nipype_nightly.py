@@ -55,7 +55,7 @@ def setup_paths():
     sys.path.insert(0, pkg_path)
     # Needed to add this to my path at one point otherwise import of
     # apigen failed.
-    #sys.path.insert(2, '/home/cburns/src/nipy-sf/nipype/trunk/tools')
+    # sys.path.insert(2, '/home/cburns/src/nipy-sf/nipype/trunk/tools')
 
     # Add networkx, twisted, zope.interface and foolscap.
     # Basically we need to add all the packages we need that are
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     prev_dir = os.path.abspath(os.curdir)
     update_repos()
     build_docs()
-    #push_to_sf()
+    # push_to_sf()
     os.chdir(prev_dir)
 
 

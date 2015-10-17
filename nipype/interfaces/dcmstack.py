@@ -60,8 +60,8 @@ class NiftiGeneratorBase(BaseInterface):
         if self.inputs.out_format:
             out_fmt = self.inputs.out_format
         else:
-            #If no out_format is specified, use a sane default that will work
-            #with the provided meta data.
+            # If no out_format is specified, use a sane default that will work
+            # with the provided meta data.
             out_fmt = []
             if not idx is None:
                 out_fmt.append('%03d' % idx)

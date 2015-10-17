@@ -48,12 +48,12 @@ def run_instance(interface, options):
             if getattr(options, input_name) != None:
                 value = getattr(options, input_name)
                 if not isinstance(value, bool):
-                    #traits cannot cast from string to float or int
+                    # traits cannot cast from string to float or int
                     try:
                         value = float(value)
                     except:
                         pass
-                    #try to cast string input to boolean
+                    # try to cast string input to boolean
                     try:
                         value = str2bool(value)
                     except:

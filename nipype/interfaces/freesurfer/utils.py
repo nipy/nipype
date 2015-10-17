@@ -811,7 +811,7 @@ class MRIsConvertInputSpec(FSTraitedSpec):
 
     in_file = File(exists=True, mandatory=True, position=-2, argstr='%s', desc='File to read/convert')
     out_file = File(argstr='./%s', position=-1, genfile=True, desc='output filename or True to generate one')
-    #Not really sure why the ./ is necessary but the module fails without it
+    # Not really sure why the ./ is necessary but the module fails without it
 
     out_datatype = traits.Enum("ico", "tri", "stl", "vtk", "gii", "mgh", "mgz", mandatory=True,
                                desc="These file formats are supported:  ASCII:       .asc" \

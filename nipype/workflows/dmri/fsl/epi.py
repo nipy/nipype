@@ -350,7 +350,7 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
     vsm = pe.Node(fsl.FUGUE(save_shift=True), name='generate_vsm')
 
     # VSM demean is not anymore present in the epi_reg script
-    #vsm_mean = pe.Node(niu.Function(input_names=['in_file', 'mask_file', 'in_unwarped'], output_names=[
+    # vsm_mean = pe.Node(niu.Function(input_names=['in_file', 'mask_file', 'in_unwarped'], output_names=[
     #                   'out_file'], function=_vsm_remove_mean), name='vsm_mean_shift')
 
     # fugue_epi

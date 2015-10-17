@@ -558,7 +558,7 @@ def test_node_hash():
         pe.logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_true, error_raised
-    #yield assert_true, 'Submit called' in e
+    # yield assert_true, 'Submit called' in e
     # rerun to ensure we have outputs
     w1.run(plugin='Linear')
     # set local check

@@ -80,8 +80,8 @@ class SGEGraphPlugin(GraphPluginBase):
                 node = nodes[idx]
                 node_status_done = node_completed_status(node)
 
-                #if the node itself claims done, then check to ensure all
-                #dependancies are also done
+                # if the node itself claims done, then check to ensure all
+                # dependancies are also done
                 if node_status_done and idx in dependencies:
                     for child_idx in dependencies[idx]:
                         if child_idx in cache_doneness_per_node:
@@ -120,7 +120,7 @@ class SGEGraphPlugin(GraphPluginBase):
                     if idx in dependencies:
                         values = ' '
                         for jobid in dependencies[idx]:
-                            ## Avoid dependancies of done jobs
+                            # Avoid dependancies of done jobs
                             if not self._dont_resubmit_completed_jobs or cache_doneness_per_node[jobid] == False:
                                 values += "${{{0}}},".format(make_job_name(jobid, nodes))
                         if values != ' ':  # i.e. if some jobs were added to dependency list

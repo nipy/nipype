@@ -86,7 +86,7 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.creator):
             a.connectome_meta.set_creator(self.inputs.creator)
         else:
-            #Probably only works on some OSes...
+            # Probably only works on some OSes...
             a.connectome_meta.set_creator(os.getenv('USER'))
 
         if isdefined(self.inputs.email):
@@ -119,7 +119,7 @@ class CFFConverter(BaseInterface):
         if isdefined(self.inputs.graphml_networks):
             for ntwk in self.inputs.graphml_networks:
                 # There must be a better way to deal with the unique name problem
-                #(i.e. tracks and networks can't use the same name, and previously we were pulling them both from the input files)
+                # (i.e. tracks and networks can't use the same name, and previously we were pulling them both from the input files)
                 ntwk_name = 'Network {cnt}'.format(cnt=count)
                 a.add_connectome_network_from_graphml(ntwk_name, ntwk)
                 count += 1

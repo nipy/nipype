@@ -352,7 +352,7 @@ class BaseTraitedSpec(traits.HasTraits):
         # NOTE: In python 2.6, object.__init__ no longer accepts input
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
-        #super(TraitedSpec, self).__init__(*args, **kwargs)
+        # super(TraitedSpec, self).__init__(*args, **kwargs)
         super(BaseTraitedSpec, self).__init__(**kwargs)
         traits.push_exception_handler(reraise_exceptions=True)
         undefined_traits = {}
@@ -764,8 +764,8 @@ class BaseInterface(Interface):
         """
 
         if cls.__doc__:
-            #docstring = cls.__doc__.split('\n')
-            #docstring = [trim(line, '') for line in docstring]
+            # docstring = cls.__doc__.split('\n')
+            # docstring = [trim(line, '') for line in docstring]
             docstring = trim(cls.__doc__).split('\n') + ['']
         else:
             docstring = ['']
@@ -1071,7 +1071,7 @@ class BaseInterface(Interface):
                 if inputs_str != '':
                     e.args += (inputs_str, )
 
-            #exception raising inhibition for special cases
+            # exception raising inhibition for special cases
             import traceback
             runtime.traceback = traceback.format_exc()
             runtime.traceback_args = e.args

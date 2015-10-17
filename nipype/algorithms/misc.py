@@ -1264,7 +1264,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
         return out_files[0]
 
     img_data = np.array([im.get_data() for im in imgs]).astype(np.float32)
-    #img_data[img_data>1.0] = 1.0
+    # img_data[img_data>1.0] = 1.0
     img_data[img_data < 0.0] = 0.0
     weights = np.sum(img_data, axis=0)
 

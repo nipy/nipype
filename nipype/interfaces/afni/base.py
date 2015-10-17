@@ -74,7 +74,7 @@ class Info(object):
         -------
         None
         """
-        #warn(('AFNI has no environment variable that sets filetype '
+        # warn(('AFNI has no environment variable that sets filetype '
         #      'Nipype uses NIFTI_GZ as default'))
         return 'AFNI'
 

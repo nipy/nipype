@@ -139,7 +139,7 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x=F
     outputTraits = []
     outputs_filenames = {}
 
-    #self._outputs_nodes = []
+    # self._outputs_nodes = []
 
     class_string = "\"\"\""
 
@@ -166,13 +166,13 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x=F
 
             longFlagNode = param.getElementsByTagName('longflag')
             if longFlagNode:
-                ## Prefer to use longFlag as name if it is given, rather than the parameter name
+                # Prefer to use longFlag as name if it is given, rather than the parameter name
                 longFlagName = longFlagNode[0].firstChild.nodeValue
-                ## SEM automatically strips prefixed "--" or "-" from from xml before processing
-                ##     we need to replicate that behavior here The following
-                ##     two nodes in xml have the same behavior in the program
-                ##     <longflag>--test</longflag>
-                ##     <longflag>test</longflag>
+                # SEM automatically strips prefixed "--" or "-" from from xml before processing
+                # we need to replicate that behavior here The following
+                # two nodes in xml have the same behavior in the program
+                # <longflag>--test</longflag>
+                # <longflag>test</longflag>
                 longFlagName = longFlagName.lstrip(" -").rstrip(" ")
                 name = longFlagName
                 name = force_to_valid_python_variable_name(name)
@@ -325,7 +325,7 @@ def grab_xml(module, launcher, mipav_hacks=False):
     xmlReturnValue = subprocess.Popen(
         final_command, stdout=subprocess.PIPE, shell=True).communicate()[0]
     if mipav_hacks:
-        #workaround for a jist bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7234&group_id=228&atid=942
+        # workaround for a jist bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7234&group_id=228&atid=942
         new_xml = ""
         replace_closing_tag = False
         for line in xmlReturnValue.splitlines():
@@ -340,7 +340,7 @@ def grab_xml(module, launcher, mipav_hacks=False):
 
         xmlReturnValue = new_xml
 
-        #workaround for a JIST bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7233&group_id=228&atid=942
+        # workaround for a JIST bug https://www.nitrc.org/tracker/index.php?func=detail&aid=7233&group_id=228&atid=942
         if xmlReturnValue.strip().endswith("XML"):
             xmlReturnValue = xmlReturnValue.strip()[:-3]
         if xmlReturnValue.strip().startswith("Error: Unable to set default atlas"):
@@ -380,8 +380,8 @@ def parse_values(values):
 def gen_filename_from_param(param, base):
     fileExtensions = param.getAttribute("fileExtensions")
     if fileExtensions:
-        ## It is possible that multiple file extensions can be specified in a
-        ## comma separated list,  This will extract just the first extension
+        # It is possible that multiple file extensions can be specified in a
+        # comma separated list,  This will extract just the first extension
         firstFileExtension = fileExtensions.split(',')[0]
         ext = firstFileExtension
     else:
@@ -390,14 +390,14 @@ def gen_filename_from_param(param, base):
     return base + ext
 
 if __name__ == "__main__":
-    ## NOTE:  For now either the launcher needs to be found on the default path, or
-    ##        every tool in the modules list must be found on the default path
-    ##        AND calling the module with --xml must be supported and compliant.
+    # NOTE:  For now either the launcher needs to be found on the default path, or
+    # every tool in the modules list must be found on the default path
+    # AND calling the module with --xml must be supported and compliant.
     modules_list = ['MedianImageFilter',
                     'CheckerBoardFilter',
                     'EMSegmentCommandLine',
                     'GrayscaleFillHoleImageFilter',
-                    #'CreateDICOMSeries', #missing channel
+                    # 'CreateDICOMSeries', #missing channel
                     'TractographyLabelMapSeeding',
                     'IntensityDifferenceMetric',
                     'DWIToDTIEstimation',
@@ -456,9 +456,9 @@ if __name__ == "__main__":
                     'EMSegmentTransformToNewFormat',
                     'BSplineToDeformationField']
 
-    ## SlicerExecutionModel compliant tools that are usually statically built, and don't need the Slicer3 --launcher
+    # SlicerExecutionModel compliant tools that are usually statically built, and don't need the Slicer3 --launcher
     generate_all_classes(modules_list=modules_list, launcher=[])
-    ## Tools compliant with SlicerExecutionModel called from the Slicer environment (for shared lib compatibility)
-    #launcher = ['/home/raid3/gorgolewski/software/slicer/Slicer', '--launch']
-    #generate_all_classes(modules_list=modules_list, launcher=launcher)
-    #generate_all_classes(modules_list=['BRAINSABC'], launcher=[] )
+    # Tools compliant with SlicerExecutionModel called from the Slicer environment (for shared lib compatibility)
+    # launcher = ['/home/raid3/gorgolewski/software/slicer/Slicer', '--launch']
+    # generate_all_classes(modules_list=modules_list, launcher=launcher)
+    # generate_all_classes(modules_list=['BRAINSABC'], launcher=[] )

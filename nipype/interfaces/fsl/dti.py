@@ -587,7 +587,7 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
 
-        #create the subject specific bpx_directory
+        # create the subject specific bpx_directory
         bpx_directory = self._get_bedpostx_dir()
         if not os.path.exists(bpx_directory):
             os.makedirs(bpx_directory)
@@ -695,7 +695,7 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
     correct_path_distribution = traits.Bool(desc='correct path distribution for the length of the pathways',
                                             argstr='--pd')
     os2t = traits.Bool(desc='Outputs seeds to targets', argstr='--os2t')
-    #paths_file = File('nipype_fdtpaths', usedefault=True, argstr='--out=%s',
+    # paths_file = File('nipype_fdtpaths', usedefault=True, argstr='--out=%s',
     #                 desc='produces an output file (default is fdt_paths)')
     avoid_mp = File(exists=True, desc='reject pathways passing through locations given by this mask',
                     argstr='--avoid=%s')
@@ -835,7 +835,7 @@ class ProbTrackX(FSLCommand):
             out_dir = self.inputs.out_dir
 
         outputs['log'] = os.path.abspath(os.path.join(out_dir, 'probtrackx.log'))
-        #utputs['way_total'] = os.path.abspath(os.path.join(out_dir, 'waytotal'))
+        # utputs['way_total'] = os.path.abspath(os.path.join(out_dir, 'waytotal'))
         if isdefined(self.inputs.opd == True):
             if isinstance(self.inputs.seed, list) and isinstance(self.inputs.seed[0], list):
                 outputs['fdt_paths'] = []

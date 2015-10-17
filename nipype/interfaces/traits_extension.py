@@ -113,9 +113,9 @@ class File (BaseFile):
         super(File, self).__init__(value, filter, auto_set, entries, exists,
                                       **metadata)
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 #  'BaseDirectory' and 'Directory' traits:
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 class BaseDirectory (traits.BaseStr):
     """ Defines a trait whose value must be the name of a directory.

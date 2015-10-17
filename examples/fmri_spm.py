@@ -21,7 +21,7 @@ from builtins import range
 import os                                    # system functions
 
 from nipype import config
-#config.enable_provenance()
+# config.enable_provenance()
 
 from nipype.interfaces import spm, fsl
 

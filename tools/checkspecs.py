@@ -171,7 +171,7 @@ class InterfaceChecker(object):
         # get the names of all classes and functions
         _, classes = self._parse_module(uri)
         if not classes:
-            #print 'WARNING: Empty -',uri  # dbg
+            # print 'WARNING: Empty -',uri  # dbg
             return None
 
         # Make a shorter version of the uri that omits the package name for

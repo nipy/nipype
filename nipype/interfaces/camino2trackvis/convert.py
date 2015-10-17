@@ -32,7 +32,7 @@ class Camino2TrackvisInputSpec(CommandLineInputSpec):
                              mandatory=True, position=5, minlen=3, maxlen=3,
                              desc='Three comma-separated numbers giving the size of each voxel in mm.')
 
-    #Change to enum with all combinations? i.e. LAS, LPI, RAS, etc..
+    # Change to enum with all combinations? i.e. LAS, LPI, RAS, etc..
     voxel_order = File(argstr='--voxel-order %s', mandatory=True, position=6,
                        desc='Set the order in which various directions were stored.\
         Specify with three letters consisting of one each  \

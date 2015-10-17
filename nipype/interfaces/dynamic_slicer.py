@@ -99,10 +99,10 @@ class SlicerCommandLine(CommandLine):
                     self.inputs.add_trait(name, traits.Either(traits.Bool, File, **traitsParams))
                     undefined_traits[name] = Undefined
 
-                    #traitsParams["exists"] = True
+                    # traitsParams["exists"] = True
                     self._outputs_filenames[name] = self._gen_filename_from_param(param)
-                    #undefined_output_traits[name] = Undefined
-                    #self._outputs().add_trait(name, File(*values, **traitsParams))
+                    # undefined_output_traits[name] = Undefined
+                    # self._outputs().add_trait(name, File(*values, **traitsParams))
                     self._outputs_nodes.append(param)
                 else:
                     if param.nodeName in ['file', 'directory', 'image', 'transform']:
@@ -113,7 +113,7 @@ class SlicerCommandLine(CommandLine):
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
         for name in list(undefined_traits.keys()):
             _ = getattr(self.inputs, name)
-        #self._outputs().trait_set(trait_change_notify=False, **undefined_output_traits)
+        # self._outputs().trait_set(trait_change_notify=False, **undefined_output_traits)
 
 
     def _gen_filename(self, name):

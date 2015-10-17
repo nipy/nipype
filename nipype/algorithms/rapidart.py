@@ -55,7 +55,7 @@ def _get_affine_matrix(params, source):
         # nipy does not store typical euler angles, use nipy to convert
         from nipy.algorithms.registration import to_matrix44
         return to_matrix44(params)
-    #process for FSL, SPM, AFNI and FSFAST
+    # process for FSL, SPM, AFNI and FSFAST
     rotfunc = lambda x: np.array([[np.cos(x), np.sin(x)],
                                   [-np.sin(x), np.cos(x)]])
     q = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0])

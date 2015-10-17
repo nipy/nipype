@@ -33,7 +33,7 @@ def test_coherence_analysis():
     import nitime.analysis as nta
     import nitime.timeseries as ts
 
-    #This is the nipype interface analysis:
+    # This is the nipype interface analysis:
     CA = nitime.CoherenceAnalyzer()
     CA.inputs.TR = 1.89
     CA.inputs.in_file = example_data('fmri_timeseries.csv')
@@ -46,7 +46,7 @@ def test_coherence_analysis():
     o = CA.run()
     yield assert_equal, o.outputs.coherence_array.shape, (31, 31)
 
-    #This is the nitime analysis:
+    # This is the nitime analysis:
     TR = 1.89
     data_rec = np.recfromcsv(example_data('fmri_timeseries.csv'))
     roi_names = np.array(data_rec.dtype.names)
@@ -68,7 +68,7 @@ def test_coherence_analysis():
     freq_idx = np.where((C.frequencies > CA.inputs.frequency_range[0]) *
                         (C.frequencies < CA.inputs.frequency_range[1]))[0]
 
-    #Extract the coherence and average across these frequency bands:
+    # Extract the coherence and average across these frequency bands:
     coh = np.mean(C.coherence[:, :, freq_idx], -1)  # Averaging on the last dimension
 
     yield assert_equal, o.outputs.coherence_array, coh

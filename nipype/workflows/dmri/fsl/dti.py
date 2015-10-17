@@ -7,7 +7,7 @@ from ....interfaces import utility as niu
 from ....interfaces import fsl
 from ....algorithms import misc
 
-#backwards compatibility
+# backwards compatibility
 from .epi import create_eddy_correct_pipeline
 
 
@@ -100,7 +100,7 @@ def create_bedpostx_pipeline(name='bedpostx', params={'n_fibres': 2, 'fudge': 1,
     wf.connect([
         (mms['thsamples'], make_dyads, [('outputnode.merged', 'theta_vol')]),
         (mms['phsamples'], make_dyads, [('outputnode.merged', 'phi_vol')]),
-        #(xfibres, m_mdsamples,  [('mean_dsamples', 'in_files')]),
+        # (xfibres, m_mdsamples,  [('mean_dsamples', 'in_files')]),
         (make_dyads, outputnode, [('dyads', 'dyads'),
                                   ('dispersion', 'dyads_disp')])
     ])
@@ -228,7 +228,7 @@ def bedpostx_parallel(name='bedpostx_parallel',
         wf.connect([
             (mms['thsamples'], make_dyads, [('outputnode.merged', 'theta_vol')]),
             (mms['phsamples'], make_dyads, [('outputnode.merged', 'phi_vol')]),
-            #(xfibres, m_mdsamples,  [('mean_dsamples', 'in_files')]),
+            # (xfibres, m_mdsamples,  [('mean_dsamples', 'in_files')]),
             (make_dyads, outputnode, [('dispersion', 'dyads_disp')])
         ])
 

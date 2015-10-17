@@ -107,9 +107,9 @@ def setup(app, get_doc_object_=get_doc_object):
     app.add_domain(NumpyPythonDomain)
     app.add_domain(NumpyCDomain)
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Docstring-mangling domains
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 from docutils.statemachine import ViewList
 from sphinx.domains.c import CDomain

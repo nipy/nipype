@@ -26,7 +26,7 @@ class Logging(object):
         self._config = config
         logging.basicConfig(format=self.fmt, datefmt=self.datefmt,
                             stream=sys.stdout)
-        #logging.basicConfig(stream=sys.stdout)
+        # logging.basicConfig(stream=sys.stdout)
         self._logger = logging.getLogger('workflow')
         self._fmlogger = logging.getLogger('filemanip')
         self._iflogger = logging.getLogger('interface')

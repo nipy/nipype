@@ -36,15 +36,15 @@ else:
 
 class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
 
-    #Input either csv file, or time-series object and use _xor_inputs to
-    #discriminate
+    # Input either csv file, or time-series object and use _xor_inputs to
+    # discriminate
     _xor_inputs = ('in_file', 'in_TS')
     in_file = File(desc=('csv file with ROIs on the columns and '
                          'time-points on the rows. ROI names at the top row'),
                    exists=True,
                    requires=('TR',))
 
-    #If you gave just a file name, you need to specify the sampling_rate:
+    # If you gave just a file name, you need to specify the sampling_rate:
     TR = traits.Float(desc=('The TR used to collect the data'
                             'in your csv file <in_file>'))
 
@@ -110,13 +110,13 @@ class CoherenceAnalyzer(BaseInterface):
         (TRs) will becomes the second (and last) dimension of the array
 
         """
-        #Check that input conforms to expectations:
+        # Check that input conforms to expectations:
         first_row = open(self.inputs.in_file).readline()
         if not first_row[1].isalpha():
             raise ValueError("First row of in_file should contain ROI names as strings of characters")
 
         roi_names = open(self.inputs.in_file).readline().replace('\"', '').strip('\n').split(',')
-        #Transpose, so that the time is the last dimension:
+        # Transpose, so that the time is the last dimension:
         data = np.loadtxt(self.inputs.in_file, skiprows=1, delimiter=',').T
 
         return data, roi_names
@@ -133,7 +133,7 @@ class CoherenceAnalyzer(BaseInterface):
 
         return TS
 
-    #Rewrite _run_interface, but not run
+    # Rewrite _run_interface, but not run
     def _run_interface(self, runtime):
         lb, ub = self.inputs.frequency_range
 
@@ -159,27 +159,27 @@ class CoherenceAnalyzer(BaseInterface):
         freq_idx = np.where((A.frequencies > self.inputs.frequency_range[0]) *
                             (A.frequencies < self.inputs.frequency_range[1]))[0]
 
-        #Get the coherence matrix from the analyzer, averaging on the last
-        #(frequency) dimension: (roi X roi array)
+        # Get the coherence matrix from the analyzer, averaging on the last
+        # (frequency) dimension: (roi X roi array)
         self.coherence = np.mean(A.coherence[:, :, freq_idx], -1)
         # Get the time delay from analyzer, (roi X roi array)
         self.delay = np.mean(A.delay[:, :, freq_idx], -1)
         return runtime
 
-    #Rewrite _list_outputs (look at BET)
+    # Rewrite _list_outputs (look at BET)
     def _list_outputs(self):
         outputs = self.output_spec().get()
 
-        #if isdefined(self.inputs.output_csv_file):
+        # if isdefined(self.inputs.output_csv_file):
 
-        #write to a csv file and assign a value to self.coherence_file (a
-        #file name + path)
+        # write to a csv file and assign a value to self.coherence_file (a
+        # file name + path)
 
-        #Always defined (the arrays):
+        # Always defined (the arrays):
         outputs['coherence_array'] = self.coherence
         outputs['timedelay_array'] = self.delay
 
-        #Conditional
+        # Conditional
         if isdefined(self.inputs.output_csv_file) and hasattr(self, 'coherence'):
             # we need to make a function that we call here that writes the
             # coherence values to this file "coherence_csv" and makes the

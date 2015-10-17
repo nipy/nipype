@@ -269,7 +269,7 @@ class InterfaceHelpWriter(object):
         # Make a shorter version of the uri that omits the package name for
         # titles
         uri_short = re.sub(r'^%s\.' % self.package_name, '', uri)
-        #uri_short = uri
+        # uri_short = uri
 
         ad = '.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n'
 
@@ -279,13 +279,13 @@ class InterfaceHelpWriter(object):
 
         # Set the chapter title to read 'module' for all modules except for the
         # main packages
-        #if '.' in uri:
+        # if '.' in uri:
         #    title = 'Module: :mod:`' + uri_short + '`'
-        #else:
+        # else:
         #    title = ':mod:`' + uri_short + '`'
-        #ad += title + '\n' + self.rst_section_levels[2] * len(title)
+        # ad += title + '\n' + self.rst_section_levels[2] * len(title)
 
-        #ad += '\n' + 'Classes' + '\n' + \
+        # ad += '\n' + 'Classes' + '\n' + \
         #    self.rst_section_levels[2] * 7 + '\n'
         for c in classes:
             __import__(uri)

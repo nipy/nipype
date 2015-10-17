@@ -117,9 +117,9 @@ class EditTransform(BaseInterface):
             dirs = ' '.join(['%0.4f' % f for f in affine[0:3, 0:3].reshape(-1)])
             orig = ' '.join(['%0.4f' % f for f in affine[0:3, 3].reshape(-1)])
 
-            #p = re.compile((self._pattern % 'Direction').decode('string-escape'))
-            #rep = '(\g<entry>%s\g<3>' % dirs
-            #contents = p.sub(rep, contents)
+            # p = re.compile((self._pattern % 'Direction').decode('string-escape'))
+            # rep = '(\g<entry>%s\g<3>' % dirs
+            # contents = p.sub(rep, contents)
 
             p = re.compile((self._pattern % 'Origin').decode('string-escape'))
             rep = '(\g<entry>%s\g<3>' % orig

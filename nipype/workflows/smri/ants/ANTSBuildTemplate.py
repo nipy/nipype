@@ -1,12 +1,12 @@
 #################################################################################
-## Program:   Build Template Parallel
-## Language:  Python
+# Program:   Build Template Parallel
+# Language:  Python
 ##
-## Authors:  Jessica Forbes, Grace Murray, and Hans Johnson, University of Iowa
+# Authors:  Jessica Forbes, Grace Murray, and Hans Johnson, University of Iowa
 ##
-##      This software is distributed WITHOUT ANY WARRANTY; without even
-##      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-##      PURPOSE.
+# This software is distributed WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+# PURPOSE.
 ##
 #################################################################################
 from __future__ import print_function
@@ -42,7 +42,7 @@ def RenestDeformedPassiveImages(deformedPassiveImages, flattened_image_nametypes
     nested_imagetype_list = list()
     outputAverageImageName_list = list()
     image_type_list = list()
-    ## make empty_list, this is not efficient, but it works
+    # make empty_list, this is not efficient, but it works
     for name in flattened_image_nametypes:
         image_dictionary_of_lists[name] = list()
     for index in range(0, all_images_size):
@@ -59,17 +59,17 @@ def RenestDeformedPassiveImages(deformedPassiveImages, flattened_image_nametypes
     print("HACK: ", image_type_list)
     return nested_imagetype_list, outputAverageImageName_list, image_type_list
 
-## Utility Function
-## This will make a list of list pairs for defining the concatenation of transforms
-## wp=['wp1.nii','wp2.nii','wp3.nii']
-## af=['af1.mat','af2.mat','af3.mat']
-## ll=map(list,zip(af,wp))
-## ll
-##[['af1.mat', 'wp1.nii'], ['af2.mat', 'wp2.nii'], ['af3.mat', 'wp3.nii']]
+# Utility Function
+# This will make a list of list pairs for defining the concatenation of transforms
+# wp=['wp1.nii','wp2.nii','wp3.nii']
+# af=['af1.mat','af2.mat','af3.mat']
+# ll=map(list,zip(af,wp))
+# ll
+# #[['af1.mat', 'wp1.nii'], ['af2.mat', 'wp2.nii'], ['af3.mat', 'wp3.nii']]
 def MakeListsOfTransformLists(warpTransformList, AffineTransformList):
     return list(map(list, list(zip(warpTransformList, AffineTransformList))))
 
-## Flatten and return equal length transform and images lists.
+# Flatten and return equal length transform and images lists.
 def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries, transformation_series):
     import sys
     print("HACK:  DEBUG: ListOfPassiveImagesDictionaries\n{lpi}\n".format(lpi=ListOfPassiveImagesDictionaries))
@@ -83,7 +83,7 @@ def FlattenTransformAndImagesList(ListOfPassiveImagesDictionaries, transformatio
     flattened_transforms = list()
     passiveImagesCount = len(ListOfPassiveImagesDictionaries[0])
     for subjIndex in range(0, subjCount):
-        #if passiveImagesCount != len(ListOfPassiveImagesDictionaries[subjIndex]):
+        # if passiveImagesCount != len(ListOfPassiveImagesDictionaries[subjIndex]):
         #    print "ERROR:  all image lengths must be equal {0} != {1}".format(passiveImagesCount,len(ListOfPassiveImagesDictionaries[subjIndex]))
         #    sys.exit(-1)
         subjImgDictionary = ListOfPassiveImagesDictionaries[subjIndex]
@@ -120,17 +120,17 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
                                                                  'ListOfPassiveImagesDictionaries']),
                         run_without_submitting=True,
                         name='inputspec')
-    ## HACK: TODO: Need to move all local functions to a common untility file, or at the top of the file so that
-    ##             they do not change due to re-indenting.  Otherwise re-indenting for flow control will trigger
-    ##             their hash to change.
-    ## HACK: TODO: REMOVE 'transforms_list' it is not used.  That will change all the hashes
-    ## HACK: TODO: Need to run all python files through the code beutifiers.  It has gotten pretty ugly.
+    # HACK: TODO: Need to move all local functions to a common untility file, or at the top of the file so that
+    # they do not change due to re-indenting.  Otherwise re-indenting for flow control will trigger
+    # their hash to change.
+    # HACK: TODO: REMOVE 'transforms_list' it is not used.  That will change all the hashes
+    # HACK: TODO: Need to run all python files through the code beutifiers.  It has gotten pretty ugly.
     outputSpec = pe.Node(interface=util.IdentityInterface(fields=['template', 'transforms_list',
                                                                   'passive_deformed_templates']),
                          run_without_submitting=True,
                          name='outputspec')
 
-    ### NOTE MAP NODE! warp each of the original images to the provided fixed_image as the template
+    # NOTE MAP NODE! warp each of the original images to the provided fixed_image as the template
     BeginANTS = pe.MapNode(interface=ANTS(), name='BeginANTS', iterfield=['moving_image'])
     BeginANTS.inputs.dimension = 3
     BeginANTS.inputs.output_transform_prefix = str(iterationPhasePrefix)+'_tfm'
@@ -158,36 +158,36 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     TemplateBuildSingleIterationWF.connect(BeginANTS, 'warp_transform', MakeTransformsLists, 'warpTransformList')
     TemplateBuildSingleIterationWF.connect(BeginANTS, 'affine_transform', MakeTransformsLists, 'AffineTransformList')
 
-    ## Now warp all the input_images images
+    # Now warp all the input_images images
     wimtdeformed = pe.MapNode(interface=WarpImageMultiTransform(),
                               iterfield=['transformation_series', 'input_image'],
                               name='wimtdeformed')
     TemplateBuildSingleIterationWF.connect(inputSpec, 'images', wimtdeformed, 'input_image')
     TemplateBuildSingleIterationWF.connect(MakeTransformsLists, 'out', wimtdeformed, 'transformation_series')
 
-    ##  Shape Update Next =====
-    ## Now  Average All input_images deformed images together to create an updated template average
+    # Shape Update Next =====
+    # Now  Average All input_images deformed images together to create an updated template average
     AvgDeformedImages = pe.Node(interface=AverageImages(), name='AvgDeformedImages')
     AvgDeformedImages.inputs.dimension = 3
     AvgDeformedImages.inputs.output_average_image = str(iterationPhasePrefix)+'.nii.gz'
     AvgDeformedImages.inputs.normalize = True
     TemplateBuildSingleIterationWF.connect(wimtdeformed, "output_image", AvgDeformedImages, 'images')
 
-    ## Now average all affine transforms together
+    # Now average all affine transforms together
     AvgAffineTransform = pe.Node(interface=AverageAffineTransform(), name='AvgAffineTransform')
     AvgAffineTransform.inputs.dimension = 3
     AvgAffineTransform.inputs.output_affine_transform = 'Avererage_'+str(iterationPhasePrefix)+'_Affine.mat'
     TemplateBuildSingleIterationWF.connect(BeginANTS, 'affine_transform', AvgAffineTransform, 'transforms')
 
-    ## Now average the warp fields togther
+    # Now average the warp fields togther
     AvgWarpImages = pe.Node(interface=AverageImages(), name='AvgWarpImages')
     AvgWarpImages.inputs.dimension = 3
     AvgWarpImages.inputs.output_average_image = str(iterationPhasePrefix)+'warp.nii.gz'
     AvgWarpImages.inputs.normalize = True
     TemplateBuildSingleIterationWF.connect(BeginANTS, 'warp_transform', AvgWarpImages, 'images')
 
-    ## Now average the images together
-    ## TODO:  For now GradientStep is set to 0.25 as a hard coded default value.
+    # Now average the images together
+    # TODO:  For now GradientStep is set to 0.25 as a hard coded default value.
     GradientStep = 0.25
     GradientStepWarpImage = pe.Node(interface=MultiplyImages(), name='GradientStepWarpImage')
     GradientStepWarpImage.inputs.dimension = 3
@@ -195,7 +195,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     GradientStepWarpImage.inputs.output_product_image = 'GradientStep0.25_'+str(iterationPhasePrefix)+'_warp.nii.gz'
     TemplateBuildSingleIterationWF.connect(AvgWarpImages, 'output_average_image', GradientStepWarpImage, 'first_input')
 
-    ## Now create the new template shape based on the average of all deformed images
+    # Now create the new template shape based on the average of all deformed images
     UpdateTemplateShape = pe.Node(interface=WarpImageMultiTransform(), name='UpdateTemplateShape')
     UpdateTemplateShape.inputs.invert_affine = [1]
     TemplateBuildSingleIterationWF.connect(AvgDeformedImages, 'output_average_image', UpdateTemplateShape, 'reference_image')
@@ -222,12 +222,12 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
 
     ######
     ######
-    ######  Process all the passive deformed images in a way similar to the main image used for registration
+    # Process all the passive deformed images in a way similar to the main image used for registration
     ######
     ######
     ######
     ##############################################
-    ## Now warp all the ListOfPassiveImagesDictionaries images
+    # Now warp all the ListOfPassiveImagesDictionaries images
     FlattenTransformAndImagesListNode = pe.Node(Function(function=FlattenTransformAndImagesList,
                                                           input_names=['ListOfPassiveImagesDictionaries', 'transformation_series'],
                                                           output_names=['flattened_images', 'flattened_transforms', 'flattened_image_nametypes']),
@@ -247,7 +247,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
                                                run_without_submitting=True, name="99_RenestDeformedPassiveImages")
     TemplateBuildSingleIterationWF.connect(wimtPassivedeformed, 'output_image', RenestDeformedPassiveImagesNode, 'deformedPassiveImages')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_image_nametypes', RenestDeformedPassiveImagesNode, 'flattened_image_nametypes')
-    ## Now  Average All passive input_images deformed images together to create an updated template average
+    # Now  Average All passive input_images deformed images together to create an updated template average
     AvgDeformedPassiveImages = pe.MapNode(interface=AverageImages(),
                                         iterfield=['images', 'output_average_image'],
                                         name='AvgDeformedPassiveImages')
@@ -256,7 +256,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     TemplateBuildSingleIterationWF.connect(RenestDeformedPassiveImagesNode, "nested_imagetype_list", AvgDeformedPassiveImages, 'images')
     TemplateBuildSingleIterationWF.connect(RenestDeformedPassiveImagesNode, "outputAverageImageName_list", AvgDeformedPassiveImages, 'output_average_image')
 
-    ## -- TODO:  Now neeed to reshape all the passive images as well
+    # -- TODO:  Now neeed to reshape all the passive images as well
     ReshapeAveragePassiveImageWithShapeUpdate = pe.MapNode(interface=WarpImageMultiTransform(),
                                                            iterfield=['input_image', 'reference_image', 'out_postfix'],
                                                            name='ReshapeAveragePassiveImageWithShapeUpdate')

@@ -163,8 +163,8 @@ class ApplyTransform(SPMCommand):
         """ %(self.inputs.in_file,
              self.inputs.out_file,
              self.inputs.mat)
-        #img_space = spm_get_space(infile);
-        #spm_get_space(infile, transform.M * img_space);
+        # img_space = spm_get_space(infile);
+        # spm_get_space(infile, transform.M * img_space);
         return script
 
     def _list_outputs(self):

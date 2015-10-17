@@ -44,7 +44,7 @@ class OneTimeProperty(object):
             return self.getter
 
         val = self.getter(obj)
-        #print "** setattr_on_read - loading '%s'" % self.name  # dbg
+        # print "** setattr_on_read - loading '%s'" % self.name  # dbg
         setattr(obj, self.name, val)
         return val
 
@@ -54,7 +54,7 @@ def setattr_on_read(func):
     # - cor_property (copy on read property)
     # - sor_property (set on read property)
     # - prop2attr_on_read
-    #... ?
+    # ... ?
 
     """Decorator to create OneTimeProperty attributes.
 

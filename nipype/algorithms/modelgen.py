@@ -202,7 +202,7 @@ class SpecifyModelInputSpec(BaseInterfaceInputSpec):
                                    desc=("Time between the start of one volume to the start of "
                                          "the next image volume."))
     # Not implemented yet
-    #polynomial_order = traits.Range(0, low=0,
+    # polynomial_order = traits.Range(0, low=0,
     #        desc ="Number of polynomial functions to model high pass filter.")
 
 
@@ -470,7 +470,7 @@ class SpecifySPMModel(SpecifyModel):
                 infoout.durations[j] = (infolist[0].durations[j] *
                                         len(infolist[0].onsets[j]))
         for i, info in enumerate(infolist[1:]):
-            #info.[conditions, tmod] remain the same
+            # info.[conditions, tmod] remain the same
             if info.onsets:
                 for j, val in enumerate(info.onsets):
                     if self.inputs.input_units == 'secs':
@@ -501,11 +501,11 @@ class SpecifySPMModel(SpecifyModel):
                             for key, data in enumerate(val.param):
                                 infoout.pmod[j].param[key].extend(data)
             if hasattr(info, 'regressors') and info.regressors:
-                #assumes same ordering of regressors across different
-                #runs and the same names for the regressors
+                # assumes same ordering of regressors across different
+                # runs and the same names for the regressors
                 for j, v in enumerate(info.regressors):
                     infoout.regressors[j].extend(info.regressors[j])
-            #insert session regressors
+            # insert session regressors
             if not hasattr(infoout, 'regressors') or not infoout.regressors:
                 infoout.regressors = []
             onelist = np.zeros((1, sum(nscans)))
@@ -688,7 +688,7 @@ class SpecifySparseModel(SpecifyModel):
             timeline = np.convolve(timeline, hrf)[0:len(timeline)]
             if isdefined(self.inputs.use_temporal_deriv) and \
                     self.inputs.use_temporal_deriv:
-                #create temporal deriv
+                # create temporal deriv
                 timederiv = np.concatenate(([0], np.diff(timeline)))
         if bplot:
             plt.subplot(4, 1, 3)

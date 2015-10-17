@@ -71,8 +71,8 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
 
     pipeline.connect([(Matlab2CSV_global, MergeCSVFiles_global, [("csv_files", "in_files")])])
     pipeline.connect([(Matlab2CSV_global, MergeCSVFiles_global, [(("csv_files", remove_identical_paths), "column_headings")])])
-    #MergeCSVFiles_global.inputs.row_heading_title = 'metric'
-    #MergeCSVFiles_global.inputs.column_headings = ['average']
+    # MergeCSVFiles_global.inputs.row_heading_title = 'metric'
+    # MergeCSVFiles_global.inputs.column_headings = ['average']
 
     pipeline.connect([(inputnode, MergeCSVFiles_global, [(("extra_field", add_global_to_filename), "out_file")])])
     pipeline.connect([(inputnode, MergeCSVFiles_global, [("extra_field", "extra_field")])])

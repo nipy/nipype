@@ -415,7 +415,7 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
     for n in subgraph.nodes():
         nidx = ids.index(n._hierarchy + n._id)
         for edge in supergraph.in_edges_iter(supernodes[nidx]):
-                #make sure edge is not part of subgraph
+                # make sure edge is not part of subgraph
             if edge[0] not in subgraph.nodes():
                 if n._hierarchy + n._id not in edgeinfo.keys():
                     edgeinfo[n._hierarchy + n._id] = []
@@ -755,7 +755,7 @@ def generate_expanded_graph(graph_in):
                     logger.debug("Connected the join node %s subgraph to the"
                                  " expanded join point %s" % (jnode, in_node))
 
-        #nx.write_dot(graph_in, '%s_post.dot' % node)
+        # nx.write_dot(graph_in, '%s_post.dot' % node)
         # the remaining iterable nodes
         inodes = _iterable_nodes(graph_in)
 

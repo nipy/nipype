@@ -410,7 +410,7 @@ connected.
                                                  destnode,
                                                  edge_data)])
                 else:
-                    #pass
+                    # pass
                     logger.debug('Removing connection: %s->%s' % (srcnode,
                                                                   destnode))
                     self._graph.remove_edges_from([(srcnode, destnode)])
@@ -757,7 +757,7 @@ connected.
         template = '%%0%dd_' % np.ceil(np.log10(len(nodes))).astype(int)
         def getname(u, i):
             name_parts = u.fullname.split('.')
-            #return '.'.join(name_parts[:-1] + [template % i + name_parts[-1]])
+            # return '.'.join(name_parts[:-1] + [template % i + name_parts[-1]])
             return template % i + name_parts[-1]
         json_dict = []
         for i, node in enumerate(nodes):
@@ -1005,7 +1005,7 @@ connected.
                         self.disconnect(node, cd[0], v, cd[1])
                         self.connect(srcnode, srcout, dstnode, dstin)
                 # expand the workflow node
-                #logger.debug('expanding workflow: %s', node)
+                # logger.debug('expanding workflow: %s', node)
                 node._generate_flatgraph()
                 for innernode in node._graph.nodes():
                     innernode._hierarchy = '.'.join((self.name,

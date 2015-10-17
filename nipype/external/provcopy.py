@@ -1210,13 +1210,13 @@ class ProvMention(ProvSpecialization):
         specificEntity = self.required_attribute(attributes, PROV_ATTR_SPECIFIC_ENTITY, (ProvEntity, ProvAgent))
         generalEntity = self.required_attribute(attributes, PROV_ATTR_GENERAL_ENTITY, Identifier)
         bundle = self.required_attribute(attributes, PROV_ATTR_BUNDLE, Identifier)
-        #=======================================================================
+        # =======================================================================
         #  # This is disabled so that mentionOf can refer to bundle that is not defined in the same place
         #  bundle = self.required_attribute(attributes, PROV_ATTR_BUNDLE, ProvBundle)
         #  # Check if generalEntity is in the bundle
         #  if generalEntity.get_bundle() is not bundle:
         #    raise ProvExceptionContraint(PROV_REC_MENTION, generalEntity, bundle, 'The generalEntity must belong to the bundle')
-        #=======================================================================
+        # =======================================================================
 
         attributes = OrderedDict()
         attributes[PROV_ATTR_SPECIFIC_ENTITY] = specificEntity

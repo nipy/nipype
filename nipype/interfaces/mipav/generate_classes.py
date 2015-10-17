@@ -2,9 +2,9 @@
 if __name__ == "__main__":
     from nipype.interfaces.slicer.generate_classes import generate_all_classes
 
-    ## NOTE:  For now either the launcher needs to be found on the default path, or
-    ##        every tool in the modules list must be found on the default path
-    ##        AND calling the module with --xml must be supported and compliant.
+    # NOTE:  For now either the launcher needs to be found on the default path, or
+    # every tool in the modules list must be found on the default path
+    # AND calling the module with --xml must be supported and compliant.
     modules_list = ['edu.jhu.bme.smile.demo.RandomVol',
                     'de.mpg.cbs.jist.laminar.JistLaminarProfileCalculator',
                     'de.mpg.cbs.jist.laminar.JistLaminarProfileSampling',
@@ -22,7 +22,7 @@ if __name__ == "__main__":
                           'de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation',
                           'de.mpg.cbs.jist.brain.JistBrainPartialVolumeFilter',
                           'edu.jhu.ece.iacl.plugins.utilities.volume.MedicAlgorithmThresholdToBinaryMask',
-                          #'de.mpg.cbs.jist.cortex.JistCortexFullCRUISE', # waiting for http://www.nitrc.org/tracker/index.php?func=detail&aid=7236&group_id=228&atid=942 to be fixed
+                          # 'de.mpg.cbs.jist.cortex.JistCortexFullCRUISE', # waiting for http://www.nitrc.org/tracker/index.php?func=detail&aid=7236&group_id=228&atid=942 to be fixed
                           'de.mpg.cbs.jist.cortex.JistCortexSurfaceMeshInflation']
 
     modules_from_julia = ['de.mpg.cbs.jist.intensity.JistIntensityMp2rageMasking',

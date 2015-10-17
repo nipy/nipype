@@ -458,8 +458,8 @@ def create_fs_reg_workflow(name='registration'):
     warpmean.inputs.invert_transform_flags = [False, False]
     warpmean.inputs.terminal_output = 'file'
     warpmean.inputs.args = '--float'
-    #warpmean.inputs.num_threads = 4
-    #warpmean.plugin_args = {'sbatch_args': '--mem=4G -c 4'}
+    # warpmean.inputs.num_threads = 4
+    # warpmean.plugin_args = {'sbatch_args': '--mem=4G -c 4'}
 
     """
     Transform the remaining images. First to anatomical and then to target
@@ -1109,7 +1109,7 @@ if __name__ == '__main__':
                                   fwhm=args.fwhm,
                                   subjects_dir=args.subjects_dir,
                                   target=args.target_file)
-    #wf.config['execution']['remove_unnecessary_outputs'] = False
+    # wf.config['execution']['remove_unnecessary_outputs'] = False
 
     wf.base_dir = work_dir
     if args.plugin_args:

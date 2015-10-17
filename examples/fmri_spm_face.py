@@ -87,7 +87,7 @@ segment.inputs.save_bias_corrected = True
 """Uncomment the following line for faster execution
 """
 
-#segment.inputs.gaussians_per_class = [1, 1, 1, 4]
+# segment.inputs.gaussians_per_class = [1, 1, 1, 4]
 
 """Warp functional and structural data to SPM's T1 template using
 :class:`nipype.interfaces.spm.Normalize`.  The tutorial data set
@@ -352,7 +352,7 @@ The following lines automatically inform SPM to create a default set of
 contrats for a factorial design.
 """
 
-#l1designref.factor_info = [dict(name = 'Fame', levels = 2),
+# l1designref.factor_info = [dict(name = 'Fame', levels = 2),
 #                           dict(name = 'Rep', levels = 2)]
 
 l1pipeline.inputs.analysis.modelspec.subject_info = subjectinfo

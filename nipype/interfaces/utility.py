@@ -84,7 +84,7 @@ class IdentityInterface(IOBase):
         return base
 
     def _list_outputs(self):
-        #manual mandatory inputs check
+        # manual mandatory inputs check
         if self._fields and self._mandatory_inputs:
             for key in self._fields:
                 value = getattr(self.inputs, key)

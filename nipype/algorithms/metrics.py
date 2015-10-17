@@ -418,9 +418,9 @@ class FuzzyOverlap(BaseInterface):
         tst_msk = np.sum(img_tst, axis=0)
         tst_msk[tst_msk > 0] = 1.0
 
-        #check that volumes are normalized
-        #img_ref[:][msk>0] = img_ref[:][msk>0] / (np.sum( img_ref, axis=0 ))[msk>0]
-        #img_tst[tst_msk>0] = img_tst[tst_msk>0] / np.sum( img_tst, axis=0 )[tst_msk>0]
+        # check that volumes are normalized
+        # img_ref[:][msk>0] = img_ref[:][msk>0] / (np.sum( img_ref, axis=0 ))[msk>0]
+        # img_tst[tst_msk>0] = img_tst[tst_msk>0] / np.sum( img_tst, axis=0 )[tst_msk>0]
 
         self._jaccards = []
         volumes = []
@@ -464,7 +464,7 @@ class FuzzyOverlap(BaseInterface):
         outputs = self._outputs().get()
         for method in ("dice", "jaccard"):
             outputs[method] = getattr(self, '_' + method)
-        #outputs['volume_difference'] = self._volume
+        # outputs['volume_difference'] = self._volume
         outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
         outputs['class_fji'] = np.array(self._jaccards).astype(float).tolist();
         outputs['class_fdi'] = self._dices.astype(float).tolist();

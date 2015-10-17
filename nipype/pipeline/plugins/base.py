@@ -68,7 +68,7 @@ def report_crash(node, traceback=None, hostname=None):
     logger.info('Saving crash info to %s' % crashfile)
     logger.info(''.join(traceback))
     savepkl(crashfile, dict(node=node, traceback=traceback))
-    #np.savez(crashfile, node=node, traceback=traceback)
+    # np.savez(crashfile, node=node, traceback=traceback)
     return crashfile
 
 

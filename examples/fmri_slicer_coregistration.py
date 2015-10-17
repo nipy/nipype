@@ -13,7 +13,7 @@ will be fixed in a later release::
 
 """
 
-#raise RuntimeWarning, 'Slicer not fully implmented'
+# raise RuntimeWarning, 'Slicer not fully implmented'
 from nipype.interfaces.slicer import BRAINSFit, BRAINSResample
 
 
