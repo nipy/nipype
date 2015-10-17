@@ -379,7 +379,7 @@ def test_Vec_reg():
     yield assert_equal, results.interface.inputs.affineTmat, 'tmat3.mat'
 
     # test arguments for opt_map
-    opt_map = { 'verbose':           ('-v', True),
+    opt_map = {'verbose':           ('-v', True),
                 'helpDoc':           ('-h', True),
                 'tensor':            ('--tensor', True),
                 'affineTmat':        ('-t Tmat', 'Tmat'),

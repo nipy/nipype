@@ -9,7 +9,7 @@ import numpy as np
 
 import nibabel as nb
 
-from nipype.testing import ( assert_equal, assert_not_equal,
+from nipype.testing import (assert_equal, assert_not_equal,
                              assert_raises, skipif)
 import nipype.interfaces.fsl.epi as fsl
 from nipype.interfaces.fsl import no_fsl

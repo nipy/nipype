@@ -37,17 +37,17 @@ class Analyze2nii(SPMCommand):
         return outputs
 
 class CalcCoregAffineInputSpec(SPMCommandInputSpec):
-    target = File( exists = True, mandatory = True,
+    target = File(exists = True, mandatory = True,
                    desc = 'target for generating affine transform')
-    moving = File( exists = True, mandatory = True, copyfile=False,
+    moving = File(exists = True, mandatory = True, copyfile=False,
                    desc = 'volume transform can be applied to register with target')
-    mat = File( desc = 'Filename used to store affine matrix')
-    invmat = File( desc = 'Filename used to store inverse affine matrix')
+    mat = File(desc = 'Filename used to store affine matrix')
+    invmat = File(desc = 'Filename used to store inverse affine matrix')
 
 
 class CalcCoregAffineOutputSpec(TraitedSpec):
     mat = File(exists = True, desc = 'Matlab file holding transform')
-    invmat = File( desc = 'Matlab file holding inverse transform')
+    invmat = File(desc = 'Matlab file holding inverse transform')
 
 
 class CalcCoregAffine(SPMCommand):
@@ -117,9 +117,9 @@ class CalcCoregAffine(SPMCommand):
         return outputs
 
 class ApplyTransformInputSpec(SPMCommandInputSpec):
-    in_file = File( exists = True, mandatory = True, copyfile=True,
+    in_file = File(exists = True, mandatory = True, copyfile=True,
                     desc='file to apply transform to, (only updates header)')
-    mat = File( exists = True, mandatory = True,
+    mat = File(exists = True, mandatory = True,
                 desc='file holding transform to apply')
     out_file = File(desc="output file name for transformed data",
                     genfile=True)
@@ -180,9 +180,9 @@ class ApplyTransform(SPMCommand):
         return name + '_trans.nii'
 
 class ResliceInputSpec(SPMCommandInputSpec):
-    in_file = File( exists = True, mandatory=True,
+    in_file = File(exists = True, mandatory=True,
                     desc='file to apply transform to, (only updates header)')
-    space_defining = File ( exists = True, mandatory = True,
+    space_defining = File (exists = True, mandatory = True,
                             desc = 'Volume defining space to slice in_file into')
 
     interp = traits.Range(low = 0, high = 7, usedefault = True,
@@ -193,7 +193,7 @@ class ResliceInputSpec(SPMCommandInputSpec):
     out_file = File(desc = 'Optional file to save resliced volume')
 
 class ResliceOutputSpec(TraitedSpec):
-    out_file = File( exists = True, desc = 'resliced volume')
+    out_file = File(exists = True, desc = 'resliced volume')
 
 class Reslice(SPMCommand):
     """ uses  spm_reslice to resample in_file into space of space_defining"""

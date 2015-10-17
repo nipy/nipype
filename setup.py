@@ -294,7 +294,7 @@ def main(**extra_args):
           version=VERSION,
           install_requires=REQUIRES,
           provides=PROVIDES,
-          packages     = [ 'nipype',
+          packages     = ['nipype',
                            'nipype.algorithms',
                            'nipype.algorithms.tests',
                            'nipype.caching',

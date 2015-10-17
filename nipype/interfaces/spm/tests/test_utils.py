@@ -17,26 +17,26 @@ def test_coreg():
     coreg.inputs.target = target
     assert_equal(coreg.inputs.matlab_cmd, 'mymatlab')
     coreg.inputs.moving = moving
-    assert_equal( isdefined(coreg.inputs.mat),False)
+    assert_equal(isdefined(coreg.inputs.mat),False)
     pth, mov, _ = split_filename(moving)
     _, tgt, _ = split_filename(target)
     mat = os.path.join(pth, '%s_to_%s.mat'%(mov,tgt))
     invmat = fname_presuffix(mat, prefix = 'inverse_')
     scrpt = coreg._make_matlab_command(None)
     assert_equal(coreg.inputs.mat, mat)
-    assert_equal( coreg.inputs.invmat, invmat)
+    assert_equal(coreg.inputs.invmat, invmat)
 
 
 def test_apply_transform():
     moving = example_data(infile = 'functional.nii')
     mat = example_data(infile = 'trans.mat')
     applymat = spmu.ApplyTransform(matlab_cmd = 'mymatlab')
-    assert_equal( applymat.inputs.matlab_cmd, 'mymatlab' )
+    assert_equal(applymat.inputs.matlab_cmd, 'mymatlab' )
     applymat.inputs.in_file = moving
     applymat.inputs.mat = mat
     scrpt = applymat._make_matlab_command(None)
     expected = '[p n e v] = spm_fileparts(V.fname);'
-    assert_equal( expected in scrpt, True)
+    assert_equal(expected in scrpt, True)
     expected = 'V.mat = transform.M * V.mat;'
     assert_equal(expected in scrpt, True)
 
@@ -44,10 +44,10 @@ def test_reslice():
     moving = example_data(infile = 'functional.nii')
     space_defining = example_data(infile = 'T1.nii')
     reslice = spmu.Reslice(matlab_cmd = 'mymatlab_version')
-    assert_equal( reslice.inputs.matlab_cmd, 'mymatlab_version')
+    assert_equal(reslice.inputs.matlab_cmd, 'mymatlab_version')
     reslice.inputs.in_file = moving
     reslice.inputs.space_defining = space_defining
-    assert_equal( reslice.inputs.interp, 0)
+    assert_equal(reslice.inputs.interp, 0)
     assert_raises(TraitError,reslice.inputs.trait_set,interp = 'nearest')
     assert_raises(TraitError, reslice.inputs.trait_set, interp = 10)
     reslice.inputs.interp = 1

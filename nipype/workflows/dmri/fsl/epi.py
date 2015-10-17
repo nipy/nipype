@@ -338,10 +338,10 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
         t_size=1, t_min=0), name='select_magnitude')
 
     # Mask magnitude (it is required by PreparedFieldMap)
-    mask_mag = pe.Node( fsl.maths.ApplyMask(), name='mask_magnitude' )
+    mask_mag = pe.Node(fsl.maths.ApplyMask(), name='mask_magnitude' )
 
     # Run fsl_prepare_fieldmap
-    fslprep = pe.Node( fsl.PrepareFieldmap(), name='prepare_fieldmap' )
+    fslprep = pe.Node(fsl.PrepareFieldmap(), name='prepare_fieldmap' )
 
     if nocheck:
         fslprep.inputs.nocheck = True
@@ -395,7 +395,7 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
     return pipeline
 
 
-def topup_correction( name='topup_correction' ):
+def topup_correction(name='topup_correction' ):
     """
 
     .. deprecated:: 0.9.3
@@ -447,7 +447,7 @@ def topup_correction( name='topup_correction' ):
                                 ]), name='inputnode'
                         )
 
-    outputnode = pe.Node( niu.IdentityInterface(
+    outputnode = pe.Node(niu.IdentityInterface(
                           fields=['out_fieldcoef',
                                   'out_movpar',
                                   'out_enc_file',
@@ -455,14 +455,14 @@ def topup_correction( name='topup_correction' ):
                                   ]), name='outputnode'
                           )
 
-    b0_dir = pe.Node( fsl.ExtractROI( t_size=1 ), name='b0_1' )
-    b0_rev = pe.Node( fsl.ExtractROI( t_size=1 ), name='b0_2' )
-    combin = pe.Node( niu.Merge(2), name='merge' )
-    combin2 = pe.Node( niu.Merge(2), name='merge2' )
-    merged = pe.Node( fsl.Merge( dimension='t' ), name='b0_comb' )
+    b0_dir = pe.Node(fsl.ExtractROI(t_size=1 ), name='b0_1' )
+    b0_rev = pe.Node(fsl.ExtractROI(t_size=1 ), name='b0_2' )
+    combin = pe.Node(niu.Merge(2), name='merge' )
+    combin2 = pe.Node(niu.Merge(2), name='merge2' )
+    merged = pe.Node(fsl.Merge(dimension='t' ), name='b0_comb' )
 
-    topup = pe.Node( fsl.TOPUP(), name='topup' )
-    applytopup = pe.Node( fsl.ApplyTOPUP(in_index=[1,2] ), name='applytopup' )
+    topup = pe.Node(fsl.TOPUP(), name='topup' )
+    applytopup = pe.Node(fsl.ApplyTOPUP(in_index=[1,2] ), name='applytopup' )
 
     pipeline.connect([
                       (inputnode,     b0_dir, [('in_file_dir','in_file'),('ref_num','t_min')] ),
@@ -663,7 +663,7 @@ def create_epidewarp_pipeline(name='epidewarp', fieldmap_registration=False):
     else:
         pipeline.connect([
                      (mask_mag_dil, dwi_applyxfm, [('out_file', 'mask_file')]),
-                     ( vsm_mean,     dwi_applyxfm, [('out_file', 'shift_in_file')])
+                     (vsm_mean,     dwi_applyxfm, [('out_file', 'shift_in_file')])
                     ])
 
     return pipeline
@@ -714,7 +714,7 @@ def _compute_dwelltime(dwell_time=0.68, pi_factor=1.0, is_reverse_encoding=False
 
     return dwell_time
 
-def _effective_echospacing( dwell_time, pi_factor=1.0 ):
+def _effective_echospacing(dwell_time, pi_factor=1.0 ):
     dwelltime = 1.0e-3 * dwell_time * (1.0 / pi_factor)
     return dwelltime
 

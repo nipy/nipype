@@ -235,7 +235,7 @@ class MergeCNetworks(BaseInterface):
                 # metadata information
                 ne.load()
                 contitle = mycon.get_connectome_meta().get_title()
-                ne.set_name( str(i) + ': ' + contitle + ' - ' + ne.get_name() )
+                ne.set_name(str(i) + ': ' + contitle + ' - ' + ne.get_name() )
                 ne.set_src(ne.get_name())
                 extracted_networks.append(ne)
 
