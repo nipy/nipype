@@ -246,7 +246,7 @@ class InterfaceChecker(object):
                     if 'parent' in trait.__dict__:
                         parent_metadata = list(getattr(trait, 'parent').__dict__.keys())
                     if key not in allowed_keys + classinst._additional_metadata\
-                        + parent_metadata:
+                            + parent_metadata:
                         bad_specs.append([uri, c, 'Inputs', traitname, key])
                     if key == 'mandatory' and trait.mandatory is not None and not trait.mandatory:
                         bad_specs.append([uri, c, 'Inputs', traitname, 'mandatory=False'])
@@ -361,7 +361,7 @@ class InterfaceChecker(object):
             for dirname in dirnames[:]: # copy list - we modify inplace
                 package_uri = '.'.join((root_uri, dirname))
                 if (self._uri2path(package_uri) and
-                    self._survives_exclude(package_uri, 'package')):
+                        self._survives_exclude(package_uri, 'package')):
                     modules.append(package_uri)
                 else:
                     dirnames.remove(dirname)
@@ -370,7 +370,7 @@ class InterfaceChecker(object):
                 module_name = filename[:-3]
                 module_uri = '.'.join((root_uri, module_name))
                 if (self._uri2path(module_uri) and
-                    self._survives_exclude(module_uri, 'module')):
+                        self._survives_exclude(module_uri, 'module')):
                     modules.append(module_uri)
         return sorted(modules)
 

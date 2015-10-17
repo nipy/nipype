@@ -44,7 +44,7 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
 
     version = 0
     if fsl.Info.version() and \
-        LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
+            LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
         version = 507
 
     modelfit = pe.Workflow(name=name)

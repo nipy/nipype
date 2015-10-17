@@ -45,7 +45,7 @@ import nipype.interfaces.freesurfer as fs
 
 version = 0
 if fsl.Info.version() and \
-    LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
+        LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
     version = 507
 
 fsl.FSLCommand.set_default_output_type('NIFTI_GZ')

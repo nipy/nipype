@@ -13,7 +13,7 @@ class DebugPlugin(PluginBase):
     def __init__(self, plugin_args=None):
         super(DebugPlugin, self).__init__(plugin_args=plugin_args)
         if plugin_args and "callable" in plugin_args and \
-            hasattr(plugin_args['callable'], '__call__'):
+                hasattr(plugin_args['callable'], '__call__'):
             self._callable = plugin_args['callable']
         else:
             raise ValueError('plugin_args must contain a callable function')

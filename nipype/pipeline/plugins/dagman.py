@@ -75,8 +75,8 @@ getenv = True
              ('_block', 'block', False),
              ('_dagman_args', 'dagman_args', '')):
             if 'plugin_args' in kwargs \
-                and not kwargs['plugin_args'] is None \
-                and id_ in kwargs['plugin_args']:
+                    and not kwargs['plugin_args'] is None \
+                    and id_ in kwargs['plugin_args']:
                     if id_ == 'wrapper_cmd':
                         val = os.path.abspath(kwargs['plugin_args'][id_])
                     elif id_ == 'block':
@@ -86,7 +86,7 @@ getenv = True
             setattr(self, var, val)
         # TODO remove after some time
         if 'plugin_args' in kwargs \
-            and not kwargs['plugin_args'] is None:
+                and not kwargs['plugin_args'] is None:
             plugin_args = kwargs['plugin_args']
             if 'template' in plugin_args:
                 warn("the 'template' argument is deprecated, use 'initial_specs' instead")

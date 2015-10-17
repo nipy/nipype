@@ -1822,7 +1822,7 @@ class JoinNode(Node):
     """
 
     def __init__(self, interface, name, joinsource, joinfield=None,
-        unique=False, **kwargs):
+            unique=False, **kwargs):
         """
 
         Parameters
