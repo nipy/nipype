@@ -22,7 +22,7 @@ Import necessary modules from nipype.
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.utility as util     # utility
 import nipype.pipeline.engine as pe          # pypeline engine
-import nipype.interfaces.mrtrix as mrtrix   #<---- The important new part!
+import nipype.interfaces.mrtrix as mrtrix  # <---- The important new part!
 import nipype.interfaces.fsl as fsl
 import nipype.algorithms.misc as misc
 import os, os.path as op                     # system functions

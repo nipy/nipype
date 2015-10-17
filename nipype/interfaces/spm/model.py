@@ -116,7 +116,7 @@ class Level1Design(SPMCommand):
         """
         if opt in ['spm_mat_dir', 'mask_image']:
             return np.array([str(val)], dtype=object)
-        if opt in ['session_info']:  #, 'factor_info']:
+        if opt in ['session_info']:  # , 'factor_info']:
             if isinstance(val, dict):
                 return [val]
             else:
@@ -719,7 +719,7 @@ class FactorialDesignInputSpec(SPMCommandInputSpec):
                                            desc='threshold using a proportion of the global value')
     use_implicit_threshold = traits.Bool(field='masking.im',
                                          desc='use implicit mask NaNs or zeros to threshold')
-    explicit_mask_file = File(field='masking.em',  #requires cell
+    explicit_mask_file = File(field='masking.em',  # requires cell
                               desc='use an implicit mask file to threshold')
     global_calc_omit = traits.Bool(field='globalc.g_omit',
                                    xor=['global_calc_mean', 'global_calc_values'],
