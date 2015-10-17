@@ -531,7 +531,7 @@ def _node_ports(graph, node):
     for u, _, d in graph.in_edges_iter(node, data=True):
         for src, dest in d['connect']:
             portinputs[dest] = (u, src)
-    for  _, v, d in graph.out_edges_iter(node, data=True):
+    for _, v, d in graph.out_edges_iter(node, data=True):
         for src, dest in d['connect']:
             if isinstance(src, tuple):
                 srcport = src[0]

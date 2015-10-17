@@ -538,7 +538,7 @@ class DICOMConvert(FSCommand):
                 single_cmd = '%s %s %s' % (self.cmd, infile,
                                            os.path.join(outdir, outfile))
                 cmd.extend([single_cmd])
-        return  '; '.join(cmd)
+        return '; '.join(cmd)
 
 
 class ResampleInputSpec(FSTraitedSpec):

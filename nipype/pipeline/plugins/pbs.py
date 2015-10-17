@@ -36,9 +36,9 @@ class PBSPlugin(SGELikeBatchManagerBase):
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
-            if  'max_tries' in kwargs['plugin_args']:
+            if 'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
-            if  'max_jobname_len' in kwargs['plugin_args']:
+            if 'max_jobname_len' in kwargs['plugin_args']:
                 self._max_jobname_len = kwargs['plugin_args']['max_jobname_len']
         super(PBSPlugin, self).__init__(template, **kwargs)
 
@@ -49,7 +49,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
                                 stderr=subprocess.PIPE)
         _, e = proc.communicate()
         errmsg = 'Unknown Job Id'  # %s' % taskid
-        return  errmsg not in e
+        return errmsg not in e
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('qsub', environ=os.environ.data,

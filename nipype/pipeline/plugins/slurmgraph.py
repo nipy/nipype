@@ -45,7 +45,7 @@ class SLURMGraphPlugin(GraphPluginBase):
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
-            if  'max_tries' in kwargs['plugin_args']:
+            if 'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
             if 'template' in kwargs['plugin_args']:
                 self._template = kwargs['plugin_args']['template']
