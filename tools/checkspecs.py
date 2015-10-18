@@ -212,7 +212,7 @@ class InterfaceChecker(object):
                            ('.' * len(uri.split('.'))),
                            'from ..%s import %s' % (uri.split('.')[-1], c),
                            '']
-                    cmd.append('def test_%s_inputs():' % c)
+                    cmd.append('\ndef test_%s_inputs():' % c)
                     input_fields = ''
                     for traitname, trait in sorted(classinst.input_spec().traits(transient=None).items()):
                         input_fields += '%s=dict(' % traitname
@@ -256,7 +256,7 @@ class InterfaceChecker(object):
 
             if not os.path.exists(nonautotest):
                 with open(testfile, 'at') as fp:
-                    cmd = ['def test_%s_outputs():' % c]
+                    cmd = ['\ndef test_%s_outputs():' % c]
                     input_fields = ''
                     for traitname, trait in sorted(classinst.output_spec().traits(transient=None).items()):
                         input_fields += '%s=dict(' % traitname
@@ -278,7 +278,7 @@ class InterfaceChecker(object):
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value"""]
-                    fp.writelines('\n'.join(cmd) + '\n\n')
+                    fp.writelines('\n'.join(cmd) + '\n')
 
             for traitname, trait in sorted(classinst.output_spec().traits(transient=None).items()):
                 for key in sorted(trait.__dict__):
