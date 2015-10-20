@@ -14,17 +14,21 @@ from nipype.interfaces.base import (TraitedSpec, File, traits, InputMultiPath,
 class StatsInput(NIFTYSEGCommandInputSpec):
     
     in_file = File(position=2, argstr='%s', exists=True, mandatory=True,
-                desc='image to operate on')
+                   desc='image to operate on')
     mask_file = File(exists=True, mandatory=False, position=-2, argstr='-m %s', desc='statistics within the masked area')
-    
+
+class StatsOutput(TraitedSpec):
+    output = traits.Array(desc='Output array from seg_stats')
+
 class StatsCommand(NIFTYSEGCommand):
 
     _cmd = getNiftySegPath('seg_stats')
     input_spec = StatsInput
-    
+    output_spec = StatsOutput
+
 class UnaryStatsInput(StatsInput):
 
-    operation = traits.Enum('r', 'R', 'a', 's', 'v', 'vl', 'V', 
+    operation = traits.Enum('r', 'R', 'a', 's', 'v', 'V',
                             'n', 'N', 'x', 'X', 'c', 'B',
                             argstr='-%s', position=4, mandatory=True,
                             desc='operation to perform')
@@ -60,7 +64,6 @@ class UnaryStats(StatsCommand):
 	  -a 		| Average of all voxels 
 	  -s 		| Standard deviation of all voxels 
 	  -v 		| Volume of all binarized voxels (<# voxels> * <volume per voxel>)
-	  -vl 		| Volume of each integer label (<# voxels per label> * <volume per voxel>)
 	  -V 		| Volume of all probabilsitic voxels (sum(<in>) * <volume per voxel>)
 	  -n 		| Sum of all binarized voxels (<# voxels>)
 	  -N 		| Sum of all probabilsitic voxels (sum(<in>))
@@ -74,9 +77,28 @@ class UnaryStats(StatsCommand):
     """
     input_spec = UnaryStatsInput
 
+    def _parse_stdout(self, stdout):
+        out = []
+        for string_line in stdout.split("\n"):
+            print('parsing line ' + string_line)
+            if string_line.startswith('#'):
+                continue
+            if len(string_line) <= 1:
+                continue
+            line = [float(s) for s in string_line.split()]
+            out.append(line)
+        return np.array(out).squeeze()
+
+    def _run_interface(self, runtime):
+        print('parsing output in run_interface')
+        new_runtime = super(UnaryStats, self)._run_interface(runtime)
+        self.output = self._parse_stdout(new_runtime.stdout)
+        return new_runtime
+
     def _list_outputs(self):
-        self._suffix = '_' + self.inputs.operation
-        return super(UnaryStats, self)._list_outputs()
+        outputs = self.output_spec().get()
+        outputs['output'] = self.output
+        return outputs
 
 
 class BinaryStatsInput(StatsInput):
