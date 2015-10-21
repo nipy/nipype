@@ -162,7 +162,10 @@ class ProgressPercentage(object):
         # With the lock on, print upload status
         with self._lock:
             self._seen_so_far += bytes_amount
-            percentage = (self._seen_so_far / self._size) * 100
+            if self._size != 0:
+                percentage = (self._seen_so_far / self._size) * 100
+            else:
+                percentage = 0
             progress_str = '%d / %d (%.2f%%)\r'\
                            % (self._seen_so_far, self._size, percentage)
 
