@@ -56,8 +56,10 @@ class OARPlugin(SGELikeBatchManagerBase):
         )
         o, e = proc.communicate()
         parsed_result = json.loads(o)[taskid].lower()
-        is_pending = 'error' not in parsed_result
-
+        is_pending = (
+            ('error' not in parsed_result) and
+            ('terminated' not in parsed_result)
+        )
         return is_pending
 
     def _submit_batchtask(self, scriptfile, node):
