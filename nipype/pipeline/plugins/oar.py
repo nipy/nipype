@@ -108,7 +108,6 @@ class OARPlugin(SGELikeBatchManagerBase):
            scriptfile
         )
 
-        print cmd.inputs.args
         oldlevel = iflogger.level
         iflogger.setLevel(logging.getLevelName('CRITICAL'))
         tries = 0
