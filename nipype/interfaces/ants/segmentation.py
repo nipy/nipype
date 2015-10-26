@@ -662,18 +662,6 @@ class antsBrainExtraction(ANTSCommand):
     _cmd = 'antsBrainExtraction.sh'
 
     def _format_arg(self, opt, spec, val):
-        if opt == 'anatomical_image':
-            retval = '-a %s' % val
-            return retval
-        if opt == 'brain_template':
-            retval = '-e %s' % val
-            return retval
-        if opt == 'brain_probability_mask':
-            retval = '-m %s' % val
-            return retval
-        if opt == 'out_prefix':
-            retval = '-o %s' % val
-            return retval
         return super(ANTSCommand, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
