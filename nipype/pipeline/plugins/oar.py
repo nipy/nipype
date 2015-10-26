@@ -2,6 +2,7 @@
 """
 
 import os
+import stat
 from time import sleep
 import subprocess
 import json
@@ -26,6 +27,7 @@ class OARPlugin(SGELikeBatchManagerBase):
 
     # Addtional class variables
     _max_jobname_len = 15
+    _oarsub_args = ''
 
     def __init__(self, **kwargs):
         template = """
@@ -53,9 +55,10 @@ class OARPlugin(SGELikeBatchManagerBase):
             stderr=subprocess.PIPE
         )
         o, e = proc.communicate()
+        parsed_result = json.loads(o)[taskid].lower()
+        is_pending = 'error' not in parsed_result
 
-        parsed_result = json.loads(o)[taskid]
-        return 'error' not in parsed_result
+        return is_pending
 
     def _submit_batchtask(self, scriptfile, node):
         cmd = CommandLine('oarsub', environ=os.environ.data,
@@ -72,10 +75,7 @@ class OARPlugin(SGELikeBatchManagerBase):
                 oarsubargs = node.plugin_args['oarsub_args']
             else:
                 oarsubargs += (" " + node.plugin_args['oarsub_args'])
-        if '-o' not in oarsubargs:
-            oarsubargs = '%s -o %s' % (oarsubargs, path)
-        if '-E' not in oarsubargs:
-            oarsubargs = '%s -E %s' % (oarsubargs, path)
+
         if node._hierarchy:
             jobname = '.'.join((os.environ.data['LOGNAME'],
                                 node._hierarchy,
@@ -87,6 +87,21 @@ class OARPlugin(SGELikeBatchManagerBase):
         jobnameitems.reverse()
         jobname = '.'.join(jobnameitems)
         jobname = jobname[0:self._max_jobname_len]
+
+        if '-O' not in oarsubargs:
+            oarsubargs = '%s -O %s' % (
+                oarsubargs,
+                os.path.join(path, jobname + '.stdout')
+            )
+        if '-E' not in oarsubargs:
+            oarsubargs = '%s -E %s' % (
+                oarsubargs,
+                os.path.join(path, jobname + '.stderr')
+            )
+        if '-J' not in oarsubargs:
+            oarsubargs = '%s -J' % (oarsubargs)
+
+        os.chmod(scriptfile, stat.S_IEXEC | stat.S_IREAD | stat.S_IWRITE)
         cmd.inputs.args = '%s -n %s -S %s' % (
            oarsubargs,
            jobname,
@@ -106,7 +121,7 @@ class OARPlugin(SGELikeBatchManagerBase):
                     # sleep 2 seconds and try again.
                 else:
                     iflogger.setLevel(oldlevel)
-                    raise RuntimeError('\n'.join((('Could not submit pbs task'
+                    raise RuntimeError('\n'.join((('Could not submit OAR task'
                                                    ' for node %s') % node._id,
                                                   str(e))))
             else:
@@ -126,5 +141,4 @@ class OARPlugin(SGELikeBatchManagerBase):
         taskid = json.loads(o)['job_id']
         self._pending[taskid] = node.output_dir()
         logger.debug('submitted OAR task: %s for node %s' % (taskid, node._id))
-
         return taskid
