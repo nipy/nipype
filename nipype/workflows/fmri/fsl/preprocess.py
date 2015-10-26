@@ -36,8 +36,10 @@ def pickvol(filenames, fileidx, which):
         idx = 0
     elif which.lower() == 'middle':
         idx = int(np.ceil(load(filenames[fileidx]).get_shape()[3]/2))
+    elif which.lower() == 'last':
+        idx = load(filenames[fileidx]).get_shape()[3]-1
     else:
-        raise Exception('unknown value for volume selection : %s'%which)
+        raise Exception('unknown value for volume selection : %s' % which)
     return idx
 
 def getbtthresh(medianvals):
@@ -381,7 +383,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
         name : name of workflow (default: featpreproc)
         highpass : boolean (default: True)
-        whichvol : which volume of the first run to register to ('first', 'middle', 'mean')
+        whichvol : which volume of the first run to register to ('first', 'middle', 'last', 'mean')
 
     Inputs::
 
@@ -467,6 +469,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     run.
     """
 
+
     img2float = pe.MapNode(interface=fsl.ImageMaths(out_data_type='float',
                                                  op_string = '',
                                                  suffix='_dtype'),
@@ -475,7 +478,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
     featpreproc.connect(inputnode, 'func', img2float, 'in_file')
 
     """
-    Extract the first volume of the first run as the reference
+    Extract the middle (or what whichvol points to) volume of the first run as the reference
     """
 
     if whichvol != 'mean':
@@ -488,7 +491,7 @@ def create_featreg_preproc(name='featpreproc', highpass=True, whichvol='middle')
 
 
     """
-    Realign the functional runs to the reference (1st volume of first run)
+    Realign the functional runs to the reference (`whichvol` volume of first run)
     """
 
     motion_correct = pe.MapNode(interface=fsl.MCFLIRT(save_mats = True,
@@ -1093,7 +1096,7 @@ def create_fsl_fs_preproc(name='preproc', highpass=True, whichvol='middle'):
     return featpreproc
 
 def create_reg_workflow(name='registration'):
-    """Create a FEAT preprocessing workflow together with freesurfer
+    """Create a FEAT preprocessing workflow
 
     Parameters
     ----------

@@ -5,26 +5,32 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 .. image:: https://travis-ci.org/nipy/nipype.png?branch=master
   :target: https://travis-ci.org/nipy/nipype
 
+.. image:: https://circleci.com/gh/nipy/nipype/tree/master.svg?style=svg
+  :target: https://circleci.com/gh/nipy/nipype/tree/master
+
 .. image:: https://coveralls.io/repos/nipy/nipype/badge.png
   :target: https://coveralls.io/r/nipy/nipype
 
-.. image:: https://pypip.in/version/nipype/badge.png
+.. image:: https://www.codacy.com/project/badge/182f27944c51474490b369d0a23e2f32
+  :target: https://www.codacy.com/app/krzysztof-gorgolewski/nipy_nipype
+
+.. image:: https://img.shields.io/pypi/v/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
     :alt: Latest Version
 
-.. image:: https://pypip.in/download/nipype/badge.png
+.. image:: https://img.shields.io/pypi/dm/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
     :alt: Downloads
 
-.. image:: https://pypip.in/py_versions/nipype/badge.png
+.. image:: https://img.shields.io/pypi/pyversions/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
     :alt: Supported Python versions
 
-.. image:: https://pypip.in/status/nipype/badge.png
+.. image:: https://img.shields.io/pypi/status/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
     :alt: Development Status
 
-.. image:: https://pypip.in/license/nipype/badge.png
+.. image:: https://img.shields.io/pypi/l/nipype.svg
     :target: https://pypi.python.org/pypi/nipype/
     :alt: License
 
@@ -64,7 +70,7 @@ Website
 -------
 
 Information specific to Nipype is located here::
-	    
+
     http://nipy.org/nipype
 
 
@@ -75,12 +81,12 @@ If you have a problem or would like to ask a question about how to do something 
 to `NeuroStars.org <http://neurostars.org>`_ with a *nipype* tag. `NeuroStars.org <http://neurostars.org>`_  is a platform similar to StackOverflow but dedicated to neuroinformatics. All previous Nipype questions are available here::
 
        http://neurostars.org/t/nipype/
-	   
 
-To participate in the Nipype development related discussion please use the following mailing list::
-       
-       http://projects.scipy.org/mailman/listinfo/nipy-devel
-	   
+
+To participate in the Nipype development related discussions please use the following mailing list::
+
+       http://mail.python.org/mailman/listinfo/neuroimaging
+
 Please add *[nipype]* to the subject line when posting on the mailing list.
 
 
@@ -90,7 +96,7 @@ Nipype structure
 Currently Nipype consists of the following files and directories:
 
   INSTALL
-    NIPYPE prerequisites, installation, development, testing, and 
+    NIPYPE prerequisites, installation, development, testing, and
     troubleshooting.
 
   README
@@ -124,5 +130,5 @@ There are interfaces to some GNU code but these are entirely optional.
 All trademarks referenced herein are property of their respective
 holders.
 
-Copyright (c) 2009-2014, NIPY Developers
+Copyright (c) 2009-2015, NIPY Developers
 All rights reserved.

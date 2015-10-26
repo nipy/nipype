@@ -241,7 +241,7 @@ def create_eddy_correct_pipeline(name='eddy_correct'):
     split = pe.Node(fsl.Split(dimension='t'), name='split')
     pick_ref = pe.Node(niu.Select(), name='pick_ref')
     coregistration = pe.MapNode(fsl.FLIRT(no_search=True, padding_size=1,
-                                dof=12, interp='spline'), name='coregistration', iterfield=['in_file'])
+                                interp='trilinear'), name='coregistration', iterfield=['in_file'])
     merge = pe.Node(fsl.Merge(dimension='t'), name='merge')
     outputnode = pe.Node(
         niu.IdentityInterface(fields=['eddy_corrected']),

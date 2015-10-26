@@ -9,6 +9,7 @@ def test_MergeNifti_inputs():
     out_ext=dict(usedefault=True,
     ),
     out_format=dict(),
+    out_path=dict(),
     sort_order=dict(),
     )
     inputs = MergeNifti.input_spec()

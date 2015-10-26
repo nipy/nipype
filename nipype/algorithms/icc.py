@@ -78,10 +78,9 @@ def ICC_rep_anova(Y):
     the data Y are entered as a 'table' ie subjects are in rows and repeated
     measures in columns
 
-    --------------------------------------------------------------------------
-                       One Sample Repeated measure ANOVA
-                       Y = XB + E with X = [FaTor / Subjects]
-    --------------------------------------------------------------------------
+    One Sample Repeated measure ANOVA
+
+    Y = XB + E with X = [FaTor / Subjects]
     '''
 
     [nb_subjects, nb_conditions] = Y.shape

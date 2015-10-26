@@ -13,6 +13,7 @@ def test_GroupAndStack_inputs():
     out_ext=dict(usedefault=True,
     ),
     out_format=dict(),
+    out_path=dict(),
     )
     inputs = GroupAndStack.input_spec()
 

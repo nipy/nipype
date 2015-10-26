@@ -8,6 +8,9 @@ def test_TrackDensityMap_inputs():
     ),
     out_filename=dict(usedefault=True,
     ),
+    points_space=dict(usedefault=True,
+    ),
+    reference=dict(),
     voxel_dims=dict(),
     )
     inputs = TrackDensityMap.input_spec()

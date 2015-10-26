@@ -37,11 +37,13 @@ class AtroposInputSpec(ANTSCommandInputSpec):
     mrf_smoothing_factor = traits.Float(argstr="%s")
     mrf_radius = traits.List(traits.Int(), requires=['mrf_smoothing_factor'])
     icm_use_synchronous_update = traits.Bool(argstr="%s")
-    maximum_number_of_icm_terations = traits.Int(requires=['icm_use_synchronous_update'])
+    maximum_number_of_icm_terations = traits.Int(
+        requires=['icm_use_synchronous_update'])
     n_iterations = traits.Int(argstr="%s")
     convergence_threshold = traits.Float(requires=['n_iterations'])
     posterior_formulation = traits.Str(argstr="%s")
-    use_mixture_model_proportions = traits.Bool(requires=['posterior_formulation'])
+    use_mixture_model_proportions = traits.Bool(
+        requires=['posterior_formulation'])
     out_classified_image_name = File(argstr="%s", genfile=True,
                                      hash_files=False)
     save_posteriors = traits.Bool()
@@ -93,17 +95,21 @@ class Atropos(ANTSCommand):
 
     def _format_arg(self, opt, spec, val):
         if opt == 'initialization':
-            retval = "--initialization %s[%d" % (val, self.inputs.number_of_tissue_classes)
+            retval = "--initialization %s[%d" % (val,
+                                                 self.inputs.number_of_tissue_classes)
             if val == "PriorProbabilityImages":
-                _, _, ext = split_filename(self.inputs.prior_probability_images[0])
-                retval += ",priors/priorProbImages%02d" + ext + ",%g" % self.inputs.prior_weighting
+                _, _, ext = split_filename(
+                    self.inputs.prior_probability_images[0])
+                retval += ",priors/priorProbImages%02d" + \
+                    ext + ",%g" % self.inputs.prior_weighting
                 if isdefined(self.inputs.prior_probability_threshold):
                     retval += ",%g" % self.inputs.prior_probability_threshold
             return retval + "]"
         if opt == 'mrf_smoothing_factor':
             retval = "--mrf [%g" % val
             if isdefined(self.inputs.mrf_radius):
-                retval += ",%s" % 'x'.join([str(s) for s in self.inputs.mrf_radius])
+                retval += ",%s" % 'x'.join([str(s)
+                                            for s in self.inputs.mrf_radius])
             return retval + "]"
         if opt == "icm_use_synchronous_update":
             retval = "--icm [%d" % val
@@ -153,11 +159,13 @@ class Atropos(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['classified_image'] = os.path.abspath(self._gen_filename('out_classified_image_name'))
+        outputs['classified_image'] = os.path.abspath(
+            self._gen_filename('out_classified_image_name'))
         if isdefined(self.inputs.save_posteriors) and self.inputs.save_posteriors:
             outputs['posteriors'] = []
             for i in range(self.inputs.number_of_tissue_classes):
-                outputs['posteriors'].append(os.path.abspath(self.inputs.output_posteriors_name_template % (i + 1)))
+                outputs['posteriors'].append(os.path.abspath(
+                    self.inputs.output_posteriors_name_template % (i + 1)))
         return outputs
 
 
@@ -223,7 +231,7 @@ class LaplacianThickness(ANTSCommand):
 
 
 class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, argstr='--image-dimension %d',
+    dimension = traits.Enum(3, 2, argstr='-d %d',
                             usedefault=True,
                             desc='image dimension (2 or 3)')
     input_image = File(argstr='--input-image %s', mandatory=True,
@@ -237,8 +245,7 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     bspline_fitting_distance = traits.Float(argstr="--bspline-fitting %s")
     bspline_order = traits.Int(requires=['bspline_fitting_distance'])
     shrink_factor = traits.Int(argstr="--shrink-factor %d")
-    n_iterations = traits.List(traits.Int(), argstr="--convergence %s",
-                               requires=['convergence_threshold'])
+    n_iterations = traits.List(traits.Int(), argstr="--convergence %s")
     convergence_threshold = traits.Float(requires=['n_iterations'])
     save_bias = traits.Bool(False, mandatory=True, usedefault=True,
                             desc=('True if the estimated bias should be saved'
@@ -269,7 +276,7 @@ class N4BiasFieldCorrection(ANTSCommand):
     Examples
     --------
 
-	>>> import copy
+    >>> import copy
     >>> from nipype.interfaces.ants import N4BiasFieldCorrection
     >>> n4 = N4BiasFieldCorrection()
     >>> n4.inputs.dimension = 3
@@ -277,26 +284,33 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4.inputs.bspline_fitting_distance = 300
     >>> n4.inputs.shrink_factor = 3
     >>> n4.inputs.n_iterations = [50,50,30,20]
-    >>> n4.inputs.convergence_threshold = 1e-6
     >>> n4.cmdline
     'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
---image-dimension 3 --input-image structural.nii \
---convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
+-d 3 --input-image structural.nii \
+--convergence [ 50x50x30x20 ] --output structural_corrected.nii \
 --shrink-factor 3'
 
-	>>> n4_2 = copy.deepcopy(n4)
-    >>> n4_2.inputs.bspline_order = 5
+    >>> n4_2 = copy.deepcopy(n4)
+    >>> n4_2.inputs.convergence_threshold = 1e-6
     >>> n4_2.cmdline
-    'N4BiasFieldCorrection --bspline-fitting [ 300, 5 ] \
---image-dimension 3 --input-image structural.nii \
+    'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
+-d 3 --input-image structural.nii \
 --convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
 --shrink-factor 3'
 
-    >>> n4_3 = N4BiasFieldCorrection()
-    >>> n4_3.inputs.input_image = 'structural.nii'
-    >>> n4_3.inputs.save_bias = True
+    >>> n4_3 = copy.deepcopy(n4_2)
+    >>> n4_3.inputs.bspline_order = 5
     >>> n4_3.cmdline
-    'N4BiasFieldCorrection --image-dimension 3 --input-image structural.nii \
+    'N4BiasFieldCorrection --bspline-fitting [ 300, 5 ] \
+-d 3 --input-image structural.nii \
+--convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
+--shrink-factor 3'
+
+    >>> n4_4 = N4BiasFieldCorrection()
+    >>> n4_4.inputs.input_image = 'structural.nii'
+    >>> n4_4.inputs.save_bias = True
+    >>> n4_4.cmdline
+    'N4BiasFieldCorrection -d 3 --input-image structural.nii \
 --output [ structural_corrected.nii, structural_bias.nii ]'
     """
 
@@ -322,7 +336,7 @@ class N4BiasFieldCorrection(ANTSCommand):
 
     def _format_arg(self, name, trait_spec, value):
         if ((name == 'output_image') and
-           (self.inputs.save_bias or isdefined(self.inputs.bias_image))):
+                (self.inputs.save_bias or isdefined(self.inputs.bias_image))):
             bias_image = self._gen_filename('bias_image')
             output = self._gen_filename('output_image')
             newval = '[ %s, %s ]' % (output, bias_image)
@@ -335,10 +349,12 @@ class N4BiasFieldCorrection(ANTSCommand):
                 newval = '[ %g ]' % value
             return trait_spec.argstr % newval
 
-        if ((name == 'n_iterations') and
-           (isdefined(self.inputs.convergence_threshold))):
-            newval = '[ %s, %g ]' % ('x'.join([str(elt) for elt in value]),
-                                     self.inputs.convergence_threshold)
+        if name == 'n_iterations':
+            if isdefined(self.inputs.convergence_threshold):
+                newval = '[ %s, %g ]' % ('x'.join([str(elt) for elt in value]),
+                                         self.inputs.convergence_threshold)
+            else:
+                newval = '[ %s ]' % 'x'.join([str(elt) for elt in value])
             return trait_spec.argstr % newval
 
         return super(N4BiasFieldCorrection,
@@ -352,10 +368,12 @@ class N4BiasFieldCorrection(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_image'] = os.path.abspath(self._gen_filename('output_image'))
+        outputs['output_image'] = os.path.abspath(
+            self._gen_filename('output_image'))
 
         if self.inputs.save_bias or isdefined(self.inputs.bias_image):
-            outputs['bias_image'] = os.path.abspath(self._gen_filename('bias_image'))
+            outputs['bias_image'] = os.path.abspath(
+                self._gen_filename('bias_image'))
         return outputs
 
 
@@ -378,7 +396,8 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
                           mandatory=True)
     brain_probability_mask = File(exists=True, argstr='-m %s',
                                   desc='brain probability mask in template space', copyfile=False, mandatory=True)
-    segmentation_priors = InputMultiPath(File(exists=True), argstr='-p %s', mandatory=True)
+    segmentation_priors = InputMultiPath(
+        File(exists=True), argstr='-p %s', mandatory=True)
     out_prefix = traits.Str('antsCT_', argstr='-o %s', usedefault=True,
                             desc=('Prefix that is prepended to all output'
                                   ' files (default = antsCT_)'))
@@ -450,11 +469,15 @@ class antsCorticalThicknessoutputSpec(TraitedSpec):
     BrainSegmentationPosteriors = OutputMultiPath(File(exists=True),
                                                   desc='Posterior probability images')
     CorticalThickness = File(exists=True, desc='cortical thickness file')
-    TemplateToSubject1GenericAffine = File(exists=True, desc='Template to subject affine')
+    TemplateToSubject1GenericAffine = File(
+        exists=True, desc='Template to subject affine')
     TemplateToSubject0Warp = File(exists=True, desc='Template to subject warp')
-    SubjectToTemplate1Warp = File(exists=True, desc='Template to subject inverse warp')
-    SubjectToTemplate0GenericAffine = File(exists=True, desc='Template to subject inverse affine')
-    SubjectToTemplateLogJacobian = File(exists=True, desc='Template to subject log jacobian')
+    SubjectToTemplate1Warp = File(
+        exists=True, desc='Template to subject inverse warp')
+    SubjectToTemplate0GenericAffine = File(
+        exists=True, desc='Template to subject inverse affine')
+    SubjectToTemplateLogJacobian = File(
+        exists=True, desc='Template to subject log jacobian')
     CorticalThicknessNormedToTemplate = File(exists=True,
                                              desc='Normalized cortical thickness')
     BrainVolumes = File(exists=True, desc='Brain volumes as text')
@@ -508,7 +531,8 @@ class antsCorticalThickness(ANTSCommand):
             os.makedirs(priors_directory)
         _, _, ext = split_filename(self.inputs.segmentation_priors[0])
         for i, f in enumerate(self.inputs.segmentation_priors):
-            target = os.path.join(priors_directory, 'BrainSegmentationPrior%02d' % (i + 1) + ext)
+            target = os.path.join(
+                priors_directory, 'BrainSegmentationPrior%02d' % (i + 1) + ext)
             if not (os.path.exists(target) and os.path.realpath(target) == os.path.abspath(f)):
                 copyfile(os.path.abspath(f), target)
         runtime = super(antsCorticalThickness, self)._run_interface(runtime)
@@ -558,37 +582,56 @@ class antsCorticalThickness(ANTSCommand):
                                                                'SubjectToTemplateLogJacobian.' +
                                                                self.inputs.image_suffix)
         outputs['CorticalThicknessNormedToTemplate'] = os.path.join(os.getcwd(),
-                                                    self.inputs.out_prefix +
-                                                    'CorticalThickness.' +
-                                                    self.inputs.image_suffix)
+                                                                    self.inputs.out_prefix +
+                                                                    'CorticalThickness.' +
+                                                                    self.inputs.image_suffix)
         outputs['BrainVolumes'] = os.path.join(os.getcwd(),
                                                self.inputs.out_prefix +
                                                'brainvols.csv')
         return outputs
 
+
 class JointFusionInputSpec(ANTSCommandInputSpec):
-    dimension = traits.Enum(3, 2, 4, argstr='%d', position=0, usedefault=True, mandatory=True,
+    dimension = traits.Enum(3, 2, 4, argstr='%d', position=0, usedefault=True,
+                            mandatory=True,
                             desc='image dimension (2, 3, or 4)')
-    modalities = traits.Int(argstr='%d', position=1, mandatory=True, desc='Number of modalities or features')
-    warped_intensity_images = InputMultiPath(File(exists=True), argstr="-g %s...", mandatory=True, desc='Warped atlas images')
-    target_image = InputMultiPath(File(exists=True), argstr='-tg %s...', mandatory=True, desc='Target image(s)')
-    warped_label_images = InputMultiPath(File(exists=True), argstr="-l %s...", mandatory=True, desc='Warped atlas segmentations')
-    method = traits.Str(default='Joint', argstr='-m %s', usedefault=True, desc='Select voting method. Options: Joint (Joint Label Fusion). May be followed by optional parameters in brackets, e.g., -m Joint[0.1,2]')
-    alpha = traits.Float(default=0.1, usedefault=True, requires=['method'], desc='Regularization term added to matrix Mx for inverse')
-    beta = traits.Int(default=2, usedefault=True, requires=['method'], desc='Exponent for mapping intensity difference to joint error')
-    output_label_image = File(argstr='%s', mandatory=True, position=-1, desc='Output fusion label map image')
-    patch_radius = traits.ListInt(minlen=3, maxlen=3, argstr='-rp %s', desc='Patch radius for similarity measures, scalar or vector. Default: 2x2x2')
-    search_radius = traits.ListInt(minlen=3, maxlen=3, argstr='-rs %s', desc='Local search radius. Default: 3x3x3')
-    exclusion_region = File(exists=True, argstr='-x %s', desc='Specify an exclusion region for the given label.')
-    output_posteriors_name_template = traits.Str('POSTERIOR_%02d.nii.gz', argstr='-p %s',
-                                                 desc="Save the posterior maps (probability that each voxel belongs to each " +\
-                                                 "label) as images. The number of images saved equals the number of labels. " +\
-                                                 "The filename pattern must be in C printf format, e.g. posterior%04d.nii.gz")
-    output_voting_weights_name_template = traits.Str('WEIGHTED_%04d.nii.gz', argstr='-w %s', desc="Save the voting weights as " +\
-                                                     "images. The number of images saved equals the number of atlases. The " +\
-                                                     "filename pattern must be in C printf format, e.g. weight%04d.nii.gz")
-    atlas_group_id = traits.ListInt(argstr='-gp %d...', desc='Assign a group ID for each atlas')
-    atlas_group_weights = traits.ListInt(argstr='-gpw %d...', desc='Assign the voting weights to each atlas group')
+    modalities = traits.Int(argstr='%d', position=1, mandatory=True,
+                            desc='Number of modalities or features')
+    warped_intensity_images = InputMultiPath(File(exists=True),
+                                             argstr="-g %s...", mandatory=True,
+                                             desc='Warped atlas images')
+    target_image = InputMultiPath(File(exists=True), argstr='-tg %s...',
+                                  mandatory=True, desc='Target image(s)')
+    warped_label_images = InputMultiPath(File(exists=True), argstr="-l %s...",
+                                         mandatory=True,
+                                         desc='Warped atlas segmentations')
+    method = traits.Str(default='Joint', argstr='-m %s', usedefault=True,
+                        desc=('Select voting method. Options: Joint (Joint '
+                              'Label Fusion). May be followed by optional '
+                              'parameters in brackets, e.g., -m Joint[0.1,2]'))
+    alpha = traits.Float(default=0.1, usedefault=True, requires=['method'],
+                         desc=('Regularization term added to matrix Mx for '
+                               'inverse'))
+    beta = traits.Int(default=2, usedefault=True, requires=['method'],
+                      desc=('Exponent for mapping intensity difference to joint'
+                            ' error'))
+    output_label_image = File(argstr='%s', mandatory=True, position=-1,
+                              name_template='%s',
+                              output_name='output_label_image',
+                              desc='Output fusion label map image')
+    patch_radius = traits.ListInt(minlen=3, maxlen=3, argstr='-rp %s',
+                                  desc=('Patch radius for similarity measures, '
+                                        'scalar or vector. Default: 2x2x2'))
+    search_radius = traits.ListInt(minlen=3, maxlen=3, argstr='-rs %s',
+                                   desc='Local search radius. Default: 3x3x3')
+    exclusion_region = File(exists=True, argstr='-x %s',
+                            desc=('Specify an exclusion region for the given '
+                                  'label.'))
+    atlas_group_id = traits.ListInt(argstr='-gp %d...',
+                                    desc=('Assign a group ID for each atlas'))
+    atlas_group_weights = traits.ListInt(argstr='-gpw %d...',
+                                         desc=('Assign the voting weights to '
+                                               'each atlas group'))
 
 
 class JointFusionOutputSpec(TraitedSpec):
@@ -608,22 +651,22 @@ class JointFusion(ANTSCommand):
     >>> at.inputs.method = 'Joint[0.1,2]'
     >>> at.inputs.output_label_image ='fusion_labelimage_output.nii'
     >>> at.inputs.warped_intensity_images = ['im1.nii',
-    ...                                      'im2.nii']
+    ...                                      'im2.nii',
+    ...                                      'im3.nii']
     >>> at.inputs.warped_label_images = ['segmentation0.nii.gz',
+    ...                                  'segmentation1.nii.gz',
     ...                                  'segmentation1.nii.gz']
     >>> at.inputs.target_image = 'T1.nii'
-    >>> at.inputs.patch_radius = [3,2,1]
-    >>> at.inputs.search_radius = [1,2,3]
     >>> at.cmdline
-    'jointfusion 3 1 -m Joint[0.1,2] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -l segmentation0.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
-
-    Alternately, you can specify the voting method and parameters more 'Pythonically':
+    'jointfusion 3 1 -m Joint[0.1,2] -tg T1.nii -g im1.nii -g im2.nii -g im3.nii -l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
 
     >>> at.inputs.method = 'Joint'
     >>> at.inputs.alpha = 0.5
     >>> at.inputs.beta = 1
+    >>> at.inputs.patch_radius = [3,2,1]
+    >>> at.inputs.search_radius = [1,2,3]
     >>> at.cmdline
-    'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -l segmentation0.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
+    'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -g im3.nii -l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
     """
     input_spec = JointFusionInputSpec
     output_spec = JointFusionOutputSpec
@@ -634,18 +677,21 @@ class JointFusion(ANTSCommand):
             if '[' in val:
                 retval = '-m {0}'.format(val)
             else:
-                retval = '-m {0}[{1},{2}]'.format(self.inputs.method, self.inputs.alpha, self.inputs.beta)
+                retval = '-m {0}[{1},{2}]'.format(
+                    self.inputs.method, self.inputs.alpha, self.inputs.beta)
         elif opt == 'patch_radius':
             retval = '-rp {0}'.format(self._format_xarray(val))
         elif opt == 'search_radius':
             retval = '-rs {0}'.format(self._format_xarray(val))
         else:
             if opt == 'warped_intensity_images':
-                assert len(val) == len(self.inputs.warped_label_images), "Number of intensity images and label maps must be the same"
+                assert len(val) == self.inputs.modalities * len(self.inputs.warped_label_images), "Number of intensity images and label maps must be the same {0}!={1}".format(
+                    len(val), len(self.inputs.warped_label_images))
             return super(ANTSCommand, self)._format_arg(opt, spec, val)
         return retval
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_label_image'] = os.path.abspath(self.inputs.output_label_image)
+        outputs['output_label_image'] = os.path.abspath(
+            self.inputs.output_label_image)
         return outputs

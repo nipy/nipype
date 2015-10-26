@@ -60,8 +60,7 @@ def test_ModelMaker_inputs():
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
 def test_ModelMaker_outputs():
-    output_map = dict(modelSceneFile=dict(exists=True,
-    ),
+    output_map = dict(modelSceneFile=dict(),
     )
     outputs = ModelMaker.output_spec()
 

@@ -26,7 +26,7 @@ setting up a workflow is separate from executing it.
 **1. Import appropriate modules**
 
 .. testcode::
-   
+
    import nipype.interfaces.spm as spm         # the spm interfaces
    import nipype.pipeline.engine as pe         # the workflow and node wrappers
 
@@ -39,7 +39,7 @@ start with defining a realign node using the interface
 :class:`nipype.interfaces.spm.Realign`
 
 .. testcode::
-   
+
    realigner = pe.Node(interface=spm.Realign(), name='realign')
    realigner.inputs.in_files = 'somefuncrun.nii'
    realigner.inputs.register_to_mean = True
@@ -47,14 +47,14 @@ start with defining a realign node using the interface
 This would be equivalent to:
 
 .. testcode::
-   
+
    realigner = pe.Node(interface=spm.Realign(infile='somefuncrun.nii',
-                                             register_to_mean = True), 
+                                             register_to_mean = True),
                        name='realign')
 
 In Pythonic terms, this is saying that interface option in Node accepts
 an *instance* of an interface. The inputs to this interface can be set either
-later or while initializing the interface. 
+later or while initializing the interface.
 
 .. note::
 
@@ -78,7 +78,7 @@ Here we create an instance of a workflow and indicate that it should operate in
 the current directory.
 
 .. testcode::
-   
+
    workflow = pe.Workflow(name='preproc')
    workflow.base_dir = '.'
 
@@ -90,7 +90,7 @@ connecting it to any other node, then you need to add it to the
 workflow. For adding nodes, order of nodes is not important.
 
 .. testcode::
-   
+
    workflow.add_nodes([smoother, realigner])
 
 This results in a workflow containing two isolated nodes:
@@ -99,19 +99,19 @@ This results in a workflow containing two isolated nodes:
 
 **5. Connecting nodes to each other**
 
-We want to connect the output produced by realignment to the input of
-smoothing. This is done as follows.
+We want to connect the output produced by the node realignment to the input of
+the node smoothing. This is done as follows.
 
 .. testcode::
-   
+
    workflow.connect(realigner, 'realigned_files', smoother, 'in_files')
 
-or alternatively, a more flexible notation can be used. Although not shown here,
-the following notation can be used to connect multiple outputs from one node to
+
+Although not shown here, the following notation can be used to connect multiple outputs from one node to
 multiple inputs (see step 7 below).
 
 .. testcode::
-   
+
    workflow.connect([(realigner, smoother, [('realigned_files', 'in_files')])])
 
 This results in a workflow containing two connected nodes:
@@ -125,14 +125,14 @@ can visualize this using the following command. In fact, the pictures
 above were generated using this.
 
 .. testcode::
-   
+
    workflow.write_graph()
 
 This creates two files graph.dot and graph_detailed.dot and if
 graphviz_ is installed on your system it automatically converts it
 to png files. If graphviz is not installed you can take the dot files
 and load them in a graphviz visualizer elsewhere. You can specify how detailed
-the graph is going to be, by using "graph2use" argument which takes the following 
+the graph is going to be, by using "graph2use" argument which takes the following
 options:
 
 * hierarchical - creates a graph showing all embedded workflows (default)
@@ -148,7 +148,7 @@ Now that you have seen a basic pipeline let's add another node to the
 above pipeline.
 
 .. testcode::
-   
+
    import nipype.algorithms.rapidart as ra
    artdetect = pe.Node(interface=ra.ArtifactDetect(), name='artdetect')
    artdetect.inputs.use_differences  = [True, False]
@@ -181,7 +181,7 @@ Assuming that **somefuncrun.nii** is actually a file or you've
 replaced it with an appropriate one, you can run the pipeline with:
 
 .. testcode::
-   
+
    workflow.run()
 
 This should create a folder called preproc in your current directory,
@@ -189,3 +189,22 @@ inside which are three folders: realign, smooth and artdetect (the names
 of the nodes). The outputs of these routines are in these folders.
 
 .. include:: ../links_names.txt
+
+.. glossary::
+
+   pipeline
+      Connected series of processes (processes can be run parallel and or sequential)
+
+   workflow
+      (kind of synonymous to pipeline) = hosting the nodes
+
+   node
+      = switching-point within a pipeline, you can give it a name (in the above example e.g. realigner),
+      a node usually requires an or several inputs and will produce an or several outputs
+
+   interface
+      = specific software (e.g. FSL, SPM ...) are wrapped in interfaces, within a node instances of an
+      interface can be run
+
+   modules
+      for each interface the according modules have to be imported in the usual pythonic manner

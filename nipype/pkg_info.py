@@ -1,7 +1,10 @@
 import os
 import sys
 import subprocess
-from ConfigParser import ConfigParser
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser  # python 3
 
 COMMIT_INFO_FNAME = 'COMMIT_INFO.txt'
 
@@ -48,7 +51,7 @@ def pkg_commit_hash(pkg_path):
     if install_subst != '':
         return 'installation', install_subst
     # maybe we are in a repository
-    proc = subprocess.Popen('git rev-parse HEAD',
+    proc = subprocess.Popen('git rev-parse --short HEAD',
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             cwd=pkg_path, shell=True)

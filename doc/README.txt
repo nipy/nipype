@@ -16,7 +16,7 @@ Discover available make targets::
   make help
 
 Clean up previous build::
-  
+
   make clean
 
 Build html documentation::

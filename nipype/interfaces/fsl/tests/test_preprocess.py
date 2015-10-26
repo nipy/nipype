@@ -10,7 +10,7 @@ from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
 from nipype.utils.filemanip import split_filename
 import nipype.interfaces.fsl.preprocess as fsl
 from nipype.interfaces.fsl import Info
-from nipype.interfaces.base import File, TraitError, Undefined
+from nipype.interfaces.base import File, TraitError, Undefined, isdefined
 from nipype.interfaces.fsl import no_fsl
 
 
@@ -24,6 +24,7 @@ def fsl_name(obj, fname):
 tmp_infile = None
 tmp_dir = None
 
+
 @skipif(no_fsl)
 def setup_infile():
     global tmp_infile, tmp_dir
@@ -33,12 +34,15 @@ def setup_infile():
     file(tmp_infile, 'w')
     return tmp_infile, tmp_dir
 
+
 def teardown_infile(tmp_dir):
     shutil.rmtree(tmp_dir)
 
 # test BET
 #@with_setup(setup_infile, teardown_infile)
-#broken in nose with generators
+# broken in nose with generators
+
+
 @skipif(no_fsl)
 def test_bet():
     tmp_infile, tp_dir = setup_infile()
@@ -81,7 +85,7 @@ def test_bet():
         'surfaces':           ('-A', True)
         #'verbose':            ('-v', True),
         #'flags':              ('--i-made-this-up', '--i-made-this-up'),
-            }
+    }
     # Currently we don't test -R, -S, -B, -Z, -F, -A or -A2
 
     # test each of our arguments
@@ -92,32 +96,34 @@ def test_bet():
         better = fsl.BET(**{name: settings[1]})
         # Add mandatory input
         better.inputs.in_file = tmp_infile
-        realcmd =  ' '.join([better.cmd, tmp_infile, outpath, settings[0]])
+        realcmd = ' '.join([better.cmd, tmp_infile, outpath, settings[0]])
         yield assert_equal, better.cmdline, realcmd
     teardown_infile(tmp_dir)
 
 # test fast
+
+
 @skipif(no_fsl)
 def test_fast():
     tmp_infile, tp_dir = setup_infile()
     faster = fsl.FAST()
     faster.inputs.verbose = True
-    fasted = fsl.FAST(in_files=tmp_infile, verbose = True)
-    fasted2 = fsl.FAST(in_files=[tmp_infile, tmp_infile], verbose = True)
+    fasted = fsl.FAST(in_files=tmp_infile, verbose=True)
+    fasted2 = fsl.FAST(in_files=[tmp_infile, tmp_infile], verbose=True)
 
     yield assert_equal, faster.cmd, 'fast'
     yield assert_equal, faster.inputs.verbose, True
-    yield assert_equal, faster.inputs.manual_seg , Undefined
+    yield assert_equal, faster.inputs.manual_seg, Undefined
     yield assert_not_equal, faster.inputs, fasted.inputs
-    yield assert_equal, fasted.cmdline, 'fast -v -S 1 %s'%(tmp_infile)
-    yield assert_equal, fasted2.cmdline, 'fast -v -S 2 %s %s'%(tmp_infile,
-                                                                  tmp_infile)
+    yield assert_equal, fasted.cmdline, 'fast -v -S 1 %s' % (tmp_infile)
+    yield assert_equal, fasted2.cmdline, 'fast -v -S 2 %s %s' % (tmp_infile,
+                                                                 tmp_infile)
 
     faster = fsl.FAST()
     faster.inputs.in_files = tmp_infile
-    yield assert_equal, faster.cmdline, 'fast -S 1 %s'%(tmp_infile)
+    yield assert_equal, faster.cmdline, 'fast -S 1 %s' % (tmp_infile)
     faster.inputs.in_files = [tmp_infile, tmp_infile]
-    yield assert_equal, faster.cmdline, 'fast -S 2 %s %s'%(tmp_infile, tmp_infile)
+    yield assert_equal, faster.cmdline, 'fast -S 2 %s %s' % (tmp_infile, tmp_infile)
 
     # Our options and some test values for them
     # Should parallel the opt_map structure in the class for clarity
@@ -127,12 +133,12 @@ def test_fast():
                'img_type':             ('-t 2', 2),
                'init_seg_smooth':      ('-f 0.035', 0.035),
                'segments':             ('-g', True),
-               'init_transform':       ('-a %s'%(tmp_infile), '%s'%(tmp_infile)),
-               'other_priors':         ('-A %s %s %s'%(tmp_infile, tmp_infile,
-                                                       tmp_infile),
-                                        (['%s'%(tmp_infile),
-                                          '%s'%(tmp_infile),
-                                          '%s'%(tmp_infile)])),
+               'init_transform':       ('-a %s' % (tmp_infile), '%s' % (tmp_infile)),
+               'other_priors':         ('-A %s %s %s' % (tmp_infile, tmp_infile,
+                                                         tmp_infile),
+                                        (['%s' % (tmp_infile),
+                                          '%s' % (tmp_infile),
+                                          '%s' % (tmp_infile)])),
                'no_pve':                ('--nopve', True),
                'output_biasfield':     ('-b', True),
                'output_biascorrected': ('-B', True),
@@ -144,28 +150,32 @@ def test_fast():
                'iters_afterbias':      ('-O 3', 3),
                'hyper':                ('-H 0.15', 0.15),
                'verbose':              ('-v', True),
-               'manual_seg':            ('-s %s'%(tmp_infile),
-                       '%s'%(tmp_infile)),
+               'manual_seg':            ('-s %s' % (tmp_infile),
+                                         '%s' % (tmp_infile)),
                'probability_maps':     ('-p', True),
-              }
+               }
 
     # test each of our arguments
     for name, settings in opt_map.items():
         faster = fsl.FAST(in_files=tmp_infile, **{name: settings[1]})
         yield assert_equal, faster.cmdline, ' '.join([faster.cmd,
                                                       settings[0],
-                                                      "-S 1 %s"%tmp_infile])
+                                                      "-S 1 %s" % tmp_infile])
     teardown_infile(tmp_dir)
+
+
 @skipif(no_fsl)
 def setup_flirt():
     ext = Info.output_type_to_ext(Info.output_type())
     tmpdir = tempfile.mkdtemp()
-    _, infile = tempfile.mkstemp(suffix = ext, dir = tmpdir)
-    _, reffile = tempfile.mkstemp(suffix = ext, dir = tmpdir)
+    _, infile = tempfile.mkstemp(suffix=ext, dir=tmpdir)
+    _, reffile = tempfile.mkstemp(suffix=ext, dir=tmpdir)
     return tmpdir, infile, reffile
+
 
 def teardown_flirt(tmpdir):
     shutil.rmtree(tmpdir)
+
 
 @skipif(no_fsl)
 def test_flirt():
@@ -179,13 +189,13 @@ def test_flirt():
     flirter.inputs.cost = 'mutualinfo'
 
     flirted = fsl.FLIRT(in_file=infile, reference=reffile,
-                          out_file='outfile', out_matrix_file='outmat.mat',
-                          bins = 256,
-                          cost = 'mutualinfo')
+                        out_file='outfile', out_matrix_file='outmat.mat',
+                        bins=256,
+                        cost='mutualinfo')
     flirt_est = fsl.FLIRT(in_file=infile, reference=reffile,
-                            out_matrix_file='outmat.mat',
-                            bins = 256,
-                            cost = 'mutualinfo')
+                          out_matrix_file='outmat.mat',
+                          bins=256,
+                          cost='mutualinfo')
     yield assert_not_equal, flirter.inputs, flirted.inputs
     yield assert_not_equal, flirted.inputs, flirt_est.inputs
 
@@ -204,13 +214,13 @@ def test_flirt():
     flirter.inputs.reference = reffile
     # Generate outfile and outmatrix
     pth, fname, ext = split_filename(infile)
-    outfile = fsl_name(flirter, '%s_flirt' %fname)
+    outfile = fsl_name(flirter, '%s_flirt' % fname)
     outmat = '%s_flirt.mat' % fname
     realcmd = 'flirt -in %s -ref %s -out %s -omat %s' % (infile, reffile,
                                                          outfile, outmat)
     yield assert_equal, flirter.cmdline, realcmd
 
-    _, tmpfile = tempfile.mkstemp(suffix = '.nii', dir = tmpdir)
+    _, tmpfile = tempfile.mkstemp(suffix='.nii', dir=tmpdir)
     # Loop over all inputs, set a reasonable value and make sure the
     # cmdline is updated correctly.
     for key, trait_spec in sorted(fsl.FLIRT.input_spec().traits().items()):
@@ -227,7 +237,7 @@ def test_flirt():
             value = '-v'
         elif isinstance(trait_spec.trait_type, File):
             value = tmpfile
-            param = trait_spec.argstr  % value
+            param = trait_spec.argstr % value
         elif trait_spec.default is False:
             param = trait_spec.argstr
             value = True
@@ -240,27 +250,27 @@ def test_flirt():
         cmdline = 'flirt -in %s -ref %s' % (infile, reffile)
         # Handle autogeneration of outfile
         pth, fname, ext = split_filename(infile)
-        outfile = fsl_name(fsl.FLIRT(),'%s_flirt' % fname)
+        outfile = fsl_name(fsl.FLIRT(), '%s_flirt' % fname)
         outfile = ' '.join(['-out', outfile])
         # Handle autogeneration of outmatrix
         outmatrix = '%s_flirt.mat' % fname
         outmatrix = ' '.join(['-omat', outmatrix])
         # Build command line
         cmdline = ' '.join([cmdline, outfile, outmatrix, param])
-        flirter = fsl.FLIRT(in_file = infile, reference = reffile)
+        flirter = fsl.FLIRT(in_file=infile, reference=reffile)
         setattr(flirter.inputs, key, value)
         yield assert_equal, flirter.cmdline, cmdline
 
     # Test OutputSpec
-    flirter = fsl.FLIRT(in_file = infile, reference = reffile)
+    flirter = fsl.FLIRT(in_file=infile, reference=reffile)
     pth, fname, ext = split_filename(infile)
     flirter.inputs.out_file = ''.join(['foo', ext])
     flirter.inputs.out_matrix_file = ''.join(['bar', ext])
     outs = flirter._list_outputs()
     yield assert_equal, outs['out_file'], \
-          os.path.join(os.getcwd(), flirter.inputs.out_file)
+        os.path.join(os.getcwd(), flirter.inputs.out_file)
     yield assert_equal, outs['out_matrix_file'], \
-          os.path.join(os.getcwd(), flirter.inputs.out_matrix_file)
+        os.path.join(os.getcwd(), flirter.inputs.out_matrix_file)
 
     teardown_flirt(tmpdir)
 
@@ -277,7 +287,7 @@ def test_mcflirt():
     frt.inputs.in_file = infile
     _, nme = os.path.split(infile)
     outfile = os.path.join(os.getcwd(), nme)
-    outfile = frt._gen_fname(outfile, suffix = '_mcf')
+    outfile = frt._gen_fname(outfile, suffix='_mcf')
     realcmd = 'mcflirt -in ' + infile + ' -out ' + outfile
     yield assert_equal, frt.cmdline, realcmd
     # Test specified outfile name
@@ -295,20 +305,20 @@ def test_mcflirt():
         'smooth':      ('-smooth 1.00', 1.00),
         'rotation':    ('-rotation 2', 2),
         'stages':      ('-stages 3', 3),
-        'init':        ('-init %s'%(infile), infile),
+        'init':        ('-init %s' % (infile), infile),
         'use_gradient': ('-gdt', True),
         'use_contour':  ('-edge', True),
         'mean_vol':     ('-meanvol', True),
         'stats_imgs':   ('-stats', True),
         'save_mats':    ('-mats', True),
         'save_plots':   ('-plots', True),
-        }
+    }
 
     for name, settings in opt_map.items():
-        fnt = fsl.MCFLIRT(in_file = infile, **{name : settings[1]})
-        instr = '-in %s'%(infile)
-        outstr = '-out %s'%(outfile)
-        if name in ('init', 'cost', 'dof','mean_vol','bins'):
+        fnt = fsl.MCFLIRT(in_file=infile, **{name: settings[1]})
+        instr = '-in %s' % (infile)
+        outstr = '-out %s' % (outfile)
+        if name in ('init', 'cost', 'dof', 'mean_vol', 'bins'):
             yield assert_equal, fnt.cmdline, ' '.join([fnt.cmd,
                                                        instr,
                                                        settings[0],
@@ -319,13 +329,14 @@ def test_mcflirt():
                                                        outstr,
                                                        settings[0]])
 
-
     # Test error is raised when missing required args
     fnt = fsl.MCFLIRT()
     yield assert_raises, ValueError, fnt.run
     teardown_flirt(tmpdir)
 
-#test fnirt
+# test fnirt
+
+
 @skipif(no_fsl)
 def test_fnirt():
 
@@ -334,17 +345,17 @@ def test_fnirt():
     yield assert_equal, fnirt.cmd, 'fnirt'
 
     # Test list parameters
-    params = [('subsampling_scheme', '--subsamp', [4,2,2,1],'4,2,2,1'),
-              ('max_nonlin_iter', '--miter', [4,4,4,2],'4,4,4,2'),
-              ('ref_fwhm', '--reffwhm', [4,2,2,0],'4,2,2,0'),
-              ('in_fwhm', '--infwhm', [4,2,2,0],'4,2,2,0'),
-              ('apply_refmask', '--applyrefmask', [0,0,1,1],'0,0,1,1'),
-              ('apply_inmask', '--applyinmask', [0,0,0,1],'0,0,0,1'),
-              ('regularization_lambda', '--lambda', [0.5,0.75],'0.5,0.75')]
+    params = [('subsampling_scheme', '--subsamp', [4, 2, 2, 1], '4,2,2,1'),
+              ('max_nonlin_iter', '--miter', [4, 4, 4, 2], '4,4,4,2'),
+              ('ref_fwhm', '--reffwhm', [4, 2, 2, 0], '4,2,2,0'),
+              ('in_fwhm', '--infwhm', [4, 2, 2, 0], '4,2,2,0'),
+              ('apply_refmask', '--applyrefmask', [0, 0, 1, 1], '0,0,1,1'),
+              ('apply_inmask', '--applyinmask', [0, 0, 0, 1], '0,0,0,1'),
+              ('regularization_lambda', '--lambda', [0.5, 0.75], '0.5,0.75')]
     for item, flag, val, strval in params:
-        fnirt = fsl.FNIRT(in_file = infile,
-                          ref_file = reffile,
-                          **{item : val})
+        fnirt = fsl.FNIRT(in_file=infile,
+                          ref_file=reffile,
+                          **{item: val})
         log = fnirt._gen_fname(infile, suffix='_log.txt', change_ext=False)
         iout = fnirt._gen_fname(infile, suffix='_warped')
         if item in ('max_nonlin_iter'):
@@ -361,10 +372,10 @@ def test_fnirt():
             cmd = 'fnirt %s=%s '\
                   '--in=%s '\
                   '--logout=%s '\
-                  '--ref=%s --iout=%s' % (flag,strval,
-                                                infile, log,
-                                                reffile,
-                                                iout)
+                  '--ref=%s --iout=%s' % (flag, strval,
+                                          infile, log,
+                                          reffile,
+                                          iout)
 
         else:
             cmd = 'fnirt '\
@@ -392,15 +403,15 @@ def test_fnirt():
         'field_file':           ('--fout='),
         'jacobian_file':        ('--jout='),
         'modulatedref_file':    ('--refout='),
-        'out_intensitymap_file':('--intout='),
+        'out_intensitymap_file': ('--intout='),
         'log_file':             ('--logout=')}
 
     for name, settings in opt_map.items():
-        fnirt = fsl.FNIRT(in_file = infile,
-                          ref_file = reffile,
-                          **{name : infile})
+        fnirt = fsl.FNIRT(in_file=infile,
+                          ref_file=reffile,
+                          **{name: infile})
 
-        if name in ('config_file', 'affine_file','field_file'):
+        if name in ('config_file', 'affine_file', 'field_file'):
             cmd = 'fnirt %s%s --in=%s '\
                   '--logout=%s '\
                   '--ref=%s --iout=%s' % (settings, infile, infile, log,
@@ -411,14 +422,14 @@ def test_fnirt():
                   '%s%s '\
                   '--iout=%s' % (infile, log,
                                  reffile,
-                                 settings,infile,
+                                 settings, infile,
                                  iout)
         elif name in ('in_intensitymap_file', 'inwarp_file', 'inmask_file', 'jacobian_file'):
             cmd = 'fnirt --in=%s '\
                   '%s%s '\
                   '--logout=%s --ref=%s '\
                   '--iout=%s' % (infile,
-                                 settings,infile,
+                                 settings, infile,
                                  log,
                                  reffile,
                                  iout)
@@ -426,50 +437,129 @@ def test_fnirt():
             cmd = 'fnirt --in=%s '\
                   '%s%s --ref=%s '\
                   '--iout=%s' % (infile,
-                                 settings,infile,
+                                 settings, infile,
                                  reffile,
                                  iout)
         else:
             cmd = 'fnirt --in=%s '\
                   '--logout=%s %s%s '\
-                  '--ref=%s --iout=%s' % (infile,log,
+                  '--ref=%s --iout=%s' % (infile, log,
                                           settings, infile,
-                                          reffile,iout)
+                                          reffile, iout)
 
         yield assert_equal, fnirt.cmdline, cmd
     teardown_flirt(tmpdir)
+
 
 @skipif(no_fsl)
 def test_applywarp():
     tmpdir, infile, reffile = setup_flirt()
     opt_map = {
         'out_file':          ('--out=bar.nii', 'bar.nii'),
-        'premat':            ('--premat=%s'%(reffile), reffile),
-        'postmat':           ('--postmat=%s'%(reffile), reffile),
-         }
+        'premat':            ('--premat=%s' % (reffile), reffile),
+        'postmat':           ('--postmat=%s' % (reffile), reffile),
+    }
 
     # in_file, ref_file, field_file mandatory
     for name, settings in opt_map.items():
-        awarp = fsl.ApplyWarp(in_file = infile,
-                              ref_file = reffile,
-                              field_file = reffile,
-                              **{name : settings[1]})
+        awarp = fsl.ApplyWarp(in_file=infile,
+                              ref_file=reffile,
+                              field_file=reffile,
+                              **{name: settings[1]})
         if name == 'out_file':
             realcmd = 'applywarp --in=%s '\
                       '--ref=%s --out=%s '\
-                      '--warp=%s'%(infile, reffile,
-                                  settings[1],reffile)
+                      '--warp=%s' % (infile, reffile,
+                                     settings[1], reffile)
         else:
             outfile = awarp._gen_fname(infile, suffix='_warp')
             realcmd = 'applywarp --in=%s '\
                       '--ref=%s --out=%s '\
-                      '--warp=%s %s'%(infile, reffile,
-                                     outfile, reffile,
-                                     settings[0])
+                      '--warp=%s %s' % (infile, reffile,
+                                        outfile, reffile,
+                                        settings[0])
         yield assert_equal, awarp.cmdline, realcmd
 
-    awarp = fsl.ApplyWarp(in_file = infile,
-                          ref_file = reffile,
-                          field_file = reffile)
+    awarp = fsl.ApplyWarp(in_file=infile,
+                          ref_file=reffile,
+                          field_file=reffile)
 
     teardown_flirt(tmpdir)
+
+
+@skipif(no_fsl)
+def setup_fugue():
+    import nibabel as nb
+    import numpy as np
+    import os.path as op
+
+    d = np.ones((80, 80, 80))
+    tmpdir = tempfile.mkdtemp()
+    infile = op.join(tmpdir, 'dumbfile.nii.gz')
+    nb.Nifti1Image(d, None, None).to_filename(infile)
+    return tmpdir, infile
+
+
+def teardown_fugue(tmpdir):
+    shutil.rmtree(tmpdir)
+
+
+@skipif(no_fsl)
+def test_fugue():
+    import os.path as op
+    tmpdir, infile = setup_fugue()
+
+    fugue = fsl.FUGUE()
+    fugue.inputs.save_unmasked_fmap = True
+    fugue.inputs.fmap_in_file = infile
+    fugue.inputs.mask_file = infile
+    fugue.inputs.output_type = "NIFTI_GZ"
+
+    res = fugue.run()
+
+    if not isdefined(res.outputs.fmap_out_file):
+        yield False
+    else:
+        trait_spec = fugue.inputs.trait('fmap_out_file')
+        out_name = trait_spec.name_template % 'dumbfile'
+        out_name += '.nii.gz'
+
+        yield assert_equal, op.basename(res.outputs.fmap_out_file), out_name
+
+    fugue = fsl.FUGUE()
+    fugue.inputs.save_unmasked_shift = True
+    fugue.inputs.fmap_in_file = infile
+    fugue.inputs.dwell_time = 1.0e-3
+    fugue.inputs.mask_file = infile
+    fugue.inputs.output_type = "NIFTI_GZ"
+    res = fugue.run()
+
+    if not isdefined(res.outputs.shift_out_file):
+        yield False
+    else:
+        trait_spec = fugue.inputs.trait('shift_out_file')
+        out_name = trait_spec.name_template % 'dumbfile'
+        out_name += '.nii.gz'
+
+        yield assert_equal, op.basename(res.outputs.shift_out_file), \
+            out_name
+
+    fugue = fsl.FUGUE()
+    fugue.inputs.in_file = infile
+    fugue.inputs.mask_file = infile
+    # Previously computed with fugue as well
+    fugue.inputs.shift_in_file = infile
+    fugue.inputs.output_type = "NIFTI_GZ"
+
+    res = fugue.run()
+
+    if not isdefined(res.outputs.unwarped_file):
+        yield False
+    else:
+        trait_spec = fugue.inputs.trait('unwarped_file')
+        out_name = trait_spec.name_template % 'dumbfile'
+        out_name += '.nii.gz'
+
+        yield assert_equal, op.basename(res.outputs.unwarped_file), out_name
+
+    teardown_fugue(tmpdir)
