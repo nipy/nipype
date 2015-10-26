@@ -1,10 +1,16 @@
+from nipype import config, logging
+config.enable_debug_mode()
+logging.update_logging(config)
+
 import os
+from os import path
 from shutil import rmtree
 from tempfile import mkdtemp
 
 import nipype.interfaces.base as nib
 from nipype.testing import assert_equal, skipif
 import nipype.pipeline.engine as pe
+
 
 
 class InputSpec(nib.TraitedSpec):
@@ -31,9 +37,9 @@ class TestInterface(nib.BaseInterface):
 
 
 @skipif(False)
-def test_run_oargraph():
+def test_run_oar():
     cur_dir = os.getcwd()
-    temp_dir = mkdtemp(prefix='test_engine_')
+    temp_dir = mkdtemp(prefix='test_engine_', dir=os.getcwd())
     os.chdir(temp_dir)
 
     pipe = pe.Workflow(name='pipe')
@@ -45,6 +51,7 @@ def test_run_oargraph():
     pipe.base_dir = os.getcwd()
     mod1.inputs.input1 = 1
     execgraph = pipe.run(plugin="OAR")
+    print "Run"
     names = [
         '.'.join((node._hierarchy, node.name))
         for node in execgraph.nodes()
