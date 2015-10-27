@@ -11,24 +11,13 @@ Much of the machinery at the beginning of this file has been copied over from
 nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 
 """
+"""Build helper."""
 
-import sys
-from glob import glob
 import os
-
-## START - COPIED FROM NIBABEL
 from os.path import join as pjoin
+from glob import glob
+import sys
 from functools import partial
-
-PY3 = sys.version_info[0] >= 3
-if PY3:
-    string_types = str,
-else:
-    string_types = basestring,
-try:
-    from ConfigParser import ConfigParser
-except ImportError:
-    from configparser import ConfigParser
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
 # update it when the contents of directories change.
@@ -43,8 +32,25 @@ if len(set(('develop', 'bdist_egg', 'bdist_rpm', 'bdist', 'bdist_dumb',
 
 from distutils.core import setup
 
+# Commit hash writing, and dependency checking
+''' Distutils / setuptools helpers from nibabel.nisext'''
+
+import os
+from os.path import join as pjoin, split as psplit, splitext
+import sys
+PY3 = sys.version_info[0] >= 3
+if PY3:
+    string_types = str,
+else:
+    string_types = basestring,
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
+
 from distutils.version import LooseVersion
 from distutils.command.build_py import build_py
+from distutils.command.install_scripts import install_scripts
 
 from distutils import log
 
@@ -63,8 +69,8 @@ def get_comrec_build(pkg_dir, build_cmd=build_py):
 
         # This is an ini file that may contain information about the code state
         [commit hash]
-        # The line below may contain a valid hash if it has been substituted
-        during 'git archive' archive_subst_hash=$Format:%h$
+        # The line below may contain a valid hash if it has been substituted during 'git archive'
+        archive_subst_hash=$Format:%h$
         # This line may be modified by the install process
         install_hash=
 
@@ -88,7 +94,7 @@ def get_comrec_build(pkg_dir, build_cmd=build_py):
         def run(self):
             build_cmd.run(self)
             import subprocess
-            proc = subprocess.Popen('git rev-parse HEAD',
+            proc = subprocess.Popen('git rev-parse --short HEAD',
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE,
                                     shell=True)
@@ -103,6 +109,7 @@ def get_comrec_build(pkg_dir, build_cmd=build_py):
             cfg_parser.write(open(out_pth, 'wt'))
     return MyBuildPy
 
+
 def _add_append_key(in_dict, key, value):
     """ Helper for appending dependencies to setuptools args """
     # If in_dict[key] does not exist, create it
@@ -114,14 +121,14 @@ def _add_append_key(in_dict, key, value):
         in_dict[key] = [in_dict[key]]
     in_dict[key].append(value)
 
+
 # Dependency checks
 def package_check(pkg_name, version=None,
                   optional=False,
                   checker=LooseVersion,
                   version_getter=None,
                   messages=None,
-                  setuptools_args=None,
-                  pypi_pkg_name=None
+                  setuptools_args=None
                   ):
     ''' Check if package `pkg_name` is present and has good enough version
 
@@ -165,9 +172,6 @@ def package_check(pkg_name, version=None,
        If None, raise errors / warnings for missing non-optional / optional
        dependencies.  If dict fill key values ``install_requires`` and
        ``extras_require`` for non-optional and optional dependencies.
-    pypi_pkg_name : None or string
-       When the pypi package name differs from the installed module. This is the
-       case with the package python-dateutil which installs as dateutil.
     '''
     setuptools_mode = not setuptools_args is None
     optional_tf = bool(optional)
@@ -188,9 +192,6 @@ def package_check(pkg_name, version=None,
                                            version,
                                            version_getter,
                                            checker)
-    if pypi_pkg_name:
-        pkg_name = pypi_pkg_name
-
     if status == 'satisfied':
         return
     if not setuptools_mode:
@@ -216,7 +217,6 @@ def package_check(pkg_name, version=None,
     if optional_tf and not isinstance(optional, string_types):
         raise RuntimeError('Not-False optional arg should be string')
     dependency = pkg_name
-
     if version:
         dependency += '>=' + version
     if optional_tf:
@@ -226,7 +226,7 @@ def package_check(pkg_name, version=None,
                         optional,
                         dependency)
         return
-    _add_append_key(setuptools_args, 'install_requires', dependency)
+    #_add_append_key(setuptools_args, 'install_requires', dependency)
     return
 
 
@@ -245,29 +245,11 @@ def _package_status(pkg_name, version, version_getter, checker):
         return 'low-version', have_version
     return 'satisfied', have_version
 
-## END - COPIED FROM NIBABEL
+cmdclass = {'build_py': get_comrec_build('nipype')}
 
-from build_docs import cmdclass, INFO_VARS
-
-# Add custom commit-recording build command
-cmdclass['build_py'] = get_comrec_build('nipype')
-
-def configuration(parent_package='',top_path=None):
-    from numpy.distutils.misc_util import Configuration
-
-    config = Configuration(None, parent_package, top_path)
-    config.set_options(ignore_setup_xxx_py=True,
-                       assume_default_configuration=True,
-                       delegate_options_to_subpackages=True,
-                       quiet=True)
-    # The quiet=True option will silence all of the name setting warnings:
-    # Ignoring attempt to set 'name' (from 'nipy.core' to
-    #    'nipy.core.image')
-    # Robert Kern recommends setting quiet=True on the numpy list, stating
-    # these messages are probably only used in debugging numpy distutils.
-    config.get_version('nipype/__init__.py') # sets config.version
-    config.add_subpackage('nipype', 'nipype')
-    return config
+# Get version and release info, which is all stored in nipype/info.py
+ver_file = os.path.join('nipype', 'info.py')
+exec(open(ver_file).read())
 
 # Prepare setuptools args
 if 'setuptools' in sys.modules:
@@ -284,48 +266,170 @@ else:
     extra_setuptools_args = {}
     pkg_chk = package_check
 
-# Hard and soft dependency checking
-pkg_chk('networkx', INFO_VARS['NETWORKX_MIN_VERSION'])
-pkg_chk('nibabel', INFO_VARS['NIBABEL_MIN_VERSION'])
-pkg_chk('numpy', INFO_VARS['NUMPY_MIN_VERSION'])
-pkg_chk('scipy', INFO_VARS['SCIPY_MIN_VERSION'])
-pkg_chk('traits', INFO_VARS['TRAITS_MIN_VERSION'])
-pkg_chk('nose', INFO_VARS['NOSE_MIN_VERSION'])
-pkg_chk('dateutil', INFO_VARS['DATEUTIL_MIN_VERSION'],
-        pypi_pkg_name='python-dateutil')
-
-################################################################################
-# Import the documentation building classes.
-
-try:
-    from build_docs import cmdclass
-except ImportError:
-    """ Pass by the doc build gracefully if sphinx is not installed """
-    print "Sphinx is not installed, docs cannot be built"
-    cmdclass = {}
-
-
-################################################################################
+# Do dependency checking
+pkg_chk('networkx', NETWORKX_MIN_VERSION)
+pkg_chk('nibabel', NIBABEL_MIN_VERSION)
+pkg_chk('numpy', NUMPY_MIN_VERSION)
+pkg_chk('scipy', SCIPY_MIN_VERSION)
+pkg_chk('traits', TRAITS_MIN_VERSION)
+pkg_chk('nose', NOSE_MIN_VERSION)
+custom_dateutil_messages = {'missing opt': ('Missing optional package "%s"'
+                                            ' provided by package '
+                                            '"python-dateutil"')}
+pkg_chk('dateutil', DATEUTIL_MIN_VERSION,
+        messages = custom_dateutil_messages)
 
 def main(**extra_args):
-    from numpy.distutils.core import setup
-    setup(name=INFO_VARS['NAME'],
-          maintainer=INFO_VARS['MAINTAINER'],
-          maintainer_email=INFO_VARS['MAINTAINER_EMAIL'],
-          description=INFO_VARS['DESCRIPTION'],
-          long_description=INFO_VARS['LONG_DESCRIPTION'],
-          url=INFO_VARS['URL'],
-          download_url=INFO_VARS['DOWNLOAD_URL'],
-          license=INFO_VARS['LICENSE'],
-          classifiers=INFO_VARS['CLASSIFIERS'],
-          author=INFO_VARS['AUTHOR'],
-          author_email=INFO_VARS['AUTHOR_EMAIL'],
-          platforms=INFO_VARS['PLATFORMS'],
-          version=INFO_VARS['VERSION'],
-          configuration=configuration,
-          cmdclass=cmdclass,
-          scripts=glob('bin/*'),
-          **extra_args)
+    setup(name=NAME,
+          maintainer=MAINTAINER,
+          maintainer_email=MAINTAINER_EMAIL,
+          description=DESCRIPTION,
+          long_description=LONG_DESCRIPTION,
+          url=URL,
+          download_url=DOWNLOAD_URL,
+          license=LICENSE,
+          classifiers=CLASSIFIERS,
+          author=AUTHOR,
+          author_email=AUTHOR_EMAIL,
+          platforms=PLATFORMS,
+          version=VERSION,
+          install_requires=REQUIRES,
+          provides=PROVIDES,
+          packages     = [ 'nipype',
+                           'nipype.algorithms',
+                           'nipype.algorithms.tests',
+                           'nipype.caching',
+                           'nipype.caching.tests',
+                           'nipype.external',
+                           'nipype.fixes',
+                           'nipype.fixes.numpy',
+                           'nipype.fixes.numpy.testing',
+                           'nipype.interfaces',
+                           'nipype.interfaces.afni',
+                           'nipype.interfaces.afni.tests',
+                           'nipype.interfaces.ants',
+                           'nipype.interfaces.ants.tests',
+                           'nipype.interfaces.camino',
+                           'nipype.interfaces.camino.tests',
+                           'nipype.interfaces.camino2trackvis',
+                           'nipype.interfaces.camino2trackvis.tests',
+                           'nipype.interfaces.cmtk',
+                           'nipype.interfaces.cmtk.tests',
+                           'nipype.interfaces.diffusion_toolkit',
+                           'nipype.interfaces.diffusion_toolkit.tests',
+                           'nipype.interfaces.dipy',
+                           'nipype.interfaces.dipy.tests',
+                           'nipype.interfaces.elastix',
+                           'nipype.interfaces.elastix.tests',
+                           'nipype.interfaces.freesurfer',
+                           'nipype.interfaces.freesurfer.tests',
+                           'nipype.interfaces.fsl',
+                           'nipype.interfaces.fsl.tests',
+                           'nipype.interfaces.mipav',
+                           'nipype.interfaces.mipav.tests',
+                           'nipype.interfaces.mne',
+                           'nipype.interfaces.mne.tests',
+                           'nipype.interfaces.mrtrix',
+                           'nipype.interfaces.mrtrix.tests',
+                           'nipype.interfaces.nipy',
+                           'nipype.interfaces.nipy.tests',
+                           'nipype.interfaces.nitime',
+                           'nipype.interfaces.nitime.tests',
+                           'nipype.interfaces.script_templates',
+                           'nipype.interfaces.semtools',
+                           'nipype.interfaces.semtools.brains',
+                           'nipype.interfaces.semtools.brains.tests',
+                           'nipype.interfaces.semtools.diffusion',
+                           'nipype.interfaces.semtools.diffusion.tests',
+                           'nipype.interfaces.semtools.diffusion.tractography',
+                           'nipype.interfaces.semtools.diffusion.tractography.tests',
+                           'nipype.interfaces.semtools.filtering',
+                           'nipype.interfaces.semtools.filtering.tests',
+                           'nipype.interfaces.semtools.legacy',
+                           'nipype.interfaces.semtools.legacy.tests',
+                           'nipype.interfaces.semtools.registration',
+                           'nipype.interfaces.semtools.registration.tests',
+                           'nipype.interfaces.semtools.segmentation',
+                           'nipype.interfaces.semtools.segmentation.tests',
+                           'nipype.interfaces.semtools.testing',
+                           'nipype.interfaces.semtools.tests',
+                           'nipype.interfaces.semtools.utilities',
+                           'nipype.interfaces.semtools.utilities.tests',
+                           'nipype.interfaces.slicer',
+                           'nipype.interfaces.slicer.diffusion',
+                           'nipype.interfaces.slicer.diffusion.tests',
+                           'nipype.interfaces.slicer.filtering',
+                           'nipype.interfaces.slicer.filtering.tests',
+                           'nipype.interfaces.slicer.legacy',
+                           'nipype.interfaces.slicer.legacy.diffusion',
+                           'nipype.interfaces.slicer.legacy.diffusion.tests',
+                           'nipype.interfaces.slicer.legacy.tests',
+                           'nipype.interfaces.slicer.quantification',
+                           'nipype.interfaces.slicer.quantification.tests',
+                           'nipype.interfaces.slicer.registration',
+                           'nipype.interfaces.slicer.registration.tests',
+                           'nipype.interfaces.slicer.segmentation',
+                           'nipype.interfaces.slicer.segmentation.tests',
+                           'nipype.interfaces.slicer.tests',
+                           'nipype.interfaces.spm',
+                           'nipype.interfaces.spm.tests',
+                           'nipype.interfaces.tests',
+                           'nipype.interfaces.vista',
+                           'nipype.interfaces.vista.tests',
+                           'nipype.pipeline',
+                           'nipype.pipeline.plugins',
+                           'nipype.pipeline.plugins.tests',
+                           'nipype.pipeline.tests',
+                           'nipype.testing',
+                           'nipype.testing.data',
+                           'nipype.testing.data.bedpostxout',
+                           'nipype.testing.data.dicomdir',
+                           'nipype.testing.data.tbss_dir',
+                           'nipype.utils',
+                           'nipype.utils.tests',
+                           'nipype.workflows',
+                           'nipype.workflows.data',
+                           'nipype.workflows.dmri',
+                           'nipype.workflows.dmri.camino',
+                           'nipype.workflows.dmri.connectivity',
+                           'nipype.workflows.dmri.dipy',
+                           'nipype.workflows.dmri.fsl',
+                           'nipype.workflows.dmri.fsl.tests',
+                           'nipype.workflows.dmri.mrtrix',
+                           'nipype.workflows.fmri',
+                           'nipype.workflows.fmri.fsl',
+                           'nipype.workflows.fmri.fsl.tests',
+                           'nipype.workflows.fmri.spm',
+                           'nipype.workflows.fmri.spm.tests',
+                           'nipype.workflows.graph',
+                           'nipype.workflows.misc',
+                           'nipype.workflows.rsfmri',
+                           'nipype.workflows.rsfmri.fsl',
+                           'nipype.workflows.smri',
+                           'nipype.workflows.smri.ants',
+                           'nipype.workflows.smri.freesurfer',
+                           'nipype.workflows.warp'],
+          # The package_data spec has no effect for me (on python 2.6) -- even
+          # changing to data_files doesn't get this stuff included in the source
+          # distribution -- not sure if it has something to do with the magic
+          # above, but distutils is surely the worst piece of code in all of
+          # python -- duplicating things into MANIFEST.in but this is admittedly
+          # only a workaround to get things started -- not a solution
+          package_data = {'nipype':
+                          [pjoin('testing', 'data', '*'),
+                           pjoin('testing', 'data', 'dicomdir', '*'),
+                           pjoin('testing', 'data', 'bedpostxout', '*'),
+                           pjoin('testing', 'data', 'tbss_dir', '*'),
+                           pjoin('workflows', 'data', '*'),
+                           pjoin('pipeline', 'report_template.html'),
+                           pjoin('external', 'd3.js'),
+                           pjoin('interfaces', 'script_templates', '*'),
+                           pjoin('interfaces', 'tests', 'realign_json.json')
+                          ]},
+          scripts      = glob('bin/*'),
+          cmdclass = cmdclass,
+          **extra_args
+         )
 
 if __name__ == "__main__":
     main(**extra_setuptools_args)

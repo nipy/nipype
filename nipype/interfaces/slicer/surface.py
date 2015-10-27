@@ -204,7 +204,7 @@ class ModelMakerInputSpec(CommandLineInputSpec):
 
 
 class ModelMakerOutputSpec(TraitedSpec):
-    modelSceneFile = OutputMultiPath(File(exists=True), desc="Generated models, under a model hierarchy node. Models are imported into Slicer under a model hierarchy node, and their colors are set by the color table associated with the input label map volume. The model hierarchy node must be created before running the model maker, by selecting Create New ModelHierarchy from the Models drop down menu. If you're running from the command line, a model hierarchy node in a new mrml scene will be created for you.", exists=True)
+    modelSceneFile = OutputMultiPath(File(exists=True), desc="Generated models, under a model hierarchy node. Models are imported into Slicer under a model hierarchy node, and their colors are set by the color table associated with the input label map volume. The model hierarchy node must be created before running the model maker, by selecting Create New ModelHierarchy from the Models drop down menu. If you're running from the command line, a model hierarchy node in a new mrml scene will be created for you.")
 
 
 class ModelMaker(SEMLikeCommandLine):

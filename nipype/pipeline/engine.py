@@ -14,6 +14,7 @@ The `Workflow` class provides core functionality for batch processing.
 
 from datetime import datetime
 from nipype.utils.misc import flatten, unflatten
+from nipype.interfaces.traits_extension import File
 try:
     from collections import OrderedDict
 except ImportError:
@@ -1143,26 +1144,29 @@ class Node(WorkflowBase):
             Input field and list to iterate using the pipeline engine
             for example to iterate over different frac values in fsl.Bet()
             for a single field the input can be a tuple, otherwise a list
-            of tuples
-            node.iterables = ('frac',[0.5,0.6,0.7])
-            node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
+            of tuples ::
+
+                node.iterables = ('frac',[0.5,0.6,0.7])
+                node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
 
             If this node has an itersource, then the iterables values
             is a dictionary which maps an iterable source field value
-            to the target iterables field values, e.g.:
-            inputspec.iterables = ('images',['img1.nii', 'img2.nii']])
-            node.itersource = ('inputspec', ['frac'])
-            node.iterables = ('frac', {'img1.nii': [0.5, 0.6],
-                                       img2.nii': [0.6, 0.7]})
+            to the target iterables field values, e.g.: ::
+
+                inputspec.iterables = ('images',['img1.nii', 'img2.nii']])
+                node.itersource = ('inputspec', ['frac'])
+                node.iterables = ('frac', {'img1.nii': [0.5, 0.6],
+                                           'img2.nii': [0.6, 0.7]})
 
             If this node's synchronize flag is set, then an alternate
             form of the iterables is a [fields, values] list, where
             fields is the list of iterated fields and values is the
-            list of value tuples for the given fields, e.g.:
-            node.synchronize = True
-            node.iterables = [('frac', 'threshold'),
-                              [(0.5, True),
-                               (0.6, False)]]
+            list of value tuples for the given fields, e.g.: ::
+
+                node.synchronize = True
+                node.iterables = [('frac', 'threshold'),
+                                  [(0.5, True),
+                                   (0.6, False)]]
 
         itersource: tuple
             The (name, fields) iterables source which specifies the name
@@ -1467,7 +1471,7 @@ class Node(WorkflowBase):
             sorted_outputs = sorted(self.needed_outputs)
             hashobject.update(str(sorted_outputs))
             hashvalue = hashobject.hexdigest()
-            hashed_inputs['needed_outputs'] = sorted_outputs
+            hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
 
     def _save_hashfile(self, hashfile, hashed_inputs):
@@ -1947,6 +1951,7 @@ class JoinNode(Node):
             if name in fields and len(trait.inner_traits) == 1:
                 item_trait = trait.inner_traits[0]
                 dyntraits.add_trait(name, item_trait)
+                setattr(dyntraits, name, Undefined)
                 logger.debug("Converted the join node %s field %s"
                              " trait type from %s to %s"
                              % (self, name, trait.trait_type.info(),
@@ -2131,7 +2136,7 @@ class MapNode(Node):
             sorted_outputs = sorted(self.needed_outputs)
             hashobject.update(str(sorted_outputs))
             hashvalue = hashobject.hexdigest()
-            hashed_inputs['needed_outputs'] = sorted_outputs
+            hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
 
     @property

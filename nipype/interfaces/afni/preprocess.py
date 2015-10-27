@@ -170,6 +170,20 @@ class RefitInputSpec(CommandLineInputSpec):
     zorigin = traits.Str(desc='z distance for edge voxel offset',
                          argstr='-zorigin %s')
 
+    xdel = traits.Float(desc='new x voxel dimension in mm',
+                        argstr='-xdel %f')
+
+    ydel = traits.Float(desc='new y voxel dimension in mm',
+                        argstr='-ydel %f')
+
+    zdel = traits.Float(desc='new z voxel dimension in mm',
+                        argstr='-zdel %f')
+
+    space = traits.Enum('TLRC', 'MNI', 'ORIG',
+                        argstr='-space %s',
+                        desc='Associates the dataset with a specific' +
+                         ' template type, e.g. TLRC, MNI, ORIG')
+
 
 class Refit(CommandLine):
     """Changes some of the information inside a 3D dataset's header
@@ -233,6 +247,9 @@ class WarpInputSpec(AFNICommandInputSpec):
                    argstr="-gridset %s",
                    exists=True)
 
+    newgrid = traits.Float(desc="specify grid of this size (mm)",
+                           argstr="-newgrid %f")
+
     zpad = traits.Int(desc="pad input dataset with N planes" +
                       " of zero on all sides.",
                       argstr="-zpad %d")
@@ -254,7 +271,13 @@ class Warp(AFNICommand):
     >>> warp.inputs.out_file = "trans.nii.gz"
     >>> warp.cmdline
     '3dWarp -deoblique -prefix trans.nii.gz structural.nii'
-    >>> res = warp.run() # doctest: +SKIP
+
+    >>> warp_2 = afni.Warp()
+    >>> warp_2.inputs.in_file = 'structural.nii'
+    >>> warp_2.inputs.newgrid = 1.0
+    >>> warp_2.inputs.out_file = "trans.nii.gz"
+    >>> warp_2.cmdline
+    '3dWarp -newgrid 1.000000 -prefix trans.nii.gz structural.nii'
 
     """
 
@@ -667,7 +690,7 @@ class CopyInputSpec(AFNICommandInputSpec):
                    exists=True,
                    copyfile=False)
     out_file = File(name_template="%s_copy", desc='output image file name',
-                    argstr='-prefix %s', name_source="in_file")
+                    argstr='%s', position=-1, name_source="in_file")
 
 
 class Copy(AFNICommand):
@@ -681,11 +704,26 @@ class Copy(AFNICommand):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> copy = afni.Copy()
-    >>> copy.inputs.in_file = 'functional.nii'
-    >>> copy.inputs.out_file = 'new_func.nii'
-    >>> res = copy.run() # doctest: +SKIP
+    >>> copy3d = afni.Copy()
+    >>> copy3d.inputs.in_file = 'functional.nii'
+    >>> copy3d.cmdline
+    '3dcopy functional.nii functional_copy'
 
+    >>> from copy import deepcopy
+    >>> copy3d_2 = deepcopy(copy3d)
+    >>> copy3d_2.inputs.outputtype = 'NIFTI'
+    >>> copy3d_2.cmdline
+    '3dcopy functional.nii functional_copy.nii'
+
+    >>> copy3d_3 = deepcopy(copy3d)
+    >>> copy3d_3.inputs.outputtype = 'NIFTI_GZ'
+    >>> copy3d_3.cmdline
+    '3dcopy functional.nii functional_copy.nii.gz'
+
+    >>> copy3d_4 = deepcopy(copy3d)
+    >>> copy3d_4.inputs.out_file = 'new_func.nii'
+    >>> copy3d_4.cmdline
+    '3dcopy functional.nii new_func.nii'
     """
 
     _cmd = '3dcopy'

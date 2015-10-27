@@ -26,6 +26,8 @@ def test_Warp_inputs():
     ),
     mni2tta=dict(argstr='-mni2tta',
     ),
+    newgrid=dict(argstr='-newgrid %f',
+    ),
     out_file=dict(argstr='-prefix %s',
     name_source='in_file',
     name_template='%s_warp',

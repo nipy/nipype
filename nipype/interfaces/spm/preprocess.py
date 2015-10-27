@@ -123,9 +123,8 @@ class RealignInputSpec(SPMCommandInputSpec):
                         desc='gaussian smoothing kernel width')
     separation = traits.Range(low=0.0, field='eoptions.sep',
                               desc='sampling separation in mm')
-    register_to_mean = traits.Bool(True, field='eoptions.rtm',
-                                   mandatory=True, usedefault=True,
-                desc='Indicate whether realignment is done to the mean image')
+    register_to_mean = traits.Bool(field='eoptions.rtm',
+                                   desc='Indicate whether realignment is done to the mean image')
     weight_img = File(exists=True, field='eoptions.weight',
                       desc='filename of weighting image')
     interp = traits.Range(low=0, high=7, field='eoptions.interp',
@@ -191,9 +190,13 @@ class Realign(SPMCommand):
         """Convert input to appropriate format for spm
         """
         if opt == 'in_files':
+            if self.inputs.jobtype == "write":
+                separate_sessions = False
+            else:
+                separate_sessions = True
             return scans_for_fnames(val,
-                                    keep4d=True,
-                                    separate_sessions=True)
+                                    keep4d=False,
+                                    separate_sessions=separate_sessions)
         return super(Realign, self)._format_arg(opt, spec, val)
 
     def _parse_inputs(self):
@@ -206,19 +209,21 @@ class Realign(SPMCommand):
         outputs = self._outputs().get()
         resliced_all = self.inputs.write_which[0] > 0
         resliced_mean = self.inputs.write_which[1] > 0
-        if isdefined(self.inputs.in_files):
-            outputs['realignment_parameters'] = []
-        for imgf in self.inputs.in_files:
-            if isinstance(imgf, list):
-                tmp_imgf = imgf[0]
-            else:
-                tmp_imgf = imgf
-            outputs['realignment_parameters'].append(fname_presuffix(tmp_imgf,
-                                                                     prefix='rp_',
-                                                                     suffix='.txt',
-                                                                     use_ext=False))
-            if not isinstance(imgf, list) and func_is_3d(imgf):
-                break
+        
+        if self.inputs.jobtype != "write":
+            if isdefined(self.inputs.in_files):
+                outputs['realignment_parameters'] = []
+            for imgf in self.inputs.in_files:
+                if isinstance(imgf, list):
+                    tmp_imgf = imgf[0]
+                else:
+                    tmp_imgf = imgf
+                outputs['realignment_parameters'].append(fname_presuffix(tmp_imgf,
+                                                                         prefix='rp_',
+                                                                         suffix='.txt',
+                                                                         use_ext=False))
+                if not isinstance(imgf, list) and func_is_3d(imgf):
+                    break
         if self.inputs.jobtype == "estimate":
             outputs['realigned_files'] = self.inputs.in_files
         if self.inputs.jobtype == "estimate" or self.inputs.jobtype == "estwrite":
@@ -240,18 +245,10 @@ class Realign(SPMCommand):
                         for i, inner_imgf in enumerate(filename_to_list(imgf)):
                             newfile = fname_presuffix(inner_imgf,
                                                       prefix=self.inputs.out_prefix)
-                            if os.path.exists(newfile):
-                                realigned_run.append(newfile)
-                                continue
-                            if (idx == 0) and (i == 0) and \
-                                    func_is_3d(inner_imgf):
-                                realigned_run.append(fname_presuffix(inner_imgf,
-                                                                     prefix=''))
+                            realigned_run.append(newfile)
                     else:
                         realigned_run = fname_presuffix(imgf,
                                                         prefix=self.inputs.out_prefix)
-                        if (idx == 0) and func_is_3d(imgf):
-                            realigned_run = fname_presuffix(imgf, prefix='')
                     outputs['realigned_files'].append(realigned_run)
         return outputs
 
@@ -766,15 +763,19 @@ class Segment(SPMCommand):
 
     """
 
-    if Info.version() and Info.version()['name'] == "SPM12":
-        _jobtype = 'tools'
-        _jobname = 'oldseg'
-    else:
-        _jobtype = 'spatial'
-        _jobname = 'preproc'
-
     input_spec = SegmentInputSpec
     output_spec = SegmentOutputSpec
+    
+    def __init__(self, **inputs):
+        _local_version = SPMCommand().version
+        if _local_version and '12.' in _local_version:
+            self._jobtype = 'tools'
+            self._jobname = 'oldseg'
+        else:
+            self._jobtype = 'spatial'
+            self._jobname = 'preproc'
+        
+        SPMCommand.__init__(self, **inputs)
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
@@ -893,12 +894,17 @@ class NewSegment(SPMCommand):
 
     input_spec = NewSegmentInputSpec
     output_spec = NewSegmentOutputSpec
-    if Info.version() and Info.version()['name'] == "SPM12":
-        _jobtype = 'spatial'
-        _jobname = 'preproc'
-    else:
-        _jobtype = 'tools'
-        _jobname = 'preproc8'
+        
+    def __init__(self, **inputs):
+        _local_version = SPMCommand().version
+        if _local_version and '12.' in _local_version:
+            self._jobtype = 'spatial'
+            self._jobname = 'preproc'
+        else:
+            self._jobtype = 'tools'
+            self._jobname = 'preproc8'
+        
+        SPMCommand.__init__(self, **inputs)
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm

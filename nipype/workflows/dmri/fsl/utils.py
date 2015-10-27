@@ -19,9 +19,9 @@ def cleanup_edge_pipeline(name='Cleanup'):
                          name='outputnode')
 
     fugue = pe.Node(fsl.FUGUE(save_fmap=True, despike_2dfilter=True,
-                    despike_threshold=2.1), name='Despike')
-    erode = pe.Node(fsl.maths.MathsCommand(nan2zeros=True,
-                    args='-kernel 2D -ero'), name='MskErode')
+                              despike_threshold=2.1), name='Despike')
+    erode = pe.Node(fsl.maths.MathsCommand(
+        nan2zeros=True, args='-kernel 2D -ero'), name='MskErode')
     newmsk = pe.Node(fsl.MultiImageMaths(op_string='-sub %s -thr 0.5 -bin'),
                      name='NewMask')
     applymsk = pe.Node(fsl.ApplyMask(nan2zeros=True), name='ApplyMask')
@@ -51,13 +51,13 @@ def vsm2warp(name='Shiftmap2Warping'):
     """
     Converts a voxel shift map (vsm) to a displacements field (warp).
     """
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_vsm',
-                        'in_ref', 'scaling', 'enc_dir']), name='inputnode')
+    inputnode = pe.Node(niu.IdentityInterface(
+        fields=['in_vsm', 'in_ref', 'scaling', 'enc_dir']), name='inputnode')
     outputnode = pe.Node(niu.IdentityInterface(fields=['out_warp']),
                          name='outputnode')
-    fixhdr = pe.Node(niu.Function(input_names=['in_file', 'in_file_hdr'],
-                     output_names=['out_file'], function=copy_hdr),
-                     name='Fix_hdr')
+    fixhdr = pe.Node(niu.Function(
+        input_names=['in_file', 'in_file_hdr'], output_names=['out_file'],
+        function=copy_hdr), name='Fix_hdr')
     vsm = pe.Node(fsl.maths.BinaryMaths(operation='mul'), name='ScaleField')
     vsm2dfm = pe.Node(fsl.ConvertWarp(relwarp=True, out_relwarp=True),
                       name='vsm2dfm')
@@ -81,33 +81,33 @@ def dwi_flirt(name='DWICoregistration', excl_nodiff=False,
     """
     Generates a workflow for linear registration of dwi volumes
     """
-    inputnode = pe.Node(niu.IdentityInterface(fields=['reference',
-                        'in_file', 'ref_mask', 'in_xfms', 'in_bval']),
-                        name='inputnode')
+    inputnode = pe.Node(niu.IdentityInterface(
+        fields=['reference', 'in_file', 'ref_mask', 'in_xfms', 'in_bval']),
+        name='inputnode')
 
-    initmat = pe.Node(niu.Function(input_names=['in_bval', 'in_xfms',
-                      'excl_nodiff'], output_names=['init_xfms'],
-                                   function=_checkinitxfm), name='InitXforms')
+    initmat = pe.Node(niu.Function(
+        input_names=['in_bval', 'in_xfms', 'excl_nodiff'],
+        output_names=['init_xfms'], function=_checkinitxfm), name='InitXforms')
     initmat.inputs.excl_nodiff = excl_nodiff
-    dilate = pe.Node(fsl.maths.MathsCommand(nan2zeros=True,
-                     args='-kernel sphere 5 -dilM'), name='MskDilate')
+    dilate = pe.Node(fsl.maths.MathsCommand(
+        nan2zeros=True, args='-kernel sphere 5 -dilM'), name='MskDilate')
     split = pe.Node(fsl.Split(dimension='t'), name='SplitDWIs')
     pick_ref = pe.Node(niu.Select(), name='Pick_b0')
     n4 = pe.Node(ants.N4BiasFieldCorrection(dimension=3), name='Bias')
-    enhb0 = pe.Node(niu.Function(input_names=['in_file', 'in_mask',
-                    'clip_limit'], output_names=['out_file'],
-                                 function=enhance), name='B0Equalize')
+    enhb0 = pe.Node(niu.Function(
+        input_names=['in_file', 'in_mask', 'clip_limit'],
+        output_names=['out_file'], function=enhance), name='B0Equalize')
     enhb0.inputs.clip_limit = 0.015
-    enhdw = pe.MapNode(niu.Function(input_names=['in_file', 'in_mask'],
-                       output_names=['out_file'], function=enhance),
-                       name='DWEqualize', iterfield=['in_file'])
+    enhdw = pe.MapNode(niu.Function(
+        input_names=['in_file', 'in_mask'], output_names=['out_file'],
+        function=enhance), name='DWEqualize', iterfield=['in_file'])
     flirt = pe.MapNode(fsl.FLIRT(**flirt_param), name='CoRegistration',
                        iterfield=['in_file', 'in_matrix_file'])
     thres = pe.MapNode(fsl.Threshold(thresh=0.0), iterfield=['in_file'],
                        name='RemoveNegative')
     merge = pe.Node(fsl.Merge(dimension='t'), name='MergeDWIs')
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file',
-                         'out_xfms']), name='outputnode')
+    outputnode = pe.Node(niu.IdentityInterface(
+        fields=['out_file', 'out_xfms']), name='outputnode')
     wf = pe.Workflow(name=name)
     wf.connect([
         (inputnode,  split,      [('in_file', 'in_file')]),
@@ -141,10 +141,11 @@ def apply_all_corrections(name='UnwarpArtifacts'):
     the map of determinants of the jacobian.
     """
 
-    inputnode = pe.Node(niu.IdentityInterface(fields=['in_sdc',
-                        'in_hmc', 'in_ecc', 'in_dwi']), name='inputnode')
-    outputnode = pe.Node(niu.IdentityInterface(fields=['out_file', 'out_warp',
-                         'out_coeff', 'out_jacobian']), name='outputnode')
+    inputnode = pe.Node(niu.IdentityInterface(
+        fields=['in_sdc', 'in_hmc', 'in_ecc', 'in_dwi']), name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(
+        fields=['out_file', 'out_warp', 'out_coeff', 'out_jacobian']),
+        name='outputnode')
     warps = pe.MapNode(fsl.ConvertWarp(relwarp=True),
                        iterfield=['premat', 'postmat'],
                        name='ConvertWarp')
@@ -248,7 +249,7 @@ def hmc_split(in_file, in_bval, ref_num=0, lowbval=5.0):
 
     volid = lowbs[0]
     if (isdefined(ref_num) and (ref_num < len(lowbs))):
-        volid = [ref_num]
+        volid = ref_num
 
     if volid == 0:
         data = data[..., 1:]
@@ -265,8 +266,8 @@ def hmc_split(in_file, in_bval, ref_num=0, lowbval=5.0):
     out_mov = op.abspath('hmc_mov.nii.gz')
     out_bval = op.abspath('bval_split.txt')
 
-    hdr.set_data_shape(refdata.shape)
     refdata = data[..., volid]
+    hdr.set_data_shape(refdata.shape)
     nb.Nifti1Image(refdata, im.get_affine(), hdr).to_filename(out_ref)
 
     hdr.set_data_shape(data.shape)
@@ -406,8 +407,8 @@ def time_avg(in_file, index=[0], out_file=None):
     if len(index) == 1:
         data = imgs[0].get_data().astype(np.float32)
     else:
-        data = np.average(np.array([im.get_data().astype(np.float32) for im in imgs]),
-                         axis=0)
+        data = np.average(np.array([im.get_data().astype(np.float32)
+                                    for im in imgs]), axis=0)
 
     hdr = imgs[0].get_header().copy()
     hdr.set_data_shape(data.shape)
@@ -448,7 +449,9 @@ def b0_average(in_dwi, in_bval, max_b=10.0, out_file=None):
         out_file = op.abspath("%s_avg_b0%s" % (fname, ext))
 
     imgs = np.array(nb.four_to_three(nb.load(in_dwi)))
-    index = b0_indices(in_bval, max_b=max_b)
+    bval = np.loadtxt(in_bval)
+    index = np.argwhere(bval <= max_b).flatten().tolist()
+
     b0s = [im.get_data().astype(np.float32)
            for im in imgs[index]]
     b0 = np.average(np.array(b0s), axis=0)
@@ -483,8 +486,8 @@ def rotate_bvecs(in_bvec, in_matrix):
 
     if len(bvecs) != len(in_matrix):
         raise RuntimeError(('Number of b-vectors (%d) and rotation '
-                           'matrices (%d) should match.') % (len(bvecs),
-                           len(in_matrix)))
+                            'matrices (%d) should match.') % (len(bvecs),
+                                                              len(in_matrix)))
 
     for bvec, mat in zip(bvecs, in_matrix):
         if np.all(bvec == 0.0):
@@ -492,7 +495,7 @@ def rotate_bvecs(in_bvec, in_matrix):
         else:
             invrot = np.linalg.inv(np.loadtxt(mat))[:3, :3]
             newbvec = invrot.dot(bvec)
-            new_bvecs.append((newbvec/np.linalg.norm(newbvec)))
+            new_bvecs.append((newbvec / np.linalg.norm(newbvec)))
 
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
     return out_file
@@ -519,7 +522,7 @@ def eddy_rotate_bvecs(in_bvec, eddy_params):
 
     if len(bvecs) != len(params):
         raise RuntimeError(('Number of b-vectors and rotation '
-                           'matrices should match.'))
+                            'matrices should match.'))
 
     for bvec, row in zip(bvecs, params):
         if np.all(bvec == 0.0):
@@ -530,19 +533,19 @@ def eddy_rotate_bvecs(in_bvec, eddy_params):
             az = row[5]
 
             Rx = np.array([[1.0, 0.0, 0.0],
-                          [0.0, cos(ax), -sin(ax)],
-                          [0.0, sin(ax), cos(ax)]])
+                           [0.0, cos(ax), -sin(ax)],
+                           [0.0, sin(ax), cos(ax)]])
             Ry = np.array([[cos(ay), 0.0, sin(ay)],
-                          [0.0, 1.0, 0.0],
-                          [-sin(ay), 0.0, cos(ay)]])
+                           [0.0, 1.0, 0.0],
+                           [-sin(ay), 0.0, cos(ay)]])
             Rz = np.array([[cos(az), -sin(az), 0.0],
-                          [sin(az), cos(az), 0.0],
-                          [0.0, 0.0, 1.0]])
+                           [sin(az), cos(az), 0.0],
+                           [0.0, 0.0, 1.0]])
             R = Rx.dot(Ry).dot(Rz)
 
             invrot = np.linalg.inv(R)
             newbvec = invrot.dot(bvec)
-            new_bvecs.append((newbvec/np.linalg.norm(newbvec)))
+            new_bvecs.append((newbvec / np.linalg.norm(newbvec)))
 
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
     return out_file
@@ -600,7 +603,7 @@ def siemens2rads(in_file, out_file=None):
 
     imin = data.min()
     imax = data.max()
-    data = (2.0 * math.pi * (data - imin)/(imax-imin)) - math.pi
+    data = (2.0 * math.pi * (data - imin) / (imax - imin)) - math.pi
     hdr.set_data_dtype(np.float32)
     hdr.set_xyzt_units('mm')
     hdr['datatype'] = 16
@@ -624,7 +627,7 @@ def rads2radsec(in_file, delta_te, out_file=None):
         out_file = op.abspath('./%s_radsec.nii.gz' % fname)
 
     im = nb.load(in_file)
-    data = im.get_data().astype(np.float32) * (1.0/delta_te)
+    data = im.get_data().astype(np.float32) * (1.0 / delta_te)
     nb.Nifti1Image(data, im.get_affine(),
                    im.get_header()).to_filename(out_file)
     return out_file
@@ -705,7 +708,7 @@ def reorient_bvecs(in_dwi, old_dwi, in_bvec):
     sc_idx = np.where((np.abs(RS) != 1) & (RS != 0))
     S = np.ones_like(RS)
     S[sc_idx] = RS[sc_idx]
-    R = RS/S
+    R = RS / S
 
     new_bvecs = [R.dot(b) for b in bvecs]
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')

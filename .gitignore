@@ -14,3 +14,6 @@
 .pydevproject
 .idea/
 /documentation.zip
+.DS_Store
+nipype/testing/data/von-ray_errmap.nii.gz
+nipype/testing/data/von_errmap.nii.gz

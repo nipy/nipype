@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 """
 ====================================
@@ -348,8 +347,6 @@ def create_reg_workflow(name='registration'):
     Parameters
     ----------
 
-    ::
-
         name : name of workflow (default: 'registration')
 
     Inputs::
@@ -365,10 +362,6 @@ def create_reg_workflow(name='registration'):
         outputspec.anat2target_transform : FLIRT+FNIRT transform
         outputspec.transformed_files : transformed files in target space
         outputspec.transformed_mean : mean image in target space
-
-    Example
-    -------
-
     """
 
     register = Workflow(name=name)
@@ -387,7 +380,8 @@ def create_reg_workflow(name='registration'):
                                                           'transformed_mean',
                                                           'segmentation_files',
                                                           'anat2target',
-                                                          'aparc'
+                                                          'aparc',
+                                                          'min_cost_file'
                                                           ]),
                       name='outputspec')
 
@@ -438,6 +432,7 @@ def create_reg_workflow(name='registration'):
     """
     Apply inverse transform to take segmentations to functional space
     """
+
     applyxfm = MapNode(freesurfer.ApplyVolTransform(inverse=True,
                                                     interp='nearest'),
                        iterfield=['target_file'],
@@ -450,6 +445,7 @@ def create_reg_workflow(name='registration'):
     """
     Apply inverse transform to aparc file
     """
+
     aparcxfm = Node(freesurfer.ApplyVolTransform(inverse=True,
                                                  interp='nearest'),
                     name='aparc_inverse_transform')
@@ -502,10 +498,10 @@ def create_reg_workflow(name='registration'):
     reg.inputs.use_histogram_matching = [False] * 2 + [True]
     reg.inputs.winsorize_lower_quantile = 0.005
     reg.inputs.winsorize_upper_quantile = 0.995
-    reg.inputs.args = '--float'
+    reg.inputs.float = True
     reg.inputs.output_warped_image = 'output_warped_image.nii.gz'
     reg.inputs.num_threads = 4
-    reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
+    reg.plugin_args = {'sbatch_args': '-c%d' % 4}
     register.connect(stripper, 'out_file', reg, 'moving_image')
     register.connect(inputnode,'target_image', reg,'fixed_image')
 
@@ -514,16 +510,15 @@ def create_reg_workflow(name='registration'):
     Concatenate the affine and ants transforms into a list
     """
 
-    pickfirst = lambda x: x[0]
-
     merge = Node(Merge(2), iterfield=['in2'], name='mergexfm')
     register.connect(convert2itk, 'itk_transform', merge, 'in2')
-    register.connect(reg, ('composite_transform', pickfirst), merge, 'in1')
+    register.connect(reg, 'composite_transform', merge, 'in1')
 
 
     """
     Transform the mean image. First to anatomical and then to target
     """
+
     warpmean = Node(ants.ApplyTransforms(), name='warpmean')
     warpmean.inputs.input_image_type = 3
     warpmean.inputs.interpolation = 'Linear'
@@ -531,6 +526,7 @@ def create_reg_workflow(name='registration'):
     warpmean.inputs.terminal_output = 'file'
     warpmean.inputs.args = '--float'
     warpmean.inputs.num_threads = 4
+    warpmean.plugin_args = {'sbatch_args': '-c%d' % 4}
 
     register.connect(inputnode,'target_image', warpmean,'reference_image')
     register.connect(inputnode, 'mean_image', warpmean, 'input_image')
@@ -554,6 +550,8 @@ def create_reg_workflow(name='registration'):
     register.connect(reg, 'composite_transform',
                      outputnode, 'anat2target_transform')
     register.connect(merge, 'out', outputnode, 'transforms')
+    register.connect(bbregister, 'min_cost_file',
+                     outputnode, 'min_cost_file')
 
     return register
 
@@ -593,6 +591,7 @@ def create_workflow(files,
     realign.inputs.slice_times = slice_times
     realign.inputs.tr = TR
     realign.inputs.slice_info = 2
+    realign.plugin_args = {'sbatch_args': '-c%d' % 4}
 
 
     # Comute TSNR on realigned data regressing polynomials upto order 2
@@ -609,12 +608,21 @@ def create_workflow(files,
 
     """Segment and Register
     """
+
     registration = create_reg_workflow(name='registration')
     wf.connect(calc_median, 'median_file', registration, 'inputspec.mean_image')
     registration.inputs.inputspec.subject_id = subject_id
     registration.inputs.inputspec.subjects_dir = subjects_dir
     registration.inputs.inputspec.target_image = target_file
 
+    """Quantify TSNR in each freesurfer ROI
+    """
+
+    get_roi_tsnr = MapNode(fs.SegStats(default_color_table=True),
+                           iterfield=['in_file'], name='get_aparc_tsnr')
+    get_roi_tsnr.inputs.avgwf_txt_file = True
+    wf.connect(tsnr, 'tsnr_file', get_roi_tsnr, 'in_file')
+    wf.connect(registration, 'outputspec.aparc', get_roi_tsnr, 'segmentation_file')
 
     """Use :class:`nipype.algorithms.rapidart` to determine which of the
     images in the functional series are outliers based on deviations in
@@ -754,7 +762,8 @@ def create_workflow(files,
     warpall.inputs.terminal_output = 'file'
     warpall.inputs.reference_image = target_file
     warpall.inputs.args = '--float'
-    warpall.inputs.num_threads = 1
+    warpall.inputs.num_threads = 2
+    warpall.plugin_args = {'sbatch_args': '-c%d' % 2}
 
     # transform to target
     wf.connect(collector, 'out', warpall, 'input_image')
@@ -874,13 +883,14 @@ def create_workflow(files,
     substitutions += [("_filtermotion%d" % i,"") for i in range(11)[::-1]]
     substitutions += [("_filter_noise_nosmooth%d" % i,"") for i in range(11)[::-1]]
     substitutions += [("_makecompcorfilter%d" % i,"") for i in range(11)[::-1]]
+    substitutions += [("_get_aparc_tsnr%d/" % i, "run%d_" % (i + 1)) for i in range(11)[::-1]]
 
-    substitutions += [("T1_out_brain_pve_0_maths_warped","compcor_csf"),
-                      ("T1_out_brain_pve_1_maths_warped","compcor_gm"),
+    substitutions += [("T1_out_brain_pve_0_maths_warped", "compcor_csf"),
+                      ("T1_out_brain_pve_1_maths_warped", "compcor_gm"),
                       ("T1_out_brain_pve_2_maths_warped", "compcor_wm"),
-                      ("output_warped_image_maths","target_brain_mask"),
-                      ("median_brain_mask","native_brain_mask"),
-                      ("corr_","")]
+                      ("output_warped_image_maths", "target_brain_mask"),
+                      ("median_brain_mask", "native_brain_mask"),
+                      ("corr_", "")]
 
     regex_subs = [('_combiner.*/sar', '/smooth/'),
                   ('_combiner.*/ar', '/unsmooth/'),
@@ -910,6 +920,11 @@ def create_workflow(files,
     wf.connect(filter1, 'out_pf', datasink, 'resting.qa.compmaps.@mc_pF')
     wf.connect(filter2, 'out_f', datasink, 'resting.qa.compmaps')
     wf.connect(filter2, 'out_pf', datasink, 'resting.qa.compmaps.@p')
+    wf.connect(registration, 'outputspec.min_cost_file', datasink, 'resting.qa.mincost')
+    wf.connect(tsnr, 'tsnr_file', datasink, 'resting.qa.tsnr.@map')
+    wf.connect([(get_roi_tsnr, datasink, [('avgwf_txt_file', 'resting.qa.tsnr'),
+                                          ('summary_file', 'resting.qa.tsnr.@summary')])])
+
     wf.connect(bandpass, 'out_files', datasink, 'resting.timeseries.@bandpassed')
     wf.connect(smooth, 'out_file', datasink, 'resting.timeseries.@smoothed')
     wf.connect(createfilter1, 'out_files',
@@ -937,7 +952,6 @@ def create_workflow(files,
 """
 Creates the full workflow including getting information from dicom files
 """
-
 
 def create_resting_workflow(args, name=None):
     TR = args.TR

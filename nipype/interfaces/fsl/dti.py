@@ -111,9 +111,10 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
                  desc='b values file')
 
     logdir = Directory('.', argstr='--logdir=%s', usedefault=True)
-    n_fibres = traits.Range(low=1, argstr='--nfibres=%d', desc=('Maximum '
-                            'number of fibres to fit in each voxel'))
-    model = traits.Enum(1, 2, argstr='--model=%d',
+    n_fibres = traits.Range(
+        usedefault=True, low=1, default=2, argstr='--nfibres=%d',
+        desc=('Maximum number of fibres to fit in each voxel'), mandatory=True)
+    model = traits.Enum(1, 2, 3, argstr='--model=%d',
                         desc=('use monoexponential (1, default, required for '
                               'single-shell) or multiexponential (2, multi-'
                               'shell) model'))
@@ -166,22 +167,19 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
 
 
 class FSLXCommandOutputSpec(TraitedSpec):
-    dsamples = File(desc=('Samples from the distribution on diffusivity d'))
-    d_stdsamples = File(desc=('Std of samples from the distribution d'))
-    dyads = OutputMultiPath(File(), desc=('Mean of PDD distribution'
+    dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
                                           ' in vector form.'))
-    fsamples = OutputMultiPath(File(), desc=('Samples from the '
+    fsamples = OutputMultiPath(File(exists=True), desc=('Samples from the '
                                'distribution on f anisotropy'))
-    mean_dsamples = File(desc='Mean of distribution on diffusivity d')
-    mean_d_stdsamples = File(desc='Mean of distribution on diffusivity d')
-    mean_fsamples = OutputMultiPath(File(), desc=('Mean of '
+    mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
+    mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
                                     'distribution on f anisotropy'))
-    mean_S0samples = File(desc=('Mean of distribution on T2w'
+    mean_S0samples = File(exists=True,desc=('Mean of distribution on T2w'
                                 'baseline signal intensity S0'))
-    mean_tausamples = File(desc=('Mean of distribution on '
+    mean_tausamples = File(exists=True,desc=('Mean of distribution on '
                                  'tau samples (only with rician noise)'))
-    phsamples = OutputMultiPath(File(), desc=('phi samples, per fiber'))
-    thsamples = OutputMultiPath(File(), desc=('theta samples, per fiber'))
+    phsamples = OutputMultiPath(File(exists=True), desc=('phi samples, per fiber'))
+    thsamples = OutputMultiPath(File(exists=True), desc=('theta samples, per fiber'))
 
 
 class FSLXCommand(FSLCommand):
@@ -198,19 +196,18 @@ class FSLXCommand(FSLCommand):
             self.raise_exception(runtime)
         return runtime
 
-    def _list_outputs(self):
+    def _list_outputs(self, out_dir=None):
         outputs = self.output_spec().get()
-        out_dir = self._out_dir
-
-        if isdefined(self.inputs.logdir):
-            out_dir = os.path.abspath(self.inputs.logdir)
-        else:
-            out_dir = os.path.abspath('logdir')
+        n_fibres = self.inputs.n_fibres
+        if not out_dir:
+            if isdefined(self.inputs.logdir):
+                out_dir = os.path.abspath(self.inputs.logdir)
+            else:
+                out_dir = os.path.abspath('logdir')
 
         multi_out = ['dyads', 'fsamples', 'mean_fsamples',
                      'phsamples', 'thsamples']
-        single_out = ['dsamples', 'd_stdsamples', 'mean_dsamples',
-                      'mean_S0samples', 'mean_d_stdsamples']
+        single_out = ['mean_dsamples', 'mean_S0samples']
 
         for k in single_out:
             outputs[k] = self._gen_fname(k, cwd=out_dir)
@@ -222,13 +219,13 @@ class FSLXCommand(FSLCommand):
         for k in multi_out:
             outputs[k] = []
 
-        for i in xrange(self.inputs.n_fibres + 1):
+        for i in xrange(1, n_fibres + 1):
             outputs['fsamples'].append(self._gen_fname('f%dsamples' % i,
                                        cwd=out_dir))
             outputs['mean_fsamples'].append(self._gen_fname(('mean_f%d'
                                             'samples') % i, cwd=out_dir))
 
-        for i in xrange(1, self.inputs.n_fibres + 1):
+        for i in xrange(1, n_fibres + 1):
             outputs['dyads'].append(self._gen_fname('dyads%d' % i,
                                     cwd=out_dir))
             outputs['phsamples'].append(self._gen_fname('ph%dsamples' % i,
@@ -240,28 +237,55 @@ class FSLXCommand(FSLCommand):
 
 
 class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
-    out_dir = Directory('.', mandatory=True, desc='output directory',
+    dwi = File(exists=True, desc='diffusion weighted image data file',
+               mandatory=True)
+    mask = File(exists=True, desc='bet binary mask file', mandatory=True)
+    bvecs = File(exists=True, desc='b vectors file', mandatory=True)
+    bvals = File(exists=True, desc='b values file', mandatory=True)
+    logdir = Directory(argstr='--logdir=%s')
+    n_fibres = traits.Range(
+        usedefault=True, low=1, default=2, argstr='-n %d',
+        desc=('Maximum number of fibres to fit in each voxel'), mandatory=True)
+    model = traits.Enum(1, 2, 3, argstr='-model %d',
+                        desc=('use monoexponential (1, default, required for '
+                              'single-shell) or multiexponential (2, multi-'
+                              'shell) model'))
+    fudge = traits.Int(argstr='-w %d',
+                       desc='ARD fudge factor')
+    n_jumps = traits.Int(5000, argstr='-j %d',
+                         desc='Num of jumps to be made by MCMC')
+    burn_in = traits.Range(low=0, default=0, argstr='-b %d',
+                           desc=('Total num of jumps at start of MCMC to be '
+                                 'discarded'))
+    sample_every = traits.Range(low=0, default=1, argstr='-s %d',
+                                desc='Num of jumps for each sample (MCMC)')
+    out_dir = Directory('bedpostx', mandatory=True, desc='output directory',
                         usedefault=True, position=1, argstr='%s')
     gradnonlin = traits.Bool(False, argstr='-g', desc=('consider gradient '
                              'nonlinearities, default off'))
     use_gpu = traits.Bool(False, desc='Use the GPU version of bedpostx')
 
 
-class BEDPOSTX5OutputSpec(FSLXCommandOutputSpec):
-    mean_thsamples = OutputMultiPath(File(), desc=('Mean of '
-                                     'distribution on theta'))
-    mean_phsamples = OutputMultiPath(File(), desc=('Mean of '
-                                     'distribution on phi'))
-
-    merged_thsamples = OutputMultiPath(File(), desc=('Samples from '
+class BEDPOSTX5OutputSpec(TraitedSpec):
+    mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
+    mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
+                                    'distribution on f anisotropy'))
+    mean_S0samples = File(exists=True,desc=('Mean of distribution on T2w'
+                                'baseline signal intensity S0'))
+    mean_phsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
+                                    'distribution on phi'))
+    mean_thsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
+                                    'distribution on theta'))
+    merged_thsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
                                        'the distribution on theta'))
-    merged_phsamples = OutputMultiPath(File(), desc=('Samples from '
+    merged_phsamples = OutputMultiPath(File(exists=True), desc=('Samples from '
                                        'the distribution on phi'))
-    merged_fsamples = OutputMultiPath(File(),
+    merged_fsamples = OutputMultiPath(File(exists=True),
                                       desc=('Samples from the distribution on '
-                                            'anisotropic volume fraction.'))
-    dyads_disp = OutputMultiPath(File(), desc=('Uncertainty on the '
-                                 ' estimated fiber orientation'))
+                                            'anisotropic volume fraction'))
+    dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
+                                          ' in vector form.'))
+    dyads_dispersion = OutputMultiPath(File(exists=True), desc=('Dispersion'))
 
 
 class BEDPOSTX5(FSLXCommand):
@@ -286,8 +310,7 @@ class BEDPOSTX5(FSLXCommand):
     >>> bedp = fsl.BEDPOSTX5(bvecs='bvecs', bvals='bvals', dwi='diffusion.nii',
     ...                     mask='mask.nii', n_fibres=1)
     >>> bedp.cmdline
-    'bedpostx . --bvals=bvals --bvecs=bvecs --data=diffusion.nii \
---forcedir --logdir=. --mask=mask.nii --nfibres=1'
+    'bedpostx bedpostx --forcedir -n 1'
 
     """
 
@@ -308,16 +331,10 @@ class BEDPOSTX5(FSLXCommand):
             self._cmd = self._default_cmd
 
     def _run_interface(self, runtime):
+
         subjectdir = os.path.abspath(self.inputs.out_dir)
-        out_dir = subjectdir + '.bedpostX'
-
-        if isdefined(self.inputs.force_dir) and self.inputs.force_dir:
-            out_dir = os.path.abspath(self.inputs.out_dir)
-        self._out_dir = out_dir
-
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
-
+        if not os.path.exists(subjectdir):
+            os.makedirs(subjectdir)
         _, _, ext = split_filename(self.inputs.mask)
         copyfile(self.inputs.mask,
                  os.path.join(subjectdir,
@@ -330,41 +347,47 @@ class BEDPOSTX5(FSLXCommand):
         copyfile(self.inputs.bvecs,
                  os.path.join(subjectdir, 'bvecs'))
 
-        return super(BEDPOSTX5, self)._run_interface(runtime)
+        retval = super(BEDPOSTX5, self)._run_interface(runtime)
+
+        self._out_dir = subjectdir + '.bedpostX'
+        return retval
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        out_dir = self._out_dir
+        n_fibres = self.inputs.n_fibres
 
-        post_fields = ['merged_thsamples', 'merged_phsamples',
-                       'merged_fsamples', 'dyads_disp']
-        for k in post_fields:
+        multi_out = ['merged_thsamples', 'merged_fsamples',
+                     'merged_phsamples', 'mean_phsamples',
+                     'mean_thsamples', 'mean_fsamples',
+                     'dyads_dispersion', 'dyads']
+
+        single_out = ['mean_dsamples', 'mean_S0samples']
+
+        for k in single_out:
+            outputs[k] = self._gen_fname(k, cwd=self._out_dir)
+
+
+        for k in multi_out:
             outputs[k] = []
 
-        for i in xrange(1, self.inputs.n_fibres + 1):
-            outputs['merged_thsamples'].append(self._gen_fname(('merged_th%d'
-                                               'samples') % i,
-                                               cwd=out_dir))
-            outputs['merged_phsamples'].append(self._gen_fname(('merged_ph%d'
-                                               'samples') % i,
-                                               cwd=out_dir))
-            outputs['merged_fsamples'].append(self._gen_fname(('merged_f%d'
-                                              'samples') % i,
-                                              cwd=out_dir))
-            outputs['mean_thsamples'].append(self._gen_fname(('mean_th%d'
-                                             'samples') % i,
-                                             cwd=out_dir))
-            outputs['mean_phsamples'].append(self._gen_fname(('mean_ph%d'
-                                             'samples') % i,
-                                             cwd=out_dir))
-            outputs['dyads_disp'].append(self._gen_fname(('dyads%d'
-                                         '_dispersion') % i, cwd=out_dir))
+        for i in xrange(1, n_fibres + 1):
+            outputs['merged_thsamples'].append(self._gen_fname('merged_th%dsamples' % i,
+                                       cwd=self._out_dir))
+            outputs['merged_fsamples'].append(self._gen_fname('merged_f%dsamples' % i,
+                                       cwd=self._out_dir))
+            outputs['merged_phsamples'].append(self._gen_fname('merged_ph%dsamples' % i,
+                                       cwd=self._out_dir))
 
-        super_out = super(BEDPOSTX5, self)._list_outputs()
-
-        for k, v in super_out.iteritems():
-            outputs[k] = v
-
+            outputs['mean_thsamples'].append(self._gen_fname('mean_th%dsamples' % i,
+                                       cwd=self._out_dir))
+            outputs['mean_phsamples'].append(self._gen_fname('mean_ph%dsamples' % i,
+                                       cwd=self._out_dir))
+            outputs['mean_fsamples'].append(self._gen_fname('mean_f%dsamples' % i,
+                                       cwd=self._out_dir))
+            outputs['dyads'].append(self._gen_fname('dyads%d' % i,
+                                       cwd=self._out_dir))
+            outputs['dyads_dispersion'].append(self._gen_fname('dyads%d_dispersion' % i,
+                                       cwd=self._out_dir))
         return outputs
 
 

@@ -53,25 +53,34 @@ class NipypeInterfaceError(Exception):
     def __str__(self):
         return repr(self.value)
 
-def _lock_files():
-    tmpdir = '/tmp'
-    pattern = '.X*-lock'
-    names = fnmatch.filter(os.listdir(tmpdir), pattern)
-    ls = [os.path.join(tmpdir, child) for child in names]
-    ls = [p for p in ls if os.path.isfile(p)]
-    return ls
 
-def _search_for_free_display():
-    ls = [int(x.split('X')[1].split('-')[0]) for x in _lock_files()]
-    min_display_num = 1000
-    if len(ls):
-        display_num = max(min_display_num, max(ls) + 1)
+def _unlock_display(ndisplay):
+    lockf = os.path.join('/tmp', '.X%d-lock' % ndisplay)
+    try:
+        os.remove(lockf)
+    except:
+        return False
+
+    return True
+
+def _exists_in_path(cmd, environ):
+    '''
+    Based on a code snippet from
+     http://orip.org/2009/08/python-checking-if-executable-exists-in.html
+    '''
+
+    if 'PATH' in environ:
+        input_environ = environ.get("PATH")
     else:
-        display_num = min_display_num
-    random.seed()
-    display_num += random.randint(0, 100)
-    return display_num
-
+        input_environ = os.environ.get("PATH", "")
+    extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
+    for directory in input_environ.split(os.pathsep):
+        base = os.path.join(directory, cmd)
+        options = [base] + [(base + ext) for ext in extensions]
+        for filename in options:
+            if os.path.exists(filename):
+                return True, filename
+    return False, None
 
 def load_template(name):
     """Load a template from the script_templates directory
@@ -166,7 +175,14 @@ class Bunch(object):
         for k, v in sorted(self.items()):
             if not first:
                 outstr.append(', ')
-            outstr.append('%s=%r' % (k, v))
+            if isinstance(v, dict):
+                pairs = []
+                for key, value in sorted(v.items()):
+                    pairs.append("'%s': %s" % (key, value))
+                v = '{' + ', '.join(pairs) + '}'
+                outstr.append('%s=%s' % (k, v))
+            else:
+                outstr.append('%s=%r' % (k, v))
             first = False
         outstr.append(')')
         return ''.join(outstr)
@@ -528,8 +544,8 @@ class BaseTraitedSpec(traits.HasTraits):
 
         """
 
-        dict_withhash = {}
-        dict_nofilename = {}
+        dict_withhash = []
+        dict_nofilename = []
         for name, val in sorted(self.get().items()):
             if isdefined(val):
                 trait = self.trait(name)
@@ -539,24 +555,24 @@ class BaseTraitedSpec(traits.HasTraits):
                                                False)
                               and not has_metadata(trait.trait_type,
                                                    "name_source"))
-                dict_nofilename[name] = \
+                dict_nofilename.append((name,
                     self._get_sorteddict(val, hash_method=hash_method,
-                                         hash_files=hash_files)
-                dict_withhash[name] = \
+                                         hash_files=hash_files)))
+                dict_withhash.append((name,
                     self._get_sorteddict(val, True, hash_method=hash_method,
-                                         hash_files=hash_files)
-        return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
+                                         hash_files=hash_files)))
+        return dict_withhash, md5(str(dict_nofilename)).hexdigest()
 
     def _get_sorteddict(self, object, dictwithhash=False, hash_method=None,
                         hash_files=True):
         if isinstance(object, dict):
-            out = {}
+            out = []
             for key, val in sorted(object.items()):
                 if isdefined(val):
-                    out[key] = \
+                    out.append((key,
                         self._get_sorteddict(val, dictwithhash,
                                              hash_method=hash_method,
-                                             hash_files=hash_files)
+                                             hash_files=hash_files)))
         elif isinstance(object, (list, tuple)):
             out = []
             for val in object:
@@ -916,35 +932,67 @@ class BaseInterface(Interface):
         """ Raises an exception on version mismatch
         """
         unavailable_traits = []
-        version = LooseVersion(str(self.version))
-        if not version:
-            return
         # check minimum version
         check = dict(min_ver=lambda t: t is not None)
         names = trait_object.trait_names(**check)
-        for name in names:
-            min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
-            if min_ver > version:
-                unavailable_traits.append(name)
-                if not isdefined(getattr(trait_object, name)):
-                    continue
-                if raise_exception:
-                    raise Exception('Trait %s (%s) (version %s < required %s)' %
-                                    (name, self.__class__.__name__,
-                                     version, min_ver))
-        check = dict(max_ver=lambda t: t is not None)
-        names = trait_object.trait_names(**check)
-        for name in names:
-            max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
-            if max_ver < version:
-                unavailable_traits.append(name)
-                if not isdefined(getattr(trait_object, name)):
-                    continue
-                if raise_exception:
-                    raise Exception('Trait %s (%s) (version %s > required %s)' %
-                                    (name, self.__class__.__name__,
-                                     version, max_ver))
+        
+        if names:
+            version = LooseVersion(str(self.version))
+            if not version:
+                return
+            for name in names:
+                min_ver = LooseVersion(str(trait_object.traits()[name].min_ver))
+                if min_ver > version:
+                    unavailable_traits.append(name)
+                    if not isdefined(getattr(trait_object, name)):
+                        continue
+                    if raise_exception:
+                        raise Exception('Trait %s (%s) (version %s < required %s)' %
+                                        (name, self.__class__.__name__,
+                                         version, min_ver))
+            check = dict(max_ver=lambda t: t is not None)
+            names = trait_object.trait_names(**check)
+            for name in names:
+                max_ver = LooseVersion(str(trait_object.traits()[name].max_ver))
+                if max_ver < version:
+                    unavailable_traits.append(name)
+                    if not isdefined(getattr(trait_object, name)):
+                        continue
+                    if raise_exception:
+                        raise Exception('Trait %s (%s) (version %s > required %s)' %
+                                        (name, self.__class__.__name__,
+                                         version, max_ver))
         return unavailable_traits
+
+    def _run_wrapper(self, runtime):
+        sysdisplay = os.getenv('DISPLAY')
+        if self._redirect_x:
+            try:
+                from xvfbwrapper import Xvfb
+            except ImportError:
+                iflogger.error('Xvfb wrapper could not be imported')
+                raise
+
+            vdisp = Xvfb(nolisten='tcp')
+            vdisp.start()
+            vdisp_num = vdisp.vdisplay_num
+
+            iflogger.info('Redirecting X to :%d' % vdisp_num)
+            runtime.environ['DISPLAY'] = ':%d' % vdisp_num
+
+        runtime = self._run_interface(runtime)
+
+        if self._redirect_x:
+            if sysdisplay is None:
+                os.unsetenv('DISPLAY')
+            else:
+                os.environ['DISPLAY'] = sysdisplay
+
+            iflogger.info('Freeing X :%d' % vdisp_num)
+            vdisp.stop()
+            _unlock_display(vdisp_num)
+
+        return runtime
 
     def _run_interface(self, runtime):
         """ Core function that executes interface
@@ -982,30 +1030,7 @@ class BaseInterface(Interface):
                         hostname=getfqdn(),
                         version=self.version)
         try:
-            if self._redirect_x:
-                exist_val, _ = self._exists_in_path('Xvfb',
-                                                    runtime.environ)
-                if not exist_val:
-                    raise IOError("Xvfb could not be found on host %s" %
-                                  (runtime.hostname))
-                else:
-                    vdisplay_num = _search_for_free_display()
-                    xvfb_cmd = ['Xvfb', ':%d' % vdisplay_num]
-                    xvfb_proc = subprocess.Popen(xvfb_cmd,
-                                                 stdout=open(os.devnull),
-                                                 stderr=open(os.devnull))
-                    time.sleep(0.2)  # give Xvfb time to start
-                    if xvfb_proc.poll() is not None:
-                        raise Exception('Error: Xvfb did not start')
-
-                    runtime.environ['DISPLAY'] = ':%s' % vdisplay_num
-
-            runtime = self._run_interface(runtime)
-
-            if self._redirect_x:
-                xvfb_proc.kill()
-                xvfb_proc.wait()
-
+            runtime = self._run_wrapper(runtime)
             outputs = self.aggregate_outputs(runtime)
             runtime.endTime = dt.isoformat(dt.utcnow())
             timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
@@ -1165,12 +1190,19 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
-def run_command(runtime, output=None, timeout=0.01):
+def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
     PIPE = subprocess.PIPE
+
+    cmdline = runtime.cmdline
+    if redirect_x:
+        exist_xvfb, _ = _exists_in_path('xvfb-run', runtime.environ)
+        if not exist_xvfb:
+            raise RuntimeError('Xvfb was not found, X redirection aborted')
+        cmdline = 'xvfb-run -a ' + cmdline
 
     if output == 'file':
         errfile = os.path.join(runtime.cwd, 'stderr.nipype')
@@ -1178,19 +1210,19 @@ def run_command(runtime, output=None, timeout=0.01):
         stderr = open(errfile, 'wt')
         stdout = open(outfile, 'wt')
 
-        proc = subprocess.Popen(runtime.cmdline,
+        proc = subprocess.Popen(cmdline,
                                 stdout=stdout,
                                 stderr=stderr,
                                 shell=True,
                                 cwd=runtime.cwd,
                                 env=runtime.environ)
     else:
-        proc = subprocess.Popen(runtime.cmdline,
-                                 stdout=PIPE,
-                                 stderr=PIPE,
-                                 shell=True,
-                                 cwd=runtime.cwd,
-                                 env=runtime.environ)
+        proc = subprocess.Popen(cmdline,
+                                stdout=PIPE,
+                                stderr=PIPE,
+                                shell=True,
+                                cwd=runtime.cwd,
+                                env=runtime.environ)
     result = {}
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
@@ -1317,7 +1349,7 @@ class CommandLine(BaseInterface):
      'environ': {'DISPLAY': ':1'}, 'args': '-al'}
 
     >>> cli.inputs.get_hashval()
-    ({'args': '-al'}, 'a2f45e04a34630c5f33a75ea2a533cdd')
+    ([('args', '-al')], '11c37f97649cd61627f4afe5136af8c0')
 
     """
 
@@ -1349,9 +1381,9 @@ class CommandLine(BaseInterface):
     def set_default_terminal_output(cls, output_type):
         """Set the default terminal output for CommandLine Interfaces.
 
-        This method is used to set default terminal output for 
-        CommandLine Interfaces.  However, setting this will not 
-        update the output type for any existing instances.  For these, 
+        This method is used to set default terminal output for
+        CommandLine Interfaces.  However, setting this will not
+        update the output type for any existing instances.  For these,
         assign the <instance>.inputs.terminal_output.
         """
 
@@ -1408,7 +1440,7 @@ class CommandLine(BaseInterface):
 
     def version_from_command(self, flag='-v'):
         cmdname = self.cmd.split()[0]
-        if self._exists_in_path(cmdname):
+        if _exists_in_path(cmdname):
             env = deepcopy(os.environ.data)
             out_environ = self._get_environ()
             env.update(out_environ)
@@ -1420,6 +1452,10 @@ class CommandLine(BaseInterface):
                                     )
             o, e = proc.communicate()
             return o
+
+    def _run_wrapper(self, runtime):
+        runtime = self._run_interface(runtime)
+        return runtime
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
         """Execute command via subprocess
@@ -1440,39 +1476,21 @@ class CommandLine(BaseInterface):
         out_environ = self._get_environ()
         runtime.environ.update(out_environ)
         executable_name = self.cmd.split()[0]
-        exist_val, cmd_path = self._exists_in_path(executable_name,
-                                                   runtime.environ)
+        exist_val, cmd_path = _exists_in_path(executable_name,
+                                              runtime.environ)
         if not exist_val:
             raise IOError("%s could not be found on host %s" %
                           (self.cmd.split()[0], runtime.hostname))
         setattr(runtime, 'command_path', cmd_path)
         setattr(runtime, 'dependencies', get_dependencies(executable_name,
                                                           runtime.environ))
-        runtime = run_command(runtime, output=self.inputs.terminal_output)
+        runtime = run_command(runtime, output=self.inputs.terminal_output,
+                              redirect_x=self._redirect_x)
         if runtime.returncode is None or \
                         runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
 
         return runtime
-
-    def _exists_in_path(self, cmd, environ):
-        '''
-        Based on a code snippet from
-         http://orip.org/2009/08/python-checking-if-executable-exists-in.html
-        '''
-
-        if 'PATH' in environ:
-            input_environ = environ.get("PATH")
-        else:
-            input_environ = os.environ.get("PATH", "")
-        extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
-        for directory in input_environ.split(os.pathsep):
-            base = os.path.join(directory, cmd)
-            options = [base] + [(base + ext) for ext in extensions]
-            for filename in options:
-                if os.path.exists(filename):
-                    return True, filename
-        return False, None
 
     def _format_arg(self, name, trait_spec, value):
         """A helper function for _parse_inputs
