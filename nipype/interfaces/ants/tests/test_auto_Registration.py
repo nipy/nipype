@@ -41,6 +41,7 @@ def test_Registration_inputs():
     interpolation=dict(argstr='%s',
     usedefault=True,
     ),
+    interpolation_parameters=dict(),
     invert_initial_moving_transform=dict(requires=['initial_moving_transform'],
     xor=['initial_moving_transform_com'],
     ),
