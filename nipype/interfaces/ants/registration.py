@@ -394,7 +394,7 @@ class RegistrationOutputSpec(TraitedSpec):
     reverse_invert_flags = traits.List(traits.Bool(
     ), desc='List of flags corresponding to the reverse transforms')
     composite_transform = File(exists=True, desc='Composite transform file')
-    inverse_composite_transform = File(exists=True, desc='Inverse composite transform file')
+    inverse_composite_transform = File(desc='Inverse composite transform file')
     warped_image = File(desc="Outputs warped image")
     inverse_warped_image = File(desc="Outputs the inverse of the warped image")
     save_state = File(desc="The saved registration state to be restored")
