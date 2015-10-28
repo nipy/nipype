@@ -41,7 +41,7 @@ def teardown_infile(tmp_dir):
     shutil.rmtree(tmp_dir)
 
 # test BET
-#@with_setup(setup_infile, teardown_infile)
+# @with_setup(setup_infile, teardown_infile)
 # broken in nose with generators
 
 
@@ -85,8 +85,8 @@ def test_bet():
         'threshold':          ('-t', True),
         'mesh':               ('-e', True),
         'surfaces':           ('-A', True)
-        #'verbose':            ('-v', True),
-        #'flags':              ('--i-made-this-up', '--i-made-this-up'),
+        # 'verbose':            ('-v', True),
+        # 'flags':              ('--i-made-this-up', '--i-made-this-up'),
     }
     # Currently we don't test -R, -S, -B, -Z, -F, -A or -A2
 

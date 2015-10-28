@@ -240,11 +240,11 @@ class FASTInputSpec(FSLCommandInputSpec):
                           argstr='-N')
     use_priors = traits.Bool(desc='use priors throughout',
                              argstr='-P')   # must also set -a!,
-                                              # mutually inclusive??
-                                              # No, conditional
-                                              # mandatory... need to
-                                              # figure out how to
-                                              # handle with traits.
+                                            # mutually inclusive??
+                                            # No, conditional
+                                            # mandatory... need to
+                                            # figure out how to
+                                            # handle with traits.
     segment_iters = traits.Range(low=1, high=50,
                                  desc='number of segmentation-initialisation'
                                  ' iterations',
@@ -1023,12 +1023,12 @@ class ApplyWarp(FSLCommand):
 
 class SliceTimerInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='--in=%s',
-                  mandatory=True, position=0,
-                  desc='filename of input timeseries')
+                   mandatory=True, position=0,
+                   desc='filename of input timeseries')
     out_file = File(argstr='--out=%s', genfile=True,
-                   desc='filename of output timeseries', hash_files=False)
+                    desc='filename of output timeseries', hash_files=False)
     index_dir = traits.Bool(argstr='--down',
-              desc='slice indexing from top to bottom')
+                            desc='slice indexing from top to bottom')
     time_repetition = traits.Float(argstr='--repeat=%f',
                                    desc='Specify TR of data - default is 3s')
     slice_direction = traits.Enum(1, 2, 3, argstr='--direction=%d',
@@ -1071,7 +1071,7 @@ class SliceTimer(FSLCommand):
         out_file = self.inputs.out_file
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
-                                      suffix='_st')
+                                       suffix='_st')
         outputs['slice_time_corrected_file'] = os.path.abspath(out_file)
         return outputs
 
@@ -1087,23 +1087,23 @@ class SUSANInputSpec(FSLCommandInputSpec):
                    desc='filename of input timeseries')
     brightness_threshold = traits.Float(argstr='%.10f',
                                         position=2, mandatory=True,
-                   desc='brightness threshold and should be greater than '
-                        'noise level and less than contrast of edges to '
-                        'be preserved.')
+                                        desc='brightness threshold and should be greater than '
+                                        'noise level and less than contrast of edges to '
+                                        'be preserved.')
     fwhm = traits.Float(argstr='%.10f',
                         position=3, mandatory=True,
                         desc='fwhm of smoothing, in mm, gets converted using sqrt(8*log(2))')
     dimension = traits.Enum(3, 2, argstr='%d', position=4, usedefault=True,
                             desc='within-plane (2) or fully 3D (3)')
     use_median = traits.Enum(1, 0, argstr='%d', position=5, usedefault=True,
-                        desc='whether to use a local median filter in the cases where single-point noise is detected')
+                             desc='whether to use a local median filter in the cases where single-point noise is detected')
     usans = traits.List(
         traits.Tuple(File(exists=True), traits.Float), maxlen=2,
-                        argstr='', position=6, default=[], usedefault=True,
-             desc='determines whether the smoothing area (USAN) is to be '
-                  'found from secondary images (0, 1 or 2). A negative '
-                  'value for any brightness threshold will auto-set the '
-                  'threshold at 10% of the robust range')
+        argstr='', position=6, default=[], usedefault=True,
+        desc='determines whether the smoothing area (USAN) is to be '
+             'found from secondary images (0, 1 or 2). A negative '
+             'value for any brightness threshold will auto-set the '
+             'threshold at 10% of the robust range')
     out_file = File(argstr='%s', position=-1, genfile=True,
                     desc='output file name', hash_files=False)
 
@@ -1150,7 +1150,7 @@ class SUSAN(FSLCommand):
         out_file = self.inputs.out_file
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
-                                      suffix='_smooth')
+                                       suffix='_smooth')
         outputs['smoothed_file'] = os.path.abspath(out_file)
         return outputs
 
@@ -1185,7 +1185,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     asym_se_time = traits.Float(argstr='--asym=%.10f',
                                 desc='set the fieldmap asymmetric spin echo time (sec)')
     median_2dfilter = traits.Bool(argstr='--median',
-                                desc='apply 2D median filtering')
+                                  desc='apply 2D median filtering')
     despike_2dfilter = traits.Bool(argstr='--despike',
                                    desc='apply a 2D de-spiking filter')
     no_gap_fill = traits.Bool(argstr='--nofill',
@@ -1203,7 +1203,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     pava = traits.Bool(argstr='--pava',
                        desc='apply monotonic enforcement via PAVA')
     despike_threshold = traits.Float(argstr='--despikethreshold=%s',
-                                    desc='specify the threshold for de-spiking (default=3.0)')
+                                     desc='specify the threshold for de-spiking (default=3.0)')
     unwarp_direction = traits.Enum('x', 'y', 'z', 'x-', 'y-', 'z-',
                                    argstr='--unwarpdir=%s',
                                    desc='specifies direction of warping (default y)')
@@ -1229,8 +1229,6 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     fmap_out_file = File(argstr='--savefmap=%s', desc='filename for saving fieldmap (rad/s)')
     save_unmasked_fmap = traits.Bool(False, argstr='--unmaskfmap', xor=['save_fmap'],
                                      desc='saves the unmasked fieldmap when using --savefmap')
-
-
 
 
 class FUGUEOutputSpec(TraitedSpec):
@@ -1351,7 +1349,7 @@ class FUGUE(FSLCommand):
                     trait_spec.name_source = 'shift_in_file'
                 else:
                     raise RuntimeError(('Either phasemap_in_file, shift_in_file or '
-                                       'fmap_in_file must be set.'))
+                                        'fmap_in_file must be set.'))
 
                 if vsm_save_unmasked:
                     trait_spec.name_template = '%s_vsm_unmasked'
@@ -1364,7 +1362,7 @@ class FUGUE(FSLCommand):
         if not isdefined(self.inputs.fmap_out_file):
             fmap_save_masked = (isdefined(self.inputs.save_fmap) and self.inputs.save_fmap)
             fmap_save_unmasked = (isdefined(self.inputs.save_unmasked_fmap) and
-                                 self.inputs.save_unmasked_fmap)
+                                  self.inputs.save_unmasked_fmap)
 
             if (fmap_save_masked or fmap_save_unmasked):
                 trait_spec = self.inputs.trait('fmap_out_file')
@@ -1378,7 +1376,7 @@ class FUGUE(FSLCommand):
                     trait_spec.name_source = 'fmap_in_file'
                 else:
                     raise RuntimeError(('Either phasemap_in_file, shift_in_file or '
-                                       'fmap_in_file must be set.'))
+                                        'fmap_in_file must be set.'))
 
                 if fmap_save_unmasked:
                     trait_spec.name_template = '%s_fieldmap_unmasked'

@@ -53,7 +53,7 @@ def tensor_fitting(data, bvals, bvecs, mask_file=None):
     if mask_file is not None:
         mask = nb.load(self.inputs.mask_file).get_data()
     else:
-        mask=None
+        mask = None
 
     # Load information about the gradients:
     gtab = grad.gradient_table(self.inputs.bvals, self.inputs.bvecs)
@@ -71,7 +71,7 @@ class DTIInputSpec(TraitedSpec):
     bvals = File(exists=True, mandatory=True,
                  desc='The input b-value text file')
     mask_file = File(exists=True,
-                 desc='An optional white matter mask')
+                     desc='An optional white matter mask')
     out_filename = File(
         genfile=True, desc='The output filename for the DTI parameters image')
 
@@ -171,7 +171,7 @@ class TensorMode(BaseInterface):
         ten_fit = tensor_fitting(self.inputs.in_file, self.inputs.bvals, self.inputs.bvecs,
                                  self.inputs.mask_file)
 
-        ## Write as a 3D Nifti image with the original affine
+        # Write as a 3D Nifti image with the original affine
         img = nb.Nifti1Image(tenfit.mode, affine)
         out_file = op.abspath(self._gen_outfilename())
         nb.save(img, out_file)

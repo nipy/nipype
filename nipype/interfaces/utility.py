@@ -84,14 +84,14 @@ class IdentityInterface(IOBase):
         return base
 
     def _list_outputs(self):
-        #manual mandatory inputs check
+        # manual mandatory inputs check
         if self._fields and self._mandatory_inputs:
             for key in self._fields:
                 value = getattr(self.inputs, key)
                 if not isdefined(value):
                     msg = "%s requires a value for input '%s' because it was listed in 'fields'. \
                     You can turn off mandatory inputs checking by passing mandatory_inputs = False to the constructor." % \
-                    (self.__class__.__name__, key)
+                        (self.__class__.__name__, key)
                     raise ValueError(msg)
 
         outputs = self._outputs().get()
@@ -104,8 +104,9 @@ class IdentityInterface(IOBase):
 
 class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     axis = traits.Enum('vstack', 'hstack', usedefault=True,
-                desc='direction in which to merge, hstack requires same number of elements in each input')
+                       desc='direction in which to merge, hstack requires same number of elements in each input')
     no_flatten = traits.Bool(False, usedefault=True, desc='append to outlist instead of extending in vstack mode')
+
 
 class MergeOutputSpec(TraitedSpec):
     out = traits.List(desc='Merged output')
@@ -264,9 +265,9 @@ class Rename(IOBase):
 
 class SplitInputSpec(BaseInterfaceInputSpec):
     inlist = traits.List(traits.Any, mandatory=True,
-                  desc='list of values to split')
+                         desc='list of values to split')
     splits = traits.List(traits.Int, mandatory=True,
-                  desc='Number of outputs in each split - should add to number of inputs')
+                         desc='Number of outputs in each split - should add to number of inputs')
     squeeze = traits.Bool(False, usedefault=True,
                           desc='unfold one-element splits removing the list')
 
@@ -316,9 +317,9 @@ class Split(IOBase):
 
 class SelectInputSpec(BaseInterfaceInputSpec):
     inlist = InputMultiPath(traits.Any, mandatory=True,
-                  desc='list of values to choose from')
+                            desc='list of values to choose from')
     index = InputMultiPath(traits.Int, mandatory=True,
-                  desc='0-based indices of values to choose')
+                           desc='0-based indices of values to choose')
 
 
 class SelectOutputSpec(TraitedSpec):

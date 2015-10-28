@@ -93,6 +93,6 @@ def get_file_url(object):
         info = nipype.get_info()
         shortfile = os.path.join('nipype', filename.split('nipype/')[-1])
         uri = 'http://github.com/nipy/nipype/tree/%s/%s#L%d' % \
-                                                           (info['commit_hash'],
-                                                            shortfile, lines[1])
+            (info['commit_hash'],
+         shortfile, lines[1])
     return uri

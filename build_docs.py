@@ -29,6 +29,8 @@ DOC_DOCTREES_DIR = os.path.join('doc', '_build', 'doctrees')
 
 ################################################################################
 # Distutils Command class for installing nipype to a temporary location.
+
+
 class TempInstall(Command):
     temp_install_dir = os.path.join('build', 'install')
 
@@ -36,11 +38,11 @@ class TempInstall(Command):
         """ build and install nipype in a temporary location. """
         install = self.distribution.get_command_obj('install')
         install.install_scripts = self.temp_install_dir
-        install.install_base    = self.temp_install_dir
+        install.install_base = self.temp_install_dir
         install.install_platlib = self.temp_install_dir
         install.install_purelib = self.temp_install_dir
-        install.install_data    = self.temp_install_dir
-        install.install_lib     = self.temp_install_dir
+        install.install_data = self.temp_install_dir
+        install.install_lib = self.temp_install_dir
         install.install_headers = self.temp_install_dir
         install.run()
 
@@ -64,12 +66,11 @@ class TempInstall(Command):
 # Distutils Command class for API generation
 class APIDocs(TempInstall):
     description = \
-    """generate API docs """
+        """generate API docs """
 
     user_options = [
         ('None', None, 'this command has no options'),
         ]
-
 
     def run(self):
         # First build the project and install it to a temporary location.
@@ -141,21 +142,20 @@ else:
             # require zlib.
             try:
                 zf = zipfile.ZipFile(target_file, 'w',
-                                            compression=zipfile.ZIP_DEFLATED)
+                                     compression=zipfile.ZIP_DEFLATED)
             except RuntimeError:
                 warnings.warn('zlib not installed, storing the docs '
-                                'without compression')
+                              'without compression')
                 zf = zipfile.ZipFile(target_file, 'w',
-                                            compression=zipfile.ZIP_STORED)
+                                     compression=zipfile.ZIP_STORED)
 
             for root, dirs, files in os.walk(DOC_BUILD_DIR):
                 relative = relative_path(root)
                 if not relative.startswith('.doctrees'):
                     for f in files:
                         zf.write(os.path.join(root, f),
-                                os.path.join(relative, 'html_docs', f))
+                                 os.path.join(relative, 'html_docs', f))
             zf.close()
-
 
         def finalize_options(self):
             """ Override the default for the documentation build
@@ -166,6 +166,8 @@ else:
 
 ################################################################################
 # Distutils Command class to clean
+
+
 class Clean(clean):
 
     def run(self):

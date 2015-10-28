@@ -63,13 +63,13 @@ CLASSIFIERS = ["Development Status :: 5 - Production/Stable",
                "Programming Language :: Python :: 3.4",
                "Topic :: Scientific/Engineering"]
 
-description  = 'Neuroimaging in Python: Pipelines and Interfaces'
+description = 'Neuroimaging in Python: Pipelines and Interfaces'
 
 # Note: this long_description is actually a copy/paste from the top-level
 # README.txt, so that it shows up nicely on PyPI.  So please remember to edit
 # it only in one place and sync it correctly.
 long_description = \
-"""
+    """
 ========================================================
 NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 ========================================================
@@ -112,31 +112,31 @@ NOSE_MIN_VERSION = '1.2'
 FUTURE_MIN_VERSION = '0.15.2'
 SIMPLEJSON_MIN_VERSION = '3.8.0'
 
-NAME                = 'nipype'
-MAINTAINER          = "nipype developers"
-MAINTAINER_EMAIL    = "neuroimaging@python.org"
-DESCRIPTION         = description
-LONG_DESCRIPTION    = long_description
-URL                 = "http://nipy.org/nipype"
-DOWNLOAD_URL        = "http://github.com/nipy/nipype/archives/master"
-LICENSE             = "BSD license"
-CLASSIFIERS         = CLASSIFIERS
-AUTHOR              = "nipype developers"
-AUTHOR_EMAIL        = "neuroimaging@python.org"
-PLATFORMS           = "OS Independent"
-MAJOR               = _version_major
-MINOR               = _version_minor
-MICRO               = _version_micro
-ISRELEASE           = _version_extra == ''
-VERSION             = __version__
-PROVIDES            = ['nipype']
-REQUIRES            = ["nibabel>=%s" % NIBABEL_MIN_VERSION,
-                       "networkx>=%s" % NETWORKX_MIN_VERSION,
-                       "numpy>=%s" % NUMPY_MIN_VERSION,
-                       "python-dateutil>=%s" % DATEUTIL_MIN_VERSION,
-                       "scipy>=%s" % SCIPY_MIN_VERSION,
-                       "traits>=%s" % TRAITS_MIN_VERSION,
-                       "nose>=%s" % NOSE_MIN_VERSION,
-                       "future>=%s" % FUTURE_MIN_VERSION,
-                       "simplejson>=%s" % SIMPLEJSON_MIN_VERSION]
-STATUS              = 'stable'
+NAME = 'nipype'
+MAINTAINER = "nipype developers"
+MAINTAINER_EMAIL = "neuroimaging@python.org"
+DESCRIPTION = description
+LONG_DESCRIPTION = long_description
+URL = "http://nipy.org/nipype"
+DOWNLOAD_URL = "http://github.com/nipy/nipype/archives/master"
+LICENSE = "BSD license"
+CLASSIFIERS = CLASSIFIERS
+AUTHOR = "nipype developers"
+AUTHOR_EMAIL = "neuroimaging@python.org"
+PLATFORMS = "OS Independent"
+MAJOR = _version_major
+MINOR = _version_minor
+MICRO = _version_micro
+ISRELEASE = _version_extra == ''
+VERSION = __version__
+PROVIDES = ['nipype']
+REQUIRES = ["nibabel>=%s" % NIBABEL_MIN_VERSION,
+            "networkx>=%s" % NETWORKX_MIN_VERSION,
+            "numpy>=%s" % NUMPY_MIN_VERSION,
+            "python-dateutil>=%s" % DATEUTIL_MIN_VERSION,
+            "scipy>=%s" % SCIPY_MIN_VERSION,
+            "traits>=%s" % TRAITS_MIN_VERSION,
+            "nose>=%s" % NOSE_MIN_VERSION,
+            "future>=%s" % FUTURE_MIN_VERSION,
+            "simplejson>=%s" % SIMPLEJSON_MIN_VERSION]
+STATUS = 'stable'

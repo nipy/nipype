@@ -303,12 +303,12 @@ class ApiDocWriter(object):
         if matchstr[:L] == self.package_name:
             matchstr = matchstr[L:]
         for pat in patterns:
-            #print (pat, matchstr, match_type)  #dbg
+            # print (pat, matchstr, match_type)  #dbg
             try:
                 pat.search
             except AttributeError:
                 pat = re.compile(pat)
-            #print (pat.search(matchstr))  #dbg
+            # print (pat.search(matchstr))  #dbg
             if pat.search(matchstr):
                 return False
         return True
@@ -346,7 +346,7 @@ class ApiDocWriter(object):
             for dirname in dirnames[:]:  # copy list - we modify inplace
                 package_uri = '.'.join((root_uri, dirname))
                 if (self._uri2path(package_uri) and
-                    self._survives_exclude(package_uri, 'package')):
+                        self._survives_exclude(package_uri, 'package')):
                     modules.append(package_uri)
                 else:
                     dirnames.remove(dirname)
@@ -355,9 +355,9 @@ class ApiDocWriter(object):
                 module_name = filename[:-3]
                 module_uri = '.'.join((root_uri, module_name))
                 if (self._uri2path(module_uri) and
-                    self._survives_exclude(module_uri, 'module')):
+                        self._survives_exclude(module_uri, 'module')):
                     modules.append(module_uri)
-        #print sorted(modules)  #dbg
+        # print sorted(modules)  #dbg
         return sorted(modules)
 
     def write_modules_api(self, modules, outdir):

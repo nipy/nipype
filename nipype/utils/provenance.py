@@ -15,9 +15,9 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 
-#try:
+# try:
 #    import prov.model as pm
-#except ImportError:
+# except ImportError:
 from ..external import provcopy as pm
 from ..external.six import string_types
 
@@ -35,11 +35,13 @@ crypto = pm.Namespace("crypto",
                        "cryptographicHashFunctions/"))
 get_id = lambda: niiri[uuid1().hex]
 
+
 def get_attr_id(attr, skip=None):
     dictwithhash, hashval = get_hashval(attr, skip=skip)
     return niiri[hashval]
 
 max_text_len = 1024000
+
 
 def get_hashval(inputdict, skip=None):
     """Return a dictionary of our items with hashes for each file.
@@ -84,6 +86,7 @@ def get_hashval(inputdict, skip=None):
         dict_nofilename[outname] = _get_sorteddict(val)
         dict_withhash[outname] = _get_sorteddict(val, True)
     return (dict_withhash, md5(str(dict_nofilename)).hexdigest())
+
 
 def _get_sorteddict(object, dictwithhash=False):
     if isinstance(object, dict):
@@ -283,18 +286,18 @@ class ProvStore(object):
         try:
             a0_attrs.update({nipype_ns['command']: safe_encode(runtime.cmdline)})
             a0_attrs.update({nipype_ns['commandPath']:
-                                 safe_encode(runtime.command_path)})
+                             safe_encode(runtime.command_path)})
             a0_attrs.update({nipype_ns['dependencies']:
-                                 safe_encode(runtime.dependencies)})
+                             safe_encode(runtime.dependencies)})
         except AttributeError:
             pass
         a0 = self.g.activity(get_id(), runtime.startTime, runtime.endTime,
-                        a0_attrs)
+                             a0_attrs)
         # environment
         id = get_id()
         env_collection = self.g.collection(id)
         env_collection.add_extra_attributes({pm.PROV['type']:
-                                                 nipype_ns['Environment'],
+                                             nipype_ns['Environment'],
                                              pm.PROV['label']: "Environment"})
         self.g.used(a0, id)
         # write environment entities
@@ -317,7 +320,7 @@ class ProvStore(object):
             id = get_id()
             input_collection = self.g.collection(id)
             input_collection.add_extra_attributes({pm.PROV['type']:
-                                                       nipype_ns['Inputs'],
+                                                   nipype_ns['Inputs'],
                                                    pm.PROV['label']: "Inputs"})
             # write input entities
             for idx, (key, val) in enumerate(sorted(inputs.items())):
@@ -334,7 +337,7 @@ class ProvStore(object):
             if not isinstance(outputs, dict):
                 outputs = outputs.get_traitsfree()
             output_collection.add_extra_attributes({pm.PROV['type']:
-                                                        nipype_ns['Outputs'],
+                                                    nipype_ns['Outputs'],
                                                     pm.PROV['label']:
                                                         "Outputs"})
             self.g.wasGeneratedBy(output_collection, a0)
@@ -350,7 +353,7 @@ class ProvStore(object):
         id = get_id()
         runtime_collection = self.g.collection(id)
         runtime_collection.add_extra_attributes({pm.PROV['type']:
-                                                     nipype_ns['Runtime'],
+                                                 nipype_ns['Runtime'],
                                                  pm.PROV['label']:
                                                      "RuntimeInfo"})
         self.g.wasGeneratedBy(runtime_collection, a0)
@@ -377,7 +380,7 @@ class ProvStore(object):
             agent_attr.update({nipype_ns[key]: safe_encode(value)})
         software_agent = self.g.agent(get_attr_id(agent_attr), agent_attr)
         self.g.wasAssociatedWith(a0, user_agent, None, None,
-                            {pm.PROV["hadRole"]: nipype_ns["LoggedInUser"]})
+                                 {pm.PROV["hadRole"]: nipype_ns["LoggedInUser"]})
         self.g.wasAssociatedWith(a0, software_agent)
         return self.g
 

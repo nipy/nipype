@@ -42,7 +42,7 @@ def grab_doc(cmd, trap_error=True):
     stdout, stderr = proc.communicate()
 
     if trap_error and proc.returncode:
-        msg = 'Attempting to run %s. Returned Error: %s'%(cmd,stderr)
+        msg = 'Attempting to run %s. Returned Error: %s' %(cmd, stderr)
         raise IOError(msg)
 
     if stderr:
@@ -51,6 +51,7 @@ def grab_doc(cmd, trap_error=True):
         # XXX: Test for error vs. doc in stderr
         return stderr
     return stdout
+
 
 def reverse_opt_map(opt_map):
     """Reverse the key/value pairs of the option map in the interface classes.
@@ -122,6 +123,7 @@ def format_params(paramlist, otherlist=None):
         otherparams = '\n'.join(otherlist)
         doc = ''.join([doc, otherparams])
     return doc
+
 
 def insert_doc(doc, new_items):
     """Insert ``new_items`` into the beginning of the ``doc``
@@ -206,13 +208,13 @@ def build_doc(doc, opts):
             # Probably an empty line
             continue
         # For lines we care about, the first item is the flag
-        if ',' in linelist[0]: #sometimes flags are only seperated by comma
+        if ',' in linelist[0]:  # sometimes flags are only seperated by comma
             flag = linelist[0].split(',')[0]
         else:
             flag = linelist[0]
         attr = opts.get(flag)
         if attr is not None:
-            #newline = line.replace(flag, attr)
+            # newline = line.replace(flag, attr)
             # Replace the flag with our attribute name
             linelist[0] = '%s :' % str(attr)
             # Add some line formatting
@@ -228,6 +230,7 @@ def build_doc(doc, opts):
                 # about the flags.
                 flags_doc.append(line)
     return format_params(newdoc, flags_doc)
+
 
 def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
     """Get the docstring from our command and options map.
@@ -253,12 +256,13 @@ def get_doc(cmd, opt_map, help_flag=None, trap_error=True):
                       terminal_output='allatonce').run()
     cmd_path = res.runtime.stdout.strip()
     if cmd_path == '':
-        raise Exception('Command %s not found'%cmd.split(' ')[0])
+        raise Exception('Command %s not found' %cmd.split(' ')[0])
     if help_flag:
-        cmd = ' '.join((cmd,help_flag))
-    doc = grab_doc(cmd,trap_error)
+        cmd = ' '.join((cmd, help_flag))
+    doc = grab_doc(cmd, trap_error)
     opts = reverse_opt_map(opt_map)
     return build_doc(doc, opts)
+
 
 def _parse_doc(doc, style=['--']):
     """Parses a help doc for inputs
@@ -283,24 +287,25 @@ def _parse_doc(doc, style=['--']):
         style = [style]
     for line in doclist:
         linelist = line.split()
-        flag =[item for i,item in enumerate(linelist) if i<2 and \
-                   any([item.startswith(s) for s in style]) and \
-                   len(item)>1]
+        flag = [item for i, item in enumerate(linelist) if i < 2 and \
+               any([item.startswith(s) for s in style]) and \
+               len(item) > 1]
         if flag:
-            if len(flag)==1:
+            if len(flag) == 1:
                 style_idx = [flag[0].startswith(s) for s in style].index(True)
                 flag = flag[0]
             else:
                 style_idx = []
                 for f in flag:
-                    for i,s in enumerate(style):
+                    for i, s in enumerate(style):
                         if f.startswith(s):
                             style_idx.append(i)
                             break
                 flag = flag[style_idx.index(min(style_idx))]
                 style_idx = min(style_idx)
-            optmap[flag.split(style[style_idx])[1]] = '%s %%s'%flag
+            optmap[flag.split(style[style_idx])[1]] = '%s %%s' %flag
     return optmap
+
 
 def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
     """Auto-generate option map from command line help
@@ -327,11 +332,12 @@ def get_params_from_doc(cmd, style='--', help_flag=None, trap_error=True):
                       terminal_output='allatonce').run()
     cmd_path = res.runtime.stdout.strip()
     if cmd_path == '':
-        raise Exception('Command %s not found'%cmd.split(' ')[0])
+        raise Exception('Command %s not found' %cmd.split(' ')[0])
     if help_flag:
-        cmd = ' '.join((cmd,help_flag))
-    doc = grab_doc(cmd,trap_error)
-    return _parse_doc(doc,style)
+        cmd = ' '.join((cmd, help_flag))
+    doc = grab_doc(cmd, trap_error)
+    return _parse_doc(doc, style)
+
 
 def replace_opts(rep_doc, opts):
     """Replace flags with parameter names.

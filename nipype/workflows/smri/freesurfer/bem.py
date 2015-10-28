@@ -58,8 +58,8 @@ def create_bem_flow(name='bem', out_format='stl'):
     watershed_bem = pe.Node(interface=mne.WatershedBEM(), name='WatershedBEM')
 
     surfconvert = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
-                          iterfield=['in_file'],
-                          name='surfconvert')
+                             iterfield=['in_file'],
+                             name='surfconvert')
 
     """
     Connect the nodes
@@ -67,7 +67,7 @@ def create_bem_flow(name='bem', out_format='stl'):
 
     bemflow.connect([
             (inputnode, watershed_bem, [('subject_id', 'subject_id'),
-                                   ('subjects_dir', 'subjects_dir')]),
+                                        ('subjects_dir', 'subjects_dir')]),
             (watershed_bem, surfconvert, [('mesh_files', 'in_file')]),
             ])
 

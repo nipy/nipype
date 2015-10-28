@@ -110,7 +110,7 @@ def format_node(node, format='python', include_config=False):
         if args:
             filled_args = []
             for arg in args:
-                if  hasattr(node._interface, '_%s' % arg):
+                if hasattr(node._interface, '_%s' % arg):
                     filled_args.append('%s=%s' % (arg, getattr(node._interface,
                                                                '_%s' % arg)))
             args = ', '.join(filled_args)
@@ -410,7 +410,7 @@ connected.
                                                  destnode,
                                                  edge_data)])
                 else:
-                    #pass
+                    # pass
                     logger.debug('Removing connection: %s->%s' % (srcnode,
                                                                   destnode))
                     self._graph.remove_edges_from([(srcnode, destnode)])
@@ -706,7 +706,7 @@ connected.
         datestr = datetime.utcnow().strftime('%Y%m%dT%H%M%S')
         if str2bool(self.config['execution']['write_provenance']):
             prov_base = op.join(self.base_dir,
-                                     'workflow_provenance_%s' % datestr)
+                                'workflow_provenance_%s' % datestr)
             logger.info('Provenance file prefix: %s' % prov_base)
             write_workflow_prov(execgraph, prov_base, format='all')
         return execgraph
@@ -720,10 +720,10 @@ connected.
         if not op.exists(report_dir):
             os.makedirs(report_dir)
         shutil.copyfile(op.join(op.dirname(__file__),
-                                     'report_template.html'),
+                                'report_template.html'),
                         op.join(report_dir, 'index.html'))
         shutil.copyfile(op.join(op.dirname(__file__),
-                                     '..', 'external', 'd3.js'),
+                                '..', 'external', 'd3.js'),
                         op.join(report_dir, 'd3.js'))
         nodes, groups = topological_sort(graph, depth_first=True)
         graph_file = op.join(report_dir, 'graph1.json')
@@ -755,9 +755,10 @@ connected.
         save_json(graph_file, json_dict)
         graph_file = op.join(report_dir, 'graph.json')
         template = '%%0%dd_' % np.ceil(np.log10(len(nodes))).astype(int)
+
         def getname(u, i):
             name_parts = u.fullname.split('.')
-            #return '.'.join(name_parts[:-1] + [template % i + name_parts[-1]])
+            # return '.'.join(name_parts[:-1] + [template % i + name_parts[-1]])
             return template % i + name_parts[-1]
         json_dict = []
         for i, node in enumerate(nodes):
@@ -796,7 +797,7 @@ connected.
                 for sourceinfo, field in sorted(data['connect']):
                     node.input_source[field] = \
                         (op.join(edge[0].output_dir(),
-                         'result_%s.pklz' % edge[0].name),
+                                 'result_%s.pklz' % edge[0].name),
                          sourceinfo)
 
     def _check_nodes(self, nodes):
@@ -1005,7 +1006,7 @@ connected.
                         self.disconnect(node, cd[0], v, cd[1])
                         self.connect(srcnode, srcout, dstnode, dstin)
                 # expand the workflow node
-                #logger.debug('expanding workflow: %s', node)
+                # logger.debug('expanding workflow: %s', node)
                 node._generate_flatgraph()
                 for innernode in node._graph.nodes():
                     innernode._hierarchy = '.'.join((self.name,
@@ -1024,8 +1025,8 @@ connected.
             prefix = '  '
         if hierarchy is None:
             hierarchy = []
-        colorset = ['#FFFFC8','#0000FF','#B4B4FF','#E6E6FF','#FF0000',
-                    '#FFB4B4','#FFE6E6','#00A300','#B4FFB4','#E6FFE6']
+        colorset = ['#FFFFC8', '#0000FF', '#B4B4FF', '#E6E6FF', '#FF0000',
+                    '#FFB4B4', '#FFE6E6', '#00A300', '#B4FFB4', '#E6FFE6']
 
         dotlist = ['%slabel="%s";' % (prefix, self.name)]
         for node in nx.topological_sort(self._graph):
@@ -1039,16 +1040,16 @@ connected.
                     dotlist.append(('%s[label="%s", shape=box3d,'
                                     'style=filled, color=black, colorscheme'
                                     '=greys7 fillcolor=2];') % (nodename,
-                                                            node_class_name))
+                                                                node_class_name))
                 else:
                     if colored:
                         dotlist.append(('%s[label="%s", style=filled,'
                                         ' fillcolor="%s"];')
-                                        % (nodename,node_class_name,
+                                       % (nodename, node_class_name,
                                            colorset[level]))
                     else:
                         dotlist.append(('%s[label="%s"];')
-                                        % (nodename,node_class_name))
+                                       % (nodename, node_class_name))
 
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
@@ -1064,7 +1065,7 @@ connected.
                                              colored=colored,
                                              simple_form=simple_form, level=level+3))
                 dotlist.append('}')
-                if level==6:level=2
+                if level == 6: level = 2
             else:
                 for subnode in self._graph.successors_iter(node):
                     if node._hierarchy != subnode._hierarchy:
@@ -1262,7 +1263,7 @@ class Node(WorkflowBase):
             else:
                 outputdir = op.join(outputdir, *self.parameterization)
         return op.abspath(op.join(outputdir,
-                                            self.name))
+                                  self.name))
 
     def set_input(self, parameter, val):
         """ Set interface input value"""
@@ -1380,13 +1381,13 @@ class Node(WorkflowBase):
                 cannot_rerun = (str2bool(
                     self.config['execution']['stop_on_first_rerun'])
                     and not (self.overwrite is None
-                         and self._interface.always_run))
+                             and self._interface.always_run))
                 if cannot_rerun:
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
                                      "is set to True"))
             hashfile_unfinished = op.join(outdir,
-                                               '_0x%s_unfinished.json' %
-                                               hashvalue)
+                                          '_0x%s_unfinished.json' %
+                                          hashvalue)
             if op.exists(hashfile):
                 os.remove(hashfile)
             rm_outdir = (op.exists(outdir)
@@ -1401,12 +1402,12 @@ class Node(WorkflowBase):
                     outdircont = os.listdir(outdir)
                     if ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) == 0)):
                         logger.warn(('An exception was raised trying to remove old %s, '
-                                    'but the path seems empty. Is it an NFS mount?. '
-                                    'Passing the exception.') % outdir)
+                                     'but the path seems empty. Is it an NFS mount?. '
+                                     'Passing the exception.') % outdir)
                         pass
                     elif ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) != 0)):
                         logger.debug(('Folder contents (%d items): '
-                                     '%s') % (len(outdircont), outdircont))
+                                      '%s') % (len(outdircont), outdircont))
                         raise ex
                     else:
                         raise ex
@@ -1822,7 +1823,7 @@ class JoinNode(Node):
     """
 
     def __init__(self, interface, name, joinsource, joinfield=None,
-        unique=False, **kwargs):
+                 unique=False, **kwargs):
         """
 
         Parameters
@@ -2015,8 +2016,9 @@ class JoinNode(Node):
             return getattr(self._inputs, slot_field)
         except AttributeError as e:
             raise AttributeError("The join node %s does not have a slot field %s"
-                         " to hold the %s value at index %d: %s"
-                         % (self, slot_field, field, index, e))
+                                 " to hold the %s value at index %d: %s"
+                                 % (self, slot_field, field, index, e))
+
 
 class MapNode(Node):
     """Wraps interface objects that need to be iterated on a list of inputs.
@@ -2055,7 +2057,6 @@ class MapNode(Node):
             nested list structure of the outputs will be resored
         See Node docstring for additional keyword arguments.
         """
-
 
         super(MapNode, self).__init__(interface, name, **kwargs)
         if isinstance(iterfield, string_types):
@@ -2257,10 +2258,10 @@ class MapNode(Node):
                 nodename = '_' + self.name + str(i)
                 subnode_report_files.insert(i, 'subnode %d' % i + ' : ' +
                                                op.join(cwd,
-                                                            'mapflow',
-                                                            nodename,
-                                                            '_report',
-                                                            'report.rst'))
+                                                       'mapflow',
+                                                       nodename,
+                                                       '_report',
+                                                       'report.rst'))
             fp.writelines(write_rst_list(subnode_report_files))
             fp.close()
 
@@ -2277,7 +2278,7 @@ class MapNode(Node):
             self._get_inputs()
             self._got_inputs = True
         self._check_iterfield()
-        if self._serial :
+        if self._serial:
             return 1
         else:
             if self.nested:
@@ -2325,7 +2326,7 @@ class MapNode(Node):
         if execute:
             if self.nested:
                 nitems = len(filename_to_list(flatten(getattr(self.inputs,
-                                                      self.iterfield[0]))))
+                                                              self.iterfield[0]))))
             else:
                 nitems = len(filename_to_list(getattr(self.inputs,
                                                       self.iterfield[0])))

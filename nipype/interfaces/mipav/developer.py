@@ -53,7 +53,7 @@ contributor: Miriam Waehnert (waehnert@cbs.mpg.de) http://www.cbs.mpg.de/
     input_spec = JistLaminarVolumetricLayeringInputSpec
     output_spec = JistLaminarVolumetricLayeringOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarVolumetricLayering "
-    _outputs_filenames = {'outContinuous':'outContinuous.nii','outLayer':'outLayer.nii','outDiscrete':'outDiscrete.nii'}
+    _outputs_filenames = {'outContinuous': 'outContinuous.nii', 'outLayer': 'outLayer.nii', 'outDiscrete': 'outDiscrete.nii'}
     _redirect_x = True
 
 
@@ -105,7 +105,7 @@ version: 2.0.RC
     input_spec = JistBrainMgdmSegmentationInputSpec
     output_spec = JistBrainMgdmSegmentationOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMgdmSegmentation "
-    _outputs_filenames = {'outSegmented':'outSegmented.nii','outPosterior2':'outPosterior2.nii','outPosterior3':'outPosterior3.nii','outLevelset':'outLevelset.nii'}
+    _outputs_filenames = {'outSegmented': 'outSegmented.nii', 'outPosterior2': 'outPosterior2.nii', 'outPosterior3': 'outPosterior3.nii', 'outLevelset': 'outLevelset.nii'}
     _redirect_x = True
 
 
@@ -140,7 +140,7 @@ version: 3.0.RC
     input_spec = JistLaminarProfileGeometryInputSpec
     output_spec = JistLaminarProfileGeometryOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarProfileGeometry "
-    _outputs_filenames = {'outResult':'outResult.nii'}
+    _outputs_filenames = {'outResult': 'outResult.nii'}
     _redirect_x = True
 
 
@@ -173,7 +173,7 @@ version: 3.0.RC
     input_spec = JistLaminarProfileCalculatorInputSpec
     output_spec = JistLaminarProfileCalculatorOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarProfileCalculator "
-    _outputs_filenames = {'outResult':'outResult.nii'}
+    _outputs_filenames = {'outResult': 'outResult.nii'}
     _redirect_x = True
 
 
@@ -214,7 +214,7 @@ version: 1.8.R
     input_spec = MedicAlgorithmN3InputSpec
     output_spec = MedicAlgorithmN3OutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.classification.MedicAlgorithmN3 "
-    _outputs_filenames = {'outInhomogeneity2':'outInhomogeneity2.nii','outInhomogeneity':'outInhomogeneity.nii'}
+    _outputs_filenames = {'outInhomogeneity2': 'outInhomogeneity2.nii', 'outInhomogeneity': 'outInhomogeneity.nii'}
     _redirect_x = True
 
 
@@ -248,7 +248,7 @@ version: 3.0.RC
     input_spec = JistLaminarROIAveragingInputSpec
     output_spec = JistLaminarROIAveragingOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarROIAveraging "
-    _outputs_filenames = {'outROI3':'outROI3'}
+    _outputs_filenames = {'outROI3': 'outROI3'}
     _redirect_x = True
 
 
@@ -318,7 +318,7 @@ contributor: Navid Shiee (navid.shiee@nih.gov) http://iacl.ece.jhu.edu/~nshiee/
     input_spec = MedicAlgorithmLesionToadsInputSpec
     output_spec = MedicAlgorithmLesionToadsOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.classification.MedicAlgorithmLesionToads "
-    _outputs_filenames = {'outWM':'outWM.nii','outHard':'outHard.nii','outFilled':'outFilled.nii','outMembership':'outMembership.nii','outInhomogeneity':'outInhomogeneity.nii','outCortical':'outCortical.nii','outHard2':'outHard2.nii','outLesion':'outLesion.nii','outSulcal':'outSulcal.nii'}
+    _outputs_filenames = {'outWM': 'outWM.nii', 'outHard': 'outHard.nii', 'outFilled': 'outFilled.nii', 'outMembership': 'outMembership.nii', 'outInhomogeneity': 'outInhomogeneity.nii', 'outCortical': 'outCortical.nii', 'outHard2': 'outHard2.nii', 'outLesion': 'outLesion.nii', 'outSulcal': 'outSulcal.nii'}
     _redirect_x = True
 
 
@@ -359,7 +359,7 @@ version: 3.0.RC
     input_spec = JistBrainMp2rageSkullStrippingInputSpec
     output_spec = JistBrainMp2rageSkullStrippingOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMp2rageSkullStripping "
-    _outputs_filenames = {'outBrain':'outBrain.nii','outMasked3':'outMasked3.nii','outMasked2':'outMasked2.nii','outMasked':'outMasked.nii'}
+    _outputs_filenames = {'outBrain': 'outBrain.nii', 'outMasked3': 'outMasked3.nii', 'outMasked2': 'outMasked2.nii', 'outMasked': 'outMasked.nii'}
     _redirect_x = True
 
 
@@ -401,7 +401,7 @@ contributor: Duygu Tosun
     input_spec = JistCortexSurfaceMeshInflationInputSpec
     output_spec = JistCortexSurfaceMeshInflationOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.cortex.JistCortexSurfaceMeshInflation "
-    _outputs_filenames = {'outOriginal':'outOriginal','outInflated':'outInflated'}
+    _outputs_filenames = {'outOriginal': 'outOriginal', 'outInflated': 'outInflated'}
     _redirect_x = True
 
 
@@ -442,7 +442,7 @@ documentation-url: http://www.nitrc.org/projects/jist/
     input_spec = RandomVolInputSpec
     output_spec = RandomVolOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.bme.smile.demo.RandomVol "
-    _outputs_filenames = {'outRand1':'outRand1.nii'}
+    _outputs_filenames = {'outRand1': 'outRand1.nii'}
     _redirect_x = True
 
 
@@ -477,7 +477,7 @@ documentation-url: http://www.iacl.ece.jhu.edu/
     input_spec = MedicAlgorithmImageCalculatorInputSpec
     output_spec = MedicAlgorithmImageCalculatorOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.utilities.math.MedicAlgorithmImageCalculator "
-    _outputs_filenames = {'outResult':'outResult.nii'}
+    _outputs_filenames = {'outResult': 'outResult.nii'}
     _redirect_x = True
 
 
@@ -511,7 +511,7 @@ version: 3.0.RC
     input_spec = JistBrainMp2rageDuraEstimationInputSpec
     output_spec = JistBrainMp2rageDuraEstimationOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainMp2rageDuraEstimation "
-    _outputs_filenames = {'outDura':'outDura.nii'}
+    _outputs_filenames = {'outDura': 'outDura.nii'}
     _redirect_x = True
 
 
@@ -546,7 +546,7 @@ version: 3.0.RC
     input_spec = JistLaminarProfileSamplingInputSpec
     output_spec = JistLaminarProfileSamplingOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.laminar.JistLaminarProfileSampling "
-    _outputs_filenames = {'outProfile2':'outProfile2.nii','outProfilemapped':'outProfilemapped.nii'}
+    _outputs_filenames = {'outProfile2': 'outProfile2.nii', 'outProfilemapped': 'outProfilemapped.nii'}
     _redirect_x = True
 
 
@@ -676,7 +676,7 @@ Hanlin Wan (hanlinwan@gmail.com)
     input_spec = MedicAlgorithmSPECTRE2010InputSpec
     output_spec = MedicAlgorithmSPECTRE2010OutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run edu.jhu.ece.iacl.plugins.segmentation.skull_strip.MedicAlgorithmSPECTRE2010 "
-    _outputs_filenames = {'outd0':'outd0.nii','outOriginal':'outOriginal.nii','outMask':'outMask.nii','outSplitHalves':'outSplitHalves.nii','outMidsagittal':'outMidsagittal.nii','outPrior':'outPrior.nii','outFANTASM':'outFANTASM.nii','outSegmentation':'outSegmentation.nii','outStripped':'outStripped.nii'}
+    _outputs_filenames = {'outd0': 'outd0.nii', 'outOriginal': 'outOriginal.nii', 'outMask': 'outMask.nii', 'outSplitHalves': 'outSplitHalves.nii', 'outMidsagittal': 'outMidsagittal.nii', 'outPrior': 'outPrior.nii', 'outFANTASM': 'outFANTASM.nii', 'outSegmentation': 'outSegmentation.nii', 'outStripped': 'outStripped.nii'}
     _redirect_x = True
 
 
@@ -709,7 +709,7 @@ version: 2.0.RC
     input_spec = JistBrainPartialVolumeFilterInputSpec
     output_spec = JistBrainPartialVolumeFilterOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.brain.JistBrainPartialVolumeFilter "
-    _outputs_filenames = {'outPartial':'outPartial.nii'}
+    _outputs_filenames = {'outPartial': 'outPartial.nii'}
     _redirect_x = True
 
 
@@ -751,7 +751,7 @@ version: 3.0.RC
     input_spec = JistIntensityMp2rageMaskingInputSpec
     output_spec = JistIntensityMp2rageMaskingOutputSpec
     _cmd = "java edu.jhu.ece.iacl.jist.cli.run de.mpg.cbs.jist.intensity.JistIntensityMp2rageMasking "
-    _outputs_filenames = {'outSignal2':'outSignal2.nii','outSignal':'outSignal.nii','outMasked2':'outMasked2.nii','outMasked':'outMasked.nii'}
+    _outputs_filenames = {'outSignal2': 'outSignal2.nii', 'outSignal': 'outSignal.nii', 'outMasked2': 'outMasked2.nii', 'outMasked': 'outMasked.nii'}
     _redirect_x = True
 
 

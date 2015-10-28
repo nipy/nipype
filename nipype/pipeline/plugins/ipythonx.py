@@ -15,6 +15,7 @@ except:
 
 from .base import (DistributedPluginBase, logger, report_crash)
 
+
 class IPythonXPlugin(DistributedPluginBase):
     """Execute workflow with ipython
     """
@@ -63,10 +64,10 @@ except:
     result = task.result
 """
         task = self.ipyclient.StringTask(cmdstr,
-                                         push = dict(task=node,
+                                         push=dict(task=node,
                                                      updatehash=updatehash),
-                                         pull = ['result','traceback'])
-        return self.taskclient.run(task, block = False)
+                                         pull=['result', 'traceback'])
+        return self.taskclient.run(task, block=False)
 
     def _report_crash(self, node, result=None):
         if result and result['traceback']:
@@ -79,5 +80,5 @@ except:
 
     def _clear_task(self, taskid):
         if IPyversion >= '0.10.1':
-            logger.debug("Clearing id: %d"%taskid)
+            logger.debug("Clearing id: %d" %taskid)
             self.taskclient.clear(taskid)

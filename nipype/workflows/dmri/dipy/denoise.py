@@ -37,11 +37,11 @@ def nlmeans_pipeline(name='Denoise',
     wf = pe.Workflow(name=name)
     wf.connect([
          (inputnode,  nmask,       [('in_file', 'in_file'),
-                                    ('in_mask', 'in_mask')])
-        ,(inputnode,  nlmeans,     [('in_file', 'in_file'),
-                                    ('in_mask', 'in_mask')])
-        ,(nmask,      nlmeans,     [('out_file', 'noise_mask')])
-        ,(nlmeans,    outputnode,  [('out_file', 'out_file')])
+                                    ('in_mask', 'in_mask')]),
+         (inputnode,  nlmeans,     [('in_file', 'in_file'),
+                                    ('in_mask', 'in_mask')]),
+         (nmask,      nlmeans,     [('out_file', 'noise_mask')]),
+         (nlmeans,    outputnode,  [('out_file', 'out_file')])
     ])
     return wf
 
@@ -57,9 +57,9 @@ def csf_mask(in_file, in_mask, out_file=None):
     import os.path as op
 
     if out_file is None:
-        fname,ext = op.splitext(op.basename(in_file))
+        fname, ext = op.splitext(op.basename(in_file))
         if ext == ".gz":
-            fname,ext2 = op.splitext(fname)
+            fname, ext2 = op.splitext(fname)
             ext = ext2 + ext
         out_file = op.abspath("%s_csfmask%s" % (fname, ext))
 
@@ -100,9 +100,9 @@ def bg_mask(in_file, in_mask, out_file=None):
     import os.path as op
 
     if out_file is None:
-        fname,ext = op.splitext(op.basename(in_file))
+        fname, ext = op.splitext(op.basename(in_file))
         if ext == ".gz":
-            fname,ext2 = op.splitext(fname)
+            fname, ext2 = op.splitext(fname)
             ext = ext2 + ext
         out_file = op.abspath("%s_bgmask%s" % (fname, ext))
 

@@ -48,7 +48,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
 #
 #    Cost = Sum_i ( metricweight[i] Metric_i ( fixedimage[i], movingimage[i]) )
     metric = traits.List(traits.Enum('CC', 'MI', 'SMI', 'PR', 'SSD',
-                         'MSQ', 'PSE'), mandatory=True, desc='')
+                                     'MSQ', 'PSE'), mandatory=True, desc='')
 
     metric_weight = traits.List(traits.Float(), requires=['metric'], desc='')
     radius = traits.List(traits.Int(), requires=['metric'], desc='')
@@ -305,11 +305,11 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         argstr='--initialize-transforms-per-stage %d', default=False,
         usedefault=True,  # This should be true for explicit completeness
         desc=('Initialize linear transforms from the previous stage. By enabling this option, '
-          'the current linear stage transform is directly intialized from the previous '
-          'stages linear transform; this allows multiple linear stages to be run where '
-          'each stage directly updates the estimated linear transform from the previous '
-          'stage. (e.g. Translation -> Rigid -> Affine). '
-          ))
+              'the current linear stage transform is directly intialized from the previous '
+              'stages linear transform; this allows multiple linear stages to be run where '
+              'each stage directly updates the estimated linear transform from the previous '
+              'stage. (e.g. Translation -> Rigid -> Affine). '
+              ))
     # NOTE: Even though only 0=False and 1=True are allowed, ants uses integer
     # values instead of booleans
     float = traits.Bool(
@@ -375,6 +375,7 @@ class RegistrationOutputSpec(TraitedSpec):
     warped_image = File(desc="Outputs warped image")
     inverse_warped_image = File(desc="Outputs the inverse of the warped image")
     save_state = File(desc="The saved registration state to be restored")
+
 
 class Registration(ANTSCommand):
 
@@ -553,7 +554,7 @@ class Registration(ANTSCommand):
                 else:
                     temp["moving_image"] = self.inputs.moving_image[i]
 
-                specs.append( temp )
+                specs.append(temp)
         else:
             specs = [stage_inputs]
 
@@ -605,9 +606,9 @@ class Registration(ANTSCommand):
             retval.append('--convergence %s' % self._formatConvergence(ii))
             if isdefined(self.inputs.sigma_units):
                 retval.append('--smoothing-sigmas %s%s' %
-                             (self._antsJoinList(self.inputs.smoothing_sigmas[
+                              (self._antsJoinList(self.inputs.smoothing_sigmas[
                                  ii]),
-                              self.inputs.sigma_units[ii]))
+                               self.inputs.sigma_units[ii]))
             else:
                 retval.append('--smoothing-sigmas %s' %
                               self._antsJoinList(self.inputs.smoothing_sigmas[ii]))
@@ -668,7 +669,6 @@ class Registration(ANTSCommand):
             % (self.inputs.winsorize_upper_quantile, self.inputs.winsorize_lower_quantile)
         self._quantilesDone = True
         return '--winsorize-image-intensities [ %s, %s ]' % (self.inputs.winsorize_lower_quantile, self.inputs.winsorize_upper_quantile)
-
 
     def _format_arg(self, opt, spec, val):
         if opt == 'fixed_image_mask':

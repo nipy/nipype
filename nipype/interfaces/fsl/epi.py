@@ -121,19 +121,19 @@ class TOPUPInputSpec(FSLCommandInputSpec):
                          desc='name of text file with PE directions/times',
                          argstr='--datain=%s')
     encoding_direction = traits.List(traits.Enum('y', 'x', 'z', 'x-', 'y-',
-                                     'z-'), mandatory=True,
+                                                 'z-'), mandatory=True,
                                      xor=['encoding_file'],
                                      requires=['readout_times'],
                                      argstr='--datain=%s',
                                      desc=('encoding direction for automatic '
-                                     'generation of encoding_file'))
+                                           'generation of encoding_file'))
     readout_times = InputMultiPath(traits.Float,
                                    requires=['encoding_direction'],
                                    xor=['encoding_file'], mandatory=True,
                                    desc=('readout times (dwell times by # '
                                          'phase-encode steps minus 1)'))
     out_base = File(desc=('base-name of output files (spline '
-                    'coefficients (Hz) and movement parameters)'),
+                          'coefficients (Hz) and movement parameters)'),
                     name_source=['in_file'], name_template='%s_base',
                     argstr='--out=%s', hash_files=False)
     out_field = File(argstr='--fout=%s', hash_files=False,
@@ -276,7 +276,7 @@ class TOPUP(FSLCommand):
     def _get_encfilename(self):
         out_file = os.path.join(os.getcwd(),
                                 ('%s_encfile.txt' %
-                                split_filename(self.inputs.in_file)[1]))
+                                 split_filename(self.inputs.in_file)[1]))
         return out_file
 
     def _generate_encfile(self):
@@ -398,8 +398,8 @@ class EddyInputSpec(FSLCommandInputSpec):
                    desc=('File containing the b-values for all volumes in '
                          '--imain'))
     out_base = traits.Str('eddy_corrected', argstr='--out=%s',
-                              usedefault=True,
-                              desc=('basename for output (warped) image'))
+                          usedefault=True,
+                          desc=('basename for output (warped) image'))
     session = File(exists=True, argstr='--session=%s',
                    desc=('File containing session indices for all volumes in '
                          '--imain'))
@@ -585,19 +585,19 @@ class EpiRegInputSpec(FSLCommandInputSpec):
                         desc='phase encoding direction, dir = x/y/z/-x/-y/-z')
 
     weight_image = File(exists=True, argstr='--weight=%s',
-                      desc='weighting image (in T1 space)')
+                        desc='weighting image (in T1 space)')
     no_fmapreg = traits.Bool(False, argstr='--nofmapreg',
-                        desc='do not perform registration of fmap to T1 \
+                             desc='do not perform registration of fmap to T1 \
                         (use if fmap already registered)')
     no_clean = traits.Bool(False, argstr='--noclean',
-                        desc='do not clean up intermediate files')
+                           desc='do not clean up intermediate files')
 
 
 class EpiRegOutputSpec(TraitedSpec):
     out_file = File(exists=True,
                     desc='unwarped and coregistered epi input')
     out_1vol = File(exists=True,
-                          desc='unwarped and coregistered single volume')
+                    desc='unwarped and coregistered single volume')
     fmap2str_mat = File(exists=True,
                         desc='rigid fieldmap-to-structural transform')
     fmap2epi_mat = File(exists=True,
@@ -652,36 +652,35 @@ class EpiReg(FSLCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '.nii.gz')
+                                           self.inputs.out_base + '.nii.gz')
         if not (isdefined(self.inputs.no_fmapreg) and self.inputs.no_fmapreg) and isdefined(self.inputs.fmap):
             outputs['out_1vol'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_1vol.nii.gz')
+                                               self.inputs.out_base + '_1vol.nii.gz')
             outputs['fmap2str_mat'] = os.path.join(os.getcwd(),
-                                        self.inputs.out_base + '_fieldmap2str.mat')
+                                                   self.inputs.out_base + '_fieldmap2str.mat')
             outputs['fmap2epi_mat'] = os.path.join(os.getcwd(),
-                                        self.inputs.out_base + '_fieldmaprads2epi.mat')
+                                                   self.inputs.out_base + '_fieldmaprads2epi.mat')
             outputs['fmap_epi'] = os.path.join(os.getcwd(),
-                                        self.inputs.out_base + '_fieldmaprads2epi.nii.gz')
+                                               self.inputs.out_base + '_fieldmaprads2epi.nii.gz')
             outputs['fmap_str'] = os.path.join(os.getcwd(),
-                                        self.inputs.out_base + '_fieldmaprads2str.ni    `i.gz')
+                                               self.inputs.out_base + '_fieldmaprads2str.ni    `i.gz')
             outputs['fmapmag_str'] = os.path.join(os.getcwd(),
-                                        self.inputs.out_base + '_fieldmap2str.nii.gz')
+                                                  self.inputs.out_base + '_fieldmap2str.nii.gz')
             outputs['shiftmap'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
+                                               self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
             outputs['fullwarp'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_warp.nii.gz')
+                                               self.inputs.out_base + '_warp.nii.gz')
             outputs['epi2str_inv'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_inv.mat')
+                                                  self.inputs.out_base + '_inv.mat')
 
         outputs['epi2str_mat'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '.mat')
+                                              self.inputs.out_base + '.mat')
         outputs['wmedge'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_fast_wmedge.nii.gz')
+                                         self.inputs.out_base + '_fast_wmedge.nii.gz')
         outputs['wmseg'] = os.path.join(os.getcwd(),
-                                    self.inputs.out_base + '_fast_wmseg.nii.gz')
+                                        self.inputs.out_base + '_fast_wmseg.nii.gz')
 
         return outputs
-
 
 
 #######################################
@@ -762,7 +761,7 @@ class EPIDeWarp(FSLCommand):
 
     def __init__(self, **inputs):
         warnings.warn(("Deprecated: Please use "
-                      "nipype.workflows.dmri.preprocess.epi.sdc_fmb instead"),
+                       "nipype.workflows.dmri.preprocess.epi.sdc_fmb instead"),
                       DeprecationWarning)
         return super(EPIDeWarp, self).__init__(**inputs)
 
@@ -851,7 +850,7 @@ class EddyCorrect(FSLCommand):
 
     def __init__(self, **inputs):
         warnings.warn(("Deprecated: Please use nipype.interfaces.fsl.epi.Eddy "
-                      "instead"), DeprecationWarning)
+                       "instead"), DeprecationWarning)
         return super(EddyCorrect, self).__init__(**inputs)
 
     def _run_interface(self, runtime):

@@ -21,6 +21,7 @@ def clean_workspace_and_get_default_script_file():
         os.remove(default_script_file)  # raise Exception('Default script file needed for tests; please remove %s!' % default_script_file)
     return default_script_file
 
+
 @skipif(no_matlab)
 def test_cmdline():
     default_script_file = clean_workspace_and_get_default_script_file()

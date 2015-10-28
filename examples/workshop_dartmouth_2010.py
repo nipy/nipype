@@ -131,7 +131,7 @@ motion_correct = pe.Node(interface=fsl.MCFLIRT(in_file=os.path.abspath('data/s1/
 smooth = pe.Node(interface=fsl.Smooth(fwhm=6), name="smooth")
 
 motion_correct_and_smooth = pe.Workflow(name="motion_correct_and_smooth")
-motion_correct_and_smooth.base_dir = os.path.abspath('.') # define where will be the root folder for the workflow
+motion_correct_and_smooth.base_dir = os.path.abspath('.')  # define where will be the root folder for the workflow
 motion_correct_and_smooth.connect([
                                    (motion_correct, smooth, [('out_file', 'in_file')])
                                    ])
@@ -212,7 +212,7 @@ import nipype.interfaces.io as nio
 
 preproc.inputs.inputspec.func = os.path.abspath('data/s1/f3.nii')
 preproc.inputs.inputspec.struct = os.path.abspath('data/s1/struct.nii')
-datasink = pe.Node(interface=nio.DataSink(),name='sinker')
+datasink = pe.Node(interface=nio.DataSink(), name='sinker')
 preprocess = pe.Workflow(name='preprocout')
 preprocess.base_dir = os.path.abspath('.')
 preprocess.connect([
@@ -272,7 +272,7 @@ infosource.iterables = ('subject_id', ['s1', 's3'])
 datasource = pe.Node(nio.DataGrabber(infields=['subject_id'], outfields=['func', 'struct']), name="datasource")
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.base_directory = os.path.abspath('data')
-datasource.inputs.template_args = dict(func=[['subject_id','f3']], struct=[['subject_id','struct']])
+datasource.inputs.template_args = dict(func=[['subject_id', 'f3']], struct=[['subject_id', 'struct']])
 datasource.inputs.sort_filelist = True
 
 my_workflow = pe.Workflow(name="my_workflow")
@@ -280,7 +280,7 @@ my_workflow.base_dir = os.path.abspath('.')
 
 my_workflow.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                      (datasource, preproc, [('func', 'inputspec.func'),
-                                          ('struct', 'inputspec.struct')])])
+                                            ('struct', 'inputspec.struct')])])
 my_workflow.run()
 
 
@@ -290,8 +290,8 @@ and we can change a node attribute and run it again
 """
 
 smoothnode = my_workflow.get_node('preproc.smooth')
-assert(str(smoothnode)=='preproc.smooth')
-smoothnode.iterables = ('fwhm', [5.,10.])
+assert(str(smoothnode) == 'preproc.smooth')
+smoothnode.iterables = ('fwhm', [5., 10.])
 my_workflow.run()
 
 """

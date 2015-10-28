@@ -26,9 +26,9 @@ from nibabel import load
 from ... import LooseVersion
 from .base import (FSLCommand, FSLCommandInputSpec, Info)
 from ..base import (load_template, File, traits, isdefined,
-                                    TraitedSpec, BaseInterface, Directory,
-                                    InputMultiPath, OutputMultiPath,
-                                    BaseInterfaceInputSpec)
+                    TraitedSpec, BaseInterface, Directory,
+                    InputMultiPath, OutputMultiPath,
+                    BaseInterfaceInputSpec)
 from ...utils.filemanip import (list_to_filename, filename_to_list)
 from ...utils.misc import human_order_sorted
 
@@ -68,19 +68,19 @@ this option for FILMGLS by setting autocorr_noestimate to True", mandatory=True)
                                    traits.List(
                                        traits.Either(traits.Tuple(traits.Str,
                                                                   traits.Enum(
-                                                                  'T'),
+                                                                      'T'),
                                                                   traits.List(
-                                                                  traits.Str),
+                                                                      traits.Str),
                                                                   traits.List(
                                                                       traits.Float)),
                                                      traits.Tuple(
                                                      traits.Str,
                                                      traits.Enum(
-                                                     'T'),
+                                                         'T'),
                                                      traits.List(
-                                                     traits.Str),
+                                                         traits.Str),
                                                      traits.List(
-                                                     traits.Float),
+                                                         traits.Float),
                                                      traits.List(
                                                          traits.Float)))))),
         desc="List of contrasts with each contrast being a list of the form - \
@@ -387,17 +387,17 @@ class FEAT(FSLCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         is_ica = False
-        outputs['feat_dir']=None
+        outputs['feat_dir'] = None
         with open(self.inputs.fsf_file, 'rt') as fp:
             text = fp.read()
             if "set fmri(inmelodic) 1" in text:
                 is_ica = True
             for line in text.split('\n'):
-                if line.find("set fmri(outputdir)")>-1:
+                if line.find("set fmri(outputdir)") > -1:
                     try:
-                        outputdir_spec=line.split('"')[-2]
+                        outputdir_spec = line.split('"')[-2]
                         if os.path.exists(outputdir_spec):
-                           outputs['feat_dir']=outputdir_spec
+                            outputs['feat_dir'] = outputdir_spec
 
                     except:
                         pass
@@ -406,7 +406,7 @@ class FEAT(FSLCommand):
                 outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*ica'))[0]
             else:
                 outputs['feat_dir'] = glob(os.path.join(os.getcwd(), '*feat'))[0]
-        print('Outputs from FEATmodel:',outputs)
+        print('Outputs from FEATmodel:', outputs)
         return outputs
 
 
@@ -491,7 +491,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     mask_size = traits.Int(argstr='-ms %d',
                            desc="susan mask size")
     brightness_threshold = traits.Range(low=0, argstr='-epith %d',
-                                      desc='susan brightness threshold, otherwise it is estimated')
+                                        desc='susan brightness threshold, otherwise it is estimated')
     full_data = traits.Bool(argstr='-v', desc='output full data')
     _estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
                      'multitaper_product', 'use_pava', 'autocorr_noestimate']
@@ -513,6 +513,7 @@ class FILMGLSInputSpec(FSLCommandInputSpec):
     results_dir = Directory('results', argstr='-rn %s', usedefault=True,
                             desc='directory to store results in')
 
+
 class FILMGLSInputSpec505(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, position=-3,
                    argstr='--in=%s', desc='input data file')
@@ -524,8 +525,8 @@ class FILMGLSInputSpec505(FSLCommandInputSpec):
                                   desc='Smooth auto corr estimates')
     mask_size = traits.Int(argstr='--ms=%d', desc="susan mask size")
     brightness_threshold = traits.Range(low=0, argstr='--epith=%d',
-                                      desc=('susan brightness threshold, '
-                                            'otherwise it is estimated'))
+                                        desc=('susan brightness threshold, '
+                                              'otherwise it is estimated'))
     full_data = traits.Bool(argstr='-v', desc='output full data')
     _estimate_xor = ['autocorr_estimate_only', 'fit_armodel', 'tukey_window',
                      'multitaper_product', 'use_pava', 'autocorr_noestimate']
@@ -550,6 +551,7 @@ class FILMGLSInputSpec505(FSLCommandInputSpec):
     results_dir = Directory('results', argstr='--rn=%s', usedefault=True,
                             desc='directory to store results in')
 
+
 class FILMGLSInputSpec507(FILMGLSInputSpec505):
     threshold = traits.Float(default=-1000., argstr='--thr=%f',
                              position=-1, usedefault=True,
@@ -563,6 +565,7 @@ class FILMGLSInputSpec507(FILMGLSInputSpec505):
     surface = File(exists=True, argstr="--in2=%s",
                    desc=("input surface for autocorr smoothing in "
                          "surface-based analyses"))
+
 
 class FILMGLSOutputSpec(TraitedSpec):
     param_estimates = OutputMultiPath(File(exists=True),
@@ -983,7 +986,7 @@ class ContrastMgrInputSpec(FSLCommandInputSpec):
                          copyfile=False, mandatory=True,
                          desc='summary of residuals, See Woolrich, et. al., 2001')
     contrast_num = traits.Range(low=1, argstr='-cope',
-                              desc='contrast number to start labeling copes from')
+                                desc='contrast number to start labeling copes from')
     suffix = traits.Str(argstr='-suffix %s',
                         desc='suffix to put on the end of the cope filename before the contrast number, default is nothing')
 

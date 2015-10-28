@@ -22,7 +22,7 @@ from ..fsl.base import FSLCommand, FSLCommandInputSpec
 class MathsInput(FSLCommandInputSpec):
 
     in_file = File(position=2, argstr="%s", exists=True, mandatory=True,
-                desc="image to operate on")
+                   desc="image to operate on")
     out_file = File(genfile=True, position=-2, argstr="%s", desc="image to write", hash_files=False)
     _dtypes = ["float", "char", "int", "short", "double", "input"]
     internal_datatype = traits.Enum(*_dtypes, position=1, argstr="-dt %s",
@@ -33,6 +33,7 @@ class MathsInput(FSLCommandInputSpec):
 
     nan2zeros = traits.Bool(position=3, argstr='-nan',
                             desc='change NaNs to zeros before doing anything')
+
 
 class MathsOutput(TraitedSpec):
 
@@ -124,10 +125,11 @@ class MeanImage(MathsCommand):
     input_spec = MeanImageInput
     _suffix = "_mean"
 
+
 class MaxImageInput(MathsInput):
 
     dimension = traits.Enum("T", "X", "Y", "Z", usedefault=True, argstr="-%smax", position=4,
-        desc="dimension to max across")
+                            desc="dimension to max across")
 
 
 class MaxImage(MathsCommand):
@@ -172,7 +174,7 @@ class IsotropicSmooth(MathsCommand):
 class ApplyMaskInput(MathsInput):
 
     mask_file = File(exists=True, mandatory=True, argstr="-mas %s", position=4,
-                      desc="binary image defining mask space")
+                     desc="binary image defining mask space")
 
 
 class ApplyMask(MathsCommand):
@@ -188,7 +190,7 @@ class KernelInput(MathsInput):
     kernel_shape = traits.Enum("3D", "2D", "box", "boxv", "gauss", "sphere", "file",
                                argstr="-kernel %s", position=4, desc="kernel shape to use")
     kernel_size = traits.Float(argstr="%.4f", position=5, xor=["kernel_file"],
-                             desc="kernel size - voxels for box/boxv, mm for sphere, mm sigma for gauss")
+                               desc="kernel size - voxels for box/boxv, mm for sphere, mm sigma for gauss")
     kernel_file = File(exists=True, argstr="%s", position=5, xor=["kernel_size"],
                        desc="use external file for kernel")
 
@@ -290,7 +292,7 @@ class MultiImageMathsInput(MathsInput):
     op_string = traits.String(position=4, argstr="%s", mandatory=True,
                               desc="python formatted string of operations to perform")
     operand_files = InputMultiPath(File(exists=True), mandatory=True,
-                                 desc="list of file names to plug into op string")
+                                   desc="list of file names to plug into op string")
 
 
 class MultiImageMaths(MathsCommand):

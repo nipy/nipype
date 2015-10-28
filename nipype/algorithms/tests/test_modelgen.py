@@ -52,7 +52,7 @@ def test_modelgen1():
     s.inputs.input_units = 'scans'
     res = s.run()
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([6., 6.])
-    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([6.,])
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([6., ])
     yield assert_almost_equal, np.array(res.outputs.session_info[1]['cond'][1]['duration']), np.array([6., 6.])
     rmtree(tempdir)
 
@@ -104,9 +104,9 @@ def test_modelgen_spm_concat():
     s.inputs.subject_info = deepcopy(info)
     res = s.run()
     yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][0]['duration']), np.array([1., 1.])
-    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([1.,])
+    yield assert_almost_equal, np.array(res.outputs.session_info[0]['cond'][1]['duration']), np.array([1., ])
     yield assert_almost_equal, np.array(res.outputs.session_info[1]['cond'][1]['duration']), np.array([1., 1.])
-    yield assert_almost_equal, np.array(res.outputs.session_info[2]['cond'][1]['duration']), np.array([1.,])
+    yield assert_almost_equal, np.array(res.outputs.session_info[2]['cond'][1]['duration']), np.array([1., ])
     # Test case for variable number of events in concatenated runs, sometimes unique.
     s.inputs.concatenate_runs = True
     info = [Bunch(conditions=['cond1', 'cond2'], onsets=[[2, 3], [2]], durations=[[1, 1], [1]]),

@@ -22,9 +22,11 @@ import inspect
 # Some of the classes in this module begin with 'Numpy' to clearly distinguish
 # them from the plethora of very similar names from nose/unittest/doctest
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Modified version of the one in the stdlib, that fixes a python bug (doctests
 # not found in extension modules, http://bugs.python.org/issue3158)
+
+
 class NumpyDocTestFinder(doctest.DocTestFinder):
 
     def _from_module(self, module, object):
@@ -33,34 +35,34 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
         module.
         """
         if module is None:
-            #print '_fm C1'  # dbg
+            # print '_fm C1'  # dbg
             return True
         elif inspect.isfunction(object):
-            #print '_fm C2'  # dbg
+            # print '_fm C2'  # dbg
             return module.__dict__ is object.__globals__
         elif inspect.isbuiltin(object):
-            #print '_fm C2-1'  # dbg
+            # print '_fm C2-1'  # dbg
             return module.__name__ == object.__module__
         elif inspect.isclass(object):
-            #print '_fm C3'  # dbg
+            # print '_fm C3'  # dbg
             return module.__name__ == object.__module__
         elif inspect.ismethod(object):
             # This one may be a bug in cython that fails to correctly set the
             # __module__ attribute of methods, but since the same error is easy
             # to make by extension code writers, having this safety in place
             # isn't such a bad idea
-            #print '_fm C3-1'  # dbg
+            # print '_fm C3-1'  # dbg
             return module.__name__ == object.__self__.__class__.__module__
         elif inspect.getmodule(object) is not None:
-            #print '_fm C4'  # dbg
-            #print 'C4 mod',module,'obj',object # dbg
+            # print '_fm C4'  # dbg
+            # print 'C4 mod',module,'obj',object # dbg
             return module is inspect.getmodule(object)
         elif hasattr(object, '__module__'):
-            #print '_fm C5'  # dbg
+            # print '_fm C5'  # dbg
             return module.__name__ == object.__module__
         elif isinstance(object, property):
-            #print '_fm C6'  # dbg
-            return True # [XX] no way not be sure.
+            # print '_fm C6'  # dbg
+            return True  # [XX] no way not be sure.
         else:
             raise ValueError("object must be a class or function")
 
@@ -70,7 +72,7 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
         add them to `tests`.
         """
 
-        doctest.DocTestFinder._find(self,tests, obj, name, module,
+        doctest.DocTestFinder._find(self, tests, obj, name, module,
                                     source_lines, globs, seen)
 
         # Below we re-run pieces of the above method with manual modifications,
@@ -79,25 +81,24 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
 
         # Local shorthands
         from inspect import isroutine, isclass, ismodule, isfunction, \
-                            ismethod
+            ismethod
 
         # Look for tests in a module's contained objects.
         if ismodule(obj) and self._recurse:
             for valname, val in list(obj.__dict__.items()):
                 valname1 = '%s.%s' % (name, valname)
-                if ( (isroutine(val) or isclass(val))
-                     and self._from_module(module, val) ):
+                if ((isroutine(val) or isclass(val))
+                     and self._from_module(module, val)):
 
                     self._find(tests, val, valname1, module, source_lines,
                                globs, seen)
 
-
         # Look for tests in a class's contained objects.
         if isclass(obj) and self._recurse:
-            #print 'RECURSE into class:',obj  # dbg
+            # print 'RECURSE into class:',obj  # dbg
             for valname, val in list(obj.__dict__.items()):
-                #valname1 = '%s.%s' % (name, valname)  # dbg
-                #print 'N',name,'VN:',valname,'val:',str(val)[:77] # dbg
+                # valname1 = '%s.%s' % (name, valname)  # dbg
+                # print 'N',name,'VN:',valname,'val:',str(val)[:77] # dbg
                 # Special handling for staticmethod/classmethod.
                 if isinstance(val, staticmethod):
                     val = getattr(obj, valname)
@@ -106,8 +107,8 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
 
                 # Recurse to methods, properties, and nested classes.
                 if ((isfunction(val) or isclass(val) or
-                     ismethod(val) or isinstance(val, property)) and
-                      self._from_module(module, val)):
+                        ismethod(val) or isinstance(val, property)) and
+                        self._from_module(module, val)):
                     valname = '%s.%s' % (name, valname)
                     self._find(tests, val, valname, module, source_lines,
                                globs, seen)
@@ -128,16 +129,16 @@ class NumpyOutputChecker(doctest.OutputChecker):
             # bigendian machines don't fail all the tests (and there are
             # actually some bigendian examples in the doctests). Let's try
             # making them all little endian
-            got = got.replace("'>","'<")
-            want= want.replace("'>","'<")
+            got = got.replace("'>", "'<")
+            want = want.replace("'>", "'<")
 
             # try to normalize out 32 and 64 bit default int sizes
-            for sz in [4,8]:
-                got = got.replace("'<i%d'"%sz,"int")
-                want= want.replace("'<i%d'"%sz,"int")
+            for sz in [4, 8]:
+                got = got.replace("'<i%d'" %sz, "int")
+                want = want.replace("'<i%d'" %sz, "int")
 
             ret = doctest.OutputChecker.check_output(self, want,
-                    got, optionflags)
+                                                     got, optionflags)
 
         return ret
 
@@ -158,9 +159,10 @@ class NumpyDocTestCase(npd.DocTestCase):
 
 print_state = numpy.get_printoptions()
 
+
 class NumpyDoctest(npd.Doctest):
     name = 'numpydoctest'   # call nosetests with --with-numpydoctest
-    score = 1000 # load late, after doctest builtin
+    score = 1000  # load late, after doctest builtin
 
     # always use whitespace and ellipsis options for doctests
     doctest_optflags = doctest.NORMALIZE_WHITESPACE | doctest.ELLIPSIS
@@ -228,10 +230,10 @@ class NumpyDoctest(npd.Doctest):
         #
         # Note: __file__ allows the doctest in NoseTester to run
         # without producing an error
-        test.globs = {'__builtins__':__builtins__,
-                      '__file__':'__main__',
-                      '__name__':'__main__',
-                      'np':numpy}
+        test.globs = {'__builtins__': __builtins__,
+                      '__file__': '__main__',
+                      '__name__': '__main__',
+                      'np': numpy}
         # add appropriate scipy import for SciPy tests
         if 'scipy' in pkg_name:
             p = pkg_name.split('.')
@@ -286,8 +288,8 @@ class Unplugger(object):
     By default it removes the "doctest" plugin.
     """
     name = 'unplugger'
-    enabled = True # always enabled
-    score = 4000 # load late in order to be after builtins
+    enabled = True  # always enabled
+    score = 4000  # load late in order to be after builtins
 
     def __init__(self, to_unplug='doctest'):
         self.to_unplug = to_unplug

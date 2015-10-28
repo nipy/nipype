@@ -422,7 +422,7 @@ def create_reg_workflow(name='registration'):
 
     # Coregister the median to the surface
     bbregister = Node(freesurfer.BBRegister(),
-                    name='bbregister')
+                      name='bbregister')
     bbregister.inputs.init = 'fsl'
     bbregister.inputs.contrast_type = 't2'
     bbregister.inputs.out_fsl_file = True
@@ -484,7 +484,7 @@ def create_reg_workflow(name='registration'):
     convert2itk.inputs.fsl2ras = True
     convert2itk.inputs.itk_transform = True
     register.connect(bbregister, 'out_fsl_file', convert2itk, 'transform_file')
-    register.connect(inputnode, 'mean_image',convert2itk, 'source_file')
+    register.connect(inputnode, 'mean_image', convert2itk, 'source_file')
     register.connect(stripper, 'out_file', convert2itk, 'reference_file')
 
     """
@@ -524,7 +524,7 @@ def create_reg_workflow(name='registration'):
     reg.inputs.num_threads = 4
     reg.plugin_args = {'qsub_args': '-l nodes=1:ppn=4'}
     register.connect(stripper, 'out_file', reg, 'moving_image')
-    register.connect(inputnode,'target_image', reg,'fixed_image')
+    register.connect(inputnode, 'target_image', reg, 'fixed_image')
 
     """
     Concatenate the affine and ants transforms into a list
@@ -546,7 +546,7 @@ def create_reg_workflow(name='registration'):
     warpmean.inputs.args = '--float'
     warpmean.inputs.num_threads = 4
 
-    register.connect(inputnode,'target_image', warpmean,'reference_image')
+    register.connect(inputnode, 'target_image', warpmean, 'reference_image')
     register.connect(inputnode, 'mean_image', warpmean, 'input_image')
     register.connect(merge, 'out', warpmean, 'transforms')
 
@@ -634,7 +634,6 @@ def create_workflow(files,
     registration.inputs.inputspec.subjects_dir = subjects_dir
     registration.inputs.inputspec.target_image = target_file
 
-
     """Use :class:`nipype.algorithms.rapidart` to determine which of the
     images in the functional series are outliers based on deviations in
     intensity or movement.
@@ -647,7 +646,6 @@ def create_workflow(files,
     art.inputs.zintensity_threshold = 9
     art.inputs.mask_type = 'spm_global'
     art.inputs.parameter_source = 'SPM'
-
 
     """Here we are connecting all the nodes together. Notice that we add the merge node only if you choose
     to use 4D. Also `get_vox_dims` function is passed along the input volume of normalise to set the optimal
@@ -698,7 +696,6 @@ def create_workflow(files,
     wf.connect(art, 'norm_files', createfilter1, 'comp_norm')
     wf.connect(art, 'outlier_files', createfilter1, 'outliers')
 
-
     filter1 = MapNode(fsl.GLM(out_f_name='F_mcart.nii',
                               out_pf_name='pF_mcart.nii',
                               demean=True),
@@ -709,7 +706,6 @@ def create_workflow(files,
     wf.connect(slice_timing, ('timecorrected_files', rename, '_filtermotart'),
                filter1, 'out_res_name')
     wf.connect(createfilter1, 'out_files', filter1, 'design')
-
 
     createfilter2 = MapNode(Function(input_names=['realigned_file', 'mask_file',
                                                   'num_components',
@@ -726,7 +722,6 @@ def create_workflow(files,
     wf.connect(registration, ('outputspec.segmentation_files', selectindex, [0, 2]),
                createfilter2, 'mask_file')
 
-
     filter2 = MapNode(fsl.GLM(out_f_name='F.nii',
                               out_pf_name='pF.nii',
                               demean=True),
@@ -739,11 +734,11 @@ def create_workflow(files,
     wf.connect(mask, 'mask_file', filter2, 'mask')
 
     bandpass = Node(Function(input_names=['files', 'lowpass_freq',
-                                           'highpass_freq', 'fs'],
-                              output_names=['out_files'],
-                              function=bandpass_filter,
-                              imports=imports),
-                     name='bandpass_unsmooth')
+                                          'highpass_freq', 'fs'],
+                             output_names=['out_files'],
+                             function=bandpass_filter,
+                             imports=imports),
+                    name='bandpass_unsmooth')
     bandpass.inputs.fs = 1. / TR
     bandpass.inputs.highpass_freq = highpass_freq
     bandpass.inputs.lowpass_freq = lowpass_freq
@@ -839,7 +834,7 @@ def create_workflow(files,
     samplerlh.inputs.sampling_units = "frac"
     samplerlh.inputs.interp_method = "trilinear"
     samplerlh.inputs.smooth_surf = surf_fwhm
-    #samplerlh.inputs.cortex_mask = True
+    # samplerlh.inputs.cortex_mask = True
     samplerlh.inputs.out_type = 'niigz'
     samplerlh.inputs.subjects_dir = subjects_dir
 
@@ -874,7 +869,7 @@ def create_workflow(files,
                      iterfield=['timeseries_file'],
                      name='getsubcortts')
     ts2txt.inputs.indices = [8] + list(range(10, 14)) + [17, 18, 26, 47] +\
-                            list(range(49, 55)) + [58]
+        list(range(49, 55)) + [58]
     ts2txt.inputs.label_file = \
         os.path.abspath(('OASIS-TRT-20_jointfusion_DKT31_CMA_labels_in_MNI152_'
                          '2mm_v2.nii.gz'))
@@ -903,7 +898,7 @@ def create_workflow(files,
     datasink.inputs.base_directory = sink_directory
     datasink.inputs.container = subject_id
     datasink.inputs.substitutions = substitutions
-    datasink.inputs.regexp_substitutions = regex_subs #(r'(/_.*(\d+/))', r'/run\2')
+    datasink.inputs.regexp_substitutions = regex_subs  # (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(realign, 'realignment_parameters', datasink, 'resting.qa.motion')
     wf.connect(art, 'norm_files', datasink, 'resting.qa.art.@norm')
     wf.connect(art, 'intensity_files', datasink, 'resting.qa.art.@intensity')
@@ -934,7 +929,7 @@ def create_workflow(files,
     datasink2.inputs.base_directory = sink_directory
     datasink2.inputs.container = subject_id
     datasink2.inputs.substitutions = substitutions
-    datasink2.inputs.regexp_substitutions = regex_subs #(r'(/_.*(\d+/))', r'/run\2')
+    datasink2.inputs.regexp_substitutions = regex_subs  # (r'(/_.*(\d+/))', r'/run\2')
     wf.connect(combiner, 'out_file',
                datasink2, 'resting.parcellations.grayo.@surface')
     return wf

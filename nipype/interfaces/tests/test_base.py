@@ -10,8 +10,8 @@ import shutil
 import warnings
 
 from nipype.testing import (assert_equal, assert_not_equal, assert_raises,
-                        assert_true, assert_false, with_setup, package_check,
-                        skipif)
+                            assert_true, assert_false, with_setup, package_check,
+                            skipif)
 import nipype.interfaces.base as nib
 from nipype.utils.filemanip import split_filename
 from nipype.interfaces.base import Undefined, config
@@ -21,19 +21,22 @@ import traits.api as traits
 
 def test_bunch():
     b = nib.Bunch()
-    yield assert_equal, b.__dict__,{}
-    b = nib.Bunch(a=1,b=[2,3])
-    yield assert_equal, b.__dict__,{'a': 1, 'b': [2,3]}
+    yield assert_equal, b.__dict__, {}
+    b = nib.Bunch(a=1, b=[2, 3])
+    yield assert_equal, b.__dict__, {'a': 1, 'b': [2, 3]}
+
 
 def test_bunch_attribute():
-    b = nib.Bunch(a=1,b=[2,3],c=None)
-    yield assert_equal, b.a ,1
-    yield assert_equal, b.b, [2,3]
+    b = nib.Bunch(a=1, b=[2, 3], c=None)
+    yield assert_equal, b.a, 1
+    yield assert_equal, b.b, [2, 3]
     yield assert_equal, b.c, None
 
+
 def test_bunch_repr():
-    b = nib.Bunch(b=2,c=3,a=dict(n=1,m=2))
+    b = nib.Bunch(b=2, c=3, a=dict(n=1, m=2))
     yield assert_equal, repr(b), "Bunch(a={'m': 2, 'n': 1}, b=2, c=3)"
+
 
 def test_bunch_methods():
     b = nib.Bunch(a=2)
@@ -46,14 +49,15 @@ def test_bunch_methods():
     yield assert_equal, type(dict()), type(newb)
     yield assert_equal, newb['a'], 3
 
+
 def test_bunch_hash():
     # NOTE: Since the path to the json file is included in the Bunch,
     # the hash will be unique to each machine.
     pth = os.path.split(os.path.abspath(__file__))[0]
     json_pth = os.path.join(pth, 'realign_json.json')
-    b = nib.Bunch(infile = json_pth,
-                  otherthing = 'blue',
-                  yat = True)
+    b = nib.Bunch(infile=json_pth,
+                  otherthing='blue',
+                  yat=True)
     newbdict, bhash = b._get_bunch_hash()
     yield assert_equal, bhash, 'ddcc7b4ec5675df8cf317a48bd1857fa'
     # Make sure the hash stored in the json file for `infile` is correct.
@@ -65,16 +69,17 @@ def test_bunch_hash():
 
 
 # create a temp file
-#global tmp_infile, tmp_dir
-#tmp_infile = None
-#tmp_dir = None
+# global tmp_infile, tmp_dir
+# tmp_infile = None
+# tmp_dir = None
 def setup_file():
-    #global tmp_infile, tmp_dir
+    # global tmp_infile, tmp_dir
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo.txt')
     with open(tmp_infile, 'w') as fp:
         fp.writelines(['123456789'])
     return tmp_infile
+
 
 def teardown_file(tmp_dir):
     shutil.rmtree(tmp_dir)
@@ -88,16 +93,16 @@ def test_TraitedSpec():
         foo = nib.traits.Int
         goo = nib.traits.Float(usedefault=True)
 
-
     yield assert_equal, spec().foo, Undefined
     yield assert_equal, spec().goo, 0.0
-    specfunc = lambda x : spec(hoo=x)
+    specfunc = lambda x: spec(hoo=x)
     yield assert_raises, nib.traits.TraitError, specfunc, 1
     infields = spec(foo=1)
     hashval = ([('foo', 1), ('goo', '0.0000000000')], 'e89433b8c9141aa0fda2f8f4d662c047')
     yield assert_equal, infields.get_hashval(), hashval
-    #yield assert_equal, infields.hashval[1], hashval[1]
+    # yield assert_equal, infields.hashval[1], hashval[1]
     yield assert_equal, infields.__repr__(), '\nfoo = 1\ngoo = 0.0\n'
+
 
 @skip
 def test_TraitedSpec_dynamic():
@@ -105,26 +110,29 @@ def test_TraitedSpec_dynamic():
     a = nib.BaseTraitedSpec()
     a.add_trait('foo', nib.traits.Int)
     a.foo = 1
-    assign_a = lambda : setattr(a, 'foo', 'a')
+    assign_a = lambda: setattr(a, 'foo', 'a')
     yield assert_raises, Exception, assign_a
     pkld_a = dumps(a)
     unpkld_a = loads(pkld_a)
-    assign_a_again = lambda : setattr(unpkld_a, 'foo', 'a')
+    assign_a_again = lambda: setattr(unpkld_a, 'foo', 'a')
     yield assert_raises, Exception, assign_a_again
+
 
 def test_TraitedSpec_logic():
     class spec3(nib.TraitedSpec):
         _xor_inputs = ('foo', 'bar')
 
-        foo = nib.traits.Int(xor = _xor_inputs,
-                             desc = 'foo or bar, not both')
-        bar = nib.traits.Int(xor = _xor_inputs,
-                             desc = 'bar or foo, not both')
-        kung = nib.traits.Float(requires = ('foo',),
-                                position = 0,
-                                desc = 'kung foo')
+        foo = nib.traits.Int(xor=_xor_inputs,
+                             desc='foo or bar, not both')
+        bar = nib.traits.Int(xor=_xor_inputs,
+                             desc='bar or foo, not both')
+        kung = nib.traits.Float(requires=('foo',),
+                                position=0,
+                                desc='kung foo')
+
     class out3(nib.TraitedSpec):
         output = nib.traits.Int
+
     class MyInterface(nib.BaseInterface):
         input_spec = spec3
         output_spec = out3
@@ -133,11 +141,12 @@ def test_TraitedSpec_logic():
     yield assert_raises, TypeError, setattr(myif.inputs, 'kung', 10.0)
     myif.inputs.foo = 1
     yield assert_equal,  myif.inputs.foo, 1
-    set_bar = lambda : setattr(myif.inputs, 'bar', 1)
+    set_bar = lambda: setattr(myif.inputs, 'bar', 1)
     yield assert_raises, IOError, set_bar
     yield assert_equal, myif.inputs.foo, 1
     myif.inputs.kung = 2
     yield assert_equal, myif.inputs.kung, 2.0
+
 
 def test_deprecation():
     with warnings.catch_warnings(record=True) as w:
@@ -146,7 +155,7 @@ def test_deprecation():
         class DeprecationSpec1(nib.TraitedSpec):
             foo = nib.traits.Int(deprecated='0.1')
         spec_instance = DeprecationSpec1()
-        set_foo = lambda : setattr(spec_instance, 'foo', 1)
+        set_foo = lambda: setattr(spec_instance, 'foo', 1)
         yield assert_raises, nib.TraitError, set_foo
         yield assert_equal, len(w), 0, 'no warnings, just errors'
 
@@ -156,7 +165,7 @@ def test_deprecation():
         class DeprecationSpec1numeric(nib.TraitedSpec):
             foo = nib.traits.Int(deprecated='0.1')
         spec_instance = DeprecationSpec1numeric()
-        set_foo = lambda : setattr(spec_instance, 'foo', 1)
+        set_foo = lambda: setattr(spec_instance, 'foo', 1)
         yield assert_raises, nib.TraitError, set_foo
         yield assert_equal, len(w), 0, 'no warnings, just errors'
 
@@ -166,7 +175,7 @@ def test_deprecation():
         class DeprecationSpec2(nib.TraitedSpec):
             foo = nib.traits.Int(deprecated='100', new_name='bar')
         spec_instance = DeprecationSpec2()
-        set_foo = lambda : setattr(spec_instance, 'foo', 1)
+        set_foo = lambda: setattr(spec_instance, 'foo', 1)
         yield assert_raises, nib.TraitError, set_foo
         yield assert_equal, len(w), 0, 'no warnings, just errors'
 
@@ -214,7 +223,7 @@ def test_namesource():
                        position=2)
         doo = nib.File(exists=True, argstr="%s", position=1)
         goo = traits.Int(argstr="%d", position=4)
-        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s",position=3)
+        poo = nib.File(name_source=['goo'], hash_files=False, argstr="%s", position=3)
 
     class TestName(nib.CommandLine):
         _cmd = "mycommand"
@@ -287,12 +296,12 @@ def test_cycle_namesource1():
     os.chdir(pwd)
     teardown_file(tmpd)
 
+
 def test_cycle_namesource2():
     tmp_infile = setup_file()
     tmpd, nme, ext = split_filename(tmp_infile)
     pwd = os.getcwd()
     os.chdir(tmpd)
-
 
     class spec3(nib.CommandLineInputSpec):
         moo = nib.File(name_source=['doo'], hash_files=False, argstr="%s",
@@ -334,11 +343,13 @@ def checknose():
     else:
         return 1
 
+
 @skipif(checknose)
 def test_TraitedSpec_withFile():
     tmp_infile = setup_file()
     tmpd, nme = os.path.split(tmp_infile)
     yield assert_true, os.path.exists(tmp_infile)
+
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True)
         doo = nib.traits.List(nib.File(exists=True))
@@ -347,6 +358,7 @@ def test_TraitedSpec_withFile():
     yield assert_equal, hashval[1], 'a00e9ee24f5bfa9545a515b7a759886b'
     teardown_file(tmpd)
 
+
 @skipif(checknose)
 def test_TraitedSpec_withNoFileHashing():
     tmp_infile = setup_file()
@@ -354,6 +366,7 @@ def test_TraitedSpec_withNoFileHashing():
     pwd = os.getcwd()
     os.chdir(tmpd)
     yield assert_true, os.path.exists(tmp_infile)
+
     class spec2(nib.TraitedSpec):
         moo = nib.File(exists=True, hash_files=False)
         doo = nib.traits.List(nib.File(exists=True))
@@ -377,6 +390,7 @@ def test_TraitedSpec_withNoFileHashing():
     os.chdir(pwd)
     teardown_file(tmpd)
 
+
 def test_Interface():
     yield assert_equal, nib.Interface.input_spec, None
     yield assert_equal, nib.Interface.output_spec, None
@@ -396,6 +410,7 @@ def test_Interface():
     yield assert_raises, NotImplementedError, nif._list_outputs
     yield assert_raises, NotImplementedError, nif._get_filecopy_info
 
+
 def test_BaseInterface():
     yield assert_equal, nib.BaseInterface.help(), None
     yield assert_equal, nib.BaseInterface._get_filecopy_info(), []
@@ -407,8 +422,10 @@ def test_BaseInterface():
         hoo = nib.traits.Int(desc='a random int', usedefault=True)
         zoo = nib.File(desc='a file', copyfile=False)
         woo = nib.File(desc='a file', copyfile=True)
+
     class OutputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
+
     class DerivedInterface(nib.BaseInterface):
         input_spec = InputSpec
 
@@ -427,6 +444,7 @@ def test_BaseInterface():
 
     class DerivedInterface2(DerivedInterface):
         output_spec = OutputSpec
+
         def _run_interface(self, runtime):
             return runtime
 
@@ -437,13 +455,16 @@ def test_BaseInterface():
     nib.BaseInterface.input_spec = None
     yield assert_raises, Exception, nib.BaseInterface
 
+
 def assert_not_raises(fn, *args, **kwargs):
     fn(*args, **kwargs)
     return True
 
+
 def test_input_version():
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
     obj = DerivedInterface1()
@@ -453,8 +474,10 @@ def test_input_version():
     yield assert_raises, Exception, obj._check_version_requirements, obj.inputs
 
     config.set_default_config()
+
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.8'
@@ -464,6 +487,7 @@ def test_input_version():
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.10'
@@ -472,6 +496,7 @@ def test_input_version():
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.9'
@@ -482,6 +507,7 @@ def test_input_version():
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', max_ver='0.7')
+
     class DerivedInterface2(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.8'
@@ -491,6 +517,7 @@ def test_input_version():
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', max_ver='0.9')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         _version = '0.9'
@@ -499,11 +526,14 @@ def test_input_version():
     not_raised = True
     yield assert_not_raises, obj._check_version_requirements, obj.inputs
 
+
 def test_output_version():
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
+
     class OutputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.9')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         output_spec = OutputSpec
@@ -513,28 +543,36 @@ def test_output_version():
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
+
     class OutputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.11')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         output_spec = OutputSpec
         _version = '0.10'
     obj = DerivedInterface1()
     yield assert_equal, obj._check_version_requirements(obj._outputs()), ['foo']
+
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
+
     class OutputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int', min_ver='0.11')
+
     class DerivedInterface1(nib.BaseInterface):
         input_spec = InputSpec
         output_spec = OutputSpec
         _version = '0.10'
+
         def _run_interface(self, runtime):
             return runtime
+
         def _list_outputs(self):
             return {'foo': 1}
     obj = DerivedInterface1()
     yield assert_raises, KeyError, obj.run
+
 
 def test_Commandline():
     yield assert_raises, Exception, nib.CommandLine
@@ -544,7 +582,7 @@ def test_Commandline():
     ci2 = nib.CommandLine(command='which', args='ls')
     yield assert_equal, ci2.cmdline, 'which ls'
     ci3 = nib.CommandLine(command='echo')
-    ci3.inputs.environ = {'MYENV' : 'foo'}
+    ci3.inputs.environ = {'MYENV': 'foo'}
     res = ci3.run()
     yield assert_equal, res.runtime.environ['MYENV'], 'foo'
     yield assert_equal, res.outputs, None
@@ -584,6 +622,7 @@ def test_Commandline():
 
     class DerivedClass(nib.CommandLine):
         input_spec = CommandLineInputSpec2
+
         def _gen_filename(self, name):
             return 'filename'
 
@@ -602,9 +641,10 @@ def test_Commandline_environ():
     res = ci3.run()
     yield assert_false, 'DISPLAY' in ci3.inputs.environ
     yield assert_equal, res.runtime.environ['DISPLAY'], ':3'
-    ci3.inputs.environ = {'DISPLAY' : ':2'}
+    ci3.inputs.environ = {'DISPLAY': ':2'}
     res = ci3.run()
     yield assert_equal, res.runtime.environ['DISPLAY'], ':2'
+
 
 def test_CommandLine_output():
     tmp_infile = setup_file()
@@ -631,6 +671,7 @@ def test_CommandLine_output():
     yield assert_true, 'stdout.nipype' in res.runtime.stdout
     os.chdir(pwd)
     teardown_file(tmpd)
+
 
 def test_global_CommandLine_output():
     tmp_infile = setup_file()

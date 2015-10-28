@@ -24,12 +24,14 @@ class DWI2SphericalHarmonicsImageInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='Diffusion-weighted images')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
     encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=1,
-    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
+                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     maximum_harmonic_order = traits.Float(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     normalise = traits.Bool(argstr='-normalise', position=3, desc="normalise the DW signal to the b=0 image")
 
+
 class DWI2SphericalHarmonicsImageOutputSpec(TraitedSpec):
     spherical_harmonics_image = File(exists=True, desc='Spherical harmonics image')
+
 
 class DWI2SphericalHarmonicsImage(CommandLine):
     """
@@ -70,8 +72,8 @@ class DWI2SphericalHarmonicsImage(CommandLine):
     >>> dwi2SH.run()                                    # doctest: +SKIP
     """
     _cmd = 'dwi2SH'
-    input_spec=DWI2SphericalHarmonicsImageInputSpec
-    output_spec=DWI2SphericalHarmonicsImageOutputSpec
+    input_spec = DWI2SphericalHarmonicsImageInputSpec
+    output_spec = DWI2SphericalHarmonicsImageOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -87,21 +89,23 @@ class DWI2SphericalHarmonicsImage(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_SH.mif'
+
 
 class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3, desc='diffusion-weighted image')
     response_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
-    desc='the diffusion-weighted signal response function for a single fibre population (see EstimateResponse)')
+                         desc='the diffusion-weighted signal response function for a single fibre population (see EstimateResponse)')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
     mask_image = File(exists=True, argstr='-mask %s', position=2, desc='only perform computation within the specified binary brain mask image')
     encoding_file = File(exists=True, argstr='-grad %s', position=1,
-    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
+                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     filter_file = File(exists=True, argstr='-filter %s', position=-2,
-    desc='a text file containing the filtering coefficients for each even harmonic order.' \
-    'the linear frequency filtering parameters used for the initial linear spherical deconvolution step (default = [ 1 1 1 0 0 ]).')
+                       desc='a text file containing the filtering coefficients for each even harmonic order.' \
+                       'the linear frequency filtering parameters used for the initial linear spherical deconvolution step (default = [ 1 1 1 0 0 ]).')
 
     lambda_value = traits.Float(argstr='-lambda %s', desc='the regularisation parameter lambda that controls the strength of the constraint (default = 1.0).')
     maximum_harmonic_order = traits.Int(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
@@ -109,12 +113,14 @@ class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     iterations = traits.Int(argstr='-niter %s', desc='the maximum number of iterations to perform for each voxel (default = 50)')
     debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
     directions_file = File(exists=True, argstr='-directions %s', position=-2,
-    desc='a text file containing the [ el az ] pairs for the directions: Specify the directions over which to apply the non-negativity constraint (by default, the built-in 300 direction set is used)')
+                           desc='a text file containing the [ el az ] pairs for the directions: Specify the directions over which to apply the non-negativity constraint (by default, the built-in 300 direction set is used)')
 
     normalise = traits.Bool(argstr='-normalise', position=3, desc="normalise the DW signal to the b=0 image")
 
+
 class ConstrainedSphericalDeconvolutionOutputSpec(TraitedSpec):
     spherical_harmonics_image = File(exists=True, desc='Spherical harmonics image')
+
 
 class ConstrainedSphericalDeconvolution(CommandLine):
     """
@@ -149,8 +155,8 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     """
 
     _cmd = 'csdeconv'
-    input_spec=ConstrainedSphericalDeconvolutionInputSpec
-    output_spec=ConstrainedSphericalDeconvolutionOutputSpec
+    input_spec = ConstrainedSphericalDeconvolutionInputSpec
+    output_spec = ConstrainedSphericalDeconvolutionOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -166,23 +172,27 @@ class ConstrainedSphericalDeconvolution(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_CSD.mif'
+
 
 class EstimateResponseForSHInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3, desc='Diffusion-weighted images')
     mask_image = File(exists=True, mandatory=True, argstr='%s', position=-2, desc='only perform computation within the specified binary brain mask image')
     out_filename = File(genfile=True, argstr='%s', position=-1, desc='Output filename')
     encoding_file = File(exists=True, argstr='-grad %s', mandatory=True, position=1,
-    desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
+                         desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     maximum_harmonic_order = traits.Int(argstr='-lmax %s', desc='set the maximum harmonic order for the output series. By default, the program will use the highest possible lmax given the number of diffusion-weighted images.')
     normalise = traits.Bool(argstr='-normalise', desc='normalise the DW signal to the b=0 image')
     quiet = traits.Bool(argstr='-quiet', desc='Do not display information messages or progress status.')
     debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
 
+
 class EstimateResponseForSHOutputSpec(TraitedSpec):
     response = File(exists=True, desc='Spherical harmonics image')
+
 
 class EstimateResponseForSH(CommandLine):
     """
@@ -199,8 +209,8 @@ class EstimateResponseForSH(CommandLine):
     >>> estresp.run()                                   # doctest: +SKIP
     """
     _cmd = 'estimate_response'
-    input_spec=EstimateResponseForSHInputSpec
-    output_spec=EstimateResponseForSHOutputSpec
+    input_spec = EstimateResponseForSHInputSpec
+    output_spec = EstimateResponseForSHOutputSpec
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
@@ -216,9 +226,11 @@ class EstimateResponseForSH(CommandLine):
             return self._gen_outfilename()
         else:
             return None
+
     def _gen_outfilename(self):
-        _, name , _ = split_filename(self.inputs.in_file)
+        _, name, _ = split_filename(self.inputs.in_file)
         return name + '_ER.txt'
+
 
 def concat_files(bvec_file, bval_file, invert_x, invert_y, invert_z):
     bvecs = np.loadtxt(bvec_file)
@@ -228,22 +240,23 @@ def concat_files(bvec_file, bval_file, invert_x, invert_y, invert_z):
         flip = True
         bvecs = np.transpose(bvecs)
     if invert_x:
-        bvecs[0,:] = -bvecs[0,:]
+        bvecs[0, :] = -bvecs[0, :]
         iflogger.info('Inverting b-vectors in the x direction')
     if invert_y:
-        bvecs[1,:] = -bvecs[1,:]
+        bvecs[1, :] = -bvecs[1, :]
         iflogger.info('Inverting b-vectors in the y direction')
     if invert_z:
-        bvecs[2,:] = -bvecs[2,:]
+        bvecs[2, :] = -bvecs[2, :]
         iflogger.info('Inverting b-vectors in the z direction')
     iflogger.info(np.shape(bvecs))
     iflogger.info(np.shape(bvals))
-    encoding = np.transpose(np.vstack((bvecs,bvals)))
-    _, bvec , _ = split_filename(bvec_file)
-    _, bval , _ = split_filename(bval_file)
+    encoding = np.transpose(np.vstack((bvecs, bvals)))
+    _, bvec, _ = split_filename(bvec_file)
+    _, bval, _ = split_filename(bval_file)
     out_encoding_file = bvec + '_' + bval + '.txt'
     np.savetxt(out_encoding_file, encoding)
     return out_encoding_file
+
 
 class FSL2MRTrixInputSpec(TraitedSpec):
     bvec_file = File(exists=True, mandatory=True, desc='FSL b-vectors file (3xN text file)')
@@ -253,9 +266,11 @@ class FSL2MRTrixInputSpec(TraitedSpec):
     invert_z = traits.Bool(False, usedefault=True, desc='Inverts the b-vectors along the z-axis')
     out_encoding_file = File(genfile=True, desc='Output encoding filename')
 
+
 class FSL2MRTrixOutputSpec(TraitedSpec):
     encoding_file = File(desc='The gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient' \
-        'and b gives the b-value in units (1000 s/mm^2).')
+                         'and b gives the b-value in units (1000 s/mm^2).')
+
 
 class FSL2MRTrix(BaseInterface):
     """
@@ -293,13 +308,13 @@ class FSL2MRTrix(BaseInterface):
             return None
 
     def _gen_outfilename(self):
-        _, bvec , _ = split_filename(self.inputs.bvec_file)
-        _, bval , _ = split_filename(self.inputs.bval_file)
+        _, bvec, _ = split_filename(self.inputs.bvec_file)
+        _, bval, _ = split_filename(self.inputs.bval_file)
         return bvec + '_' + bval + '.txt'
 
 
 class GenerateDirectionsInputSpec(CommandLineInputSpec):
-    num_dirs = traits.Int(mandatory=True, argstr='%s', position=-2 , desc='the number of directions to generate.')
+    num_dirs = traits.Int(mandatory=True, argstr='%s', position=-2, desc='the number of directions to generate.')
 
     power = traits.Float(argstr='-power %s', desc='specify exponent to use for repulsion power law.')
     niter = traits.Int(argstr='-niter %s', desc='specify the maximum number of iterations to perform.')
@@ -307,10 +322,12 @@ class GenerateDirectionsInputSpec(CommandLineInputSpec):
     quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
     out_file = File(name_source=['num_dirs'], name_template='directions_%d.txt', argstr='%s', hash_files=False,
-                     position= -1, desc='the text file to write the directions to, as [ az el ] pairs.')
+                    position=-1, desc='the text file to write the directions to, as [ az el ] pairs.')
+
 
 class GenerateDirectionsOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='directions file')
+
 
 class GenerateDirections(CommandLine):
     """
@@ -326,8 +343,8 @@ class GenerateDirections(CommandLine):
     """
 
     _cmd = 'gendir'
-    input_spec=GenerateDirectionsInputSpec
-    output_spec=GenerateDirectionsOutputSpec
+    input_spec = GenerateDirectionsInputSpec
+    output_spec = GenerateDirectionsOutputSpec
 
 
 class FindShPeaksInputSpec(CommandLineInputSpec):
@@ -342,11 +359,13 @@ class FindShPeaksInputSpec(CommandLineInputSpec):
     display_info = traits.Bool(argstr='-info', desc='Display information messages.')
     quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
-    out_file = File(name_template="%s_peak_dirs.mif", keep_extension=False, argstr='%s', hash_files=False, position= -1,
+    out_file = File(name_template="%s_peak_dirs.mif", keep_extension=False, argstr='%s', hash_files=False, position=-1,
                     desc='the output image. Each volume corresponds to the x, y & z component of each peak direction vector in turn', name_source=["in_file"])
+
 
 class FindShPeaksOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Peak directions image')
+
 
 class FindShPeaks(CommandLine):
     """
@@ -364,9 +383,8 @@ class FindShPeaks(CommandLine):
     """
 
     _cmd = 'find_SH_peaks'
-    input_spec=FindShPeaksInputSpec
-    output_spec=FindShPeaksOutputSpec
-
+    input_spec = FindShPeaksInputSpec
+    output_spec = FindShPeaksOutputSpec
 
 
 class Directions2AmplitudeInputSpec(CommandLineInputSpec):
@@ -379,11 +397,13 @@ class Directions2AmplitudeInputSpec(CommandLineInputSpec):
     display_info = traits.Bool(argstr='-info', desc='Display information messages.')
     quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
     display_debug = traits.Bool(argstr='-debug', desc='Display debugging messages.')
-    out_file = File(name_template="%s_amplitudes.mif", keep_extension=False, argstr='%s', hash_files=False, position= -1,
+    out_file = File(name_template="%s_amplitudes.mif", keep_extension=False, argstr='%s', hash_files=False, position=-1,
                     desc='the output amplitudes image', name_source=["in_file"])
+
 
 class Directions2AmplitudeOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='amplitudes image')
+
 
 class Directions2Amplitude(CommandLine):
     """
@@ -399,6 +419,6 @@ class Directions2Amplitude(CommandLine):
     """
 
     _cmd = 'dir2amp'
-    input_spec=Directions2AmplitudeInputSpec
-    output_spec=Directions2AmplitudeOutputSpec
+    input_spec = Directions2AmplitudeInputSpec
+    output_spec = Directions2AmplitudeOutputSpec
 

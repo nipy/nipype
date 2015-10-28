@@ -74,7 +74,7 @@ class Info(object):
         -------
         None
         """
-        #warn(('AFNI has no environment variable that sets filetype '
+        # warn(('AFNI has no environment variable that sets filetype '
         #      'Nipype uses NIFTI_GZ as default'))
         return 'AFNI'
 
@@ -100,6 +100,7 @@ class AFNICommandInputSpec(CommandLineInputSpec):
                     argstr='-prefix %s',
                     name_source=["in_file"])
 
+
 class AFNICommandOutputSpec(TraitedSpec):
     out_file = File(desc='output file',
                     exists=True)
@@ -109,7 +110,6 @@ class AFNICommand(CommandLine):
 
     input_spec = AFNICommandInputSpec
     _outputtype = None
-
 
     def __init__(self, **inputs):
         super(AFNICommand, self).__init__(**inputs)
@@ -156,7 +156,7 @@ class AFNICommand(CommandLine):
         if out_names:
             for name in out_names:
                 if outputs[name]:
-                    _,_,ext = split_filename(outputs[name])
+                    _, _, ext = split_filename(outputs[name])
                     if ext == "":
                         outputs[name] = outputs[name] + "+orig.BRIK"
         return outputs

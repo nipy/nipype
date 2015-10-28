@@ -3,6 +3,7 @@
 from __future__ import print_function
 import subprocess
 
+
 def run_tests(cmd):
     proc = subprocess.Popen(cmd,
                             stdout=subprocess.PIPE,
@@ -14,6 +15,7 @@ def run_tests(cmd):
         raise Exception(msg)
     # Nose returns the output in stderr
     return stderr
+
 
 def grab_coverage(output):
     """Grab coverage lines from nose output."""

@@ -54,9 +54,11 @@ iflogger = logging.getLogger('interface')
 
 __docformat__ = 'restructuredtext'
 
+
 class NipypeInterfaceError(Exception):
     def __init__(self, value):
         self.value = value
+
     def __str__(self):
         return repr(self.value)
 
@@ -69,6 +71,7 @@ def _unlock_display(ndisplay):
         return False
 
     return True
+
 
 def _exists_in_path(cmd, environ):
     '''
@@ -88,6 +91,7 @@ def _exists_in_path(cmd, environ):
             if os.path.exists(filename):
                 return True, filename
     return False, None
+
 
 def load_template(name):
     """Load a template from the script_templates directory
@@ -137,6 +141,7 @@ class Bunch(object):
            Items", Python Cookbook, 2nd Ed, Chapter 4.18, 2005.
 
     """
+
     def __init__(self, *args, **kwargs):
         self.__dict__.update(*args, **kwargs)
 
@@ -352,7 +357,7 @@ class BaseTraitedSpec(traits.HasTraits):
         # NOTE: In python 2.6, object.__init__ no longer accepts input
         # arguments.  HasTraits does not define an __init__ and
         # therefore these args were being ignored.
-        #super(TraitedSpec, self).__init__(*args, **kwargs)
+        # super(TraitedSpec, self).__init__(*args, **kwargs)
         super(BaseTraitedSpec, self).__init__(**kwargs)
         traits.push_exception_handler(reraise_exceptions=True)
         undefined_traits = {}
@@ -563,11 +568,11 @@ class BaseTraitedSpec(traits.HasTraits):
                               and not has_metadata(trait.trait_type,
                                                    "name_source"))
                 dict_nofilename.append((name,
-                    self._get_sorteddict(val, hash_method=hash_method,
-                                         hash_files=hash_files)))
+                                        self._get_sorteddict(val, hash_method=hash_method,
+                                                             hash_files=hash_files)))
                 dict_withhash.append((name,
-                    self._get_sorteddict(val, True, hash_method=hash_method,
-                                         hash_files=hash_files)))
+                                      self._get_sorteddict(val, True, hash_method=hash_method,
+                                                           hash_files=hash_files)))
         return dict_withhash, md5(str(dict_nofilename).encode()).hexdigest()
 
     def _get_sorteddict(self, object, dictwithhash=False, hash_method=None,
@@ -577,9 +582,9 @@ class BaseTraitedSpec(traits.HasTraits):
             for key, val in sorted(object.items()):
                 if isdefined(val):
                     out.append((key,
-                        self._get_sorteddict(val, dictwithhash,
-                                             hash_method=hash_method,
-                                             hash_files=hash_files)))
+                                self._get_sorteddict(val, dictwithhash,
+                                                     hash_method=hash_method,
+                                                     hash_files=hash_files)))
         elif isinstance(object, (list, tuple)):
             out = []
             for val in object:
@@ -619,6 +624,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
     This class is a workaround for add_traits and clone_traits not
     functioning well together.
     """
+
     def __deepcopy__(self, memo):
         """ bug in deepcopy for HasTraits results in weird cloning behavior for
         added traits
@@ -662,15 +668,15 @@ class Interface(object):
     input_spec = None  # A traited input specification
     output_spec = None  # A traited output specification
 
-    _can_resume = False  # defines if the interface can reuse partial results
-                         # after interruption
+    # defines if the interface can reuse partial results after interruption
+    _can_resume = False
 
     @property
     def can_resume(self):
         return self._can_resume
 
-    _always_run = False  # should the interface be always run even if the
-                         # inputs were not changed?
+    # should the interface be always run even if the inputs were not changed?
+    _always_run = False
 
     @property
     def always_run(self):
@@ -764,8 +770,8 @@ class BaseInterface(Interface):
         """
 
         if cls.__doc__:
-            #docstring = cls.__doc__.split('\n')
-            #docstring = [trim(line, '') for line in docstring]
+            # docstring = cls.__doc__.split('\n')
+            # docstring = [trim(line, '') for line in docstring]
             docstring = trim(cls.__doc__).split('\n') + ['']
         else:
             docstring = ['']
@@ -932,7 +938,7 @@ class BaseInterface(Interface):
             if isdefined(value):
                 self._check_requires(spec, name, value)
         for name, spec in list(self.inputs.traits(mandatory=None,
-                                             transient=None).items()):
+                                                  transient=None).items()):
             self._check_requires(spec, name, getattr(self.inputs, name))
 
     def _check_version_requirements(self, trait_object, raise_exception=True):
@@ -1071,7 +1077,7 @@ class BaseInterface(Interface):
                 if inputs_str != '':
                     e.args += (inputs_str, )
 
-            #exception raising inhibition for special cases
+            # exception raising inhibition for special cases
             import traceback
             runtime.traceback = traceback.format_exc()
             runtime.traceback_args = e.args
@@ -1494,7 +1500,7 @@ class CommandLine(BaseInterface):
         runtime = run_command(runtime, output=self.inputs.terminal_output,
                               redirect_x=self._redirect_x)
         if runtime.returncode is None or \
-                        runtime.returncode not in correct_return_codes:
+            runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
 
         return runtime
@@ -1568,7 +1574,7 @@ class CommandLine(BaseInterface):
 
             if not isinstance(ns, string_types):
                 raise ValueError(('name_source of \'%s\' trait sould be an '
-                                 'input trait name') % name)
+                                  'input trait name') % name)
 
             if isdefined(getattr(self.inputs, ns)):
                 name_source = ns
@@ -1723,6 +1729,7 @@ class SEMLikeCommandLine(CommandLine):
     used but only for the reduced (by excluding those that do not have
     corresponding inputs list of outputs.
     """
+
     def _list_outputs(self):
         outputs = self.output_spec().get()
         return self._outputs_from_inputs(outputs)
@@ -1732,7 +1739,7 @@ class SEMLikeCommandLine(CommandLine):
             corresponding_input = getattr(self.inputs, name)
             if isdefined(corresponding_input):
                 if (isinstance(corresponding_input, bool) and
-                            corresponding_input):
+                        corresponding_input):
                     outputs[name] = \
                         os.path.abspath(self._outputs_filenames[name])
                 else:

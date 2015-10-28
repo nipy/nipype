@@ -16,6 +16,7 @@ tmp_infile = None
 tmp_dir = None
 cwd = None
 
+
 @skipif(no_fsl)
 def setup_infile():
     global tmp_infile, tmp_dir, cwd
@@ -27,23 +28,25 @@ def setup_infile():
     os.chdir(tmp_dir)
     return tmp_infile, tmp_dir
 
+
 def teardown_infile(tmp_dir):
     os.chdir(cwd)
     shutil.rmtree(tmp_dir)
+
 
 @skipif(no_fsl)
 def test_MultipleRegressDesign():
     _, tp_dir = setup_infile()
     foo = fsl.MultipleRegressDesign()
-    foo.inputs.regressors = dict(voice_stenght=[1,1,1],age=[0.2,0.4,0.5],BMI=[1,-1,2])
-    con1 = ['voice_and_age','T',['age','voice_stenght'],[0.5,0.5]]
-    con2 = ['just_BMI','T',['BMI'],[1]]
-    foo.inputs.contrasts = [con1,con2,['con3','F',[con1,con2]]]
+    foo.inputs.regressors = dict(voice_stenght=[1, 1, 1], age=[0.2, 0.4, 0.5], BMI=[1, -1, 2])
+    con1 = ['voice_and_age', 'T', ['age', 'voice_stenght'], [0.5, 0.5]]
+    con2 = ['just_BMI', 'T', ['BMI'], [1]]
+    foo.inputs.contrasts = [con1, con2, ['con3', 'F', [con1, con2]]]
     res = foo.run()
-    yield assert_equal, res.outputs.design_mat, os.path.join(os.getcwd(),'design.mat')
-    yield assert_equal, res.outputs.design_con, os.path.join(os.getcwd(),'design.con')
-    yield assert_equal, res.outputs.design_fts, os.path.join(os.getcwd(),'design.fts')
-    yield assert_equal, res.outputs.design_grp, os.path.join(os.getcwd(),'design.grp')
+    yield assert_equal, res.outputs.design_mat, os.path.join(os.getcwd(), 'design.mat')
+    yield assert_equal, res.outputs.design_con, os.path.join(os.getcwd(), 'design.con')
+    yield assert_equal, res.outputs.design_fts, os.path.join(os.getcwd(), 'design.fts')
+    yield assert_equal, res.outputs.design_grp, os.path.join(os.getcwd(), 'design.grp')
 
     design_mat_expected_content = """/NumWaves       3
 /NumPoints      3

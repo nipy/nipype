@@ -168,7 +168,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
                     if not key == 'count':
                         data[key] = data[key] / len(in_files)
                 ntwk.edge[edge[0]][edge[1]] = data
-                avg_ntwk.add_edge(edge[0],edge[1],data)
+                avg_ntwk.add_edge(edge[0], edge[1], data)
             edge_dict['count'][edge[0]-1][edge[1]-1] = ntwk.edge[edge[0]][edge[1]]['count']
 
         iflogger.info('After thresholding, the average network has has {n} edges'.format(n=avg_ntwk.number_of_edges()))
@@ -228,7 +228,7 @@ def compute_node_measures(ntwk, calculate_cliques=False):
     isolate_list = nx.isolates(ntwk)
     binarized = np.zeros((ntwk.number_of_nodes(), 1))
     for value in isolate_list:
-        value = value - 1 # Zero indexing
+        value = value - 1  # Zero indexing
         binarized[value] = 1
     measures['isolates'] = binarized
     if calculate_cliques:
@@ -245,12 +245,12 @@ def compute_edge_measures(ntwk):
     """
     iflogger.info('Computing edge measures:')
     measures = {}
-    #iflogger.info('...Computing google matrix...' #Makes really large networks (500k+ edges))
-    #measures['google_matrix'] = nx.google_matrix(ntwk)
-    #iflogger.info('...Computing hub matrix...')
-    #measures['hub_matrix'] = nx.hub_matrix(ntwk)
-    #iflogger.info('...Computing authority matrix...')
-    #measures['authority_matrix'] = nx.authority_matrix(ntwk)
+    # iflogger.info('...Computing google matrix...' #Makes really large networks (500k+ edges))
+    # measures['google_matrix'] = nx.google_matrix(ntwk)
+    # iflogger.info('...Computing hub matrix...')
+    # measures['hub_matrix'] = nx.hub_matrix(ntwk)
+    # iflogger.info('...Computing authority matrix...')
+    # measures['authority_matrix'] = nx.authority_matrix(ntwk)
     return measures
 
 
@@ -274,7 +274,7 @@ def compute_singlevalued_measures(ntwk, weighted=True, calculate_cliques=False):
     iflogger.info('...Computing degree assortativity (pearson number) ...')
     try:
         measures['degree_pearsonr'] = nx.degree_pearsonr(ntwk)
-    except AttributeError: # For NetworkX 1.6
+    except AttributeError:  # For NetworkX 1.6
         measures['degree_pearsonr'] = nx.degree_pearson_correlation_coefficient(ntwk)
     iflogger.info('...Computing degree assortativity...')
     try:
@@ -301,18 +301,18 @@ def compute_singlevalued_measures(ntwk, weighted=True, calculate_cliques=False):
         measures['average_shortest_path_length'] = nx.average_shortest_path_length(nx.connected_component_subgraphs(ntwk)[0], weighted)
     if calculate_cliques:
         iflogger.info('...Computing graph clique number...')
-        measures['graph_clique_number'] = nx.graph_clique_number(ntwk) #out of memory error
+        measures['graph_clique_number'] = nx.graph_clique_number(ntwk)  # out of memory error
     return measures
 
 
 def compute_network_measures(ntwk):
     measures = {}
-    #iflogger.info('Identifying k-core')
-    #measures['k_core'] = nx.k_core(ntwk)
-    #iflogger.info('Identifying k-shell')
-    #measures['k_shell'] = nx.k_shell(ntwk)
-    #iflogger.info('Identifying k-crust')
-    #measures['k_crust'] = nx.k_crust(ntwk)
+    # iflogger.info('Identifying k-core')
+    # measures['k_core'] = nx.k_core(ntwk)
+    # iflogger.info('Identifying k-shell')
+    # measures['k_shell'] = nx.k_shell(ntwk)
+    # iflogger.info('Identifying k-crust')
+    # measures['k_crust'] = nx.k_crust(ntwk)
     return measures
 
 
@@ -355,6 +355,7 @@ class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
     out_edge_metrics_matlab = File(genfile=True, desc='Output edge metrics in MATLAB .mat format')
     out_pickled_extra_measures = File('extra_measures', usedefault=True, desc='Network measures for group 1 that return dictionaries stored as a Pickle.')
 
+
 class NetworkXMetricsOutputSpec(TraitedSpec):
     gpickled_network_files = OutputMultiPath(File(desc='Output gpickled network files'))
     matlab_matrix_files = OutputMultiPath(File(desc='Output network metrics in MATLAB .mat format'))
@@ -369,6 +370,7 @@ class NetworkXMetricsOutputSpec(TraitedSpec):
     k_crust = File(desc='Computed k-crust network stored as a NetworkX pickle.')
     pickled_extra_measures = File(desc='Network measures for the group that return dictionaries, stored as a Pickle.')
     matlab_dict_measures = OutputMultiPath(File(desc='Network measures for the group that return dictionaries, stored as matlab matrices.'))
+
 
 class NetworkXMetrics(BaseInterface):
     """
@@ -500,18 +502,21 @@ class NetworkXMetrics(BaseInterface):
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext
 
+
 class AverageNetworksInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for a group of subjects')
     resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary' \
-                                ', but if included, the interface will output the statistical maps as networkx graphs.')
+                                   ', but if included, the interface will output the statistical maps as networkx graphs.')
     group_id = traits.Str('group1', usedefault=True, desc='ID for group')
     out_gpickled_groupavg = File(desc='Average network saved as a NetworkX .pck')
     out_gexf_groupavg = File(desc='Average network saved as a .gexf file')
+
 
 class AverageNetworksOutputSpec(TraitedSpec):
     gpickled_groupavg = File(desc='Average network saved as a NetworkX .pck')
     gexf_groupavg = File(desc='Average network saved as a .gexf file')
     matlab_groupavgs = OutputMultiPath(File(desc='Average network saved as a .gexf file'))
+
 
 class AverageNetworks(BaseInterface):
     """

@@ -14,6 +14,7 @@ except:
 
 from .base import (GraphPluginBase, logger)
 
+
 class SomaFlowPlugin(GraphPluginBase):
     """Execute using Soma workflow
     """

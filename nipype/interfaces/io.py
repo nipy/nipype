@@ -320,7 +320,7 @@ class DataSink(IOBase):
                 else:
                     raise(inst)
         use_hardlink = str2bool(config.get('execution',
-                                           'try_hard_link_datasink') )
+                                           'try_hard_link_datasink'))
         for key, files in list(self.inputs._outputs.items()):
             if not isdefined(files):
                 continue
@@ -382,15 +382,15 @@ class DataSink(IOBase):
 
 class S3DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     testing = traits.Bool(False, usedefault=True,
-                                   desc='Flag for using local fakes3 server.'
-                                        ' (for testing purposes only)')
+                          desc='Flag for using local fakes3 server.'
+                          ' (for testing purposes only)')
     anon = traits.Bool(False, usedefault=True,
-                                   desc='Use anonymous connection to s3')
+                       desc='Use anonymous connection to s3')
     bucket = traits.Str(mandatory=True,
                         desc='Amazon S3 bucket where your data is stored')
     bucket_path = traits.Str('', usedefault=True,
                              desc='Location within your bucket to store '
-                                   'data.')
+                             'data.')
     base_directory = Directory(
         desc='Path to the base directory for storing data.')
     container = traits.Str(
@@ -475,16 +475,16 @@ class S3DataSink(DataSink):
 
 class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     anon = traits.Bool(False, usedefault=True,
-                                   desc='Use anonymous connection to s3')
+                       desc='Use anonymous connection to s3')
     region = traits.Str('us-east-1', usedefault=True,
-                             desc='Region of s3 bucket')
+                        desc='Region of s3 bucket')
     bucket = traits.Str(mandatory=True,
                         desc='Amazon S3 bucket where your data is stored')
     bucket_path = traits.Str('', usedefault=True,
                              desc='Location within your bucket for subject data.')
     local_directory = Directory(exists=True,
                                 desc='Path to the local directory for subject data to be downloaded '
-                                    'and accessed. Should be on HDFS for Spark jobs.')
+                                'and accessed. Should be on HDFS for Spark jobs.')
     raise_on_empty = traits.Bool(True, usedefault=True,
                                  desc='Generate exception if list is empty for a given field')
     sort_filelist = traits.Bool(mandatory=True,
@@ -587,7 +587,7 @@ class S3DataGrabber(IOBase):
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
                     key in self.inputs.field_template:
-                template = self.inputs.field_template[key] # template override for multiple outfields
+                template = self.inputs.field_template[key]  # template override for multiple outfields
             if isdefined(self.inputs.bucket_path):
                 template = os.path.join(self.inputs.bucket_path, template)
             if not args:
@@ -892,17 +892,17 @@ class DataGrabber(IOBase):
 class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     base_directory = Directory(exists=True,
-        desc="Root path common to templates.")
+                               desc="Root path common to templates.")
     sort_filelist = traits.Bool(True, usedefault=True,
-        desc="When matching mutliple files, return them in sorted order.")
+                                desc="When matching mutliple files, return them in sorted order.")
     raise_on_empty = traits.Bool(True, usedefault=True,
-        desc="Raise an exception if a template pattern matches no files.")
+                                 desc="Raise an exception if a template pattern matches no files.")
     force_lists = traits.Either(traits.Bool(), traits.List(traits.Str()),
-        default=False, usedefault=True,
-        desc=("Whether to return outputs as a list even when only one file "
-              "matches the template. Either a boolean that applies to all "
-              "output fields or a list of output field names to coerce to "
-              " a list"))
+                                default=False, usedefault=True,
+                                desc=("Whether to return outputs as a list even when only one file "
+                                      "matches the template. Either a boolean that applies to all "
+                                      "output fields or a list of output field names to coerce to "
+                                      " a list"))
 
 
 class SelectFiles(IOBase):
@@ -1040,10 +1040,10 @@ class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     match_regex = traits.Str('(.+)',
                              usedefault=True,
                              desc=("Regular expression for matching "
-                             "paths."))
+                                   "paths."))
     ignore_regexes = traits.List(desc=("List of regular expressions, "
-                                 "if any match the path it will be "
-                                 "ignored.")
+                                       "if any match the path it will be "
+                                       "ignored.")
                                  )
     max_depth = traits.Int(desc="The maximum depth to search beneath "
                            "the root_paths")
@@ -1094,11 +1094,11 @@ class DataFinder(IOBase):
     _always_run = True
 
     def _match_path(self, target_path):
-        #Check if we should ignore the path
+        # Check if we should ignore the path
         for ignore_re in self.ignore_regexes:
             if ignore_re.search(target_path):
                 return
-        #Check if we can match the path
+        # Check if we can match the path
         match = self.match_regex.search(target_path)
         if not match is None:
             match_dict = match.groupdict()
@@ -1111,7 +1111,7 @@ class DataFinder(IOBase):
                 self.result[key].append(val)
 
     def _run_interface(self, runtime):
-        #Prepare some of the inputs
+        # Prepare some of the inputs
         if isinstance(self.inputs.root_paths, string_types):
             self.inputs.root_paths = [self.inputs.root_paths]
         self.match_regex = re.compile(self.inputs.match_regex)
@@ -1131,24 +1131,24 @@ class DataFinder(IOBase):
                  for regex in self.inputs.ignore_regexes]
         self.result = None
         for root_path in self.inputs.root_paths:
-            #Handle tilda/env variables and remove extra seperators
+            # Handle tilda/env variables and remove extra seperators
             root_path = os.path.normpath(os.path.expandvars(os.path.expanduser(root_path)))
-            #Check if the root_path is a file
+            # Check if the root_path is a file
             if os.path.isfile(root_path):
                 if min_depth == 0:
                     self._match_path(root_path)
                 continue
-            #Walk through directory structure checking paths
+            # Walk through directory structure checking paths
             for curr_dir, sub_dirs, files in os.walk(root_path):
-                #Determine the current depth from the root_path
+                # Determine the current depth from the root_path
                 curr_depth = (curr_dir.count(os.sep) -
                               root_path.count(os.sep))
-                #If the max path depth has been reached, clear sub_dirs
-                #and files
+                # If the max path depth has been reached, clear sub_dirs
+                # and files
                 if max_depth is not None and curr_depth >= max_depth:
                     sub_dirs[:] = []
                     files = []
-                #Test the path for the curr_dir and all files
+                # Test the path for the curr_dir and all files
                 if curr_depth >= min_depth:
                     self._match_path(curr_dir)
                 if curr_depth >= (min_depth - 1):
@@ -1156,17 +1156,17 @@ class DataFinder(IOBase):
                         full_path = os.path.join(curr_dir, infile)
                         self._match_path(full_path)
         if (self.inputs.unpack_single and
-            len(self.result['out_paths']) == 1
-            ):
+                len(self.result['out_paths']) == 1
+                ):
             for key, vals in self.result.items():
                 self.result[key] = vals[0]
         else:
-            #sort all keys acording to out_paths
+            # sort all keys acording to out_paths
             for key in list(self.result.keys()):
                 if key == "out_paths":
                     continue
                 sort_tuples = human_order_sorted(list(zip(self.result["out_paths"],
-                                                     self.result[key])))
+                                                          self.result[key])))
                 self.result[key] = [x for (_, x) in sort_tuples]
             self.result["out_paths"] = human_order_sorted(self.result["out_paths"])
 
@@ -1419,7 +1419,7 @@ class XNATSource(IOBase):
                             desc="arguments that fit into query_template")
             )
             undefined_traits['field_template'] = Undefined
-            #self.inputs.remove_trait('query_template_args')
+            # self.inputs.remove_trait('query_template_args')
             outdict = {}
             for key in outfields:
                 outdict[key] = []
@@ -1455,7 +1455,7 @@ class XNATSource(IOBase):
                 if not isdefined(value):
                     msg = ("%s requires a value for input '%s' "
                            "because it was listed in 'infields'" %
-                          (self.__class__.__name__, key)
+                           (self.__class__.__name__, key)
                            )
                     raise ValueError(msg)
 
@@ -1575,11 +1575,11 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     )
 
     share = traits.Bool(False,
-        desc=('Option to share the subjects from the original project'
-              'instead of creating new ones when possible - the created '
-              'experiments are then shared back to the original project'
+                        desc=('Option to share the subjects from the original project'
+                              'instead of creating new ones when possible - the created '
+                              'experiments are then shared back to the original project'
               ),
-        usedefault=True)
+                        usedefault=True)
 
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
@@ -1873,18 +1873,19 @@ class MySQLSink(IOBase):
         c.close()
         return None
 
+
 class SSHDataGrabberInputSpec(DataGrabberInputSpec):
     hostname = traits.Str(mandatory=True, desc='Server hostname.')
     username = traits.Str(desc='Server username.')
     password = traits.Password(desc='Server password.')
     download_files = traits.Bool(True, usedefault=True,
-                                    desc='If false it will return the file names without downloading them')
+                                 desc='If false it will return the file names without downloading them')
     base_directory = traits.Str(mandatory=True,
-                               desc='Path to the base directory consisting of subject data.')
+                                desc='Path to the base directory consisting of subject data.')
     template_expression = traits.Enum(['fnmatch', 'regexp'], usedefault=True,
-                            desc='Use either fnmatch or regexp to express templates')
+                                      desc='Use either fnmatch or regexp to express templates')
     ssh_log_to_file = traits.Str('', usedefault=True,
-                            desc='If set SSH commands will be logged to the given file')
+                                 desc='If set SSH commands will be logged to the given file')
 
 
 class SSHDataGrabber(DataGrabber):
@@ -1991,7 +1992,6 @@ class SSHDataGrabber(DataGrabber):
             self.inputs.template[-1] != '$'
         ):
             self.inputs.template += '$'
-
 
     def _list_outputs(self):
         try:
@@ -2138,7 +2138,7 @@ class SSHDataGrabber(DataGrabber):
 class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     in_file = File(exists=True, desc='JSON source file')
     defaults = traits.Dict(desc=('JSON dictionary that sets default output'
-                                'values, overridden by values found in in_file'))
+                                 'values, overridden by values found in in_file'))
 
 
 class JSONFileGrabber(IOBase):

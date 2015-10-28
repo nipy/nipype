@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from nipype.external.six import PY2, PY3, StringIO
 from nipype.utils import nipype_cmd
 
+
 @contextmanager
 def capture_sys_output():
     caputure_out, capture_err = StringIO(), StringIO()
@@ -32,12 +33,12 @@ class TestNipypeCMD(unittest.TestCase):
 
         if PY2:
             self.assertEqual(stderr.getvalue(),
-"""usage: nipype_cmd [-h] module interface
+                             """usage: nipype_cmd [-h] module interface
 nipype_cmd: error: too few arguments
 """)
         elif PY3:
             self.assertEqual(stderr.getvalue(),
-"""usage: nipype_cmd [-h] module interface
+                             """usage: nipype_cmd [-h] module interface
 nipype_cmd: error: the following arguments are required: module, interface
 """)
 
@@ -53,7 +54,7 @@ nipype_cmd: error: the following arguments are required: module, interface
 
         self.assertEqual(stderr.getvalue(), '')
         self.assertEqual(stdout.getvalue(),
-"""usage: nipype_cmd [-h] module interface
+                         """usage: nipype_cmd [-h] module interface
 
 Nipype interface runner
 
@@ -79,7 +80,7 @@ optional arguments:
 
         self.assertEqual(stderr.getvalue(), '')
         self.assertEqual(stdout.getvalue(),
-"""Available Interfaces:
+                         """Available Interfaces:
 	ComputeMask
 	EstimateContrast
 	FitGLM

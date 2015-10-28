@@ -186,6 +186,7 @@ _normalise_attributes = lambda attr: (str(attr[0]), str(attr[1]))
 #  Datatypes
 attr2rdf = lambda attr: PROV[PROV_ID_ATTRIBUTES_MAP[attr].split('prov:')[1]].rdf_representation()
 
+
 def _parse_xsd_dateTime(s):
     return dateutil.parser.parse(s)
 
@@ -318,13 +319,13 @@ class Literal(object):
                 #  Assuming it is a valid identifier
                 return {'$': str(self._value), 'type': self._datatype.get_uri()}
 
-
     def rdf_representation(self):
         if self._langtag:
             # a langtag can only goes with string
             return RDFLiteral(self._value, lang=str(self._langtag))
         else:
             return RDFLiteral(self._value, datatype=self._datatype.get_uri())
+
 
 class Identifier(object):
     def __init__(self, uri):
@@ -353,6 +354,7 @@ class Identifier(object):
 
     def rdf_representation(self):
         return URIRef(self.get_uri())
+
 
 class QName(Identifier):
     def __init__(self, namespace, localpart):
@@ -826,8 +828,8 @@ class ProvRelation(ProvRecord):
             graph = Graph()
         pred = PROV[PROV_N_MAP[self.get_type()]].rdf_representation()
         items = []
-        subj=None
-        obj=None
+        subj = None
+        obj = None
         for idx, (attr, value) in enumerate(self._attributes.items()):
             if idx == 0:
                 subj = value.get_identifier().rdf_representation()
@@ -873,12 +875,14 @@ class ProvRelation(ProvRecord):
 
 #  ## Component 1: Entities and Activities
 
+
 class ProvEntity(ProvElement):
     def get_type(self):
         return PROV_REC_ENTITY
 
     def get_prov_type(self):
         return PROV['Entity']
+
 
 class ProvActivity(ProvElement):
     def get_type(self):
@@ -1210,13 +1214,13 @@ class ProvMention(ProvSpecialization):
         specificEntity = self.required_attribute(attributes, PROV_ATTR_SPECIFIC_ENTITY, (ProvEntity, ProvAgent))
         generalEntity = self.required_attribute(attributes, PROV_ATTR_GENERAL_ENTITY, Identifier)
         bundle = self.required_attribute(attributes, PROV_ATTR_BUNDLE, Identifier)
-        #=======================================================================
+        # =======================================================================
         #  # This is disabled so that mentionOf can refer to bundle that is not defined in the same place
         #  bundle = self.required_attribute(attributes, PROV_ATTR_BUNDLE, ProvBundle)
         #  # Check if generalEntity is in the bundle
         #  if generalEntity.get_bundle() is not bundle:
         #    raise ProvExceptionContraint(PROV_REC_MENTION, generalEntity, bundle, 'The generalEntity must belong to the bundle')
-        #=======================================================================
+        # =======================================================================
 
         attributes = OrderedDict()
         attributes[PROV_ATTR_SPECIFIC_ENTITY] = specificEntity
@@ -1246,24 +1250,24 @@ class ProvMembership(ProvRelation):
 
 #  Class mappings from PROV record type
 PROV_REC_CLS = {
-    PROV_REC_ENTITY                 : ProvEntity,
-    PROV_REC_ACTIVITY               : ProvActivity,
-    PROV_REC_GENERATION             : ProvGeneration,
-    PROV_REC_USAGE                  : ProvUsage,
-    PROV_REC_COMMUNICATION          : ProvCommunication,
-    PROV_REC_START                  : ProvStart,
-    PROV_REC_END                    : ProvEnd,
-    PROV_REC_INVALIDATION           : ProvInvalidation,
-    PROV_REC_DERIVATION             : ProvDerivation,
-    PROV_REC_AGENT                  : ProvAgent,
-    PROV_REC_ATTRIBUTION            : ProvAttribution,
-    PROV_REC_ASSOCIATION            : ProvAssociation,
-    PROV_REC_DELEGATION             : ProvDelegation,
-    PROV_REC_INFLUENCE              : ProvInfluence,
-    PROV_REC_SPECIALIZATION         : ProvSpecialization,
-    PROV_REC_ALTERNATE              : ProvAlternate,
-    PROV_REC_MENTION                : ProvMention,
-    PROV_REC_MEMBERSHIP             : ProvMembership,
+    PROV_REC_ENTITY: ProvEntity,
+    PROV_REC_ACTIVITY: ProvActivity,
+    PROV_REC_GENERATION: ProvGeneration,
+    PROV_REC_USAGE: ProvUsage,
+    PROV_REC_COMMUNICATION: ProvCommunication,
+    PROV_REC_START: ProvStart,
+    PROV_REC_END: ProvEnd,
+    PROV_REC_INVALIDATION: ProvInvalidation,
+    PROV_REC_DERIVATION: ProvDerivation,
+    PROV_REC_AGENT: ProvAgent,
+    PROV_REC_ATTRIBUTION: ProvAttribution,
+    PROV_REC_ASSOCIATION: ProvAssociation,
+    PROV_REC_DELEGATION: ProvDelegation,
+    PROV_REC_INFLUENCE: ProvInfluence,
+    PROV_REC_SPECIALIZATION: ProvSpecialization,
+    PROV_REC_ALTERNATE: ProvAlternate,
+    PROV_REC_MENTION: ProvMention,
+    PROV_REC_MEMBERSHIP: ProvMembership,
 }
 
 

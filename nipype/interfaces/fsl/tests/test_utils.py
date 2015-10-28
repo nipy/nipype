@@ -89,6 +89,8 @@ def test_fslmerge():
     # Fslmerge class doesn't have a filled opt_map{}
 
 # test fslmath
+
+
 @skipif(no_fsl)
 def test_fslmaths():
     filelist, outdir, cwd, _ = create_files_in_directory()

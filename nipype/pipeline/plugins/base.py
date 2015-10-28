@@ -57,8 +57,8 @@ def report_crash(node, traceback=None, hostname=None):
     timeofcrash = strftime('%Y%m%d-%H%M%S')
     login_name = getpass.getuser()
     crashfile = 'crash-%s-%s-%s.pklz' % (timeofcrash,
-                                        login_name,
-                                        name)
+                                         login_name,
+                                         name)
     crashdir = node.config['execution']['crashdump_dir']
     if crashdir is None:
         crashdir = os.getcwd()
@@ -68,7 +68,7 @@ def report_crash(node, traceback=None, hostname=None):
     logger.info('Saving crash info to %s' % crashfile)
     logger.info(''.join(traceback))
     savepkl(crashfile, dict(node=node, traceback=traceback))
-    #np.savez(crashfile, node=node, traceback=traceback)
+    # np.savez(crashfile, node=node, traceback=traceback)
     return crashfile
 
 
@@ -233,7 +233,7 @@ class DistributedPluginBase(PluginBase):
         # setup polling - TODO: change to threaded model
         notrun = []
         while np.any(self.proc_done == False) | \
-                    np.any(self.proc_pending == True):
+            np.any(self.proc_pending == True):
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -311,7 +311,7 @@ class DistributedPluginBase(PluginBase):
         self.procs.extend(mapnodesubids)
         self.depidx = ssp.vstack((self.depidx,
                                   ssp.lil_matrix(np.zeros(
-                                  (numnodes, self.depidx.shape[1])))),
+                                      (numnodes, self.depidx.shape[1])))),
                                  'lil')
         self.depidx = ssp.hstack((self.depidx,
                                   ssp.lil_matrix(
@@ -360,23 +360,23 @@ class DistributedPluginBase(PluginBase):
                     self.proc_pending[jobid] = True
                     # Send job to task manager and add to pending tasks
                     logger.info('Executing: %s ID: %d' %
-                               (self.procs[jobid]._id, jobid))
+                                (self.procs[jobid]._id, jobid))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
                     continue_with_submission = True
                     if str2bool(self.procs[jobid].config['execution']
-                                                          ['local_hash_check']):
+                                ['local_hash_check']):
                         logger.debug('checking hash locally')
                         try:
                             hash_exists, _, _, _ = self.procs[
                                 jobid].hash_exists()
                             logger.debug('Hash exists %s' % str(hash_exists))
                             if (hash_exists and
-                                 (self.procs[jobid].overwrite == False or
-                                   (self.procs[jobid].overwrite == None and
-                                    not self.procs[jobid]._interface.always_run)
-                                 )
-                               ):
+                                (self.procs[jobid].overwrite == False or
+                                 (self.procs[jobid].overwrite == None and
+                                  not self.procs[jobid]._interface.always_run)
+                                      )
+                                    ):
                                 continue_with_submission = False
                                 self._task_finished_cb(jobid)
                                 self._remove_node_dirs()
@@ -530,7 +530,7 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
                                  'seconds. Batch dir contains crashdump file '
                                  'if node raised an exception.\n'
                                  'Node working directory: ({2}) '.format(
-                                 taskid,timeout,node_dir) )
+                                     taskid, timeout, node_dir))
                 raise IOError(error_message)
             except IOError as e:
                 result_data['traceback'] = format_exc()
@@ -607,18 +607,18 @@ class GraphPluginBase(PluginBase):
                 value = open(value).read()
             if (hasattr(node, "plugin_args") and
                     isinstance(node.plugin_args, dict) and
-                        keyword in node.plugin_args):
-                    if (keyword == "template" and
-                            os.path.isfile(node.plugin_args[keyword])):
-                        tmp_value = open(node.plugin_args[keyword]).read()
-                    else:
-                        tmp_value = node.plugin_args[keyword]
+                    keyword in node.plugin_args):
+                if (keyword == "template" and
+                        os.path.isfile(node.plugin_args[keyword])):
+                    tmp_value = open(node.plugin_args[keyword]).read()
+                else:
+                    tmp_value = node.plugin_args[keyword]
 
-                    if ('overwrite' in node.plugin_args and
-                            node.plugin_args['overwrite']):
-                        value = tmp_value
-                    else:
-                        value += tmp_value
+                if ('overwrite' in node.plugin_args and
+                        node.plugin_args['overwrite']):
+                    value = tmp_value
+                else:
+                    value += tmp_value
             values += (value, )
         return values
 
@@ -629,15 +629,12 @@ class GraphPluginBase(PluginBase):
         """
         raise NotImplementedError
 
-
-
     def _get_result(self, taskid):
         if taskid not in self._pending:
             raise Exception('Task %d not found' % taskid)
         if self._is_pending(taskid):
             return None
         node_dir = self._pending[taskid]
-
 
         logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
                                                               '..'))))

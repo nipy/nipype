@@ -65,7 +65,6 @@ except ImportError:
     codecs = None
 
 
-
 # Question/TODO: Should we have a fallback mode if we can't load portalocker /
 # we should still be better off than with the standard RotattingFileHandler
 # class, right? We do some rename checking... that should prevent some file
@@ -156,7 +155,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                      "Use 'supress_abs_warn=True' to hide this message.")
         try:
             BaseRotatingHandler.__init__(self, filename, mode, encoding)
-        except TypeError: # Due to a different logging release without encoding support  (Python 2.4.1 and earlier?)
+        except TypeError:  # Due to a different logging release without encoding support  (Python 2.4.1 and earlier?)
             BaseRotatingHandler.__init__(self, filename, mode)
             self.encoding = encoding
 
@@ -264,7 +263,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             # Attempt to rename logfile to tempname:  There is a slight race-condition here, but it seems unavoidable
             tmpname = None
             while not tmpname or os.path.exists(tmpname):
-                tmpname = "%s.rotate.%08d" % (self.baseFilename, randint(0,99999999))
+                tmpname = "%s.rotate.%08d" % (self.baseFilename, randint(0, 99999999))
             try:
                 # Do a rename test to determine if we can successfully rename the log file
                 os.rename(self.baseFilename, tmpname)
@@ -285,7 +284,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
                 sfn = "%s.%d" % (self.baseFilename, i)
                 dfn = "%s.%d" % (self.baseFilename, i + 1)
                 if os.path.exists(sfn):
-                    #print "%s -> %s" % (sfn, dfn)
+                    # print "%s -> %s" % (sfn, dfn)
                     if os.path.exists(dfn):
                         os.remove(dfn)
                     os.rename(sfn, dfn)
@@ -293,7 +292,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
             if os.path.exists(dfn):
                 os.remove(dfn)
             os.rename(tmpname, dfn)
-            #print "%s -> %s" % (self.baseFilename, dfn)
+            # print "%s -> %s" % (self.baseFilename, dfn)
             self._degrade(False, "Rotation completed")
         finally:
             self._openFile(self.mode)
@@ -319,7 +318,7 @@ class ConcurrentRotatingFileHandler(BaseRotatingHandler):
     def _shouldRollover(self):
         if self.maxBytes > 0:                   # are we rolling over?
             try:
-                self.stream.seek(0, 2)  #due to non-posix-compliant Windows feature
+                self.stream.seek(0, 2)  # due to non-posix-compliant Windows feature
             except IOError:
                 return True
             if self.stream.tell() >= self.maxBytes:

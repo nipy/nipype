@@ -55,11 +55,12 @@ def get_package_name(filepath):
 
     return '.'.join(pkg_name)
 
+
 def import_nose():
     """ Import nose only when needed.
     """
     fine_nose = True
-    minimum_nose_version = (0,10,0)
+    minimum_nose_version = (0, 10, 0)
     try:
         import nose
         from nose.tools import raises
@@ -78,14 +79,15 @@ def import_nose():
 
     return nose
 
-def run_module_suite(file_to_run = None):
+
+def run_module_suite(file_to_run=None):
     if file_to_run is None:
         f = sys._getframe(1)
         file_to_run = f.f_locals.get('__file__', None)
         if file_to_run is None:
             raise AssertionError
 
-    import_nose().run(argv=['',file_to_run])
+    import_nose().run(argv=['', file_to_run])
 
 
 class NoseTester(object):
@@ -198,7 +200,7 @@ class NoseTester(object):
             spdir = os.path.dirname(scipy.__file__)
             print("SciPy is installed in %s" % spdir)
 
-        pyversion = sys.version.replace('\n','')
+        pyversion = sys.version.replace('\n', '')
         print("Python version %s" % pyversion)
         print("nose version %d.%d.%d" % nose.__versioninfo__)
 
@@ -234,7 +236,7 @@ class NoseTester(object):
             argv += ['--exclude', ename]
         # our way of doing coverage
         if coverage:
-            argv+=['--cover-package=%s' % self.package_name, '--with-coverage',
+            argv += ['--cover-package=%s' % self.package_name, '--with-coverage',
                    '--cover-tests', '--cover-inclusive', '--cover-erase']
         # construct list of plugins
         import nose.plugins.builtin
@@ -250,8 +252,8 @@ class NoseTester(object):
             # use standard doctesting
             if doctests and not doctest_argv:
                 argv += ['--with-doctest']
-        else: # custom doctesting
-            if doctest_argv: # in fact the unplugger would take care of this
+        else:  # custom doctesting
+            if doctest_argv:  # in fact the unplugger would take care of this
                 argv.remove('--with-doctest')
             plugins += [Unplugger('doctest'), plug]
             if doctests:

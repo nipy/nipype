@@ -9,14 +9,14 @@ from __future__ import print_function
 import os
 import sys
 
-#*****************************************************************************
+# *****************************************************************************
 if __name__ == '__main__':
     nipypepath = os.path.abspath('..')
-    sys.path.insert(1,nipypepath)
+    sys.path.insert(1, nipypepath)
     # local imports
     from interfacedocgen import InterfaceHelpWriter
     package = 'nipype'
-    outdir = os.path.join('interfaces','generated')
+    outdir = os.path.join('interfaces', 'generated')
     docwriter = InterfaceHelpWriter(package)
     # Packages that should not be included in generated API docs.
     docwriter.package_skip_patterns += ['\.external$',

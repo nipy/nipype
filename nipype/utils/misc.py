@@ -27,9 +27,10 @@ def human_order_sorted(l):
     def natural_keys(text):
         if isinstance(text, tuple):
             text = text[0]
-        return [ atoi(c) for c in re.split('(\d+)', text) ]
+        return [atoi(c) for c in re.split('(\d+)', text)]
 
     return sorted(l, key=natural_keys)
+
 
 def trim(docstring, marker=None):
     if not docstring:
@@ -50,7 +51,7 @@ def trim(docstring, marker=None):
             # replace existing REST marker with doc level marker
             stripped = line.lstrip().strip().rstrip()
             if marker is not None and stripped and \
-               all([s==stripped[0] for s in stripped]) and \
+               all([s == stripped[0] for s in stripped]) and \
                stripped[0] not in [':']:
                 line = line.replace(stripped[0], marker)
             trimmed.append(line[indent:].rstrip())
@@ -62,10 +63,12 @@ def trim(docstring, marker=None):
     # Return a single string:
     return '\n'.join(trimmed)
 
+
 def getsource(function):
     """Returns the source code of a function"""
     src = dedent(inspect.getsource(function))
     return src
+
 
 def create_function_from_source(function_source, imports=None):
     """Return a function object from a function source
@@ -88,12 +91,12 @@ def create_function_from_source(function_source, imports=None):
         exec(function_source, ns)
 
     except Exception as msg:
-        msg = str(msg) + '\nError executing function:\n %s\n'%function_source
+        msg = str(msg) + '\nError executing function:\n %s\n' %function_source
         msg += '\n'.join(["Functions in connection strings have to be standalone.",
                           "They cannot be declared either interactively or inside",
                           "another function or inline in the connect string. Any",
                           "imports should be done inside the function"
-                           ])
+                          ])
         raise RuntimeError(msg)
     ns_funcs = list(set(ns) - set(import_keys + ['__builtins__']))
     assert len(ns_funcs) == 1, "Function or inputs are ill-defined"
@@ -101,56 +104,59 @@ def create_function_from_source(function_source, imports=None):
     func = ns[funcname]
     return func
 
+
 def find_indices(condition):
-   "Return the indices where ravel(condition) is true"
-   res, = np.nonzero(np.ravel(condition))
-   return res
+    "Return the indices where ravel(condition) is true"
+    res, = np.nonzero(np.ravel(condition))
+    return res
+
 
 def is_container(item):
-   """Checks if item is a container (list, tuple, dict, set)
+    """Checks if item is a container (list, tuple, dict, set)
 
-   Parameters
-   ----------
-   item : object
-       object to check for .__iter__
+    Parameters
+    ----------
+    item : object
+        object to check for .__iter__
 
-   Returns
-   -------
-   output : Boolean
-       True if container
-       False if not (eg string)
-   """
-   if isinstance(item, string_types):
-       return False
-   elif hasattr(item, '__iter__'):
-      return True
-   else:
-      return False
+    Returns
+    -------
+    output : Boolean
+        True if container
+        False if not (eg string)
+    """
+    if isinstance(item, string_types):
+        return False
+    elif hasattr(item, '__iter__'):
+        return True
+    else:
+        return False
+
 
 def container_to_string(cont):
-   """Convert a container to a command line string.
+    """Convert a container to a command line string.
 
-   Elements of the container are joined with a space between them,
-   suitable for a command line parameter.
+    Elements of the container are joined with a space between them,
+    suitable for a command line parameter.
 
-   If the container `cont` is only a sequence, like a string and not a
-   container, it is returned unmodified.
+    If the container `cont` is only a sequence, like a string and not a
+    container, it is returned unmodified.
 
-   Parameters
-   ----------
-   cont : container
-      A container object like a list, tuple, dict, or a set.
+    Parameters
+    ----------
+    cont : container
+       A container object like a list, tuple, dict, or a set.
 
-   Returns
-   -------
-   cont_str : string
-       Container elements joined into a string.
+    Returns
+    -------
+    cont_str : string
+        Container elements joined into a string.
 
-   """
-   if hasattr(cont, '__iter__') and not isinstance(cont, string_types):
-      return str(' '.join(cont))
+    """
+    if hasattr(cont, '__iter__') and not isinstance(cont, string_types):
+        return str(' '.join(cont))
 
-   return str(cont)
+    return str(cont)
 
 
 # Dependency checks.  Copied this from Nipy, with some modificiations
@@ -190,7 +196,7 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     else:
         msg = 'Nipype requires %s' % pkg_name
     if version:
-      msg += ' with version >= %s' % (version,)
+        msg += ' with version >= %s' % (version,)
     try:
         mod = __import__(pkg_name)
     except ImportError:
@@ -204,6 +210,7 @@ def package_check(pkg_name, version=None, app=None, checker=LooseVersion,
     if checker(have_version) < checker(version):
         raise exc_failed_check(msg)
 
+
 def str2bool(v):
     if isinstance(v, bool):
         return v
@@ -215,12 +222,14 @@ def str2bool(v):
     else:
         raise ValueError("%s cannot be converted to bool" % v)
 
+
 def flatten(S):
     if S == []:
         return S
     if isinstance(S[0], list):
         return flatten(S[0]) + flatten(S[1:])
     return S[:1] + flatten(S[1:])
+
 
 def unflatten(in_list, prev_structure):
     if not isinstance(in_list, Iterator):

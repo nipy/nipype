@@ -44,7 +44,7 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
 
     version = 0
     if fsl.Info.version() and \
-        LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
+            LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
         version = 507
 
     modelfit = pe.Workflow(name=name)
@@ -110,7 +110,6 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
                                                         'parameter_estimates']),
                          name='outputspec')
 
-
     """
     Setup the connections
     """
@@ -125,12 +124,12 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
         (inputspec, modelestimate, [('film_threshold', 'threshold'),
                                     ('functional_data', 'in_file')]),
         (level1design, modelgen, [('fsf_files', 'fsf_file'),
-                                ('ev_files', 'ev_files')]),
+                                  ('ev_files', 'ev_files')]),
         (modelgen, modelestimate, [('design_file', 'design_file')]),
 
-        (merge_contrasts, ztopval,[('out', 'in_file')]),
+        (merge_contrasts, ztopval, [('out', 'in_file')]),
         (ztopval, outputspec, [('out_file', 'pfiles')]),
-        (merge_contrasts, outputspec,[('out', 'zfiles')]),
+        (merge_contrasts, outputspec, [('out', 'zfiles')]),
         (modelestimate, outputspec, [('param_estimates', 'parameter_estimates'),
                                      ('dof_file', 'dof_file')]),
         ])
@@ -139,11 +138,11 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
             (modelgen, conestimate, [('con_file', 'tcon_file'),
                                      ('fcon_file', 'fcon_file')]),
             (modelestimate, conestimate, [('param_estimates', 'param_estimates'),
-                                        ('sigmasquareds', 'sigmasquareds'),
-                                        ('corrections', 'corrections'),
-                                        ('dof_file', 'dof_file')]),
+                                          ('sigmasquareds', 'sigmasquareds'),
+                                          ('corrections', 'corrections'),
+                                          ('dof_file', 'dof_file')]),
             (conestimate, merge_contrasts, [('zstats', 'in1'),
-                                              ('zfstats', 'in2')]),
+                                            ('zfstats', 'in2')]),
             (conestimate, outputspec, [('copes', 'copes'),
                                        ('varcopes', 'varcopes')]),
             ])
@@ -154,7 +153,7 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
             (modelestimate, merge_contrasts, [('zstats', 'in1'),
                                               ('zfstats', 'in2')]),
             (modelestimate, outputspec, [('copes', 'copes'),
-                                       ('varcopes', 'varcopes')]),
+                                         ('varcopes', 'varcopes')]),
             ])
     return modelfit
 
@@ -229,8 +228,8 @@ def create_fixed_effects_flow(name='fixedfx'):
                            name="copemerge")
 
     varcopemerge = pe.MapNode(interface=fsl.Merge(dimension='t'),
-                           iterfield=['in_files'],
-                           name="varcopemerge")
+                              iterfield=['in_files'],
+                              name="varcopemerge")
 
     """
     Use :class:`nipype.interfaces.fsl.L2Model` to generate subject and condition
@@ -282,8 +281,8 @@ def create_fixed_effects_flow(name='fixedfx'):
                       (varcopemerge, flameo, [('merged_file',
                                                'var_cope_file')]),
                       (level2model, flameo, [('design_mat', 'design_file'),
-                                            ('design_con', 't_con_file'),
-                                            ('design_grp', 'cov_split_file')]),
+                                             ('design_con', 't_con_file'),
+                                             ('design_grp', 'cov_split_file')]),
                       (gendof, flameo, [('dof_volume', 'dof_var_cope_file')]),
                       (flameo, outputspec, [('res4d', 'res4d'),
                                             ('copes', 'copes'),

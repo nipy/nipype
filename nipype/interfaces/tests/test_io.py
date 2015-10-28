@@ -32,6 +32,7 @@ def test_datagrabber():
     yield assert_equal, dg.inputs.base_directory, Undefined
     yield assert_equal, dg.inputs.template_args, {'outfiles': []}
 
+
 @skipif(noboto)
 def test_s3datagrabber():
     dg = nio.S3DataGrabber()
@@ -92,6 +93,7 @@ def test_selectfiles_valueerror():
                          force_lists=force_lists)
     yield assert_raises, ValueError, sf.run
 
+
 @skipif(noboto)
 def test_s3datagrabber_communication():
     dg = nio.S3DataGrabber(infields=['subj_id', 'run_num'], outfields=['func', 'struct'])
@@ -124,6 +126,7 @@ def test_s3datagrabber_communication():
 
     shutil.rmtree(tempdir)
 
+
 def test_datagrabber_order():
     tempdir = mkdtemp()
     file1 = mkstemp(prefix='sub002_L1_R1.q', dir=tempdir)
@@ -149,6 +152,7 @@ def test_datagrabber_order():
     yield assert_true, 'sub002_L3_R10' in outfiles[2][1]
     shutil.rmtree(tempdir)
 
+
 def test_datasink():
     ds = nio.DataSink()
     yield assert_true, ds.inputs.parameterization
@@ -159,6 +163,7 @@ def test_datasink():
     yield assert_equal, ds.inputs.base_directory, 'foo'
     ds = nio.DataSink(infields=['test'])
     yield assert_true, 'test' in ds.inputs.copyable_trait_names()
+
 
 @skipif(noboto)
 def test_s3datasink():
@@ -195,11 +200,12 @@ def test_datasink_substitutions():
     setattr(ds.inputs, '@outdir', files)
     ds.run()
     yield assert_equal, \
-          sorted([os.path.basename(x) for
-                  x in glob.glob(os.path.join(outdir, '*'))]), \
-          ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
+        sorted([os.path.basename(x) for
+            x in glob.glob(os.path.join(outdir, '*'))]), \
+        ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
     shutil.rmtree(indir)
     shutil.rmtree(outdir)
+
 
 @skipif(noboto)
 def test_s3datasink_substitutions():
@@ -221,8 +227,8 @@ def test_s3datasink_substitutions():
         raise ose
 
     conn = S3Connection(anon=True, is_secure=False, port=4567,
-                          host='localhost',
-                          calling_format=OrdinaryCallingFormat())
+                        host='localhost',
+                        calling_format=OrdinaryCallingFormat())
     conn.create_bucket('test')
 
     ds = nio.S3DataSink(
@@ -243,9 +249,9 @@ def test_s3datasink_substitutions():
     setattr(ds.inputs, '@outdir', files)
     ds.run()
     yield assert_equal, \
-          sorted([os.path.basename(x) for
-                  x in glob.glob(os.path.join(outdir, '*'))]), \
-          ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
+        sorted([os.path.basename(x) for
+            x in glob.glob(os.path.join(outdir, '*'))]), \
+        ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
 
     bkt = conn.get_bucket(ds.inputs.bucket)
     bkt_files = list(k for k in bkt.list())
@@ -276,6 +282,7 @@ def test_s3datasink_substitutions():
     shutil.rmtree(fakes3dir)
     shutil.rmtree(indir)
     shutil.rmtree(outdir)
+
 
 def _temp_analyze_files():
     """Generate temporary analyze file pair."""

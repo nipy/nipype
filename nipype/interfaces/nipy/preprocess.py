@@ -66,7 +66,7 @@ class ComputeMask(BaseInterface):
         _, name, ext = split_filename(self.inputs.mean_volume)
         self._brain_mask_path = os.path.abspath("%s_mask.%s" % (name, ext))
         nb.save(nb.Nifti1Image(brain_mask.astype(np.uint8),
-                nii.get_affine()), self._brain_mask_path)
+                               nii.get_affine()), self._brain_mask_path)
 
         return runtime
 
@@ -84,11 +84,11 @@ class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
     tr = traits.Float(desc="TR in seconds",
                       mandatory=True)
     slice_order = traits.List(traits.Int(),
-            desc=('0 based slice order. This would be equivalent to entering'
-                  'np.argsort(spm_slice_order) for this field. This effects'
-                  'interleaved acquisition. This field will be deprecated in'
-                  'future Nipy releases and be replaced by actual slice'
-                  'acquisition times.'),
+                              desc=('0 based slice order. This would be equivalent to entering'
+                                    'np.argsort(spm_slice_order) for this field. This effects'
+                                    'interleaved acquisition. This field will be deprecated in'
+                                    'future Nipy releases and be replaced by actual slice'
+                                    'acquisition times.'),
                               requires=["time_interp"])
     tr_slices = traits.Float(desc="TR slices", requires=['time_interp'])
     start = traits.Float(0.0, usedefault=True,
@@ -171,11 +171,11 @@ class FmriRealign4d(BaseInterface):
 
         for j, corr in enumerate(corr_run):
             self._out_file_path.append(os.path.abspath('corr_%s.nii.gz' %
-                                      (split_filename(self.inputs.in_file[j])[1])))
+                                                       (split_filename(self.inputs.in_file[j])[1])))
             save_image(corr, self._out_file_path[j])
 
             self._par_file_path.append(os.path.abspath('%s.par' %
-                                      (os.path.split(self.inputs.in_file[j])[1])))
+                                                       (os.path.split(self.inputs.in_file[j])[1])))
             mfile = open(self._par_file_path[j], 'w')
             motion = R._transforms[j]
             # nipy does not encode euler angles. return in original form of
@@ -302,11 +302,11 @@ class SpaceTimeRealigner(BaseInterface):
 
         for j, corr in enumerate(corr_run):
             self._out_file_path.append(os.path.abspath('corr_%s.nii.gz' %
-                                      (split_filename(self.inputs.in_file[j])[1])))
+                                                       (split_filename(self.inputs.in_file[j])[1])))
             save_image(corr, self._out_file_path[j])
 
             self._par_file_path.append(os.path.abspath('%s.par' %
-                                      (os.path.split(self.inputs.in_file[j])[1])))
+                                                       (os.path.split(self.inputs.in_file[j])[1])))
             mfile = open(self._par_file_path[j], 'w')
             motion = R._transforms[j]
             # nipy does not encode euler angles. return in original form of

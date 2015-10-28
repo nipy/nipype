@@ -12,6 +12,7 @@ import subprocess
 
 dirname = '/home/cburns/src/nipy-sf/nipype/trunk/'
 
+
 def run_cmd(cmd):
     print(cmd)
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
@@ -25,11 +26,13 @@ def run_cmd(cmd):
         raise Exception(msg)
     print(output)
 
+
 def update_repos():
     """Update svn repository."""
     os.chdir(dirname)
     cmd = 'svn update'
     run_cmd(cmd)
+
 
 def build_docs():
     """Build the sphinx documentation."""
@@ -37,11 +40,13 @@ def build_docs():
     cmd = 'make html'
     run_cmd(cmd)
 
+
 def push_to_sf():
     """Push documentation to sourceforge."""
     os.chdir(dirname + 'doc')
     cmd = 'make sf_cburns'
     run_cmd(cmd)
+
 
 def setup_paths():
     # Cron has no PYTHONPATH defined, so we need to add the paths to
@@ -55,7 +60,7 @@ def setup_paths():
     sys.path.insert(0, pkg_path)
     # Needed to add this to my path at one point otherwise import of
     # apigen failed.
-    #sys.path.insert(2, '/home/cburns/src/nipy-sf/nipype/trunk/tools')
+    # sys.path.insert(2, '/home/cburns/src/nipy-sf/nipype/trunk/tools')
 
     # Add networkx, twisted, zope.interface and foolscap.
     # Basically we need to add all the packages we need that are
@@ -81,7 +86,7 @@ if __name__ == '__main__':
     prev_dir = os.path.abspath(os.curdir)
     update_repos()
     build_docs()
-    #push_to_sf()
+    # push_to_sf()
     os.chdir(prev_dir)
 
 

@@ -26,6 +26,7 @@ from ..pipeline.utils import modify_paths
 ################################################################################
 # PipeFunc object: callable interface to nipype.interface objects
 
+
 class PipeFunc(object):
     """ Callable interface to nipype.interface objects
 
@@ -51,7 +52,7 @@ class PipeFunc(object):
                 is called.
         """
         if not (isinstance(interface, type)
-                                and issubclass(interface, BaseInterface)):
+                and issubclass(interface, BaseInterface)):
             raise ValueError('the interface argument should be a nipype '
                              'interface class, but %s (type %s) was passed.' %
                              (interface, type(interface)))
@@ -61,7 +62,7 @@ class PipeFunc(object):
             raise ValueError('base_dir should be an existing directory')
         self.base_dir = base_dir
         doc = '%s\n%s' % (self.interface.__doc__,
-                            self.interface.help(returnhelp=True))
+                          self.interface.help(returnhelp=True))
         self.__doc__ = doc
         self.callback = callback
 
@@ -93,13 +94,14 @@ class PipeFunc(object):
 
     def __repr__(self):
         return '%s(%s.%s, base_dir=%s)' % (self.__class__.__name__,
-                           self.interface.__module__,
-                           self.interface.__name__,
-                           self.base_dir)
+                                           self.interface.__module__,
+                                           self.interface.__name__,
+                                           self.base_dir)
 
 ################################################################################
 # Memory manager: provide some tracking about what is computed when, to
 # be able to flush the disk
+
 
 def read_log(filename, run_dict=None):
     if run_dict is None:
@@ -225,7 +227,7 @@ class Memory(object):
         # immediately to avoid race conditions in parallel computing:
         # file appends are atomic
         open(os.path.join(base_dir, 'log.current'),
-            'a').write('%s/%s\n' % (dir_name, job_name))
+             'a').write('%s/%s\n' % (dir_name, job_name))
         t = time.localtime()
         year_dir = os.path.join(base_dir, 'log.%i' % t.tm_year)
         try:
@@ -238,7 +240,7 @@ class Memory(object):
         except OSError:
             "Dir exists"
         open(os.path.join(month_dir, '%02i.log' % t.tm_mday),
-            'a').write('%s/%s\n' % (dir_name, job_name))
+             'a').write('%s/%s\n' % (dir_name, job_name))
 
     def clear_previous_runs(self, warn=True):
         """ Remove all the cache that where not used in the latest run of
@@ -274,7 +276,7 @@ class Memory(object):
         year = year if year is not None else t.tm_year
         base_dir = self.base_dir
         cut_off_file = '%s/log.%i/%02i/%02i.log' % (base_dir,
-                    year, month, day)
+                                                    year, month, day)
         logs_to_flush = list()
         recent_runs = dict()
         for log_name in glob.glob('%s/log.*/*/*.log' % base_dir):
@@ -297,5 +299,5 @@ class Memory(object):
 
     def __repr__(self):
         return '%s(base_dir=%s)' % (self.__class__.__name__,
-                           self.base_dir)
+                                    self.base_dir)
 

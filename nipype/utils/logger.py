@@ -7,7 +7,7 @@ import os
 import sys
 try:
     from ..external.cloghandler import ConcurrentRotatingFileHandler as \
-    RFHandler
+        RFHandler
 except ImportError:
     # Next 2 lines are optional:  issue a warning to the user
     from warnings import warn
@@ -16,17 +16,19 @@ except ImportError:
 from .misc import str2bool
 from .config import NipypeConfig
 
+
 class Logging(object):
     """Nipype logging class
     """
     fmt = ('%(asctime)s,%(msecs)d %(name)-2s '
            '%(levelname)-2s:\n\t %(message)s')
     datefmt = '%y%m%d-%H:%M:%S'
+
     def __init__(self, config):
         self._config = config
         logging.basicConfig(format=self.fmt, datefmt=self.datefmt,
                             stream=sys.stdout)
-        #logging.basicConfig(stream=sys.stdout)
+        # logging.basicConfig(stream=sys.stdout)
         self._logger = logging.getLogger('workflow')
         self._fmlogger = logging.getLogger('filemanip')
         self._iflogger = logging.getLogger('interface')
@@ -91,10 +93,10 @@ class Logging(object):
         old_keys = set(dold.keys())
         if len(new_keys - old_keys):
             self._logger.debug("%s not previously seen: %s"
-                         % (prefix, new_keys - old_keys))
+                               % (prefix, new_keys - old_keys))
         if len(old_keys - new_keys):
             self._logger.debug("%s not presently seen: %s"
-                         % (prefix, old_keys - new_keys))
+                               % (prefix, old_keys - new_keys))
 
         # Values in common keys would differ quite often,
         # so we need to join the messages together
@@ -116,4 +118,4 @@ class Logging(object):
                          % (k, dnew[k], dold[k])]
         if len(msgs):
             self._logger.debug("%s values differ in fields: %s" % (prefix,
-                                                             ", ".join(msgs)))
+                                                                   ", ".join(msgs)))

@@ -108,7 +108,7 @@ class InterfaceChecker(object):
         path = path.replace(self.package_name + os.path.sep, '')
         path = os.path.join(self.root_path, path)
         # XXX maybe check for extensions as well?
-        if os.path.exists(path + '.py'): # file
+        if os.path.exists(path + '.py'):  # file
             path += '.py'
         elif os.path.exists(os.path.join(path, '__init__.py')):
             path = os.path.join(path, '__init__.py')
@@ -128,7 +128,7 @@ class InterfaceChecker(object):
         filename = self._uri2path(uri)
         if filename is None:
             # nothing that we could handle here.
-            return ([],[])
+            return ([], [])
         f = open(filename, 'rt')
         functions, classes = self._parse_lines(f, uri)
         f.close()
@@ -171,7 +171,7 @@ class InterfaceChecker(object):
         # get the names of all classes and functions
         _, classes = self._parse_module(uri)
         if not classes:
-            #print 'WARNING: Empty -',uri  # dbg
+            # print 'WARNING: Empty -',uri  # dbg
             return None
 
         # Make a shorter version of the uri that omits the package name for
@@ -212,7 +212,7 @@ class InterfaceChecker(object):
                            ('.' * len(uri.split('.'))),
                            'from ..%s import %s' % (uri.split('.')[-1], c),
                            '']
-                    cmd.append('def test_%s_inputs():' % c)
+                    cmd.append('\ndef test_%s_inputs():' % c)
                     input_fields = ''
                     for traitname, trait in sorted(classinst.input_spec().traits(transient=None).items()):
                         input_fields += '%s=dict(' % traitname
@@ -246,7 +246,7 @@ class InterfaceChecker(object):
                     if 'parent' in trait.__dict__:
                         parent_metadata = list(getattr(trait, 'parent').__dict__.keys())
                     if key not in allowed_keys + classinst._additional_metadata\
-                        + parent_metadata:
+                            + parent_metadata:
                         bad_specs.append([uri, c, 'Inputs', traitname, key])
                     if key == 'mandatory' and trait.mandatory is not None and not trait.mandatory:
                         bad_specs.append([uri, c, 'Inputs', traitname, 'mandatory=False'])
@@ -256,7 +256,7 @@ class InterfaceChecker(object):
 
             if not os.path.exists(nonautotest):
                 with open(testfile, 'at') as fp:
-                    cmd = ['def test_%s_outputs():' % c]
+                    cmd = ['\ndef test_%s_outputs():' % c]
                     input_fields = ''
                     for traitname, trait in sorted(classinst.output_spec().traits(transient=None).items()):
                         input_fields += '%s=dict(' % traitname
@@ -278,7 +278,7 @@ class InterfaceChecker(object):
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value"""]
-                    fp.writelines('\n'.join(cmd) + '\n\n')
+                    fp.writelines('\n'.join(cmd) + '\n')
 
             for traitname, trait in sorted(classinst.output_spec().traits(transient=None).items()):
                 for key in sorted(trait.__dict__):
@@ -291,7 +291,6 @@ class InterfaceChecker(object):
                             + parent_metadata:
                         bad_specs.append([uri, c, 'Outputs', traitname, key])
         return bad_specs
-
 
     def _survives_exclude(self, matchstr, match_type):
         ''' Returns True if *matchstr* does not match patterns
@@ -358,10 +357,10 @@ class InterfaceChecker(object):
             # Check directory names for packages
             root_uri = self._path2uri(os.path.join(self.root_path,
                                                    dirpath))
-            for dirname in dirnames[:]: # copy list - we modify inplace
+            for dirname in dirnames[:]:  # copy list - we modify inplace
                 package_uri = '.'.join((root_uri, dirname))
                 if (self._uri2path(package_uri) and
-                    self._survives_exclude(package_uri, 'package')):
+                        self._survives_exclude(package_uri, 'package')):
                     modules.append(package_uri)
                 else:
                     dirnames.remove(dirname)
@@ -370,7 +369,7 @@ class InterfaceChecker(object):
                 module_name = filename[:-3]
                 module_uri = '.'.join((root_uri, module_name))
                 if (self._uri2path(module_uri) and
-                    self._survives_exclude(module_uri, 'module')):
+                        self._survives_exclude(module_uri, 'module')):
                     modules.append(module_uri)
         return sorted(modules)
 

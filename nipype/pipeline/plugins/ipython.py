@@ -19,12 +19,13 @@ except:
 
 from .base import (DistributedPluginBase, logger, report_crash)
 
+
 def execute_task(pckld_task, node_config, updatehash):
     from socket import gethostname
     from traceback import format_exc
     from nipype import config, logging
-    traceback=None
-    result=None
+    traceback = None
+    result = None
     import os
     cwd = os.getcwd()
     try:
@@ -38,6 +39,7 @@ def execute_task(pckld_task, node_config, updatehash):
         result = task.result
     os.chdir(cwd)
     return result, traceback, gethostname()
+
 
 class IPythonPlugin(DistributedPluginBase):
     """Execute workflow with ipython
@@ -110,6 +112,6 @@ class IPythonPlugin(DistributedPluginBase):
 
     def _clear_task(self, taskid):
         if IPyversion >= '0.11':
-            logger.debug("Clearing id: %d"%taskid)
+            logger.debug("Clearing id: %d" %taskid)
             self.taskclient.purge_results(self.taskmap[taskid])
             del self.taskmap[taskid]

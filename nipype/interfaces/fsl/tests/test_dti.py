@@ -98,7 +98,7 @@ def test_dtifit2():
     dti.inputs.max_z = 50
 
     yield assert_equal, dti.cmdline, \
-        'dtifit -k %s -o foo.dti.nii -m %s -r %s -b %s -Z 50 -z 10'%(filelist[0],
+        'dtifit -k %s -o foo.dti.nii -m %s -r %s -b %s -Z 50 -z 10' %(filelist[0],
                                                                      filelist[1],
                                                                      filelist[0],
                                                                      filelist[1])
@@ -169,7 +169,7 @@ def test_randomise2():
     results = rand3.run(input_4D='infile3',
                         output_rootname='outfile3')
     yield assert_equal, results.runtime.cmdline, \
-          'randomise -i infile3 -o outfile3'
+        'randomise -i infile3 -o outfile3'
 
     # test arguments for opt_map
     opt_map = {'demean_data':                        ('-D', True),
@@ -252,7 +252,7 @@ def test_Randomise_parallel():
     results = rand3.run(input_4D='infile3',
                         output_rootname='outfile3')
     yield assert_equal, results.runtime.cmdline, \
-          'randomise_parallel -i infile3 -o outfile3'
+        'randomise_parallel -i infile3 -o outfile3'
 
     # test arguments for opt_map
     opt_map = {'demean_data':                        ('-D', True),
@@ -286,11 +286,11 @@ def test_Randomise_parallel():
                'TFCE_extent_param':                  ('--tfce_E=0.50', 0.50),
                'TFCE_connectivity':                  ('--tfce_C=0.30', 0.30),
                'list_num_voxel_EVs_pos':             ('--vxl=' \
-                                                          + repr([1, 2, 3, 4]),
+                                                      + repr([1, 2, 3, 4]),
                                                       repr([1, 2, 3, 4])),
                'list_img_voxel_EVs':               ('--vxf=' \
-                                                        + repr([6, 7, 8, 9, 3]),
-                                                      repr([6, 7, 8, 9, 3]))}
+                                                    + repr([6, 7, 8, 9, 3]),
+                                                    repr([6, 7, 8, 9, 3]))}
 
     for name, settings in list(opt_map.items()):
         rand4 = fsl.Randomise_parallel(input_4D='infile',
@@ -366,12 +366,12 @@ def test_Vec_reg():
 
     vrg3 = fsl.VecReg()
     results = vrg3.run(infile='infile3',
-                     outfile='outfile3',
-                     refVolName='MNI152',
-                     affineTmat='tmat3.mat',)
+                       outfile='outfile3',
+                       refVolName='MNI152',
+                       affineTmat='tmat3.mat',)
 
     yield assert_equal, results.runtime.cmdline, \
-          'vecreg -i infile3 -o outfile3 -r MNI152 -t tmat3.mat'
+        'vecreg -i infile3 -o outfile3 -r MNI152 -t tmat3.mat'
     yield assert_not_equal, results.runtime.returncode, 0
     yield assert_equal, results.interface.inputs.infile, 'infile3'
     yield assert_equal, results.interface.inputs.outfile, 'outfile3'
@@ -379,13 +379,13 @@ def test_Vec_reg():
     yield assert_equal, results.interface.inputs.affineTmat, 'tmat3.mat'
 
     # test arguments for opt_map
-    opt_map = { 'verbose':           ('-v', True),
-               'helpDoc':           ('-h', True),
-               'tensor':            ('--tensor', True),
-               'affineTmat':        ('-t Tmat', 'Tmat'),
-               'warpFile':          ('-w wrpFile', 'wrpFile'),
-               'interpolation':     ('--interp=sinc', 'sinc'),
-               'brainMask':         ('-m mask', 'mask')}
+    opt_map = {'verbose':           ('-v', True),
+                'helpDoc':           ('-h', True),
+                'tensor':            ('--tensor', True),
+                'affineTmat':        ('-t Tmat', 'Tmat'),
+                'warpFile':          ('-w wrpFile', 'wrpFile'),
+                'interpolation':     ('--interp=sinc', 'sinc'),
+                'brainMask':         ('-m mask', 'mask')}
 
     for name, settings in list(opt_map.items()):
         vrg4 = fsl.VecReg(infile='infile', outfile='outfile',
@@ -440,7 +440,7 @@ def test_tbss_skeleton():
     # First by implicit argument
     skeletor.inputs.skeleton_file = True
     yield assert_equal, skeletor.cmdline, \
-    "tbss_skeleton -i a.nii -o %s"%os.path.join(newdir, "a_skeleton.nii")
+        "tbss_skeleton -i a.nii -o %s" %os.path.join(newdir, "a_skeleton.nii")
 
     # Now with a specific name
     skeletor.inputs.skeleton_file = "old_boney.nii"
@@ -455,21 +455,22 @@ def test_tbss_skeleton():
     # But we can set what we need
     bones.inputs.threshold = 0.2
     bones.inputs.distance_map = "b.nii"
-    bones.inputs.data_file = "b.nii" # Even though that's silly
+    bones.inputs.data_file = "b.nii"  # Even though that's silly
 
     # Now we get a command line
     yield assert_equal, bones.cmdline, \
-    "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s"%(Info.standard_image("LowerCingulum_1mm.nii.gz"),
-                                                         os.path.join(newdir, "b_skeletonised.nii"))
+        "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s" %(Info.standard_image("LowerCingulum_1mm.nii.gz"),
+                                                             os.path.join(newdir, "b_skeletonised.nii"))
 
     # Can we specify a mask?
     bones.inputs.use_cingulum_mask = Undefined
     bones.inputs.search_mask_file = "a.nii"
     yield assert_equal, bones.cmdline, \
-    "tbss_skeleton -i a.nii -p 0.200 b.nii a.nii b.nii %s"%os.path.join(newdir, "b_skeletonised.nii")
+        "tbss_skeleton -i a.nii -p 0.200 b.nii a.nii b.nii %s" %os.path.join(newdir, "b_skeletonised.nii")
 
     # Looks good; clean up
     clean_directory(newdir, olddir)
+
 
 @skipif(no_fsl)
 def test_distancemap():
@@ -487,18 +488,18 @@ def test_distancemap():
     mapper.inputs.in_file = "a.nii"
 
     # It should
-    yield assert_equal, mapper.cmdline, "distancemap --out=%s --in=a.nii"%os.path.join(newdir, "a_dstmap.nii")
+    yield assert_equal, mapper.cmdline, "distancemap --out=%s --in=a.nii" %os.path.join(newdir, "a_dstmap.nii")
 
     # And we should be able to write out a maxima map
     mapper.inputs.local_max_file = True
     yield assert_equal, mapper.cmdline, \
-        "distancemap --out=%s --in=a.nii --localmax=%s"%(os.path.join(newdir, "a_dstmap.nii"),
+        "distancemap --out=%s --in=a.nii --localmax=%s" %(os.path.join(newdir, "a_dstmap.nii"),
                                                          os.path.join(newdir, "a_lclmax.nii"))
 
     # And call it whatever we want
     mapper.inputs.local_max_file = "max.nii"
     yield assert_equal, mapper.cmdline, \
-        "distancemap --out=%s --in=a.nii --localmax=max.nii"%os.path.join(newdir, "a_dstmap.nii")
+        "distancemap --out=%s --in=a.nii --localmax=max.nii" %os.path.join(newdir, "a_dstmap.nii")
 
     # Not much else to do here
     clean_directory(newdir, olddir)

@@ -5,9 +5,9 @@ from __future__ import absolute_import
 import os
 
 from .info import (LONG_DESCRIPTION as __doc__,
-                  URL as __url__,
-                  STATUS as __status__,
-                  __version__)
+                   URL as __url__,
+                   STATUS as __status__,
+                   __version__)
 from .utils.config import NipypeConfig
 config = NipypeConfig()
 from .utils.logger import Logging
@@ -16,6 +16,7 @@ logging = Logging(config)
 from distutils.version import LooseVersion
 
 from .fixes.numpy.testing import nosetester
+
 
 class _NoseTester(nosetester.NoseTester):
     """ Subclass numpy's NoseTester to add doctests by default
@@ -57,7 +58,7 @@ def _test_local_install():
                             os.path.abspath(__file__).split(os.sep)[:-2]):
         import warnings
         warnings.warn('Running the tests from the install directory may '
-                     'trigger some failures')
+                      'trigger some failures')
 
 _test_local_install()
 
@@ -78,4 +79,4 @@ except:
 
 from .pipeline import Node, MapNode, JoinNode, Workflow
 from .interfaces import (DataGrabber, DataSink, SelectFiles,
-                        IdentityInterface, Rename, Function, Select, Merge)
+                         IdentityInterface, Rename, Function, Select, Merge)
