@@ -661,13 +661,6 @@ class antsBrainExtraction(ANTSCommand):
     output_spec = antsBrainExtractionOutputSpec
     _cmd = 'antsBrainExtraction.sh'
 
-    def _format_arg(self, opt, spec, val):
-        return super(ANTSCommand, self)._format_arg(opt, spec, val)
-
-    def _run_interface(self, runtime, correct_return_codes=[0]):
-        runtime = super(antsBrainExtraction, self)._run_interface(runtime)
-        return runtime
-
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['BrainExtractionMask'] = os.path.join(os.getcwd(),
