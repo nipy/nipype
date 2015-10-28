@@ -322,21 +322,40 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                          'GaussianDisplacementField', 'TimeVaryingVelocityField',
                                          'TimeVaryingBSplineVelocityField', 'SyN', 'BSplineSyN',
                                          'Exponential', 'BSplineExponential'), argstr='%s', mandatory=True)
-    # TODO: transform_parameters currently supports rigid, affine, composite
-    # affine, translation, bspline, gaussian displacement field (gdf), and SyN
-    # -----ONLY-----!
-    transform_parameters = traits.List(traits.Either(traits.Float(),
-                                                     traits.Tuple(
-                                                         traits.Float()),
-                                                     traits.Tuple(traits.Float(),  # gdf & syn
-                                                                  traits.Float(
+    # TODO: input checking and allow defaults
+    # All parameters must be specified for BSplineDisplacementField, TimeVaryingBSplineVelocityField, BSplineSyN,
+    # Exponential, and BSplineExponential. EVEN DEFAULTS!
+    transform_parameters = traits.List(traits.Either(traits.Tuple(traits.Float()),  # Translation, Rigid, Affine,
+                                                                                    # CompositeAffine, Similarity
+                                                     traits.Tuple(traits.Float(),  # GaussianDisplacementField, SyN
+                                                                  traits.Float(),
+                                                                  traits.Float()
                                                                   ),
-                                                                  traits.Float(
-                                                                  )),
-                                                     traits.Tuple(traits.Float(),  # BSplineSyn
+                                                     traits.Tuple(traits.Float(),  # BSplineSyn,
+                                                                  traits.Int(),    # BSplineDisplacementField,
+                                                                  traits.Int(),    # TimeVaryingBSplineVelocityField
+                                                                  traits.Int()
+                                                                  ),
+                                                     traits.Tuple(traits.Float(),  # TimeVaryingVelocityField
+                                                                  traits.Int(),
+                                                                  traits.Float(),
+                                                                  traits.Float(),
+                                                                  traits.Float(),
+                                                                  traits.Float()
+                                                                  ),
+                                                     traits.Tuple(traits.Float(),  # Exponential
+                                                                  traits.Float(),
+                                                                  traits.Float(),
+                                                                  traits.Int()
+                                                                  ),
+                                                     traits.Tuple(traits.Float(),  # BSplineExponential
                                                                   traits.Int(),
                                                                   traits.Int(),
-                                                                  traits.Int())))
+                                                                  traits.Int(),
+                                                                  traits.Int()
+                                                                  ),
+                                                     )
+                                       )
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
     smoothing_sigmas = traits.List(traits.List(traits.Float()), mandatory=True)
@@ -509,6 +528,13 @@ class Registration(ANTSCommand):
     >>> reg7b.inputs.interpolation_parameters = (1.0, 1.0)
     >>> reg7b.cmdline
     'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Gaussian[ 1.0, 1.0 ] --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+
+    >>> # Test Extended Transform Parameters
+    >>> reg8 = copy.deepcopy(reg)
+    >>> reg8.inputs.transforms = ['Affine', 'BSplineSyN']
+    >>> reg8.inputs.transform_parameters = [(2.0,), (0.25, 26, 0, 3)]
+    >>> reg8.cmdline
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform BSplineSyN[ 0.25, 26, 0, 3 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
     """
     DEF_SAMPLING_STRATEGY = 'None'
     """The default sampling strategy argument."""
@@ -544,7 +570,6 @@ class Registration(ANTSCommand):
             sampling_strategy = self.inputs.sampling_strategy[index]
             if sampling_strategy:
                 stage_inputs['sampling_strategy'] = sampling_strategy
-            sampling_percentage = self.inputs.sampling_percentage
         if (isdefined(self.inputs.sampling_percentage) and self.inputs.sampling_percentage):
             sampling_percentage = self.inputs.sampling_percentage[index]
             if sampling_percentage:
