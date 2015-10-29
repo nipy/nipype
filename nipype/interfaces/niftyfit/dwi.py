@@ -33,6 +33,10 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
                                argstr='-rotsform %d', 
                                mandatory=False, 
                                usedefault = 0)
+    bvallowthreshold = traits.Float(20, desc='B-value threshold used for detection of B0 and DWI images [default: 20]',
+                                 argstr='-bvallowthreshold %f', 
+                                 mandatory=False, 
+                                 usedefault = True)
     op_basename = traits.String('dwifit_', desc='Output file basename',usedefault = True)
 
     # Output options, with templated output names based on the source image
@@ -44,7 +48,9 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
     error_file = File(desc='Filename of parameter error maps', 
                       argstr='-error %s')
     res_file = File(desc='Filename of model residual map', 
-                    argstr='-res %s')
+                    argstr='-res %s',
+                    name_source=['op_basename'],
+                    name_template='%s_resmap')
     syn_file = File(desc='Filename of synthetic image', 
                     argstr='-syn %s', 
                     name_source=['op_basename'], 
@@ -194,6 +200,10 @@ class DwiToolInputSpec(NIFTYFITCommandInputSpec):
                        name_source=['op_basename'], 
                        name_template='%s_logdti2', 
                        requires=['dti_flag'])
+    bvallowthreshold = traits.Float(10, desc='B-value threshold used for detection of B0 and DWI images [default: 10]',
+                                 argstr='-bvallowthreshold %f', 
+                                 mandatory=False, 
+                                 usedefault = True)
     
     
     # Methods options
