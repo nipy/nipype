@@ -393,6 +393,12 @@ class DataSink(IOBase):
         sep = os.path.sep
         base_directory = self.inputs.base_directory
 
+        # Explicitly lower-case the "s3"
+        if base_directory.lower().startswith(s3_str):
+            base_dir_sp = base_directory.split('/')
+            base_dir_sp[0] = base_dir_sp[0].lower()
+            base_directory = '/'.join(base_dir_sp)
+
         # Check if 's3://' in base dir
         if base_directory.startswith(s3_str):
             try:
@@ -558,6 +564,12 @@ class DataSink(IOBase):
         iflogger = logging.getLogger('interface')
         s3_str = 's3://'
         s3_prefix = os.path.join(s3_str, bucket.name)
+
+        # Explicitly lower-case the "s3"
+        if dst.lower().startswith(s3_str):
+            dst_sp = dst.split('/')
+            dst_sp[0] = dst_sp[0].lower()
+            dst = '/'.join(dst_sp)
 
         # If src is a directory, collect files (this assumes dst is a dir too)
         if os.path.isdir(src):
