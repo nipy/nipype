@@ -50,7 +50,8 @@ def gcd(a, b):
     11
 
     """
-    while b > 0: a, b = b, a % b
+    while b > 0:
+        a, b = b, a % b
     return a
 
 

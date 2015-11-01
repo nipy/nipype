@@ -1065,7 +1065,8 @@ connected.
                                              colored=colored,
                                              simple_form=simple_form, level=level+3))
                 dotlist.append('}')
-                if level == 6: level = 2
+                if level == 6:
+                    level = 2
             else:
                 for subnode in self._graph.successors_iter(node):
                     if node._hierarchy != subnode._hierarchy:

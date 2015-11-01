@@ -145,10 +145,12 @@ class NumpyDocString(object):
         i = 0
         j = 0
         for i, line in enumerate(doc):
-            if line.strip(): break
+            if line.strip():
+                break
 
         for j, line in enumerate(doc[::-1]):
-            if line.strip(): break
+            if line.strip():
+                break
 
         return doc[i:len(doc)-j]
 
@@ -227,7 +229,8 @@ class NumpyDocString(object):
         rest = []
 
         for line in content:
-            if not line.strip(): continue
+            if not line.strip():
+                continue
 
             m = self._name_rgx.match(line)
             if m and line[m.end():].strip().startswith(':'):
@@ -351,7 +354,8 @@ class NumpyDocString(object):
         return out
 
     def _str_see_also(self, func_role):
-        if not self['See Also']: return []
+        if not self['See Also']:
+            return []
         out = []
         out += self._str_header("See Also")
         last_had_desc = True

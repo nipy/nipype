@@ -20,7 +20,8 @@ from functools import partial
 
 # BEFORE importing distutils, remove MANIFEST. distutils doesn't properly
 # update it when the contents of directories change.
-if os.path.exists('MANIFEST'): os.remove('MANIFEST')
+if os.path.exists('MANIFEST'):
+    os.remove('MANIFEST')
 
 # For some commands, use setuptools.
 if len(set(('develop', 'bdist_egg', 'bdist_rpm', 'bdist', 'bdist_dumb',
