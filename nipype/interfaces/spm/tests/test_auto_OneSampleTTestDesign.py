@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..model import OneSampleTTestDesign
 
+
 def test_OneSampleTTestDesign_inputs():
     input_map = dict(covariates=dict(field='cov',
     ),
@@ -54,6 +55,7 @@ def test_OneSampleTTestDesign_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_OneSampleTTestDesign_outputs():
     output_map = dict(spm_mat_file=dict(),
     )
@@ -62,4 +64,3 @@ def test_OneSampleTTestDesign_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

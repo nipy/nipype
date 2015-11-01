@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..utils import ResliceToReference
 
+
 def test_ResliceToReference_inputs():
     input_map = dict(bounding_box=dict(field='comp{2}.idbbvox.bb',
     ),
@@ -32,6 +33,7 @@ def test_ResliceToReference_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_ResliceToReference_outputs():
     output_map = dict(out_files=dict(),
     )
@@ -40,4 +42,3 @@ def test_ResliceToReference_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

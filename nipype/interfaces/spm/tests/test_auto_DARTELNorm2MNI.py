@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import DARTELNorm2MNI
 
+
 def test_DARTELNorm2MNI_inputs():
     input_map = dict(apply_to_files=dict(copyfile=False,
     field='mni_norm.data.subjs.images',
@@ -40,6 +41,7 @@ def test_DARTELNorm2MNI_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_DARTELNorm2MNI_outputs():
     output_map = dict(normalization_parameter_file=dict(),
     normalized_files=dict(),
@@ -49,4 +51,3 @@ def test_DARTELNorm2MNI_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..base import AFNICommand
 
+
 def test_AFNICommand_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),

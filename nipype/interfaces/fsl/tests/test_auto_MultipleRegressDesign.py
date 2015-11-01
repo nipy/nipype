@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..model import MultipleRegressDesign
 
+
 def test_MultipleRegressDesign_inputs():
     input_map = dict(contrasts=dict(mandatory=True,
     ),
@@ -18,6 +19,7 @@ def test_MultipleRegressDesign_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_MultipleRegressDesign_outputs():
     output_map = dict(design_con=dict(),
     design_fts=dict(),
@@ -29,4 +31,3 @@ def test_MultipleRegressDesign_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import Coregister
 
+
 def test_Coregister_inputs():
     input_map = dict(apply_to_files=dict(copyfile=True,
     field='other',
@@ -51,6 +52,7 @@ def test_Coregister_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Coregister_outputs():
     output_map = dict(coregistered_files=dict(),
     coregistered_source=dict(),
@@ -60,4 +62,3 @@ def test_Coregister_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

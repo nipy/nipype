@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..gtract import gtractCoRegAnatomy
 
+
 def test_gtractCoRegAnatomy_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -70,6 +71,7 @@ def test_gtractCoRegAnatomy_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_gtractCoRegAnatomy_outputs():
     output_map = dict(outputTransformName=dict(),
     )
@@ -78,4 +80,3 @@ def test_gtractCoRegAnatomy_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

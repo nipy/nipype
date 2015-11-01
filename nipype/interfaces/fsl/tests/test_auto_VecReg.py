@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..dti import VecReg
 
+
 def test_VecReg_inputs():
     input_map = dict(affine_mat=dict(argstr='-t %s',
     ),
@@ -45,6 +46,7 @@ def test_VecReg_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_VecReg_outputs():
     output_map = dict(out_file=dict(),
     )
@@ -53,4 +55,3 @@ def test_VecReg_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

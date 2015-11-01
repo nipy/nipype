@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..utils import Overlay
 
+
 def test_Overlay_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -75,6 +76,7 @@ def test_Overlay_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Overlay_outputs():
     output_map = dict(out_file=dict(),
     )
@@ -83,4 +85,3 @@ def test_Overlay_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

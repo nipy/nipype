@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import MRTrixViewer
 
+
 def test_MRTrixViewer_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -30,6 +31,7 @@ def test_MRTrixViewer_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_MRTrixViewer_outputs():
     output_map = dict()
     outputs = MRTrixViewer.output_spec()
@@ -37,4 +39,3 @@ def test_MRTrixViewer_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

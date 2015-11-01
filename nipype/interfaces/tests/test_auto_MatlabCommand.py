@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..matlab import MatlabCommand
 
+
 def test_MatlabCommand_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),

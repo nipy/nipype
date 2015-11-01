@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..legacy import antsIntroduction
 
+
 def test_antsIntroduction_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -54,6 +55,7 @@ def test_antsIntroduction_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_antsIntroduction_outputs():
     output_map = dict(affine_transformation=dict(),
     input_file=dict(),
@@ -66,4 +68,3 @@ def test_antsIntroduction_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..dcm2nii import Dcm2nii
 
+
 def test_Dcm2nii_inputs():
     input_map = dict(anonymize=dict(argstr='-a',
     usedefault=True,
@@ -75,6 +76,7 @@ def test_Dcm2nii_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Dcm2nii_outputs():
     output_map = dict(bvals=dict(),
     bvecs=dict(),
@@ -87,4 +89,3 @@ def test_Dcm2nii_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

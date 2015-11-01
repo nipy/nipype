@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..base import BaseInterface
 
+
 def test_BaseInterface_inputs():
     input_map = dict(ignore_exception=dict(nohash=True,
     usedefault=True,

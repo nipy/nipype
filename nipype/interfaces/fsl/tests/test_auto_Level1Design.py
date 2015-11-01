@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..model import Level1Design
 
+
 def test_Level1Design_inputs():
     input_map = dict(bases=dict(mandatory=True,
     ),
@@ -22,6 +23,7 @@ def test_Level1Design_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Level1Design_outputs():
     output_map = dict(ev_files=dict(),
     fsf_files=dict(),
@@ -31,4 +33,3 @@ def test_Level1Design_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

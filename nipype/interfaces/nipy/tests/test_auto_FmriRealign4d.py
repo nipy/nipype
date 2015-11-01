@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import FmriRealign4d
 
+
 def test_FmriRealign4d_inputs():
     input_map = dict(between_loops=dict(usedefault=True,
     ),
@@ -31,6 +32,7 @@ def test_FmriRealign4d_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_FmriRealign4d_outputs():
     output_map = dict(out_file=dict(),
     par_file=dict(),
@@ -40,4 +42,3 @@ def test_FmriRealign4d_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

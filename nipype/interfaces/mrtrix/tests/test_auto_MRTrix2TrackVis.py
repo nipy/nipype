@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..convert import MRTrix2TrackVis
 
+
 def test_MRTrix2TrackVis_inputs():
     input_map = dict(image_file=dict(),
     in_file=dict(mandatory=True,
@@ -18,6 +19,7 @@ def test_MRTrix2TrackVis_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_MRTrix2TrackVis_outputs():
     output_map = dict(out_file=dict(),
     )
@@ -26,4 +28,3 @@ def test_MRTrix2TrackVis_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

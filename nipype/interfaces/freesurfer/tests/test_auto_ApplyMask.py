@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..utils import ApplyMask
 
+
 def test_ApplyMask_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -45,6 +46,7 @@ def test_ApplyMask_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_ApplyMask_outputs():
     output_map = dict(out_file=dict(),
     )
@@ -53,4 +55,3 @@ def test_ApplyMask_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

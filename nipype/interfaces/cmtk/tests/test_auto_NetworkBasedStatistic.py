@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..nbs import NetworkBasedStatistic
 
+
 def test_NetworkBasedStatistic_inputs():
     input_map = dict(edge_key=dict(usedefault=True,
     ),
@@ -28,6 +29,7 @@ def test_NetworkBasedStatistic_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_NetworkBasedStatistic_outputs():
     output_map = dict(nbs_network=dict(),
     nbs_pval_network=dict(),
@@ -38,4 +40,3 @@ def test_NetworkBasedStatistic_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

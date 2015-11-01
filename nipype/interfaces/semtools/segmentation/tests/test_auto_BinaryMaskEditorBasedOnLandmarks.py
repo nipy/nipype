@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..specialized import BinaryMaskEditorBasedOnLandmarks
 
+
 def test_BinaryMaskEditorBasedOnLandmarks_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -39,6 +40,7 @@ def test_BinaryMaskEditorBasedOnLandmarks_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_BinaryMaskEditorBasedOnLandmarks_outputs():
     output_map = dict(outputBinaryVolume=dict(),
     )
@@ -47,4 +49,3 @@ def test_BinaryMaskEditorBasedOnLandmarks_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

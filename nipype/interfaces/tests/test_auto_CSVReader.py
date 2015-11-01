@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..utility import CSVReader
 
+
 def test_CSVReader_inputs():
     input_map = dict(header=dict(usedefault=True,
     ),
@@ -14,6 +15,7 @@ def test_CSVReader_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_CSVReader_outputs():
     output_map = dict()
     outputs = CSVReader.output_spec()
@@ -21,4 +23,3 @@ def test_CSVReader_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

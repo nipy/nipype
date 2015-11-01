@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..gtract import gtractCoregBvalues
 
+
 def test_gtractCoregBvalues_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -54,6 +55,7 @@ def test_gtractCoregBvalues_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_gtractCoregBvalues_outputs():
     output_map = dict(outputTransform=dict(),
     outputVolume=dict(),
@@ -63,4 +65,3 @@ def test_gtractCoregBvalues_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

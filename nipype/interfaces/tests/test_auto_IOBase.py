@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..io import IOBase
 
+
 def test_IOBase_inputs():
     input_map = dict(ignore_exception=dict(nohash=True,
     usedefault=True,

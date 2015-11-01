@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..segmentation import JointFusion
 
+
 def test_JointFusion_inputs():
     input_map = dict(alpha=dict(requires=['method'],
     usedefault=True,
@@ -70,6 +71,7 @@ def test_JointFusion_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_JointFusion_outputs():
     output_map = dict(output_label_image=dict(),
     )
@@ -78,4 +80,3 @@ def test_JointFusion_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..utils import MakeAverageSubject
 
+
 def test_MakeAverageSubject_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -28,6 +29,7 @@ def test_MakeAverageSubject_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_MakeAverageSubject_outputs():
     output_map = dict(average_subject_name=dict(),
     )
@@ -36,4 +38,3 @@ def test_MakeAverageSubject_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import DICOMConvert
 
+
 def test_DICOMConvert_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),

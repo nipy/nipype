@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import TCorrMap
 
+
 def test_TCorrMap_inputs():
     input_map = dict(absolute_threshold=dict(argstr='-Thresh %f %s',
     name_source='in_file',
@@ -106,6 +107,7 @@ def test_TCorrMap_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_TCorrMap_outputs():
     output_map = dict(absolute_threshold=dict(),
     average_expr=dict(),
@@ -126,4 +128,3 @@ def test_TCorrMap_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..model import Binarize
 
+
 def test_Binarize_inputs():
     input_map = dict(abs=dict(argstr='--abs',
     ),
@@ -79,6 +80,7 @@ def test_Binarize_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Binarize_outputs():
     output_map = dict(binary_file=dict(),
     count_file=dict(),
@@ -88,4 +90,3 @@ def test_Binarize_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

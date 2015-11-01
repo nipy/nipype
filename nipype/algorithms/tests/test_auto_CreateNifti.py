@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..misc import CreateNifti
 
+
 def test_CreateNifti_inputs():
     input_map = dict(affine=dict(),
     data_file=dict(mandatory=True,
@@ -18,6 +19,7 @@ def test_CreateNifti_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_CreateNifti_outputs():
     output_map = dict(nifti_file=dict(),
     )
@@ -26,4 +28,3 @@ def test_CreateNifti_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

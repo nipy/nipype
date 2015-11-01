@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..utils import Slicer
 
+
 def test_Slicer_inputs():
     input_map = dict(all_axial=dict(argstr='-A',
     position=10,
@@ -84,6 +85,7 @@ def test_Slicer_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Slicer_outputs():
     output_map = dict(out_file=dict(),
     )
@@ -92,4 +94,3 @@ def test_Slicer_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

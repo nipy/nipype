@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..gtract import gtractResampleDWIInPlace
 
+
 def test_gtractResampleDWIInPlace_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -41,6 +42,7 @@ def test_gtractResampleDWIInPlace_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_gtractResampleDWIInPlace_outputs():
     output_map = dict(outputResampledB0=dict(),
     outputVolume=dict(),
@@ -50,4 +52,3 @@ def test_gtractResampleDWIInPlace_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

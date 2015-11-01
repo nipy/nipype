@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..developer import JistBrainMgdmSegmentation
 
+
 def test_JistBrainMgdmSegmentation_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -73,6 +74,7 @@ def test_JistBrainMgdmSegmentation_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_JistBrainMgdmSegmentation_outputs():
     output_map = dict(outLevelset=dict(),
     outPosterior2=dict(),
@@ -84,4 +86,3 @@ def test_JistBrainMgdmSegmentation_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

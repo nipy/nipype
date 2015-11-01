@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..dti import BEDPOSTX5
 
+
 def test_BEDPOSTX5_inputs():
     input_map = dict(all_ard=dict(argstr='--allard',
     xor=('no_ard', 'all_ard'),
@@ -85,6 +86,7 @@ def test_BEDPOSTX5_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_BEDPOSTX5_outputs():
     output_map = dict(dyads=dict(),
     dyads_dispersion=dict(),
@@ -102,4 +104,3 @@ def test_BEDPOSTX5_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

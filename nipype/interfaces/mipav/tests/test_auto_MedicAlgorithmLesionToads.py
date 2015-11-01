@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..developer import MedicAlgorithmLesionToads
 
+
 def test_MedicAlgorithmLesionToads_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -98,6 +99,7 @@ def test_MedicAlgorithmLesionToads_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_MedicAlgorithmLesionToads_outputs():
     output_map = dict(outCortical=dict(),
     outFilled=dict(),
@@ -114,4 +116,3 @@ def test_MedicAlgorithmLesionToads_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

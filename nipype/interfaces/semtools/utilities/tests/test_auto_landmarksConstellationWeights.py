@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..brains import landmarksConstellationWeights
 
+
 def test_landmarksConstellationWeights_inputs():
     input_map = dict(LLSModel=dict(argstr='--LLSModel %s',
     ),
@@ -29,6 +30,7 @@ def test_landmarksConstellationWeights_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_landmarksConstellationWeights_outputs():
     output_map = dict(outputWeightsList=dict(),
     )
@@ -37,4 +39,3 @@ def test_landmarksConstellationWeights_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

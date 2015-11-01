@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..odf import ODFRecon
 
+
 def test_ODFRecon_inputs():
     input_map = dict(DWI=dict(argstr='%s',
     mandatory=True,
@@ -59,6 +60,7 @@ def test_ODFRecon_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_ODFRecon_outputs():
     output_map = dict(B0=dict(),
     DWI=dict(),
@@ -71,4 +73,3 @@ def test_ODFRecon_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-
