@@ -1502,7 +1502,7 @@ class Complex(FSLCommand):
     output_spec = ComplexOuputSpec
 
     def _parse_inputs(self, skip=None):
-        if skip == None:
+        if skip is None:
             skip = []
         if self.inputs.real_cartesian:
             skip += self.inputs._ofs[:3]

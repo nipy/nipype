@@ -239,13 +239,13 @@ def has_metadata(trait, metadata, value=None, recursive=True):
     Checks if a given trait has a metadata (and optionally if it is set to particular value)
     '''
     count = 0
-    if hasattr(trait, "_metadata") and metadata in list(trait._metadata.keys()) and (trait._metadata[metadata] == value or value == None):
+    if hasattr(trait, "_metadata") and metadata in list(trait._metadata.keys()) and (trait._metadata[metadata] == value or value is None):
         count += 1
     if recursive:
         if hasattr(trait, 'inner_traits'):
             for inner_trait in trait.inner_traits():
                 count += has_metadata(inner_trait.trait_type, metadata, recursive)
-        if hasattr(trait, 'handlers') and trait.handlers != None:
+        if hasattr(trait, 'handlers') and trait.handlers is not None:
             for handler in trait.handlers:
                 count += has_metadata(handler, metadata, recursive)
 

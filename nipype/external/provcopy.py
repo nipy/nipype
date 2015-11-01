@@ -1820,7 +1820,7 @@ class ProvBundle(ProvEntity):
         '''Add a bundle to the current document
         '''
 
-        if identifier == None:
+        if identifier is None:
             identifier = bundle.get_identifier()
 
         if not identifier:

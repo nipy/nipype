@@ -894,11 +894,11 @@ def _transpose_iterables(fields, values):
         for key, tuples in list(values.items()):
             for kvals in tuples:
                 for idx, val in enumerate(kvals):
-                    if val != None:
+                    if val is not None:
                         transposed[fields[idx]][key].append(val)
         return list(transposed.items())
     else:
-        return list(zip(fields, [[v for v in list(transpose) if v != None]
+        return list(zip(fields, [[v for v in list(transpose) if v is not None]
                                  for transpose in zip(*values)]))
 
 
