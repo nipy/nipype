@@ -216,9 +216,8 @@ def build_doc(doc, opts):
         if attr is not None:
             # newline = line.replace(flag, attr)
             # Replace the flag with our attribute name
-            linelist[0] = '%s :' % str(attr)
+            linelist[0] = '%s :\n    ' % str(attr)
             # Add some line formatting
-            linelist.insert(1, '\n    ')
             newline = ' '.join(linelist)
             newdoc.append(newline)
         else:
