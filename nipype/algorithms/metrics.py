@@ -463,8 +463,8 @@ class FuzzyOverlap(BaseInterface):
             outputs[method] = getattr(self, '_' + method)
         # outputs['volume_difference'] = self._volume
         outputs['diff_file'] = os.path.abspath(self.inputs.out_file)
-        outputs['class_fji'] = np.array(self._jaccards).astype(float).tolist();
-        outputs['class_fdi'] = self._dices.astype(float).tolist();
+        outputs['class_fji'] = np.array(self._jaccards).astype(float).tolist()
+        outputs['class_fdi'] = self._dices.astype(float).tolist()
         return outputs
 
 

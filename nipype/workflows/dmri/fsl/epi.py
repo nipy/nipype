@@ -788,7 +788,7 @@ def _vsm_remove_mean(in_file, mask_file, in_unwarped):
 
 
 def _ms2sec(val):
-    return val*1e-3;
+    return val*1e-3
 
 
 def _split_dwi(in_file):

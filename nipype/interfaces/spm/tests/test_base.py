@@ -93,7 +93,7 @@ def test_find_mlab_cmd_defaults():
     yield assert_equal, dc._use_mcr, True
     yield assert_equal, dc._matlab_cmd, 'spmcmd'
     # restore environment
-    os.environ.clear();
+    os.environ.clear()
     os.environ.update(saved_env)
 
 
