@@ -1,5 +1,8 @@
 from __future__ import absolute_import
-import re, inspect, textwrap, pydoc
+import re
+import inspect
+import textwrap
+import pydoc
 import sphinx
 from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
 from nipype.external.six import string_types

@@ -17,7 +17,9 @@ from future import standard_library
 standard_library.install_aliases()
 
 import os
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 from nipype.interfaces.ants import Registration
 
 """

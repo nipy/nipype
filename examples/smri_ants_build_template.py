@@ -28,7 +28,9 @@ from nipype.workflows.smri.ants import ANTSTemplateBuildSingleIterationWF
 2. Download T1 volumes into home directory
 """
 
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 homeDir = os.getenv("HOME")
 requestedPath = os.path.join(homeDir, 'nipypeTestPath')
 mydatadir = os.path.realpath(requestedPath)

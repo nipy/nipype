@@ -8,7 +8,8 @@
     >>> os.chdir(datadir)
 
 """
-import os, os.path as op
+import os
+import os.path as op
 
 from ..base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from ..traits_extension import isdefined

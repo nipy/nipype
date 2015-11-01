@@ -3,7 +3,8 @@
 from future import standard_library
 standard_library.install_aliases()
 
-import unittest, sys
+import unittest
+import sys
 from contextlib import contextmanager
 
 from nipype.external.six import PY2, PY3, StringIO

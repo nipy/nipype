@@ -25,7 +25,8 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.mrtrix as mrtrix  # <---- The important new part!
 import nipype.interfaces.fsl as fsl
 import nipype.algorithms.misc as misc
-import os, os.path as op                     # system functions
+import os
+import os.path as op                     # system functions
 
 fsl.FSLCommand.set_default_output_type('NIFTI')
 

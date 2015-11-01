@@ -13,7 +13,8 @@ from __future__ import division
 
 # -*- coding: utf-8 -*-
 import os.path as op
-import nibabel as nb, nibabel.trackvis as trk
+import nibabel as nb
+import nibabel.trackvis as trk
 import numpy as np
 from nibabel.trackvis import HeaderError
 from nibabel.volumeutils import native_code

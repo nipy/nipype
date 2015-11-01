@@ -27,7 +27,9 @@ from string import Template
 import select
 import subprocess
 import sys
-import random, time, fnmatch
+import random
+import time
+import fnmatch
 from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc

@@ -18,7 +18,12 @@ Example Makefile rule::
 """
 
 from __future__ import print_function
-import glob, re, inspect, os, optparse, pydoc
+import glob
+import re
+import inspect
+import os
+import optparse
+import pydoc
 from autosummary import import_by_name
 
 try:
