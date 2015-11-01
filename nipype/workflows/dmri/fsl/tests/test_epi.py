@@ -45,4 +45,3 @@ def test_create_eddy_correct_pipeline():
 
     pipeline.run(plugin='Linear')
     shutil.rmtree(pipeline.base_dir)
-

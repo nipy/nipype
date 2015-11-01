@@ -424,4 +424,3 @@ class SplitNifti(NiftiGeneratorBase):
         outputs = self._outputs().get()
         outputs['out_list'] = self.out_list
         return outputs
-

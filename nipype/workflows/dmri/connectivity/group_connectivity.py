@@ -524,4 +524,3 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
 
     l4pipeline.connect([(merge_gexf_averages, l4datasink, [('out', '@l4output.gexf')])])
     return l4pipeline
-

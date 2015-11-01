@@ -72,4 +72,3 @@ class VtoMat(CommandLine):
     _cmd = 'vtomat'
     input_spec = VtoMatInputSpec
     output_spec = VtoMatOutputSpec
-

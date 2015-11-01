@@ -46,6 +46,3 @@ out_mean = mem.cache(fsl.MeanImage)(in_file=out_merge.outputs.merged_file)
 
 # or what wasn't used since the start of 2011
 # mem.clear_runs_since(year=2011)
-
-
-

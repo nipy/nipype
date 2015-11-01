@@ -193,5 +193,3 @@ cmdclass = {'build_sphinx': MyBuildDoc,
             'api_docs': APIDocs,
             'clean': Clean,
             }
-
-

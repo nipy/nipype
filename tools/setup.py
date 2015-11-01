@@ -10,4 +10,3 @@ setup(name='Nipype Tools',
       url='http://nipy.sourceforge.net',
       scripts=['./nipype_nightly.py', './report_coverage.py']
       )
-

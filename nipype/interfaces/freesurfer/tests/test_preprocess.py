@@ -117,4 +117,3 @@ def test_synthesizeflash():
     syn2 = freesurfer.SynthesizeFLASH(t1_image=filelist[0], pd_image=filelist[1], flip_angle=20, te=5, tr=25)
     yield assert_equal, syn2.cmdline, ('mri_synthesize 25.00 20.00 5.000 %s %s %s'
                                        % (filelist[0], filelist[1], os.path.join(outdir, 'synth-flash_20.mgz')))
-

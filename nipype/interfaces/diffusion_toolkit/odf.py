@@ -233,4 +233,3 @@ class ODFTracker(CommandLine):
         outputs = self.output_spec().get()
         outputs['track_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
-

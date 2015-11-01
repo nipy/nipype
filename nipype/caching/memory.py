@@ -300,4 +300,3 @@ class Memory(object):
     def __repr__(self):
         return '%s(base_dir=%s)' % (self.__class__.__name__,
                                     self.base_dir)
-

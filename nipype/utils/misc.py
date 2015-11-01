@@ -242,6 +242,3 @@ def unflatten(in_list, prev_structure):
         for item in prev_structure:
             out.append(unflatten(in_list, item))
         return out
-
-
-

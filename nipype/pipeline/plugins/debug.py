@@ -34,4 +34,3 @@ class DebugPlugin(PluginBase):
         logger.info("Executing debug plugin")
         for node in nx.topological_sort(graph):
             self._callable(node, graph)
-

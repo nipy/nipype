@@ -208,5 +208,3 @@ dwiproc.inputs.compute_ODF.odf_recon.n_output_directions = 181
 if __name__ == '__main__':
     dwiproc.run()
     dwiproc.write_graph()
-
-

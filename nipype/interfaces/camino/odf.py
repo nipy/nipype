@@ -438,5 +438,3 @@ class SFPeaks(StdOutCommandLine):
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_peaks.Bdouble'
-
-

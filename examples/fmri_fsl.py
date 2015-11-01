@@ -648,5 +648,3 @@ if __name__ == '__main__':
     l1pipeline.write_graph()
     outgraph = l1pipeline.run()
     # l1pipeline.run(plugin='MultiProc', plugin_args={'n_procs':2})
-
-

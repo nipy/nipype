@@ -1961,4 +1961,3 @@ class GLM(FSLCommand):
                 self.inputs.out_vnscales_name)
 
         return outputs
-

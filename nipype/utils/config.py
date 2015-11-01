@@ -175,4 +175,3 @@ class NipypeConfig(object):
     def enable_provenance(self):
         self._config.set('execution', 'write_provenance', 'true')
         self._config.set('execution', 'hash_method', 'content')
-

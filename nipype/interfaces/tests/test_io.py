@@ -420,4 +420,3 @@ def test_jsonsink():
 
     os.chdir(curdir)
     shutil.rmtree(outdir)
-

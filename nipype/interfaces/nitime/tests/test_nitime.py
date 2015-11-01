@@ -73,5 +73,3 @@ def test_coherence_analysis():
     coh = np.mean(C.coherence[:, :, freq_idx], -1)  # Averaging on the last dimension
 
     yield assert_equal, o.outputs.coherence_array, coh
-
-

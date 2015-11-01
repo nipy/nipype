@@ -259,5 +259,3 @@ if __name__ == '__main__':
     # level1_workflow.write_graph()
     level1_workflow.run()
     # level1_workflow.run(plugin='MultiProc', plugin_args={'n_procs':2})
-
-

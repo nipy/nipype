@@ -503,4 +503,3 @@ def test_distancemap():
 
     # Not much else to do here
     clean_directory(newdir, olddir)
-

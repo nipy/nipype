@@ -214,5 +214,3 @@ dwiproc.connect([
 if __name__ == '__main__':
     dwiproc.run()
     dwiproc.write_graph()
-
-

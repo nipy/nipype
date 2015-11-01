@@ -318,4 +318,3 @@ class EstimateContrast(BaseInterface):
         outputs["p_maps"] = self._p_maps
         outputs["z_maps"] = self._z_maps
         return outputs
-

@@ -97,4 +97,3 @@ else:
         figure_basename = pjoin('fig', os.path.splitext(script)[0])
         execfile(script)
         plt.close('all')
-

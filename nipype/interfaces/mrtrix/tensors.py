@@ -421,4 +421,3 @@ class Directions2Amplitude(CommandLine):
     _cmd = 'dir2amp'
     input_spec = Directions2AmplitudeInputSpec
     output_spec = Directions2AmplitudeOutputSpec
-

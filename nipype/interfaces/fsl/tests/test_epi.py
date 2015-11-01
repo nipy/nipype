@@ -61,6 +61,3 @@ def test_eddy_correct2():
     # test arguments for opt_map
     # eddy_correct class doesn't have opt_map{}
     clean_directory(outdir, cwd)
-
-
-

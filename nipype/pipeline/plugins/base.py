@@ -656,4 +656,3 @@ class GraphPluginBase(PluginBase):
             result_out['result'] = result_data
 
         return result_out
-

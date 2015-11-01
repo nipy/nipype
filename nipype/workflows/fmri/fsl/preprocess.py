@@ -1241,4 +1241,3 @@ def create_reg_workflow(name='registration'):
                      outputnode, 'anat2target_transform')
 
     return register
-

@@ -648,4 +648,3 @@ that visually represents the workflow.
 if __name__ == '__main__':
     l2flow.run()
     l2flow.write_graph(graph2use='flat')
-

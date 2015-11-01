@@ -250,6 +250,3 @@ def has_metadata(trait, metadata, value=None, recursive=True):
                 count += has_metadata(handler, metadata, recursive)
 
     return count > 0
-
-
-

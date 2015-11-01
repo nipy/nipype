@@ -268,4 +268,3 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
 
 if __name__ == '__main__':
     l1pipeline.run()
-

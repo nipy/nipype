@@ -488,4 +488,3 @@ function needs to be called.
 if __name__ == '__main__':
     level1.run()
     level1.write_graph()
-

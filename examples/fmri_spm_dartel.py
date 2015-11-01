@@ -531,5 +531,3 @@ Execute the second level pipeline
 
 if __name__ == '__main__':
     l2pipeline.run()
-
-
