@@ -244,7 +244,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
                                      iterfield=['transformation_series', 'input_image'],
                                      name='wimtPassivedeformed')
     TemplateBuildSingleIterationWF.connect(AvgDeformedImages, 'output_average_image', wimtPassivedeformed, 'reference_image')
-    TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_images',     wimtPassivedeformed, 'input_image')
+    TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_images', wimtPassivedeformed, 'input_image')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_transforms', wimtPassivedeformed, 'transformation_series')
 
     RenestDeformedPassiveImagesNode = pe.Node(Function(function=RenestDeformedPassiveImages,

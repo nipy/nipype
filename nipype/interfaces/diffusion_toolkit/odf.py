@@ -143,12 +143,12 @@ class ODFRecon(CommandLine):
         output_type = self.inputs.output_type
 
         outputs = self.output_spec().get()
-        outputs['B0'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_b0.' + output_type))
-        outputs['DWI'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_dwi.' + output_type))
-        outputs['max'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_max.' + output_type))
-        outputs['ODF'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_odf.' + output_type))
+        outputs['B0'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_b0.' + output_type))
+        outputs['DWI'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_dwi.' + output_type))
+        outputs['max'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_max.' + output_type))
+        outputs['ODF'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_odf.' + output_type))
         if isdefined(self.inputs.output_entropy):
-            outputs['entropy'] = os.path.abspath(fname_presuffix("",  prefix=out_prefix, suffix='_entropy.' + output_type))
+            outputs['entropy'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_entropy.' + output_type))
 
         return outputs
 

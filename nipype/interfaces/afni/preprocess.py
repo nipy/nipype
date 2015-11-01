@@ -1095,7 +1095,7 @@ if not given the reference will be the first volume of in_file.""")
     # Non-linear experimental
     _nwarp_types = ['bilinear',
                     'cubic', 'quintic', 'heptic', 'nonic',
-                    'poly3', 'poly5', 'poly7',  'poly9']  # same non-hellenistic
+                    'poly3', 'poly5', 'poly7', 'poly9']  # same non-hellenistic
     nwarp = traits.Enum(
         *_nwarp_types, argstr='-nwarp %s',
         desc='Experimental nonlinear warping: bilinear or legendre poly.')

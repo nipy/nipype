@@ -65,7 +65,7 @@ art = pe.MapNode(interface=ra.ArtifactDetect(use_differences=[True, False],
                  iterfield=['realigned_files', 'realignment_parameters', 'mask_file'],
                  name="art")
 
-modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec")
+modelspec = pe.Node(interface=model.SpecifyModel(), name="modelspec")
 
 level1_workflow.connect([(preproc, art, [('outputspec.motion_parameters',
                                           'realignment_parameters'),

@@ -367,7 +367,7 @@ modelfit = pe.Workflow(name='modelfit')
 Use :class:`nipype.algorithms.modelgen.SpecifyModel` to generate design information.
 """
 
-modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec")
+modelspec = pe.Node(interface=model.SpecifyModel(), name="modelspec")
 
 """
 Use :class:`nipype.interfaces.fsl.Level1Design` to generate a run specific fsf

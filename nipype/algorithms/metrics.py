@@ -443,7 +443,7 @@ class FuzzyOverlap(BaseInterface):
 
         weights = weights / np.sum(weights)
 
-        setattr(self, '_jaccard',  np.sum(weights * self._jaccards))
+        setattr(self, '_jaccard', np.sum(weights * self._jaccards))
         setattr(self, '_dice', np.sum(weights * self._dices))
 
         diff = np.zeros(diff_im[0].shape)

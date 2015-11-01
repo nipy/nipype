@@ -552,7 +552,7 @@ class BEDPOSTX4OutputSpec(TraitedSpec):
                                  desc='a list of path/name of 3D volume with mean of distribution on phi')
     mean_fsamples = traits.List(File(exists=True),
                                 desc='a list of path/name of 3D volume with mean of distribution on f anisotropy')
-    dyads = traits.List(File(exists=True),  desc='a list of path/name of mean of PDD distribution in vector form')
+    dyads = traits.List(File(exists=True), desc='a list of path/name of mean of PDD distribution in vector form')
 
 
 class BEDPOSTX4(FSLCommand):

@@ -46,7 +46,7 @@ class ICC(BaseInterface):
 
         for x in range(icc.shape[0]):
             Y = all_data[x, :, :]
-            icc[x], subject_var[x], session_var[x],  session_F[x], _, _ = ICC_rep_anova(Y)
+            icc[x], subject_var[x], session_var[x], session_F[x], _, _ = ICC_rep_anova(Y)
 
         nim = nb.load(self.inputs.subjects_sessions[0][0])
         new_data = np.zeros(nim.get_shape())
