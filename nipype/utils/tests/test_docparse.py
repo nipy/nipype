@@ -23,9 +23,9 @@ Other stuff:
 
 fmtd_doc = """Parameters
 ----------
-outline : 
+outline :
      something about an outline
-fun : 
+fun :
      <f> intensity of fun factor
 
 Others Parameters
@@ -50,9 +50,9 @@ infile : str
     The name of the input file
 outfile : str
     The name of the output file
-outline : 
+outline :
      something about an outline
-fun : 
+fun :
      <f> intensity of fun factor
 
 Others Parameters

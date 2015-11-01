@@ -15,8 +15,8 @@ stc = pe.Node(interface=spm.SliceTiming(), name='stc')
 stc.inputs.num_slices = 21
 stc.inputs.time_repetition = 1.0
 stc.inputs.time_acquisition = 2. - 2. / 32
-stc.inputs.slice_order = list(range(21, 0, -1)) 
-stc.inputs.ref_slice = 10 
+stc.inputs.slice_order = list(range(21, 0, -1))
+stc.inputs.ref_slice = 10
 
 realign_estimate = pe.Node(interface=spm.Realign(), name='realign_estimate')
 realign_estimate.inputs.jobtype = "estimate"
@@ -50,8 +50,8 @@ stc = pe.Node(interface=spm.SliceTiming(), name='stc')
 stc.inputs.num_slices = 21
 stc.inputs.time_repetition = 1.0
 stc.inputs.time_acquisition = 2. - 2. / 32
-stc.inputs.slice_order = list(range(21, 0, -1)) 
-stc.inputs.ref_slice = 10 
+stc.inputs.slice_order = list(range(21, 0, -1))
+stc.inputs.ref_slice = 10
 
 realign_estimate = pe.Node(interface=spm.Realign(), name='realign_estimate')
 realign_estimate.inputs.jobtype = "estimate"
