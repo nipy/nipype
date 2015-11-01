@@ -1337,19 +1337,19 @@ class Node(WorkflowBase):
         logger.debug(('updatehash, overwrite, always_run, hash_exists',
                       updatehash, self.overwrite, self._interface.always_run,
                       hash_exists))
-        if (not updatehash and (((self.overwrite is None
-                                  and self._interface.always_run)
-                                 or self.overwrite) or
-                                not hash_exists)):
+        if (not updatehash and (((self.overwrite is None and
+                                  self._interface.always_run) or
+                                 self.overwrite) or not
+                                hash_exists)):
             logger.debug("Node hash: %s" % hashvalue)
 
             # by rerunning we mean only nodes that did finish to run previously
             json_pat = op.join(outdir, '_0x*.json')
             json_unfinished_pat = op.join(outdir, '_0x*_unfinished.json')
-            need_rerun = (op.exists(outdir)
-                          and not isinstance(self, MapNode)
-                          and len(glob(json_pat)) != 0
-                          and len(glob(json_unfinished_pat)) == 0)
+            need_rerun = (op.exists(outdir) and not
+                          isinstance(self, MapNode) and
+                          len(glob(json_pat)) != 0 and
+                          len(glob(json_unfinished_pat)) == 0)
             if need_rerun:
                 logger.debug("Rerunning node")
                 logger.debug(("updatehash = %s, "
@@ -1379,9 +1379,8 @@ class Node(WorkflowBase):
                             logging.logdebug_dict_differences(prev_inputs,
                                                               hashed_inputs)
                 cannot_rerun = (str2bool(
-                    self.config['execution']['stop_on_first_rerun'])
-                    and not (self.overwrite is None
-                             and self._interface.always_run))
+                    self.config['execution']['stop_on_first_rerun']) and not
+                    (self.overwrite is None and self._interface.always_run))
                 if cannot_rerun:
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
                                      "is set to True"))
@@ -1390,10 +1389,10 @@ class Node(WorkflowBase):
                                           hashvalue)
             if op.exists(hashfile):
                 os.remove(hashfile)
-            rm_outdir = (op.exists(outdir)
-                         and not (op.exists(hashfile_unfinished)
-                                  and self._interface.can_resume)
-                         and not isinstance(self, MapNode))
+            rm_outdir = (op.exists(outdir) and not
+                         (op.exists(hashfile_unfinished) and
+                             self._interface.can_resume) and not
+                         isinstance(self, MapNode))
             if rm_outdir:
                 logger.debug("Removing old %s and its contents" % outdir)
                 try:
@@ -1762,8 +1761,8 @@ class Node(WorkflowBase):
             fp = open(report_file, 'at')
             fp.writelines(write_rst_header('Execution Inputs', level=1))
             fp.writelines(write_rst_dict(self.inputs.get()))
-            exit_now = (not hasattr(self.result, 'outputs')
-                        or self.result.outputs is None)
+            exit_now = (not hasattr(self.result, 'outputs') or
+                        self.result.outputs is None)
             if exit_now:
                 return
             fp.writelines(write_rst_header('Execution Outputs', level=1))

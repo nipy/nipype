@@ -164,8 +164,8 @@ class SphinxDocString(NumpyDocString):
     def _str_examples(self):
         examples_str = "\n".join(self['Examples'])
 
-        if (self.use_plots and 'import matplotlib' in examples_str
-                and 'plot::' not in examples_str):
+        if (self.use_plots and 'import matplotlib' in examples_str and
+                'plot::' not in examples_str):
             out = []
             out += self._str_header('Examples')
             out += ['.. plot::', '']

@@ -96,8 +96,8 @@ class DTIFit(FSLCommand):
         outputs = self.output_spec().get()
         for k in list(outputs.keys()):
             if k not in ('outputtype', 'environ', 'args'):
-                if k != 'tensor' or (isdefined(self.inputs.save_tensor)
-                                     and self.inputs.save_tensor):
+                if k != 'tensor' or (isdefined(self.inputs.save_tensor) and
+                                     self.inputs.save_tensor):
                     outputs[k] = self._gen_fname(self.inputs.base_name, suffix='_' + k)
         return outputs
 
@@ -623,27 +623,27 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
                 outputs[k] = []
 
         for n in range(self.inputs.fibres):
-            outputs['merged_thsamples'].append(self._gen_fname('merged_th' + repr(n + 1)
-                                                               + 'samples', suffix='',
-                                                               cwd=outputs['bpx_out_directory']))
-            outputs['merged_phsamples'].append(self._gen_fname('merged_ph' + repr(n + 1)
-                                                               + 'samples', suffix='',
-                                                               cwd=outputs['bpx_out_directory']))
-            outputs['merged_fsamples'].append(self._gen_fname('merged_f' + repr(n + 1)
-                                                              + 'samples', suffix='',
-                                                              cwd=outputs['bpx_out_directory']))
-            outputs['mean_thsamples'].append(self._gen_fname('mean_th' + repr(n + 1)
-                                                             + 'samples', suffix='',
-                                                             cwd=outputs['bpx_out_directory']))
-            outputs['mean_phsamples'].append(self._gen_fname('mean_ph' + repr(n + 1)
-                                                             + 'samples', suffix='',
-                                                             cwd=outputs['bpx_out_directory']))
-            outputs['mean_fsamples'].append(self._gen_fname('mean_f' + repr(n + 1)
-                                                            + 'samples', suffix='',
-                                                            cwd=outputs['bpx_out_directory']))
-            outputs['dyads'].append(self._gen_fname('dyads' + repr(n + 1),
-                                                    suffix='',
-                                                    cwd=outputs['bpx_out_directory']))
+            outputs['merged_thsamples'].append(self._gen_fname(
+                'merged_th' + repr(n + 1) + 'samples',
+                suffix='', cwd=outputs['bpx_out_directory']))
+            outputs['merged_phsamples'].append(self._gen_fname(
+                'merged_ph' + repr(n + 1) + 'samples',
+                suffix='', cwd=outputs['bpx_out_directory']))
+            outputs['merged_fsamples'].append(self._gen_fname(
+                'merged_f' + repr(n + 1) + 'samples',
+                suffix='', cwd=outputs['bpx_out_directory']))
+            outputs['mean_thsamples'].append(self._gen_fname(
+                'mean_th' + repr(n + 1) + 'samples',
+                suffix='', cwd=outputs['bpx_out_directory']))
+            outputs['mean_phsamples'].append(self._gen_fname(
+                'mean_ph' + repr(n + 1) + 'samples',
+                suffix='', cwd=outputs['bpx_out_directory']))
+            outputs['mean_fsamples'].append(self._gen_fname(
+                'mean_f' + repr(n + 1) + 'samples',
+                suffix='', cwd=outputs['bpx_out_directory']))
+            outputs['dyads'].append(self._gen_fname(
+                'dyads' + repr(n + 1),
+                suffix='', cwd=outputs['bpx_out_directory']))
         return outputs
 
 
@@ -735,8 +735,8 @@ class ProbTrackXBaseInputSpec(FSLCommandInputSpec):
 
 class ProbTrackXInputSpec(ProbTrackXBaseInputSpec):
     mode = traits.Enum("simple", "two_mask_symm", "seedmask",
-                       desc='options: simple (single seed voxel), seedmask (mask of seed voxels), '
-                            + 'twomask_symm (two bet binary masks) ',
+                       desc='options: simple (single seed voxel), seedmask (mask of seed voxels), ' +
+                            'twomask_symm (two bet binary masks) ',
                        argstr='--mode=%s', genfile=True)
     mask2 = File(exists=True, desc='second bet binary mask (in diffusion space) in twomask_symm mode',
                  argstr='--mask2=%s')

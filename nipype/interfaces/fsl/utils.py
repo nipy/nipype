@@ -739,8 +739,8 @@ class Overlay(FSLCommand):
         out_file = self.inputs.out_file
         if not isdefined(out_file):
             if isdefined(self.inputs.stat_image2) and (
-                not isdefined(self.inputs.show_negative_stats)
-                    or not self.inputs.show_negative_stats):
+                not isdefined(self.inputs.show_negative_stats) or not
+                    self.inputs.show_negative_stats):
                     stem = "%s_and_%s" % (split_filename(self.inputs.stat_image)[1],
                                           split_filename(self.inputs.stat_image2)[1])
             else:

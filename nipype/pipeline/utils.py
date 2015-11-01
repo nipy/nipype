@@ -620,9 +620,9 @@ def generate_expanded_graph(graph_in):
 
         # the join successor nodes of the current iterable node
         jnodes = [node for node in graph_in.nodes_iter()
-                  if hasattr(node, 'joinsource')
-                  and inode.name == node.joinsource
-                  and nx.has_path(graph_in, inode, node)]
+                  if hasattr(node, 'joinsource') and
+                  inode.name == node.joinsource and
+                  nx.has_path(graph_in, inode, node)]
 
         # excise the join in-edges. save the excised edges in a
         # {jnode: {source name: (destination name, edge data)}}
@@ -649,8 +649,8 @@ def generate_expanded_graph(graph_in):
             # find the unique iterable source node in the graph
             try:
                 iter_src = next((node for node in graph_in.nodes_iter()
-                                 if node.name == src_name
-                                 and nx.has_path(graph_in, node, inode)))
+                                 if node.name == src_name and
+                                 nx.has_path(graph_in, node, inode)))
             except StopIteration:
                 raise ValueError("The node %s itersource %s was not found"
                                  " among the iterable predecessor nodes"

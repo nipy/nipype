@@ -461,8 +461,8 @@ class ArtifactDetect(BaseInterface):
             traval = mc[:, 0:3]  # translation parameters (mm)
             rotval = mc[:, 3:6]  # rotation parameters (rad)
             tidx = find_indices(np.sum(abs(traval) >
-                                       self.inputs.translation_threshold, 1)
-                                > 0)
+                                       self.inputs.translation_threshold, 1) >
+                                0)
             ridx = find_indices(np.sum(abs(rotval) >
                                        self.inputs.rotation_threshold, 1) > 0)
 

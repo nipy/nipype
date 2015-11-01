@@ -51,8 +51,8 @@ class PipeFunc(object):
                 An optional callable called each time after the function
                 is called.
         """
-        if not (isinstance(interface, type)
-                and issubclass(interface, BaseInterface)):
+        if not (isinstance(interface, type) and
+                issubclass(interface, BaseInterface)):
             raise ValueError('the interface argument should be a nipype '
                              'interface class, but %s (type %s) was passed.' %
                              (interface, type(interface)))

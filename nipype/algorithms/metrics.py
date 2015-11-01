@@ -335,8 +335,8 @@ class Overlap(BaseInterface):
 
         self._labels = labels
         self._ove_rois = results
-        self._vol_rois = (np.array(volumes1)
-                          - np.array(volumes2)) / np.array(volumes1)
+        self._vol_rois = (np.array(volumes1) -
+                          np.array(volumes2)) / np.array(volumes1)
 
         self._dice = round(np.sum(weights*results['dice']), 5)
         self._jaccard = round(np.sum(weights*results['jaccard']), 5)
