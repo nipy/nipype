@@ -723,7 +723,7 @@ def _prepare_phasediff(in_file):
     img = nib.load(in_file)
     max_diff = np.max(img.get_data().reshape(-1))
     min_diff = np.min(img.get_data().reshape(-1))
-    A = (2.0 * np.pi) / (max_diff-min_diff)
+    A = (2.0 * np.pi) / (max_diff - min_diff)
     B = np.pi - (A * max_diff)
     diff_norm = img.get_data() * A + B
 
@@ -788,7 +788,7 @@ def _vsm_remove_mean(in_file, mask_file, in_unwarped):
 
 
 def _ms2sec(val):
-    return val*1e-3
+    return val * 1e-3
 
 
 def _split_dwi(in_file):

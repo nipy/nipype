@@ -191,7 +191,7 @@ Define a function to get 10% of the intensity
 
 
 def getthreshop(thresh):
-    return '-thr %.10f -Tmin -bin' %(0.1*thresh[0][1])
+    return '-thr %.10f -Tmin -bin' % (0.1 * thresh[0][1])
 preproc.connect(getthresh, ('out_stat', getthreshop), threshold, 'op_string')
 
 """
@@ -259,11 +259,11 @@ Define a function to get the brightness threshold for SUSAN
 
 
 def getbtthresh(medianvals):
-    return [0.75*val for val in medianvals]
+    return [0.75 * val for val in medianvals]
 
 
 def getusans(x):
-    return [[tuple([val[0], 0.75*val[1]])] for val in x]
+    return [[tuple([val[0], 0.75 * val[1]])] for val in x]
 
 preproc.connect(maskfunc2, 'out_file', smooth, 'in_file')
 preproc.connect(medianval, ('out_stat', getbtthresh), smooth, 'brightness_threshold')

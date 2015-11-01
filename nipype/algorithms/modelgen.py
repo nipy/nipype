@@ -156,7 +156,7 @@ def gen_info(run_event_files):
         for event_file in event_files:
             _, name = os.path.split(event_file)
             if '.run' in name:
-                name, _ = name.split('.run%03d' % (i+1))
+                name, _ = name.split('.run%03d' % (i + 1))
             elif '.txt' in name:
                 name, _ = name.split('.txt')
             runinfo.conditions.append(name)
@@ -339,7 +339,7 @@ class SpecifyModel(BaseInterface):
                         sessinfo[i]['regress'][j]['name'] = \
                             info.regressor_names[j]
                     else:
-                        sessinfo[i]['regress'][j]['name'] = 'UR%d' % (j+1)
+                        sessinfo[i]['regress'][j]['name'] = 'UR%d' % (j + 1)
                     sessinfo[i]['regress'][j]['val'] = info.regressors[j]
             sessinfo[i]['scans'] = functional_runs[i]
         if realignment_parameters is not None:
@@ -365,7 +365,7 @@ class SpecifyModel(BaseInterface):
                 for j, scanno in enumerate(out):
                     colidx = len(sessinfo[i]['regress'])
                     sessinfo[i]['regress'].insert(colidx, dict(name='', val=[]))
-                    sessinfo[i]['regress'][colidx]['name'] = 'Outlier%d' %(j+1)
+                    sessinfo[i]['regress'][colidx]['name'] = 'Outlier%d' % (j + 1)
                     sessinfo[i]['regress'][colidx]['val'] = \
                         np.zeros((1, numscans))[0].tolist()
                     sessinfo[i]['regress'][colidx]['val'][int(scanno)] = 1
@@ -492,7 +492,7 @@ class SpecifySPMModel(SpecifyModel):
                     else:
                         raise ValueError('Mismatch in number of onsets and \
                                          durations for run {0}, condition \
-                                         {1}'.format(i+2, j+1))
+                                         {1}'.format(i + 2, j + 1))
                 if hasattr(info, 'amplitudes') and info.amplitudes:
                     for j, val in enumerate(info.amplitudes):
                         infoout.amplitudes[j].extend(info.amplitudes[j])
@@ -634,7 +634,7 @@ class SpecifySparseModel(SpecifyModel):
         dt = TA / 10.0
         durations = np.round(np.array(i_durations) * 1000)
         if len(durations) == 1:
-            durations = durations*np.ones((len(i_onsets)))
+            durations = durations * np.ones((len(i_onsets)))
         onsets = np.round(np.array(i_onsets) * 1000)
         dttemp = gcd(TA, gcd(SILENCE, TR))
         if dt < dttemp:
@@ -703,7 +703,7 @@ class SpecifySparseModel(SpecifyModel):
         regderiv = []
         for i, trial in enumerate(np.arange(nscans) / nvol):
             scanstart = int((SCANONSET + trial * TR + (i % nvol) * TA) / dt)
-            scanidx = scanstart+np.arange(int(TA / dt))
+            scanidx = scanstart + np.arange(int(TA / dt))
             timeline2[scanidx] = np.max(timeline)
             reg.insert(i, np.mean(timeline[scanidx]) * reg_scale)
             if isdefined(self.inputs.use_temporal_deriv) and \
@@ -759,7 +759,7 @@ class SpecifySparseModel(SpecifyModel):
         # for sparse-clustered acquisitions enter T1-effect regressors
         nvol = self.inputs.volumes_in_cluster
         if nvol > 1:
-            for i in range(nvol-1):
+            for i in range(nvol - 1):
                 treg = np.zeros((nscans / nvol, nvol))
                 treg[:, i] = 1
                 reg.insert(len(reg), treg.ravel().tolist())
@@ -783,7 +783,7 @@ class SpecifySparseModel(SpecifyModel):
                 if hasattr(infoout[i], 'regressors') and infoout[i].regressors:
                     if not infoout[i].regressor_names:
                         infoout[i].regressor_names = \
-                            ['R%d' %j for j in range(len(infoout[i].regressors))]
+                            ['R%d' % j for j in range(len(infoout[i].regressors))]
                 else:
                     infoout[i].regressors = []
                     infoout[i].regressor_names = []

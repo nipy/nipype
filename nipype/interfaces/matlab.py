@@ -180,7 +180,7 @@ class MatlabCommand(CommandLine):
             # clean up the code of comments and replace newlines with commas
             script_lines = ','.join([line for line in script_lines.split("\n") if not line.strip().startswith("%")])
 
-        script_lines = '\n'.join(prescript)+script_lines+'\n'.join(postscript)
+        script_lines = '\n'.join(prescript) + script_lines + '\n'.join(postscript)
         if mfile:
             with open(os.path.join(cwd, self.inputs.script_file), 'wt') as mfile:
                 mfile.write(script_lines)

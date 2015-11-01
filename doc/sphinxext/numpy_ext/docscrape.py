@@ -67,7 +67,7 @@ class Reader(object):
                 return self[start:self._l]
             self._l += 1
             if self.eof():
-                return self[start:self._l+1]
+                return self[start:self._l + 1]
         return []
 
     def read_to_next_empty_line(self):
@@ -139,7 +139,7 @@ class NumpyDocString(object):
             return True
 
         l2 = self._doc.peek(1).strip()  # ---------- or ==========
-        return l2.startswith('-'*len(l1)) or l2.startswith('='*len(l1))
+        return l2.startswith('-' * len(l1)) or l2.startswith('=' * len(l1))
 
     def _strip(self, doc):
         i = 0
@@ -152,7 +152,7 @@ class NumpyDocString(object):
             if line.strip():
                 break
 
-        return doc[i:len(doc)-j]
+        return doc[i:len(doc) - j]
 
     def _read_to_next_section(self):
         section = self._doc.read_to_next_empty_line()
@@ -309,12 +309,12 @@ class NumpyDocString(object):
     # string conversion routines
 
     def _str_header(self, name, symbol='-'):
-        return [name, len(name)*symbol]
+        return [name, len(name) * symbol]
 
     def _str_indent(self, doc, indent=4):
         out = []
         for line in doc:
-            out += [' '*indent + line]
+            out += [' ' * indent + line]
         return out
 
     def _str_signature(self):
@@ -408,7 +408,7 @@ class NumpyDocString(object):
 
 
 def indent(str, indent=4):
-    indent_str = ' '*indent
+    indent_str = ' ' * indent
     if str is None:
         return indent_str
     lines = str.split('\n')
@@ -421,7 +421,7 @@ def dedent_lines(lines):
 
 
 def header(text, style='-'):
-    return text + '\n' + style*len(text) + '\n'
+    return text + '\n' + style * len(text) + '\n'
 
 
 class FunctionDoc(NumpyDocString):

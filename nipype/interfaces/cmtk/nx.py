@@ -169,7 +169,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
                         data[key] = data[key] / len(in_files)
                 ntwk.edge[edge[0]][edge[1]] = data
                 avg_ntwk.add_edge(edge[0], edge[1], data)
-            edge_dict['count'][edge[0]-1][edge[1]-1] = ntwk.edge[edge[0]][edge[1]]['count']
+            edge_dict['count'][edge[0] - 1][edge[1] - 1] = ntwk.edge[edge[0]][edge[1]]['count']
 
         iflogger.info('After thresholding, the average network has has {n} edges'.format(n=avg_ntwk.number_of_edges()))
 
@@ -179,7 +179,7 @@ def average_networks(in_files, ntwk_res_file, group_id):
             for key in list(data.keys()):
                 if not key == 'count':
                     edge_dict[key] = np.zeros((avg_ntwk.number_of_nodes(), avg_ntwk.number_of_nodes()))
-                    edge_dict[key][edge[0]-1][edge[1]-1] = data[key]
+                    edge_dict[key][edge[0] - 1][edge[1] - 1] = data[key]
 
         for key in list(edge_dict.keys()):
             tmp = {}

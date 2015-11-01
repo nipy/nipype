@@ -23,7 +23,7 @@ class SphinxDocString(NumpyDocString):
     def _str_indent(self, doc, indent=4):
         out = []
         for line in doc:
-            out += [' '*indent + line]
+            out += [' ' * indent + line]
         return out
 
     def _str_signature(self):
@@ -90,7 +90,7 @@ class SphinxDocString(NumpyDocString):
             if others:
                 maxlen_0 = max([len(x[0]) for x in others])
                 maxlen_1 = max([len(x[1]) for x in others])
-                hdr = "="*maxlen_0 + "  " + "="*maxlen_1 + "  " + "="*10
+                hdr = "=" * maxlen_0 + "  " + "=" * maxlen_1 + "  " + "=" * 10
                 fmt = '%%%ds  %%%ds  ' % (maxlen_0, maxlen_1)
                 n_indent = maxlen_0 + maxlen_1 + 4
                 out += [hdr]

@@ -36,8 +36,8 @@ def grab_coverage(output):
         if line.startswith('Ran '):
             tcount = line
     covout.insert(0, header)
-    covout.insert(1, '-'*70)
-    covout.append('-'*70)
+    covout.insert(1, '-' * 70)
+    covout.append('-' * 70)
     covout.append(tcount)
     return '\n'.join(covout)
 

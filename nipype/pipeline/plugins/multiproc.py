@@ -72,7 +72,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _get_result(self, taskid):
         if taskid not in self._taskresult:
-            raise RuntimeError('Multiproc task %d not found' %taskid)
+            raise RuntimeError('Multiproc task %d not found' % taskid)
         if not self._taskresult[taskid].ready():
             return None
         return self._taskresult[taskid].get()

@@ -288,7 +288,7 @@ class ProcStreamlines(StdOutCommandLine):
             if not os.path.exists(base):
                 os.makedirs(base)
             new_runtime = super(ProcStreamlines, self)._run_interface(runtime)
-            self.outputroot_files = glob.glob(os.path.join(os.getcwd(), actual_outputroot+'*'))
+            self.outputroot_files = glob.glob(os.path.join(os.getcwd(), actual_outputroot + '*'))
             return new_runtime
         else:
             new_runtime = super(ProcStreamlines, self)._run_interface(runtime)

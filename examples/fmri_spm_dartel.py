@@ -302,7 +302,7 @@ def pickFieldFlow(dartel_flow_fields, subject_id):
     from nipype.utils.filemanip import split_filename
     for f in dartel_flow_fields:
         _, name, _ = split_filename(f)
-        if name.find("subject_id_%s" %subject_id):
+        if name.find("subject_id_%s" % subject_id):
             return f
 
     raise Exception
@@ -328,7 +328,7 @@ paradigm was used for every participant.
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print("Subject ID: %s\n" %str(subject_id))
+    print("Subject ID: %s\n" % str(subject_id))
     output = []
     names = ['Task-Odd', 'Task-Even']
     for r in range(4):
@@ -485,7 +485,7 @@ contrasts.
 """
 
 # collect all the con images for each contrast.
-contrast_ids = list(range(1, len(contrasts)+1))
+contrast_ids = list(range(1, len(contrasts) + 1))
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
 # we use .*i* to capture both .img (SPM8) and .nii (SPM12)
 l2source.inputs.template = os.path.abspath('spm_dartel_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')

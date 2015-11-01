@@ -53,9 +53,9 @@ def RenestDeformedPassiveImages(deformedPassiveImages, flattened_image_nametypes
         image_dictionary_of_lists[curr_name].append(curr_file)
     for image_type, image_list in list(image_dictionary_of_lists.items()):
         nested_imagetype_list.append(image_list)
-        outputAverageImageName_list.append('AVG_'+image_type+'.nii.gz')
-        image_type_list.append('WARP_AVG_'+image_type)
-    print("\n"*10)
+        outputAverageImageName_list.append('AVG_' + image_type + '.nii.gz')
+        image_type_list.append('WARP_AVG_' + image_type)
+    print("\n" * 10)
     print("HACK: ", nested_imagetype_list)
     print("HACK: ", outputAverageImageName_list)
     print("HACK: ", image_type_list)
@@ -120,7 +120,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
            outputspec.passive_deformed_templates :
     """
 
-    TemplateBuildSingleIterationWF = pe.Workflow(name='ANTSTemplateBuildSingleIterationWF_'+str(str(iterationPhasePrefix)))
+    TemplateBuildSingleIterationWF = pe.Workflow(name='ANTSTemplateBuildSingleIterationWF_' + str(str(iterationPhasePrefix)))
 
     inputSpec = pe.Node(interface=util.IdentityInterface(fields=['images', 'fixed_image',
                                                                  'ListOfPassiveImagesDictionaries']),
@@ -139,7 +139,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     # NOTE MAP NODE! warp each of the original images to the provided fixed_image as the template
     BeginANTS = pe.MapNode(interface=ANTS(), name='BeginANTS', iterfield=['moving_image'])
     BeginANTS.inputs.dimension = 3
-    BeginANTS.inputs.output_transform_prefix = str(iterationPhasePrefix)+'_tfm'
+    BeginANTS.inputs.output_transform_prefix = str(iterationPhasePrefix) + '_tfm'
     BeginANTS.inputs.metric = ['CC']
     BeginANTS.inputs.metric_weight = [1.0]
     BeginANTS.inputs.radius = [5]
@@ -175,20 +175,20 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     # Now  Average All input_images deformed images together to create an updated template average
     AvgDeformedImages = pe.Node(interface=AverageImages(), name='AvgDeformedImages')
     AvgDeformedImages.inputs.dimension = 3
-    AvgDeformedImages.inputs.output_average_image = str(iterationPhasePrefix)+'.nii.gz'
+    AvgDeformedImages.inputs.output_average_image = str(iterationPhasePrefix) + '.nii.gz'
     AvgDeformedImages.inputs.normalize = True
     TemplateBuildSingleIterationWF.connect(wimtdeformed, "output_image", AvgDeformedImages, 'images')
 
     # Now average all affine transforms together
     AvgAffineTransform = pe.Node(interface=AverageAffineTransform(), name='AvgAffineTransform')
     AvgAffineTransform.inputs.dimension = 3
-    AvgAffineTransform.inputs.output_affine_transform = 'Avererage_'+str(iterationPhasePrefix)+'_Affine.mat'
+    AvgAffineTransform.inputs.output_affine_transform = 'Avererage_' + str(iterationPhasePrefix) + '_Affine.mat'
     TemplateBuildSingleIterationWF.connect(BeginANTS, 'affine_transform', AvgAffineTransform, 'transforms')
 
     # Now average the warp fields togther
     AvgWarpImages = pe.Node(interface=AverageImages(), name='AvgWarpImages')
     AvgWarpImages.inputs.dimension = 3
-    AvgWarpImages.inputs.output_average_image = str(iterationPhasePrefix)+'warp.nii.gz'
+    AvgWarpImages.inputs.output_average_image = str(iterationPhasePrefix) + 'warp.nii.gz'
     AvgWarpImages.inputs.normalize = True
     TemplateBuildSingleIterationWF.connect(BeginANTS, 'warp_transform', AvgWarpImages, 'images')
 
@@ -198,7 +198,7 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     GradientStepWarpImage = pe.Node(interface=MultiplyImages(), name='GradientStepWarpImage')
     GradientStepWarpImage.inputs.dimension = 3
     GradientStepWarpImage.inputs.second_input = -1.0 * GradientStep
-    GradientStepWarpImage.inputs.output_product_image = 'GradientStep0.25_'+str(iterationPhasePrefix)+'_warp.nii.gz'
+    GradientStepWarpImage.inputs.output_product_image = 'GradientStep0.25_' + str(iterationPhasePrefix) + '_warp.nii.gz'
     TemplateBuildSingleIterationWF.connect(AvgWarpImages, 'output_average_image', GradientStepWarpImage, 'first_input')
 
     # Now create the new template shape based on the average of all deformed images

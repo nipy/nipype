@@ -789,13 +789,13 @@ class ReconAll(CommandLine):
             if all([os.path.exists(os.path.join(subjects_dir,
                                                 self.inputs.subject_id, f)) for
                     f in outfiles]):
-                flags.append('-no%s' %step)
+                flags.append('-no%s' % step)
                 if idx > 4:
                     directive = 'autorecon2'
                 elif idx > 23:
                     directive = 'autorecon3'
             else:
-                flags.append('-%s' %step)
+                flags.append('-%s' % step)
         cmd = cmd.replace(' -%s ' % self.inputs.directive, ' -%s ' % directive)
         cmd += ' ' + ' '.join(flags)
         iflogger.info('resume recon-all : %s' % cmd)

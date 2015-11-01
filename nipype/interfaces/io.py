@@ -456,7 +456,7 @@ class S3DataSink(DataSink):
             # convert local path to s3 path
             bd_index = path.find(self.inputs.base_directory)
             if bd_index != -1:  # base_directory is in path, maintain directory structure
-                s3path = path[bd_index+len(self.inputs.base_directory):]  # cut out base directory
+                s3path = path[bd_index + len(self.inputs.base_directory):]  # cut out base directory
                 if s3path[0] == os.path.sep:
                     s3path = s3path[1:]
             else:  # base_directory isn't in path, simply place all files in bucket_path folder

@@ -391,7 +391,7 @@ def matlab2csv(in_array, name, reshape):
     if reshape:
         if len(np.shape(output_array)) > 1:
             output_array = np.reshape(output_array, (
-                np.shape(output_array)[0]*np.shape(output_array)[1], 1))
+                np.shape(output_array)[0] * np.shape(output_array)[1], 1))
             iflogger.info(np.shape(output_array))
     output_name = op.abspath(name + '.csv')
     np.savetxt(output_name, output_array, delimiter=',')
@@ -512,7 +512,7 @@ def merge_csvs(in_list):
                     )
                 except ValueError as ex:
                     in_array = np.loadtxt(
-                        in_file, delimiter=',', skiprows=1, usecols=list(range(1, n_cols-1)))
+                        in_file, delimiter=',', skiprows=1, usecols=list(range(1, n_cols - 1)))
         if idx == 0:
             out_array = in_array
         else:
@@ -530,7 +530,7 @@ def remove_identical_paths(in_files):
         out_names = list()
         commonprefix = op.commonprefix(in_files)
         lastslash = commonprefix.rfind('/')
-        commonpath = commonprefix[0:(lastslash+1)]
+        commonpath = commonprefix[0:(lastslash + 1)]
         for fileidx, in_file in enumerate(in_files):
             path, name, ext = split_filename(in_file)
             in_file = op.join(path, name)
@@ -548,10 +548,10 @@ def maketypelist(rowheadings, shape, extraheadingBool, extraheading):
     if rowheadings:
         typelist.append(('heading', 'a40'))
     if len(shape) > 1:
-        for idx in range(1, (min(shape)+1)):
+        for idx in range(1, (min(shape) + 1)):
             typelist.append((str(idx), float))
     else:
-        for idx in range(1, (shape[0]+1)):
+        for idx in range(1, (shape[0] + 1)):
             typelist.append((str(idx), float))
     if extraheadingBool:
         typelist.append((extraheading, 'a40'))
@@ -566,13 +566,13 @@ def makefmtlist(output_array, typelist, rowheadingsBool,
         fmtlist.append('%s')
     if len(shape) > 1:
         output = np.zeros(max(shape), typelist)
-        for idx in range(1, min(shape)+1):
-            output[str(idx)] = output_array[:, idx-1]
+        for idx in range(1, min(shape) + 1):
+            output[str(idx)] = output_array[:, idx - 1]
             fmtlist.append('%f')
     else:
         output = np.zeros(1, typelist)
-        for idx in range(1, len(output_array)+1):
-            output[str(idx)] = output_array[idx-1]
+        for idx in range(1, len(output_array) + 1):
+            output[str(idx)] = output_array[idx - 1]
             fmtlist.append('%f')
     if extraheadingBool:
         fmtlist.append('%s')
@@ -1056,7 +1056,7 @@ class AddNoise(BaseInterface):
             mask[mask < 1] = 0
 
             if mask.ndim < image.ndim:
-                mask = np.rollaxis(np.array([mask]*image.shape[3]), 0, 4)
+                mask = np.rollaxis(np.array([mask] * image.shape[3]), 0, 4)
 
         signal = image[mask > 0].reshape(-1)
 
@@ -1334,7 +1334,7 @@ def split_rois(in_file, mask=None, roishape=None):
 
     for i in range(nrois):
         first = i * roisize
-        last = (i+1) * roisize
+        last = (i + 1) * roisize
         fill = 0
 
         if last > els:
@@ -1343,7 +1343,7 @@ def split_rois(in_file, mask=None, roishape=None):
 
         droi = data[first:last, ...]
         iname = op.abspath('roi%010d_idx' % i)
-        out_idxs.append(iname+'.npz')
+        out_idxs.append(iname + '.npz')
         np.savez(iname, (nzels[0][first:last],))
 
         if fill > 0:

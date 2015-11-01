@@ -284,7 +284,7 @@ class Overlap(BaseInterface):
 
         if self.inputs.vol_units == 'mm':
             voxvol = nii1.get_header().get_zooms()
-            for i in range(nii1.get_data().ndim-1):
+            for i in range(nii1.get_data().ndim - 1):
                 scale = scale * voxvol[i]
 
         data1 = nii1.get_data()
@@ -318,7 +318,7 @@ class Overlap(BaseInterface):
 
         results = dict(jaccard=[], dice=[])
         results['jaccard'] = np.array(res)
-        results['dice'] = 2.0*results['jaccard'] / (results['jaccard'] + 1.0)
+        results['dice'] = 2.0 * results['jaccard'] / (results['jaccard'] + 1.0)
 
         weights = np.ones((len(volumes1),), dtype=np.float32)
         if self.inputs.weighting != 'none':
@@ -338,9 +338,9 @@ class Overlap(BaseInterface):
         self._vol_rois = (np.array(volumes1) -
                           np.array(volumes2)) / np.array(volumes1)
 
-        self._dice = round(np.sum(weights*results['dice']), 5)
-        self._jaccard = round(np.sum(weights*results['jaccard']), 5)
-        self._volume = np.sum(weights*self._vol_rois)
+        self._dice = round(np.sum(weights * results['dice']), 5)
+        self._jaccard = round(np.sum(weights * results['jaccard']), 5)
+        self._volume = np.sum(weights * self._vol_rois)
 
         return runtime
 
@@ -529,7 +529,7 @@ class ErrorMap(BaseInterface):
         msk_idxs = np.where(mskvector == 1)
         refvector = ref_data.reshape(-1, comps)[msk_idxs].astype(np.float32)
         tstvector = tst_data.reshape(-1, comps)[msk_idxs].astype(np.float32)
-        diffvector = (refvector-tstvector)
+        diffvector = (refvector - tstvector)
 
         # Scale the difference
         if self.inputs.metric == 'sqeuclidean':

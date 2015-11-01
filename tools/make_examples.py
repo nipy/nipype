@@ -56,7 +56,7 @@ def show():
     allfm = Gcf.get_all_fig_managers()
     for fcount, fm in enumerate(allfm):
         fm.canvas.figure.savefig('%s_%02i.png' %
-                                 (figure_basename, fcount+1))
+                                 (figure_basename, fcount + 1))
 
 _mpl_show = plt.show
 plt.show = show

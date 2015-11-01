@@ -25,11 +25,11 @@ class Analyze2nii(SPMCommand):
     output_spec = Analyze2niiOutputSpec
 
     def _make_matlab_command(self, _):
-        script = "V = spm_vol('%s');\n" %self.inputs.analyze_file
+        script = "V = spm_vol('%s');\n" % self.inputs.analyze_file
         _, name, _ = split_filename(self.inputs.analyze_file)
         self.output_name = os.path.join(os.getcwd(), name + ".nii")
         script += "[Y, XYZ] = spm_read_vols(V);\n"
-        script += "V.fname = '%s';\n" %self.output_name
+        script += "V.fname = '%s';\n" % self.output_name
         script += "spm_write_vol(V, Y);\n"
 
         return script
@@ -89,7 +89,7 @@ class CalcCoregAffine(SPMCommand):
         """ makes name for matfile if doesn exist"""
         pth, mv, _ = split_filename(self.inputs.moving)
         _, tgt, _ = split_filename(self.inputs.target)
-        mat = os.path.join(pth, '%s_to_%s.mat' %(mv, tgt))
+        mat = os.path.join(pth, '%s_to_%s.mat' % (mv, tgt))
         return mat
 
     def _make_matlab_command(self, _):
@@ -108,7 +108,7 @@ class CalcCoregAffine(SPMCommand):
         save('%s' , 'M' );
         M = inv(M);
         save('%s','M')
-        """ %(self.inputs.target,
+        """ % (self.inputs.target,
              self.inputs.moving,
              self.inputs.mat,
              self.inputs.invmat)
@@ -166,7 +166,7 @@ class ApplyTransform(SPMCommand):
         V.fname = fullfile(outfile);
         spm_write_vol(V,X);
 
-        """ %(self.inputs.in_file,
+        """ % (self.inputs.in_file,
              self.inputs.out_file,
              self.inputs.mat)
         # img_space = spm_get_space(infile);
@@ -222,7 +222,7 @@ class Reslice(SPMCommand):
         infiles = strvcat(\'%s\', \'%s\');
         invols = spm_vol(infiles);
         spm_reslice(invols, flags);
-        """ %(self.inputs.interp,
+        """ % (self.inputs.interp,
              self.inputs.space_defining,
              self.inputs.in_file)
         return script
@@ -465,11 +465,11 @@ class DicomImport(SPMCommand):
 
         ext = self.inputs.format
         if self.inputs.output_dir_struct == "flat":
-            outputs['out_files'] = glob(os.path.join(od, '*.%s' %ext))
+            outputs['out_files'] = glob(os.path.join(od, '*.%s' % ext))
         elif self.inputs.output_dir_struct == 'series':
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*.%s' %ext)))
+            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*.%s' % ext)))
         elif self.inputs.output_dir_struct in ['patid', 'date_time', 'patname']:
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*', '*.%s' %ext)))
+            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*', '*.%s' % ext)))
         elif self.inputs.output_dir_struct == 'patid_date':
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*', '*', '*.%s' %ext)))
+            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*', '*', '*.%s' % ext)))
         return outputs

@@ -77,7 +77,7 @@ class DTIRecon(CommandLine):
         bvecs_f.close()
         gradient_matrix_f = open(_gradient_matrix_file, 'w')
         for i in range(len(bvals)):
-            gradient_matrix_f.write("%s, %s, %s, %s\n" %(bvecs_x[i], bvecs_y[i], bvecs_z[i], bvals[i]))
+            gradient_matrix_f.write("%s, %s, %s, %s\n" % (bvecs_x[i], bvecs_y[i], bvecs_z[i], bvals[i]))
         gradient_matrix_f.close()
         return _gradient_matrix_file
 

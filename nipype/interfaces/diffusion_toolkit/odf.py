@@ -75,7 +75,7 @@ class HARDIMat(CommandLine):
         for i in range(len(bvals)):
             if int(bvals[i]) == 0:
                 continue
-            gradient_matrix_f.write("%s %s %s\n" %(bvecs_x[i], bvecs_y[i], bvecs_z[i]))
+            gradient_matrix_f.write("%s %s %s\n" % (bvecs_x[i], bvecs_y[i], bvecs_z[i]))
         gradient_matrix_f.close()
         return _gradient_matrix_file
 

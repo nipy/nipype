@@ -1057,13 +1057,13 @@ connected.
                 nodename = fullname.replace('.', '_')
                 dotlist.append('subgraph cluster_%s {' % nodename)
                 if colored:
-                    dotlist.append(prefix + prefix + 'edge [color="%s"];' % (colorset[level+1]))
+                    dotlist.append(prefix + prefix + 'edge [color="%s"];' % (colorset[level + 1]))
                     dotlist.append(prefix + prefix + 'style=filled;')
-                    dotlist.append(prefix + prefix + 'fillcolor="%s";' % (colorset[level+2]))
+                    dotlist.append(prefix + prefix + 'fillcolor="%s";' % (colorset[level + 2]))
                 dotlist.append(node._get_dot(prefix=prefix + prefix,
                                              hierarchy=hierarchy + [self.name],
                                              colored=colored,
-                                             simple_form=simple_form, level=level+3))
+                                             simple_form=simple_form, level=level + 3))
                 dotlist.append('}')
                 if level == 6:
                     level = 2

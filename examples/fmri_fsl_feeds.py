@@ -79,7 +79,7 @@ modelspec.inputs.input_units = 'secs'
 modelspec.inputs.time_repetition = TR
 modelspec.inputs.high_pass_filter_cutoff = 100
 modelspec.inputs.subject_info = [Bunch(conditions=['Visual', 'Auditory'],
-                                 onsets=[list(range(0, int(180*TR), 60)), list(range(0, int(180*TR), 90))],
+                                 onsets=[list(range(0, int(180 * TR), 60)), list(range(0, int(180 * TR), 90))],
                                  durations=[[30], [45]],
                                  amplitudes=None,
                                  tmod=None,

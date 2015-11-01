@@ -801,7 +801,7 @@ class BaseInterface(Interface):
         line = "(%s%s)" % (type_info, default)
 
         manhelpstr = wrap(line, 70,
-                          initial_indent=manhelpstr[0]+': ',
+                          initial_indent=manhelpstr[0] + ': ',
                           subsequent_indent='\t\t ')
 
         if desc:

@@ -55,7 +55,7 @@ def test_robustregister():
     reg.inputs.target_file = filelist[1]
     reg.inputs.auto_sens = True
     yield assert_equal, reg.cmdline, ('mri_robust_register '
-                                      '--satit --lta %s_robustreg.lta --mov %s --dst %s' %(filelist[0][:-4], filelist[0], filelist[1]))
+                                      '--satit --lta %s_robustreg.lta --mov %s --dst %s' % (filelist[0][:-4], filelist[0], filelist[1]))
 
     # constructor based parameter setting
     reg2 = freesurfer.RobustRegister(source_file=filelist[0], target_file=filelist[1], outlier_sens=3.0,
@@ -81,7 +81,7 @@ def test_fitmsparams():
     # .inputs based parameters setting
     fit.inputs.in_files = filelist
     fit.inputs.out_dir = outdir
-    yield assert_equal, fit.cmdline, 'mri_ms_fitparms  %s %s %s' %(filelist[0], filelist[1], outdir)
+    yield assert_equal, fit.cmdline, 'mri_ms_fitparms  %s %s %s' % (filelist[0], filelist[1], outdir)
 
     # constructor based parameter setting
     fit2 = freesurfer.FitMSParams(in_files=filelist, te_list=[1.5, 3.5], flip_list=[20, 30], out_dir=outdir)

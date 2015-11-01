@@ -68,7 +68,7 @@ reg.inputs.output_warped_image = 'INTERNAL_WARPED.nii.gz'
 reg.inputs.output_transform_prefix = "output_"
 reg.inputs.transforms = ['Translation', 'Rigid', 'Affine', 'SyN']
 reg.inputs.transform_parameters = [(0.1,), (0.1,), (0.1,), (0.2, 3.0, 0.0)]
-reg.inputs.number_of_iterations = ([[10000, 111110, 11110]]*3 +
+reg.inputs.number_of_iterations = ([[10000, 111110, 11110]] * 3 +
                                    [[100, 50, 30]])
 reg.inputs.dimension = 3
 reg.inputs.write_composite_transform = True
@@ -82,7 +82,7 @@ reg.inputs.convergence_threshold = [1.e-8] * 3 + [-0.01]
 reg.inputs.convergence_window_size = [20] * 3 + [5]
 reg.inputs.smoothing_sigmas = [[4, 2, 1]] * 3 + [[1, 0.5, 0]]
 reg.inputs.sigma_units = ['vox'] * 4
-reg.inputs.shrink_factors = [[6, 4, 2]] + [[3, 2, 1]]*2 + [[4, 2, 1]]
+reg.inputs.shrink_factors = [[6, 4, 2]] + [[3, 2, 1]] * 2 + [[4, 2, 1]]
 reg.inputs.use_estimate_learning_rate_once = [True] * 4
 reg.inputs.use_histogram_matching = [False] * 3 + [True]
 reg.inputs.initial_moving_transform_com = True

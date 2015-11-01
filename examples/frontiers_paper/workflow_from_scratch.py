@@ -69,7 +69,7 @@ specify_model.inputs.high_pass_filter_cutoff = 120
 specify_model.inputs.subject_info = [Bunch(conditions=['Task-Odd', 'Task-Even'],
                                            onsets=[list(range(15, 240, 60)),
                                                    list(range(45, 240, 60))],
-                                           durations=[[15], [15]])]*4
+                                           durations=[[15], [15]])] * 4
 
 level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
 level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}

@@ -134,8 +134,8 @@ class NumpyOutputChecker(doctest.OutputChecker):
 
             # try to normalize out 32 and 64 bit default int sizes
             for sz in [4, 8]:
-                got = got.replace("'<i%d'" %sz, "int")
-                want = want.replace("'<i%d'" %sz, "int")
+                got = got.replace("'<i%d'" % sz, "int")
+                want = want.replace("'<i%d'" % sz, "int")
 
             ret = doctest.OutputChecker.check_output(self, want,
                                                      got, optionflags)

@@ -81,7 +81,7 @@ def main():
         f = open(fn, 'w')
 
         try:
-            f.write('%s\n%s\n\n' % (name, '='*len(name)))
+            f.write('%s\n%s\n\n' % (name, '=' * len(name)))
 
             if inspect.isclass(obj):
                 if issubclass(obj, Exception):
@@ -210,7 +210,7 @@ def get_documented_in_lines(lines, module=None, filename=None):
                     current_module = name
                     documented.update(get_documented_in_docstring(
                         name, filename=filename))
-                elif current_module and not name.startswith(current_module+'.'):
+                elif current_module and not name.startswith(current_module + '.'):
                     name = "%s.%s" % (current_module, name)
                 documented.setdefault(name, []).append(
                     (filename, current_title, "auto" + m.group(1), None))

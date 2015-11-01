@@ -112,6 +112,6 @@ class IPythonPlugin(DistributedPluginBase):
 
     def _clear_task(self, taskid):
         if IPyversion >= '0.11':
-            logger.debug("Clearing id: %d" %taskid)
+            logger.debug("Clearing id: %d" % taskid)
             self.taskclient.purge_results(self.taskmap[taskid])
             del self.taskmap[taskid]

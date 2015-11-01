@@ -1441,15 +1441,15 @@ class ComplexInputSpec(FSLCommandInputSpec):
                    'complex_split', 'complex_merge', ]
 
     complex_out_file = File(genfile=True, argstr="%s", position=-3,
-                            xor=_ofs+_conversion[:2])
+                            xor=_ofs + _conversion[:2])
     magnitude_out_file = File(genfile=True, argstr="%s", position=-4,
-                              xor=_ofs[:1]+_ofs[3:]+_conversion[1:])
+                              xor=_ofs[:1] + _ofs[3:] + _conversion[1:])
     phase_out_file = File(genfile=True, argstr="%s", position=-3,
-                          xor=_ofs[:1]+_ofs[3:]+_conversion[1:])
+                          xor=_ofs[:1] + _ofs[3:] + _conversion[1:])
     real_out_file = File(genfile=True, argstr="%s", position=-4,
-                         xor=_ofs[:3]+_conversion[:1]+_conversion[2:])
+                         xor=_ofs[:3] + _conversion[:1] + _conversion[2:])
     imaginary_out_file = File(genfile=True, argstr="%s", position=-3,
-                              xor=_ofs[:3]+_conversion[:1]+_conversion[2:])
+                              xor=_ofs[:3] + _conversion[:1] + _conversion[2:])
 
     start_vol = traits.Int(position=-2, argstr='%d')
     end_vol = traits.Int(position=-1, argstr='%d')
@@ -1507,7 +1507,7 @@ class Complex(FSLCommand):
         if self.inputs.real_cartesian:
             skip += self.inputs._ofs[:3]
         elif self.inputs.real_polar:
-            skip += self.inputs._ofs[:1]+self.inputs._ofs[3:]
+            skip += self.inputs._ofs[:1] + self.inputs._ofs[3:]
         else:
             skip += self.inputs._ofs[1:]
         return super(Complex, self)._parse_inputs(skip)
@@ -1870,7 +1870,7 @@ class WarpPoints(CommandLine):
         except ImportError:
             raise ImportError('This interface requires tvtk to run.')
 
-        reader = tvtk.PolyDataReader(file_name=in_file+'.vtk')
+        reader = tvtk.PolyDataReader(file_name=in_file + '.vtk')
         reader.update()
         points = reader.output.points
 

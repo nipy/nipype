@@ -48,7 +48,7 @@ def select_volume(filename, which):
     elif which.lower() == 'middle':
         idx = int(np.ceil(load(filename).get_shape()[3] / 2))
     else:
-        raise Exception('unknown value for volume selection : %s' %which)
+        raise Exception('unknown value for volume selection : %s' % which)
     return idx
 
 

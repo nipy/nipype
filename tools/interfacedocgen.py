@@ -491,7 +491,7 @@ class InterfaceHelpWriter(object):
         if self.written_modules is None:
             raise ValueError('No modules written')
         # Get full filename path
-        path = os.path.join(outdir, froot+self.rst_extension)
+        path = os.path.join(outdir, froot + self.rst_extension)
         # Path written into index is relative to rootpath
         if relative_to is not None:
             relpath = outdir.replace(relative_to + os.path.sep, '')

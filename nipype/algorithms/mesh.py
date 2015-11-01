@@ -71,7 +71,7 @@ class WarpPoints(BaseInterface):
 
         if fext == '.gz':
             fname, fext2 = op.splitext(fname)
-            fext = fext2+fext
+            fext = fext2 + fext
 
         if ext is None:
             ext = fext
@@ -117,7 +117,7 @@ class WarpPoints(BaseInterface):
         ras2vox = np.linalg.inv(vox2ras)
         origin = affine[0:3, 3]
         voxpoints = np.array([np.dot(ras2vox,
-                                     (p-origin)) for p in points])
+                                     (p - origin)) for p in points])
 
         warps = []
         for axis in warp_dims:
@@ -132,7 +132,7 @@ class WarpPoints(BaseInterface):
             warps.append(warp)
 
         disps = np.squeeze(np.dstack(warps))
-        newpoints = [p+d for p, d in zip(points, disps)]
+        newpoints = [p + d for p, d in zip(points, disps)]
         mesh.points = newpoints
         w = tvtk.PolyDataWriter()
         if vtk_major <= 5:

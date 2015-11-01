@@ -195,7 +195,7 @@ def create_vbm_preproc(name='vbmpreproc'):
             img = load(session[0][0]).get_data() + \
                 load(session[1][0]).get_data() + \
                 load(session[2][0]).get_data()
-            img_icv = (img > 0.5).astype(int).sum()*voxel_volume*1e-3
+            img_icv = (img > 0.5).astype(int).sum() * voxel_volume * 1e-3
             icv.append(img_icv)
         return icv
 

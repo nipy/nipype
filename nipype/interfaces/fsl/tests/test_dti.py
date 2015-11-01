@@ -98,7 +98,7 @@ def test_dtifit2():
     dti.inputs.max_z = 50
 
     yield assert_equal, dti.cmdline, \
-        'dtifit -k %s -o foo.dti.nii -m %s -r %s -b %s -Z 50 -z 10' %(filelist[0],
+        'dtifit -k %s -o foo.dti.nii -m %s -r %s -b %s -Z 50 -z 10' % (filelist[0],
                                                                      filelist[1],
                                                                      filelist[0],
                                                                      filelist[1])
@@ -440,7 +440,7 @@ def test_tbss_skeleton():
     # First by implicit argument
     skeletor.inputs.skeleton_file = True
     yield assert_equal, skeletor.cmdline, \
-        "tbss_skeleton -i a.nii -o %s" %os.path.join(newdir, "a_skeleton.nii")
+        "tbss_skeleton -i a.nii -o %s" % os.path.join(newdir, "a_skeleton.nii")
 
     # Now with a specific name
     skeletor.inputs.skeleton_file = "old_boney.nii"
@@ -459,14 +459,14 @@ def test_tbss_skeleton():
 
     # Now we get a command line
     yield assert_equal, bones.cmdline, \
-        "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s" %(Info.standard_image("LowerCingulum_1mm.nii.gz"),
+        "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s" % (Info.standard_image("LowerCingulum_1mm.nii.gz"),
                                                              os.path.join(newdir, "b_skeletonised.nii"))
 
     # Can we specify a mask?
     bones.inputs.use_cingulum_mask = Undefined
     bones.inputs.search_mask_file = "a.nii"
     yield assert_equal, bones.cmdline, \
-        "tbss_skeleton -i a.nii -p 0.200 b.nii a.nii b.nii %s" %os.path.join(newdir, "b_skeletonised.nii")
+        "tbss_skeleton -i a.nii -p 0.200 b.nii a.nii b.nii %s" % os.path.join(newdir, "b_skeletonised.nii")
 
     # Looks good; clean up
     clean_directory(newdir, olddir)
@@ -488,18 +488,18 @@ def test_distancemap():
     mapper.inputs.in_file = "a.nii"
 
     # It should
-    yield assert_equal, mapper.cmdline, "distancemap --out=%s --in=a.nii" %os.path.join(newdir, "a_dstmap.nii")
+    yield assert_equal, mapper.cmdline, "distancemap --out=%s --in=a.nii" % os.path.join(newdir, "a_dstmap.nii")
 
     # And we should be able to write out a maxima map
     mapper.inputs.local_max_file = True
     yield assert_equal, mapper.cmdline, \
-        "distancemap --out=%s --in=a.nii --localmax=%s" %(os.path.join(newdir, "a_dstmap.nii"),
+        "distancemap --out=%s --in=a.nii --localmax=%s" % (os.path.join(newdir, "a_dstmap.nii"),
                                                          os.path.join(newdir, "a_lclmax.nii"))
 
     # And call it whatever we want
     mapper.inputs.local_max_file = "max.nii"
     yield assert_equal, mapper.cmdline, \
-        "distancemap --out=%s --in=a.nii --localmax=max.nii" %os.path.join(newdir, "a_dstmap.nii")
+        "distancemap --out=%s --in=a.nii --localmax=max.nii" % os.path.join(newdir, "a_dstmap.nii")
 
     # Not much else to do here
     clean_directory(newdir, olddir)

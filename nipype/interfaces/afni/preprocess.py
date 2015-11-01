@@ -302,7 +302,7 @@ class ResampleInputSpec(AFNICommandInputSpec):
                                 argstr='-rmode %s',
                                 desc="resampling method from set {'NN', 'Li', 'Cu', 'Bk'}.  These are for 'Nearest Neighbor', 'Linear', 'Cubic' and 'Blocky' interpolation, respectively. Default is NN.")
 
-    voxel_size = traits.Tuple(*[traits.Float()]*3,
+    voxel_size = traits.Tuple(*[traits.Float()] * 3,
                               argstr='-dxyz %f %f %f',
                               desc="resample to new dx, dy and dz")
 

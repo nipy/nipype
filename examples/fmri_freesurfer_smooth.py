@@ -450,7 +450,7 @@ paradigm was used for every participant.
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print("Subject ID: %s\n" %str(subject_id))
+    print("Subject ID: %s\n" % str(subject_id))
     output = []
     names = ['Task-Odd', 'Task-Even']
     for r in range(4):
@@ -539,7 +539,7 @@ datasink.inputs.substitutions = []
 
 
 def getsubs(subject_id):
-    subs = [('_subject_id_%s/' %subject_id, '')]
+    subs = [('_subject_id_%s/' % subject_id, '')]
     return subs
 
 # store relevant outputs from various stages of the 1st level analysis
@@ -579,7 +579,7 @@ Setup a dummy node to iterate over contrasts and hemispheres
 l2inputnode = pe.Node(interface=util.IdentityInterface(fields=['contrasts',
                                                                'hemi']),
                       name='inputnode')
-l2inputnode.iterables = [('contrasts', list(range(1, len(contrasts)+1))),
+l2inputnode.iterables = [('contrasts', list(range(1, len(contrasts) + 1))),
                          ('hemi', ['lh', 'rh'])]
 
 """
@@ -610,7 +610,7 @@ def ordersubjects(files, subj_list):
     outlist = []
     for s in subj_list:
         for f in files:
-            if '/%s/' %s in f:
+            if '/%s/' % s in f:
                 outlist.append(f)
                 continue
     print(outlist)

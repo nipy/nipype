@@ -122,7 +122,7 @@ class FitGLM(BaseInterface):
         for i in range(len(reg_names)):
             reg_vals[:, i] = np.array(session_info[0]['regress'][i]['val']).reshape(1, -1)
 
-        frametimes = np.linspace(0, (nscans-1)*self.inputs.TR, nscans)
+        frametimes = np.linspace(0, (nscans - 1) * self.inputs.TR, nscans)
 
         conditions = []
         onsets = []
@@ -130,9 +130,9 @@ class FitGLM(BaseInterface):
 
         for i, cond in enumerate(session_info[0]['cond']):
             onsets += cond['onset']
-            conditions += [cond['name']]*len(cond['onset'])
+            conditions += [cond['name']] * len(cond['onset'])
             if len(cond['duration']) == 1:
-                duration += cond['duration']*len(cond['onset'])
+                duration += cond['duration'] * len(cond['onset'])
             else:
                 duration += cond['duration']
 
@@ -146,7 +146,7 @@ class FitGLM(BaseInterface):
                                                        add_reg_names=reg_names
                                                        )
         if self.inputs.normalize_design_matrix:
-            for i in range(len(self._reg_names)-1):
+            for i in range(len(self._reg_names) - 1):
                 design_matrix[:, i] = ((design_matrix[:, i] -
                                        design_matrix[:, i].mean()) /
                                       design_matrix[:, i].std())

@@ -150,7 +150,7 @@ def get_print_name(node, simple_form=True):
     if simple_form:
         parts = name.split('.')
         if len(parts) > 2:
-            return ' ('.join(parts[1:])+')'
+            return ' ('.join(parts[1:]) + ')'
         elif len(parts) == 2:
             return parts[1]
     return name
@@ -281,7 +281,7 @@ def count_iterables(iterables, synchronize=False):
     if synchronize:
         op = max
     else:
-        op = lambda x, y: x*y
+        op = lambda x, y: x * y
     return reduce(op, [len(func()) for _, func in iterables.items()])
 
 
