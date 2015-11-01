@@ -1003,8 +1003,8 @@ class ApplyVolTransform(FSCommand):
     def _get_outfile(self):
         outfile = self.inputs.transformed_file
         if not isdefined(outfile):
-            if self.inputs.inverse == True:
-                if self.inputs.fs_target == True:
+            if self.inputs.inverse is True:
+                if self.inputs.fs_target is True:
                     src = 'orig.mgz'
                 else:
                     src = self.inputs.target_file

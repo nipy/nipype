@@ -836,7 +836,7 @@ class ProbTrackX(FSLCommand):
 
         outputs['log'] = os.path.abspath(os.path.join(out_dir, 'probtrackx.log'))
         # utputs['way_total'] = os.path.abspath(os.path.join(out_dir, 'waytotal'))
-        if isdefined(self.inputs.opd == True):
+        if isdefined(self.inputs.opd is True):
             if isinstance(self.inputs.seed, list) and isinstance(self.inputs.seed[0], list):
                 outputs['fdt_paths'] = []
                 for seed in self.inputs.seed:

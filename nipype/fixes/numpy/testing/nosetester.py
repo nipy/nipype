@@ -245,7 +245,7 @@ class NoseTester(object):
         plugins += [p() for p in nose.plugins.builtin.plugins]
         # add doctesting if required
         doctest_argv = '--with-doctest' in argv
-        if doctests == False and doctest_argv:
+        if doctests is False and doctest_argv:
             doctests = True
         plug = self._get_custom_doctester()
         if plug is None:
