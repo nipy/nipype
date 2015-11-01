@@ -814,7 +814,7 @@ class MRIsConvertInputSpec(FSTraitedSpec):
     # Not really sure why the ./ is necessary but the module fails without it
 
     out_datatype = traits.Enum("ico", "tri", "stl", "vtk", "gii", "mgh", "mgz", mandatory=True,
-                               desc="These file formats are supported:  ASCII:       .asc" \
+                               desc="These file formats are supported:  ASCII:       .asc"
                                "ICO: .ico, .tri GEO: .geo STL: .stl VTK: .vtk GIFTI: .gii MGH surface-encoded 'volume': .mgh, .mgz")
 
 

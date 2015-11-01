@@ -285,11 +285,11 @@ def test_Randomise_parallel():
                'TFCE_height_param':                  ('--tfce_H=0.11', 0.11),
                'TFCE_extent_param':                  ('--tfce_E=0.50', 0.50),
                'TFCE_connectivity':                  ('--tfce_C=0.30', 0.30),
-               'list_num_voxel_EVs_pos':             ('--vxl=' \
-                                                      + repr([1, 2, 3, 4]),
+               'list_num_voxel_EVs_pos':             ('--vxl=' +
+                                                      repr([1, 2, 3, 4]),
                                                       repr([1, 2, 3, 4])),
-               'list_img_voxel_EVs':               ('--vxf=' \
-                                                    + repr([6, 7, 8, 9, 3]),
+               'list_img_voxel_EVs':               ('--vxf=' +
+                                                    repr([6, 7, 8, 9, 3]),
                                                     repr([6, 7, 8, 9, 3]))}
 
     for name, settings in list(opt_map.items()):

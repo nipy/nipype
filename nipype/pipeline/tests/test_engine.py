@@ -178,8 +178,8 @@ def test8():
     pipe._execgraph = pe.generate_expanded_graph(deepcopy(pipe._flatgraph))
     yield assert_equal, len(pipe._execgraph.nodes()), 8
     yield assert_equal, len(pipe._execgraph.edges()), 8
-    edgenum = sorted([(len(pipe._execgraph.in_edges(node)) + \
-                       len(pipe._execgraph.out_edges(node))) \
+    edgenum = sorted([(len(pipe._execgraph.in_edges(node)) +
+                       len(pipe._execgraph.out_edges(node)))
                       for node in pipe._execgraph.nodes()])
     yield assert_true, edgenum[0] > 0
 

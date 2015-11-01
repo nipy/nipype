@@ -37,7 +37,7 @@ class IPythonXPlugin(DistributedPluginBase):
             __import__(name)
             self.ipyclient = sys.modules[name]
         except ImportError:
-            raise ImportError("Ipython kernel not found. Parallel execution " \
+            raise ImportError("Ipython kernel not found. Parallel execution "
                               "will be unavailable")
         try:
             self.taskclient = self.ipyclient.TaskClient()

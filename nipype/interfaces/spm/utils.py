@@ -193,7 +193,7 @@ class ResliceInputSpec(SPMCommandInputSpec):
                             desc='Volume defining space to slice in_file into')
 
     interp = traits.Range(low=0, high=7, usedefault=True,
-                          desc='degree of b-spline used for interpolation'\
+                          desc='degree of b-spline used for interpolation'
                           '0 is nearest neighbor (default)')
 
     out_file = File(desc='Optional file to save resliced volume')
