@@ -89,7 +89,7 @@ def create_dmri_preprocessing(name='dMRI_preprocessing', use_fieldmap=True, fiel
 
     if use_fieldmap:  # we have a fieldmap, so lets use it (yay!)
         susceptibility = create_epidewarp_pipeline(
-                         fieldmap_registration=fieldmap_registration)
+            fieldmap_registration=fieldmap_registration)
 
         pipeline.connect([
                          (inputnode, motion, [('in_file', 'inputnode.in_file'),
@@ -250,14 +250,14 @@ def create_eddy_correct_pipeline(name='eddy_correct'):
         name='outputnode')
 
     pipeline.connect([
-                      (inputnode, split, [('in_file', 'in_file')]),
-                      (split, pick_ref, [('out_files', 'inlist')]),
-                      (inputnode, pick_ref, [('ref_num', 'index')]),
-                      (split, coregistration, [('out_files', 'in_file')]),
-                      (pick_ref, coregistration, [('out', 'reference')]),
-                      (coregistration, merge, [('out_file', 'in_files')]),
-                      (merge, outputnode, [('merged_file', 'eddy_corrected')])
-                      ])
+        (inputnode, split, [('in_file', 'in_file')]),
+        (split, pick_ref, [('out_files', 'inlist')]),
+        (inputnode, pick_ref, [('ref_num', 'index')]),
+        (split, coregistration, [('out_files', 'in_file')]),
+        (pick_ref, coregistration, [('out', 'reference')]),
+        (coregistration, merge, [('out_file', 'in_files')]),
+        (merge, outputnode, [('merged_file', 'eddy_corrected')])
+    ])
     return pipeline
 
 
@@ -366,27 +366,27 @@ def fieldmap_correction(name='fieldmap_correction', nocheck=False):
         name='outputnode')
 
     pipeline.connect([
-                      (inputnode,    select_mag, [('fieldmap_mag', 'in_file')]),
-                      (inputnode,       fslprep, [('fieldmap_pha', 'in_phase'), ('te_diff', 'delta_TE')]),
-                      (inputnode,      mask_mag, [('in_mask', 'mask_file')]),
-                      (select_mag,     mask_mag, [('roi_file', 'in_file')]),
-                      (mask_mag,        fslprep, [('out_file', 'in_magnitude')]),
-                      (fslprep,             vsm, [('out_fieldmap', 'phasemap_in_file')]),
-                      (inputnode,           vsm, [('fieldmap_mag', 'in_file'),
-                                                  ('encoding_direction', 'unwarp_direction'),
-                                                  (('te_diff', _ms2sec), 'asym_se_time'),
-                                                  ('vsm_sigma', 'smooth2d'),
-                                                  (('epi_echospacing', _ms2sec), 'dwell_time')]),
-                      (mask_mag,            vsm, [('out_file', 'mask_file')]),
-                      (inputnode,     dwi_split, [('in_file', 'in_file')]),
-                      (dwi_split,  dwi_applyxfm, [('out_files', 'in_file')]),
-                      (mask_mag,   dwi_applyxfm, [('out_file', 'mask_file')]),
-                      (vsm,        dwi_applyxfm, [('shift_out_file', 'shift_in_file')]),
-                      (inputnode,  dwi_applyxfm, [('encoding_direction', 'unwarp_direction')]),
-                      (dwi_applyxfm,  dwi_merge, [('unwarped_file', 'in_files')]),
-                      (dwi_merge,    outputnode, [('merged_file', 'epi_corrected')]),
-                      (vsm,          outputnode, [('shift_out_file', 'out_vsm')])
-                     ])
+        (inputnode,    select_mag, [('fieldmap_mag', 'in_file')]),
+        (inputnode,       fslprep, [('fieldmap_pha', 'in_phase'), ('te_diff', 'delta_TE')]),
+        (inputnode,      mask_mag, [('in_mask', 'mask_file')]),
+        (select_mag,     mask_mag, [('roi_file', 'in_file')]),
+        (mask_mag,        fslprep, [('out_file', 'in_magnitude')]),
+        (fslprep,             vsm, [('out_fieldmap', 'phasemap_in_file')]),
+        (inputnode,           vsm, [('fieldmap_mag', 'in_file'),
+                                    ('encoding_direction', 'unwarp_direction'),
+                                    (('te_diff', _ms2sec), 'asym_se_time'),
+                                    ('vsm_sigma', 'smooth2d'),
+                                    (('epi_echospacing', _ms2sec), 'dwell_time')]),
+        (mask_mag,            vsm, [('out_file', 'mask_file')]),
+        (inputnode,     dwi_split, [('in_file', 'in_file')]),
+        (dwi_split,  dwi_applyxfm, [('out_files', 'in_file')]),
+        (mask_mag,   dwi_applyxfm, [('out_file', 'mask_file')]),
+        (vsm,        dwi_applyxfm, [('shift_out_file', 'shift_in_file')]),
+        (inputnode,  dwi_applyxfm, [('encoding_direction', 'unwarp_direction')]),
+        (dwi_applyxfm,  dwi_merge, [('unwarped_file', 'in_files')]),
+        (dwi_merge,    outputnode, [('merged_file', 'epi_corrected')]),
+        (vsm,          outputnode, [('shift_out_file', 'out_vsm')])
+    ])
 
     return pipeline
 
@@ -444,12 +444,12 @@ def topup_correction(name='topup_correction'):
                         )
 
     outputnode = pe.Node(niu.IdentityInterface(
-                          fields=['out_fieldcoef',
-                                  'out_movpar',
-                                  'out_enc_file',
-                                  'epi_corrected'
-                                  ]), name='outputnode'
-                          )
+        fields=['out_fieldcoef',
+                'out_movpar',
+                'out_enc_file',
+                'epi_corrected'
+                ]), name='outputnode'
+    )
 
     b0_dir = pe.Node(fsl.ExtractROI(t_size=1), name='b0_1')
     b0_rev = pe.Node(fsl.ExtractROI(t_size=1), name='b0_2')
@@ -461,21 +461,21 @@ def topup_correction(name='topup_correction'):
     applytopup = pe.Node(fsl.ApplyTOPUP(in_index=[1, 2]), name='applytopup')
 
     pipeline.connect([
-                      (inputnode,     b0_dir, [('in_file_dir', 'in_file'), ('ref_num', 't_min')]),
-                      (inputnode,     b0_rev, [('in_file_rev', 'in_file'), ('ref_num', 't_min')]),
-                      (inputnode,    combin2, [('in_file_dir', 'in1'), ('in_file_rev', 'in2')]),
-                      (b0_dir,        combin, [('roi_file', 'in1')]),
-                      (b0_rev,        combin, [('roi_file', 'in2')]),
-                      (combin,        merged, [('out', 'in_files')]),
-                      (merged,         topup, [('merged_file', 'in_file')]),
-                      (inputnode,      topup, [('encoding_direction', 'encoding_direction'), ('readout_times', 'readout_times')]),
-                      (topup,     applytopup, [('out_fieldcoef', 'in_topup_fieldcoef'), ('out_movpar', 'in_topup_movpar'),
-                                               ('out_enc_file', 'encoding_file')]),
-                      (combin2,   applytopup, [('out', 'in_files')]),
-                      (topup,     outputnode, [('out_fieldcoef', 'out_fieldcoef'), ('out_movpar', 'out_movpar'),
-                                               ('out_enc_file', 'out_enc_file')]),
-                      (applytopup, outputnode, [('out_corrected', 'epi_corrected')])
-                     ])
+        (inputnode,     b0_dir, [('in_file_dir', 'in_file'), ('ref_num', 't_min')]),
+        (inputnode,     b0_rev, [('in_file_rev', 'in_file'), ('ref_num', 't_min')]),
+        (inputnode,    combin2, [('in_file_dir', 'in1'), ('in_file_rev', 'in2')]),
+        (b0_dir,        combin, [('roi_file', 'in1')]),
+        (b0_rev,        combin, [('roi_file', 'in2')]),
+        (combin,        merged, [('out', 'in_files')]),
+        (merged,         topup, [('merged_file', 'in_file')]),
+        (inputnode,      topup, [('encoding_direction', 'encoding_direction'), ('readout_times', 'readout_times')]),
+        (topup,     applytopup, [('out_fieldcoef', 'in_topup_fieldcoef'), ('out_movpar', 'in_topup_movpar'),
+                                 ('out_enc_file', 'encoding_file')]),
+        (combin2,   applytopup, [('out', 'in_files')]),
+        (topup,     outputnode, [('out_fieldcoef', 'out_fieldcoef'), ('out_movpar', 'out_movpar'),
+                                 ('out_enc_file', 'out_enc_file')]),
+        (applytopup, outputnode, [('out_corrected', 'epi_corrected')])
+    ])
 
     return pipeline
 
@@ -641,26 +641,26 @@ def create_epidewarp_pipeline(name='epidewarp', fieldmap_registration=False):
             interp='nearestneighbour'), name='msk_apply_xfm')
 
         pipeline.connect([
-                     (inputnode,      select_epi, [('in_file', 'in_file'), ('ref_num', 't_min')]),
-                     (select_epi,        vsm_reg, [('roi_file', 'reference')]),
-                     (vsm,               vsm_fwd, [('shift_out_file', 'shift_in_file')]),
-                     (mask_mag_dil,      vsm_fwd, [('out_file', 'mask_file')]),
-                     (inputnode,         vsm_fwd, [('fieldmap_mag', 'in_file')]),
-                     (vsm_fwd,           vsm_reg, [('warped_file', 'in_file')]),
-                     (vsm_reg,      msk_applyxfm, [('out_matrix_file', 'in_matrix_file')]),
-                     (select_epi,   msk_applyxfm, [('roi_file', 'reference')]),
-                     (mask_mag_dil, msk_applyxfm, [('out_file', 'in_file')]),
-                     (vsm_reg,      vsm_applyxfm, [('out_matrix_file', 'in_matrix_file')]),
-                     (select_epi,   vsm_applyxfm, [('roi_file', 'reference')]),
-                     (vsm_mean,     vsm_applyxfm, [('out_file', 'in_file')]),
-                     (msk_applyxfm, dwi_applyxfm, [('out_file', 'mask_file')]),
-                     (vsm_applyxfm, dwi_applyxfm, [('out_file', 'shift_in_file')])
-                    ])
+            (inputnode,      select_epi, [('in_file', 'in_file'), ('ref_num', 't_min')]),
+            (select_epi,        vsm_reg, [('roi_file', 'reference')]),
+            (vsm,               vsm_fwd, [('shift_out_file', 'shift_in_file')]),
+            (mask_mag_dil,      vsm_fwd, [('out_file', 'mask_file')]),
+            (inputnode,         vsm_fwd, [('fieldmap_mag', 'in_file')]),
+            (vsm_fwd,           vsm_reg, [('warped_file', 'in_file')]),
+            (vsm_reg,      msk_applyxfm, [('out_matrix_file', 'in_matrix_file')]),
+            (select_epi,   msk_applyxfm, [('roi_file', 'reference')]),
+            (mask_mag_dil, msk_applyxfm, [('out_file', 'in_file')]),
+            (vsm_reg,      vsm_applyxfm, [('out_matrix_file', 'in_matrix_file')]),
+            (select_epi,   vsm_applyxfm, [('roi_file', 'reference')]),
+            (vsm_mean,     vsm_applyxfm, [('out_file', 'in_file')]),
+            (msk_applyxfm, dwi_applyxfm, [('out_file', 'mask_file')]),
+            (vsm_applyxfm, dwi_applyxfm, [('out_file', 'shift_in_file')])
+        ])
     else:
         pipeline.connect([
-                     (mask_mag_dil, dwi_applyxfm, [('out_file', 'mask_file')]),
-                     (vsm_mean,     dwi_applyxfm, [('out_file', 'shift_in_file')])
-                    ])
+            (mask_mag_dil, dwi_applyxfm, [('out_file', 'mask_file')]),
+            (vsm_mean,     dwi_applyxfm, [('out_file', 'shift_in_file')])
+        ])
 
     return pipeline
 

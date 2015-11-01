@@ -245,7 +245,7 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                     (datasource, realign, [('func', 'in_files')]),
                     (realign, compute_mask, [('mean_image', 'mean_volume')]),
                     (realign, coregister, [('mean_image', 'source'),
-                                          ('realigned_files', 'apply_to_files')]),
+                                           ('realigned_files', 'apply_to_files')]),
                     (datasource, coregister, [('struct', 'target')]),
                     (coregister, smooth, [('coregistered_files', 'in_files')]),
                     (realign, modelspec, [('realignment_parameters', 'realignment_parameters')]),
@@ -264,7 +264,7 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                                                          ("axis", "axis"),
                                                          ("constants", "constants"),
                                                          ("reg_names", "reg_names")])
-                  ])
+                    ])
 
 if __name__ == '__main__':
     l1pipeline.run()

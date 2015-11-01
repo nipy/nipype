@@ -17,10 +17,10 @@ from ....interfaces import utility as util
 from ....interfaces.utility import Function
 
 from ....interfaces.ants import (
-                                 Registration,
-                                 ApplyTransforms,
-                                 AverageImages, MultiplyImages,
-                                 AverageAffineTransform)
+    Registration,
+    ApplyTransforms,
+    AverageImages, MultiplyImages,
+    AverageAffineTransform)
 
 
 def makeListOfOneElement(inputFile):
@@ -179,10 +179,10 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     TemplateBuildSingleIterationWF = pe.Workflow(name='antsRegistrationTemplateBuildSingleIterationWF_' + str(iterationPhasePrefix))
 
     inputSpec = pe.Node(interface=util.IdentityInterface(fields=[
-                'ListOfImagesDictionaries', 'registrationImageTypes',
-                'interpolationMapping', 'fixed_image']),
-                run_without_submitting=True,
-                name='inputspec')
+        'ListOfImagesDictionaries', 'registrationImageTypes',
+        'interpolationMapping', 'fixed_image']),
+        run_without_submitting=True,
+        name='inputspec')
     # HACK: TODO: Need to move all local functions to a common untility file, or at the top of the file so that
     # they do not change due to re-indenting.  Otherwise re-indenting for flow control will trigger
     # their hash to change.
@@ -309,11 +309,11 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     ##############################################
     # Now warp all the ListOfPassiveImagesDictionaries images
     FlattenTransformAndImagesListNode = pe.Node(Function(function=FlattenTransformAndImagesList,
-                                                          input_names=['ListOfPassiveImagesDictionaries', 'transforms',
-                                                                         'invert_transform_flags', 'interpolationMapping'],
-                                                          output_names=['flattened_images', 'flattened_transforms', 'flattened_invert_transform_flags',
-                                                                          'flattened_image_nametypes', 'flattened_interpolation_type']),
-                                                 run_without_submitting=True, name="99_FlattenTransformAndImagesList")
+                                                         input_names=['ListOfPassiveImagesDictionaries', 'transforms',
+                                                                      'invert_transform_flags', 'interpolationMapping'],
+                                                         output_names=['flattened_images', 'flattened_transforms', 'flattened_invert_transform_flags',
+                                                                       'flattened_image_nametypes', 'flattened_interpolation_type']),
+                                                run_without_submitting=True, name="99_FlattenTransformAndImagesList")
 
     GetPassiveImagesNode = pe.Node(interface=util.Function(function=GetPassiveImages,
                                                            input_names=['ListOfImagesDictionaries', 'registrationImageTypes'],
@@ -338,17 +338,17 @@ def antsRegistrationTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_invert_transform_flags', wimtPassivedeformed, 'invert_transform_flags')
 
     RenestDeformedPassiveImagesNode = pe.Node(Function(function=RenestDeformedPassiveImages,
-                                                        input_names=['deformedPassiveImages', 'flattened_image_nametypes', 'interpolationMapping'],
-                                                        output_names=['nested_imagetype_list', 'outputAverageImageName_list',
-                                                                        'image_type_list', 'nested_interpolation_type']),
-                                               run_without_submitting=True, name="99_RenestDeformedPassiveImages")
+                                                       input_names=['deformedPassiveImages', 'flattened_image_nametypes', 'interpolationMapping'],
+                                                       output_names=['nested_imagetype_list', 'outputAverageImageName_list',
+                                                                     'image_type_list', 'nested_interpolation_type']),
+                                              run_without_submitting=True, name="99_RenestDeformedPassiveImages")
     TemplateBuildSingleIterationWF.connect(inputSpec, 'interpolationMapping', RenestDeformedPassiveImagesNode, 'interpolationMapping')
     TemplateBuildSingleIterationWF.connect(wimtPassivedeformed, 'output_image', RenestDeformedPassiveImagesNode, 'deformedPassiveImages')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_image_nametypes', RenestDeformedPassiveImagesNode, 'flattened_image_nametypes')
     # Now  Average All passive input_images deformed images together to create an updated template average
     AvgDeformedPassiveImages = pe.MapNode(interface=AverageImages(),
-                                        iterfield=['images', 'output_average_image'],
-                                        name='AvgDeformedPassiveImages')
+                                          iterfield=['images', 'output_average_image'],
+                                          name='AvgDeformedPassiveImages')
     AvgDeformedPassiveImages.inputs.dimension = 3
     AvgDeformedPassiveImages.inputs.normalize = False
     TemplateBuildSingleIterationWF.connect(RenestDeformedPassiveImagesNode, "nested_imagetype_list", AvgDeformedPassiveImages, 'images')

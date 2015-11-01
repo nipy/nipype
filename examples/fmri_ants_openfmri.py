@@ -903,7 +903,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                  [('copes', 'copes'),
                   ('varcopes', 'varcopes'),
                   ('zstats', 'zstats'),
-                                  ])])
+                  ])])
     wf.connect(mergefunc, 'out_files', registration, 'inputspec.source_files')
 
     def split_files(in_files, splits):
@@ -1007,7 +1007,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                  [('design_cov', 'qa.model'),
                   ('design_image', 'qa.model.@matrix_image'),
                   ('design_file', 'qa.model.@matrix'),
-                                  ])])
+                  ])])
     wf.connect([(preproc, datasink, [('outputspec.motion_parameters',
                                       'qa.motion'),
                                      ('outputspec.motion_plots',

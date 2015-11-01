@@ -118,9 +118,9 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
                 if not n_streams == stream_count:
                     raise HeaderError(
                         'Expecting %s points, found only %s' % (
-                                stream_count, n_streams))
+                            stream_count, n_streams))
                     iflogger.error('Expecting %s points, found only %s' % (
-                                stream_count, n_streams))
+                        stream_count, n_streams))
                 break
             pts = np.ndarray(
                 shape=(n_pts, pt_cols),

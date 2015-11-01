@@ -235,9 +235,9 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     ##############################################
     # Now warp all the ListOfPassiveImagesDictionaries images
     FlattenTransformAndImagesListNode = pe.Node(Function(function=FlattenTransformAndImagesList,
-                                                          input_names=['ListOfPassiveImagesDictionaries', 'transformation_series'],
-                                                          output_names=['flattened_images', 'flattened_transforms', 'flattened_image_nametypes']),
-                                                 run_without_submitting=True, name="99_FlattenTransformAndImagesList")
+                                                         input_names=['ListOfPassiveImagesDictionaries', 'transformation_series'],
+                                                         output_names=['flattened_images', 'flattened_transforms', 'flattened_image_nametypes']),
+                                                run_without_submitting=True, name="99_FlattenTransformAndImagesList")
     TemplateBuildSingleIterationWF.connect(inputSpec, 'ListOfPassiveImagesDictionaries', FlattenTransformAndImagesListNode, 'ListOfPassiveImagesDictionaries')
     TemplateBuildSingleIterationWF.connect(MakeTransformsLists, 'out', FlattenTransformAndImagesListNode, 'transformation_series')
     wimtPassivedeformed = pe.MapNode(interface=WarpImageMultiTransform(),
@@ -248,15 +248,15 @@ def ANTSTemplateBuildSingleIterationWF(iterationPhasePrefix=''):
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_transforms', wimtPassivedeformed, 'transformation_series')
 
     RenestDeformedPassiveImagesNode = pe.Node(Function(function=RenestDeformedPassiveImages,
-                                                        input_names=['deformedPassiveImages', 'flattened_image_nametypes'],
-                                                        output_names=['nested_imagetype_list', 'outputAverageImageName_list', 'image_type_list']),
-                                               run_without_submitting=True, name="99_RenestDeformedPassiveImages")
+                                                       input_names=['deformedPassiveImages', 'flattened_image_nametypes'],
+                                                       output_names=['nested_imagetype_list', 'outputAverageImageName_list', 'image_type_list']),
+                                              run_without_submitting=True, name="99_RenestDeformedPassiveImages")
     TemplateBuildSingleIterationWF.connect(wimtPassivedeformed, 'output_image', RenestDeformedPassiveImagesNode, 'deformedPassiveImages')
     TemplateBuildSingleIterationWF.connect(FlattenTransformAndImagesListNode, 'flattened_image_nametypes', RenestDeformedPassiveImagesNode, 'flattened_image_nametypes')
     # Now  Average All passive input_images deformed images together to create an updated template average
     AvgDeformedPassiveImages = pe.MapNode(interface=AverageImages(),
-                                        iterfield=['images', 'output_average_image'],
-                                        name='AvgDeformedPassiveImages')
+                                          iterfield=['images', 'output_average_image'],
+                                          name='AvgDeformedPassiveImages')
     AvgDeformedPassiveImages.inputs.dimension = 3
     AvgDeformedPassiveImages.inputs.normalize = False
     TemplateBuildSingleIterationWF.connect(RenestDeformedPassiveImagesNode, "nested_imagetype_list", AvgDeformedPassiveImages, 'images')

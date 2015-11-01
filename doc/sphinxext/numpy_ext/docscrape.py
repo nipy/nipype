@@ -114,7 +114,7 @@ class NumpyDocString(object):
             'References': '',
             'Examples': '',
             'index': {}
-            }
+        }
 
         self._parse()
 

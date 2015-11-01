@@ -95,8 +95,8 @@ def create_spm_preproc(name='preproc'):
                                           save_plot=True),
                         name='artdetect')
     workflow.connect([(inputnode, artdetect, [('norm_threshold', 'norm_threshold'),
-                                             ('zintensity_threshold',
-                                              'zintensity_threshold')])])
+                                              ('zintensity_threshold',
+                                               'zintensity_threshold')])])
     workflow.connect([(realign, artdetect, [('realigned_files', 'realigned_files'),
                                             ('realignment_parameters',
                                              'realignment_parameters')])])
@@ -117,15 +117,15 @@ def create_spm_preproc(name='preproc'):
                                                        ]),
                          name="outputspec")
     workflow.connect([
-            (maskflow, outputnode, [("outputspec.reg_file", "reg_file")]),
-            (maskflow, outputnode, [("outputspec.reg_cost", "reg_cost")]),
-            (maskflow, outputnode, [(("outputspec.mask_file", poplist), "mask_file")]),
-            (realign, outputnode, [('realignment_parameters', 'realignment_parameters')]),
-            (smooth, outputnode, [('smoothed_files', 'smoothed_files')]),
-            (artdetect, outputnode, [('outlier_files', 'outlier_files'),
-                                    ('statistic_files', 'outlier_stats'),
-                                    ('plot_files', 'outlier_plots')])
-            ])
+        (maskflow, outputnode, [("outputspec.reg_file", "reg_file")]),
+        (maskflow, outputnode, [("outputspec.reg_cost", "reg_cost")]),
+        (maskflow, outputnode, [(("outputspec.mask_file", poplist), "mask_file")]),
+        (realign, outputnode, [('realignment_parameters', 'realignment_parameters')]),
+        (smooth, outputnode, [('smoothed_files', 'smoothed_files')]),
+        (artdetect, outputnode, [('outlier_files', 'outlier_files'),
+                                 ('statistic_files', 'outlier_stats'),
+                                 ('plot_files', 'outlier_plots')])
+    ])
     return workflow
 
 
@@ -303,8 +303,8 @@ def create_DARTEL_template(name='dartel_template'):
                                                        ]),
                          name="outputspec")
     workflow.connect([
-            (dartel, outputnode, [('final_template_file', 'template_file'),
-                                  ('dartel_flow_fields', 'flow_fields')]),
-            ])
+        (dartel, outputnode, [('final_template_file', 'template_file'),
+                              ('dartel_flow_fields', 'flow_fields')]),
+    ])
 
     return workflow

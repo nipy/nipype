@@ -187,11 +187,11 @@ contrastestimate = pe.Node(interface=spm.EstimateContrast(), name="contrastestim
 l1analysis.connect([(modelspec, level1design, [('session_info', 'session_info')]),
                     (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
                     (level1estimate, contrastestimate, [('spm_mat_file', 'spm_mat_file'),
-                                                      ('beta_images', 'beta_images'),
-                                                      ('residual_image', 'residual_image')]),
+                                                        ('beta_images', 'beta_images'),
+                                                        ('residual_image', 'residual_image')]),
                     (contrastestimate, threshold, [('spm_mat_file', 'spm_mat_file'),
-                                                  ('spmT_images', 'stat_image')]),
-                  ])
+                                                   ('spmT_images', 'stat_image')]),
+                    ])
 
 """
 Preproc + Analysis pipeline
@@ -376,9 +376,9 @@ def getstripdir(subject_id):
 
 # store relevant outputs from various stages of the 1st level analysis
 level1.connect([(infosource, datasink, [('subject_id', 'container'),
-                                       (('subject_id', getstripdir), 'strip_dir')]),
+                                        (('subject_id', getstripdir), 'strip_dir')]),
                 (l1pipeline, datasink, [('analysis.contrastestimate.con_images', 'contrasts.@con'),
-                                       ('analysis.contrastestimate.spmT_images', 'contrasts.@T')]),
+                                        ('analysis.contrastestimate.spmT_images', 'contrasts.@T')]),
                 ])
 
 

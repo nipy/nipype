@@ -42,9 +42,9 @@ class Analyze2nii(SPMCommand):
 
 class CalcCoregAffineInputSpec(SPMCommandInputSpec):
     target = File(exists=True, mandatory=True,
-                   desc='target for generating affine transform')
+                  desc='target for generating affine transform')
     moving = File(exists=True, mandatory=True, copyfile=False,
-                   desc='volume transform can be applied to register with target')
+                  desc='volume transform can be applied to register with target')
     mat = File(desc='Filename used to store affine matrix')
     invmat = File(desc='Filename used to store inverse affine matrix')
 
@@ -109,9 +109,9 @@ class CalcCoregAffine(SPMCommand):
         M = inv(M);
         save('%s','M')
         """ % (self.inputs.target,
-             self.inputs.moving,
-             self.inputs.mat,
-             self.inputs.invmat)
+               self.inputs.moving,
+               self.inputs.mat,
+               self.inputs.invmat)
         return script
 
     def _list_outputs(self):
@@ -123,9 +123,9 @@ class CalcCoregAffine(SPMCommand):
 
 class ApplyTransformInputSpec(SPMCommandInputSpec):
     in_file = File(exists=True, mandatory=True, copyfile=True,
-                    desc='file to apply transform to, (only updates header)')
+                   desc='file to apply transform to, (only updates header)')
     mat = File(exists=True, mandatory=True,
-                desc='file holding transform to apply')
+               desc='file holding transform to apply')
     out_file = File(desc="output file name for transformed data",
                     genfile=True)
 
@@ -167,8 +167,8 @@ class ApplyTransform(SPMCommand):
         spm_write_vol(V,X);
 
         """ % (self.inputs.in_file,
-             self.inputs.out_file,
-             self.inputs.mat)
+               self.inputs.out_file,
+               self.inputs.mat)
         # img_space = spm_get_space(infile);
         # spm_get_space(infile, transform.M * img_space);
         return script
@@ -188,9 +188,9 @@ class ApplyTransform(SPMCommand):
 
 class ResliceInputSpec(SPMCommandInputSpec):
     in_file = File(exists=True, mandatory=True,
-                    desc='file to apply transform to, (only updates header)')
+                   desc='file to apply transform to, (only updates header)')
     space_defining = File(exists=True, mandatory=True,
-                            desc='Volume defining space to slice in_file into')
+                          desc='Volume defining space to slice in_file into')
 
     interp = traits.Range(low=0, high=7, usedefault=True,
                           desc='degree of b-spline used for interpolation'
@@ -223,8 +223,8 @@ class Reslice(SPMCommand):
         invols = spm_vol(infiles);
         spm_reslice(invols, flags);
         """ % (self.inputs.interp,
-             self.inputs.space_defining,
-             self.inputs.in_file)
+               self.inputs.space_defining,
+               self.inputs.in_file)
         return script
 
     def _list_outputs(self):

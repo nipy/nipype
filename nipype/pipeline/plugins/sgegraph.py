@@ -17,9 +17,9 @@ def node_completed_status(checknode):
     """
     """ TODO: place this in the base.py file and refactor """
     node_state_does_not_require_overwrite = (checknode.overwrite is False or
-                                              (checknode.overwrite is None and not
-                                               checknode._interface.always_run)
-    )
+                                             (checknode.overwrite is None and not
+                                              checknode._interface.always_run)
+                                             )
     hash_exists = False
     try:
         hash_exists, _, _, _ = checknode.hash_exists()

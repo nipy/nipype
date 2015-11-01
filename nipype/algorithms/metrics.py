@@ -360,9 +360,9 @@ class Overlap(BaseInterface):
 
 class FuzzyOverlapInputSpec(BaseInterfaceInputSpec):
     in_ref = InputMultiPath(File(exists=True), mandatory=True,
-                             desc='Reference image. Requires the same dimensions as in_tst.')
+                            desc='Reference image. Requires the same dimensions as in_tst.')
     in_tst = InputMultiPath(File(exists=True), mandatory=True,
-                             desc='Test image. Requires the same dimensions as in_ref.')
+                            desc='Test image. Requires the same dimensions as in_ref.')
     weighting = traits.Enum('none', 'volume', 'squared_vol', usedefault=True,
                             desc=('\'none\': no class-overlap weighting is '
                                   'performed. \'volume\': computed class-'

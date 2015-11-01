@@ -236,10 +236,10 @@ def get_unique_value(type, id):
     assuming id is unique.
     '''
     return {
-      "File": os.path.abspath(create_tempfile()),
-      "Boolean": True,
-      "Number": abs(hash(id)),  # abs in case input param must be positive...
-      "String": id
+        "File": os.path.abspath(create_tempfile()),
+        "Boolean": True,
+        "Number": abs(hash(id)),  # abs in case input param must be positive...
+        "String": id
     }[type]
 
 

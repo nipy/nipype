@@ -119,11 +119,11 @@ def _calc_norm(mc, use_differences, source, brain_pts=None):
                               all_pts)[0:3, :].ravel()
         if brain_pts is not None:
             displacement[i, :] = \
-                  np.sqrt(np.sum(np.power(np.reshape(newpos[i, :],
-                                                     (3, all_pts.shape[1])) -
-                                          all_pts[0:3, :],
-                                          2),
-                                 axis=0))
+                np.sqrt(np.sum(np.power(np.reshape(newpos[i, :],
+                                                   (3, all_pts.shape[1])) -
+                                        all_pts[0:3, :],
+                                        2),
+                               axis=0))
     # np.savez('displacement.npz', newpos=newpos, pts=all_pts)
     normdata = np.zeros(mc.shape[0])
     if use_differences:
@@ -131,8 +131,8 @@ def _calc_norm(mc, use_differences, source, brain_pts=None):
                                  np.diff(newpos, n=1, axis=0)), axis=0)
         for i in range(newpos.shape[0]):
             normdata[i] = \
-             np.max(np.sqrt(np.sum(np.reshape(np.power(np.abs(newpos[i, :]), 2),
-                                              (3, all_pts.shape[1])), axis=0)))
+                np.max(np.sqrt(np.sum(np.reshape(np.power(np.abs(newpos[i, :]), 2),
+                                                 (3, all_pts.shape[1])), axis=0)))
     else:
         newpos = np.abs(signal.detrend(newpos, axis=0, type='constant'))
         normdata = np.sqrt(np.mean(np.power(newpos, 2), axis=1))
@@ -319,7 +319,7 @@ class ArtifactDetect(BaseInterface):
         for i, f in enumerate(filename_to_list(self.inputs.realigned_files)):
             (outlierfile, intensityfile, statsfile, normfile, plotfile,
              displacementfile, maskfile) = \
-                                      self._get_output_filenames(f, os.getcwd())
+                self._get_output_filenames(f, os.getcwd())
             outputs['outlier_files'].insert(i, outlierfile)
             outputs['intensity_files'].insert(i, intensityfile)
             outputs['statistic_files'].insert(i, statsfile)
@@ -514,13 +514,13 @@ class ArtifactDetect(BaseInterface):
                               'min': np.min(mc_in, axis=0).tolist(),
                               'max': np.max(mc_in, axis=0).tolist(),
                               'std': np.std(mc_in, axis=0).tolist()},
-                     ]},
+                             ]},
                  {'intensity': [{'using differences': self.inputs.use_differences[1]},
                                 {'mean': np.mean(gz, axis=0).tolist(),
                                  'min': np.min(gz, axis=0).tolist(),
                                  'max': np.max(gz, axis=0).tolist(),
                                  'std': np.std(gz, axis=0).tolist()},
-                        ]},
+                                ]},
                  ]
         if self.inputs.use_norm:
             stats.insert(3, {'motion_norm':
@@ -528,7 +528,7 @@ class ArtifactDetect(BaseInterface):
                               'min': np.min(normval, axis=0).tolist(),
                               'max': np.max(normval, axis=0).tolist(),
                               'std': np.std(normval, axis=0).tolist(),
-                                  }})
+                              }})
         save_json(statsfile, stats)
 
     def _run_interface(self, runtime):

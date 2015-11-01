@@ -346,7 +346,7 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(dtifit, fa, [("tensor_fitted", "in_file")])])
     mapping.connect([(fa, analyzeheader_fa, [("fa", "in_file")])])
     mapping.connect([(inputnode_within, analyzeheader_fa, [(('dwi', get_vox_dims), 'voxel_dims'),
-                                                          (('dwi', get_data_dims), 'data_dims')])])
+                                                           (('dwi', get_data_dims), 'data_dims')])])
     mapping.connect([(fa, fa2nii, [('fa', 'data_file')])])
     mapping.connect([(inputnode_within, fa2nii, [(('dwi', get_affine), 'affine')])])
     mapping.connect([(analyzeheader_fa, fa2nii, [('header', 'header_file')])])
@@ -354,7 +354,7 @@ def create_connectivity_pipeline(name="connectivity"):
     mapping.connect([(dtifit, trace, [("tensor_fitted", "in_file")])])
     mapping.connect([(trace, analyzeheader_trace, [("trace", "in_file")])])
     mapping.connect([(inputnode_within, analyzeheader_trace, [(('dwi', get_vox_dims), 'voxel_dims'),
-                                                             (('dwi', get_data_dims), 'data_dims')])])
+                                                              (('dwi', get_data_dims), 'data_dims')])])
     mapping.connect([(trace, trace2nii, [('trace', 'data_file')])])
     mapping.connect([(inputnode_within, trace2nii, [(('dwi', get_affine), 'affine')])])
     mapping.connect([(analyzeheader_trace, trace2nii, [('header', 'header_file')])])
@@ -371,7 +371,7 @@ def create_connectivity_pipeline(name="connectivity"):
                      (camino2trackvis, trk2camino, [['trackvis', 'in_file']])
                      ])
     mapping.connect([(inputnode_within, camino2trackvis, [(('dwi', get_vox_dims), 'voxel_dims'),
-                                                         (('dwi', get_data_dims), 'data_dims')])])
+                                                          (('dwi', get_data_dims), 'data_dims')])])
 
     """
     Here the CMTK connectivity mapping nodes are connected.
@@ -451,16 +451,16 @@ def create_connectivity_pipeline(name="connectivity"):
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["subject_id", "dwi", "bvecs", "bvals", "subjects_dir", "resolution_network_file"]), name="inputnode")
 
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["fa",
-                                                                    "struct",
-                                                                    "trace",
-                                                                    "tracts",
-                                                                    "connectome",
-                                                                    "cmatrix",
-                                                                    "networks",
-                                                                    "rois",
-                                                                    "mean_fiber_length",
-                                                                    "fiber_length_std",
-                                                                    "tensors"]),
+                                                                  "struct",
+                                                                  "trace",
+                                                                  "tracts",
+                                                                  "connectome",
+                                                                  "cmatrix",
+                                                                  "networks",
+                                                                  "rois",
+                                                                  "mean_fiber_length",
+                                                                  "fiber_length_std",
+                                                                  "tensors"]),
                          name="outputnode")
 
     connectivity = pe.Workflow(name="connectivity")
@@ -485,6 +485,6 @@ def create_connectivity_pipeline(name="connectivity"):
                                                  ("mri_convert_Brain.out_file", "struct"),
                                                  ("trace2nii.nifti_file", "trace"),
                                                  ("dtifit.tensor_fitted", "tensors")])
-        ])
+                          ])
 
     return connectivity

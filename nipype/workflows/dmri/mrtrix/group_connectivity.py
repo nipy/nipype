@@ -102,7 +102,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
     l1pipeline.connect([(datasource, conmapper, [("dwi", "inputnode.dwi"),
                                                  ("bvals", "inputnode.bvals"),
                                                  ("bvecs", "inputnode.bvecs"),
-                                              ])])
+                                                 ])])
     l1pipeline.connect([(conmapper, datasink, [("outputnode.connectome", "@l1output.cff"),
                                                ("outputnode.nxstatscff", "@l1output.nxstatscff"),
                                                ("outputnode.nxmatlab", "@l1output.nxmatlab"),

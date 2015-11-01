@@ -70,7 +70,7 @@ class APIDocs(TempInstall):
 
     user_options = [
         ('None', None, 'this command has no options'),
-        ]
+    ]
 
     def run(self):
         # First build the project and install it to a temporary location.

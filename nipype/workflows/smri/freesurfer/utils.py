@@ -221,11 +221,11 @@ def create_get_stats_flow(name='getstats', withreg=False):
                 return label_file, transform_output
 
         chooser = pe.MapNode(niu.Function(input_names=['inverse',
-                                                         'transform_output',
-                                                         'source_file',
-                                                         'label_file'],
+                                                       'transform_output',
+                                                       'source_file',
+                                                       'label_file'],
                                           output_names=['label_file',
-                                                          'source_file'],
+                                                        'source_file'],
                                           function=switch_labels),
                              iterfield=['transform_output', 'source_file'],
                              name='chooser')
@@ -247,8 +247,8 @@ def create_get_stats_flow(name='getstats', withreg=False):
                                                        ]),
                          name="outputspec")
     getstats.connect([
-            (statnode, outputnode, [("summary_file", "stats_file")]),
-            ])
+        (statnode, outputnode, [("summary_file", "stats_file")]),
+    ])
     return getstats
 
 
@@ -339,18 +339,18 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     """
 
     tessflow.connect([
-            (inputnode, fssource, [('subject_id', 'subject_id'),
-                                   ('subjects_dir', 'subjects_dir')]),
-            (fssource, volconvert, [('aseg', 'in_file')]),
-            (volconvert, region_list_from_volume_node, [('out_file', 'in_file')]),
-            (region_list_from_volume_node, tessellate, [('region_list', 'label_value')]),
-            (region_list_from_volume_node, id_list_from_lookup_table_node, [('region_list', 'region_list')]),
-            (inputnode, id_list_from_lookup_table_node, [('lookup_file', 'lookup_file')]),
-            (id_list_from_lookup_table_node, tessellate, [('id_list', 'out_file')]),
-            (fssource, tessellate, [('aseg', 'in_file')]),
-            (tessellate, surfconvert, [('surface', 'in_file')]),
-            (surfconvert, smoother, [('converted', 'in_file1')]),
-            ])
+        (inputnode, fssource, [('subject_id', 'subject_id'),
+                               ('subjects_dir', 'subjects_dir')]),
+        (fssource, volconvert, [('aseg', 'in_file')]),
+        (volconvert, region_list_from_volume_node, [('out_file', 'in_file')]),
+        (region_list_from_volume_node, tessellate, [('region_list', 'label_value')]),
+        (region_list_from_volume_node, id_list_from_lookup_table_node, [('region_list', 'region_list')]),
+        (inputnode, id_list_from_lookup_table_node, [('lookup_file', 'lookup_file')]),
+        (id_list_from_lookup_table_node, tessellate, [('id_list', 'out_file')]),
+        (fssource, tessellate, [('aseg', 'in_file')]),
+        (tessellate, surfconvert, [('surface', 'in_file')]),
+        (surfconvert, smoother, [('converted', 'in_file1')]),
+    ])
 
     """
     Setup an outputnode that defines relevant inputs of the workflow.
@@ -365,9 +365,9 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
         ])
         tessflow.connect([
             (stl_to_gifti, outputnode, [("converted", "meshes")]),
-            ])
+        ])
     else:
         tessflow.connect([
             (smoother, outputnode, [("mesh_file", "meshes")]),
-            ])
+        ])
     return tessflow

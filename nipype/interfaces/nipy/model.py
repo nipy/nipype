@@ -39,8 +39,8 @@ class FitGLMInputSpec(BaseInterfaceInputSpec):
                                   "With Derivative' or 'FIR'"), usedefault=True)
     drift_model = traits.Enum("Cosine", "Polynomial", "Blank",
                               desc=("string that specifies the desired drift "
-                                      "model, to be chosen among 'Polynomial', "
-                                      "'Cosine', 'Blank'"), usedefault=True)
+                                    "model, to be chosen among 'Polynomial', "
+                                    "'Cosine', 'Blank'"), usedefault=True)
     TR = traits.Float(mandatory=True)
     model = traits.Enum("ar1", "spherical",
                         desc=("autoregressive mode is available only for the "
@@ -148,8 +148,8 @@ class FitGLM(BaseInterface):
         if self.inputs.normalize_design_matrix:
             for i in range(len(self._reg_names) - 1):
                 design_matrix[:, i] = ((design_matrix[:, i] -
-                                       design_matrix[:, i].mean()) /
-                                      design_matrix[:, i].std())
+                                        design_matrix[:, i].mean()) /
+                                       design_matrix[:, i].std())
 
         if self.inputs.plot_design_matrix:
             import pylab

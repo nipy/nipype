@@ -34,9 +34,9 @@ if not os.path.exists(mydatadir):
 print(mydatadir)
 
 MyFileURLs = [
-           ('http://slicer.kitware.com/midas3/download?bitstream=13121', '01_T1_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13122', '02_T1_half.nii.gz'),
-           ]
+    ('http://slicer.kitware.com/midas3/download?bitstream=13121', '01_T1_half.nii.gz'),
+    ('http://slicer.kitware.com/midas3/download?bitstream=13122', '02_T1_half.nii.gz'),
+]
 for tt in MyFileURLs:
     myURL = tt[0]
     localFilename = os.path.join(mydatadir, tt[1])

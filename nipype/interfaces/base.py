@@ -1501,7 +1501,7 @@ class CommandLine(BaseInterface):
         runtime = run_command(runtime, output=self.inputs.terminal_output,
                               redirect_x=self._redirect_x)
         if runtime.returncode is None or \
-            runtime.returncode not in correct_return_codes:
+                runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
 
         return runtime

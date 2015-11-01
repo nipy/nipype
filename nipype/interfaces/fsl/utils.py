@@ -1292,7 +1292,7 @@ class SigLoss(FSLCommand):
         if not isdefined(outputs['out_file']) and \
                 isdefined(self.inputs.in_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
-                                                suffix='_sigloss')
+                                                  suffix='_sigloss')
         return outputs
 
     def _gen_filename(self, name):
@@ -1686,7 +1686,7 @@ class ConvertWarpInputSpec(FSLCommandInputSpec):
                        'of subjects.'))
 
     midmat = File(exists=True, argstr="--midmat=%s",
-                desc="Name of file containing mid-warp-affine transform")
+                  desc="Name of file containing mid-warp-affine transform")
 
     warp2 = File(exists=True, argstr='--warp2=%s',
                  desc=('Name of file containing secondary warp-fields/coefficients (after warp1/midmat but before postmat). This could e.g. be a '

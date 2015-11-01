@@ -65,7 +65,7 @@ except:
 """
         task = self.ipyclient.StringTask(cmdstr,
                                          push=dict(task=node,
-                                                     updatehash=updatehash),
+                                                   updatehash=updatehash),
                                          pull=['result', 'traceback'])
         return self.taskclient.run(task, block=False)
 

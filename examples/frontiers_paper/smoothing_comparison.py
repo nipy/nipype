@@ -28,8 +28,8 @@ iter_fwhm.iterables = [('fwhm', [4, 8])]
 iter_smoothing_method = pe.Node(interface=util.IdentityInterface(fields=["smoothing_method"]),
                                 name="iter_smoothing_method")
 iter_smoothing_method.iterables = [('smoothing_method', ['isotropic_voxel',
-                                                        'anisotropic_voxel',
-                                                        'isotropic_surface'])]
+                                                         'anisotropic_voxel',
+                                                         'isotropic_surface'])]
 
 realign = pe.Node(interface=spm.Realign(), name="realign")
 realign.inputs.register_to_mean = True

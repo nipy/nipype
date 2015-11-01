@@ -99,9 +99,9 @@ def test_dtifit2():
 
     yield assert_equal, dti.cmdline, \
         'dtifit -k %s -o foo.dti.nii -m %s -r %s -b %s -Z 50 -z 10' % (filelist[0],
-                                                                     filelist[1],
-                                                                     filelist[0],
-                                                                     filelist[1])
+                                                                       filelist[1],
+                                                                       filelist[0],
+                                                                       filelist[1])
 
     clean_directory(outdir, cwd)
 
@@ -380,12 +380,12 @@ def test_Vec_reg():
 
     # test arguments for opt_map
     opt_map = {'verbose':           ('-v', True),
-                'helpDoc':           ('-h', True),
-                'tensor':            ('--tensor', True),
-                'affineTmat':        ('-t Tmat', 'Tmat'),
-                'warpFile':          ('-w wrpFile', 'wrpFile'),
-                'interpolation':     ('--interp=sinc', 'sinc'),
-                'brainMask':         ('-m mask', 'mask')}
+               'helpDoc':           ('-h', True),
+               'tensor':            ('--tensor', True),
+               'affineTmat':        ('-t Tmat', 'Tmat'),
+               'warpFile':          ('-w wrpFile', 'wrpFile'),
+               'interpolation':     ('--interp=sinc', 'sinc'),
+               'brainMask':         ('-m mask', 'mask')}
 
     for name, settings in list(opt_map.items()):
         vrg4 = fsl.VecReg(infile='infile', outfile='outfile',
@@ -460,7 +460,7 @@ def test_tbss_skeleton():
     # Now we get a command line
     yield assert_equal, bones.cmdline, \
         "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s" % (Info.standard_image("LowerCingulum_1mm.nii.gz"),
-                                                             os.path.join(newdir, "b_skeletonised.nii"))
+                                                               os.path.join(newdir, "b_skeletonised.nii"))
 
     # Can we specify a mask?
     bones.inputs.use_cingulum_mask = Undefined
@@ -494,7 +494,7 @@ def test_distancemap():
     mapper.inputs.local_max_file = True
     yield assert_equal, mapper.cmdline, \
         "distancemap --out=%s --in=a.nii --localmax=%s" % (os.path.join(newdir, "a_dstmap.nii"),
-                                                         os.path.join(newdir, "a_lclmax.nii"))
+                                                           os.path.join(newdir, "a_lclmax.nii"))
 
     # And call it whatever we want
     mapper.inputs.local_max_file = "max.nii"

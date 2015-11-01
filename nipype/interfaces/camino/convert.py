@@ -188,13 +188,13 @@ class ProcStreamlinesInputSpec(StdOutCommandLineInputSpec):
                    desc='data file')
 
     maxtractpoints = traits.Int(argstr='-maxtractpoints %d', units='NA',
-                               desc="maximum number of tract points")
+                                desc="maximum number of tract points")
     mintractpoints = traits.Int(argstr='-mintractpoints %d', units='NA',
-                               desc="minimum number of tract points")
+                                desc="minimum number of tract points")
     maxtractlength = traits.Int(argstr='-maxtractlength %d', units='mm',
-                               desc="maximum length of tracts")
+                                desc="maximum length of tracts")
     mintractlength = traits.Int(argstr='-mintractlength %d', units='mm',
-                               desc="minimum length of tracts")
+                                desc="minimum length of tracts")
     datadims = traits.List(traits.Int, desc='data dimensions in voxels',
                            argstr='-datadims %s', minlen=3, maxlen=3,
                            units='voxels')

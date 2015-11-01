@@ -250,12 +250,12 @@ their names to the subject list and their data to the proper folders.
 dwiproc = pe.Workflow(name="dwiproc")
 dwiproc.base_dir = os.path.abspath('dmri_mrtrix_dti')
 dwiproc.connect([
-                    (infosource, datasource, [('subject_id', 'subject_id')]),
-                    (datasource, tractography, [('dwi', 'inputnode.dwi'),
-                                              ('bvals', 'inputnode.bvals'),
-                                              ('bvecs', 'inputnode.bvecs')
-                                              ])
-                ])
+    (infosource, datasource, [('subject_id', 'subject_id')]),
+    (datasource, tractography, [('dwi', 'inputnode.dwi'),
+                                ('bvals', 'inputnode.bvals'),
+                                ('bvecs', 'inputnode.bvecs')
+                                ])
+])
 
 if __name__ == '__main__':
     dwiproc.run()

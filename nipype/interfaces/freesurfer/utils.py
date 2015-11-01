@@ -633,7 +633,7 @@ class SurfaceSnapshots(FSCommand):
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.screenshot_stem):
             stem = "%s_%s_%s" % (
-                    self.inputs.subject_id, self.inputs.hemi, self.inputs.surface)
+                self.inputs.subject_id, self.inputs.hemi, self.inputs.surface)
         else:
             stem = self.inputs.screenshot_stem
             stem_args = self.inputs.stem_template_args

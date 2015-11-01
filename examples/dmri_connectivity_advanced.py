@@ -581,11 +581,11 @@ connectivity.base_dir = op.abspath('dmri_connectivity_advanced')
 connectivity.connect([
                     (infosource, datasource, [('subject_id', 'subject_id')]),
                     (datasource, mapping, [('dwi', 'inputnode.dwi'),
-                                         ('bvals', 'inputnode.bvals'),
-                                         ('bvecs', 'inputnode.bvecs')
-                                         ]),
-        (infosource, mapping, [('subject_id', 'inputnode.subject_id')])
-                ])
+                                           ('bvals', 'inputnode.bvals'),
+                                           ('bvecs', 'inputnode.bvecs')
+                                           ]),
+    (infosource, mapping, [('subject_id', 'inputnode.subject_id')])
+])
 
 """
 The following functions run the whole workflow and produce a .dot and .png graph of the processing pipeline.

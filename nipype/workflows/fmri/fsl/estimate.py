@@ -132,7 +132,7 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
         (merge_contrasts, outputspec, [('out', 'zfiles')]),
         (modelestimate, outputspec, [('param_estimates', 'parameter_estimates'),
                                      ('dof_file', 'dof_file')]),
-        ])
+    ])
     if version < 507:
         modelfit.connect([
             (modelgen, conestimate, [('con_file', 'tcon_file'),
@@ -145,7 +145,7 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
                                             ('zfstats', 'in2')]),
             (conestimate, outputspec, [('copes', 'copes'),
                                        ('varcopes', 'varcopes')]),
-            ])
+        ])
     else:
         modelfit.connect([
             (modelgen, modelestimate, [('con_file', 'tcon_file'),
@@ -154,7 +154,7 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
                                               ('zfstats', 'in2')]),
             (modelestimate, outputspec, [('copes', 'copes'),
                                          ('varcopes', 'varcopes')]),
-            ])
+        ])
     return modelfit
 
 

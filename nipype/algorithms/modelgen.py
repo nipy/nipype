@@ -316,10 +316,10 @@ class SpecifyModel(BaseInterface):
                         sessinfo[i]['cond'][cid]['amplitudes'] = \
                             info.amplitudes[cid]
                     if hasattr(info, 'tmod') and info.tmod and \
-                        len(info.tmod) > cid:
+                            len(info.tmod) > cid:
                         sessinfo[i]['cond'][cid]['tmod'] = info.tmod[cid]
                     if hasattr(info, 'pmod') and info.pmod and \
-                        len(info.pmod) > cid:
+                            len(info.pmod) > cid:
                         if info.pmod[cid]:
                             sessinfo[i]['cond'][cid]['pmod'] = []
                             for j, name in enumerate(info.pmod[cid].name):
@@ -335,7 +335,7 @@ class SpecifyModel(BaseInterface):
                 for j, r in enumerate(info.regressors):
                     sessinfo[i]['regress'].insert(j, dict(name='', val=[]))
                     if hasattr(info, 'regressor_names') and \
-                        info.regressor_names is not None:
+                            info.regressor_names is not None:
                         sessinfo[i]['regress'][j]['name'] = \
                             info.regressor_names[j]
                     else:
@@ -476,12 +476,12 @@ class SpecifySPMModel(SpecifyModel):
                 for j, val in enumerate(info.onsets):
                     if self.inputs.input_units == 'secs':
                         onsets = np.array(info.onsets[j]) +\
-                                 self.inputs.time_repetition * \
-                                 sum(nscans[0:(i + 1)])
+                            self.inputs.time_repetition * \
+                            sum(nscans[0:(i + 1)])
                         infoout.onsets[j].extend(onsets.tolist())
                     else:
                         onsets = np.array(info.onsets[j]) + \
-                                 sum(nscans[0:(i + 1)])
+                            sum(nscans[0:(i + 1)])
                         infoout.onsets[j].extend(onsets.tolist())
                 for j, val in enumerate(info.durations):
                     if len(info.onsets[j]) > 1 and len(val) == 1:
@@ -561,7 +561,7 @@ class SpecifySparseModelInputSpec(SpecifyModelInputSpec):
     time_acquisition = traits.Float(0, mandatory=True,
                                     desc="Time in seconds to acquire a single image volume")
     volumes_in_cluster = traits.Range(1, usedefault=True,
-                                    desc="Number of scan volumes in a cluster")
+                                      desc="Number of scan volumes in a cluster")
     model_hrf = traits.Bool(desc="model sparse events with hrf")
     stimuli_as_impulses = traits.Bool(True,
                                       desc="Treat each stimulus to be impulse like.",

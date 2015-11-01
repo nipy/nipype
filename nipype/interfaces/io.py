@@ -1156,8 +1156,7 @@ class DataFinder(IOBase):
                         full_path = os.path.join(curr_dir, infile)
                         self._match_path(full_path)
         if (self.inputs.unpack_single and
-                len(self.result['out_paths']) == 1
-                ):
+                len(self.result['out_paths']) == 1):
             for key, vals in self.result.items():
                 self.result[key] = vals[0]
         else:
@@ -1578,7 +1577,7 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                         desc=('Option to share the subjects from the original project'
                               'instead of creating new ones when possible - the created '
                               'experiments are then shared back to the original project'
-              ),
+                              ),
                         usedefault=True)
 
     def __setattr__(self, key, value):

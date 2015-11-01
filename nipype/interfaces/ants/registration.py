@@ -329,9 +329,9 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                                          traits.Float()),
                                                      traits.Tuple(traits.Float(),  # gdf & syn
                                                                   traits.Float(
-                                                                  ),
-                                                                  traits.Float(
-                                                                  )),
+                                                     ),
+        traits.Float(
+                                                     )),
                                                      traits.Tuple(traits.Float(),  # BSplineSyn
                                                                   traits.Int(),
                                                                   traits.Int(),
@@ -607,7 +607,7 @@ class Registration(ANTSCommand):
             if isdefined(self.inputs.sigma_units):
                 retval.append('--smoothing-sigmas %s%s' %
                               (self._antsJoinList(self.inputs.smoothing_sigmas[
-                                 ii]),
+                                  ii]),
                                self.inputs.sigma_units[ii]))
             else:
                 retval.append('--smoothing-sigmas %s' %

@@ -133,8 +133,8 @@ smooth = pe.Node(interface=fsl.Smooth(fwhm=6), name="smooth")
 motion_correct_and_smooth = pe.Workflow(name="motion_correct_and_smooth")
 motion_correct_and_smooth.base_dir = os.path.abspath('.')  # define where will be the root folder for the workflow
 motion_correct_and_smooth.connect([
-                                   (motion_correct, smooth, [('out_file', 'in_file')])
-                                   ])
+    (motion_correct, smooth, [('out_file', 'in_file')])
+])
 # we are connecting 'out_file' output of motion_correct to 'in_file' input of smooth
 motion_correct_and_smooth.run()
 
@@ -154,8 +154,8 @@ subtract.inputs.op_string = "-sub"
 demean = pe.Workflow(name="demean")
 demean.base_dir = os.path.abspath('.')
 demean.connect([
-                (calc_mean, subtract, [('out_file', 'in_file2')])
-                ])
+    (calc_mean, subtract, [('out_file', 'in_file2')])
+])
 
 demean.inputs.calc_mean.in_file = os.path.abspath('data/s1/f3.nii')
 demean.inputs.subtract.in_file = os.path.abspath('data/s1/f3.nii')
@@ -216,9 +216,9 @@ datasink = pe.Node(interface=nio.DataSink(), name='sinker')
 preprocess = pe.Workflow(name='preprocout')
 preprocess.base_dir = os.path.abspath('.')
 preprocess.connect([
-                    (preproc, datasink, [('meanfunc2.out_file', 'meanfunc'),
-                                         ('maskfunc3.out_file', 'funcruns')])
-                    ])
+    (preproc, datasink, [('meanfunc2.out_file', 'meanfunc'),
+                         ('maskfunc3.out_file', 'funcruns')])
+])
 preprocess.run()
 
 """

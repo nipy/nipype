@@ -177,9 +177,9 @@ class FSLXCommandOutputSpec(TraitedSpec):
     mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
                                                              'distribution on f anisotropy'))
     mean_S0samples = File(exists=True, desc=('Mean of distribution on T2w'
-                                            'baseline signal intensity S0'))
+                                             'baseline signal intensity S0'))
     mean_tausamples = File(exists=True, desc=('Mean of distribution on '
-                                             'tau samples (only with rician noise)'))
+                                              'tau samples (only with rician noise)'))
     phsamples = OutputMultiPath(File(exists=True), desc=('phi samples, per fiber'))
     thsamples = OutputMultiPath(File(exists=True), desc=('theta samples, per fiber'))
 
@@ -273,7 +273,7 @@ class BEDPOSTX5OutputSpec(TraitedSpec):
     mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
                                                              'distribution on f anisotropy'))
     mean_S0samples = File(exists=True, desc=('Mean of distribution on T2w'
-                                            'baseline signal intensity S0'))
+                                             'baseline signal intensity S0'))
     mean_phsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
                                                               'distribution on phi'))
     mean_thsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
@@ -534,7 +534,7 @@ class BEDPOSTX4OutputSpec(TraitedSpec):
                                        'bedpostx output files for this subject')
     xfms_directory = Directory(exists=True,
                                desc='path/name of directory with the ' +
-                                   'tranformation matrices')
+                               'tranformation matrices')
     merged_thsamples = traits.List(File(exists=True),
                                    desc='a list of path/name of 4D volume ' +
                                         'with samples from the distribution ' +
@@ -841,9 +841,9 @@ class ProbTrackX(FSLCommand):
                 outputs['fdt_paths'] = []
                 for seed in self.inputs.seed:
                     outputs['fdt_paths'].append(
-                            os.path.abspath(
-                                self._gen_fname("fdt_paths_%s" % ("_".join([str(s) for s in seed])),
-                                                cwd=out_dir, suffix='')))
+                        os.path.abspath(
+                            self._gen_fname("fdt_paths_%s" % ("_".join([str(s) for s in seed])),
+                                            cwd=out_dir, suffix='')))
             else:
                 outputs['fdt_paths'] = os.path.abspath(self._gen_fname("fdt_paths",
                                                                        cwd=out_dir, suffix=''))
@@ -853,13 +853,13 @@ class ProbTrackX(FSLCommand):
             outputs['targets'] = []
             for target in self.inputs.target_masks:
                 outputs['targets'].append(os.path.abspath(
-                                                self._gen_fname('seeds_to_' + os.path.split(target)[1],
-                                                                cwd=out_dir,
-                                                                suffix='')))
+                    self._gen_fname('seeds_to_' + os.path.split(target)[1],
+                                    cwd=out_dir,
+                                    suffix='')))
         if isdefined(self.inputs.verbose) and self.inputs.verbose == 2:
             outputs['particle_files'] = [os.path.abspath(
-                                            os.path.join(out_dir, 'particle%d' % i))
-                                         for i in range(self.inputs.n_samples)]
+                os.path.join(out_dir, 'particle%d' % i))
+                for i in range(self.inputs.n_samples)]
         return outputs
 
     def _gen_filename(self, name):
@@ -955,7 +955,7 @@ class ProbTrackX2(ProbTrackX):
 
         if isdefined(self.inputs.omatrix2):
             outputs['lookup_tractspace'] = \
-              os.path.abspath(os.path.join(out_dir, 'lookup_tractspace_fdt_matrix2.nii.gz'))
+                os.path.abspath(os.path.join(out_dir, 'lookup_tractspace_fdt_matrix2.nii.gz'))
             outputs['matrix2_dot'] = os.path.abspath(os.path.join(out_dir, 'fdt_matrix2.dot'))
 
         if isdefined(self.inputs.omatrix3):

@@ -66,10 +66,10 @@ def create_bem_flow(name='bem', out_format='stl'):
     """
 
     bemflow.connect([
-            (inputnode, watershed_bem, [('subject_id', 'subject_id'),
-                                        ('subjects_dir', 'subjects_dir')]),
-            (watershed_bem, surfconvert, [('mesh_files', 'in_file')]),
-            ])
+        (inputnode, watershed_bem, [('subject_id', 'subject_id'),
+                                    ('subjects_dir', 'subjects_dir')]),
+        (watershed_bem, surfconvert, [('mesh_files', 'in_file')]),
+    ])
 
     """
     Setup an outputnode that defines relevant inputs of the workflow.
@@ -78,6 +78,6 @@ def create_bem_flow(name='bem', out_format='stl'):
     outputnode = pe.Node(niu.IdentityInterface(fields=["meshes"]),
                          name="outputspec")
     bemflow.connect([
-            (surfconvert, outputnode, [("converted", "meshes")]),
-            ])
+        (surfconvert, outputnode, [("converted", "meshes")]),
+    ])
     return bemflow

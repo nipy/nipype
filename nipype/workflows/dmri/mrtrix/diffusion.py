@@ -36,8 +36,8 @@ def create_mrtrix_dti_pipeline(name="dtiproc", tractography_type='probabilistic'
     """
 
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["dwi",
-                                                                   "bvecs",
-                                                                   "bvals"]),
+                                                                 "bvecs",
+                                                                 "bvals"]),
                         name="inputnode")
 
     bet = pe.Node(interface=fsl.BET(), name="bet")
