@@ -546,7 +546,7 @@ class S3DataGrabber(IOBase):
         if not isdefined(self.inputs.template_args):
             self.inputs.template_args = {}
         for key in outfields:
-            if not key in self.inputs.template_args:
+            if key not in self.inputs.template_args:
                 if infields:
                     self.inputs.template_args[key] = [infields]
                 else:
@@ -789,7 +789,7 @@ class DataGrabber(IOBase):
         if not isdefined(self.inputs.template_args):
             self.inputs.template_args = {}
         for key in outfields:
-            if not key in self.inputs.template_args:
+            if key not in self.inputs.template_args:
                 if infields:
                     self.inputs.template_args[key] = [infields]
                 else:

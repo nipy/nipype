@@ -37,7 +37,7 @@ except ImportError:
 def sanitize_path_comp(path_comp):
     result = []
     for char in path_comp:
-        if not char in string.letters + string.digits + '-_.':
+        if char not in string.letters + string.digits + '-_.':
             result.append('_')
         else:
             result.append(char)
@@ -303,7 +303,7 @@ class CopyMeta(BaseInterface):
         if self.inputs.exclude_classes:
             classes = [cls
                        for cls in classes
-                       if not cls in self.inputs.exclude_classes
+                       if cls not in self.inputs.exclude_classes
                        ]
 
         for cls in classes:

@@ -219,7 +219,7 @@ def package_check(pkg_name, version=None,
     if version:
         dependency += '>=' + version
     if optional_tf:
-        if not 'extras_require' in setuptools_args:
+        if 'extras_require' not in setuptools_args:
             setuptools_args['extras_require'] = {}
         _add_append_key(setuptools_args['extras_require'],
                         optional,

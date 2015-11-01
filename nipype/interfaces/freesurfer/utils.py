@@ -641,7 +641,7 @@ class SurfaceSnapshots(FSCommand):
                 args = tuple([getattr(self.inputs, arg) for arg in stem_args])
                 stem = stem % args
         # Check if the DISPLAY variable is set -- should avoid crashes (might not?)
-        if not "DISPLAY" in os.environ:
+        if "DISPLAY" not in os.environ:
             raise RuntimeError("Graphics are not enabled -- cannot run tksurfer")
         runtime.environ["_SNAPSHOT_STEM"] = stem
         self._write_tcl_script()
