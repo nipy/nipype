@@ -1271,7 +1271,7 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
     msk = np.ones_like(imgs[0].get_data())
     msk[weights <= 0] = 0
 
-    if not in_mask is None:
+    if in_mask is not None:
         msk = nib.load(in_mask).get_data()
         msk[msk <= 0] = 0
         msk[msk > 0] = 1

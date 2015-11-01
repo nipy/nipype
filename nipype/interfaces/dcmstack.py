@@ -63,7 +63,7 @@ class NiftiGeneratorBase(BaseInterface):
             # If no out_format is specified, use a sane default that will work
             # with the provided meta data.
             out_fmt = []
-            if not idx is None:
+            if idx is not None:
                 out_fmt.append('%03d' % idx)
             if 'SeriesNumber' in meta:
                 out_fmt.append('%(SeriesNumber)03d')

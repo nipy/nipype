@@ -1100,7 +1100,7 @@ class DataFinder(IOBase):
                 return
         # Check if we can match the path
         match = self.match_regex.search(target_path)
-        if not match is None:
+        if match is not None:
             match_dict = match.groupdict()
             if self.result is None:
                 self.result = {'out_paths': []}

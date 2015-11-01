@@ -1933,7 +1933,7 @@ class WarpPoints(CommandLine):
         runtime = super(WarpPoints, self)._run_interface(runtime)
         newpoints = np.fromstring('\n'.join(runtime.stdout.split('\n')[1:]), sep=' ')
 
-        if not tmpfile is None:
+        if tmpfile is not None:
             try:
                 os.remove(tmpfile.name)
             except:

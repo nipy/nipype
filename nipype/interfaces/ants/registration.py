@@ -157,7 +157,7 @@ class ANTS(ANTSCommand):
         retval = ['--transformation-model %s' % model]
         parameters = []
         for elem in (stepLength, timeStep, deltaTime, symmetryType):
-            if not elem is traits.Undefined:
+            if elem is not traits.Undefined:
                 parameters.append('%#.2g' % elem)
         if len(parameters) > 0:
             if len(parameters) > 1:

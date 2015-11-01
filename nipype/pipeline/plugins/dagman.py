@@ -127,7 +127,7 @@ getenv = True
                     basename=os.path.join(batch_dir, name),
                     override_specs=override_specs
                     )
-                if not wrapper_cmd is None:
+                if wrapper_cmd is not None:
                     specs['executable'] = wrapper_cmd
                     specs['nodescript'] = \
                         '%s %s %s' % (wrapper_args % specs,  # give access to variables

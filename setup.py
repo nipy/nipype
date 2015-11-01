@@ -172,7 +172,7 @@ def package_check(pkg_name, version=None,
        dependencies.  If dict fill key values ``install_requires`` and
        ``extras_require`` for non-optional and optional dependencies.
     '''
-    setuptools_mode = not setuptools_args is None
+    setuptools_mode = setuptools_args is not None
     optional_tf = bool(optional)
     if version_getter is None:
         def version_getter(pkg_name):

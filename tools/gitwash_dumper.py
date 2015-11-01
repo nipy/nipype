@@ -116,8 +116,8 @@ def make_link_targets(proj_name,
     .. _`proj_name` mailing list: url
     """
     link_contents = open(known_link_fname, 'rt').readlines()
-    have_url = not url is None
-    have_ml_url = not ml_url is None
+    have_url = url is not None
+    have_ml_url = ml_url is not None
     have_gh_url = None
     for line in link_contents:
         if not have_url:
@@ -136,12 +136,12 @@ def make_link_targets(proj_name,
         raise RuntimeError('Need command line or known project '
                            'and / or mailing list URLs')
     lines = []
-    if not url is None:
+    if url is not None:
         lines.append('.. _%s: %s\n' % (proj_name, url))
     if not have_gh_url:
         gh_url = 'http://github.com/%s/%s\n' % (user_name, repo_name)
         lines.append('.. _`%s github`: %s\n' % (proj_name, gh_url))
-    if not ml_url is None:
+    if ml_url is not None:
         lines.append('.. _`%s mailing list`: %s\n' % (proj_name, ml_url))
     if len(lines) == 0:
         # Nothing to do
