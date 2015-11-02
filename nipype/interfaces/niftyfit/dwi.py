@@ -29,14 +29,17 @@ class FitDwiInputSpec(NIFTYFITCommandInputSpec):
                    argstr='-mask %s', mandatory=False)
     prior_file = File(exists=True, desc='Filename of parameter priors for -ball and -nod',
                    argstr='-prior %s', mandatory=False)
-    rotsform_flag = traits.Int(0, desc='Rotate the output tensors according to the q/s form of the image (resulting tensors will be in mm coordinates, default: 0).',
+    rotsform_flag = traits.Int(0,
+                               desc='Rotate the output tensors according to the q/s form of the image ' +
+                                    '(resulting tensors will be in mm coordinates, default: 0).',
                                argstr='-rotsform %d', 
                                mandatory=False, 
-                               usedefault = 0)
-    bvallowthreshold = traits.Float(20, desc='B-value threshold used for detection of B0 and DWI images [default: 20]',
-                                 argstr='-bvallowthreshold %f', 
-                                 mandatory=False, 
-                                 usedefault = True)
+                               usedefault=False)
+    bvallowthreshold = traits.Float(20,
+                                    desc='B-value threshold used for detection of B0 and DWI images [default: 20]',
+                                    argstr='-bvallowthreshold %f',
+                                    mandatory=False,
+                                    usedefault=False)
     op_basename = traits.String('dwifit_', desc='Output file basename',usedefault = True)
 
     # Output options, with templated output names based on the source image
@@ -200,10 +203,11 @@ class DwiToolInputSpec(NIFTYFITCommandInputSpec):
                        name_source=['op_basename'], 
                        name_template='%s_logdti2', 
                        requires=['dti_flag'])
-    bvallowthreshold = traits.Float(10, desc='B-value threshold used for detection of B0 and DWI images [default: 10]',
-                                 argstr='-bvallowthreshold %f', 
-                                 mandatory=False, 
-                                 usedefault = True)
+    bvallowthreshold = traits.Float(10,
+                                    desc='B-value threshold used for detection of B0 and DWI images [default: 10]',
+                                    argstr='-bvallowthreshold %f',
+                                    mandatory=False,
+                                    usedefault=False)
     
     
     # Methods options
