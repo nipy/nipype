@@ -144,7 +144,6 @@ class ProgressPercentage(object):
 
         # Import packages
         import threading
-        import os
 
         # Initialize data attributes
         self._filename = filename
@@ -384,10 +383,6 @@ class DataSink(IOBase):
             S3 bucket path
         '''
 
-        # Import packages
-        import os
-        import sys
-
         # Init variables
         s3_str = 's3://'
         sep = os.path.sep
@@ -428,9 +423,8 @@ class DataSink(IOBase):
         Parameters
         ----------
         creds_path : string (filepath)
-            path to the csv file with 'AWSAccessKeyId=' followed by access
-            key in the first row and 'AWSSecretAccessKey=' followed by
-            secret access key in the second row
+            path to the csv file downloaded from AWS; can either be root
+            or user credentials
 
         Returns
         -------
@@ -440,19 +434,28 @@ class DataSink(IOBase):
             string of the AWS secret access key
         '''
 
-        # Import packages
-        import csv
-
         # Init variables
-        csv_reader = csv.reader(open(creds_path, 'r'))
+        with open(creds_path, 'r') as creds_in:
+            # Grab csv rows
+            row1 = creds_in.readline()
+            row2 = creds_in.readline()
 
-        # Grab csv rows
-        row1 = csv_reader.next()[0]
-        row2 = csv_reader.next()[0]
+        # Are they root or user keys
+        if 'User Name' in row1:
+            # And split out for keys
+            aws_access_key_id = row2.split(',')[1]
+            aws_secret_access_key = row2.split(',')[2]
+        elif 'AWSAccessKeyId' in row1:
+            # And split out for keys
+            aws_access_key_id = row1.split('=')[1]
+            aws_secret_access_key = row2.split('=')[1]
+        else:
+            err_msg = 'Credentials file not recognized, check file is correct'
+            raise Exception(err_msg)
 
-        # And split out for keys
-        aws_access_key_id = row1.split('=')[1]
-        aws_secret_access_key = row2.split('=')[1]
+        # Strip any carriage return/line feeds
+        aws_access_key_id = aws_access_key_id.replace('\r', '').replace('\n', '')
+        aws_secret_access_key = aws_secret_access_key.replace('\r', '').replace('\n', '')
 
         # Return keys
         return aws_access_key_id, aws_secret_access_key
