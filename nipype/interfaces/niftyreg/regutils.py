@@ -24,25 +24,22 @@ from nipype.utils.filemanip import split_filename
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+
 # A custom trait class for positive integers
 class PositiveInt (traits.BaseInt):
-
     # Define the default value
     default_value = 0
     # Describe the trait type
     info_text = 'A positive integer'
 
-    def validate ( self, object, name, value ):
+    def validate(self, object, name, value ):
         value = super(PositiveInt, self).validate(object, name, value)
         if (value >= 0) == 1:
             return value
-            self.error( object, name, value )
+        self.error(object, name, value)
 
-#-----------------------------------------------------------
+
 # reg_resample wrapper interface
-#-----------------------------------------------------------
-
-# Input spec
 class RegResampleInputSpec(NIFTYREGCommandInputSpec):
     # Input reference file
     ref_file = File(exists=True, desc='The input reference/target image',
@@ -72,6 +69,9 @@ class RegResampleInputSpec(NIFTYREGCommandInputSpec):
     # Tensor flag
     tensor_flag = traits.Bool(desc='Resample Tensor Map', 
                               argstr='-tensor ')
+    # Set the number of omp thread to use
+    omp_core_val = traits.Int(desc='Number of openmp thread to use',
+                              argstr='-omp %i')
 
 # Output spec
 class RegResampleOutputSpec(TraitedSpec):
@@ -88,15 +88,12 @@ class RegResample(NIFTYREGCommand):
     # Need this overload to properly constraint the interpolation type input
     def _format_arg(self, name, spec, value):
         if name == 'inter_val':
-            return spec.argstr%{'NN':0, 'LIN':1, 'CUB':3, 'SINC':5}[value]
+            return spec.argstr % {'NN': 0, 'LIN': 1, 'CUB': 3, 'SINC': 5}[value]
         else:
             return super(RegResample, self)._format_arg(name, spec, value)        
 
-    
-#-----------------------------------------------------------
+
 # reg_jacobian wrapper interface
-#-----------------------------------------------------------
-# Input spec
 class RegJacobianInputSpec(NIFTYREGCommandInputSpec):
     # Reference file name
     ref_file = File(exists=True, desc='Reference/target file (required if specifying CPP transformations',
@@ -113,30 +110,33 @@ class RegJacobianInputSpec(NIFTYREGCommandInputSpec):
     # Input log of jacobian determinant file name
     jac_log_file = File(desc='The output log of jacobian determinant file name',
                         argstr='-jacL %s', name_source=['trans_file'], name_template='%s_jac_log_det')
+    # Set the number of omp thread to use
+    omp_core_val = traits.Int(desc='Number of openmp thread to use',
+                              argstr='-omp %i')
+
 
 # Output spec
 class RegJacobianOutputSpec(TraitedSpec):
     jac_det_file = File(desc='The output jacobian determinant file')
     jac_mat_file = File(desc='The output filename of jacobian matrix')
     jac_log_file = File(desc='The output filename of the log of jacobian determinant')
-    
+
+
 # Main interface class
 class RegJacobian(NIFTYREGCommand):
     _cmd = getNiftyRegPath('reg_jacobian')
     input_spec = RegJacobianInputSpec
     output_spec = RegJacobianOutputSpec
     _suffix = '_jacobian_'
-    
-#-----------------------------------------------------------
+
+
 # reg_tools wrapper interface
-#-----------------------------------------------------------
-# Input spec
 class RegToolsInputSpec(NIFTYREGCommandInputSpec):
     # Input image file
     in_file = File(exists=True, desc='The input image file path',
                    argstr='-in %s', mandatory=True)
     # Output file path
-    out_file = File(desc='The output file name', argstr='-out %s', name_source = ['in_file'], name_template = '%s_out')
+    out_file = File(desc='The output file name', argstr='-out %s', name_source=['in_file'], name_template='%s_out')
     # Make the output image isotropic
     iso_flag = traits.Bool(argstr='-iso', desc='Make output image isotropic')
     # Set scale, slope to 0 and 1.
@@ -168,29 +168,28 @@ class RegToolsInputSpec(NIFTYREGCommandInputSpec):
     down_flag = traits.Bool(desc='Downsample the image by a factor of 2', argstr='-down')
     # Smoothing using spline kernel
     smo_s_val = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                             desc = 'Smooth the input image using a cubic spline kernel',
+                             desc='Smooth the input image using a cubic spline kernel',
                              argstr='-smoS %f %f %f')
     # Smoothing using Gaussian kernel
     smo_g_val = traits.Tuple(traits.Float, traits.Float, traits.Float,
-                             desc = 'Smooth the input image using a Gaussian kernel',
+                             desc='Smooth the input image using a Gaussian kernel',
                              argstr='-smoG %f %f %f')
+    # Set the number of omp thread to use
+    omp_core_val = traits.Int(desc='Number of openmp thread to use',
+                              argstr='-omp %i')
 
 
-# Output spec    
 class RegToolsOutputSpec(TraitedSpec):
-    out_file = File(desc='The output file', exists = True)
+    out_file = File(desc='The output file', exists=True)
 
 
-# Main interface class
 class RegTools(NIFTYREGCommand):
     _cmd = getNiftyRegPath('reg_tools')
     input_spec = RegToolsInputSpec
     output_spec = RegToolsOutputSpec
 
 
-# -----------------------------------------------------------
 # reg_average wrapper interface
-# -----------------------------------------------------------
 class RegAverageInputSpec(NIFTYREGCommandInputSpec):
 
     out_file = File(position=0, desc='Output file name', argstr='%s', genfile=True)
@@ -223,6 +222,9 @@ class RegAverageInputSpec(NIFTYREGCommandInputSpec):
     demean_files = traits.List(traits.Str, position=-1, argstr=' %s ', sep=' ',
                                desc='transformation files and floating image pairs/triplets to the reference space',
                                xor=['in_file', 'avg_lts_file'])
+    # Set the number of omp thread to use
+    omp_core_val = traits.Int(desc='Number of openmp thread to use',
+                              argstr='-omp %i')
 
 
 class RegAverageOutputSpec(TraitedSpec):
@@ -288,7 +290,7 @@ class RegAladinInputSpec(NIFTYREGCommandInputSpec):
                       argstr='-fmask %s')
     # Result image path
     res_file = File(desc='The affine transformed floating image',
-                    argstr='-res %s', name_source = ['flo_file'], name_template = '%s_res')
+                    argstr='-res %s', name_source=['flo_file'], name_template='%s_res')
     # Maximum number of iterations
     maxit_val = PositiveInt(desc='Maximum number of iterations', argstr='-maxit %d')
     # Multiresolution levels
@@ -325,6 +327,12 @@ class RegAladinInputSpec(NIFTYREGCommandInputSpec):
     # Upper threshold on floating image
     flo_up_val = traits.Float(desc='Upper threshold value on floating image',
                               argstr='-floUpThr %f')
+    # Platform to use
+    platform_val = traits.Int(desc='Platform index',
+                              argstr='-platf %i')
+    # Set the number of omp thread to use
+    omp_core_val = traits.Int(desc='Number of openmp thread to use',
+                              argstr='-omp %i')
 
 # Output spec
 class RegAladinOutputSpec(TraitedSpec):
@@ -341,8 +349,8 @@ class RegAladin(NIFTYREGCommand):
     
     >>> from nipype.interfaces import niftyreg
     >>> aladin = niftyreg.RegAladin()
-    >>> aladin.inputs.flo_image = "floating_image.nii.gz"
-    >>> aladin.inputs.ref_image = "reference_image.nii.gz"
+    >>> aladin.inputs.flo_file = "floating_image.nii.gz"
+    >>> aladin.inputs.ref_file = "reference_image.nii.gz"
     """
     _cmd = getNiftyRegPath('reg_aladin')
     input_spec = RegAladinInputSpec
@@ -374,94 +382,96 @@ class RegTransformInputSpec(NIFTYREGCommandInputSpec):
     ref1_file = File(exists=True, 
                      desc='The input reference/target image',
                      argstr='-ref %s', 
-                     position = 0)
+                     position=0)
     ref2_file = File(exists=True, 
                      desc='The input second reference/target image',
                      argstr='-ref2 %s',
-                     position = 1,
-                     requires = ['ref1_file'])
+                     position=1,
+                     requires=['ref1_file'])
 
     def_input = File(exists=True, 
                      desc='Compute deformation field from transformation', 
                      argstr='-def %s', 
-                     xor = ['disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+                     xor=['disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
     disp_input = File(exists=True, 
                       desc='Compute displacement field from transformation', 
                       argstr='-disp %s',
-                      xor = ['def_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+                      xor=['def_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
     flow_input = File(exists=True, 
                       desc='Compute flow field from spline SVF', 
                       argstr='-flow %s',
-                      xor = ['def_input', 'disp_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+                      xor=['def_input', 'disp_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
-    comp_input = File(exists = True,
+    comp_input = File(exists=True,
                       desc='compose two transformations', 
                       argstr='-comp %s',
-                      position = -3,
-                      xor = ['def_input', 'disp_input', 'flow_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+                      position=-3,
+                      xor=['def_input', 'disp_input', 'flow_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
-    comp_input2 = File(exists = True,
+    comp_input2 = File(exists=True,
                        desc='compose two transformations', 
                        argstr='%s',
-                       position = -2,
-                       requires = ['comp_input'])
+                       position=-2,
+                       requires=['comp_input'])
 
     upd_s_form_input = File(exists=True,
                             desc='Update s-form using the affine transformation', 
                             argstr='-updSform %s',
-                            xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+                            xor=['def_input', 'disp_input', 'flow_input', 'comp_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
     upd_s_form_input2 = File(exists=True,
                              desc='Update s-form using the affine transformation', 
                              argstr='%s',
-                             position = -2,
-                             requires = ['upd_s_form_input'])
+                             position=-2,
+                             requires=['upd_s_form_input'])
 
     inv_aff_input = File(exists=True,
                          desc='Invert an affine transformation', 
                          argstr='-invAff %s',
-                         xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+                         xor=['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
     inv_nrr_input = traits.Tuple(File(exists=True), File(exists=True),
                                  desc='Invert a non-linear transformation', 
                                  argstr='-invNrr %s %s',
-                                 xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+                                 xor=['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'half_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
     half_input = File(exists=True,
                       desc='Half way to the input transformation', 
                       argstr='-half %s',
-                      xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+                      xor=['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'make_aff_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
     make_aff_input = traits.Tuple(traits.Float, traits.Float, traits.Float, traits.Float,
                                   traits.Float, traits.Float, traits.Float, traits.Float, traits.Float, traits.Float,
                                   traits.Float, traits.Float, 
-                                  desc = 'Make an affine transformation matrix',
+                                  desc='Make an affine transformation matrix',
                                   argstr='-makeAff %f %f %f %f %f %f %f %f %f %f %f %f',
-                                  xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
+                                  xor=['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'aff_2_rig_input', 'flirt_2_nr_input'])
 
     aff_2_rig_input = File(exists=True, 
                            desc='Extract the rigid component from affine transformation', 
                            argstr='-aff2rig %s',
-                           xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'flirt_2_nr_input'])
+                           xor=['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'flirt_2_nr_input'])
 
     flirt_2_nr_input = traits.Tuple(File(exists=True), File(exists=True), File(exists=True),
                                     desc='Convert a FLIRT affine transformation to niftyreg affine transformation',
                                     argstr='-flirtAff2NR %s %s %s',
-                                    xor = ['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input'])
-
+                                    xor=['def_input', 'disp_input', 'flow_input', 'comp_input', 'upd_s_form_input', 'inv_aff_input', 'inv_nrr_input', 'half_input', 'make_aff_input', 'aff_2_rig_input'])
 
     out_file = File(genfile=True, 
                     position=-1, 
                     argstr='%s', 
                     desc='transformation file to write')
+    # Set the number of omp thread to use
+    omp_core_val = traits.Int(desc='Number of openmp thread to use',
+                              argstr='-omp %i')
+
 
 class RegTransformOutputSpec(TraitedSpec):
+    out_file = File(desc='Output File (transformation in any format)', exists=True)
 
-    out_file = File(desc = 'Output File (transformation in any format)', exists = True)
 
 class RegTransform(NIFTYREGCommand):
-    
     """
     
     * * OPTIONS * *
@@ -554,7 +564,10 @@ class RegTransform(NIFTYREGCommand):
     _suffix = '_reg_transform'
 
     def _find_input(self):
-        inputs = [self.inputs.def_input, self.inputs.disp_input, self.inputs.flow_input, self.inputs.comp_input, self.inputs.comp_input2, self.inputs.upd_s_form_input, self.inputs.inv_aff_input, self.inputs.inv_nrr_input, self.inputs.half_input, self.inputs.make_aff_input, self.inputs.aff_2_rig_input, self.inputs.flirt_2_nr_input]
+        inputs = [self.inputs.def_input, self.inputs.disp_input, self.inputs.flow_input, self.inputs.comp_input,
+                  self.inputs.comp_input2, self.inputs.upd_s_form_input, self.inputs.inv_aff_input,
+                  self.inputs.inv_nrr_input, self.inputs.half_input, self.inputs.make_aff_input,
+                  self.inputs.aff_2_rig_input, self.inputs.flirt_2_nr_input]
         entries = []
         for entry in inputs:
             if isdefined(entry):
@@ -586,10 +599,8 @@ class RegTransform(NIFTYREGCommand):
             
         return outputs
 
-#-----------------------------------------------------------
+
 # reg_f3d wrapper interface
-#-----------------------------------------------------------
-# Input spec
 class RegF3DInputSpec(NIFTYREGCommandInputSpec):
     # Input reference file
     ref_file = File(exists=True, desc='The input reference/target image',
@@ -598,15 +609,13 @@ class RegF3DInputSpec(NIFTYREGCommandInputSpec):
     flo_file = File(exists=True, desc='The input floating/source image',
                     argstr='-flo %s', mandatory=True)
     # Output CPP file
-    cpp_file = File(desc='The output CPP file', argstr='-cpp %s', name_source = ['flo_file'], name_template = '%s_cpp')
+    cpp_file = File(desc='The output CPP file', argstr='-cpp %s', name_source=['flo_file'], name_template='%s_cpp')
     # Output image file
-    res_file = File(desc='The output resampled image', argstr='-res %s', name_source = ['flo_file'], name_template = '%s_res')
+    res_file = File(desc='The output resampled image', argstr='-res %s', name_source=['flo_file'], name_template='%s_res')
     
     # Input Affine file
     aff_file = File(exists=True, desc='The input affine transformation file', argstr='-aff %s')
-    
-    # Input Affine file
-    aff_file = File(exists=True, desc='The input affine transformation file', argstr='-aff %s')
+
     # Input cpp file
     incpp_file = File(exists=True, desc='The input cpp transformation file', argstr='-incpp %s')
     
@@ -711,12 +720,15 @@ class RegF3DInputSpec(NIFTYREGCommandInputSpec):
     smooth_grad_val = traits.Float(desc='Kernel width for smoothing the metric gradient',
                                     argstr='-smoothGrad %f')
     # Padding value
-    pad_val = traits.Float(desc = 'Padding value', argstr='-pad %f')
+    pad_val = traits.Float(desc='Padding value', argstr='-pad %f')
     # verbosity off
     verbosity_off_flag = traits.Bool(argstr='-voff', desc='Turn off verbose output')
 
     output_type = traits.Enum('NIFTI_GZ', Info.ftypes.keys(),
                               desc='NiftyReg output type')
+    # Set the number of omp thread to use
+    omp_core_val = traits.Int(desc='Number of openmp thread to use',
+                              argstr='-omp %i')
 
 # Output spec
 class RegF3DOutputSpec(TraitedSpec):
@@ -751,10 +763,7 @@ class RegF3D(NIFTYREGCommand):
         return outputs
         
 
-#-----------------------------------------------------------
 # reg_measure wrapper interface
-#-----------------------------------------------------------
-# Input spec
 class RegMeasureInputSpec(NIFTYREGCommandInputSpec):
     # Input reference file
     ref_file = File(exists=True, desc='The input reference/target image',
@@ -766,14 +775,17 @@ class RegMeasureInputSpec(NIFTYREGCommandInputSpec):
                                mandatory=True, argstr='-%s',
                                desc='Measure of similarity to compute')
     out_file = File(desc='The output text file containing the measure',
-                    argstr='-out %s', name_source = ['flo_file'],
-                    name_template = '%s_measure.txt', keep_extension=True)
+                    argstr='-out %s', name_source=['flo_file'],
+                    name_template='%s_measure.txt', keep_extension=True)
+    # Set the number of omp thread to use
+    omp_core_val = traits.Int(desc='Number of openmp thread to use',
+                              argstr='-omp %i')
 
-# Output spec
+
 class RegMeasureOutputSpec(TraitedSpec):
     out_file = File(desc='The output text file containing the measure')
 
-# Main interface class
+
 class RegMeasure(NIFTYREGCommand):
     _cmd = getNiftyRegPath('reg_measure')
     input_spec = RegMeasureInputSpec
