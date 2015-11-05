@@ -330,6 +330,9 @@ class RegAladinInputSpec(NIFTYREGCommandInputSpec):
     # Platform to use
     platform_val = traits.Int(desc='Platform index',
                               argstr='-platf %i')
+    # Platform to use
+    gpuid_val = traits.Int(desc='Device to use id',
+                           argstr='-gpuid %i')
     # Set the number of omp thread to use
     omp_core_val = traits.Int(desc='Number of openmp thread to use',
                               argstr='-omp %i')
