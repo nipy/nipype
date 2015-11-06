@@ -124,6 +124,13 @@ class Dcm2nii(CommandLine):
                         base, filename, ext = split_filename(last_added_file)
                         bvecs.append(os.path.join(base, filename + ".bvec"))
                         bvals.append(os.path.join(base, filename + ".bval"))
+                elif line.startswith("Removed DWI from DTI scan"):
+                    # such line can only follow the 'diffusion' case handled
+                    # just above
+                    for l in (bvecs, bvals):
+                        l[-1] = os.path.join(
+                            os.path.dirname(l[-1]),
+                            'x%s' % (os.path.basename(l[-1]),))
                 elif re.search('.*->(.*)', line):
                     val = re.search('.*->(.*)', line)
                     val = val.groups()[0]
