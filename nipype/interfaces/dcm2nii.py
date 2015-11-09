@@ -118,8 +118,8 @@ class Dcm2nii(CommandLine):
                         base, filename, ext = split_filename(last_added_file)
                         bvecs.append(os.path.join(base, filename + ".bvec"))
                         bvals.append(os.path.join(base, filename + ".bval"))
-                elif re.search('.*-->(.*)', line):
-                    val = re.search('.*-->(.*)', line)
+                elif re.search('.*->(.*)', line):
+                    val = re.search('.*->(.*)', line)
                     val = val.groups()[0]
                     if isdefined(self.inputs.output_dir):
                         output_dir = self.inputs.output_dir
