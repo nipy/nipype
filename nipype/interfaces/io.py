@@ -144,7 +144,6 @@ class ProgressPercentage(object):
 
         # Import packages
         import threading
-        import os
 
         # Initialize data attributes
         self._filename = filename
@@ -162,7 +161,10 @@ class ProgressPercentage(object):
         # With the lock on, print upload status
         with self._lock:
             self._seen_so_far += bytes_amount
-            percentage = (self._seen_so_far / self._size) * 100
+            if self._size != 0:
+                percentage = (self._seen_so_far / self._size) * 100
+            else:
+                percentage = 0
             progress_str = '%d / %d (%.2f%%)\r'\
                            % (self._seen_so_far, self._size, percentage)
 
@@ -381,14 +383,16 @@ class DataSink(IOBase):
             S3 bucket path
         '''
 
-        # Import packages
-        import os
-        import sys
-
         # Init variables
         s3_str = 's3://'
         sep = os.path.sep
         base_directory = self.inputs.base_directory
+
+        # Explicitly lower-case the "s3"
+        if base_directory.lower().startswith(s3_str):
+            base_dir_sp = base_directory.split('/')
+            base_dir_sp[0] = base_dir_sp[0].lower()
+            base_directory = '/'.join(base_dir_sp)
 
         # Check if 's3://' in base dir
         if base_directory.startswith(s3_str):
@@ -419,9 +423,8 @@ class DataSink(IOBase):
         Parameters
         ----------
         creds_path : string (filepath)
-            path to the csv file with 'AWSAccessKeyId=' followed by access
-            key in the first row and 'AWSSecretAccessKey=' followed by
-            secret access key in the second row
+            path to the csv file downloaded from AWS; can either be root
+            or user credentials
 
         Returns
         -------
@@ -431,19 +434,28 @@ class DataSink(IOBase):
             string of the AWS secret access key
         '''
 
-        # Import packages
-        import csv
-
         # Init variables
-        csv_reader = csv.reader(open(creds_path, 'r'))
+        with open(creds_path, 'r') as creds_in:
+            # Grab csv rows
+            row1 = creds_in.readline()
+            row2 = creds_in.readline()
 
-        # Grab csv rows
-        row1 = csv_reader.next()[0]
-        row2 = csv_reader.next()[0]
+        # Are they root or user keys
+        if 'User Name' in row1:
+            # And split out for keys
+            aws_access_key_id = row2.split(',')[1]
+            aws_secret_access_key = row2.split(',')[2]
+        elif 'AWSAccessKeyId' in row1:
+            # And split out for keys
+            aws_access_key_id = row1.split('=')[1]
+            aws_secret_access_key = row2.split('=')[1]
+        else:
+            err_msg = 'Credentials file not recognized, check file is correct'
+            raise Exception(err_msg)
 
-        # And split out for keys
-        aws_access_key_id = row1.split('=')[1]
-        aws_secret_access_key = row2.split('=')[1]
+        # Strip any carriage return/line feeds
+        aws_access_key_id = aws_access_key_id.replace('\r', '').replace('\n', '')
+        aws_secret_access_key = aws_secret_access_key.replace('\r', '').replace('\n', '')
 
         # Return keys
         return aws_access_key_id, aws_secret_access_key
@@ -555,6 +567,12 @@ class DataSink(IOBase):
         iflogger = logging.getLogger('interface')
         s3_str = 's3://'
         s3_prefix = os.path.join(s3_str, bucket.name)
+
+        # Explicitly lower-case the "s3"
+        if dst.lower().startswith(s3_str):
+            dst_sp = dst.split('/')
+            dst_sp[0] = dst_sp[0].lower()
+            dst = '/'.join(dst_sp)
 
         # If src is a directory, collect files (this assumes dst is a dir too)
         if os.path.isdir(src):
