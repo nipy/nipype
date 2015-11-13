@@ -15,7 +15,7 @@
 import sys, os
 
 nipypepath = os.path.abspath('..')
-sys.path.insert(1,nipypepath)
+sys.path.insert(1, nipypepath)
 
 import nipype
 
@@ -168,9 +168,9 @@ html_index = 'index.html'
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-html_sidebars = {'**': ['gse.html','localtoc.html', 'sidebar_versions.html', 'indexsidebar.html'],
-                 'searchresults' : ['sidebar_versions.html', 'indexsidebar.html'],
-                 'version' : []}
+html_sidebars = {'**': ['gse.html', 'localtoc.html', 'sidebar_versions.html', 'indexsidebar.html'],
+                 'searchresults': ['sidebar_versions.html', 'indexsidebar.html'],
+                 'version': []}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.

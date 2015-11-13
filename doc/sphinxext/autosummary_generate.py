@@ -16,6 +16,8 @@ Example Makefile rule::
             ./ext/autosummary_generate.py -o source/generated source/*.rst
 
 """
+
+from __future__ import print_function
 import glob, re, inspect, os, optparse, pydoc
 from autosummary import import_by_name
 
@@ -23,6 +25,7 @@ try:
     from phantom_import import import_phantom_module
 except ImportError:
     import_phantom_module = lambda x: x
+
 
 def main():
     p = optparse.OptionParser(__doc__.strip())
@@ -44,7 +47,7 @@ def main():
 
     # read
     names = {}
-    for name, loc in get_documented(args).items():
+    for name, loc in list(get_documented(args).items()):
         for (filename, sec_title, keyword, toctree) in loc:
             if toctree is not None:
                 path = os.path.join(os.path.dirname(filename), toctree)
@@ -60,8 +63,8 @@ def main():
 
         try:
             obj, name = import_by_name(name)
-        except ImportError, e:
-            print "Failed to import '%s': %s" % (name, e)
+        except ImportError as e:
+            print("Failed to import '%s': %s" % (name, e))
             continue
 
         fn = os.path.join(path, '%s.rst' % name)
@@ -93,15 +96,18 @@ def main():
         finally:
             f.close()
 
+
 def format_modulemember(name, directive):
     parts = name.split('.')
     mod, name = '.'.join(parts[:-1]), parts[-1]
     return ".. currentmodule:: %s\n\n.. %s:: %s\n" % (mod, directive, name)
 
+
 def format_classmember(name, directive):
     parts = name.split('.')
     mod, name = '.'.join(parts[:-2]), '.'.join(parts[-2:])
     return ".. currentmodule:: %s\n\n.. %s:: %s\n" % (mod, directive, name)
+
 
 def get_documented(filenames):
     """
@@ -117,6 +123,7 @@ def get_documented(filenames):
         f.close()
     return documented
 
+
 def get_documented_in_docstring(name, module=None, filename=None):
     """
     Find out what items are documented in the given object's docstring.
@@ -129,9 +136,10 @@ def get_documented_in_docstring(name, module=None, filename=None):
         return get_documented_in_lines(lines, module=name, filename=filename)
     except AttributeError:
         pass
-    except ImportError, e:
-        print "Failed to import '%s': %s" % (name, e)
+    except ImportError as e:
+        print("Failed to import '%s': %s" % (name, e))
     return {}
+
 
 def get_documented_in_lines(lines, module=None, filename=None):
     """
@@ -171,7 +179,7 @@ def get_documented_in_lines(lines, module=None, filename=None):
                     continue
 
                 if line.strip().startswith(':'):
-                    continue # skip options
+                    continue  # skip options
 
                 m = autosummary_item_re.match(line)
                 if m:

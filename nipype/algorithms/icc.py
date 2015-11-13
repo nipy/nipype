@@ -1,3 +1,5 @@
+from __future__ import division
+from builtins import range
 from numpy import ones, kron, mean, eye, hstack, dot, tile
 from scipy.linalg import pinv
 from ..interfaces.base import BaseInterfaceInputSpec, TraitedSpec, \
@@ -9,8 +11,8 @@ import os
 
 class ICCInputSpec(BaseInterfaceInputSpec):
     subjects_sessions = traits.List(traits.List(File(exists=True)),
-                           desc="n subjects m sessions 3D stat files",
-                           mandatory=True)
+                                    desc="n subjects m sessions 3D stat files",
+                                    mandatory=True)
     mask = File(exists=True, mandatory=True)
 
 
@@ -122,7 +124,7 @@ def ICC_rep_anova(Y):
     # ICC(3,1) = (mean square subjeT - mean square error) / (mean square subjeT + (k-1)*-mean square error)
     ICC = (MSR - MSE) / (MSR + dfc * MSE)
 
-    e_var = MSE #variance of error
-    r_var = (MSR - MSE)/nb_conditions #variance between subjects
+    e_var = MSE  # variance of error
+    r_var = (MSR - MSE) / nb_conditions  # variance between subjects
 
     return ICC, r_var, e_var, session_effect_F, dfc, dfe

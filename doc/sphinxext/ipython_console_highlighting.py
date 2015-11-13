@@ -3,7 +3,7 @@
 """reST directive for syntax-highlighting ipython interactive sessions.
 """
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Needed modules
 
 # Standard library
@@ -18,12 +18,13 @@ from pygments.token import Comment, Generic
 from sphinx import highlighting
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Global constants
 line_re = re.compile('.*?\n')
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Code begins - classes and functions
+
 
 class IPythonConsoleLexer(Lexer):
     """
@@ -95,6 +96,6 @@ class IPythonConsoleLexer(Lexer):
                                       pylexer.get_tokens_unprocessed(curcode)):
                 yield item
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Register the extension as a valid pygments lexer
 highlighting.lexers['ipython'] = IPythonConsoleLexer()

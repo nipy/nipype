@@ -14,7 +14,6 @@ nibabel denoted by ## START - COPIED FROM NIBABEL and a corresponding ## END
 """Build helper."""
 
 import os
-from os.path import join as pjoin
 from glob import glob
 import sys
 from functools import partial
@@ -36,7 +35,7 @@ from distutils.core import setup
 ''' Distutils / setuptools helpers from nibabel.nisext'''
 
 import os
-from os.path import join as pjoin, split as psplit, splitext
+from os.path import join as pjoin
 import sys
 PY3 = sys.version_info[0] >= 3
 if PY3:
@@ -50,9 +49,8 @@ except ImportError:
 
 from distutils.version import LooseVersion
 from distutils.command.build_py import build_py
-from distutils.command.install_scripts import install_scripts
-
 from distutils import log
+
 
 def get_comrec_build(pkg_dir, build_cmd=build_py):
     """ Return extended build command class for recording commit
@@ -184,7 +182,7 @@ def package_check(pkg_name, version=None,
     msgs = {
          'missing': 'Cannot import package "%s" - is it installed?',
          'missing opt': 'Missing optional package "%s"',
-         'opt suffix' : '; you may get run-time errors',
+         'opt suffix': '; you may get run-time errors',
          'version too old': 'You have version %s of package "%s"'
                             ' but we need version >= %s', }
     msgs.update(messages)
@@ -211,7 +209,7 @@ def package_check(pkg_name, version=None,
         log.warn(msgs['version too old'] % (have_version,
                                             pkg_name,
                                             version)
-                    + msgs['opt suffix'])
+                 + msgs['opt suffix'])
         return
     # setuptools mode
     if optional_tf and not isinstance(optional, string_types):
@@ -226,7 +224,7 @@ def package_check(pkg_name, version=None,
                         optional,
                         dependency)
         return
-    #_add_append_key(setuptools_args, 'install_requires', dependency)
+    # add_append_key(setuptools_args, 'install_requires', dependency)
     return
 
 
@@ -257,11 +255,11 @@ if 'setuptools' in sys.modules:
         tests_require=['nose'],
         test_suite='nose.collector',
         zip_safe=False,
-        extras_require = dict(
+        extras_require=dict(
             doc='Sphinx>=0.3',
             test='nose>=0.10.1'),
     )
-    pkg_chk = partial(package_check, setuptools_args = extra_setuptools_args)
+    pkg_chk = partial(package_check, setuptools_args=extra_setuptools_args)
 else:
     extra_setuptools_args = {}
     pkg_chk = package_check
@@ -273,11 +271,14 @@ pkg_chk('numpy', NUMPY_MIN_VERSION)
 pkg_chk('scipy', SCIPY_MIN_VERSION)
 pkg_chk('traits', TRAITS_MIN_VERSION)
 pkg_chk('nose', NOSE_MIN_VERSION)
+pkg_chk('future', FUTURE_MIN_VERSION)
+pkg_chk('simplejson', SIMPLEJSON_MIN_VERSION)
 custom_dateutil_messages = {'missing opt': ('Missing optional package "%s"'
                                             ' provided by package '
                                             '"python-dateutil"')}
 pkg_chk('dateutil', DATEUTIL_MIN_VERSION,
-        messages = custom_dateutil_messages)
+        messages=custom_dateutil_messages)
+
 
 def main(**extra_args):
     setup(name=NAME,
@@ -295,7 +296,7 @@ def main(**extra_args):
           version=VERSION,
           install_requires=REQUIRES,
           provides=PROVIDES,
-          packages     = [ 'nipype',
+          packages=['nipype',
                            'nipype.algorithms',
                            'nipype.algorithms.tests',
                            'nipype.caching',
@@ -415,7 +416,7 @@ def main(**extra_args):
           # above, but distutils is surely the worst piece of code in all of
           # python -- duplicating things into MANIFEST.in but this is admittedly
           # only a workaround to get things started -- not a solution
-          package_data = {'nipype':
+          package_data={'nipype':
                           [pjoin('testing', 'data', '*'),
                            pjoin('testing', 'data', 'dicomdir', '*'),
                            pjoin('testing', 'data', 'bedpostxout', '*'),
@@ -425,11 +426,11 @@ def main(**extra_args):
                            pjoin('external', 'd3.js'),
                            pjoin('interfaces', 'script_templates', '*'),
                            pjoin('interfaces', 'tests', 'realign_json.json')
-                          ]},
-          scripts      = glob('bin/*'),
-          cmdclass = cmdclass,
+                           ]},
+          scripts=glob('bin/*'),
+          cmdclass=cmdclass,
           **extra_args
-         )
+          )
 
 if __name__ == "__main__":
     main(**extra_setuptools_args)

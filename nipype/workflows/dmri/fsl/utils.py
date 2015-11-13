@@ -2,10 +2,15 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import nipype.pipeline.engine as pe
-import nipype.interfaces.utility as niu
-from nipype.interfaces import fsl
-from nipype.interfaces import ants
+from __future__ import division
+from builtins import zip
+from builtins import next
+from builtins import range
+
+from ....pipeline import engine as pe
+from ....interfaces import utility as niu
+from ....interfaces import fsl
+from ....interfaces import ants
 
 
 def cleanup_edge_pipeline(name='Cleanup'):
@@ -373,7 +378,7 @@ def recompose_xfm(in_bval, in_xfms):
         if b == 0.0:
             mat = np.eye(4)
         else:
-            mat = xfms.next()
+            mat = next(xfms)
 
         out_name = op.abspath('eccor_%04d.mat' % i)
         out_files.append(out_name)
@@ -545,7 +550,7 @@ def eddy_rotate_bvecs(in_bvec, eddy_params):
 
             invrot = np.linalg.inv(R)
             newbvec = invrot.dot(bvec)
-            new_bvecs.append((newbvec / np.linalg.norm(newbvec)))
+            new_bvecs.append(newbvec / np.linalg.norm(newbvec))
 
     np.savetxt(out_file, np.array(new_bvecs).T, fmt='%0.15f')
     return out_file
@@ -785,7 +790,7 @@ def _checkinitxfm(in_bval, excl_nodiff, in_xfms=None):
     if excl_nodiff:
         dws = np.where(bvals != 0)[0].tolist()
     else:
-        dws = range(len(bvals))
+        dws = list(range(len(bvals)))
 
     if gen_id:
         for i in dws:

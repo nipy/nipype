@@ -10,6 +10,11 @@ Miscellaneous algorithms
     >>> os.chdir(datadir)
 
 '''
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from builtins import range
 
 import os
 import os.path as op
@@ -18,9 +23,6 @@ import nibabel as nb
 import numpy as np
 from math import floor, ceil
 from scipy.ndimage.morphology import grey_dilation
-from scipy.ndimage.morphology import binary_erosion
-from scipy.spatial.distance import cdist, euclidean, dice, jaccard
-from scipy.ndimage.measurements import center_of_mass, label
 from scipy.special import legendre
 import scipy.io as sio
 import itertools
@@ -30,7 +32,7 @@ from nipype import logging
 
 import warnings
 
-import metrics as nam
+from . import metrics as nam
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                InputMultiPath, OutputMultiPath,
                                BaseInterfaceInputSpec, isdefined,
@@ -98,9 +100,9 @@ class PickAtlas(BaseInterface):
         for lab in labels:
             newdata[origdata == lab] = 1
         if self.inputs.hemi == 'right':
-            newdata[floor(float(origdata.shape[0]) / 2):, :, :] = 0
+            newdata[int(floor(float(origdata.shape[0]) / 2)):, :, :] = 0
         elif self.inputs.hemi == 'left':
-            newdata[:ceil(float(origdata.shape[0]) / 2), :, :] = 0
+            newdata[:int(ceil(float(origdata.shape[0]) / 2)), :, :] = 0
 
         if self.inputs.dilation_size != 0:
             newdata = grey_dilation(
@@ -203,7 +205,7 @@ class ModifyAffine(BaseInterface):
             affine = np.dot(self.inputs.transformation_matrix, affine)
 
             nb.save(nb.Nifti1Image(img.get_data(), affine,
-                    img.get_header()), self._gen_output_filename(fname))
+                                   img.get_header()), self._gen_output_filename(fname))
 
         return runtime
 
@@ -439,7 +441,7 @@ class Matlab2CSV(BaseInterface):
         # name and a .csv extension.
 
         saved_variables = list()
-        for key in in_dict.keys():
+        for key in list(in_dict.keys()):
             if not key.startswith('__'):
                 if isinstance(in_dict[key][0], np.ndarray):
                     saved_variables.append(key)
@@ -473,7 +475,7 @@ class Matlab2CSV(BaseInterface):
         outputs = self.output_spec().get()
         in_dict = sio.loadmat(op.abspath(self.inputs.in_file))
         saved_variables = list()
-        for key in in_dict.keys():
+        for key in list(in_dict.keys()):
             if not key.startswith('__'):
                 if isinstance(in_dict[key][0], np.ndarray):
                     saved_variables.append(key)
@@ -495,10 +497,10 @@ def merge_csvs(in_list):
     for idx, in_file in enumerate(in_list):
         try:
             in_array = np.loadtxt(in_file, delimiter=',')
-        except ValueError, ex:
+        except ValueError as ex:
             try:
                 in_array = np.loadtxt(in_file, delimiter=',', skiprows=1)
-            except ValueError, ex:
+            except ValueError as ex:
                 first = open(in_file, 'r')
                 header_line = first.readline()
                 header_list = header_line.split(',')
@@ -506,11 +508,11 @@ def merge_csvs(in_list):
                 try:
                     in_array = np.loadtxt(
                         in_file, delimiter=',', skiprows=1,
-                        usecols=range(1, n_cols)
+                        usecols=list(range(1, n_cols))
                     )
-                except ValueError, ex:
+                except ValueError as ex:
                     in_array = np.loadtxt(
-                        in_file, delimiter=',', skiprows=1, usecols=range(1, n_cols-1))
+                        in_file, delimiter=',', skiprows=1, usecols=list(range(1, n_cols-1)))
         if idx == 0:
             out_array = in_array
         else:
@@ -523,7 +525,7 @@ def merge_csvs(in_list):
 
 def remove_identical_paths(in_files):
     import os.path as op
-    from nipype.utils.filemanip import split_filename
+    from ..utils.filemanip import split_filename
     if len(in_files) > 1:
         out_names = list()
         commonprefix = op.commonprefix(in_files)
@@ -865,7 +867,7 @@ class AddCSVRow(BaseInterface):
                   ' thread-safe in multi-processor execution'))
 
         input_dict = {}
-        for key, val in self.inputs._outputs.items():
+        for key, val in list(self.inputs._outputs.items()):
             # expand lists to several columns
             if key == 'trait_added' and val in self.inputs.copyable_trait_names():
                 continue
@@ -970,20 +972,20 @@ def calc_moments(timeseries_file, moment):
     m2 = stats.moment(timeseries, 2, axis=0)
     m3 = stats.moment(timeseries, moment, axis=0)
     zero = (m2 == 0)
-    return np.where(zero, 0, m3 / m2**(moment/2.0))
+    return np.where(zero, 0, m3 / m2 ** (moment / 2.0))
 
 
 class AddNoiseInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='input image that will be corrupted with noise')
     in_mask = File(exists=True, desc=('input mask, voxels outside this mask '
-                   'will be considered background'))
+                                      'will be considered background'))
     snr = traits.Float(10.0, desc='desired output SNR in dB', usedefault=True)
     dist = traits.Enum('normal', 'rician', usedefault=True, mandatory=True,
                        desc=('desired noise distribution'))
     bg_dist = traits.Enum('normal', 'rayleigh', usedefault=True, mandatory=True,
                           desc=('desired noise distribution, currently '
-                          'only normal is implemented'))
+                                'only normal is implemented'))
     out_file = File(desc='desired output filename')
 
 
@@ -1045,7 +1047,7 @@ class AddNoise(BaseInterface):
         added gaussian noise (rayleigh for background in mask)
         """
         from math import sqrt
-        snr = sqrt(np.power(10.0, snr_db/10.0))
+        snr = sqrt(np.power(10.0, snr_db / 10.0))
 
         if mask is None:
             mask = np.ones_like(image)
@@ -1060,7 +1062,7 @@ class AddNoise(BaseInterface):
 
         if dist == 'normal':
             signal = signal - signal.mean()
-            sigma_n = sqrt(signal.var()/snr)
+            sigma_n = sqrt(signal.var() / snr)
             noise = np.random.normal(size=image.shape, scale=sigma_n)
 
             if (np.any(mask == 0)) and (bg_dist == 'rayleigh'):
@@ -1070,22 +1072,22 @@ class AddNoise(BaseInterface):
             im_noise = image + noise
 
         elif dist == 'rician':
-            sigma_n = signal.mean()/snr
+            sigma_n = signal.mean() / snr
             n_1 = np.random.normal(size=image.shape, scale=sigma_n)
             n_2 = np.random.normal(size=image.shape, scale=sigma_n)
-            stde_1 = n_1/sqrt(2.0)
-            stde_2 = n_2/sqrt(2.0)
+            stde_1 = n_1 / sqrt(2.0)
+            stde_2 = n_2 / sqrt(2.0)
             im_noise = np.sqrt((image + stde_1)**2 + (stde_2)**2)
         else:
             raise NotImplementedError(('Only normal and rician distributions '
-                                      'are supported'))
+                                       'are supported'))
 
         return im_noise
 
 
 class NormalizeProbabilityMapSetInputSpec(TraitedSpec):
     in_files = InputMultiPath(File(exists=True, mandatory=True,
-                              desc='The tpms to be normalized'))
+                                   desc='The tpms to be normalized'))
     in_mask = File(exists=True,
                    desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
 
@@ -1180,7 +1182,7 @@ class SplitROIs(BaseInterface):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        for k, v in self._outnames.iteritems():
+        for k, v in self._outnames.items():
             outputs[k] = v
         return outputs
 
@@ -1207,9 +1209,9 @@ class MergeROIs(BaseInterface):
 
     >>> from nipype.algorithms import misc
     >>> rois = misc.MergeROIs()
-    >>> rois.inputs.in_files = ['roi%02d.nii' % i for i in xrange(1, 6)]
+    >>> rois.inputs.in_files = ['roi%02d.nii' % i for i in range(1, 6)]
     >>> rois.inputs.in_reference = 'mask.nii'
-    >>> rois.inputs.in_index = ['roi%02d_idx.npz' % i for i in xrange(1, 6)]
+    >>> rois.inputs.in_index = ['roi%02d_idx.npz' % i for i in range(1, 6)]
     >>> rois.run() # doctest: +SKIP
 
     """
@@ -1241,47 +1243,46 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
     in_files = np.atleast_1d(in_files).tolist()
 
     if len(out_files) != len(in_files):
-        for i,finname in enumerate(in_files):
-            fname,fext = op.splitext(op.basename(finname))
+        for i, finname in enumerate(in_files):
+            fname, fext = op.splitext(op.basename(finname))
             if fext == '.gz':
-                fname,fext2 = op.splitext(fname)
+                fname, fext2 = op.splitext(fname)
                 fext = fext2 + fext
 
-            out_file = op.abspath('%s_norm_%02d%s' % (fname,i,fext))
-            out_files+= [out_file]
+            out_file = op.abspath('%s_norm_%02d%s' % (fname, i, fext))
+            out_files += [out_file]
 
     imgs = [nib.load(fim) for fim in in_files]
 
-    if len(in_files)==1:
+    if len(in_files) == 1:
         img_data = imgs[0].get_data()
-        img_data[img_data>0.0] = 1.0
+        img_data[img_data > 0.0] = 1.0
         hdr = imgs[0].get_header().copy()
-        hdr['data_type']= 16
+        hdr['data_type'] = 16
         hdr.set_data_dtype(np.float32)
         nib.save(nib.Nifti1Image(img_data.astype(np.float32), imgs[0].get_affine(), hdr), out_files[0])
         return out_files[0]
 
     img_data = np.array([im.get_data() for im in imgs]).astype(np.float32)
-    #img_data[img_data>1.0] = 1.0
-    img_data[img_data<0.0] = 0.0
+    # img_data[img_data>1.0] = 1.0
+    img_data[img_data < 0.0] = 0.0
     weights = np.sum(img_data, axis=0)
 
     msk = np.ones_like(imgs[0].get_data())
-    msk[ weights<= 0 ] = 0
+    msk[weights <= 0] = 0
 
     if not in_mask is None:
         msk = nib.load(in_mask).get_data()
-        msk[ msk<=0 ] = 0
-        msk[ msk>0 ] = 1
+        msk[msk <= 0] = 0
+        msk[msk > 0] = 1
 
     msk = np.ma.masked_equal(msk, 0)
 
-
-    for i,out_file in enumerate(out_files):
+    for i, out_file in enumerate(out_files):
         data = np.ma.masked_equal(img_data[i], 0)
         probmap = data / weights
         hdr = imgs[i].get_header().copy()
-        hdr['data_type']= 16
+        hdr['data_type'] = 16
         hdr.set_data_dtype('float32')
         nib.save(nib.Nifti1Image(probmap.astype(np.float32), imgs[i].get_affine(), hdr), out_file)
 
@@ -1317,7 +1318,7 @@ def split_rois(in_file, mask=None, roishape=None):
     mask = mask.reshape(-1).astype(np.uint8)
     nzels = np.nonzero(mask)
     els = np.sum(mask)
-    nrois = int(ceil(els/roisize))
+    nrois = int(ceil(els / float(roisize)))
 
     data = im.get_data().reshape((mask.size, -1))
     data = np.squeeze(data.take(nzels, axis=0))
@@ -1331,7 +1332,7 @@ def split_rois(in_file, mask=None, roishape=None):
     out_mask = []
     out_idxs = []
 
-    for i in xrange(nrois):
+    for i in range(nrois):
         first = i * roisize
         last = (i+1) * roisize
         fill = 0
@@ -1417,8 +1418,8 @@ def merge_rois(in_files, in_idxs, in_ref,
                 data[idata, ...] = cdata[0:nels, ...]
             except:
                 print(('Consistency between indexes and chunks was '
-                      'lost: data=%s, chunk=%s') % (str(data.shape),
-                      str(cdata.shape)))
+                       'lost: data=%s, chunk=%s') % (str(data.shape),
+                                                     str(cdata.shape)))
                 raise
 
         hdr.set_data_shape(newshape)
@@ -1428,7 +1429,7 @@ def merge_rois(in_files, in_idxs, in_ref,
     else:
         hdr.set_data_shape(rsh[:3])
         nii = []
-        for d in xrange(ndirs):
+        for d in range(ndirs):
             fname = op.abspath('vol%06d.nii' % d)
             nb.Nifti1Image(np.zeros(rsh[:3]), aff, hdr).to_filename(fname)
             nii.append(fname)
@@ -1464,7 +1465,7 @@ class Distance(nam.Distance):
     def __init__(self, **inputs):
         super(nam.Distance, self).__init__(**inputs)
         warnings.warn(("This interface has been deprecated since 0.10.0,"
-                      " please use nipype.algorithms.metrics.Distance"),
+                       " please use nipype.algorithms.metrics.Distance"),
                       DeprecationWarning)
 
 
@@ -1477,7 +1478,7 @@ class Overlap(nam.Overlap):
     def __init__(self, **inputs):
         super(nam.Overlap, self).__init__(**inputs)
         warnings.warn(("This interface has been deprecated since 0.10.0,"
-                      " please use nipype.algorithms.metrics.Overlap"),
+                       " please use nipype.algorithms.metrics.Overlap"),
                       DeprecationWarning)
 
 
@@ -1491,5 +1492,5 @@ class FuzzyOverlap(nam.FuzzyOverlap):
     def __init__(self, **inputs):
         super(nam.FuzzyOverlap, self).__init__(**inputs)
         warnings.warn(("This interface has been deprecated since 0.10.0,"
-                      " please use nipype.algorithms.metrics.FuzzyOverlap"),
+                       " please use nipype.algorithms.metrics.FuzzyOverlap"),
                       DeprecationWarning)

@@ -15,11 +15,13 @@ See the docstrings for the individual classes for 'working' examples.
 """
 __docformat__ = 'restructuredtext'
 
+from builtins import object
+
 import os
 
-from nipype.utils.filemanip import fname_presuffix
-from nipype.interfaces.base import (CommandLine, Directory,
-                                    CommandLineInputSpec, isdefined)
+from ..base import (CommandLine, Directory,
+                    CommandLineInputSpec, isdefined)
+from ...utils.filemanip import fname_presuffix
 
 
 class Info(object):
@@ -108,7 +110,7 @@ class FSCommand(CommandLine):
     def _subjects_dir_update(self):
         if self.inputs.subjects_dir:
             self.inputs.environ.update({'SUBJECTS_DIR':
-                                            self.inputs.subjects_dir})
+                                        self.inputs.subjects_dir})
 
     @classmethod
     def set_default_subjects_dir(cls, subjects_dir):

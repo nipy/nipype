@@ -48,7 +48,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = BSplineDeformableRegistrationInputSpec
     output_spec = BSplineDeformableRegistrationOutputSpec
     _cmd = "BSplineDeformableRegistration "
-    _outputs_filenames = {'resampledmovingfilename':'resampledmovingfilename.nii','outputtransform':'outputtransform.txt','outputwarp':'outputwarp.nrrd'}
+    _outputs_filenames = {'resampledmovingfilename': 'resampledmovingfilename.nii', 'outputtransform': 'outputtransform.txt', 'outputwarp': 'outputwarp.nrrd'}
 
 
 class AffineRegistrationInputSpec(CommandLineInputSpec):
@@ -96,7 +96,7 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
     input_spec = AffineRegistrationInputSpec
     output_spec = AffineRegistrationOutputSpec
     _cmd = "AffineRegistration "
-    _outputs_filenames = {'resampledmovingfilename':'resampledmovingfilename.nii','outputtransform':'outputtransform.txt'}
+    _outputs_filenames = {'resampledmovingfilename': 'resampledmovingfilename.nii', 'outputtransform': 'outputtransform.txt'}
 
 
 class MultiResolutionAffineRegistrationInputSpec(CommandLineInputSpec):
@@ -138,7 +138,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = MultiResolutionAffineRegistrationInputSpec
     output_spec = MultiResolutionAffineRegistrationOutputSpec
     _cmd = "MultiResolutionAffineRegistration "
-    _outputs_filenames = {'resampledImage':'resampledImage.nii','saveTransform':'saveTransform.txt'}
+    _outputs_filenames = {'resampledImage': 'resampledImage.nii', 'saveTransform': 'saveTransform.txt'}
 
 
 class RigidRegistrationInputSpec(CommandLineInputSpec):
@@ -192,7 +192,7 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
     input_spec = RigidRegistrationInputSpec
     output_spec = RigidRegistrationOutputSpec
     _cmd = "RigidRegistration "
-    _outputs_filenames = {'resampledmovingfilename':'resampledmovingfilename.nii','outputtransform':'outputtransform.txt'}
+    _outputs_filenames = {'resampledmovingfilename': 'resampledmovingfilename.nii', 'outputtransform': 'outputtransform.txt'}
 
 
 class LinearRegistrationInputSpec(CommandLineInputSpec):
@@ -235,7 +235,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = LinearRegistrationInputSpec
     output_spec = LinearRegistrationOutputSpec
     _cmd = "LinearRegistration "
-    _outputs_filenames = {'resampledmovingfilename':'resampledmovingfilename.nii','outputtransform':'outputtransform.txt'}
+    _outputs_filenames = {'resampledmovingfilename': 'resampledmovingfilename.nii', 'outputtransform': 'outputtransform.txt'}
 
 
 class ExpertAutomatedRegistrationInputSpec(CommandLineInputSpec):
@@ -294,4 +294,4 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = ExpertAutomatedRegistrationInputSpec
     output_spec = ExpertAutomatedRegistrationOutputSpec
     _cmd = "ExpertAutomatedRegistration "
-    _outputs_filenames = {'resampledImage':'resampledImage.nii','saveTransform':'saveTransform.txt'}
+    _outputs_filenames = {'resampledImage': 'resampledImage.nii', 'saveTransform': 'saveTransform.txt'}

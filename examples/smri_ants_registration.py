@@ -12,30 +12,34 @@ coregister two T1 volumes.
 1. Tell python where to find the appropriate functions.
 """
 
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+
 import os
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from nipype.interfaces.ants import Registration
 
 """
 2. Download T1 volumes into home directory
 """
 
-homeDir=os.getenv("HOME")
-requestedPath=os.path.join(homeDir,'nipypeTestPath')
-mydatadir=os.path.realpath(requestedPath)
+homeDir = os.getenv("HOME")
+requestedPath = os.path.join(homeDir, 'nipypeTestPath')
+mydatadir = os.path.realpath(requestedPath)
 if not os.path.exists(mydatadir):
     os.makedirs(mydatadir)
-print mydatadir
+print(mydatadir)
 
-MyFileURLs=[
-           ('http://slicer.kitware.com/midas3/download?bitstream=13121','01_T1_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13122','02_T1_half.nii.gz'),
+MyFileURLs = [
+           ('http://slicer.kitware.com/midas3/download?bitstream=13121', '01_T1_half.nii.gz'),
+           ('http://slicer.kitware.com/midas3/download?bitstream=13122', '02_T1_half.nii.gz'),
            ]
 for tt in MyFileURLs:
-    myURL=tt[0]
-    localFilename=os.path.join(mydatadir,tt[1])
+    myURL = tt[0]
+    localFilename = os.path.join(mydatadir, tt[1])
     if not os.path.exists(localFilename):
-        remotefile = urllib2.urlopen(myURL)
+        remotefile = urllib.request.urlopen(myURL)
 
         localFile = open(localFilename, 'wb')
         localFile.write(remotefile.read())
@@ -44,9 +48,9 @@ for tt in MyFileURLs:
     else:
         print("File previously downloaded {0}".format(localFilename))
 
-input_images=[
-os.path.join(mydatadir,'01_T1_half.nii.gz'),
-os.path.join(mydatadir,'02_T1_half.nii.gz'),
+input_images = [
+    os.path.join(mydatadir, '01_T1_half.nii.gz'),
+    os.path.join(mydatadir, '02_T1_half.nii.gz'),
 ]
 
 """
@@ -54,7 +58,7 @@ os.path.join(mydatadir,'02_T1_half.nii.gz'),
 """
 
 reg = Registration()
-reg.inputs.fixed_image =  input_images[0]
+reg.inputs.fixed_image = input_images[0]
 reg.inputs.moving_image = input_images[1]
 reg.inputs.output_transform_prefix = 'thisTransform'
 reg.inputs.output_warped_image = 'INTERNAL_WARPED.nii.gz'
@@ -63,7 +67,7 @@ reg.inputs.output_transform_prefix = "output_"
 reg.inputs.transforms = ['Translation', 'Rigid', 'Affine', 'SyN']
 reg.inputs.transform_parameters = [(0.1,), (0.1,), (0.1,), (0.2, 3.0, 0.0)]
 reg.inputs.number_of_iterations = ([[10000, 111110, 11110]]*3 +
-                                    [[100, 50, 30]])
+                                   [[100, 50, 30]])
 reg.inputs.dimension = 3
 reg.inputs.write_composite_transform = True
 reg.inputs.collapse_output_transforms = False
@@ -81,7 +85,7 @@ reg.inputs.use_estimate_learning_rate_once = [True] * 4
 reg.inputs.use_histogram_matching = [False] * 3 + [True]
 reg.inputs.initial_moving_transform_com = True
 
-print reg.cmdline
+print(reg.cmdline)
 
 
 """

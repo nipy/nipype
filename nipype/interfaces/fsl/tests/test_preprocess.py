@@ -1,5 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from builtins import open
+
 import os
 import tempfile
 import shutil
@@ -31,7 +33,7 @@ def setup_infile():
     ext = Info.output_type_to_ext(Info.output_type())
     tmp_dir = tempfile.mkdtemp()
     tmp_infile = os.path.join(tmp_dir, 'foo' + ext)
-    file(tmp_infile, 'w')
+    open(tmp_infile, 'w')
     return tmp_infile, tmp_dir
 
 
@@ -39,7 +41,7 @@ def teardown_infile(tmp_dir):
     shutil.rmtree(tmp_dir)
 
 # test BET
-#@with_setup(setup_infile, teardown_infile)
+# @with_setup(setup_infile, teardown_infile)
 # broken in nose with generators
 
 
@@ -83,8 +85,8 @@ def test_bet():
         'threshold':          ('-t', True),
         'mesh':               ('-e', True),
         'surfaces':           ('-A', True)
-        #'verbose':            ('-v', True),
-        #'flags':              ('--i-made-this-up', '--i-made-this-up'),
+        # 'verbose':            ('-v', True),
+        # 'flags':              ('--i-made-this-up', '--i-made-this-up'),
     }
     # Currently we don't test -R, -S, -B, -Z, -F, -A or -A2
 
@@ -92,7 +94,7 @@ def test_bet():
     better = fsl.BET()
     outfile = fsl_name(better, 'foo_brain')
     outpath = os.path.join(os.getcwd(), outfile)
-    for name, settings in opt_map.items():
+    for name, settings in list(opt_map.items()):
         better = fsl.BET(**{name: settings[1]})
         # Add mandatory input
         better.inputs.in_file = tmp_infile
@@ -156,7 +158,7 @@ def test_fast():
                }
 
     # test each of our arguments
-    for name, settings in opt_map.items():
+    for name, settings in list(opt_map.items()):
         faster = fsl.FAST(in_files=tmp_infile, **{name: settings[1]})
         yield assert_equal, faster.cmdline, ' '.join([faster.cmd,
                                                       settings[0],
@@ -314,7 +316,7 @@ def test_mcflirt():
         'save_plots':   ('-plots', True),
     }
 
-    for name, settings in opt_map.items():
+    for name, settings in list(opt_map.items()):
         fnt = fsl.MCFLIRT(in_file=infile, **{name: settings[1]})
         instr = '-in %s' % (infile)
         outstr = '-out %s' % (outfile)
@@ -406,7 +408,7 @@ def test_fnirt():
         'out_intensitymap_file': ('--intout='),
         'log_file':             ('--logout=')}
 
-    for name, settings in opt_map.items():
+    for name, settings in list(opt_map.items()):
         fnirt = fsl.FNIRT(in_file=infile,
                           ref_file=reffile,
                           **{name: infile})
@@ -461,7 +463,7 @@ def test_applywarp():
     }
 
     # in_file, ref_file, field_file mandatory
-    for name, settings in opt_map.items():
+    for name, settings in list(opt_map.items()):
         awarp = fsl.ApplyWarp(in_file=infile,
                               ref_file=reffile,
                               field_file=reffile,

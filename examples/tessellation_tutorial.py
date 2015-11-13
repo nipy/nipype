@@ -15,18 +15,18 @@ This example requires that the user has Freesurfer installed, and that the Frees
 
 .. seealso::
 
-	ConnectomeViewer
-		The Connectome Viewer connects Multi-Modal Multi-Scale Neuroimaging and Network Datasets For Analysis and Visualization in Python.
+    ConnectomeViewer
+        The Connectome Viewer connects Multi-Modal Multi-Scale Neuroimaging and Network Datasets For Analysis and Visualization in Python.
 
-	http://www.geuz.org/gmsh/
-		Gmsh: a three-dimensional finite element mesh generator with built-in pre- and post-processing facilities
+    http://www.geuz.org/gmsh/
+        Gmsh: a three-dimensional finite element mesh generator with built-in pre- and post-processing facilities
 
-	http://www.blender.org/
-		Blender is the free open source 3D content creation suite, available for all major operating systems under the GNU General Public License.
+    http://www.blender.org/
+        Blender is the free open source 3D content creation suite, available for all major operating systems under the GNU General Public License.
 
 .. warning::
 
-	This workflow will take several hours to finish entirely, since smoothing the larger cortical surfaces is very time consuming.
+    This workflow will take several hours to finish entirely, since smoothing the larger cortical surfaces is very time consuming.
 
 Packages and Data Setup
 =======================
@@ -48,7 +48,7 @@ Set the default directory and lookup table (LUT) paths
 """
 
 fs_dir = os.environ['FREESURFER_HOME']
-lookup_file = op.join(fs_dir,'FreeSurferColorLUT.txt')
+lookup_file = op.join(fs_dir, 'FreeSurferColorLUT.txt')
 subjects_dir = op.join(fs_dir, 'subjects/')
 output_dir = './tessellate_tutorial'
 
@@ -99,7 +99,7 @@ Finally, create and run another pipeline that connects the workflow and datasink
 
 tesspipe = pe.Workflow(name='tessellate_tutorial')
 tesspipe.base_dir = output_dir
-tesspipe.connect([(tessflow, datasink,[('outputspec.meshes', '@meshes.all')])])
+tesspipe.connect([(tessflow, datasink, [('outputspec.meshes', '@meshes.all')])])
 
 """
 If the surfaces are to be packaged, this will connect the CFFConverter
@@ -107,7 +107,7 @@ node to the tessellation and smoothing workflow, as well as to the datasink.
 """
 
 if cff:
-    tesspipe.connect([(tessflow, cff,[('outputspec.meshes', 'gifti_surfaces')])])
-    tesspipe.connect([(cff, datasink,[('connectome_file', '@cff')])])
+    tesspipe.connect([(tessflow, cff, [('outputspec.meshes', 'gifti_surfaces')])])
+    tesspipe.connect([(cff, datasink, [('connectome_file', '@cff')])])
 
 tesspipe.run()

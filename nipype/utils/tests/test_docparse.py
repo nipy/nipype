@@ -1,8 +1,10 @@
+from builtins import object
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from nipype.testing import *
 
 from nipype.utils.docparse import reverse_opt_map, build_doc, insert_doc
+
 
 class Foo(object):
     opt_map = {'outline': '-o', 'fun': '-f %.2f', 'flags': '%s'}
@@ -30,10 +32,12 @@ Others Parameters
 -----------------
   -v        verbose"""
 
+
 def test_rev_opt_map():
     map = {'-f': 'fun', '-o': 'outline'}
     rev_map = reverse_opt_map(Foo.opt_map)
     assert_equal(rev_map, map)
+
 
 def test_build_doc():
     opts = reverse_opt_map(Foo.opt_map)
@@ -54,6 +58,7 @@ fun :
 Others Parameters
 -----------------
   -v        verbose"""
+
 
 def test_insert_doc():
     new_items = ['infile : str', '    The name of the input file']

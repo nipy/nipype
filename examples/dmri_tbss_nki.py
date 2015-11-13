@@ -120,7 +120,7 @@ tbssproc.connect([(tbss_all, tbss_MD, [('tbss2.outputnode.field_list',
                                         'inputnode.distance_map')]),
                   (tbss_source, tbss_MD, [('md_list',
                                            'inputnode.file_list')]),
-            ])
+                  ])
 
 if __name__ == '__main__':
     tbssproc.write_graph()
