@@ -795,3 +795,51 @@ class JointFusion(ANTSCommand):
         outputs['output_label_image'] = os.path.abspath(
             self.inputs.output_label_image)
         return outputs
+
+
+class DenoiseImageInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(2, 3, 4, argstr='-d %d', usedefault=False,
+                            desc='This option forces the image to be treated '
+                                 'as a specified-dimensional image. If not '
+                                 'specified, the program tries to infer the '
+                                 'dimensionality from the input image.')
+    input_image = File(exists=True, argstr="-i %s",
+                       mandatory=True, desc='A scalar image is expected '
+                                            'as input for noise correction.')
+    noise_model = traits.Enum('Gaussian', 'Rician', argstr='-n %s', usedefault=True,
+                              desc=('Employ a Rician or Gaussian noise model.'))
+    shrink_factor = traits.Int(default_value=1, usedefault=True, argstr='-s %s',
+                               desc=('Running noise correction on large images can '
+                                     'be time consuming. To lessen computation time, '
+                                     'the input image can be resampled. The shrink '
+                                     'factor, specified as a single integer, describes '
+                                     'this resampling. Shrink factor = 1 is the default.'))
+    output_image = traits.List(traits.Str(), argstr="-o %s...",
+                                  desc='The output consists of the noise corrected '
+                                       'version of the input image. Optionally, one '
+                                       'can also output the estimated noise image.')
+    version = traits.Bool(False, argstr="--version", desc=('Get version information.'))
+    verbose = traits.Bool(False, argstr="-v", desc=('Verbose output.'))
+    short_help = traits.Bool(False, argstr="-h", desc=('Print the help menu (short version).'))
+    help = traits.Bool(False, argstr="--help", desc=('Print the help menu.'))
+
+
+class DenoiseImageOutputSpec(TraitedSpec):
+    output_corrected_image = File(exists=True)
+    # TODO: optional outputs - output_noise_image
+
+
+class DenoiseImage(ANTSCommand):
+    """
+    Examples
+    --------
+
+    """
+    input_spec = DenoiseImageInputSpec
+    output_spec = DenoiseImageOutputSpec
+    _cmd = 'DenoiseImage'
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['output_corrected_image'] = os.path.abspath(self.inputs.output_image)
+        return outputs
