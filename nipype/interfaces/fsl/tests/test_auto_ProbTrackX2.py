@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..dti import ProbTrackX2
 
+
 def test_ProbTrackX2_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -131,6 +132,7 @@ def test_ProbTrackX2_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_ProbTrackX2_outputs():
     output_map = dict(fdt_paths=dict(),
     log=dict(),
@@ -148,4 +150,3 @@ def test_ProbTrackX2_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

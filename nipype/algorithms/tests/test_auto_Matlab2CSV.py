@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..misc import Matlab2CSV
 
+
 def test_Matlab2CSV_inputs():
     input_map = dict(in_file=dict(mandatory=True,
     ),
@@ -14,6 +15,7 @@ def test_Matlab2CSV_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Matlab2CSV_outputs():
     output_map = dict(csv_files=dict(),
     )
@@ -22,4 +24,3 @@ def test_Matlab2CSV_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

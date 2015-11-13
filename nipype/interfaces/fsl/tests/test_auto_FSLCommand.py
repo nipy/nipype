@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..base import FSLCommand
 
+
 def test_FSLCommand_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),

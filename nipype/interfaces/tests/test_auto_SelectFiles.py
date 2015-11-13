@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..io import SelectFiles
 
+
 def test_SelectFiles_inputs():
     input_map = dict(base_directory=dict(),
     force_lists=dict(usedefault=True,
@@ -20,6 +21,7 @@ def test_SelectFiles_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_SelectFiles_outputs():
     output_map = dict()
     outputs = SelectFiles.output_spec()
@@ -27,4 +29,3 @@ def test_SelectFiles_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

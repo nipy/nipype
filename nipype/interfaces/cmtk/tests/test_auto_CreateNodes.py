@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..cmtk import CreateNodes
 
+
 def test_CreateNodes_inputs():
     input_map = dict(ignore_exception=dict(nohash=True,
     usedefault=True,
@@ -19,6 +20,7 @@ def test_CreateNodes_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_CreateNodes_outputs():
     output_map = dict(node_network=dict(),
     )
@@ -27,4 +29,3 @@ def test_CreateNodes_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

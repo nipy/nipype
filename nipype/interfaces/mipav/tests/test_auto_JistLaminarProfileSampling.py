@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..developer import JistLaminarProfileSampling
 
+
 def test_JistLaminarProfileSampling_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -41,6 +42,7 @@ def test_JistLaminarProfileSampling_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_JistLaminarProfileSampling_outputs():
     output_map = dict(outProfile2=dict(),
     outProfilemapped=dict(),
@@ -50,4 +52,3 @@ def test_JistLaminarProfileSampling_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

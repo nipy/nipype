@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..utils import SmoothTessellation
 
+
 def test_SmoothTessellation_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -58,6 +59,7 @@ def test_SmoothTessellation_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_SmoothTessellation_outputs():
     output_map = dict(surface=dict(),
     )
@@ -66,4 +68,3 @@ def test_SmoothTessellation_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

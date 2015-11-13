@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..brainsfit import BRAINSFit
 
+
 def test_BRAINSFit_inputs():
     input_map = dict(NEVER_USE_THIS_FLAG_IT_IS_OUTDATED_00=dict(argstr='--NEVER_USE_THIS_FLAG_IT_IS_OUTDATED_00 ',
     ),
@@ -155,6 +156,7 @@ def test_BRAINSFit_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_BRAINSFit_outputs():
     output_map = dict(bsplineTransform=dict(),
     linearTransform=dict(),
@@ -169,4 +171,3 @@ def test_BRAINSFit_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

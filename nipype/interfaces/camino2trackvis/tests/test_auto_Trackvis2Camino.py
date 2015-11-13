@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..convert import Trackvis2Camino
 
+
 def test_Trackvis2Camino_inputs():
     input_map = dict(append_file=dict(argstr='-a %s',
     position=2,
@@ -31,6 +32,7 @@ def test_Trackvis2Camino_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Trackvis2Camino_outputs():
     output_map = dict(camino=dict(),
     )
@@ -39,4 +41,3 @@ def test_Trackvis2Camino_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

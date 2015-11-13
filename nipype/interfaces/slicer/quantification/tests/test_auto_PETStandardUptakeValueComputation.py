@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..petstandarduptakevaluecomputation import PETStandardUptakeValueComputation
 
+
 def test_PETStandardUptakeValueComputation_inputs():
     input_map = dict(OutputLabel=dict(argstr='--OutputLabel %s',
     ),
@@ -41,6 +42,7 @@ def test_PETStandardUptakeValueComputation_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_PETStandardUptakeValueComputation_outputs():
     output_map = dict(csvFile=dict(),
     )
@@ -49,4 +51,3 @@ def test_PETStandardUptakeValueComputation_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import Threshold
 
+
 def test_Threshold_inputs():
     input_map = dict(absolute_threshold_value=dict(argstr='-abs %s',
     ),
@@ -44,6 +45,7 @@ def test_Threshold_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Threshold_outputs():
     output_map = dict(out_file=dict(),
     )
@@ -52,4 +54,3 @@ def test_Threshold_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import SliceTiming
 
+
 def test_SliceTiming_inputs():
     input_map = dict(ignore_exception=dict(nohash=True,
     usedefault=True,
@@ -43,6 +44,7 @@ def test_SliceTiming_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_SliceTiming_outputs():
     output_map = dict(timecorrected_files=dict(),
     )
@@ -51,4 +53,3 @@ def test_SliceTiming_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

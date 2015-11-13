@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..cmtk import CreateMatrix
 
+
 def test_CreateMatrix_inputs():
     input_map = dict(count_region_intersections=dict(usedefault=True,
     ),
@@ -32,6 +33,7 @@ def test_CreateMatrix_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_CreateMatrix_outputs():
     output_map = dict(endpoint_file=dict(),
     endpoint_file_mm=dict(),
@@ -57,4 +59,3 @@ def test_CreateMatrix_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

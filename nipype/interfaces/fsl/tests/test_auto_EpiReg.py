@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..epi import EpiReg
 
+
 def test_EpiReg_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -55,6 +56,7 @@ def test_EpiReg_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_EpiReg_outputs():
     output_map = dict(epi2str_inv=dict(),
     epi2str_mat=dict(),
@@ -75,4 +77,3 @@ def test_EpiReg_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

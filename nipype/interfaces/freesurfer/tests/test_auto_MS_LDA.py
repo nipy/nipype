@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..model import MS_LDA
 
+
 def test_MS_LDA_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -46,6 +47,7 @@ def test_MS_LDA_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_MS_LDA_outputs():
     output_map = dict(vol_synth_file=dict(),
     weight_file=dict(),
@@ -55,4 +57,3 @@ def test_MS_LDA_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

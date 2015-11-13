@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..segmentation import BRAINSTalairach
 
+
 def test_BRAINSTalairach_inputs():
     input_map = dict(AC=dict(argstr='--AC %s',
     sep=',',
@@ -48,6 +49,7 @@ def test_BRAINSTalairach_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_BRAINSTalairach_outputs():
     output_map = dict(outputBox=dict(),
     outputGrid=dict(),
@@ -57,4 +59,3 @@ def test_BRAINSTalairach_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

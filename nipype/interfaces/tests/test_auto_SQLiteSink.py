@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..io import SQLiteSink
 
+
 def test_SQLiteSink_inputs():
     input_map = dict(database_file=dict(mandatory=True,
     ),

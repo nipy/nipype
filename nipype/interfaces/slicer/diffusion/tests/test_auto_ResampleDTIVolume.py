@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..diffusion import ResampleDTIVolume
 
+
 def test_ResampleDTIVolume_inputs():
     input_map = dict(Inverse_ITK_Transformation=dict(argstr='--Inverse_ITK_Transformation ',
     ),
@@ -79,6 +80,7 @@ def test_ResampleDTIVolume_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_ResampleDTIVolume_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
@@ -88,4 +90,3 @@ def test_ResampleDTIVolume_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

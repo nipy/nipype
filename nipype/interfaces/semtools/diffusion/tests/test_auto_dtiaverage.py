@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..diffusion import dtiaverage
 
+
 def test_dtiaverage_inputs():
     input_map = dict(DTI_double=dict(argstr='--DTI_double ',
     ),
@@ -29,6 +30,7 @@ def test_dtiaverage_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_dtiaverage_outputs():
     output_map = dict(tensor_output=dict(),
     )
@@ -37,4 +39,3 @@ def test_dtiaverage_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

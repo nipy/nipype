@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..diffusion import dtiestim
 
+
 def test_dtiestim_inputs():
     input_map = dict(B0=dict(argstr='--B0 %s',
     hash_files=False,
@@ -61,6 +62,7 @@ def test_dtiestim_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_dtiestim_outputs():
     output_map = dict(B0=dict(),
     B0_mask_output=dict(),
@@ -72,4 +74,3 @@ def test_dtiestim_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

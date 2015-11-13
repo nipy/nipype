@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..model import OneSampleTTest
 
+
 def test_OneSampleTTest_inputs():
     input_map = dict(allow_ill_cond=dict(argstr='--illcond',
     ),
@@ -142,6 +143,7 @@ def test_OneSampleTTest_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_OneSampleTTest_outputs():
     output_map = dict(beta_file=dict(),
     dof_file=dict(),
@@ -166,4 +168,3 @@ def test_OneSampleTTest_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

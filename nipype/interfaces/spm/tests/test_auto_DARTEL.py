@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import DARTEL
 
+
 def test_DARTEL_inputs():
     input_map = dict(ignore_exception=dict(nohash=True,
     usedefault=True,
@@ -34,6 +35,7 @@ def test_DARTEL_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_DARTEL_outputs():
     output_map = dict(dartel_flow_fields=dict(),
     final_template_file=dict(),
@@ -44,4 +46,3 @@ def test_DARTEL_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

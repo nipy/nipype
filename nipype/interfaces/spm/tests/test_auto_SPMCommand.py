@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..base import SPMCommand
 
+
 def test_SPMCommand_inputs():
     input_map = dict(ignore_exception=dict(nohash=True,
     usedefault=True,

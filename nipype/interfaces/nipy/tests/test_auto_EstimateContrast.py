@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..model import EstimateContrast
 
+
 def test_EstimateContrast_inputs():
     input_map = dict(axis=dict(mandatory=True,
     ),
@@ -30,6 +31,7 @@ def test_EstimateContrast_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_EstimateContrast_outputs():
     output_map = dict(p_maps=dict(),
     stat_maps=dict(),
@@ -40,4 +42,3 @@ def test_EstimateContrast_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

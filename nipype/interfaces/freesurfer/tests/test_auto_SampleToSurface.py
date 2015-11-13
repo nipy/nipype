@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..utils import SampleToSurface
 
+
 def test_SampleToSurface_inputs():
     input_map = dict(apply_rot=dict(argstr='--rot %.3f %.3f %.3f',
     ),
@@ -109,6 +110,7 @@ def test_SampleToSurface_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_SampleToSurface_outputs():
     output_map = dict(hits_file=dict(),
     out_file=dict(),
@@ -119,4 +121,3 @@ def test_SampleToSurface_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

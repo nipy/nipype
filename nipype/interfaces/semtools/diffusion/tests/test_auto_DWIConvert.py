@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..diffusion import DWIConvert
 
+
 def test_DWIConvert_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -57,6 +58,7 @@ def test_DWIConvert_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_DWIConvert_outputs():
     output_map = dict(gradientVectorFile=dict(),
     outputBValues=dict(),
@@ -69,4 +71,3 @@ def test_DWIConvert_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

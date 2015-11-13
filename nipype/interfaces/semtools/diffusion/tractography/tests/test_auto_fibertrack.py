@@ -2,6 +2,7 @@
 from ......testing import assert_equal
 from ..fibertrack import fibertrack
 
+
 def test_fibertrack_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -47,6 +48,7 @@ def test_fibertrack_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_fibertrack_outputs():
     output_map = dict(output_fiber_file=dict(),
     )
@@ -55,4 +57,3 @@ def test_fibertrack_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

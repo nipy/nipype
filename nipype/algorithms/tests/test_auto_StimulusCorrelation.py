@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..rapidart import StimulusCorrelation
 
+
 def test_StimulusCorrelation_inputs():
     input_map = dict(concatenated_design=dict(mandatory=True,
     ),
@@ -21,6 +22,7 @@ def test_StimulusCorrelation_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_StimulusCorrelation_outputs():
     output_map = dict(stimcorr_files=dict(),
     )
@@ -29,4 +31,3 @@ def test_StimulusCorrelation_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

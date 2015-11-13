@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..diffusion import dtiprocess
 
+
 def test_dtiprocess_inputs():
     input_map = dict(DTI_double=dict(argstr='--DTI_double ',
     ),
@@ -93,6 +94,7 @@ def test_dtiprocess_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_dtiprocess_outputs():
     output_map = dict(RD_output=dict(),
     color_fa_output=dict(),
@@ -115,4 +117,3 @@ def test_dtiprocess_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

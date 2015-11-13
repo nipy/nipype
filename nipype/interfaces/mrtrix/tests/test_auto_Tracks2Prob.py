@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..tracking import Tracks2Prob
 
+
 def test_Tracks2Prob_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -48,6 +49,7 @@ def test_Tracks2Prob_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Tracks2Prob_outputs():
     output_map = dict(tract_image=dict(),
     )
@@ -56,4 +58,3 @@ def test_Tracks2Prob_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

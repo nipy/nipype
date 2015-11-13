@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..visualization import CreateTiledMosaic
 
+
 def test_CreateTiledMosaic_inputs():
     input_map = dict(alpha_value=dict(argstr='-a %.2f',
     ),
@@ -48,6 +49,7 @@ def test_CreateTiledMosaic_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_CreateTiledMosaic_outputs():
     output_map = dict(output_image=dict(),
     )
@@ -56,4 +58,3 @@ def test_CreateTiledMosaic_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

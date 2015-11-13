@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..parcellation import Parcellate
 
+
 def test_Parcellate_inputs():
     input_map = dict(dilation=dict(usedefault=True,
     ),
@@ -23,6 +24,7 @@ def test_Parcellate_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Parcellate_outputs():
     output_map = dict(aseg_file=dict(),
     cc_unknown_file=dict(),
@@ -38,4 +40,3 @@ def test_Parcellate_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

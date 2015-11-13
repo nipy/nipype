@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..calib import SFLUTGen
 
+
 def test_SFLUTGen_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -47,6 +48,7 @@ def test_SFLUTGen_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_SFLUTGen_outputs():
     output_map = dict(lut_one_fibre=dict(),
     lut_two_fibres=dict(),
@@ -56,4 +58,3 @@ def test_SFLUTGen_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

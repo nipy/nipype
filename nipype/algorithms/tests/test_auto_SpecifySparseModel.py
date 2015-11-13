@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..modelgen import SpecifySparseModel
 
+
 def test_SpecifySparseModel_inputs():
     input_map = dict(event_files=dict(mandatory=True,
     xor=['subject_info', 'event_files'],
@@ -46,6 +47,7 @@ def test_SpecifySparseModel_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_SpecifySparseModel_outputs():
     output_map = dict(session_info=dict(),
     sparse_png_file=dict(),
@@ -56,4 +58,3 @@ def test_SpecifySparseModel_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

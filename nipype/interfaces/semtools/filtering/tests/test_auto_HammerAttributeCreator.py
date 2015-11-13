@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..featuredetection import HammerAttributeCreator
 
+
 def test_HammerAttributeCreator_inputs():
     input_map = dict(Scale=dict(argstr='--Scale %d',
     ),
@@ -32,6 +33,7 @@ def test_HammerAttributeCreator_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_HammerAttributeCreator_outputs():
     output_map = dict()
     outputs = HammerAttributeCreator.output_spec()
@@ -39,4 +41,3 @@ def test_HammerAttributeCreator_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

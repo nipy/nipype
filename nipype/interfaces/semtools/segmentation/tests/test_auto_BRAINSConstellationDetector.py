@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..specialized import BRAINSConstellationDetector
 
+
 def test_BRAINSConstellationDetector_inputs():
     input_map = dict(BackgroundFillValue=dict(argstr='--BackgroundFillValue %s',
     ),
@@ -115,6 +116,7 @@ def test_BRAINSConstellationDetector_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_BRAINSConstellationDetector_outputs():
     output_map = dict(outputLandmarksInACPCAlignedSpace=dict(),
     outputLandmarksInInputSpace=dict(),
@@ -132,4 +134,3 @@ def test_BRAINSConstellationDetector_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

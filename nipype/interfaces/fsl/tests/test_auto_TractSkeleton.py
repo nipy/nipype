@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..dti import TractSkeleton
 
+
 def test_TractSkeleton_inputs():
     input_map = dict(alt_data_file=dict(argstr='-a %s',
     ),
@@ -42,6 +43,7 @@ def test_TractSkeleton_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_TractSkeleton_outputs():
     output_map = dict(projected_data=dict(),
     skeleton_file=dict(),
@@ -51,4 +53,3 @@ def test_TractSkeleton_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

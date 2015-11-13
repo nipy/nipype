@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..model import SegStats
 
+
 def test_SegStats_inputs():
     input_map = dict(annot=dict(argstr='--annot %s %s %s',
     mandatory=True,
@@ -92,6 +93,7 @@ def test_SegStats_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_SegStats_outputs():
     output_map = dict(avgwf_file=dict(),
     avgwf_txt_file=dict(),
@@ -103,4 +105,3 @@ def test_SegStats_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

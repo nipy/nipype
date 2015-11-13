@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..rapidart import ArtifactDetect
 
+
 def test_ArtifactDetect_inputs():
     input_map = dict(bound_by_brainmask=dict(usedefault=True,
     ),
@@ -50,6 +51,7 @@ def test_ArtifactDetect_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_ArtifactDetect_outputs():
     output_map = dict(displacement_files=dict(),
     intensity_files=dict(),
@@ -64,4 +66,3 @@ def test_ArtifactDetect_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-
