@@ -803,9 +803,8 @@ class DenoiseImageInputSpec(ANTSCommandInputSpec):
                                  'as a specified-dimensional image. If not '
                                  'specified, the program tries to infer the '
                                  'dimensionality from the input image.')
-    input_image = File(exists=True, argstr="-i %s",
-                       mandatory=True, desc='A scalar image is expected '
-                                            'as input for noise correction.')
+    input_image = File(exists=True, argstr="-i %s", mandatory=True,
+                       desc='A scalar image is expected as input for noise correction.')
     noise_model = traits.Enum('Gaussian', 'Rician', argstr='-n %s', usedefault=True,
                               desc=('Employ a Rician or Gaussian noise model.'))
     shrink_factor = traits.Int(default_value=1, usedefault=True, argstr='-s %s',
@@ -814,7 +813,7 @@ class DenoiseImageInputSpec(ANTSCommandInputSpec):
                                      'the input image can be resampled. The shrink '
                                      'factor, specified as a single integer, describes '
                                      'this resampling. Shrink factor = 1 is the default.'))
-    output_image = traits.List(traits.Str(), argstr="-o %s...",
+    output_image = traits.List(traits.Str(), argstr="",
                                   desc='The output consists of the noise corrected '
                                        'version of the input image. Optionally, one '
                                        'can also output the estimated noise image.')
@@ -826,6 +825,7 @@ class DenoiseImageInputSpec(ANTSCommandInputSpec):
 
 class DenoiseImageOutputSpec(TraitedSpec):
     output_corrected_image = File(exists=True)
+    output_noise_image = File(exists=True)
     # TODO: optional outputs - output_noise_image
 
 
@@ -839,7 +839,18 @@ class DenoiseImage(ANTSCommand):
     output_spec = DenoiseImageOutputSpec
     _cmd = 'DenoiseImage'
 
+    def _format_arg(self, opt, spec, val):
+        if opt == 'output_image':
+            if len(val) == 1:
+                retval = '-o {0}'.format(val[0])
+            elif len(val) == 2:
+                retval = '-o [{0},{1}]'.format(val[0], val[1])
+            return retval
+        return super(ANTSCommand, self)._format_arg(opt, spec, val)
+
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_corrected_image'] = os.path.abspath(self.inputs.output_image)
+        outputs['output_corrected_image'] = os.path.abspath(self.inputs.output_image[0][0])
+        if len(self.inputs.output_image) == 2:
+            outputs['output_noise_image'] = os.path.abspath(self.inputs.output_image[0][1])
         return outputs
