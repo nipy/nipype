@@ -173,7 +173,6 @@ class ANTS(ANTSCommand):
                                                       self.inputs.regularization_deformation_field_sigma)
 
     def _affine_gradient_descent_option_constructor(self):
-        retval = ['--affine-gradient-descent-option']
         values = self.inputs.affine_gradient_descent_option
         defaults = [0.1, 0.5, 1.e-4, 1.e-4]
         for ii in range(len(defaults)):
@@ -181,9 +180,8 @@ class ANTS(ANTSCommand):
                 defaults[ii] = values[ii]
             except IndexError:
                 break
-        stringList = [('%g' % defaults[index]) for index in range(4)]
-        parameters = 'x'.join(stringList)
-        retval.append(parameters)
+        parameters = self._format_xarray([('%g' % defaults[index]) for index in range(4)])
+        retval = ['--affine-gradient-descent-option', parameters]
         return ' '.join(retval)
 
     def _format_arg(self, opt, spec, val):
@@ -653,14 +651,13 @@ class Registration(ANTSCommand):
             retval.append('--convergence %s' % self._formatConvergence(ii))
             if isdefined(self.inputs.sigma_units):
                 retval.append('--smoothing-sigmas %s%s' %
-                              (self._antsJoinList(self.inputs.smoothing_sigmas[
-                                  ii]),
+                              (self._format_xarray(self.inputs.smoothing_sigmas[ii]),
                                self.inputs.sigma_units[ii]))
             else:
                 retval.append('--smoothing-sigmas %s' %
-                              self._antsJoinList(self.inputs.smoothing_sigmas[ii]))
+                              self._format_xarray(self.inputs.smoothing_sigmas[ii]))
             retval.append('--shrink-factors %s' %
-                          self._antsJoinList(self.inputs.shrink_factors[ii]))
+                          self._format_xarray(self.inputs.shrink_factors[ii]))
             if isdefined(self.inputs.use_estimate_learning_rate_once):
                 retval.append('--use-estimate-learning-rate-once %d' %
                               self.inputs.use_estimate_learning_rate_once[ii])
@@ -673,9 +670,6 @@ class Registration(ANTSCommand):
                     histval = self.inputs.use_histogram_matching[ii]
                 retval.append('--use-histogram-matching %d' % histval)
         return " ".join(retval)
-
-    def _antsJoinList(self, antsList):
-        return "x".join([str(i) for i in antsList])
 
     def _get_outputfilenames(self, inverse=False):
         output_filename = None
@@ -699,8 +693,7 @@ class Registration(ANTSCommand):
         return inv_output_filename
 
     def _formatConvergence(self, ii):
-        convergence_iter = self._antsJoinList(
-            self.inputs.number_of_iterations[ii])
+        convergence_iter = self._format_xarray(self.inputs.number_of_iterations[ii])
         if len(self.inputs.convergence_threshold) > ii:
             convergence_value = self.inputs.convergence_threshold[ii]
         else:

@@ -84,8 +84,3 @@ class ANTSCommand(CommandLine):
         <instance>.inputs.num_threads
         """
         cls._num_threads = num_threads
-
-    def _format_xarray(self, val):
-        """ Convienence method for converting [1,2,3] -> 1x2x3 """
-        val = 'x'.join([str(x) for x in val])
-        return val

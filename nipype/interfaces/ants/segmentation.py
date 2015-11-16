@@ -110,8 +110,7 @@ class Atropos(ANTSCommand):
         if opt == 'mrf_smoothing_factor':
             retval = "--mrf [%g" % val
             if isdefined(self.inputs.mrf_radius):
-                retval += ",%s" % 'x'.join([str(s)
-                                            for s in self.inputs.mrf_radius])
+                retval += ",%s" % self._format_xarray([str(s) for s in self.inputs.mrf_radius])
             return retval + "]"
         if opt == "icm_use_synchronous_update":
             retval = "--icm [%d" % val
@@ -354,10 +353,10 @@ class N4BiasFieldCorrection(ANTSCommand):
 
         if name == 'n_iterations':
             if isdefined(self.inputs.convergence_threshold):
-                newval = '[ %s, %g ]' % ('x'.join([str(elt) for elt in value]),
+                newval = '[ %s, %g ]' % (self._format_xarray([str(elt) for elt in value]),
                                          self.inputs.convergence_threshold)
             else:
-                newval = '[ %s ]' % 'x'.join([str(elt) for elt in value])
+                newval = '[ %s ]' % self._format_xarray([str(elt) for elt in value])
             return trait_spec.argstr % newval
 
         return super(N4BiasFieldCorrection,
