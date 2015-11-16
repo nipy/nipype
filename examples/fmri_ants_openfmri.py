@@ -217,7 +217,7 @@ def create_reg_workflow(name='registration'):
     reg.inputs.convergence_window_size = [20] * 2 + [5]
     reg.inputs.smoothing_sigmas = [[4, 2, 1]] * 2 + [[1, 0.5, 0]]
     reg.inputs.sigma_units = ['vox'] * 3
-    reg.inputs.shrink_factors = [[3, 2, 1]]*2 + [[4, 2, 1]]
+    reg.inputs.shrink_factors = [[3, 2, 1]] * 2 + [[4, 2, 1]]
     reg.inputs.use_estimate_learning_rate_once = [True] * 3
     reg.inputs.use_histogram_matching = [False] * 2 + [True]
     reg.inputs.winsorize_lower_quantile = 0.005
@@ -428,7 +428,7 @@ def create_fs_reg_workflow(name='registration'):
     reg.inputs.convergence_window_size = [20] * 2 + [5]
     reg.inputs.smoothing_sigmas = [[4, 2, 1]] * 2 + [[1, 0.5, 0]]
     reg.inputs.sigma_units = ['vox'] * 3
-    reg.inputs.shrink_factors = [[3, 2, 1]]*2 + [[4, 2, 1]]
+    reg.inputs.shrink_factors = [[3, 2, 1]] * 2 + [[4, 2, 1]]
     reg.inputs.use_estimate_learning_rate_once = [True] * 3
     reg.inputs.use_histogram_matching = [False] * 2 + [True]
     reg.inputs.winsorize_lower_quantile = 0.005
@@ -903,7 +903,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                  [('copes', 'copes'),
                   ('varcopes', 'varcopes'),
                   ('zstats', 'zstats'),
-                                  ])])
+                  ])])
     wf.connect(mergefunc, 'out_files', registration, 'inputspec.source_files')
 
     def split_files(in_files, splits):
@@ -1007,7 +1007,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                  [('design_cov', 'qa.model'),
                   ('design_image', 'qa.model.@matrix_image'),
                   ('design_file', 'qa.model.@matrix'),
-                                  ])])
+                  ])])
     wf.connect([(preproc, datasink, [('outputspec.motion_parameters',
                                       'qa.motion'),
                                      ('outputspec.motion_plots',

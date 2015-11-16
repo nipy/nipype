@@ -12,7 +12,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys
+import os
 
 nipypepath = os.path.abspath('..')
 sys.path.insert(1, nipypepath)
@@ -211,8 +212,8 @@ htmlhelp_basename = 'nipypedoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('documentation', 'nipype.tex', u'nipype Documentation',
-   u'Neuroimaging in Python team', 'manual'),
+    ('documentation', 'nipype.tex', u'nipype Documentation',
+     u'Neuroimaging in Python team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

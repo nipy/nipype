@@ -30,18 +30,18 @@ def nlmeans_pipeline(name='Denoise',
                          name='outputnode')
 
     nmask = pe.Node(niu.Function(input_names=['in_file', 'in_mask'],
-                    output_names=['out_file'], function=bg_mask),
+                                 output_names=['out_file'], function=bg_mask),
                     name='NoiseMsk')
     nlmeans = pe.Node(dipy.Denoise(**params), name='NLMeans')
 
     wf = pe.Workflow(name=name)
     wf.connect([
-         (inputnode,  nmask,       [('in_file', 'in_file'),
-                                    ('in_mask', 'in_mask')]),
-         (inputnode,  nlmeans,     [('in_file', 'in_file'),
-                                    ('in_mask', 'in_mask')]),
-         (nmask,      nlmeans,     [('out_file', 'noise_mask')]),
-         (nlmeans,    outputnode,  [('out_file', 'out_file')])
+        (inputnode, nmask, [('in_file', 'in_file'),
+                            ('in_mask', 'in_mask')]),
+        (inputnode, nlmeans, [('in_file', 'in_file'),
+                              ('in_mask', 'in_mask')]),
+        (nmask, nlmeans, [('out_file', 'noise_mask')]),
+        (nlmeans, outputnode, [('out_file', 'out_file')])
     ])
     return wf
 

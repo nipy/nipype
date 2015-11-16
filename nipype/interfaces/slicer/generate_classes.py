@@ -227,7 +227,7 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x=F
                               param.nodeName.replace('-vector', '')]]
                 else:
                     values = [typesDict[param.nodeName.replace('-vector', '')]]
-                if mipav_hacks == True:
+                if mipav_hacks is True:
                     traitsParams["sep"] = ";"
                 else:
                     traitsParams["sep"] = ','

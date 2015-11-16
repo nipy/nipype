@@ -37,7 +37,7 @@ workflow3d.base_dir = "/tmp"
 workflow3d.connect([(split, stc, [("out_files", "in_files")]),
                     (stc, realign_estimate, [('timecorrected_files', 'in_files')]),
                     (realign_estimate, realign_write, [('modified_in_files', 'in_files')]),
-                    (stc, realign_estwrite,  [('timecorrected_files', 'in_files')]),
+                    (stc, realign_estwrite, [('timecorrected_files', 'in_files')]),
                     (realign_write, smooth, [('realigned_files', 'in_files')])])
 
 workflow3d.run()
@@ -71,7 +71,7 @@ workflow4d.base_dir = "/tmp"
 workflow4d.connect([(gunzip, stc, [("out_file", "in_files")]),
                     (stc, realign_estimate, [('timecorrected_files', 'in_files')]),
                     (realign_estimate, realign_write, [('modified_in_files', 'in_files')]),
-                    (stc, realign_estwrite,  [('timecorrected_files', 'in_files')]),
+                    (stc, realign_estwrite, [('timecorrected_files', 'in_files')]),
                     (realign_write, smooth, [('realigned_files', 'in_files')])])
 
 workflow4d.run()

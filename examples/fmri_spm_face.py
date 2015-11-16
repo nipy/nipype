@@ -182,11 +182,11 @@ def pickfirst(l):
 l1analysis.connect([(modelspec, level1design, [('session_info', 'session_info')]),
                     (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
                     (level1estimate, contrastestimate, [('spm_mat_file', 'spm_mat_file'),
-                                                      ('beta_images', 'beta_images'),
-                                                      ('residual_image', 'residual_image')]),
+                                                        ('beta_images', 'beta_images'),
+                                                        ('residual_image', 'residual_image')]),
                     (contrastestimate, threshold, [('spm_mat_file', 'spm_mat_file'),
-                                                  (('spmT_images', pickfirst), 'stat_image')]),
-                  ])
+                                                   (('spmT_images', pickfirst), 'stat_image')]),
+                    ])
 
 """
 Preproc + Analysis pipeline
@@ -228,7 +228,7 @@ data_dir = os.path.abspath('spm_face_data')
 # Specify the subject directories
 subject_list = ['M03953']
 # Map field names to individual subject runs.
-info = dict(func=[['RawEPI', 'subject_id', 5, ["_%04d" %i for i in range(6, 357)]]],
+info = dict(func=[['RawEPI', 'subject_id', 5, ["_%04d" % i for i in range(6, 357)]]],
             struct=[['Structural', 'subject_id', 7, '']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
@@ -402,7 +402,7 @@ paramanalysis.inputs.contrastestimate.use_derivs = False
 l1pipeline.connect([(preproc, paramanalysis, [('realign.realignment_parameters',
                                                'modelspec.realignment_parameters'),
                                               (('smooth.smoothed_files', makelist),
-                                                'modelspec.functional_runs')])])
+                                               'modelspec.functional_runs')])])
 
 """
 Setup the pipeline
@@ -432,7 +432,7 @@ level1.base_dir = os.path.abspath('spm_face_tutorial/workingdir')
 
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                 (datasource, l1pipeline, [('struct', 'preproc.coregister.source'),
-                                        ('func', 'preproc.realign.in_files')])
+                                          ('func', 'preproc.realign.in_files')])
                 ])
 
 
@@ -466,11 +466,11 @@ def getstripdir(subject_id):
 
 # store relevant outputs from various stages of the 1st level analysis
 level1.connect([(infosource, datasink, [('subject_id', 'container'),
-                                       (('subject_id', getstripdir), 'strip_dir')]),
+                                        (('subject_id', getstripdir), 'strip_dir')]),
                 (l1pipeline, datasink, [('analysis.contrastestimate.con_images', 'contrasts.@con'),
-                                       ('analysis.contrastestimate.spmT_images', 'contrasts.@T'),
-                                       ('paramanalysis.contrastestimate.con_images', 'paramcontrasts.@con'),
-                                       ('paramanalysis.contrastestimate.spmT_images', 'paramcontrasts.@T')]),
+                                        ('analysis.contrastestimate.spmT_images', 'contrasts.@T'),
+                                        ('paramanalysis.contrastestimate.con_images', 'paramcontrasts.@con'),
+                                        ('paramanalysis.contrastestimate.spmT_images', 'paramcontrasts.@T')]),
                 ])
 
 
@@ -488,4 +488,3 @@ function needs to be called.
 if __name__ == '__main__':
     level1.run()
     level1.write_graph()
-

@@ -44,5 +44,3 @@ class InTemporaryDirectory(TemporaryDirectory):
     def __exit__(self, exc, value, tb):
         os.chdir(self._pwd)
         return super(InTemporaryDirectory, self).__exit__(exc, value, tb)
-
-

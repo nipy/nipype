@@ -104,7 +104,7 @@ class ConstrainedSphericalDeconvolutionInputSpec(CommandLineInputSpec):
     encoding_file = File(exists=True, argstr='-grad %s', position=1,
                          desc='Gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient, and b gives the b-value in units (1000 s/mm^2). See FSL2MRTrix')
     filter_file = File(exists=True, argstr='-filter %s', position=-2,
-                       desc='a text file containing the filtering coefficients for each even harmonic order.' \
+                       desc='a text file containing the filtering coefficients for each even harmonic order.'
                        'the linear frequency filtering parameters used for the initial linear spherical deconvolution step (default = [ 1 1 1 0 0 ]).')
 
     lambda_value = traits.Float(argstr='-lambda %s', desc='the regularisation parameter lambda that controls the strength of the constraint (default = 1.0).')
@@ -268,7 +268,7 @@ class FSL2MRTrixInputSpec(TraitedSpec):
 
 
 class FSL2MRTrixOutputSpec(TraitedSpec):
-    encoding_file = File(desc='The gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient' \
+    encoding_file = File(desc='The gradient encoding, supplied as a 4xN text file with each line is in the format [ X Y Z b ], where [ X Y Z ] describe the direction of the applied gradient'
                          'and b gives the b-value in units (1000 s/mm^2).')
 
 
@@ -353,7 +353,7 @@ class FindShPeaksInputSpec(CommandLineInputSpec):
     peaks_image = File(exists=True, argstr='-peaks %s', desc='the program will try to find the peaks that most closely match those in the image provided')
     num_peaks = traits.Int(argstr='-num %s', desc='the number of peaks to extract (default is 3)')
     peak_directions = traits.List(traits.Float, argstr='-direction %s', sep=' ', minlen=2, maxlen=2,
-                                  desc='phi theta.  the direction of a peak to estimate. The algorithm will attempt to find the same number of peaks as have been specified using this option ' \
+                                  desc='phi theta.  the direction of a peak to estimate. The algorithm will attempt to find the same number of peaks as have been specified using this option '
                                   ' phi: the azimuthal angle of the direction (in degrees). theta: the elevation angle of the direction (in degrees, from the vertical z-axis)')
     peak_threshold = traits.Float(argstr='-threshold %s', desc='only peak amplitudes greater than the threshold will be considered')
     display_info = traits.Bool(argstr='-info', desc='Display information messages.')
@@ -392,7 +392,7 @@ class Directions2AmplitudeInputSpec(CommandLineInputSpec):
     peaks_image = File(exists=True, argstr='-peaks %s', desc='the program will try to find the peaks that most closely match those in the image provided')
     num_peaks = traits.Int(argstr='-num %s', desc='the number of peaks to extract (default is 3)')
     peak_directions = traits.List(traits.Float, argstr='-direction %s', sep=' ', minlen=2, maxlen=2,
-                                  desc='phi theta.  the direction of a peak to estimate. The algorithm will attempt to find the same number of peaks as have been specified using this option ' \
+                                  desc='phi theta.  the direction of a peak to estimate. The algorithm will attempt to find the same number of peaks as have been specified using this option '
                                   ' phi: the azimuthal angle of the direction (in degrees). theta: the elevation angle of the direction (in degrees, from the vertical z-axis)')
     display_info = traits.Bool(argstr='-info', desc='Display information messages.')
     quiet_display = traits.Bool(argstr='-quiet', desc='do not display information messages or progress status.')
@@ -421,4 +421,3 @@ class Directions2Amplitude(CommandLine):
     _cmd = 'dir2amp'
     input_spec = Directions2AmplitudeInputSpec
     output_spec = Directions2AmplitudeOutputSpec
-

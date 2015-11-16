@@ -83,7 +83,7 @@ def create_networkx_pipeline(name="networkx", extra_column_heading="subject"):
     pipeline.connect([(ntwkMetrics, mergeNetworks, [("gpickled_network_files", "in2")])])
 
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["network_files",
-                                                                    "csv_files", "matlab_files", "node_csv", "global_csv"]),
+                                                                  "csv_files", "matlab_files", "node_csv", "global_csv"]),
                          name="outputnode")
 
     pipeline.connect([(MergeCSVFiles_node, outputnode, [("csv_file", "node_csv")])])

@@ -88,6 +88,3 @@ if __name__ == '__main__':
     build_docs()
     # push_to_sf()
     os.chdir(prev_dir)
-
-
-

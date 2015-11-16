@@ -329,7 +329,7 @@ class Coregister(SPMCommand):
             return np.array(filename_to_list(val), dtype=object)
         if opt == 'source' and self.inputs.jobtype == "write":
             if isdefined(self.inputs.apply_to_files):
-                return scans_for_fnames(val+self.inputs.apply_to_files)
+                return scans_for_fnames(val + self.inputs.apply_to_files)
             else:
                 return scans_for_fnames(val)
         return super(Coregister, self)._format_arg(opt, spec, val)
@@ -811,7 +811,7 @@ class Segment(SPMCommand):
                         outfield = '%s_%s_image' % (image, tissue)
                         outputs[outfield] = fname_presuffix(f,
                                                             prefix='%sc%d' % (prefix,
-                                                                              tidx+1))
+                                                                              tidx + 1))
         if isdefined(self.inputs.save_bias_corrected) and \
                 self.inputs.save_bias_corrected:
             outputs['bias_corrected_image'] = fname_presuffix(f, prefix='m')
@@ -963,16 +963,16 @@ class NewSegment(SPMCommand):
             if isdefined(self.inputs.tissues):
                 for i, tissue in enumerate(self.inputs.tissues):
                     if tissue[2][0]:
-                        outputs['native_class_images'][i].append(os.path.join(pth, "c%d%s.nii" % (i+1, base)))
+                        outputs['native_class_images'][i].append(os.path.join(pth, "c%d%s.nii" % (i + 1, base)))
                     if tissue[2][1]:
-                        outputs['dartel_input_images'][i].append(os.path.join(pth, "rc%d%s.nii" % (i+1, base)))
+                        outputs['dartel_input_images'][i].append(os.path.join(pth, "rc%d%s.nii" % (i + 1, base)))
                     if tissue[3][0]:
-                        outputs['normalized_class_images'][i].append(os.path.join(pth, "wc%d%s.nii" % (i+1, base)))
+                        outputs['normalized_class_images'][i].append(os.path.join(pth, "wc%d%s.nii" % (i + 1, base)))
                     if tissue[3][1]:
-                        outputs['modulated_class_images'][i].append(os.path.join(pth, "mwc%d%s.nii" % (i+1, base)))
+                        outputs['modulated_class_images'][i].append(os.path.join(pth, "mwc%d%s.nii" % (i + 1, base)))
             else:
                 for i in range(n_classes):
-                    outputs['native_class_images'][i].append(os.path.join(pth, "c%d%s.nii" % (i+1, base)))
+                    outputs['native_class_images'][i].append(os.path.join(pth, "c%d%s.nii" % (i + 1, base)))
             outputs['transformation_mat'].append(os.path.join(pth, "%s_seg8.mat" % base))
 
             if isdefined(self.inputs.write_deformation_fields):
@@ -1146,7 +1146,7 @@ class DARTEL(SPMCommand):
         outputs = self._outputs().get()
         outputs['template_files'] = []
         for i in range(6):
-            outputs['template_files'].append(os.path.realpath('%s_%d.nii' % (self.inputs.template_prefix, i+1)))
+            outputs['template_files'].append(os.path.realpath('%s_%d.nii' % (self.inputs.template_prefix, i + 1)))
         outputs['final_template_file'] = os.path.realpath('%s_6.nii' % self.inputs.template_prefix)
         outputs['dartel_flow_fields'] = []
         for filename in self.inputs.image_files[0]:
@@ -1234,7 +1234,7 @@ class DARTELNorm2MNI(SPMCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         pth, base, ext = split_filename(self.inputs.template_file)
-        outputs['normalization_parameter_file'] = os.path.realpath(base+'_2mni.mat')
+        outputs['normalization_parameter_file'] = os.path.realpath(base + '_2mni.mat')
         outputs['normalized_files'] = []
         prefix = "w"
         if isdefined(self.inputs.modulate) and self.inputs.modulate:
@@ -1374,7 +1374,7 @@ class VBMSegmentInputSpec(SPMCommandInputSpec):
         exists=True, field='estwrite.tpm',
         desc='tissue probability map')
     gaussians_per_class = traits.Tuple(
-        (2, 2, 2, 3, 4, 2), *([traits.Int()]*6),
+        (2, 2, 2, 3, 4, 2), *([traits.Int()] * 6),
         usedefault=True,
         desc='number of gaussians for each tissue class')
     bias_regularization = traits.Enum(
@@ -1562,25 +1562,25 @@ class VBMSegment(SPMCommand):
 
                 if getattr(self.inputs, '%s_native' % tis):
                     outputs['native_class_images'][i].append(
-                        os.path.join(pth, "p%d%s.nii" % (i+1, base)))
+                        os.path.join(pth, "p%d%s.nii" % (i + 1, base)))
                 if getattr(self.inputs, '%s_dartel' % tis) == 1:
                     outputs['dartel_input_images'][i].append(
-                        os.path.join(pth, "rp%d%s.nii" % (i+1, base)))
+                        os.path.join(pth, "rp%d%s.nii" % (i + 1, base)))
                 elif getattr(self.inputs, '%s_dartel' % tis) == 2:
                     outputs['dartel_input_images'][i].append(
-                        os.path.join(pth, "rp%d%s_affine.nii" % (i+1, base)))
+                        os.path.join(pth, "rp%d%s_affine.nii" % (i + 1, base)))
 
             # normalized space
                 if getattr(self.inputs, '%s_normalized' % tis):
                     outputs['normalized_class_images'][i].append(
-                        os.path.join(pth, "w%sp%d%s.nii" % (dartel_px, i+1, base)))
+                        os.path.join(pth, "w%sp%d%s.nii" % (dartel_px, i + 1, base)))
 
                 if getattr(self.inputs, '%s_modulated_normalized' % tis) == 1:
                     outputs['modulated_class_images'][i].append(os.path.join(
-                        pth, "mw%sp%d%s.nii" % (dartel_px, i+1, base)))
+                        pth, "mw%sp%d%s.nii" % (dartel_px, i + 1, base)))
                 elif getattr(self.inputs, '%s_modulated_normalized' % tis) == 2:
                     outputs['normalized_class_images'][i].append(os.path.join(
-                        pth, "m0w%sp%d%s.nii" % (dartel_px, i+1, base)))
+                        pth, "m0w%sp%d%s.nii" % (dartel_px, i + 1, base)))
 
             if self.inputs.pve_label_native:
                 outputs['pve_label_native_images'].append(

@@ -56,7 +56,8 @@ import nipype.algorithms.misc as misc
 import nipype.interfaces.cmtk as cmtk
 import nipype.interfaces.dipy as dipy
 import inspect
-import os, os.path as op                      # system functions
+import os
+import os.path as op                      # system functions
 from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
 from nipype.workflows.dmri.camino.connectivity_mapping import select_aparc_annot
 from nipype.utils.misc import package_check
@@ -580,11 +581,11 @@ connectivity.base_dir = op.abspath('dmri_connectivity_advanced')
 connectivity.connect([
                     (infosource, datasource, [('subject_id', 'subject_id')]),
                     (datasource, mapping, [('dwi', 'inputnode.dwi'),
-                                         ('bvals', 'inputnode.bvals'),
-                                         ('bvecs', 'inputnode.bvecs')
-                                         ]),
-        (infosource, mapping, [('subject_id', 'inputnode.subject_id')])
-                ])
+                                           ('bvals', 'inputnode.bvals'),
+                                           ('bvecs', 'inputnode.bvecs')
+                                           ]),
+    (infosource, mapping, [('subject_id', 'inputnode.subject_id')])
+])
 
 """
 The following functions run the whole workflow and produce a .dot and .png graph of the processing pipeline.

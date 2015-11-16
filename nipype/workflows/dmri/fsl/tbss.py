@@ -77,7 +77,7 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
         (getmask1, getmask2, [("out_file", "in_file"),
                               ("out_file", "operand_files")]),
         (prepfa, slicer, [('out_file', 'in_file')]),
-        ])
+    ])
 
     # Define the outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["fa_list",
@@ -85,10 +85,10 @@ def create_tbss_1_preproc(name='tbss_1_preproc'):
                                                                   "slices"]),
                          name="outputnode")
     tbss1.connect([
-                (prepfa, outputnode, [("out_file", "fa_list")]),
-                (getmask2, outputnode, [("out_file", "mask_list")]),
-                (slicer, outputnode, [('out_file', 'slices')])
-                ])
+        (prepfa, outputnode, [("out_file", "fa_list")]),
+        (getmask2, outputnode, [("out_file", "mask_list")]),
+        (slicer, outputnode, [('out_file', 'slices')])
+    ])
     return tbss1
 
 
@@ -152,7 +152,7 @@ def create_tbss_2_reg(name="tbss_2_reg"):
                             ("mask_list", "inmask_file"),
                             ("target", "ref_file")]),
         (flirt, fnirt, [("out_matrix_file", "affine_file")]),
-        ])
+    ])
 
     # Define the outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=['field_list']),
@@ -160,7 +160,7 @@ def create_tbss_2_reg(name="tbss_2_reg"):
 
     tbss2.connect([
         (fnirt, outputnode, [('fieldcoeff_file', 'field_list')])
-        ])
+    ])
     return tbss2
 
 
@@ -228,7 +228,7 @@ def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton=True):
         (mergefa, groupmask, [("merged_file", "in_file")]),
         (mergefa, maskgroup, [("merged_file", "in_file")]),
         (groupmask, maskgroup, [("out_file", "in_file2")]),
-        ])
+    ])
 
     # Create outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=['groupmask',
@@ -247,13 +247,13 @@ def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton=True):
         makeskeleton = pe.Node(fsl.TractSkeleton(skeleton_file=True),
                                name="makeskeleton")
         tbss3.connect([
-                       (maskgroup, meanfa, [("out_file", "in_file")]),
-                       (meanfa, makeskeleton, [("out_file", "in_file")]),
-                       (groupmask, outputnode, [('out_file', 'groupmask')]),
-                       (makeskeleton, outputnode, [('skeleton_file', 'skeleton_file')]),
-                       (meanfa, outputnode, [('out_file', 'meanfa_file')]),
-                       (maskgroup, outputnode, [('out_file', 'mergefa_file')])
-                       ])
+            (maskgroup, meanfa, [("out_file", "in_file")]),
+            (meanfa, makeskeleton, [("out_file", "in_file")]),
+            (groupmask, outputnode, [('out_file', 'groupmask')]),
+            (makeskeleton, outputnode, [('skeleton_file', 'skeleton_file')]),
+            (meanfa, outputnode, [('out_file', 'meanfa_file')]),
+            (maskgroup, outputnode, [('out_file', 'mergefa_file')])
+        ])
     else:
         # $FSLDIR/bin/fslmaths $FSLDIR/data/standard/FMRIB58_FA_1mm -mas mean_FA_mask mean_FA
         maskstd = pe.Node(fsl.ImageMaths(op_string="-mas",
@@ -271,18 +271,18 @@ def create_tbss_3_postreg(name='tbss_3_postreg', estimate_skeleton=True):
                              name="maskgroup2")
 
         tbss3.connect([
-                        (groupmask, maskstd, [("out_file", "in_file2")]),
-                        (maskstd, binmaskstd, [("out_file", "in_file")]),
-                        (maskgroup, maskgroup2, [("out_file", "in_file")]),
-                        (binmaskstd, maskgroup2, [("out_file", "in_file2")])
+            (groupmask, maskstd, [("out_file", "in_file2")]),
+            (maskstd, binmaskstd, [("out_file", "in_file")]),
+            (maskgroup, maskgroup2, [("out_file", "in_file")]),
+            (binmaskstd, maskgroup2, [("out_file", "in_file2")])
         ])
 
         outputnode.inputs.skeleton_file = fsl.Info.standard_image("FMRIB58_FA-skeleton_1mm.nii.gz")
         tbss3.connect([
-                (binmaskstd, outputnode, [('out_file', 'groupmask')]),
-                (maskstd, outputnode, [('out_file', 'meanfa_file')]),
-                (maskgroup2, outputnode, [('out_file', 'mergefa_file')])
-                ])
+            (binmaskstd, outputnode, [('out_file', 'groupmask')]),
+            (maskstd, outputnode, [('out_file', 'meanfa_file')]),
+            (maskgroup2, outputnode, [('out_file', 'mergefa_file')])
+        ])
     return tbss3
 
 
@@ -329,8 +329,8 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
 
     # Mask the skeleton at the threshold
     skeletonmask = pe.Node(fsl.ImageMaths(
-                                          suffix="_mask"),
-                           name="skeletonmask")
+        suffix="_mask"),
+        name="skeletonmask")
 
     # Invert the brainmask then add in the tract skeleton
     invertmask = pe.Node(fsl.ImageMaths(suffix="_inv",
@@ -360,7 +360,7 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
         (skeletonmask, invertmask, [("out_file", "in_file2")]),
         (invertmask, distancemap, [("out_file", "in_file")]),
         (distancemap, projectfa, [("distance_map", "distance_map")]),
-        ])
+    ])
 
     # Create the outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=['projectedfa_file',
@@ -370,12 +370,12 @@ def create_tbss_4_prestats(name='tbss_4_prestats'):
                          name='outputnode')
 
     tbss4.connect([
-            (projectfa, outputnode, [('projected_data', 'projectedfa_file'),
-                                     ('skeleton_file', 'skeleton_file')
-                                     ]),
-            (distancemap, outputnode, [('distance_map', 'distance_map')]),
-            (skeletonmask, outputnode, [('out_file', 'skeleton_mask')])
-            ])
+        (projectfa, outputnode, [('projected_data', 'projectedfa_file'),
+                                 ('skeleton_file', 'skeleton_file')
+                                 ]),
+        (distancemap, outputnode, [('distance_map', 'distance_map')]),
+        (skeletonmask, outputnode, [('out_file', 'skeleton_mask')])
+    ])
 
     return tbss4
 
@@ -420,20 +420,20 @@ def create_tbss_all(name='tbss_all', estimate_skeleton=True):
 
     tbss_all = pe.Workflow(name=name)
     tbss_all.connect([
-                (inputnode, tbss1, [('fa_list', 'inputnode.fa_list')]),
-                (inputnode, tbss4, [('skeleton_thresh', 'inputnode.skeleton_thresh')]),
+        (inputnode, tbss1, [('fa_list', 'inputnode.fa_list')]),
+        (inputnode, tbss4, [('skeleton_thresh', 'inputnode.skeleton_thresh')]),
 
-                (tbss1, tbss2, [('outputnode.fa_list', 'inputnode.fa_list'),
-                                ('outputnode.mask_list', 'inputnode.mask_list')]),
-                (tbss1, tbss3, [('outputnode.fa_list', 'inputnode.fa_list')]),
-                (tbss2, tbss3, [('outputnode.field_list', 'inputnode.field_list')]),
-                (tbss3, tbss4, [
-                            ('outputnode.groupmask', 'inputnode.groupmask'),
-                            ('outputnode.skeleton_file', 'inputnode.skeleton_file'),
-                            ('outputnode.meanfa_file', 'inputnode.meanfa_file'),
-                            ('outputnode.mergefa_file', 'inputnode.mergefa_file')
-                        ])
-                ])
+        (tbss1, tbss2, [('outputnode.fa_list', 'inputnode.fa_list'),
+                        ('outputnode.mask_list', 'inputnode.mask_list')]),
+        (tbss1, tbss3, [('outputnode.fa_list', 'inputnode.fa_list')]),
+        (tbss2, tbss3, [('outputnode.field_list', 'inputnode.field_list')]),
+        (tbss3, tbss4, [
+            ('outputnode.groupmask', 'inputnode.groupmask'),
+            ('outputnode.skeleton_file', 'inputnode.skeleton_file'),
+            ('outputnode.meanfa_file', 'inputnode.meanfa_file'),
+            ('outputnode.mergefa_file', 'inputnode.mergefa_file')
+        ])
+    ])
 
     # Define the outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(fields=['groupmask',
@@ -446,47 +446,47 @@ def create_tbss_all(name='tbss_all', estimate_skeleton=True):
                                                                   'distance_map']),
                          name='outputnode')
     outputall_node = pe.Node(interface=util.IdentityInterface(
-                                                        fields=['fa_list1',
-                                                                'mask_list1',
-                                                                'field_list2',
-                                                                'groupmask3',
-                                                                'skeleton_file3',
-                                                                'meanfa_file3',
-                                                                'mergefa_file3',
-                                                                'projectedfa_file4',
-                                                                'skeleton_mask4',
-                                                                'distance_map4']),
-                             name='outputall_node')
+        fields=['fa_list1',
+                'mask_list1',
+                'field_list2',
+                'groupmask3',
+                'skeleton_file3',
+                'meanfa_file3',
+                'mergefa_file3',
+                'projectedfa_file4',
+                'skeleton_mask4',
+                'distance_map4']),
+        name='outputall_node')
 
     tbss_all.connect([
-                (tbss3, outputnode, [('outputnode.meanfa_file', 'meanfa_file'),
-                                     ('outputnode.mergefa_file', 'mergefa_file'),
-                                     ('outputnode.groupmask', 'groupmask'),
-                                     ('outputnode.skeleton_file', 'skeleton_file3'),
-                                     ]),
-                (tbss4, outputnode, [('outputnode.projectedfa_file', 'projectedfa_file'),
-                                     ('outputnode.skeleton_file', 'skeleton_file4'),
-                                     ('outputnode.skeleton_mask', 'skeleton_mask'),
-                                     ('outputnode.distance_map', 'distance_map'),
-                                     ]),
+        (tbss3, outputnode, [('outputnode.meanfa_file', 'meanfa_file'),
+                             ('outputnode.mergefa_file', 'mergefa_file'),
+                             ('outputnode.groupmask', 'groupmask'),
+                             ('outputnode.skeleton_file', 'skeleton_file3'),
+                             ]),
+        (tbss4, outputnode, [('outputnode.projectedfa_file', 'projectedfa_file'),
+                             ('outputnode.skeleton_file', 'skeleton_file4'),
+                             ('outputnode.skeleton_mask', 'skeleton_mask'),
+                             ('outputnode.distance_map', 'distance_map'),
+                             ]),
 
-                (tbss1, outputall_node, [('outputnode.fa_list', 'fa_list1'),
-                                         ('outputnode.mask_list', 'mask_list1'),
-                                    ]),
-                (tbss2, outputall_node, [('outputnode.field_list', 'field_list2'),
-                                         ]),
-                (tbss3, outputall_node, [
-                                    ('outputnode.meanfa_file', 'meanfa_file3'),
-                                    ('outputnode.mergefa_file', 'mergefa_file3'),
-                                    ('outputnode.groupmask', 'groupmask3'),
-                                    ('outputnode.skeleton_file', 'skeleton_file3'),
-                                    ]),
-                (tbss4, outputall_node, [
-                                    ('outputnode.projectedfa_file', 'projectedfa_file4'),
-                                    ('outputnode.skeleton_mask', 'skeleton_mask4'),
-                                    ('outputnode.distance_map', 'distance_map4'),
-                                    ]),
-                    ])
+        (tbss1, outputall_node, [('outputnode.fa_list', 'fa_list1'),
+                                 ('outputnode.mask_list', 'mask_list1'),
+                                 ]),
+        (tbss2, outputall_node, [('outputnode.field_list', 'field_list2'),
+                                 ]),
+        (tbss3, outputall_node, [
+            ('outputnode.meanfa_file', 'meanfa_file3'),
+            ('outputnode.mergefa_file', 'mergefa_file3'),
+            ('outputnode.groupmask', 'groupmask3'),
+            ('outputnode.skeleton_file', 'skeleton_file3'),
+        ]),
+        (tbss4, outputall_node, [
+            ('outputnode.projectedfa_file', 'projectedfa_file4'),
+            ('outputnode.skeleton_mask', 'skeleton_mask4'),
+            ('outputnode.distance_map', 'distance_map4'),
+        ]),
+    ])
     return tbss_all
 
 
@@ -555,29 +555,29 @@ def create_tbss_non_FA(name='tbss_non_FA'):
 
     tbss_non_FA = pe.Workflow(name=name)
     tbss_non_FA.connect([
-                    (inputnode, applywarp, [('file_list', 'in_file'),
-                                            ('field_list', 'field_file'),
-                                            ]),
-                    (applywarp, merge, [("out_file", "in_files")]),
+        (inputnode, applywarp, [('file_list', 'in_file'),
+                                ('field_list', 'field_file'),
+                                ]),
+        (applywarp, merge, [("out_file", "in_files")]),
 
-                    (merge, maskgroup, [("merged_file", "in_file")]),
+        (merge, maskgroup, [("merged_file", "in_file")]),
 
-                    (inputnode, maskgroup, [('groupmask', 'in_file2')]),
+        (inputnode, maskgroup, [('groupmask', 'in_file2')]),
 
-                    (maskgroup, projectfa, [('out_file', 'alt_data_file')]),
-                    (inputnode, projectfa, [('skeleton_thresh', 'threshold'),
-                                            ("meanfa_file", "in_file"),
-                                            ("distance_map", "distance_map"),
-                                            ("all_FA_file", 'data_file')
-                                            ]),
-                ])
+        (maskgroup, projectfa, [('out_file', 'alt_data_file')]),
+        (inputnode, projectfa, [('skeleton_thresh', 'threshold'),
+                                ("meanfa_file", "in_file"),
+                                ("distance_map", "distance_map"),
+                                ("all_FA_file", 'data_file')
+                                ]),
+    ])
 
     # Define the outputnode
     outputnode = pe.Node(interface=util.IdentityInterface(
-                                            fields=['projected_nonFA_file']),
-                         name='outputnode')
+        fields=['projected_nonFA_file']),
+        name='outputnode')
     tbss_non_FA.connect([
-            (projectfa, outputnode, [('projected_data', 'projected_nonFA_file'),
-                                     ]),
-            ])
+        (projectfa, outputnode, [('projected_data', 'projected_nonFA_file'),
+                                 ]),
+    ])
     return tbss_non_FA

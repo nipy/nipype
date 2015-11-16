@@ -28,7 +28,9 @@ from nipype.workflows.smri.ants import antsRegistrationTemplateBuildSingleIterat
 2. Download T1 volumes into home directory
 """
 
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 homeDir = os.getenv("HOME")
 requestedPath = os.path.join(homeDir, 'nipypeTestPath')
 mydatadir = os.path.realpath(requestedPath)
@@ -37,13 +39,13 @@ if not os.path.exists(mydatadir):
 print(mydatadir)
 
 MyFileURLs = [
-           ('http://slicer.kitware.com/midas3/download?bitstream=13121', '01_T1_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13122', '02_T1_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13124', '03_T1_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13128', '01_T1_inv_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13123', '02_T1_inv_half.nii.gz'),
-           ('http://slicer.kitware.com/midas3/download?bitstream=13125', '03_T1_inv_half.nii.gz'),
-           ]
+    ('http://slicer.kitware.com/midas3/download?bitstream=13121', '01_T1_half.nii.gz'),
+    ('http://slicer.kitware.com/midas3/download?bitstream=13122', '02_T1_half.nii.gz'),
+    ('http://slicer.kitware.com/midas3/download?bitstream=13124', '03_T1_half.nii.gz'),
+    ('http://slicer.kitware.com/midas3/download?bitstream=13128', '01_T1_inv_half.nii.gz'),
+    ('http://slicer.kitware.com/midas3/download?bitstream=13123', '02_T1_inv_half.nii.gz'),
+    ('http://slicer.kitware.com/midas3/download?bitstream=13125', '03_T1_inv_half.nii.gz'),
+]
 for tt in MyFileURLs:
     myURL = tt[0]
     localFilename = os.path.join(mydatadir, tt[1])
@@ -106,7 +108,7 @@ tbuilder.base_dir = requestedPath
 InitialTemplateInputs = [mdict['T1'] for mdict in ListOfImagesDictionaries]
 
 datasource = pe.Node(interface=util.IdentityInterface(fields=['InitialTemplateInputs', 'ListOfImagesDictionaries',
-                                                       'registrationImageTypes', 'interpolationMapping']),
+                                                              'registrationImageTypes', 'interpolationMapping']),
                      run_without_submitting=True,
                      name='InputImages')
 datasource.inputs.InitialTemplateInputs = InitialTemplateInputs

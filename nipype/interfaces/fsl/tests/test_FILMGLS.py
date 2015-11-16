@@ -43,7 +43,7 @@ def test_filmgls():
                       threshold=dict(usedefault=True, argstr='--thr=%f',),
                       tukey_window=dict(xor=['autocorr_estimate_only', 'fit_armodel', 'tukey_window', 'multitaper_product', 'use_pava', 'autocorr_noestimate'], argstr='--tukey=%d',),
                       use_pava=dict(argstr='--pava',),
-    )
+                      )
     instance = FILMGLS()
     if isinstance(instance.inputs, FILMGLSInputSpec):
         for key, metadata in list(input_map.items()):

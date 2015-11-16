@@ -25,7 +25,8 @@ import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.mrtrix as mrtrix  # <---- The important new part!
 import nipype.interfaces.fsl as fsl
 import nipype.algorithms.misc as misc
-import os, os.path as op                     # system functions
+import os
+import os.path as op                     # system functions
 
 fsl.FSLCommand.set_default_output_type('NIFTI')
 
@@ -249,12 +250,12 @@ their names to the subject list and their data to the proper folders.
 dwiproc = pe.Workflow(name="dwiproc")
 dwiproc.base_dir = os.path.abspath('dmri_mrtrix_dti')
 dwiproc.connect([
-                    (infosource, datasource, [('subject_id', 'subject_id')]),
-                    (datasource, tractography, [('dwi', 'inputnode.dwi'),
-                                              ('bvals', 'inputnode.bvals'),
-                                              ('bvecs', 'inputnode.bvecs')
-                                              ])
-                ])
+    (infosource, datasource, [('subject_id', 'subject_id')]),
+    (datasource, tractography, [('dwi', 'inputnode.dwi'),
+                                ('bvals', 'inputnode.bvals'),
+                                ('bvecs', 'inputnode.bvecs')
+                                ])
+])
 
 if __name__ == '__main__':
     dwiproc.run()

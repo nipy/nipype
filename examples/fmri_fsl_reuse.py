@@ -65,7 +65,7 @@ art = pe.MapNode(interface=ra.ArtifactDetect(use_differences=[True, False],
                  iterfield=['realigned_files', 'realignment_parameters', 'mask_file'],
                  name="art")
 
-modelspec = pe.Node(interface=model.SpecifyModel(),  name="modelspec")
+modelspec = pe.Node(interface=model.SpecifyModel(), name="modelspec")
 
 level1_workflow.connect([(preproc, art, [('outputspec.motion_parameters',
                                           'realignment_parameters'),
@@ -202,7 +202,7 @@ for every participant. Other examples of this function are available in the
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print("Subject ID: %s\n" %str(subject_id))
+    print("Subject ID: %s\n" % str(subject_id))
     output = []
     names = ['Task-Odd', 'Task-Even']
     for r in range(4):
@@ -259,5 +259,3 @@ if __name__ == '__main__':
     # level1_workflow.write_graph()
     level1_workflow.run()
     # level1_workflow.run(plugin='MultiProc', plugin_args={'n_procs':2})
-
-

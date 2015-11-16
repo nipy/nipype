@@ -114,9 +114,9 @@ getenv = True
                                     "wrapper_args"])
                 # add required slots to the template
                 template = '%s\n%s\n%s\nqueue\n' % (
-                                '%(initial_specs)s',
-                                template,
-                                '%(override_specs)s')
+                    '%(initial_specs)s',
+                    template,
+                    '%(override_specs)s')
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
                 specs = dict(
@@ -126,13 +126,13 @@ getenv = True
                     nodescript=pyscript,
                     basename=os.path.join(batch_dir, name),
                     override_specs=override_specs
-                    )
-                if not wrapper_cmd is None:
+                )
+                if wrapper_cmd is not None:
                     specs['executable'] = wrapper_cmd
                     specs['nodescript'] = \
                         '%s %s %s' % (wrapper_args % specs,  # give access to variables
-                                  sys.executable,
-                                  pyscript)
+                                      sys.executable,
+                                      pyscript)
                 submitspec = template % specs
                 # write submit spec for this job
                 submitfile = os.path.join(batch_dir,

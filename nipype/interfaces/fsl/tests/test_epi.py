@@ -10,7 +10,7 @@ import numpy as np
 import nibabel as nb
 
 from nipype.testing import (assert_equal, assert_not_equal,
-                             assert_raises, skipif)
+                            assert_raises, skipif)
 import nipype.interfaces.fsl.epi as fsl
 from nipype.interfaces.fsl import no_fsl
 
@@ -52,15 +52,12 @@ def test_eddy_correct2():
     eddy.inputs.in_file = filelist[0]
     eddy.inputs.out_file = 'foo_eddc.nii'
     eddy.inputs.ref_num = 100
-    yield assert_equal, eddy.cmdline, 'eddy_correct %s foo_eddc.nii 100' %filelist[0]
+    yield assert_equal, eddy.cmdline, 'eddy_correct %s foo_eddc.nii 100' % filelist[0]
 
     # .run based parameter setting
     eddy2 = fsl.EddyCorrect(in_file=filelist[0], out_file='foo_ec.nii', ref_num=20)
-    yield assert_equal, eddy2.cmdline, 'eddy_correct %s foo_ec.nii 20' %filelist[0]
+    yield assert_equal, eddy2.cmdline, 'eddy_correct %s foo_ec.nii 20' % filelist[0]
 
     # test arguments for opt_map
     # eddy_correct class doesn't have opt_map{}
     clean_directory(outdir, cwd)
-
-
-

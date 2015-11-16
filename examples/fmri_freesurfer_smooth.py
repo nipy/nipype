@@ -177,7 +177,7 @@ preproc.connect([(realign, surfregister, [('mean_image', 'source_file')]),
                  (realign, ApplyVolTransform, [('mean_image', 'source_file')]),
                  (ApplyVolTransform, Threshold, [('transformed_file', 'in_file')]),
                  (realign, art, [('realignment_parameters', 'realignment_parameters'),
-                                ('realigned_files', 'realigned_files')]),
+                                 ('realigned_files', 'realigned_files')]),
                  (Threshold, art, [('binary_file', 'mask_file')]),
                  (realign, volsmooth, [('realigned_files', 'in_files')]),
                  (realign, surfsmooth, [('realigned_files', 'in_file')]),
@@ -227,9 +227,9 @@ contrastestimate = pe.Node(interface=spm.EstimateContrast(), name="contrastestim
 volanalysis.connect([(modelspec, level1design, [('session_info', 'session_info')]),
                      (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
                      (level1estimate, contrastestimate, [('spm_mat_file', 'spm_mat_file'),
-                                                       ('beta_images', 'beta_images'),
-                                                       ('residual_image', 'residual_image')]),
-                  ])
+                                                         ('beta_images', 'beta_images'),
+                                                         ('residual_image', 'residual_image')]),
+                     ])
 
 """
 Set up surface analysis workflow
@@ -327,13 +327,13 @@ Connect the components into an integrated workflow.
 
 l1pipeline = pe.Workflow(name='firstlevel')
 l1pipeline.connect([(inputnode, preproc, [('func', 'realign.in_files'),
-                                        ('subject_id', 'surfregister.subject_id'),
-                                        ('subject_id', 'fssource.subject_id'),
-                                        ]),
+                                          ('subject_id', 'surfregister.subject_id'),
+                                          ('subject_id', 'fssource.subject_id'),
+                                          ]),
                     (inputnode, volanalysis, [('session_info', 'modelspec.subject_info'),
-                                             ('contrasts', 'contrastestimate.contrasts')]),
-                    (inputnode, surfanalysis, [('session_info', 'modelspec.subject_info'),
                                               ('contrasts', 'contrastestimate.contrasts')]),
+                    (inputnode, surfanalysis, [('session_info', 'modelspec.subject_info'),
+                                               ('contrasts', 'contrastestimate.contrasts')]),
                     ])
 
 # attach volume and surface model specification and estimation components
@@ -450,7 +450,7 @@ paradigm was used for every participant.
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print("Subject ID: %s\n" %str(subject_id))
+    print("Subject ID: %s\n" % str(subject_id))
     output = []
     names = ['Task-Odd', 'Task-Even']
     for r in range(4):
@@ -521,8 +521,8 @@ level1.base_dir = os.path.abspath('volsurf_tutorial/workingdir')
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                 (datasource, l1pipeline, [('func', 'inputnode.func')]),
                 (infosource, l1pipeline, [('subject_id', 'inputnode.subject_id'),
-                                        (('subject_id', subjectinfo),
-                                         'inputnode.session_info')]),
+                                          (('subject_id', subjectinfo),
+                                           'inputnode.session_info')]),
                 ])
 
 
@@ -539,16 +539,16 @@ datasink.inputs.substitutions = []
 
 
 def getsubs(subject_id):
-    subs = [('_subject_id_%s/' %subject_id, '')]
+    subs = [('_subject_id_%s/' % subject_id, '')]
     return subs
 
 # store relevant outputs from various stages of the 1st level analysis
 level1.connect([(infosource, datasink, [('subject_id', 'container'),
-                                       (('subject_id', getsubs), 'substitutions')
-                                       ]),
+                                        (('subject_id', getsubs), 'substitutions')
+                                        ]),
                 (l1pipeline, datasink, [('surfanalysis.contrastestimate.con_images', 'contrasts'),
-                                       ('preproc.surfregister.out_reg_file', 'registrations'),
-                                       ])
+                                        ('preproc.surfregister.out_reg_file', 'registrations'),
+                                        ])
                 ])
 
 
@@ -579,7 +579,7 @@ Setup a dummy node to iterate over contrasts and hemispheres
 l2inputnode = pe.Node(interface=util.IdentityInterface(fields=['contrasts',
                                                                'hemi']),
                       name='inputnode')
-l2inputnode.iterables = [('contrasts', list(range(1, len(contrasts)+1))),
+l2inputnode.iterables = [('contrasts', list(range(1, len(contrasts) + 1))),
                          ('hemi', ['lh', 'rh'])]
 
 """
@@ -610,7 +610,7 @@ def ordersubjects(files, subj_list):
     outlist = []
     for s in subj_list:
         for f in files:
-            if '/%s/' %s in f:
+            if '/%s/' % s in f:
                 outlist.append(f)
                 continue
     print(outlist)
@@ -648,4 +648,3 @@ that visually represents the workflow.
 if __name__ == '__main__':
     l2flow.run()
     l2flow.write_graph(graph2use='flat')
-

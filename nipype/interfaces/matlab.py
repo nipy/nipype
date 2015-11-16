@@ -32,7 +32,7 @@ class MatlabInputSpec(CommandLineInputSpec):
     """ Basic expected inputs to Matlab interface """
 
     script = traits.Str(argstr='-r \"%s;exit\"', desc='m-code to run',
-                         mandatory=True, position=-1)
+                        mandatory=True, position=-1)
     uses_mcr = traits.Bool(desc='use MCR interface',
                            xor=['nodesktop', 'nosplash',
                                 'single_comp_thread'],
@@ -51,7 +51,7 @@ class MatlabInputSpec(CommandLineInputSpec):
                                      nohash=True)
     # non-commandline options
     mfile = traits.Bool(True, desc='Run m-code using m-file',
-                          usedefault=True)
+                        usedefault=True)
     script_file = File('pyscript.m', usedefault=True,
                        desc='Name of file to write m-code to')
     paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
@@ -180,7 +180,7 @@ class MatlabCommand(CommandLine):
             # clean up the code of comments and replace newlines with commas
             script_lines = ','.join([line for line in script_lines.split("\n") if not line.strip().startswith("%")])
 
-        script_lines = '\n'.join(prescript)+script_lines+'\n'.join(postscript)
+        script_lines = '\n'.join(prescript) + script_lines + '\n'.join(postscript)
         if mfile:
             with open(os.path.join(cwd, self.inputs.script_file), 'wt') as mfile:
                 mfile.write(script_lines)

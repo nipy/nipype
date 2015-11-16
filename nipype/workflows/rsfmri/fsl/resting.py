@@ -48,7 +48,7 @@ def select_volume(filename, which):
     elif which.lower() == 'middle':
         idx = int(np.ceil(load(filename).get_shape()[3] / 2))
     else:
-        raise Exception('unknown value for volume selection : %s' %which)
+        raise Exception('unknown value for volume selection : %s' % which)
     return idx
 
 
@@ -71,9 +71,9 @@ def create_realign_flow(name='realign'):
                                                                  ]),
                         name='inputspec')
     outputnode = pe.Node(interface=util.IdentityInterface(fields=[
-                                                               'realigned_file',
-                                                                 ]),
-                         name='outputspec')
+        'realigned_file',
+    ]),
+        name='outputspec')
     realigner = pe.Node(fsl.MCFLIRT(save_mats=True, stats_imgs=True),
                         name='realigner')
     splitter = pe.Node(fsl.Split(dimension='t'), name='splitter')
@@ -136,10 +136,10 @@ def create_resting_preproc(name='restpreproc'):
                                                                  ]),
                         name='inputspec')
     outputnode = pe.Node(interface=util.IdentityInterface(fields=[
-                                                              'noise_mask_file',
-                                                              'filtered_file',
-                                                              ]),
-                         name='outputspec')
+        'noise_mask_file',
+        'filtered_file',
+    ]),
+        name='outputspec')
     slicetimer = pe.Node(fsl.SliceTimer(), name='slicetimer')
     realigner = create_realign_flow()
     tsnr = pe.Node(TSNR(regress_poly=2), name='tsnr')

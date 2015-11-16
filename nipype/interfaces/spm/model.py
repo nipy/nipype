@@ -375,8 +375,8 @@ class EstimateContrast(SPMCommand):
                     try:
                         tidx = cname.index(fcont[0])
                     except:
-                        Exception("Contrast Estimate: could not get index of" \
-                                  " T contrast. probably not defined prior " \
+                        Exception("Contrast Estimate: could not get index of"
+                                  " T contrast. probably not defined prior "
                                   "to the F contrasts")
                     script += "consess{%d}.fcon.convec{%d} = consess{%d}.tcon.convec;\n" % (i + 1, cl0 + 1, tidx + 1)
         script += "jobs{1}.stats{1}.con.consess = consess;\n"

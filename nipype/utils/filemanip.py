@@ -226,7 +226,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             s = re.search('_c[0-9]{4,4}$', fname)
             i = 0
             if s:
-                i = int(s.group()[2:])+1
+                i = int(s.group()[2:]) + 1
                 fname = fname[:-6] + "_c%04d" % i
             else:
                 fname += "_c%04d" % i
@@ -452,11 +452,11 @@ def write_rst_list(items, prefix=''):
     out = []
     for item in items:
         out.append(prefix + ' ' + str(item))
-    return '\n'.join(out)+'\n\n'
+    return '\n'.join(out) + '\n\n'
 
 
 def write_rst_dict(info, prefix=''):
     out = []
     for key, value in sorted(info.items()):
         out.append(prefix + '* ' + key + ' : ' + str(value))
-    return '\n'.join(out)+'\n\n'
+    return '\n'.join(out) + '\n\n'

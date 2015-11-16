@@ -27,7 +27,9 @@ from string import Template
 import select
 import subprocess
 import sys
-import random, time, fnmatch
+import random
+import time
+import fnmatch
 from textwrap import wrap
 from datetime import datetime as dt
 from dateutil.parser import parse as parseutc
@@ -514,8 +516,8 @@ class BaseTraitedSpec(traits.HasTraits):
                 else:
                     if not skipundefined:
                         out[key] = undefinedval
-        elif (isinstance(object, TraitListObject) or isinstance(object, list)
-              or isinstance(object, tuple)):
+        elif (isinstance(object, TraitListObject) or
+                isinstance(object, list) or isinstance(object, tuple)):
             out = []
             for val in object:
                 if isdefined(val):
@@ -564,9 +566,8 @@ class BaseTraitedSpec(traits.HasTraits):
                 if has_metadata(trait.trait_type, "nohash", True):
                     continue
                 hash_files = (not has_metadata(trait.trait_type, "hash_files",
-                                               False)
-                              and not has_metadata(trait.trait_type,
-                                                   "name_source"))
+                                               False) and not
+                              has_metadata(trait.trait_type, "name_source"))
                 dict_nofilename.append((name,
                                         self._get_sorteddict(val, hash_method=hash_method,
                                                              hash_files=hash_files)))
@@ -800,7 +801,7 @@ class BaseInterface(Interface):
         line = "(%s%s)" % (type_info, default)
 
         manhelpstr = wrap(line, 70,
-                          initial_indent=manhelpstr[0]+': ',
+                          initial_indent=manhelpstr[0] + ': ',
                           subsequent_indent='\t\t ')
 
         if desc:
@@ -1500,7 +1501,7 @@ class CommandLine(BaseInterface):
         runtime = run_command(runtime, output=self.inputs.terminal_output,
                               redirect_x=self._redirect_x)
         if runtime.returncode is None or \
-            runtime.returncode not in correct_return_codes:
+                runtime.returncode not in correct_return_codes:
             self.raise_exception(runtime)
 
         return runtime
@@ -1522,8 +1523,8 @@ class CommandLine(BaseInterface):
         # traits.Either turns into traits.TraitCompound and does not have any
         # inner_traits
         elif trait_spec.is_trait_type(traits.List) \
-            or (trait_spec.is_trait_type(traits.TraitCompound)
-                and isinstance(value, list)):
+            or (trait_spec.is_trait_type(traits.TraitCompound) and
+                isinstance(value, list)):
             # This is a bit simple-minded at present, and should be
             # construed as the default. If more sophisticated behavior
             # is needed, it can be accomplished with metadata (e.g.
@@ -1771,13 +1772,14 @@ class MultiPath(traits.List):
         newvalue = value
 
         if not isinstance(value, list) \
-            or (self.inner_traits()
-                and isinstance(self.inner_traits()[0].trait_type, traits.List)
-                and not isinstance(self.inner_traits()[0].trait_type,
-                                   InputMultiPath)
-                and isinstance(value, list)
-                and value
-                and not isinstance(value[0], list)):
+            or (self.inner_traits() and
+                isinstance(self.inner_traits()[0].trait_type,
+                           traits.List) and not
+                isinstance(self.inner_traits()[0].trait_type,
+                           InputMultiPath) and
+                isinstance(value, list) and
+                value and not
+                isinstance(value[0], list)):
             newvalue = [value]
         value = super(MultiPath, self).validate(object, name, newvalue)
 

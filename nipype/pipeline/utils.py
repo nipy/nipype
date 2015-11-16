@@ -150,7 +150,7 @@ def get_print_name(node, simple_form=True):
     if simple_form:
         parts = name.split('.')
         if len(parts) > 2:
-            return ' ('.join(parts[1:])+')'
+            return ' ('.join(parts[1:]) + ')'
         elif len(parts) == 2:
             return parts[1]
     return name
@@ -281,7 +281,7 @@ def count_iterables(iterables, synchronize=False):
     if synchronize:
         op = max
     else:
-        op = lambda x, y: x*y
+        op = lambda x, y: x * y
     return reduce(op, [len(func()) for _, func in iterables.items()])
 
 
@@ -620,9 +620,9 @@ def generate_expanded_graph(graph_in):
 
         # the join successor nodes of the current iterable node
         jnodes = [node for node in graph_in.nodes_iter()
-                  if hasattr(node, 'joinsource')
-                  and inode.name == node.joinsource
-                  and nx.has_path(graph_in, inode, node)]
+                  if hasattr(node, 'joinsource') and
+                  inode.name == node.joinsource and
+                  nx.has_path(graph_in, inode, node)]
 
         # excise the join in-edges. save the excised edges in a
         # {jnode: {source name: (destination name, edge data)}}
@@ -649,8 +649,8 @@ def generate_expanded_graph(graph_in):
             # find the unique iterable source node in the graph
             try:
                 iter_src = next((node for node in graph_in.nodes_iter()
-                                 if node.name == src_name
-                                 and nx.has_path(graph_in, node, inode)))
+                                 if node.name == src_name and
+                                 nx.has_path(graph_in, node, inode)))
             except StopIteration:
                 raise ValueError("The node %s itersource %s was not found"
                                  " among the iterable predecessor nodes"
@@ -894,11 +894,11 @@ def _transpose_iterables(fields, values):
         for key, tuples in list(values.items()):
             for kvals in tuples:
                 for idx, val in enumerate(kvals):
-                    if val != None:
+                    if val is not None:
                         transposed[fields[idx]][key].append(val)
         return list(transposed.items())
     else:
-        return list(zip(fields, [[v for v in list(transpose) if v != None]
+        return list(zip(fields, [[v for v in list(transpose) if v is not None]
                                  for transpose in zip(*values)]))
 
 

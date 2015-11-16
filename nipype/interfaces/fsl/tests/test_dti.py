@@ -98,10 +98,10 @@ def test_dtifit2():
     dti.inputs.max_z = 50
 
     yield assert_equal, dti.cmdline, \
-        'dtifit -k %s -o foo.dti.nii -m %s -r %s -b %s -Z 50 -z 10' %(filelist[0],
-                                                                     filelist[1],
-                                                                     filelist[0],
-                                                                     filelist[1])
+        'dtifit -k %s -o foo.dti.nii -m %s -r %s -b %s -Z 50 -z 10' % (filelist[0],
+                                                                       filelist[1],
+                                                                       filelist[0],
+                                                                       filelist[1])
 
     clean_directory(outdir, cwd)
 
@@ -172,40 +172,34 @@ def test_randomise2():
         'randomise -i infile3 -o outfile3'
 
     # test arguments for opt_map
-    opt_map = {'demean_data':                        ('-D', True),
-               'one_sample_gmean':                   ('-1', True),
-               'mask_image':                         ('-m inp_mask', 'inp_mask'),
-               'design_matrix':                      ('-d design.mat',
-                                                      'design.mat'),
-               't_contrast':                         ('-t input.con',
-                                                      'input.con'),
-               'f_contrast':                         ('-f input.fts',
-                                                      'input.fts'),
-               'xchange_block_labels':               ('-e design.grp',
-                                                      'design.grp'),
-               'print_unique_perm':                  ('-q', True),
-               'print_info_parallelMode':            ('-Q', True),
-               'num_permutations':                   ('-n 10', 10),
-               'vox_pvalus':                         ('-x', True),
-               'fstats_only':                        ('--fonly', True),
-               'thresh_free_cluster':                ('-T', True),
-               'thresh_free_cluster_2Dopt':          ('--T2', True),
-               'cluster_thresholding':               ('-c 0.20', 0.20),
-               'cluster_mass_thresholding':          ('-C 0.40', 0.40),
-               'fcluster_thresholding':              ('-F 0.10', 0.10),
-               'fcluster_mass_thresholding':         ('-S 0.30', 0.30),
-               'variance_smoothing':                 ('-v 0.20', 0.20),
-               'diagnostics_off':                    ('--quiet', True),
-               'output_raw':                         ('-R', True),
-               'output_perm_vect':                   ('-P', True),
-               'int_seed':                           ('--seed=20', 20),
-               'TFCE_height_param':                  ('--tfce_H=0.11', 0.11),
-               'TFCE_extent_param':                  ('--tfce_E=0.50', 0.50),
-               'TFCE_connectivity':                  ('--tfce_C=0.30', 0.30),
-               'list_num_voxel_EVs_pos':             ('--vxl=1,2,3,4',
-                                                      '1,2,3,4'),
-               'list_img_voxel_EVs':                 ('--vxf=6,7,8,9,3',
-                                                      '6,7,8,9,3')}
+    opt_map = {'demean_data': ('-D', True),
+               'one_sample_gmean': ('-1', True),
+               'mask_image': ('-m inp_mask', 'inp_mask'),
+               'design_matrix': ('-d design.mat', 'design.mat'),
+               't_contrast': ('-t input.con', 'input.con'),
+               'f_contrast': ('-f input.fts', 'input.fts'),
+               'xchange_block_labels': ('-e design.grp', 'design.grp'),
+               'print_unique_perm': ('-q', True),
+               'print_info_parallelMode': ('-Q', True),
+               'num_permutations': ('-n 10', 10),
+               'vox_pvalus': ('-x', True),
+               'fstats_only': ('--fonly', True),
+               'thresh_free_cluster': ('-T', True),
+               'thresh_free_cluster_2Dopt': ('--T2', True),
+               'cluster_thresholding': ('-c 0.20', 0.20),
+               'cluster_mass_thresholding': ('-C 0.40', 0.40),
+               'fcluster_thresholding': ('-F 0.10', 0.10),
+               'fcluster_mass_thresholding': ('-S 0.30', 0.30),
+               'variance_smoothing': ('-v 0.20', 0.20),
+               'diagnostics_off': ('--quiet', True),
+               'output_raw': ('-R', True),
+               'output_perm_vect': ('-P', True),
+               'int_seed': ('--seed=20', 20),
+               'TFCE_height_param': ('--tfce_H=0.11', 0.11),
+               'TFCE_extent_param': ('--tfce_E=0.50', 0.50),
+               'TFCE_connectivity': ('--tfce_C=0.30', 0.30),
+               'list_num_voxel_EVs_pos': ('--vxl=1,2,3,4', '1,2,3,4'),
+               'list_img_voxel_EVs': ('--vxf=6,7,8,9,3', '6,7,8,9,3')}
 
     for name, settings in list(opt_map.items()):
         rand4 = fsl.Randomise(input_4D='infile', output_rootname='root',
@@ -255,42 +249,36 @@ def test_Randomise_parallel():
         'randomise_parallel -i infile3 -o outfile3'
 
     # test arguments for opt_map
-    opt_map = {'demean_data':                        ('-D', True),
-               'one_sample_gmean':                   ('-1', True),
-               'mask_image':                         ('-m inp_mask', 'inp_mask'),
-               'design_matrix':                      ('-d design.mat',
-                                                      'design.mat'),
-               't_contrast':                         ('-t input.con',
-                                                      'input.con'),
-               'f_contrast':                         ('-f input.fts',
-                                                      'input.fts'),
-               'xchange_block_labels':               ('-e design.grp',
-                                                      'design.grp'),
-               'print_unique_perm':                  ('-q', True),
-               'print_info_parallelMode':            ('-Q', True),
-               'num_permutations':                   ('-n 10', 10),
-               'vox_pvalus':                         ('-x', True),
-               'fstats_only':                        ('--fonly', True),
-               'thresh_free_cluster':                ('-T', True),
-               'thresh_free_cluster_2Dopt':          ('--T2', True),
-               'cluster_thresholding':               ('-c 0.20', 0.20),
-               'cluster_mass_thresholding':          ('-C 0.40', 0.40),
-               'fcluster_thresholding':              ('-F 0.10', 0.10),
-               'fcluster_mass_thresholding':         ('-S 0.30', 0.30),
-               'variance_smoothing':                 ('-v 0.20', 0.20),
-               'diagnostics_off':                    ('--quiet', True),
-               'output_raw':                         ('-R', True),
-               'output_perm_vect':                   ('-P', True),
-               'int_seed':                           ('--seed=20', 20),
-               'TFCE_height_param':                  ('--tfce_H=0.11', 0.11),
-               'TFCE_extent_param':                  ('--tfce_E=0.50', 0.50),
-               'TFCE_connectivity':                  ('--tfce_C=0.30', 0.30),
-               'list_num_voxel_EVs_pos':             ('--vxl=' \
-                                                      + repr([1, 2, 3, 4]),
-                                                      repr([1, 2, 3, 4])),
-               'list_img_voxel_EVs':               ('--vxf=' \
-                                                    + repr([6, 7, 8, 9, 3]),
-                                                    repr([6, 7, 8, 9, 3]))}
+    opt_map = {'demean_data': ('-D', True),
+               'one_sample_gmean': ('-1', True),
+               'mask_image': ('-m inp_mask', 'inp_mask'),
+               'design_matrix': ('-d design.mat', 'design.mat'),
+               't_contrast': ('-t input.con', 'input.con'),
+               'f_contrast': ('-f input.fts', 'input.fts'),
+               'xchange_block_labels': ('-e design.grp', 'design.grp'),
+               'print_unique_perm': ('-q', True),
+               'print_info_parallelMode': ('-Q', True),
+               'num_permutations': ('-n 10', 10),
+               'vox_pvalus': ('-x', True),
+               'fstats_only': ('--fonly', True),
+               'thresh_free_cluster': ('-T', True),
+               'thresh_free_cluster_2Dopt': ('--T2', True),
+               'cluster_thresholding': ('-c 0.20', 0.20),
+               'cluster_mass_thresholding': ('-C 0.40', 0.40),
+               'fcluster_thresholding': ('-F 0.10', 0.10),
+               'fcluster_mass_thresholding': ('-S 0.30', 0.30),
+               'variance_smoothing': ('-v 0.20', 0.20),
+               'diagnostics_off': ('--quiet', True),
+               'output_raw': ('-R', True),
+               'output_perm_vect': ('-P', True),
+               'int_seed': ('--seed=20', 20),
+               'TFCE_height_param': ('--tfce_H=0.11', 0.11),
+               'TFCE_extent_param': ('--tfce_E=0.50', 0.50),
+               'TFCE_connectivity': ('--tfce_C=0.30', 0.30),
+               'list_num_voxel_EVs_pos': ('--vxl=' + repr([1, 2, 3, 4]),
+                                          repr([1, 2, 3, 4])),
+               'list_img_voxel_EVs': ('--vxf=' + repr([6, 7, 8, 9, 3]),
+                                      repr([6, 7, 8, 9, 3]))}
 
     for name, settings in list(opt_map.items()):
         rand4 = fsl.Randomise_parallel(input_4D='infile',
@@ -379,13 +367,13 @@ def test_Vec_reg():
     yield assert_equal, results.interface.inputs.affineTmat, 'tmat3.mat'
 
     # test arguments for opt_map
-    opt_map = {'verbose':           ('-v', True),
-                'helpDoc':           ('-h', True),
-                'tensor':            ('--tensor', True),
-                'affineTmat':        ('-t Tmat', 'Tmat'),
-                'warpFile':          ('-w wrpFile', 'wrpFile'),
-                'interpolation':     ('--interp=sinc', 'sinc'),
-                'brainMask':         ('-m mask', 'mask')}
+    opt_map = {'verbose': ('-v', True),
+               'helpDoc': ('-h', True),
+               'tensor': ('--tensor', True),
+               'affineTmat': ('-t Tmat', 'Tmat'),
+               'warpFile': ('-w wrpFile', 'wrpFile'),
+               'interpolation': ('--interp=sinc', 'sinc'),
+               'brainMask': ('-m mask', 'mask')}
 
     for name, settings in list(opt_map.items()):
         vrg4 = fsl.VecReg(infile='infile', outfile='outfile',
@@ -440,7 +428,7 @@ def test_tbss_skeleton():
     # First by implicit argument
     skeletor.inputs.skeleton_file = True
     yield assert_equal, skeletor.cmdline, \
-        "tbss_skeleton -i a.nii -o %s" %os.path.join(newdir, "a_skeleton.nii")
+        "tbss_skeleton -i a.nii -o %s" % os.path.join(newdir, "a_skeleton.nii")
 
     # Now with a specific name
     skeletor.inputs.skeleton_file = "old_boney.nii"
@@ -459,14 +447,14 @@ def test_tbss_skeleton():
 
     # Now we get a command line
     yield assert_equal, bones.cmdline, \
-        "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s" %(Info.standard_image("LowerCingulum_1mm.nii.gz"),
-                                                             os.path.join(newdir, "b_skeletonised.nii"))
+        "tbss_skeleton -i a.nii -p 0.200 b.nii %s b.nii %s" % (Info.standard_image("LowerCingulum_1mm.nii.gz"),
+                                                               os.path.join(newdir, "b_skeletonised.nii"))
 
     # Can we specify a mask?
     bones.inputs.use_cingulum_mask = Undefined
     bones.inputs.search_mask_file = "a.nii"
     yield assert_equal, bones.cmdline, \
-        "tbss_skeleton -i a.nii -p 0.200 b.nii a.nii b.nii %s" %os.path.join(newdir, "b_skeletonised.nii")
+        "tbss_skeleton -i a.nii -p 0.200 b.nii a.nii b.nii %s" % os.path.join(newdir, "b_skeletonised.nii")
 
     # Looks good; clean up
     clean_directory(newdir, olddir)
@@ -488,19 +476,18 @@ def test_distancemap():
     mapper.inputs.in_file = "a.nii"
 
     # It should
-    yield assert_equal, mapper.cmdline, "distancemap --out=%s --in=a.nii" %os.path.join(newdir, "a_dstmap.nii")
+    yield assert_equal, mapper.cmdline, "distancemap --out=%s --in=a.nii" % os.path.join(newdir, "a_dstmap.nii")
 
     # And we should be able to write out a maxima map
     mapper.inputs.local_max_file = True
     yield assert_equal, mapper.cmdline, \
-        "distancemap --out=%s --in=a.nii --localmax=%s" %(os.path.join(newdir, "a_dstmap.nii"),
-                                                         os.path.join(newdir, "a_lclmax.nii"))
+        "distancemap --out=%s --in=a.nii --localmax=%s" % (os.path.join(newdir, "a_dstmap.nii"),
+                                                           os.path.join(newdir, "a_lclmax.nii"))
 
     # And call it whatever we want
     mapper.inputs.local_max_file = "max.nii"
     yield assert_equal, mapper.cmdline, \
-        "distancemap --out=%s --in=a.nii --localmax=max.nii" %os.path.join(newdir, "a_dstmap.nii")
+        "distancemap --out=%s --in=a.nii --localmax=max.nii" % os.path.join(newdir, "a_dstmap.nii")
 
     # Not much else to do here
     clean_directory(newdir, olddir)
-

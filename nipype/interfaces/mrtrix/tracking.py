@@ -8,7 +8,8 @@
     >>> os.chdir(datadir)
 
 """
-import os, os.path as op
+import os
+import os.path as op
 
 from ..base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from ..traits_extension import isdefined
@@ -35,7 +36,7 @@ class FilterTracksInputSpec(CommandLineInputSpec):
                     name_source=['in_file'], hash_files=False, name_template='%s_filt')
 
     no_mask_interpolation = traits.Bool(argstr='-nomaskinterp', desc="Turns off trilinear interpolation of mask images.")
-    invert = traits.Bool(argstr='-invert', desc="invert the matching process, so that tracks that would" \
+    invert = traits.Bool(argstr='-invert', desc="invert the matching process, so that tracks that would"
                          "otherwise have been included are now excluded and vice-versa.")
 
     quiet = traits.Bool(argstr='-quiet', position=1, desc="Do not display information messages or progress status.")
@@ -127,8 +128,8 @@ class Tracks2Prob(CommandLine):
 
 
 class StreamlineTrackInputSpec(CommandLineInputSpec):
-    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the image containing the source data.' \
-                   'The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, ' \
+    in_file = File(exists=True, argstr='%s', mandatory=True, position=-2, desc='the image containing the source data.'
+                   'The type of data required depends on the type of tracking as set in the preceeding argument. For DT methods, '
                    'the base DWI are needed. For SD methods, the SH harmonic coefficients of the FOD are needed.')
 
     seed_xor = ['seed_file', 'seed_spec']
@@ -163,11 +164,11 @@ class StreamlineTrackInputSpec(CommandLineInputSpec):
                              desc="Set the step size of the algorithm in mm (default is 0.2).")
     minimum_radius_of_curvature = traits.Float(argstr='-curvature %s', units='mm',
                                                desc="Set the minimum radius of curvature (default is 2 mm for DT_STREAM, 0 for SD_STREAM, 1 mm for SD_PROB and DT_PROB)")
-    desired_number_of_tracks = traits.Int(argstr='-number %d', desc='Sets the desired number of tracks.'   \
-                                          'The program will continue to generate tracks until this number of tracks have been selected and written to the output file' \
+    desired_number_of_tracks = traits.Int(argstr='-number %d', desc='Sets the desired number of tracks.'
+                                          'The program will continue to generate tracks until this number of tracks have been selected and written to the output file'
                                           '(default is 100 for *_STREAM methods, 1000 for *_PROB methods).')
-    maximum_number_of_tracks = traits.Int(argstr='-maxnum %d', desc='Sets the maximum number of tracks to generate.' \
-                                          "The program will not generate more tracks than this number, even if the desired number of tracks hasn't yet been reached" \
+    maximum_number_of_tracks = traits.Int(argstr='-maxnum %d', desc='Sets the maximum number of tracks to generate.'
+                                          "The program will not generate more tracks than this number, even if the desired number of tracks hasn't yet been reached"
                                           '(default is 100 x number).')
 
     minimum_tract_length = traits.Float(argstr='-minlength %s', units='mm',

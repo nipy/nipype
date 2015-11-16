@@ -154,9 +154,9 @@ connect all the nodes for this workflow
 """
 
 computeTensor.connect([
-                        (fslroi, bet, [('roi_file', 'in_file')]),
-                        (eddycorrect, dtifit, [('outputnode.eddy_corrected', 'DWI')])
-                      ])
+    (fslroi, bet, [('roi_file', 'in_file')]),
+    (eddycorrect, dtifit, [('outputnode.eddy_corrected', 'DWI')])
+])
 
 
 """
@@ -177,8 +177,8 @@ connect all the nodes for this workflow
 """
 
 tractography.connect([
-                      (dtk_tracker, smooth_trk, [('track_file', 'track_file')])
-                      ])
+    (dtk_tracker, smooth_trk, [('track_file', 'track_file')])
+])
 
 
 """
@@ -201,18 +201,16 @@ Setup the pipeline that combines the two workflows: tractography and computeTens
 dwiproc = pe.Workflow(name="dwiproc")
 dwiproc.base_dir = os.path.abspath('dtk_dti_tutorial')
 dwiproc.connect([
-                    (infosource, datasource, [('subject_id', 'subject_id')]),
-                    (datasource, computeTensor, [('dwi', 'fslroi.in_file'),
-                                               ('bvals', 'dtifit.bvals'),
-                                               ('bvecs', 'dtifit.bvecs'),
-                                               ('dwi', 'eddycorrect.inputnode.in_file')]),
-                    (computeTensor, tractography, [('bet.mask_file', 'dtk_tracker.mask1_file'),
-                                                 ('dtifit.tensor', 'dtk_tracker.tensor_file')
-                                                 ])
-                ])
+    (infosource, datasource, [('subject_id', 'subject_id')]),
+    (datasource, computeTensor, [('dwi', 'fslroi.in_file'),
+                                 ('bvals', 'dtifit.bvals'),
+                                 ('bvecs', 'dtifit.bvecs'),
+                                 ('dwi', 'eddycorrect.inputnode.in_file')]),
+    (computeTensor, tractography, [('bet.mask_file', 'dtk_tracker.mask1_file'),
+                                   ('dtifit.tensor', 'dtk_tracker.tensor_file')
+                                   ])
+])
 
 if __name__ == '__main__':
     dwiproc.run()
     dwiproc.write_graph()
-
-

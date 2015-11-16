@@ -405,8 +405,8 @@ class Function(IOBase):
                 try:
                     self.inputs.function_str = getsource(function)
                 except IOError:
-                    raise Exception('Interface Function does not accept ' \
-                                    'function objects defined interactively ' \
+                    raise Exception('Interface Function does not accept '
+                                    'function objects defined interactively '
                                     'in a python session')
             elif isinstance(function, string_types):
                 self.inputs.function_str = function

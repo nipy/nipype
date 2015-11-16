@@ -37,7 +37,7 @@ except ImportError:
 def sanitize_path_comp(path_comp):
     result = []
     for char in path_comp:
-        if not char in string.letters + string.digits + '-_.':
+        if char not in string.letters + string.digits + '-_.':
             result.append('_')
         else:
             result.append(char)
@@ -63,7 +63,7 @@ class NiftiGeneratorBase(BaseInterface):
             # If no out_format is specified, use a sane default that will work
             # with the provided meta data.
             out_fmt = []
-            if not idx is None:
+            if idx is not None:
                 out_fmt.append('%03d' % idx)
             if 'SeriesNumber' in meta:
                 out_fmt.append('%(SeriesNumber)03d')
@@ -303,7 +303,7 @@ class CopyMeta(BaseInterface):
         if self.inputs.exclude_classes:
             classes = [cls
                        for cls in classes
-                       if not cls in self.inputs.exclude_classes
+                       if cls not in self.inputs.exclude_classes
                        ]
 
         for cls in classes:
@@ -424,4 +424,3 @@ class SplitNifti(NiftiGeneratorBase):
         outputs = self._outputs().get()
         outputs['out_list'] = self.out_list
         return outputs
-

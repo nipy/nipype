@@ -72,8 +72,8 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
     # Tool description
     tool_desc = {}
     tool_desc['name'] = interface_name
-    tool_desc['command-line'] = "nipype_cmd "+str(module)+" "+interface_name+" "
-    tool_desc['description'] = interface_name+", as implemented in Nipype (module: "+str(module)+", interface: "+interface_name+")."
+    tool_desc['command-line'] = "nipype_cmd " + str(module) + " " + interface_name + " "
+    tool_desc['description'] = interface_name + ", as implemented in Nipype (module: " + str(module) + ", interface: " + interface_name + ")."
     tool_desc['inputs'] = []
     tool_desc['outputs'] = []
     tool_desc['tool-version'] = interface.version
@@ -87,9 +87,9 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
     for name, spec in sorted(interface.inputs.traits(transient=None).items()):
         input = get_boutiques_input(inputs, interface, name, spec, ignored_template_inputs, verbose, ignore_template_numbers)
         tool_desc['inputs'].append(input)
-        tool_desc['command-line'] += input['command-line-key']+" "
+        tool_desc['command-line'] += input['command-line-key'] + " "
         if verbose:
-            print("-> Adding input "+input['name'])
+            print("-> Adding input " + input['name'])
 
     # Generates tool outputs
     for name, spec in sorted(outputs.traits(transient=None).items()):
@@ -97,9 +97,9 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
         if output['path-template'] != "":
             tool_desc['outputs'].append(output)
             if verbose:
-                print("-> Adding output "+output['name'])
+                print("-> Adding output " + output['name'])
         elif verbose:
-            print("xx Skipping output "+output['name']+" with no path template.")
+            print("xx Skipping output " + output['name'] + " with no path template.")
     if tool_desc['outputs'] == []:
         raise Exception("Tool has no output.")
 
@@ -135,10 +135,10 @@ def get_boutiques_input(inputs, interface, input_name, spec, ignored_template_in
     input['name'] = input_name.replace('_', ' ').capitalize()
     input['type'] = get_type_from_spec_info(spec_info)
     input['list'] = is_list(spec_info)
-    input['command-line-key'] = "["+input_name.upper()+"]"  # assumes that input names are unique
-    input['command-line-flag'] = ("--%s" %input_name+" ").strip()
+    input['command-line-key'] = "[" + input_name.upper() + "]"  # assumes that input names are unique
+    input['command-line-flag'] = ("--%s" % input_name + " ").strip()
     input['tempvalue'] = None
-    input['description'] = spec_info.capitalize()+". "+spec.desc.capitalize()
+    input['description'] = spec_info.capitalize() + ". " + spec.desc.capitalize()
     if not input['description'].endswith('.'):
         input['description'] += '.'
     if not (hasattr(spec, "mandatory") and spec.mandatory):
@@ -155,7 +155,7 @@ def get_boutiques_input(inputs, interface, input_name, spec, ignored_template_in
         setattr(interface.inputs, input_name, tempvalue)
         input['tempvalue'] = tempvalue
         if verbose:
-            print("oo Path-template creation using "+input['id']+"="+str(tempvalue))
+            print("oo Path-template creation using " + input['id'] + "=" + str(tempvalue))
 
     # Now that temp values have been generated, set Boolean types to
     # Number (there is no Boolean type in Boutiques)
@@ -236,10 +236,10 @@ def get_unique_value(type, id):
     assuming id is unique.
     '''
     return {
-      "File": os.path.abspath(create_tempfile()),
-      "Boolean": True,
-      "Number": abs(hash(id)),  # abs in case input param must be positive...
-      "String": id
+        "File": os.path.abspath(create_tempfile()),
+        "Boolean": True,
+        "Number": abs(hash(id)),  # abs in case input param must be positive...
+        "String": id
     }[type]
 
 

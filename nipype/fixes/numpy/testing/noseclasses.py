@@ -87,8 +87,8 @@ class NumpyDocTestFinder(doctest.DocTestFinder):
         if ismodule(obj) and self._recurse:
             for valname, val in list(obj.__dict__.items()):
                 valname1 = '%s.%s' % (name, valname)
-                if ((isroutine(val) or isclass(val))
-                     and self._from_module(module, val)):
+                if ((isroutine(val) or isclass(val)) and
+                        self._from_module(module, val)):
 
                     self._find(tests, val, valname1, module, source_lines,
                                globs, seen)
@@ -134,8 +134,8 @@ class NumpyOutputChecker(doctest.OutputChecker):
 
             # try to normalize out 32 and 64 bit default int sizes
             for sz in [4, 8]:
-                got = got.replace("'<i%d'" %sz, "int")
-                want = want.replace("'<i%d'" %sz, "int")
+                got = got.replace("'<i%d'" % sz, "int")
+                want = want.replace("'<i%d'" % sz, "int")
 
             ret = doctest.OutputChecker.check_output(self, want,
                                                      got, optionflags)

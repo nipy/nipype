@@ -91,7 +91,7 @@ def create_function_from_source(function_source, imports=None):
         exec(function_source, ns)
 
     except Exception as msg:
-        msg = str(msg) + '\nError executing function:\n %s\n' %function_source
+        msg = str(msg) + '\nError executing function:\n %s\n' % function_source
         msg += '\n'.join(["Functions in connection strings have to be standalone.",
                           "They cannot be declared either interactively or inside",
                           "another function or inline in the connect string. Any",
@@ -242,6 +242,3 @@ def unflatten(in_list, prev_structure):
         for item in prev_structure:
             out.append(unflatten(in_list, item))
         return out
-
-
-

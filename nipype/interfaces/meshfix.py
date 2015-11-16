@@ -38,7 +38,7 @@ class MeshFixInputSpec(CommandLineInputSpec):
 
     uniform_remeshing_steps = traits.Int(argstr='-u %d', requires=['uniform_remeshing_vertices'], desc="Number of steps for uniform remeshing of the whole mesh")
 
-    uniform_remeshing_vertices = traits.Int(argstr='--vertices %d', requires=['uniform_remeshing_steps'], desc="Constrains the number of vertices." \
+    uniform_remeshing_vertices = traits.Int(argstr='--vertices %d', requires=['uniform_remeshing_steps'], desc="Constrains the number of vertices."
                                             "Must be used with uniform_remeshing_steps")
 
     laplacian_smoothing_steps = traits.Int(argstr='--smooth %d', desc="The number of laplacian smoothing steps to apply")
@@ -48,23 +48,23 @@ class MeshFixInputSpec(CommandLineInputSpec):
     # Cutting, decoupling, dilation
     cut_outer = traits.Int(argstr='--cut-outer %d', desc="Remove triangles of 1st that are outside of the 2nd shell.")
     cut_inner = traits.Int(argstr='--cut-inner %d', desc="Remove triangles of 1st that are inside of the 2nd shell. Dilate 2nd by N; Fill holes and keep only 1st afterwards.")
-    decouple_inin = traits.Int(argstr='--decouple-inin %d', desc="Treat 1st file as inner, 2nd file as outer component." \
+    decouple_inin = traits.Int(argstr='--decouple-inin %d', desc="Treat 1st file as inner, 2nd file as outer component."
                                "Resolve overlaps by moving inners triangles inwards. Constrain the min distance between the components > d.")
-    decouple_outin = traits.Int(argstr='--decouple-outin %d', desc="Treat 1st file as outer, 2nd file as inner component." \
+    decouple_outin = traits.Int(argstr='--decouple-outin %d', desc="Treat 1st file as outer, 2nd file as inner component."
                                 "Resolve overlaps by moving outers triangles inwards. Constrain the min distance between the components > d.")
-    decouple_outout = traits.Int(argstr='--decouple-outout %d', desc="Treat 1st file as outer, 2nd file as inner component." \
+    decouple_outout = traits.Int(argstr='--decouple-outout %d', desc="Treat 1st file as outer, 2nd file as inner component."
                                  "Resolve overlaps by moving outers triangles outwards. Constrain the min distance between the components > d.")
 
     finetuning_inwards = traits.Bool(argstr='--fineTuneIn ', requires=['finetuning_distance', 'finetuning_substeps'])
     finetuning_outwards = traits.Bool(argstr='--fineTuneIn ', requires=['finetuning_distance', 'finetuning_substeps'], xor=['finetuning_inwards'],
                                       desc='Similar to finetuning_inwards, but ensures minimal distance in the other direction')
-    finetuning_distance = traits.Float(argstr='%f', requires=['finetuning_substeps'], desc="Used to fine-tune the minimal distance between surfaces." \
+    finetuning_distance = traits.Float(argstr='%f', requires=['finetuning_substeps'], desc="Used to fine-tune the minimal distance between surfaces."
                                        "A minimal distance d is ensured, and reached in n substeps. When using the surfaces for subsequent volume meshing by gmsh, this step prevent too flat tetrahedra2)")
-    finetuning_substeps = traits.Int(argstr='%d', requires=['finetuning_distance'], desc="Used to fine-tune the minimal distance between surfaces." \
+    finetuning_substeps = traits.Int(argstr='%d', requires=['finetuning_distance'], desc="Used to fine-tune the minimal distance between surfaces."
                                      "A minimal distance d is ensured, and reached in n substeps. When using the surfaces for subsequent volume meshing by gmsh, this step prevent too flat tetrahedra2)")
 
     dilation = traits.Int(argstr='--dilate %d', desc="Dilate the surface by d. d < 0 means shrinking.")
-    set_intersections_to_one = traits.Bool(argstr='--intersect', desc="If the mesh contains intersections, return value = 1." \
+    set_intersections_to_one = traits.Bool(argstr='--intersect', desc="If the mesh contains intersections, return value = 1."
                                            "If saved in gmsh format, intersections will be highlighted.")
 
     in_file1 = File(exists=True, argstr="%s", position=1, mandatory=True)

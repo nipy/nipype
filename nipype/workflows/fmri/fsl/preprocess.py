@@ -14,7 +14,7 @@ from .... import LooseVersion
 
 
 def getthreshop(thresh):
-    return ['-thr %.10f -Tmin -bin' %(0.1*val[1]) for val in thresh]
+    return ['-thr %.10f -Tmin -bin' % (0.1 * val[1]) for val in thresh]
 
 
 def pickfirst(files):
@@ -41,14 +41,14 @@ def pickvol(filenames, fileidx, which):
     elif which.lower() == 'middle':
         idx = int(np.ceil(load(filenames[fileidx]).get_shape()[3] / 2))
     elif which.lower() == 'last':
-        idx = load(filenames[fileidx]).get_shape()[3]-1
+        idx = load(filenames[fileidx]).get_shape()[3] - 1
     else:
         raise Exception('unknown value for volume selection : %s' % which)
     return idx
 
 
 def getbtthresh(medianvals):
-    return [0.75*val for val in medianvals]
+    return [0.75 * val for val in medianvals]
 
 
 def chooseindex(fwhm):
@@ -66,7 +66,7 @@ def getusans(x):
     return [[tuple([val[0], 0.75 * val[1]])] for val in x]
 
 tolist = lambda x: [x]
-highpass_operand = lambda x: '-bptf %.10f -1' %x
+highpass_operand = lambda x: '-bptf %.10f -1' % x
 
 
 def create_parallelfeat_preproc(name='featpreproc', highpass=True):
@@ -1241,4 +1241,3 @@ def create_reg_workflow(name='registration'):
                      outputnode, 'anat2target_transform')
 
     return register
-

@@ -332,7 +332,7 @@ def analyze_openfmri_dataset(data_dir, subject=None, model_id=None,
                  [('copes', 'copes'),
                   ('varcopes', 'varcopes'),
                   ('zstats', 'zstats'),
-                                  ])])
+                  ])])
     wf.connect(mergefunc, 'out_files', registration, 'inputspec.source_files')
 
     def split_files(in_files, splits):

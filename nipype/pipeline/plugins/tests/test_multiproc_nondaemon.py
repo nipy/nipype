@@ -144,4 +144,3 @@ def test_run_multiproc_nondaemon_true():
     # with nondaemon_flag = True, the execution should succeed
     result = run_multiproc_nondaemon_with_flag(True)
     yield assert_equal, result, 180  # n_procs (2) * numberOfThreads (2) * 45 == 180
-

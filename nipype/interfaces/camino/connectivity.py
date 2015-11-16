@@ -153,4 +153,3 @@ class Conmat(CommandLine):
             _, filename, _ = split_filename(self.inputs.in_file)
             filename = filename + "_"
         return filename
-

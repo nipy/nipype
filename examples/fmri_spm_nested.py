@@ -118,7 +118,7 @@ fwhmlist = [4]
 smooth.iterables = ('fwhm', fwhmlist)
 
 preproc.connect([(realign, coregister, [('mean_image', 'source'),
-                                      ('realigned_files', 'apply_to_files')]),
+                                        ('realigned_files', 'apply_to_files')]),
                  (coregister, normalize, [('coregistered_files', 'apply_to_files')]),
                  (normalize, smooth, [('normalized_files', 'in_files')]),
                  (normalize, skullstrip, [('normalized_source', 'in_file')]),
@@ -189,12 +189,12 @@ slicestats.inputs.image_width = 750
 l1analysis.connect([(modelspec, level1design, [('session_info', 'session_info')]),
                     (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
                     (level1estimate, contrastestimate, [('spm_mat_file', 'spm_mat_file'),
-                                                      ('beta_images', 'beta_images'),
-                                                      ('residual_image', 'residual_image')]),
+                                                        ('beta_images', 'beta_images'),
+                                                        ('residual_image', 'residual_image')]),
                     (contrastestimate, selectcontrast, [('spmT_images', 'inlist')]),
                     (selectcontrast, overlaystats, [('out', 'stat_image')]),
                     (overlaystats, slicestats, [('out_file', 'in_file')])
-                  ])
+                    ])
 
 """
 Preproc + Analysis pipeline
@@ -290,7 +290,7 @@ paradigm was used for every participant.
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print("Subject ID: %s\n" %str(subject_id))
+    print("Subject ID: %s\n" % str(subject_id))
     output = []
     names = ['Task-Odd', 'Task-Even']
     for r in range(4):
@@ -363,10 +363,10 @@ level1.base_dir = os.path.abspath('spm_tutorial2/workingdir')
 
 level1.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                 (datasource, l1pipeline, [('func', 'preproc.realign.in_files'),
-                                        ('struct', 'preproc.coregister.target'),
-                                        ('struct', 'preproc.normalize.source')]),
+                                          ('struct', 'preproc.coregister.target'),
+                                          ('struct', 'preproc.normalize.source')]),
                 (infosource, l1pipeline, [(('subject_id', subjectinfo),
-                                         'analysis.modelspec.subject_info')]),
+                                           'analysis.modelspec.subject_info')]),
                 ])
 
 
@@ -403,11 +403,11 @@ def getstripdir(subject_id):
 
 # store relevant outputs from various stages of the 1st level analysis
 level1.connect([(infosource, datasink, [('subject_id', 'container'),
-                                       (('subject_id', getstripdir), 'strip_dir')]),
+                                        (('subject_id', getstripdir), 'strip_dir')]),
                 (l1pipeline, datasink, [('analysis.contrastestimate.con_images', 'contrasts.@con'),
-                                       ('analysis.contrastestimate.spmT_images', 'contrasts.@T')]),
+                                        ('analysis.contrastestimate.spmT_images', 'contrasts.@T')]),
                 (infosource, report, [('subject_id', 'container'),
-                                     (('subject_id', getstripdir), 'strip_dir')]),
+                                      (('subject_id', getstripdir), 'strip_dir')]),
                 (l1pipeline, report, [('analysis.slicestats.out_file', '@report')]),
                 ])
 
@@ -438,7 +438,7 @@ contrasts.
 """
 
 # collect all the con images for each contrast.
-contrast_ids = list(range(1, len(contrasts)+1))
+contrast_ids = list(range(1, len(contrasts) + 1))
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
 # we use .*i* to capture both .img (SPM8) and .nii (SPM12)
 l2source.inputs.template = os.path.abspath('spm_tutorial2/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')
@@ -472,8 +472,8 @@ l2pipeline.base_dir = os.path.abspath('spm_tutorial2/l2output')
 l2pipeline.connect([(l2source, onesamplettestdes, [('outfiles', 'in_files')]),
                     (onesamplettestdes, l2estimate, [('spm_mat_file', 'spm_mat_file')]),
                     (l2estimate, l2conestimate, [('spm_mat_file', 'spm_mat_file'),
-                                               ('beta_images', 'beta_images'),
-                                               ('residual_image', 'residual_image')]),
+                                                 ('beta_images', 'beta_images'),
+                                                 ('residual_image', 'residual_image')]),
                     ])
 
 """
@@ -484,4 +484,3 @@ Execute the second level pipeline
 
 if __name__ == '__main__':
     l2pipeline.run('MultiProc')
-

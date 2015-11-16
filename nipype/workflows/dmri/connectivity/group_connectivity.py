@@ -129,9 +129,9 @@ def create_merge_networks_by_group_workflow(group_list, group_id, data_dir, subj
         [(group_infosource, l2infosource, [('group_id', 'group_id')])])
 
     l2pipeline.connect([
-                        (l2infosource, l2source, [('group_id', 'group_id')]),
-                        (l2source, l2inputnode, [('CFFfiles', 'CFFfiles')]),
-                    ])
+        (l2infosource, l2source, [('group_id', 'group_id')]),
+        (l2source, l2inputnode, [('CFFfiles', 'CFFfiles')]),
+    ])
 
     l2pipeline.connect(
         [(l2inputnode, MergeCNetworks, [('CFFfiles', 'in_files')])])
@@ -210,14 +210,14 @@ def create_merge_network_results_by_group_workflow(group_list, group_id, data_di
         [(group_infosource, l2infosource, [('group_id', 'group_id')])])
 
     l2pipeline.connect([
-                        (l2infosource, l2source, [('group_id', 'group_id')]),
-                        (l2source, l2inputnode, [('CFFfiles', 'CFFfiles')]),
-                        (l2source, l2inputnode, [(
-                            'CSVmatrices', 'CSVmatrices')]),
-                        (l2source, l2inputnode, [('CSVnodal', 'CSVnodal')]),
-                        (l2source, l2inputnode, [('CSVglobal', 'CSVglobal')]),
-                        (l2source, l2inputnode, [('CSVfibers', 'CSVfibers')]),
-                    ])
+        (l2infosource, l2source, [('group_id', 'group_id')]),
+        (l2source, l2inputnode, [('CFFfiles', 'CFFfiles')]),
+        (l2source, l2inputnode, [(
+            'CSVmatrices', 'CSVmatrices')]),
+        (l2source, l2inputnode, [('CSVnodal', 'CSVnodal')]),
+        (l2source, l2inputnode, [('CSVglobal', 'CSVglobal')]),
+        (l2source, l2inputnode, [('CSVfibers', 'CSVfibers')]),
+    ])
 
     l2pipeline.connect(
         [(l2inputnode, MergeCNetworks, [('CFFfiles', 'in_files')])])
@@ -337,9 +337,9 @@ def create_merge_group_networks_workflow(group_list, data_dir, subjects_dir, out
     l3pipeline = pe.Workflow(name="l3output")
     l3pipeline.base_dir = output_dir
     l3pipeline.connect([
-                        (l3infosource, l3source, [('group_id', 'group_id')]),
-                        (l3source, l3inputnode, [('CFFfiles', 'Group_CFFs')]),
-                    ])
+        (l3infosource, l3source, [('group_id', 'group_id')]),
+        (l3source, l3inputnode, [('CFFfiles', 'Group_CFFs')]),
+    ])
 
     l3pipeline.connect(
         [(l3inputnode, MergeCNetworks_grp, [('Group_CFFs', 'in_files')])])
@@ -400,12 +400,12 @@ def create_merge_group_network_results_workflow(group_list, data_dir, subjects_d
     l3pipeline = pe.Workflow(name="l3output")
     l3pipeline.base_dir = output_dir
     l3pipeline.connect([
-                        (l3infosource, l3source, [('group_id', 'group_id')]),
-                        (l3source, l3inputnode, [('CFFfiles', 'Group_CFFs')]),
-                        (l3source, l3inputnode, [('CSVnodemetrics', 'Group_CSVnodemetrics')]),
-                        (l3source, l3inputnode, [('CSVglobalmetrics', 'Group_CSVglobalmetrics')]),
-                        (l3source, l3inputnode, [('CSVmatrices', 'Group_CSVmatrices')]),
-                    ])
+        (l3infosource, l3source, [('group_id', 'group_id')]),
+        (l3source, l3inputnode, [('CFFfiles', 'Group_CFFs')]),
+        (l3source, l3inputnode, [('CSVnodemetrics', 'Group_CSVnodemetrics')]),
+        (l3source, l3inputnode, [('CSVglobalmetrics', 'Group_CSVglobalmetrics')]),
+        (l3source, l3inputnode, [('CSVmatrices', 'Group_CSVmatrices')]),
+    ])
 
     l3pipeline.connect([(l3inputnode, MergeCNetworks_grp, [('Group_CFFs', 'in_files')])])
     l3pipeline.connect([(MergeCNetworks_grp, l3datasink, [('connectome_file', '@l3output')])])
@@ -494,17 +494,17 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
     l4pipeline = pe.Workflow(name="l4output")
     l4pipeline.base_dir = output_dir
     l4pipeline.connect([
-                        (l4infosource, l4source_grp1, [('group_id1', 'group_id')]),
-                        (l4infosource, l4source_grp2, [('group_id2', 'group_id')]),
-                        (l4source_grp1, l4inputnode, [('CMatrices', 'CMatrices_grp1')]),
-                        (l4source_grp2, l4inputnode, [('CMatrices', 'CMatrices_grp2')]),
-                        (l4source_grp1, l4inputnode, [('networks', 'networks_grp1')]),
-                        (l4source_grp2, l4inputnode, [('networks', 'networks_grp2')]),
-                        (l4source_grp1, l4inputnode, [('fibmean', 'fibmean_grp1')]),
-                        (l4source_grp2, l4inputnode, [('fibmean', 'fibmean_grp2')]),
-                        (l4source_grp1, l4inputnode, [('fibdev', 'fibdev_grp1')]),
-                        (l4source_grp2, l4inputnode, [('fibdev', 'fibdev_grp2')]),
-                    ])
+        (l4infosource, l4source_grp1, [('group_id1', 'group_id')]),
+        (l4infosource, l4source_grp2, [('group_id2', 'group_id')]),
+        (l4source_grp1, l4inputnode, [('CMatrices', 'CMatrices_grp1')]),
+        (l4source_grp2, l4inputnode, [('CMatrices', 'CMatrices_grp2')]),
+        (l4source_grp1, l4inputnode, [('networks', 'networks_grp1')]),
+        (l4source_grp2, l4inputnode, [('networks', 'networks_grp2')]),
+        (l4source_grp1, l4inputnode, [('fibmean', 'fibmean_grp1')]),
+        (l4source_grp2, l4inputnode, [('fibmean', 'fibmean_grp2')]),
+        (l4source_grp1, l4inputnode, [('fibdev', 'fibdev_grp1')]),
+        (l4source_grp2, l4inputnode, [('fibdev', 'fibdev_grp2')]),
+    ])
 
     l4pipeline.connect([(l4inputnode, average_networks_grp1, [('networks_grp1', 'in_files')])])
     l4pipeline.connect([(l4infosource, average_networks_grp1, [('group_id1', 'group_id')])])
@@ -524,4 +524,3 @@ def create_average_networks_by_group_workflow(group_list, data_dir, subjects_dir
 
     l4pipeline.connect([(merge_gexf_averages, l4datasink, [('out', '@l4output.gexf')])])
     return l4pipeline
-

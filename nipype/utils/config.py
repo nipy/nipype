@@ -87,11 +87,11 @@ class NipypeConfig(object):
         if os.path.exists(old_config_file):
             if os.path.exists(new_config_file):
                 msg = ("Detected presence of both old (%s, used by versions "
-                     "< 0.5.2) and new (%s) config files.  This version will "
-                     "proceed with the new one. We advise to merge settings "
-                     "and remove old config file if you are not planning to "
-                     "use previous releases of nipype.") % (old_config_file,
-                                                            new_config_file)
+                       "< 0.5.2) and new (%s) config files.  This version will "
+                       "proceed with the new one. We advise to merge settings "
+                       "and remove old config file if you are not planning to "
+                       "use previous releases of nipype.") % (old_config_file,
+                                                              new_config_file)
                 warn(msg)
             else:
                 warn("Moving old config file from: %s to %s" % (old_config_file,
@@ -175,4 +175,3 @@ class NipypeConfig(object):
     def enable_provenance(self):
         self._config.set('execution', 'write_provenance', 'true')
         self._config.set('execution', 'hash_method', 'content')
-

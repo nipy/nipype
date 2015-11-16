@@ -22,12 +22,12 @@ class SlicerCommandLine(CommandLine):
     output_spec = DynamicTraitedSpec
 
     def _grab_xml(self, module):
-        cmd = CommandLine(command="Slicer3", args="--launch %s --xml" %module)
+        cmd = CommandLine(command="Slicer3", args="--launch %s --xml" % module)
         ret = cmd.run()
         if ret.runtime.returncode == 0:
             return xml.dom.minidom.parseString(ret.runtime.stdout)
         else:
-            raise Exception(cmd.cmdline + " failed:\n%s" %ret.runtime.stderr)
+            raise Exception(cmd.cmdline + " failed:\n%s" % ret.runtime.stderr)
 
     def _outputs(self):
         base = super(SlicerCommandLine, self)._outputs()
@@ -42,7 +42,7 @@ class SlicerCommandLine(CommandLine):
     def __init__(self, module, **inputs):
         warnings.warn('slicer is Not fully implemented',
                       RuntimeWarning)
-        super(SlicerCommandLine, self).__init__(command="Slicer3 --launch %s " %module, name=module, **inputs)
+        super(SlicerCommandLine, self).__init__(command="Slicer3 --launch %s " % module, name=module, **inputs)
         dom = self._grab_xml(module)
         self._outputs_filenames = {}
 

@@ -55,4 +55,3 @@ class LinearPlugin(PluginBase):
                 if self._status_callback:
                     self._status_callback(node, 'exception')
         report_nodes_not_run(notrun)
-

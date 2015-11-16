@@ -113,7 +113,7 @@ normalize_struct = pe.Node(spm.DARTELNorm2MNI(modulate=True), name='normalize_st
 normalize_struct.inputs.fwhm = 2
 
 preproc.connect([(realign, coregister, [('mean_image', 'source'),
-                                      ('realigned_files', 'apply_to_files')]),
+                                        ('realigned_files', 'apply_to_files')]),
                  (coregister, normalize_and_smooth_func, [('coregistered_files', 'apply_to_files')]),
                  (normalize_struct, skullstrip, [('normalized_files', 'in_file')]),
                  (realign, art, [('realignment_parameters', 'realignment_parameters')]),
@@ -183,12 +183,12 @@ slicestats.inputs.image_width = 750
 l1analysis.connect([(modelspec, level1design, [('session_info', 'session_info')]),
                     (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
                     (level1estimate, contrastestimate, [('spm_mat_file', 'spm_mat_file'),
-                                                      ('beta_images', 'beta_images'),
-                                                      ('residual_image', 'residual_image')]),
+                                                        ('beta_images', 'beta_images'),
+                                                        ('residual_image', 'residual_image')]),
                     (contrastestimate, selectcontrast, [('spmT_images', 'inlist')]),
                     (selectcontrast, overlaystats, [('out', 'stat_image')]),
                     (overlaystats, slicestats, [('out_file', 'in_file')])
-                  ])
+                    ])
 
 """
 Preproc + Analysis pipeline
@@ -302,7 +302,7 @@ def pickFieldFlow(dartel_flow_fields, subject_id):
     from nipype.utils.filemanip import split_filename
     for f in dartel_flow_fields:
         _, name, _ = split_filename(f)
-        if name.find("subject_id_%s" %subject_id):
+        if name.find("subject_id_%s" % subject_id):
             return f
 
     raise Exception
@@ -328,7 +328,7 @@ paradigm was used for every participant.
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print("Subject ID: %s\n" %str(subject_id))
+    print("Subject ID: %s\n" % str(subject_id))
     output = []
     names = ['Task-Odd', 'Task-Even']
     for r in range(4):
@@ -404,8 +404,8 @@ level1.connect([(datasource_dartel, rename_dartel, [('struct', 'in_file')]),
 
                 (infosource, datasource, [('subject_id', 'subject_id')]),
                 (datasource, l1pipeline, [('func', 'preproc.realign.in_files'),
-                                        ('struct', 'preproc.coregister.target'),
-                                        ('struct', 'preproc.normalize_struct.apply_to_files')]),
+                                          ('struct', 'preproc.coregister.target'),
+                                          ('struct', 'preproc.normalize_struct.apply_to_files')]),
                 (dartel_workflow, l1pipeline, [('outputspec.template_file', 'preproc.normalize_struct.template_file'),
                                                ('outputspec.template_file', 'preproc.normalize_and_smooth_func.template_file')]),
                 (infosource, pick_flow, [('subject_id', 'subject_id')]),
@@ -413,7 +413,7 @@ level1.connect([(datasource_dartel, rename_dartel, [('struct', 'in_file')]),
                 (pick_flow, l1pipeline, [('dartel_flow_field', 'preproc.normalize_struct.flowfield_files'),
                                          ('dartel_flow_field', 'preproc.normalize_and_smooth_func.flowfield_files')]),
                 (infosource, l1pipeline, [(('subject_id', subjectinfo),
-                                         'analysis.modelspec.subject_info')]),
+                                           'analysis.modelspec.subject_info')]),
                 ])
 
 
@@ -450,11 +450,11 @@ def getstripdir(subject_id):
 
 # store relevant outputs from various stages of the 1st level analysis
 level1.connect([(infosource, datasink, [('subject_id', 'container'),
-                                       (('subject_id', getstripdir), 'strip_dir')]),
+                                        (('subject_id', getstripdir), 'strip_dir')]),
                 (l1pipeline, datasink, [('analysis.contrastestimate.con_images', 'contrasts.@con'),
-                                       ('analysis.contrastestimate.spmT_images', 'contrasts.@T')]),
+                                        ('analysis.contrastestimate.spmT_images', 'contrasts.@T')]),
                 (infosource, report, [('subject_id', 'container'),
-                                     (('subject_id', getstripdir), 'strip_dir')]),
+                                      (('subject_id', getstripdir), 'strip_dir')]),
                 (l1pipeline, report, [('analysis.slicestats.out_file', '@report')]),
                 ])
 
@@ -485,7 +485,7 @@ contrasts.
 """
 
 # collect all the con images for each contrast.
-contrast_ids = list(range(1, len(contrasts)+1))
+contrast_ids = list(range(1, len(contrasts) + 1))
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
 # we use .*i* to capture both .img (SPM8) and .nii (SPM12)
 l2source.inputs.template = os.path.abspath('spm_dartel_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')
@@ -519,8 +519,8 @@ l2pipeline.base_dir = os.path.abspath('spm_dartel_tutorial/l2output')
 l2pipeline.connect([(l2source, onesamplettestdes, [('outfiles', 'in_files')]),
                     (onesamplettestdes, l2estimate, [('spm_mat_file', 'spm_mat_file')]),
                     (l2estimate, l2conestimate, [('spm_mat_file', 'spm_mat_file'),
-                                               ('beta_images', 'beta_images'),
-                                               ('residual_image', 'residual_image')]),
+                                                 ('beta_images', 'beta_images'),
+                                                 ('residual_image', 'residual_image')]),
                     ])
 
 """
@@ -531,5 +531,3 @@ Execute the second level pipeline
 
 if __name__ == '__main__':
     l2pipeline.run()
-
-

@@ -63,8 +63,8 @@ def test_coherence_analysis():
 
     T.metadata['roi'] = roi_names
     C = nta.CoherenceAnalyzer(T, method=dict(this_method='welch',
-                                            NFFT=CA.inputs.NFFT,
-                                            n_overlap=CA.inputs.n_overlap))
+                                             NFFT=CA.inputs.NFFT,
+                                             n_overlap=CA.inputs.n_overlap))
 
     freq_idx = np.where((C.frequencies > CA.inputs.frequency_range[0]) *
                         (C.frequencies < CA.inputs.frequency_range[1]))[0]
@@ -73,5 +73,3 @@ def test_coherence_analysis():
     coh = np.mean(C.coherence[:, :, freq_idx], -1)  # Averaging on the last dimension
 
     yield assert_equal, o.outputs.coherence_array, coh
-
-

@@ -268,7 +268,7 @@ will be correct and readable.
 tractography.connect([(dtifit, fa, [("tensor_fitted", "in_file")])])
 tractography.connect([(fa, analyzeheader_fa, [("fa", "in_file")])])
 tractography.connect([(inputnode, analyzeheader_fa, [(('dwi', get_vox_dims), 'voxel_dims'),
-                                                    (('dwi', get_data_dims), 'data_dims')])])
+                                                     (('dwi', get_data_dims), 'data_dims')])])
 tractography.connect([(fa, fa2nii, [('fa', 'data_file')])])
 tractography.connect([(inputnode, fa2nii, [(('dwi', get_affine), 'affine')])])
 tractography.connect([(analyzeheader_fa, fa2nii, [('header', 'header_file')])])
@@ -277,7 +277,7 @@ tractography.connect([(analyzeheader_fa, fa2nii, [('header', 'header_file')])])
 tractography.connect([(dtifit, trace, [("tensor_fitted", "in_file")])])
 tractography.connect([(trace, analyzeheader_trace, [("trace", "in_file")])])
 tractography.connect([(inputnode, analyzeheader_trace, [(('dwi', get_vox_dims), 'voxel_dims'),
-                                                       (('dwi', get_data_dims), 'data_dims')])])
+                                                        (('dwi', get_data_dims), 'data_dims')])])
 tractography.connect([(trace, trace2nii, [('trace', 'data_file')])])
 tractography.connect([(inputnode, trace2nii, [(('dwi', get_affine), 'affine')])])
 tractography.connect([(analyzeheader_trace, trace2nii, [('header', 'header_file')])])
@@ -287,10 +287,10 @@ tractography.connect([(dtifit, dteig, [("tensor_fitted", "in_file")])])
 tractography.connect([(trackpico, cam2trk_pico, [('tracked', 'in_file')])])
 tractography.connect([(trackdt, cam2trk_dt, [('tracked', 'in_file')])])
 tractography.connect([(inputnode, cam2trk_pico, [(('dwi', get_vox_dims), 'voxel_dims'),
-                                                (('dwi', get_data_dims), 'data_dims')])])
+                                                 (('dwi', get_data_dims), 'data_dims')])])
 
 tractography.connect([(inputnode, cam2trk_dt, [(('dwi', get_vox_dims), 'voxel_dims'),
-                                              (('dwi', get_data_dims), 'data_dims')])])
+                                               (('dwi', get_data_dims), 'data_dims')])])
 
 
 """
@@ -303,9 +303,9 @@ workflow = pe.Workflow(name="workflow")
 workflow.base_dir = os.path.abspath('camino_dti_tutorial')
 workflow.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                   (datasource, tractography, [('dwi', 'inputnode.dwi'),
-                                            ('bvals', 'inputnode.bvals'),
-                                            ('bvecs', 'inputnode.bvecs')
-                                            ])
+                                              ('bvals', 'inputnode.bvals'),
+                                              ('bvecs', 'inputnode.bvecs')
+                                              ])
                   ])
 """
 The following functions run the whole workflow and produce a .dot and .png graph of the processing pipeline.

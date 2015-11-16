@@ -13,7 +13,8 @@ from __future__ import division
 
 # -*- coding: utf-8 -*-
 import os.path as op
-import nibabel as nb, nibabel.trackvis as trk
+import nibabel as nb
+import nibabel.trackvis as trk
 import numpy as np
 from nibabel.trackvis import HeaderError
 from nibabel.volumeutils import native_code
@@ -83,7 +84,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
     endianness = native_code
     f4dt = np.dtype(endianness + 'f4')
     pt_cols = 3
-    bytesize = pt_cols*4
+    bytesize = pt_cols * 4
 
     def points_per_track(offset):
         n_streams = 0
@@ -95,12 +96,12 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
         pts = np.ndarray(shape=(num_triplets, pt_cols), dtype='f4', buffer=all_str)
         nonfinite_list = np.where(np.isfinite(pts[:, 2]) == False)
         nonfinite_list = list(nonfinite_list[0])[0:-1]  # Converts numpy array to list, removes the last value
-        nonfinite_list_bytes = [offset+x*bytesize for x in nonfinite_list]
+        nonfinite_list_bytes = [offset + x * bytesize for x in nonfinite_list]
         for idx, value in enumerate(nonfinite_list):
             if idx == 0:
                 track_points.append(nonfinite_list[idx])
             else:
-                track_points.append(nonfinite_list[idx]-nonfinite_list[idx-1]-1)
+                track_points.append(nonfinite_list[idx] - nonfinite_list[idx - 1] - 1)
         return track_points, nonfinite_list
 
     def track_gen(track_points):
@@ -117,9 +118,9 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
                 if not n_streams == stream_count:
                     raise HeaderError(
                         'Expecting %s points, found only %s' % (
-                                stream_count, n_streams))
+                            stream_count, n_streams))
                     iflogger.error('Expecting %s points, found only %s' % (
-                                stream_count, n_streams))
+                        stream_count, n_streams))
                 break
             pts = np.ndarray(
                 shape=(n_pts, pt_cols),
@@ -139,7 +140,7 @@ def read_mrtrix_streamlines(in_file, header, as_generator=True):
                 iflogger.info('100% : {n} tracks read'.format(n=n_streams))
                 raise StopIteration
             if n_streams % int(stream_count / 100) == 0:
-                percent = int(float(n_streams)/float(stream_count)*100)
+                percent = int(float(n_streams) / float(stream_count) * 100)
                 iflogger.info('{p}% : {n} tracks read'.format(p=percent, n=n_streams))
     track_points, nonfinite_list = points_per_track(offset)
     fileobj.seek(offset)
@@ -217,7 +218,7 @@ class MRTrix2TrackVis(BaseInterface):
             iflogger.info(aff)
 
             axcode = aff2axcodes(reg_affine)
-            trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
+            trk_header['voxel_order'] = axcode[0] + axcode[1] + axcode[2]
 
             final_streamlines = move_streamlines(transformed_streamlines, aff)
             trk_tracks = ((ii, None, None) for ii in final_streamlines)
@@ -228,7 +229,7 @@ class MRTrix2TrackVis(BaseInterface):
         else:
             iflogger.info('Applying transformation from scanner coordinates to {img}'.format(img=self.inputs.image_file))
             axcode = aff2axcodes(affine)
-            trk_header['voxel_order'] = axcode[0]+axcode[1]+axcode[2]
+            trk_header['voxel_order'] = axcode[0] + axcode[1] + axcode[2]
             trk_header['vox_to_ras'] = affine
             transformed_streamlines = transform_to_affine(streamlines, trk_header, affine)
             trk_tracks = ((ii, None, None) for ii in transformed_streamlines)

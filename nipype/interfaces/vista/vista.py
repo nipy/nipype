@@ -11,7 +11,8 @@
 
 from nipype.interfaces.base import CommandLineInputSpec, CommandLine, traits, TraitedSpec, File
 from nipype.utils.filemanip import split_filename
-import os, os.path as op
+import os
+import os.path as op
 from nipype.interfaces.traits_extension import isdefined
 
 
@@ -72,4 +73,3 @@ class VtoMat(CommandLine):
     _cmd = 'vtomat'
     input_spec = VtoMatInputSpec
     output_spec = VtoMatOutputSpec
-

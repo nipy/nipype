@@ -456,7 +456,7 @@ class S3DataSink(DataSink):
             # convert local path to s3 path
             bd_index = path.find(self.inputs.base_directory)
             if bd_index != -1:  # base_directory is in path, maintain directory structure
-                s3path = path[bd_index+len(self.inputs.base_directory):]  # cut out base directory
+                s3path = path[bd_index + len(self.inputs.base_directory):]  # cut out base directory
                 if s3path[0] == os.path.sep:
                     s3path = s3path[1:]
             else:  # base_directory isn't in path, simply place all files in bucket_path folder
@@ -546,7 +546,7 @@ class S3DataGrabber(IOBase):
         if not isdefined(self.inputs.template_args):
             self.inputs.template_args = {}
         for key in outfields:
-            if not key in self.inputs.template_args:
+            if key not in self.inputs.template_args:
                 if infields:
                     self.inputs.template_args[key] = [infields]
                 else:
@@ -789,7 +789,7 @@ class DataGrabber(IOBase):
         if not isdefined(self.inputs.template_args):
             self.inputs.template_args = {}
         for key in outfields:
-            if not key in self.inputs.template_args:
+            if key not in self.inputs.template_args:
                 if infields:
                     self.inputs.template_args[key] = [infields]
                 else:
@@ -1100,7 +1100,7 @@ class DataFinder(IOBase):
                 return
         # Check if we can match the path
         match = self.match_regex.search(target_path)
-        if not match is None:
+        if match is not None:
             match_dict = match.groupdict()
             if self.result is None:
                 self.result = {'out_paths': []}
@@ -1156,8 +1156,7 @@ class DataFinder(IOBase):
                         full_path = os.path.join(curr_dir, infile)
                         self._match_path(full_path)
         if (self.inputs.unpack_single and
-                len(self.result['out_paths']) == 1
-                ):
+                len(self.result['out_paths']) == 1):
             for key, vals in self.result.items():
                 self.result[key] = vals[0]
         else:
@@ -1578,7 +1577,7 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                         desc=('Option to share the subjects from the original project'
                               'instead of creating new ones when possible - the created '
                               'experiments are then shared back to the original project'
-              ),
+                              ),
                         usedefault=True)
 
     def __setattr__(self, key, value):

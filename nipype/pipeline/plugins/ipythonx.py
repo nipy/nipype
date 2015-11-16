@@ -37,7 +37,7 @@ class IPythonXPlugin(DistributedPluginBase):
             __import__(name)
             self.ipyclient = sys.modules[name]
         except ImportError:
-            raise ImportError("Ipython kernel not found. Parallel execution " \
+            raise ImportError("Ipython kernel not found. Parallel execution "
                               "will be unavailable")
         try:
             self.taskclient = self.ipyclient.TaskClient()
@@ -65,7 +65,7 @@ except:
 """
         task = self.ipyclient.StringTask(cmdstr,
                                          push=dict(task=node,
-                                                     updatehash=updatehash),
+                                                   updatehash=updatehash),
                                          pull=['result', 'traceback'])
         return self.taskclient.run(task, block=False)
 
@@ -80,5 +80,5 @@ except:
 
     def _clear_task(self, taskid):
         if IPyversion >= '0.10.1':
-            logger.debug("Clearing id: %d" %taskid)
+            logger.debug("Clearing id: %d" % taskid)
             self.taskclient.clear(taskid)

@@ -237,7 +237,7 @@ class NoseTester(object):
         # our way of doing coverage
         if coverage:
             argv += ['--cover-package=%s' % self.package_name, '--with-coverage',
-                   '--cover-tests', '--cover-inclusive', '--cover-erase']
+                     '--cover-tests', '--cover-inclusive', '--cover-erase']
         # construct list of plugins
         import nose.plugins.builtin
         from .noseclasses import KnownFailure, Unplugger
@@ -245,7 +245,7 @@ class NoseTester(object):
         plugins += [p() for p in nose.plugins.builtin.plugins]
         # add doctesting if required
         doctest_argv = '--with-doctest' in argv
-        if doctests == False and doctest_argv:
+        if doctests is False and doctest_argv:
             doctests = True
         plug = self._get_custom_doctester()
         if plug is None:
@@ -409,4 +409,3 @@ class NoseTester(object):
         add_plugins = [Unplugger('doctest')]
 
         return nose.run(argv=argv, addplugins=add_plugins)
-

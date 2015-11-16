@@ -275,8 +275,8 @@ class InterfaceHelpWriter(object):
         ad = '.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n'
 
         chap_title = uri_short
-        ad += (chap_title+'\n' + self.rst_section_levels[1] * len(chap_title)
-               + '\n\n')
+        ad += (chap_title + '\n' +
+               self.rst_section_levels[1] * len(chap_title) + '\n\n')
 
         # Set the chapter title to read 'module' for all modules except for the
         # main packages
@@ -491,7 +491,7 @@ class InterfaceHelpWriter(object):
         if self.written_modules is None:
             raise ValueError('No modules written')
         # Get full filename path
-        path = os.path.join(outdir, froot+self.rst_extension)
+        path = os.path.join(outdir, froot + self.rst_extension)
         # Path written into index is relative to rootpath
         if relative_to is not None:
             relpath = outdir.replace(relative_to + os.path.sep, '')

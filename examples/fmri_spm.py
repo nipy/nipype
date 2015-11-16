@@ -183,7 +183,7 @@ paradigm was used for every participant.
 def subjectinfo(subject_id):
     from nipype.interfaces.base import Bunch
     from copy import deepcopy
-    print("Subject ID: %s\n" %str(subject_id))
+    print("Subject ID: %s\n" % str(subject_id))
     output = []
     names = ['Task-Odd', 'Task-Even']
     for r in range(4):
@@ -271,13 +271,13 @@ l1pipeline.base_dir = os.path.abspath('spm_tutorial/workingdir')
 l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                     (datasource, realign, [('func', 'in_files')]),
                     (realign, coregister, [('mean_image', 'source'),
-                                         ('realigned_files', 'apply_to_files')]),
+                                           ('realigned_files', 'apply_to_files')]),
                     (datasource, coregister, [('struct', 'target')]),
                     (datasource, normalize, [('struct', 'source')]),
                     (coregister, normalize, [('coregistered_files', 'apply_to_files')]),
                     (normalize, smooth, [('normalized_files', 'in_files')]),
                     (infosource, modelspec, [(('subject_id', subjectinfo),
-                                            'subject_info')]),
+                                              'subject_info')]),
                     (realign, modelspec, [('realignment_parameters', 'realignment_parameters')]),
                     (smooth, modelspec, [('smoothed_files', 'functional_runs')]),
                     (normalize, skullstrip, [('normalized_source', 'in_file')]),
@@ -289,9 +289,9 @@ l1pipeline.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
                     (skullstrip, level1design, [('mask_file', 'mask_image')]),
                     (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
                     (level1estimate, contrastestimate, [('spm_mat_file', 'spm_mat_file'),
-                                                      ('beta_images', 'beta_images'),
-                                                      ('residual_image', 'residual_image')]),
-                  ])
+                                                        ('beta_images', 'beta_images'),
+                                                        ('residual_image', 'residual_image')]),
+                    ])
 
 
 """
@@ -324,19 +324,19 @@ def getstripdir(subject_id):
 
 # store relevant outputs from various stages of the 1st level analysis
 l1pipeline.connect([(infosource, datasink, [('subject_id', 'container'),
-                                          (('subject_id', getstripdir), 'strip_dir')]),
+                                            (('subject_id', getstripdir), 'strip_dir')]),
                     (realign, datasink, [('mean_image', 'realign.@mean'),
-                                       ('realignment_parameters', 'realign.@param')]),
+                                         ('realignment_parameters', 'realign.@param')]),
                     (art, datasink, [('outlier_files', 'art.@outliers'),
-                                   ('statistic_files', 'art.@stats')]),
+                                     ('statistic_files', 'art.@stats')]),
                     (level1design, datasink, [('spm_mat_file', 'model.pre-estimate')]),
                     (level1estimate, datasink, [('spm_mat_file', 'model.@spm'),
-                                              ('beta_images', 'model.@beta'),
-                                              ('mask_image', 'model.@mask'),
-                                              ('residual_image', 'model.@res'),
-                                              ('RPVimage', 'model.@rpv')]),
+                                                ('beta_images', 'model.@beta'),
+                                                ('mask_image', 'model.@mask'),
+                                                ('residual_image', 'model.@res'),
+                                                ('RPVimage', 'model.@rpv')]),
                     (contrastestimate, datasink, [('con_images', 'contrasts.@con'),
-                                                ('spmT_images', 'contrasts.@T')]),
+                                                  ('spmT_images', 'contrasts.@T')]),
                     ])
 
 
@@ -351,7 +351,7 @@ contrasts.
 """
 
 # collect all the con images for each contrast.
-contrast_ids = list(range(1, len(contrasts)+1))
+contrast_ids = list(range(1, len(contrasts) + 1))
 l2source = pe.Node(nio.DataGrabber(infields=['fwhm', 'con']), name="l2source")
 # we use .*i* to capture both .img (SPM8) and .nii (SPM12)
 l2source.inputs.template = os.path.abspath('spm_tutorial/l1output/*/con*/*/_fwhm_%d/con_%04d.*i*')
@@ -385,8 +385,8 @@ l2pipeline.base_dir = os.path.abspath('spm_tutorial/l2output')
 l2pipeline.connect([(l2source, onesamplettestdes, [('outfiles', 'in_files')]),
                     (onesamplettestdes, l2estimate, [('spm_mat_file', 'spm_mat_file')]),
                     (l2estimate, l2conestimate, [('spm_mat_file', 'spm_mat_file'),
-                                               ('beta_images', 'beta_images'),
-                                               ('residual_image', 'residual_image')]),
+                                                 ('beta_images', 'beta_images'),
+                                                 ('residual_image', 'residual_image')]),
                     ])
 
 """

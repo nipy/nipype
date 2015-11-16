@@ -21,7 +21,7 @@ def test_coreg():
     assert_equal(isdefined(coreg.inputs.mat), False)
     pth, mov, _ = split_filename(moving)
     _, tgt, _ = split_filename(target)
-    mat = os.path.join(pth, '%s_to_%s.mat' %(mov, tgt))
+    mat = os.path.join(pth, '%s_to_%s.mat' % (mov, tgt))
     invmat = fname_presuffix(mat, prefix='inverse_')
     scrpt = coreg._make_matlab_command(None)
     assert_equal(coreg.inputs.mat, mat)

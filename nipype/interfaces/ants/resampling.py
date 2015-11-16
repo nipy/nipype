@@ -401,4 +401,3 @@ class ApplyTransformsToPoints(ANTSCommand):
         if opt == "transforms":
             return self._getTransformFileNames()
         return super(ApplyTransformsToPoints, self)._format_arg(opt, spec, val)
-

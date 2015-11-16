@@ -1,5 +1,8 @@
 from __future__ import absolute_import
-import re, inspect, textwrap, pydoc
+import re
+import inspect
+import textwrap
+import pydoc
 import sphinx
 from .docscrape import NumpyDocString, FunctionDoc, ClassDoc
 from nipype.external.six import string_types
@@ -20,7 +23,7 @@ class SphinxDocString(NumpyDocString):
     def _str_indent(self, doc, indent=4):
         out = []
         for line in doc:
-            out += [' '*indent + line]
+            out += [' ' * indent + line]
         return out
 
     def _str_signature(self):
@@ -87,7 +90,7 @@ class SphinxDocString(NumpyDocString):
             if others:
                 maxlen_0 = max([len(x[0]) for x in others])
                 maxlen_1 = max([len(x[1]) for x in others])
-                hdr = "="*maxlen_0 + "  " + "="*maxlen_1 + "  " + "="*10
+                hdr = "=" * maxlen_0 + "  " + "=" * maxlen_1 + "  " + "=" * 10
                 fmt = '%%%ds  %%%ds  ' % (maxlen_0, maxlen_1)
                 n_indent = maxlen_0 + maxlen_1 + 4
                 out += [hdr]
@@ -164,8 +167,8 @@ class SphinxDocString(NumpyDocString):
     def _str_examples(self):
         examples_str = "\n".join(self['Examples'])
 
-        if (self.use_plots and 'import matplotlib' in examples_str
-                and 'plot::' not in examples_str):
+        if (self.use_plots and 'import matplotlib' in examples_str and
+                'plot::' not in examples_str):
             out = []
             out += self._str_header('Examples')
             out += ['.. plot::', '']

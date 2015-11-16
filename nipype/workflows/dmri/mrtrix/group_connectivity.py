@@ -94,7 +94,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
     datasink.inputs.base_directory = output_dir
     datasink.inputs.container = group_id
 
-    l1pipeline = pe.Workflow(name="l1pipeline_"+group_id)
+    l1pipeline = pe.Workflow(name="l1pipeline_" + group_id)
     l1pipeline.base_dir = output_dir
     l1pipeline.base_output_dir = group_id
     l1pipeline.connect([(subj_infosource, conmapper, [('subject_id', 'inputnode.subject_id')])])
@@ -102,7 +102,7 @@ def create_group_connectivity_pipeline(group_list, group_id, data_dir, subjects_
     l1pipeline.connect([(datasource, conmapper, [("dwi", "inputnode.dwi"),
                                                  ("bvals", "inputnode.bvals"),
                                                  ("bvecs", "inputnode.bvecs"),
-                                              ])])
+                                                 ])])
     l1pipeline.connect([(conmapper, datasink, [("outputnode.connectome", "@l1output.cff"),
                                                ("outputnode.nxstatscff", "@l1output.nxstatscff"),
                                                ("outputnode.nxmatlab", "@l1output.nxmatlab"),

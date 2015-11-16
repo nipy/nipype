@@ -233,7 +233,7 @@ class DistributedPluginBase(PluginBase):
         # setup polling - TODO: change to threaded model
         notrun = []
         while np.any(self.proc_done == False) | \
-            np.any(self.proc_pending == True):
+                np.any(self.proc_pending == True):
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -371,12 +371,9 @@ class DistributedPluginBase(PluginBase):
                             hash_exists, _, _, _ = self.procs[
                                 jobid].hash_exists()
                             logger.debug('Hash exists %s' % str(hash_exists))
-                            if (hash_exists and
-                                (self.procs[jobid].overwrite == False or
-                                 (self.procs[jobid].overwrite == None and
-                                  not self.procs[jobid]._interface.always_run)
-                                      )
-                                    ):
+                            if (hash_exists and (self.procs[jobid].overwrite is False or
+                                (self.procs[jobid].overwrite is None and not
+                                    self.procs[jobid]._interface.always_run))):
                                 continue_with_submission = False
                                 self._task_finished_cb(jobid)
                                 self._remove_node_dirs()
@@ -656,4 +653,3 @@ class GraphPluginBase(PluginBase):
             result_out['result'] = result_data
 
         return result_out
-

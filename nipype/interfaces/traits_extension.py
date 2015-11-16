@@ -35,7 +35,7 @@ class BaseFile (traits.BaseStr):
     info_text = 'a file name'
 
     def __init__(self, value='', filter=None, auto_set=False,
-                   entries=0, exists=False, **metadata):
+                 entries=0, exists=False, **metadata):
         """ Creates a File trait.
 
         Parameters
@@ -86,7 +86,7 @@ class File (BaseFile):
     """
 
     def __init__(self, value='', filter=None, auto_set=False,
-                   entries=0, exists=False, **metadata):
+                 entries=0, exists=False, **metadata):
         """ Creates a File trait.
 
         Parameters
@@ -112,7 +112,7 @@ class File (BaseFile):
             fast_validate = (11, str)
 
         super(File, self).__init__(value, filter, auto_set, entries, exists,
-                                      **metadata)
+                                   **metadata)
 
 # -------------------------------------------------------------------------------
 #  'BaseDirectory' and 'Directory' traits:
@@ -127,7 +127,7 @@ class BaseDirectory (traits.BaseStr):
     info_text = 'a directory name'
 
     def __init__(self, value='', auto_set=False, entries=0,
-                   exists=False, **metadata):
+                 exists=False, **metadata):
         """ Creates a BaseDirectory trait.
 
         Parameters
@@ -175,7 +175,7 @@ class Directory (BaseDirectory):
     """
 
     def __init__(self, value='', auto_set=False, entries=0,
-                   exists=False, **metadata):
+                 exists=False, **metadata):
         """ Creates a Directory trait.
 
         Parameters
@@ -199,7 +199,7 @@ class Directory (BaseDirectory):
             self.fast_validate = (11, str)
 
         super(Directory, self).__init__(value, auto_set, entries, exists,
-                                           **metadata)
+                                        **metadata)
 
 
 """
@@ -239,17 +239,14 @@ def has_metadata(trait, metadata, value=None, recursive=True):
     Checks if a given trait has a metadata (and optionally if it is set to particular value)
     '''
     count = 0
-    if hasattr(trait, "_metadata") and metadata in list(trait._metadata.keys()) and (trait._metadata[metadata] == value or value == None):
+    if hasattr(trait, "_metadata") and metadata in list(trait._metadata.keys()) and (trait._metadata[metadata] == value or value is None):
         count += 1
     if recursive:
         if hasattr(trait, 'inner_traits'):
             for inner_trait in trait.inner_traits():
                 count += has_metadata(inner_trait.trait_type, metadata, recursive)
-        if hasattr(trait, 'handlers') and trait.handlers != None:
+        if hasattr(trait, 'handlers') and trait.handlers is not None:
             for handler in trait.handlers:
                 count += has_metadata(handler, metadata, recursive)
 
     return count > 0
-
-
-

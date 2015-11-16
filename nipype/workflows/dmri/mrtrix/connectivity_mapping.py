@@ -516,25 +516,25 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
     inputnode = pe.Node(interface=util.IdentityInterface(fields=["subject_id", "dwi", "bvecs", "bvals", "subjects_dir"]), name="inputnode")
 
     outputnode = pe.Node(interface=util.IdentityInterface(fields=["fa",
-                                                                    "struct",
-                                                                    "tracts",
-                                                                    "tracks2prob",
-                                                                    "connectome",
-                                                                    "nxstatscff",
-                                                                    "nxmatlab",
-                                                                    "nxcsv",
-                                                                    "fiber_csv",
-                                                                    "cmatrices_csv",
-                                                                    "nxmergedcsv",
-                                                                    "cmatrix",
-                                                                    "networks",
-                                                                    "filtered_tracts",
-                                                                    "rois",
-                                                                    "odfs",
-                                                                    "tdi",
-                                                                    "mean_fiber_length",
-                                                                    "median_fiber_length",
-                                                                    "fiber_length_std"]),
+                                                                  "struct",
+                                                                  "tracts",
+                                                                  "tracks2prob",
+                                                                  "connectome",
+                                                                  "nxstatscff",
+                                                                  "nxmatlab",
+                                                                  "nxcsv",
+                                                                  "fiber_csv",
+                                                                  "cmatrices_csv",
+                                                                  "nxmergedcsv",
+                                                                  "cmatrix",
+                                                                  "networks",
+                                                                  "filtered_tracts",
+                                                                  "rois",
+                                                                  "odfs",
+                                                                  "tdi",
+                                                                  "mean_fiber_length",
+                                                                  "median_fiber_length",
+                                                                  "fiber_length_std"]),
                          name="outputnode")
 
     connectivity = pe.Workflow(name="connectivity")
@@ -564,7 +564,7 @@ def create_connectivity_pipeline(name="connectivity", parcellation_name='scale50
                                                  ("mri_convert_Brain.out_file", "struct"),
                                                  ("MRconvert_fa.converted", "fa"),
                                                  ("MRconvert_tracks2prob.converted", "tracks2prob")])
-        ])
+                          ])
 
     connectivity.connect([(cmats_to_csv, outputnode, [("outputnode.csv_file", "cmatrices_csv")])])
     connectivity.connect([(networkx, outputnode, [("outputnode.csv_files", "nxcsv")])])

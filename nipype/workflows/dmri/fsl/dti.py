@@ -74,14 +74,14 @@ def create_bedpostx_pipeline(name='bedpostx', params={'n_fibres': 2, 'fudge': 1,
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode, slice_dwi,  [('dwi', 'in_file')]),
-        (inputnode, slice_msk,  [('mask', 'in_file')]),
-        (slice_dwi, mask_dwi,   [('out_files', 'in_file')]),
-        (slice_msk, mask_dwi,   [('out_files', 'in_file2')]),
-        (slice_dwi, xfibres,    [('out_files', 'dwi')]),
-        (mask_dwi, xfibres,     [('out_file', 'mask')]),
-        (inputnode, xfibres,    [('bvecs', 'bvecs'),
-                                 ('bvals', 'bvals')]),
+        (inputnode, slice_dwi, [('dwi', 'in_file')]),
+        (inputnode, slice_msk, [('mask', 'in_file')]),
+        (slice_dwi, mask_dwi, [('out_files', 'in_file')]),
+        (slice_msk, mask_dwi, [('out_files', 'in_file2')]),
+        (slice_dwi, xfibres, [('out_files', 'dwi')]),
+        (mask_dwi, xfibres, [('out_file', 'mask')]),
+        (inputnode, xfibres, [('bvecs', 'bvecs'),
+                              ('bvals', 'bvals')]),
         (inputnode, make_dyads, [('mask', 'mask')])
     ])
 
@@ -119,10 +119,10 @@ def merge_and_mean(name='mm'):
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode, merge,  [(('in_files', transpose), 'in_files')]),
-        (merge, mean,       [('merged_file', 'in_file')]),
+        (inputnode, merge, [(('in_files', transpose), 'in_files')]),
+        (merge, mean, [('merged_file', 'in_file')]),
         (merge, outputnode, [('merged_file', 'merged')]),
-        (mean, outputnode,  [('out_file', 'mean')])
+        (mean, outputnode, [('out_file', 'mean')])
     ])
     return wf
 
@@ -190,18 +190,18 @@ def bedpostx_parallel(name='bedpostx_parallel',
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode, slice_dwi,  [('dwi', 'in_file'),
-                                 ('mask', 'in_mask')]),
-        (slice_dwi, xfibres,    [('out_files', 'dwi'),
-                                 ('out_masks', 'mask')]),
-        (inputnode, xfibres,    [('bvecs', 'bvecs'),
-                                 ('bvals', 'bvals')]),
-        (inputnode, mrg_dyads,  [('mask', 'in_reference')]),
-        (xfibres,   mrg_dyads,  [(('dyads', transpose), 'in_files')]),
-        (slice_dwi, mrg_dyads,  [('out_index', 'in_index')]),
-        (inputnode, mrg_fsamp,  [('mask', 'in_reference')]),
-        (xfibres,   mrg_fsamp,  [(('mean_fsamples', transpose), 'in_files')]),
-        (slice_dwi, mrg_fsamp,  [('out_index', 'in_index')]),
+        (inputnode, slice_dwi, [('dwi', 'in_file'),
+                                ('mask', 'in_mask')]),
+        (slice_dwi, xfibres, [('out_files', 'dwi'),
+                              ('out_masks', 'mask')]),
+        (inputnode, xfibres, [('bvecs', 'bvecs'),
+                              ('bvals', 'bvals')]),
+        (inputnode, mrg_dyads, [('mask', 'in_reference')]),
+        (xfibres, mrg_dyads, [(('dyads', transpose), 'in_files')]),
+        (slice_dwi, mrg_dyads, [('out_index', 'in_index')]),
+        (inputnode, mrg_fsamp, [('mask', 'in_reference')]),
+        (xfibres, mrg_fsamp, [(('mean_fsamples', transpose), 'in_files')]),
+        (slice_dwi, mrg_fsamp, [('out_index', 'in_index')]),
         (mrg_dyads, outputnode, [('merged_file', 'dyads')]),
         (mrg_fsamp, outputnode, [('merged_file', 'fsamples')])
     ])
@@ -247,11 +247,11 @@ def merge_and_mean_parallel(name='mm'):
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode, merge,  [(('in_files', transpose), 'in_files'),
-                             ('in_reference', 'in_reference'),
-                             ('in_index', 'in_index')]),
-        (merge, mean,       [('merged_file', 'in_file')]),
+        (inputnode, merge, [(('in_files', transpose), 'in_files'),
+                            ('in_reference', 'in_reference'),
+                            ('in_index', 'in_index')]),
+        (merge, mean, [('merged_file', 'in_file')]),
         (merge, outputnode, [('merged_file', 'merged')]),
-        (mean, outputnode,  [('out_file', 'mean')])
+        (mean, outputnode, [('out_file', 'mean')])
     ])
     return wf

@@ -37,7 +37,8 @@ Import the necessary modules and workflow from nipype.
 import nipype.pipeline.engine as pe          # pypeline engine
 import nipype.interfaces.cmtk as cmtk
 import nipype.interfaces.io as nio           # Data i/o
-import os, os.path as op
+import os
+import os.path as op
 from nipype.workflows.smri.freesurfer import create_tessellation_flow
 
 """
