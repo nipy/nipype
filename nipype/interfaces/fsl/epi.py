@@ -663,7 +663,7 @@ class EpiReg(FSLCommand):
             outputs['fmap_epi'] = os.path.join(os.getcwd(),
                                                self.inputs.out_base + '_fieldmaprads2epi.nii.gz')
             outputs['fmap_str'] = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_fieldmaprads2str.ni    `i.gz')
+                                               self.inputs.out_base + '_fieldmaprads2str.nii.gz')
             outputs['fmapmag_str'] = os.path.join(os.getcwd(),
                                                   self.inputs.out_base + '_fieldmap2str.nii.gz')
             outputs['shiftmap'] = os.path.join(os.getcwd(),
