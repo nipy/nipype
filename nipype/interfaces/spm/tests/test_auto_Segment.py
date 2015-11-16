@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import Segment
 
+
 def test_Segment_inputs():
     input_map = dict(affine_regularization=dict(field='opts.regtype',
     ),
@@ -53,6 +54,7 @@ def test_Segment_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Segment_outputs():
     output_map = dict(bias_corrected_image=dict(),
     inverse_transformation_mat=dict(),
@@ -75,4 +77,3 @@ def test_Segment_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import Volreg
 
+
 def test_Volreg_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -58,6 +59,7 @@ def test_Volreg_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Volreg_outputs():
     output_map = dict(md1d_file=dict(),
     oned_file=dict(),
@@ -69,4 +71,3 @@ def test_Volreg_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

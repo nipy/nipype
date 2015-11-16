@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..misc import FuzzyOverlap
 
+
 def test_FuzzyOverlap_inputs():
     input_map = dict(ignore_exception=dict(nohash=True,
     usedefault=True,
@@ -21,6 +22,7 @@ def test_FuzzyOverlap_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_FuzzyOverlap_outputs():
     output_map = dict(class_fdi=dict(),
     class_fji=dict(),
@@ -33,4 +35,3 @@ def test_FuzzyOverlap_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

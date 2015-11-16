@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import FNIRT
 
+
 def test_FNIRT_inputs():
     input_map = dict(affine_file=dict(argstr='--aff=%s',
     ),
@@ -127,6 +128,7 @@ def test_FNIRT_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_FNIRT_outputs():
     output_map = dict(field_file=dict(),
     fieldcoeff_file=dict(),
@@ -141,4 +143,3 @@ def test_FNIRT_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

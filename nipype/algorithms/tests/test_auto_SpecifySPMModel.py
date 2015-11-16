@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..modelgen import SpecifySPMModel
 
+
 def test_SpecifySPMModel_inputs():
     input_map = dict(concatenate_runs=dict(usedefault=True,
     ),
@@ -36,6 +37,7 @@ def test_SpecifySPMModel_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_SpecifySPMModel_outputs():
     output_map = dict(session_info=dict(),
     )
@@ -44,4 +46,3 @@ def test_SpecifySPMModel_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

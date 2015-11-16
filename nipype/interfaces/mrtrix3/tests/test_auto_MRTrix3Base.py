@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..base import MRTrix3Base
 
+
 def test_MRTrix3Base_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),

@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..model import Concatenate
 
+
 def test_Concatenate_inputs():
     input_map = dict(add_val=dict(argstr='--add %f',
     ),
@@ -57,6 +58,7 @@ def test_Concatenate_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Concatenate_outputs():
     output_map = dict(concatenated_file=dict(),
     )
@@ -65,4 +67,3 @@ def test_Concatenate_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

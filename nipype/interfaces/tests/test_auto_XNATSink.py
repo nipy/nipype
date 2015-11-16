@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..io import XNATSink
 
+
 def test_XNATSink_inputs():
     input_map = dict(_outputs=dict(usedefault=True,
     ),

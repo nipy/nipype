@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..svm import SVMTrain
 
+
 def test_SVMTrain_inputs():
     input_map = dict(alphas=dict(argstr='-alpha %s',
     name_source='in_file',
@@ -61,6 +62,7 @@ def test_SVMTrain_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_SVMTrain_outputs():
     output_map = dict(alphas=dict(),
     model=dict(),
@@ -71,4 +73,3 @@ def test_SVMTrain_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

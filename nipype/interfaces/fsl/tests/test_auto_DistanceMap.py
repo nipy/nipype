@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..dti import DistanceMap
 
+
 def test_DistanceMap_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -35,6 +36,7 @@ def test_DistanceMap_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_DistanceMap_outputs():
     output_map = dict(distance_map=dict(),
     local_max_file=dict(),
@@ -44,4 +46,3 @@ def test_DistanceMap_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..base import SlicerCommandLine
 
+
 def test_SlicerCommandLine_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),

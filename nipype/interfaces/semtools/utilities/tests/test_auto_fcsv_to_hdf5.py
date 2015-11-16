@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..brains import fcsv_to_hdf5
 
+
 def test_fcsv_to_hdf5_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -34,6 +35,7 @@ def test_fcsv_to_hdf5_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_fcsv_to_hdf5_outputs():
     output_map = dict(landmarksInformationFile=dict(),
     modelFile=dict(),
@@ -43,4 +45,3 @@ def test_fcsv_to_hdf5_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

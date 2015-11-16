@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..convert import ProcStreamlines
 
+
 def test_ProcStreamlines_inputs():
     input_map = dict(allowmultitargets=dict(argstr='-allowmultitargets',
     ),
@@ -105,6 +106,7 @@ def test_ProcStreamlines_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_ProcStreamlines_outputs():
     output_map = dict(outputroot_files=dict(),
     proc=dict(),
@@ -114,4 +116,3 @@ def test_ProcStreamlines_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

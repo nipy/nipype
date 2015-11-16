@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..convert import FSL2Scheme
 
+
 def test_FSL2Scheme_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -51,6 +52,7 @@ def test_FSL2Scheme_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_FSL2Scheme_outputs():
     output_map = dict(scheme=dict(),
     )
@@ -59,4 +61,3 @@ def test_FSL2Scheme_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

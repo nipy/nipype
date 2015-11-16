@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import Realign
 
+
 def test_Realign_inputs():
     input_map = dict(fwhm=dict(field='eoptions.fwhm',
     ),
@@ -55,6 +56,7 @@ def test_Realign_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Realign_outputs():
     output_map = dict(mean_image=dict(),
     modified_in_files=dict(),
@@ -66,4 +68,3 @@ def test_Realign_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

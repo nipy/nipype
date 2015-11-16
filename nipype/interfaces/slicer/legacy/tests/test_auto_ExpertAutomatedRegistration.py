@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..registration import ExpertAutomatedRegistration
 
+
 def test_ExpertAutomatedRegistration_inputs():
     input_map = dict(affineMaxIterations=dict(argstr='--affineMaxIterations %d',
     ),
@@ -80,6 +81,7 @@ def test_ExpertAutomatedRegistration_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_ExpertAutomatedRegistration_outputs():
     output_map = dict(resampledImage=dict(),
     saveTransform=dict(),
@@ -89,4 +91,3 @@ def test_ExpertAutomatedRegistration_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

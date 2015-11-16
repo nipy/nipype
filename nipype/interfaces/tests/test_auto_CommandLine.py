@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..base import CommandLine
 
+
 def test_CommandLine_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),

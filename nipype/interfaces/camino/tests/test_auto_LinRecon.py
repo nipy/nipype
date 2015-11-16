@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..odf import LinRecon
 
+
 def test_LinRecon_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -42,6 +43,7 @@ def test_LinRecon_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_LinRecon_outputs():
     output_map = dict(recon_data=dict(),
     )
@@ -50,4 +52,3 @@ def test_LinRecon_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

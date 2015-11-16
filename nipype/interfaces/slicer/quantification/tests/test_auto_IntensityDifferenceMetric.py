@@ -2,6 +2,7 @@
 from .....testing import assert_equal
 from ..changequantification import IntensityDifferenceMetric
 
+
 def test_IntensityDifferenceMetric_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -40,6 +41,7 @@ def test_IntensityDifferenceMetric_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_IntensityDifferenceMetric_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
@@ -50,4 +52,3 @@ def test_IntensityDifferenceMetric_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

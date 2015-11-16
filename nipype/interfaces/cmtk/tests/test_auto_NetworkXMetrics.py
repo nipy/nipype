@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..nx import NetworkXMetrics
 
+
 def test_NetworkXMetrics_inputs():
     input_map = dict(compute_clique_related_measures=dict(usedefault=True,
     ),
@@ -33,6 +34,7 @@ def test_NetworkXMetrics_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_NetworkXMetrics_outputs():
     output_map = dict(edge_measure_networks=dict(),
     edge_measures_matlab=dict(),
@@ -53,4 +55,3 @@ def test_NetworkXMetrics_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

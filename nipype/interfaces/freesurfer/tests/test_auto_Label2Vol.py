@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..model import Label2Vol
 
+
 def test_Label2Vol_inputs():
     input_map = dict(annot_file=dict(argstr='--annot %s',
     copyfile=False,
@@ -77,6 +78,7 @@ def test_Label2Vol_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_Label2Vol_outputs():
     output_map = dict(vol_label_file=dict(),
     )
@@ -85,4 +87,3 @@ def test_Label2Vol_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

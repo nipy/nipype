@@ -2,6 +2,7 @@
 from ...testing import assert_equal
 from ..io import MySQLSink
 
+
 def test_MySQLSink_inputs():
     input_map = dict(config=dict(mandatory=True,
     xor=['host'],

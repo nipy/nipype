@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import VBMSegment
 
+
 def test_VBMSegment_inputs():
     input_map = dict(bias_corrected_affine=dict(field='estwrite.output.bias.affine',
     usedefault=True,
@@ -117,6 +118,7 @@ def test_VBMSegment_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_VBMSegment_outputs():
     output_map = dict(bias_corrected_images=dict(),
     dartel_input_images=dict(),
@@ -137,4 +139,3 @@ def test_VBMSegment_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

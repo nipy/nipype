@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..dti import DTITracker
 
+
 def test_DTITracker_inputs():
     input_map = dict(angle_threshold=dict(argstr='-at %f',
     ),
@@ -68,6 +69,7 @@ def test_DTITracker_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_DTITracker_outputs():
     output_map = dict(mask_file=dict(),
     track_file=dict(),
@@ -77,4 +79,3 @@ def test_DTITracker_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-

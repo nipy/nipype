@@ -2,6 +2,7 @@
 from ....testing import assert_equal
 from ..preprocess import MCFLIRT
 
+
 def test_MCFLIRT_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
@@ -65,6 +66,7 @@ def test_MCFLIRT_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
 def test_MCFLIRT_outputs():
     output_map = dict(mat_file=dict(),
     mean_img=dict(),
@@ -79,4 +81,3 @@ def test_MCFLIRT_outputs():
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value
-
