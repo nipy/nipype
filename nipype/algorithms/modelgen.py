@@ -96,8 +96,9 @@ def spm_hrf(RT, P=None, fMRI_T=16):
     # modelled hemodynamic response function - {mixture of Gammas}
     dt = RT / float(fMRI_T)
     u = np.arange(0, int(p[6] / dt + 1)) - p[5] / dt
-    hrf = _spm_Gpdf(u, p[0] / p[2], dt / p[2]) - _spm_Gpdf(u, p[1] / p[3],
-                                                           dt / p[3]) / p[4]
+    with np.errstate(divide='ignore'):  # Known division-by-zero
+        hrf = _spm_Gpdf(u, p[0] / p[2], dt / p[2]) - _spm_Gpdf(u, p[1] / p[3],
+                                                               dt / p[3]) / p[4]
     idx = np.arange(0, int((p[6] / RT) + 1)) * fMRI_T
     hrf = hrf[idx]
     hrf = hrf / np.sum(hrf)
