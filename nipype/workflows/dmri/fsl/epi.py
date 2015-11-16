@@ -731,8 +731,7 @@ def _prepare_phasediff(in_file):
     if fext == '.gz':
         name, _ = os.path.splitext(name)
     out_file = os.path.abspath('./%s_2pi.nii.gz' % name)
-    nib.save(nib.Nifti1Image(
-        diff_norm, img.get_affine(), img.get_header()), out_file)
+    nib.save(nib.Nifti1Image(diff_norm, img.affine, img.header), out_file)
     return out_file
 
 
@@ -756,8 +755,7 @@ def _fill_phase(in_file):
     import os
     import numpy as np
     img = nib.load(in_file)
-    dumb_img = nib.Nifti1Image(np.zeros(
-        img.get_shape()), img.get_affine(), img.get_header())
+    dumb_img = nib.Nifti1Image(np.zeros(img.shape), img.affine, img.header)
     out_nii = nib.funcs.concat_images((img, dumb_img))
     name, fext = os.path.splitext(os.path.basename(in_file))
     if fext == '.gz':
@@ -778,7 +776,7 @@ def _vsm_remove_mean(in_file, mask_file, in_unwarped):
     img_data[msk == 0] = 0
     vsmmag_masked = ma.masked_values(img_data.reshape(-1), 0.0)
     vsmmag_masked = vsmmag_masked - vsmmag_masked.mean()
-    img._data = vsmmag_masked.reshape(img.get_shape())
+    img._data = vsmmag_masked.reshape(img.shape)
     name, fext = os.path.splitext(os.path.basename(in_file))
     if fext == '.gz':
         name, _ = os.path.splitext(name)

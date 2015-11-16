@@ -108,7 +108,7 @@ def getmiddlevolume(func):
     funcfile = func
     if isinstance(func, list):
         funcfile = func[0]
-    _, _, _, timepoints = load(funcfile).get_shape()
+    _, _, _, timepoints = load(funcfile).shape
     return int(timepoints / 2) - 1
 
 preproc.connect(inputnode, ('func', getmiddlevolume), extract_ref, 't_min')

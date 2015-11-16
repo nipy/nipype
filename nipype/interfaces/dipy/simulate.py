@@ -116,9 +116,9 @@ class SimulateMultiTensor(BaseInterface):
 
         # Load the baseline b0 signal
         b0_im = nb.load(self.inputs.baseline)
-        hdr = b0_im.get_header()
-        shape = b0_im.get_shape()
-        aff = b0_im.get_affine()
+        hdr = b0_im.header
+        shape = b0_im.shape
+        aff = b0_im.affine
 
         # Check and load sticks and their volume fractions
         nsticks = len(self.inputs.in_dirs)

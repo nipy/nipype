@@ -181,9 +181,9 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
         out_file = op.abspath('./%s_reslice%s' % (fname, fext))
 
     img = nb.load(in_file)
-    hdr = img.get_header().copy()
+    hdr = img.header.copy()
     data = img.get_data().astype(np.float32)
-    affine = img.get_affine()
+    affine = img.affine
     im_zooms = hdr.get_zooms()[:3]
 
     if new_zooms is None:
@@ -220,9 +220,9 @@ def nlmeans_proxy(in_file, settings,
         out_file = op.abspath('./%s_denoise%s' % (fname, fext))
 
     img = nb.load(in_file)
-    hdr = img.get_header()
+    hdr = img.header
     data = img.get_data()
-    aff = img.get_affine()
+    aff = img.affine
 
     nmask = data[..., 0] > 80
     if noise_mask is not None:

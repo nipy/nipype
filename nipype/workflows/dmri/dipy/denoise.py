@@ -64,7 +64,7 @@ def csf_mask(in_file, in_mask, out_file=None):
         out_file = op.abspath("%s_csfmask%s" % (fname, ext))
 
     im = nb.load(in_file)
-    hdr = im.get_header().copy()
+    hdr = im.header.copy()
     hdr.set_data_dtype(np.uint8)
     hdr.set_xyzt_units('mm')
     imdata = im.get_data()
@@ -84,8 +84,8 @@ def csf_mask(in_file, in_mask, out_file=None):
     remove_pixel = mask_size[label_im]
     label_im[remove_pixel] = 0
     label_im[label_im > 0] = 1
-    nb.Nifti1Image(label_im.astype(np.uint8),
-                   im.get_affine(), hdr).to_filename(out_file)
+    nb.Nifti1Image(label_im.astype(np.uint8), im.affine,
+                   hdr).to_filename(out_file)
     return out_file
 
 
@@ -107,13 +107,11 @@ def bg_mask(in_file, in_mask, out_file=None):
         out_file = op.abspath("%s_bgmask%s" % (fname, ext))
 
     im = nb.load(in_file)
-    hdr = im.get_header().copy()
+    hdr = im.header.copy()
     hdr.set_data_dtype(np.uint8)
     hdr.set_xyzt_units('mm')
     imdata = im.get_data()
     msk = nb.load(in_mask).get_data()
-    msk = 1 - binary_dilation(msk,
-                              structure=np.ones((20, 20, 20)))
-    nb.Nifti1Image(msk.astype(np.uint8),
-                   im.get_affine(), hdr).to_filename(out_file)
+    msk = 1 - binary_dilation(msk, structure=np.ones((20, 20, 20)))
+    nb.Nifti1Image(msk.astype(np.uint8), im.affine, hdr).to_filename(out_file)
     return out_file

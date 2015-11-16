@@ -80,8 +80,8 @@ def median(in_files):
             average = data
         else:
             average = average + data
-    median_img = nb.Nifti1Image(average / float(idx + 1),
-                                img.get_affine(), img.get_header())
+    median_img = nb.Nifti1Image(average / float(idx + 1), img.affine,
+                                img.header)
     filename = os.path.join(os.getcwd(), 'median.nii.gz')
     median_img.to_filename(filename)
     return filename

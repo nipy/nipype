@@ -355,7 +355,7 @@ class SpecifyModel(BaseInterface):
             for i, out in enumerate(outliers):
                 numscans = 0
                 for f in filename_to_list(sessinfo[i]['scans']):
-                    shape = load(f).get_shape()
+                    shape = load(f).shape
                     if len(shape) == 3 or shape[3] == 1:
                         iflogger.warning(("You are using 3D instead of 4D "
                                           "files. Are you sure this was "
@@ -459,7 +459,7 @@ class SpecifySPMModel(SpecifyModel):
                 numscans = len(f)
             elif isinstance(f, string_types):
                 img = load(f)
-                numscans = img.get_shape()[3]
+                numscans = img.shape[3]
             else:
                 raise Exception('Functional input not specified correctly')
             nscans.insert(i, numscans)
@@ -779,7 +779,7 @@ class SpecifySparseModel(SpecifyModel):
             infoout[i].durations = None
             if info.conditions:
                 img = load(self.inputs.functional_runs[i])
-                nscans = img.get_shape()[3]
+                nscans = img.shape[3]
                 reg, regnames = self._cond_to_regress(info, nscans)
                 if hasattr(infoout[i], 'regressors') and infoout[i].regressors:
                     if not infoout[i].regressor_names:

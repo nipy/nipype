@@ -191,7 +191,7 @@ def create_vbm_preproc(name='vbmpreproc'):
         from numpy import prod
         icv = []
         for session in class_images:
-            voxel_volume = prod(load(session[0][0]).get_header().get_zooms())
+            voxel_volume = prod(load(session[0][0]).header.get_zooms())
             img = load(session[0][0]).get_data() + \
                 load(session[1][0]).get_data() + \
                 load(session[2][0]).get_data()

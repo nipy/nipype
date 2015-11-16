@@ -117,7 +117,7 @@ def get_vox_dims(volume):
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume)
-    hdr = nii.get_header()
+    hdr = nii.header
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
 

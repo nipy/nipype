@@ -111,13 +111,12 @@ class WarpPoints(BaseInterface):
         points = np.array(mesh.points)
         warp_dims = nb.funcs.four_to_three(nb.load(self.inputs.warp))
 
-        affine = warp_dims[0].get_affine()
-        voxsize = warp_dims[0].get_header().get_zooms()
+        affine = warp_dims[0].affine
+        voxsize = warp_dims[0].header.get_zooms()
         vox2ras = affine[0:3, 0:3]
         ras2vox = np.linalg.inv(vox2ras)
         origin = affine[0:3, 3]
-        voxpoints = np.array([np.dot(ras2vox,
-                                     (p - origin)) for p in points])
+        voxpoints = np.array([np.dot(ras2vox, (p - origin)) for p in points])
 
         warps = []
         for axis in warp_dims:

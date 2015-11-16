@@ -91,20 +91,20 @@ class EditTransform(BaseInterface):
         if isdefined(self.inputs.reference_image):
             im = nb.load(self.inputs.reference_image)
 
-            if len(im.get_header().get_zooms()) == 4:
+            if len(im.header.get_zooms()) == 4:
                 im = nb.func.four_to_three(im)[0]
 
-            size = ' '.join(["%01d" % s for s in im.get_shape()])
+            size = ' '.join(["%01d" % s for s in im.shape])
             p = re.compile((self._pattern % 'Size').decode('string-escape'))
             rep = '(\g<entry>%s\g<3>' % size
             contents = p.sub(rep, contents)
 
-            index = ' '.join(["0" for s in im.get_shape()])
+            index = ' '.join(["0" for s in im.shape])
             p = re.compile((self._pattern % 'Index').decode('string-escape'))
             rep = '(\g<entry>%s\g<3>' % index
             contents = p.sub(rep, contents)
 
-            spacing = ' '.join(["%0.4f" % f for f in im.get_header().get_zooms()])
+            spacing = ' '.join(["%0.4f" % f for f in im.header.get_zooms()])
             p = re.compile((self._pattern % 'Spacing').decode('string-escape'))
             rep = '(\g<entry>%s\g<3>' % spacing
             contents = p.sub(rep, contents)
@@ -113,7 +113,7 @@ class EditTransform(BaseInterface):
             itkmat[0, 0] = -1
             itkmat[1, 1] = -1
 
-            affine = np.dot(itkmat, im.get_affine())
+            affine = np.dot(itkmat, im.affine)
             dirs = ' '.join(['%0.4f' % f for f in affine[0:3, 0:3].reshape(-1)])
             orig = ' '.join(['%0.4f' % f for f in affine[0:3, 3].reshape(-1)])
 

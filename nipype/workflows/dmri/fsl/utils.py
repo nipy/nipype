@@ -228,10 +228,9 @@ def extract_bval(in_dwi, in_bval, b=0, out_file=None):
         selection = np.where(bvals == b)
 
     extdata = np.squeeze(dwidata.take(selection, axis=3))
-    hdr = im.get_header().copy()
+    hdr = im.header.copy()
     hdr.set_data_shape(extdata.shape)
-    nb.Nifti1Image(extdata, im.get_affine(),
-                   hdr).to_filename(out_file)
+    nb.Nifti1Image(extdata, im.affine, hdr).to_filename(out_file)
     return out_file
 
 
@@ -247,7 +246,7 @@ def hmc_split(in_file, in_bval, ref_num=0, lowbval=5.0):
 
     im = nb.load(in_file)
     data = im.get_data()
-    hdr = im.get_header().copy()
+    hdr = im.header.copy()
     bval = np.loadtxt(in_bval)
 
     lowbs = np.where(bval <= lowbval)[0]
@@ -273,10 +272,10 @@ def hmc_split(in_file, in_bval, ref_num=0, lowbval=5.0):
 
     refdata = data[..., volid]
     hdr.set_data_shape(refdata.shape)
-    nb.Nifti1Image(refdata, im.get_affine(), hdr).to_filename(out_ref)
+    nb.Nifti1Image(refdata, im.affine, hdr).to_filename(out_ref)
 
     hdr.set_data_shape(data.shape)
-    nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(out_mov)
+    nb.Nifti1Image(data, im.affine, hdr).to_filename(out_mov)
     np.savetxt(out_bval, bval)
     return [out_ref, out_mov, out_bval, volid]
 
@@ -298,7 +297,7 @@ def remove_comp(in_file, in_bval, volid=0, out_file=None):
 
     im = nb.load(in_file)
     data = im.get_data()
-    hdr = im.get_header().copy()
+    hdr = im.header.copy()
     bval = np.loadtxt(in_bval)
 
     if volid == 0:
@@ -312,7 +311,7 @@ def remove_comp(in_file, in_bval, volid=0, out_file=None):
                               axis=3)
         bval = np.hstack((bval[:volid], bval[(volid + 1):]))
     hdr.set_data_shape(data.shape)
-    nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(out_file)
+    nb.Nifti1Image(data, im.affine, hdr).to_filename(out_file)
 
     out_bval = op.abspath('bval_extract.txt')
     np.savetxt(out_bval, bval)
@@ -357,8 +356,7 @@ def recompose_dwi(in_dwi, in_bval, in_corrected, out_file=None):
     for bindex, dwi in zip(dwis, in_corrected):
         dwidata[..., bindex] = nb.load(dwi).get_data()
 
-    nb.Nifti1Image(dwidata, im.get_affine(),
-                   im.get_header()).to_filename(out_file)
+    nb.Nifti1Image(dwidata, im.affine, im.header).to_filename(out_file)
     return out_file
 
 
@@ -415,11 +413,11 @@ def time_avg(in_file, index=[0], out_file=None):
         data = np.average(np.array([im.get_data().astype(np.float32)
                                     for im in imgs]), axis=0)
 
-    hdr = imgs[0].get_header().copy()
+    hdr = imgs[0].header.copy()
     hdr.set_data_shape(data.shape)
     hdr.set_xyzt_units('mm')
     hdr.set_data_dtype(np.float32)
-    nb.Nifti1Image(data, imgs[0].get_affine(), hdr).to_filename(out_file)
+    nb.Nifti1Image(data, imgs[0].affine, hdr).to_filename(out_file)
     return out_file
 
 
@@ -461,11 +459,11 @@ def b0_average(in_dwi, in_bval, max_b=10.0, out_file=None):
            for im in imgs[index]]
     b0 = np.average(np.array(b0s), axis=0)
 
-    hdr = imgs[0].get_header().copy()
+    hdr = imgs[0].header.copy()
     hdr.set_data_shape(b0.shape)
     hdr.set_xyzt_units('mm')
     hdr.set_data_dtype(np.float32)
-    nb.Nifti1Image(b0, imgs[0].get_affine(), hdr).to_filename(out_file)
+    nb.Nifti1Image(b0, imgs[0].affine, hdr).to_filename(out_file)
     return out_file
 
 
@@ -598,7 +596,7 @@ def siemens2rads(in_file, out_file=None):
     in_file = np.atleast_1d(in_file).tolist()
     im = nb.load(in_file[0])
     data = im.get_data().astype(np.float32)
-    hdr = im.get_header().copy()
+    hdr = im.header.copy()
 
     if len(in_file) == 2:
         data = nb.load(in_file[1]).get_data().astype(np.float32) - data
@@ -612,7 +610,7 @@ def siemens2rads(in_file, out_file=None):
     hdr.set_data_dtype(np.float32)
     hdr.set_xyzt_units('mm')
     hdr['datatype'] = 16
-    nb.Nifti1Image(data, im.get_affine(), hdr).to_filename(out_file)
+    nb.Nifti1Image(data, im.affine, hdr).to_filename(out_file)
     return out_file
 
 
@@ -633,8 +631,7 @@ def rads2radsec(in_file, delta_te, out_file=None):
 
     im = nb.load(in_file)
     data = im.get_data().astype(np.float32) * (1.0 / delta_te)
-    nb.Nifti1Image(data, im.get_affine(),
-                   im.get_header()).to_filename(out_file)
+    nb.Nifti1Image(data, im.affine, im.header).to_filename(out_file)
     return out_file
 
 
@@ -664,8 +661,7 @@ def demean_image(in_file, in_mask=None, out_file=None):
 
     mean = np.median(data[msk == 1].reshape(-1))
     data[msk == 1] = data[msk == 1] - mean
-    nb.Nifti1Image(data, im.get_affine(),
-                   im.get_header()).to_filename(out_file)
+    nb.Nifti1Image(data, im.affine, im.header).to_filename(out_file)
     return out_file
 
 
@@ -685,8 +681,8 @@ def add_empty_vol(in_file, out_file=None):
         out_file = op.abspath('./%s_4D.nii.gz' % fname)
 
     im = nb.load(in_file)
-    zim = nb.Nifti1Image(np.zeros_like(im.get_data()), im.get_affine(),
-                         im.get_header())
+    zim = nb.Nifti1Image(np.zeros_like(im.get_data()), im.affine,
+                         im.header)
     nb.funcs.concat_images([im, zim]).to_filename(out_file)
     return out_file
 
@@ -707,8 +703,8 @@ def reorient_bvecs(in_dwi, old_dwi, in_bvec):
     bvecs = np.loadtxt(in_bvec).T
     new_bvecs = []
 
-    N = nb.load(in_dwi).get_affine()
-    O = nb.load(old_dwi).get_affine()
+    N = nb.load(in_dwi).affine
+    O = nb.load(old_dwi).affine
     RS = N.dot(np.linalg.inv(O))[:3, :3]
     sc_idx = np.where((np.abs(RS) != 1) & (RS != 0))
     S = np.ones_like(RS)
@@ -732,12 +728,12 @@ def copy_hdr(in_file, in_file_hdr, out_file=None):
         out_file = op.abspath('./%s_fixhdr.nii.gz' % fname)
 
     imref = nb.load(in_file_hdr)
-    hdr = imref.get_header().copy()
+    hdr = imref.header.copy()
     hdr.set_data_dtype(np.float32)
     vsm = nb.load(in_file).get_data().astype(np.float32)
     hdr.set_data_shape(vsm.shape)
     hdr.set_xyzt_units('mm')
-    nii = nb.Nifti1Image(vsm, imref.get_affine(), hdr)
+    nii = nb.Nifti1Image(vsm, imref.affine, hdr)
     nii.to_filename(out_file)
     return out_file
 
@@ -756,7 +752,7 @@ def enhance(in_file, clip_limit=0.010, in_mask=None, out_file=None):
 
     im = nb.load(in_file)
     imdata = im.get_data()
-    imshape = im.get_shape()
+    imshape = im.shape
 
     if in_mask is not None:
         msk = nb.load(in_mask).get_data()
@@ -770,8 +766,8 @@ def enhance(in_file, clip_limit=0.010, in_mask=None, out_file=None):
     adapted = exposure.equalize_adapthist(imdata.reshape(imshape[0], -1),
                                           clip_limit=clip_limit)
 
-    nb.Nifti1Image(adapted.reshape(imshape), im.get_affine(),
-                   im.get_header()).to_filename(out_file)
+    nb.Nifti1Image(adapted.reshape(imshape), im.affine,
+                   im.header).to_filename(out_file)
 
     return out_file
 

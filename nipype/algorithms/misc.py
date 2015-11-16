@@ -111,7 +111,7 @@ class PickAtlas(BaseInterface):
                           1,
                           2 * self.inputs.dilation_size + 1))
 
-        return nb.Nifti1Image(newdata, nii.get_affine(), nii.get_header())
+        return nb.Nifti1Image(newdata, nii.affine, nii.header)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
@@ -150,8 +150,7 @@ class SimpleThreshold(BaseInterface):
             thresholded_map = np.zeros(data.shape)
             thresholded_map[active_map] = data[active_map]
 
-            new_img = nb.Nifti1Image(
-                thresholded_map, img.get_affine(), img.get_header())
+            new_img = nb.Nifti1Image(thresholded_map, img.affine, img.header)
             _, base, _ = split_filename(fname)
             nb.save(new_img, base + '_thresholded.nii')
 
@@ -201,11 +200,11 @@ class ModifyAffine(BaseInterface):
         for fname in self.inputs.volumes:
             img = nb.load(fname)
 
-            affine = img.get_affine()
+            affine = img.affine
             affine = np.dot(self.inputs.transformation_matrix, affine)
 
-            nb.save(nb.Nifti1Image(img.get_data(), affine,
-                                   img.get_header()), self._gen_output_filename(fname))
+            nb.save(nb.Nifti1Image(img.get_data(), affine, img.header),
+                    self._gen_output_filename(fname))
 
         return runtime
 
@@ -300,15 +299,15 @@ class TSNR(BaseInterface):
 
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file[0])
-        header = img.get_header().copy()
+        header = img.header.copy()
         vollist = [nb.load(filename) for filename in self.inputs.in_file]
         data = np.concatenate([vol.get_data().reshape(
-            vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
+            vol.shape[:3] + (-1,)) for vol in vollist], axis=3)
         if data.dtype.kind == 'i':
             header.set_data_dtype(np.float32)
             data = data.astype(np.float32)
         if isdefined(self.inputs.regress_poly):
-            timepoints = img.get_shape()[-1]
+            timepoints = img.shape[-1]
             X = np.ones((timepoints, 1))
             for i in range(self.inputs.regress_poly):
                 X = np.hstack((X, legendre(
@@ -319,16 +318,16 @@ class TSNR(BaseInterface):
                                              betas[1:, :, :, :], 0, 3)),
                                   0, 4)
             data = data - datahat
-            img = nb.Nifti1Image(data, img.get_affine(), header)
+            img = nb.Nifti1Image(data, img.affine, header)
             nb.save(img, self._gen_output_file_name('detrended'))
         meanimg = np.mean(data, axis=3)
         stddevimg = np.std(data, axis=3)
         tsnr = meanimg / stddevimg
-        img = nb.Nifti1Image(tsnr, img.get_affine(), header)
+        img = nb.Nifti1Image(tsnr, img.affine, header)
         nb.save(img, self._gen_output_file_name())
-        img = nb.Nifti1Image(meanimg, img.get_affine(), header)
+        img = nb.Nifti1Image(meanimg, img.affine, header)
         nb.save(img, self._gen_output_file_name('mean'))
-        img = nb.Nifti1Image(stddevimg, img.get_affine(), header)
+        img = nb.Nifti1Image(stddevimg, img.affine, header)
         nb.save(img, self._gen_output_file_name('stddev'))
         return runtime
 
@@ -1023,7 +1022,7 @@ class AddNoise(BaseInterface):
 
         result = self.gen_noise(in_data, mask=in_mask, snr_db=snr,
                                 dist=self.inputs.dist, bg_dist=self.inputs.bg_dist)
-        res_im = nb.Nifti1Image(result, in_image.get_affine(), in_image.get_header())
+        res_im = nb.Nifti1Image(result, in_image.affine, in_image.header)
         res_im.to_filename(self._gen_output_filename())
         return runtime
 
@@ -1257,10 +1256,11 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
     if len(in_files) == 1:
         img_data = imgs[0].get_data()
         img_data[img_data > 0.0] = 1.0
-        hdr = imgs[0].get_header().copy()
+        hdr = imgs[0].header.copy()
         hdr['data_type'] = 16
         hdr.set_data_dtype(np.float32)
-        nib.save(nib.Nifti1Image(img_data.astype(np.float32), imgs[0].get_affine(), hdr), out_files[0])
+        nib.save(nib.Nifti1Image(img_data.astype(np.float32), imgs[0].affine,
+                                 hdr), out_files[0])
         return out_files[0]
 
     img_data = np.array([im.get_data() for im in imgs]).astype(np.float32)
@@ -1281,10 +1281,11 @@ def normalize_tpms(in_files, in_mask=None, out_files=[]):
     for i, out_file in enumerate(out_files):
         data = np.ma.masked_equal(img_data[i], 0)
         probmap = data / weights
-        hdr = imgs[i].get_header().copy()
+        hdr = imgs[i].header.copy()
         hdr['data_type'] = 16
         hdr.set_data_dtype('float32')
-        nib.save(nib.Nifti1Image(probmap.astype(np.float32), imgs[i].get_affine(), hdr), out_file)
+        nib.save(nib.Nifti1Image(probmap.astype(np.float32), imgs[i].affine,
+                                 hdr), out_file)
 
     return out_files
 
@@ -1302,7 +1303,7 @@ def split_rois(in_file, mask=None, roishape=None):
         roishape = (10, 10, 1)
 
     im = nb.load(in_file)
-    imshape = im.get_shape()
+    imshape = im.shape
     dshape = imshape[:3]
     nvols = imshape[-1]
     roisize = roishape[0] * roishape[1] * roishape[2]
@@ -1391,9 +1392,9 @@ def merge_rois(in_files, in_idxs, in_ref,
             pass
 
     ref = nb.load(in_ref)
-    aff = ref.get_affine()
-    hdr = ref.get_header().copy()
-    rsh = ref.get_shape()
+    aff = ref.affine
+    hdr = ref.header.copy()
+    rsh = ref.shape
     del ref
     npix = rsh[0] * rsh[1] * rsh[2]
     fcdata = nb.load(in_files[0]).get_data()
