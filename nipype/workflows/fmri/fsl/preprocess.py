@@ -29,7 +29,7 @@ def pickmiddle(files):
     import numpy as np
     middlevol = []
     for f in files:
-        middlevol.append(int(np.ceil(load(f).get_shape()[3] / 2)))
+        middlevol.append(int(np.ceil(load(f).shape[3] / 2)))
     return middlevol
 
 
@@ -39,9 +39,9 @@ def pickvol(filenames, fileidx, which):
     if which.lower() == 'first':
         idx = 0
     elif which.lower() == 'middle':
-        idx = int(np.ceil(load(filenames[fileidx]).get_shape()[3] / 2))
+        idx = int(np.ceil(load(filenames[fileidx]).shape[3] / 2))
     elif which.lower() == 'last':
-        idx = load(filenames[fileidx]).get_shape()[3] - 1
+        idx = load(filenames[fileidx]).shape[3] - 1
     else:
         raise Exception('unknown value for volume selection : %s' % which)
     return idx

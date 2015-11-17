@@ -378,7 +378,7 @@ class MRIConvert(FSCommand):
         outputs = self.output_spec().get()
         outfile = self._get_outfilename()
         if isdefined(self.inputs.split) and self.inputs.split:
-            size = load(self.inputs.in_file).get_shape()
+            size = load(self.inputs.in_file).shape
             if len(size) == 3:
                 tp = 1
             else:
@@ -398,7 +398,7 @@ class MRIConvert(FSCommand):
         if isdefined(self.inputs.out_type):
             if self.inputs.out_type in ['spm', 'analyze']:
                 # generate all outputs
-                size = load(self.inputs.in_file).get_shape()
+                size = load(self.inputs.in_file).shape
                 if len(size) == 3:
                     tp = 1
                 else:

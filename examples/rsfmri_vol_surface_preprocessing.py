@@ -125,8 +125,8 @@ def median(in_files):
             average = data
         else:
             average = average + data
-    median_img = nb.Nifti1Image(average / float(idx + 1),
-                                img.get_affine(), img.get_header())
+    median_img = nb.Nifti1Image(average / float(idx + 1), img.affine,
+                                img.header)
     filename = os.path.join(os.getcwd(), 'median.nii.gz')
     median_img.to_filename(filename)
     return filename
@@ -165,8 +165,7 @@ def bandpass_filter(files, lowpass_freq, highpass_freq, fs):
             filtered_data = data
         else:
             filtered_data = np.real(np.fft.ifftn(np.fft.fftn(data) * F))
-        img_out = nb.Nifti1Image(filtered_data, img.get_affine(),
-                                 img.get_header())
+        img_out = nb.Nifti1Image(filtered_data, img.affine, img.header)
         img_out.to_filename(out_file)
         out_files.append(out_file)
     return list_to_filename(out_files)

@@ -696,7 +696,7 @@ class MCFLIRT(FSLCommand):
         if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
             _, filename = os.path.split(outputs['out_file'])
             matpathname = os.path.join(cwd, filename + '.mat')
-            _, _, _, timepoints = load(self.inputs.in_file).get_shape()
+            _, _, _, timepoints = load(self.inputs.in_file).shape
             outputs['mat_file'] = []
             for t in range(timepoints):
                 outputs['mat_file'].append(os.path.join(matpathname,

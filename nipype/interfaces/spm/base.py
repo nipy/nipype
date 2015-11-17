@@ -46,7 +46,7 @@ def func_is_3d(in_file):
         return func_is_3d(in_file[0])
     else:
         img = load(in_file)
-        shape = img.get_shape()
+        shape = img.shape
         if len(shape) == 3 or (len(shape) == 4 and shape[3] == 1):
             return True
         else:
@@ -74,10 +74,10 @@ def scans_for_fname(fname):
             scans[sno] = '%s,1' % f
         return scans
     img = load(fname)
-    if len(img.get_shape()) == 3:
+    if len(img.shape) == 3:
         return np.array(('%s,1' % fname,), dtype=object)
     else:
-        n_scans = img.get_shape()[3]
+        n_scans = img.shape[3]
         scans = np.zeros((n_scans,), dtype=object)
         for sno in range(n_scans):
             scans[sno] = '%s,%d' % (fname, sno + 1)

@@ -362,10 +362,10 @@ class ArtifactDetect(BaseInterface):
                 nim = funcs.concat_images(images)
 
         # compute global intensity signal
-        (x, y, z, timepoints) = nim.get_shape()
+        (x, y, z, timepoints) = nim.shape
 
         data = nim.get_data()
-        affine = nim.get_affine()
+        affine = nim.affine
         g = np.zeros((timepoints, 1))
         masktype = self.inputs.mask_type
         if masktype == 'spm_global':  # spm_global like calculation
@@ -397,7 +397,7 @@ class ArtifactDetect(BaseInterface):
         elif masktype == 'file':  # uses a mask image to determine intensity
             maskimg = load(self.inputs.mask_file)
             mask = maskimg.get_data()
-            affine = maskimg.get_affine()
+            affine = maskimg.affine
             mask = mask > 0.5
             for t0 in range(timepoints):
                 vol = data[:, :, :, t0]

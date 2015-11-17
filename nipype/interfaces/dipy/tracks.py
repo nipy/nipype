@@ -75,8 +75,8 @@ class TrackDensityMap(BaseInterface):
 
         if isdefined(self.inputs.reference):
             refnii = nb.load(self.inputs.reference)
-            affine = refnii.get_affine()
-            data_dims = refnii.get_shape()[:3]
+            affine = refnii.affine
+            data_dims = refnii.shape[:3]
             kwargs = dict(affine=affine)
         else:
             iflogger.warn(('voxel_dims and data_dims are deprecated'
@@ -103,10 +103,8 @@ class TrackDensityMap(BaseInterface):
 
         iflogger.info(
             ('Track density map saved as {i}, size={d}, '
-             'dimensions={v}').format(
-                i=out_file,
-                d=img.get_shape(),
-                v=img.get_header().get_zooms()))
+             'dimensions={v}').format(i=out_file, d=img.shape,
+                                      v=img.header.get_zooms()))
         return runtime
 
     def _list_outputs(self):

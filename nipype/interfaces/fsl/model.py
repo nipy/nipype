@@ -318,7 +318,7 @@ class Level1Design(BaseInterface):
                                                       self.inputs.contrasts,
                                                       no_bases, do_tempfilter)
             nim = load(func_files[i])
-            (_, _, _, timepoints) = nim.get_shape()
+            (_, _, _, timepoints) = nim.shape
             fsf_txt = fsf_header.substitute(run_num=i,
                                             interscan_interval=self.inputs.interscan_interval,
                                             num_vols=timepoints,

@@ -187,7 +187,7 @@ def cmat(track_file, roi_file, resolution_network_file, matrix_name, matrix_mat_
 
     roi = nb.load(roi_file)
     roiData = roi.get_data()
-    roiVoxelSize = roi.get_header().get_zooms()
+    roiVoxelSize = roi.header.get_zooms()
     (endpoints, endpointsmm) = create_endpoints_array(fib, roiVoxelSize)
 
     # Output endpoint arrays
@@ -706,7 +706,8 @@ class ROIGen(BaseInterface):
                 GMlabelDict['a'] = LUTlabelDict[label][4]
                 labelDict[label] = GMlabelDict
 
-        roi_image = nb.Nifti1Image(niiGM, niiAPARCimg.get_affine(), niiAPARCimg.get_header())
+        roi_image = nb.Nifti1Image(niiGM, niiAPARCimg.affine,
+                                   niiAPARCimg.header)
         iflogger.info('Saving ROI File to {path}'.format(path=roi_file))
         nb.save(roi_image, roi_file)
 

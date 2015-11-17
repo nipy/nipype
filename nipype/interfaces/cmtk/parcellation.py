@@ -263,12 +263,12 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
         out_roi = op.abspath('ROI_%s.nii.gz' % parcellation_name)
 
         # update the header
-        hdr = aseg.get_header()
+        hdr = aseg.header
         hdr2 = hdr.copy()
         hdr2.set_data_dtype(np.uint16)
 
         log.info("Save output image to %s" % out_roi)
-        img = nb.Nifti1Image(rois, aseg.get_affine(), hdr2)
+        img = nb.Nifti1Image(rois, aseg.affine, hdr2)
         nb.save(img, out_roi)
 
     iflogger.info("[ DONE ]")
@@ -294,7 +294,7 @@ def create_roi(subject_id, subjects_dir, fs_dir, parcellation_name, dilation):
         # store volume eg in ROIv_scale33.nii.gz
         out_roi = op.abspath('ROIv_%s.nii.gz' % parcellation_name)
         iflogger.info("Save output image to %s" % out_roi)
-        img = nb.Nifti1Image(rois, aseg.get_affine(), hdr2)
+        img = nb.Nifti1Image(rois, aseg.affine, hdr2)
         nb.save(img, out_roi)
 
         iflogger.info("[ DONE ]")
@@ -437,7 +437,7 @@ def create_wm_mask(subject_id, subjects_dir, fs_dir, parcellation_name):
 
     # output white matter mask. crop and move it afterwards
     wm_out = op.join(fs_dir, 'mri', 'fsmask_1mm.nii.gz')
-    img = nb.Nifti1Image(wmmask, fsmask.get_affine(), fsmask.get_header())
+    img = nb.Nifti1Image(wmmask, fsmask.affine, fsmask.header)
     iflogger.info("Save white matter mask: %s" % wm_out)
     nb.save(img, wm_out)
 

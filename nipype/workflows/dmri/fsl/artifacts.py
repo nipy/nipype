@@ -899,7 +899,7 @@ def _xfm_jacobian(in_xfm):
 def _get_zoom(in_file, enc_dir):
     import nibabel as nb
 
-    zooms = nb.load(in_file).get_header().get_zooms()
+    zooms = nb.load(in_file).header.get_zooms()
 
     if 'y' in enc_dir:
         return zooms[1]

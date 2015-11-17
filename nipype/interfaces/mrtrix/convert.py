@@ -184,7 +184,7 @@ class MRTrix2TrackVis(BaseInterface):
         dx, dy, dz = get_data_dims(self.inputs.image_file)
         vx, vy, vz = get_vox_dims(self.inputs.image_file)
         image_file = nb.load(self.inputs.image_file)
-        affine = image_file.get_affine()
+        affine = image_file.affine
         out_filename = op.abspath(self.inputs.out_filename)
 
         # Reads MRTrix tracks
@@ -202,7 +202,7 @@ class MRTrix2TrackVis(BaseInterface):
             xfm = np.genfromtxt(self.inputs.matrix_file)
             iflogger.info(xfm)
             registration_image_file = nb.load(self.inputs.registration_image_file)
-            reg_affine = registration_image_file.get_affine()
+            reg_affine = registration_image_file.affine
             r_dx, r_dy, r_dz = get_data_dims(self.inputs.registration_image_file)
             r_vx, r_vy, r_vz = get_vox_dims(self.inputs.registration_image_file)
             iflogger.info('Using affine from registration image file {r}'.format(r=self.inputs.registration_image_file))
