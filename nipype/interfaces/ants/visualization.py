@@ -5,13 +5,10 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-import numpy as np
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec
-from ..base import (TraitedSpec, File, traits, InputMultiPath)
-from ..traits_extension import isdefined
-from ...utils.filemanip import split_filename
+from ..base import TraitedSpec, File, traits
 
 
 class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
@@ -22,7 +19,7 @@ class ConvertScalarImageToRGBInputSpec(ANTSCommandInputSpec):
                        desc='Main input is a 3-D grayscale image.', mandatory=True,
                        position=1)
     output_image = traits.Str('rgb.nii.gz', argstr='%s', usedefault=True,
-                              desc=('rgb output image'), position=2)
+                              desc='rgb output image', position=2)
     mask_image = File('none', argstr='%s', exists=True,
                       desc='mask image', position=3, usedefault=True)
     colormap = traits.Str(argstr='%s', usedefault=True,
@@ -116,10 +113,8 @@ class CreateTiledMosaicInputSpec(ANTSCommandInputSpec):
     slices = traits.Str(argstr='-s %s',
                         desc=('Number of slices to increment Slice1xSlice2xSlice3'
                               '[numberOfSlicesToIncrement,<minSlice=0>,<maxSlice=lastSlice>]'))
-    flip_slice = traits.Str(argstr='-f %s',
-                            desc=('flipXxflipY'))
-    permute_axes = traits.Bool(argstr='-g', desc='doPermute'
-                               )
+    flip_slice = traits.Str(argstr='-f %s', desc='flipXxflipY')
+    permute_axes = traits.Bool(argstr='-g', desc='doPermute')
 
 
 class CreateTiledMosaicOutputSpec(TraitedSpec):
@@ -146,7 +141,8 @@ class CreateTiledMosaic(ANTSCommand):
     >>> mosaic_slicer.inputs.pad_or_crop = '[ -15x -50 , -15x -30 ,0]'
     >>> mosaic_slicer.inputs.slices = '[2 ,100 ,160]'
     >>> mosaic_slicer.cmdline
-    'CreateTiledMosaic -a 0.50 -d 2 -i T1.nii.gz -x mask.nii.gz -o output.png -p [ -15x -50 , -15x -30 ,0] -r rgb.nii.gz -s [2 ,100 ,160]'
+    'CreateTiledMosaic -a 0.50 -d 2 -i T1.nii.gz -x mask.nii.gz -o output.png -p [ -15x -50 , -15x -30 ,0] \
+-r rgb.nii.gz -s [2 ,100 ,160]'
     """
 
     _cmd = 'CreateTiledMosaic'
