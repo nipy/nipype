@@ -243,17 +243,15 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
                                 'Gaussian',
                                 'BSpline',
                                 argstr='%s', usedefault=True)
-    # TODO: Implement these options for multilabel, gaussian, and bspline
-    # interpolation_sigma = traits.Float(requires=['interpolation'])
-    # interpolation_alpha = traits.Float(requires=['interpolation_sigma'])
-    # bspline_order = traits.Int(3, requires=['interpolation'])
+    interpolation_parameters = traits.Either(traits.Tuple(traits.Int()),  # BSpline (order)
+                                             traits.Tuple(traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
+                                                          traits.Float())
+                                             )
     transforms = InputMultiPath(
         File(exists=True), argstr='%s', mandatory=True, desc='transform files')
     invert_transform_flags = InputMultiPath(traits.Bool())
-    default_value = traits.Float(
-        0.0, argstr='--default-value %g', usedefault=True)
-    # TODO: Change to boolean
-    print_out_composite_warp_file = traits.Enum(0, 1, requires=["output_image"],
+    default_value = traits.Float(0.0, argstr='--default-value %g', usedefault=True)
+    print_out_composite_warp_file = traits.Bool(False, requires=["output_image"],
                                                 desc='output a composite warp file instead of a transformed image')
 
 
@@ -280,7 +278,23 @@ class ApplyTransforms(ANTSCommand):
     >>> at.inputs.invert_transform_flags = [False, False]
     >>> at.cmdline
     'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation Linear \
---output deformed_moving1.nii --reference-image fixed1.nii --transform [trans.mat,0] --transform [ants_Warp.nii.gz,0]'
+--output deformed_moving1.nii --reference-image fixed1.nii --transform [ trans.mat, 0 ] \
+--transform [ ants_Warp.nii.gz, 0 ]'
+
+    >>> at1 = ApplyTransforms()
+    >>> at1.inputs.dimension = 3
+    >>> at1.inputs.input_image = 'moving1.nii'
+    >>> at1.inputs.reference_image = 'fixed1.nii'
+    >>> at1.inputs.output_image = 'deformed_moving1.nii'
+    >>> at1.inputs.interpolation = 'BSpline'
+    >>> at1.inputs.interpolation_parameters = (5,)
+    >>> at1.inputs.default_value = 0
+    >>> at1.inputs.transforms = ['trans.mat', 'ants_Warp.nii.gz']
+    >>> at1.inputs.invert_transform_flags = [False, False]
+    >>> at1.cmdline
+    'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation BSpline[ 5 ] \
+--output deformed_moving1.nii --reference-image fixed1.nii --transform [ trans.mat, 0 ] \
+--transform [ ants_Warp.nii.gz, 0 ]'
 
 
     """
@@ -304,7 +318,7 @@ class ApplyTransforms(ANTSCommand):
                 if len(self.inputs.transforms) == len(self.inputs.invert_transform_flags):
                     invert_code = 1 if self.inputs.invert_transform_flags[
                         ii] else 0
-                    retval.append("--transform [%s,%d]" %
+                    retval.append("--transform [ %s, %d ]" %
                                   (self.inputs.transforms[ii], invert_code))
                 else:
                     raise Exception(("ERROR: The useInverse list must have the same number "
@@ -315,7 +329,8 @@ class ApplyTransforms(ANTSCommand):
 
     def _get_output_warped_filename(self):
         if isdefined(self.inputs.print_out_composite_warp_file):
-            return "--output [%s,%s]" % (self._gen_filename("output_image"), self.inputs.print_out_composite_warp_file)
+            return "--output [ %s, %d ]" % (self._gen_filename("output_image"),
+                                            int(self.inputs.print_out_composite_warp_file))
         else:
             return "--output %s" % (self._gen_filename("output_image"))
 
@@ -325,8 +340,13 @@ class ApplyTransforms(ANTSCommand):
         elif opt == "transforms":
             return self._get_transform_filenames()
         elif opt == 'interpolation':
-            # TODO: handle multilabel, gaussian, and bspline options
-            return '--interpolation %s' % self.inputs.interpolation
+            if self.inputs.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
+                    isdefined(self.inputs.interpolation_parameters):
+                return '--interpolation %s[ %s ]' % (self.inputs.interpolation,
+                                                     ', '.join([str(param)
+                                                                for param in self.inputs.interpolation_parameters]))
+            else:
+                return '--interpolation %s' % self.inputs.interpolation
         return super(ApplyTransforms, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
@@ -381,7 +401,7 @@ class ApplyTransformsToPoints(ANTSCommand):
     >>> at.inputs.invert_transform_flags = [False, False]
     >>> at.cmdline
     'antsApplyTransformsToPoints --dimensionality 3 --input moving.csv --output moving_transformed.csv \
---transform [trans.mat,0] --transform [ants_Warp.nii.gz,0]'
+--transform [ trans.mat, 0 ] --transform [ ants_Warp.nii.gz, 0 ]'
 
 
     """
@@ -396,7 +416,7 @@ class ApplyTransformsToPoints(ANTSCommand):
                 if len(self.inputs.transforms) == len(self.inputs.invert_transform_flags):
                     invert_code = 1 if self.inputs.invert_transform_flags[
                         ii] else 0
-                    retval.append("--transform [%s,%d]" %
+                    retval.append("--transform [ %s, %d ]" %
                                   (self.inputs.transforms[ii], invert_code))
                 else:
                     raise Exception(("ERROR: The useInverse list must have the same number "

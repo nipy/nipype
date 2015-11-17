@@ -25,6 +25,7 @@ def test_ApplyTransforms_inputs():
     interpolation=dict(argstr='%s',
     usedefault=True,
     ),
+    interpolation_parameters=dict(),
     invert_transform_flags=dict(),
     num_threads=dict(nohash=True,
     usedefault=True,

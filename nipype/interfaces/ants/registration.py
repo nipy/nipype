@@ -289,7 +289,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         argstr='%s', usedefault=True)
     interpolation_parameters = traits.Either(traits.Tuple(traits.Int()),  # BSpline (order)
                                              traits.Tuple(traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
-                                                          traits.Float)
+                                                          traits.Float())
                                              )
 
     write_composite_transform = traits.Bool(
