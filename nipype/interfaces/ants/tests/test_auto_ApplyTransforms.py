@@ -14,6 +14,8 @@ def test_ApplyTransforms_inputs():
     environ=dict(nohash=True,
     usedefault=True,
     ),
+    float=dict(argstr='--float %d',
+    ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
@@ -45,6 +47,9 @@ def test_ApplyTransforms_inputs():
     ),
     transforms=dict(argstr='%s',
     mandatory=True,
+    ),
+    verbose=dict(argstr='--verbose %d',
+    usedefault=True,
     ),
     )
     inputs = ApplyTransforms.input_spec()
