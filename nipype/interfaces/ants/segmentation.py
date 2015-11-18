@@ -10,8 +10,7 @@
 
 from builtins import range
 
-from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath,
-                    isdefined)
+from ..base import TraitedSpec, File, traits, InputMultiPath, OutputMultiPath, isdefined
 from ...utils.filemanip import split_filename
 from .base import ANTSCommand, ANTSCommandInputSpec
 import os

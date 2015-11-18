@@ -9,8 +9,7 @@
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec
-from ..base import (TraitedSpec, File, traits,
-                    isdefined, InputMultiPath)
+from ..base import TraitedSpec, File, traits, isdefined, InputMultiPath
 from ...utils.filemanip import split_filename
 
 

@@ -9,7 +9,7 @@
 
 from builtins import range
 
-from ..base import (TraitedSpec, File, traits, InputMultiPath)
+from ..base import TraitedSpec, File, traits, InputMultiPath
 from .base import ANTSCommand, ANTSCommandInputSpec
 import os
 from ..traits_extension import isdefined
