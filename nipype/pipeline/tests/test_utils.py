@@ -2,6 +2,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Tests for the engine utils module
 """
+
+from builtins import range
 import os
 from copy import deepcopy
 from tempfile import mkdtemp
@@ -13,6 +15,7 @@ import nipype.interfaces.base as nib
 import nipype.interfaces.utility as niu
 from ... import config
 from ..utils import merge_dict, clean_working_directory
+
 
 def test_identitynode_removal():
 
@@ -48,6 +51,7 @@ def test_clean_working_directory():
     class OutputSpec(nib.TraitedSpec):
         files = nib.traits.List(nib.File)
         others = nib.File()
+
     class InputSpec(nib.TraitedSpec):
         infile = nib.File()
     outputs = OutputSpec()
@@ -86,6 +90,7 @@ def test_clean_working_directory():
     config.set_default_config()
     rmtree(wd)
 
+
 def test_outputs_removal():
 
     def test_function(arg1):
@@ -119,8 +124,8 @@ def test_outputs_removal():
     n1.needed_outputs = ['file2']
     n1.run()
     yield assert_false, os.path.exists(os.path.join(out_dir,
-                                                   n1.name,
-                                                   'file1.txt'))
+                                                    n1.name,
+                                                    'file1.txt'))
     yield assert_true, os.path.exists(os.path.join(out_dir,
                                                    n1.name,
                                                    'file2.txt'))
@@ -130,8 +135,10 @@ def test_outputs_removal():
 class InputSpec(nib.TraitedSpec):
     in_file = nib.File(exists=True, copyfile=True)
 
+
 class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
+
 
 class TestInterface(nib.BaseInterface):
     input_spec = InputSpec
@@ -145,6 +152,7 @@ class TestInterface(nib.BaseInterface):
         outputs = self._outputs().get()
         outputs['output1'] = [1]
         return outputs
+
 
 def test_inputs_removal():
     out_dir = mkdtemp()
@@ -168,8 +176,8 @@ def test_inputs_removal():
     n1.overwrite = True
     n1.run()
     yield assert_false, os.path.exists(os.path.join(out_dir,
-                                                   n1.name,
-                                                   'file1.txt'))
+                                                    n1.name,
+                                                    'file1.txt'))
     rmtree(out_dir)
 
 
@@ -186,7 +194,7 @@ def test_outputs_removal_wf():
         for filename in files:
             with open(filename, 'wt') as fp:
                 fp.write('%d' % arg1)
-        return file1, file2, os.path.join(os.getcwd(),"subdir")
+        return file1, file2, os.path.join(os.getcwd(), "subdir")
 
     def test_function2(in_file, arg):
         import os
@@ -206,23 +214,23 @@ def test_outputs_removal_wf():
 
     out_dir = mkdtemp()
 
-    for plugin in ('Linear',):#, 'MultiProc'):
+    for plugin in ('Linear',):  # , 'MultiProc'):
         n1 = pe.Node(niu.Function(input_names=['arg1'],
-                              output_names=['out_file1', 'out_file2', 'dir'],
-                              function=test_function),
-                 name='n1')
+                                  output_names=['out_file1', 'out_file2', 'dir'],
+                                  function=test_function),
+                     name='n1')
         n1.inputs.arg1 = 1
 
         n2 = pe.Node(niu.Function(input_names=['in_file', 'arg'],
-                              output_names=['out_file1', 'out_file2', 'n'],
-                              function=test_function2),
-                 name='n2')
+                                  output_names=['out_file1', 'out_file2', 'n'],
+                                  function=test_function2),
+                     name='n2')
         n2.inputs.arg = 2
 
         n3 = pe.Node(niu.Function(input_names=['arg'],
-                              output_names=['n'],
-                              function=test_function3),
-                 name='n3')
+                                  output_names=['n'],
+                                  function=test_function3),
+                     name='n3')
 
         wf = pe.Workflow(name="node_rem_test" + plugin, base_dir=out_dir)
         wf.connect(n1, "out_file1", n2, "in_file")
@@ -236,14 +244,14 @@ def test_outputs_removal_wf():
             wf.run(plugin=plugin)
 
             yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                            wf.name,
-                                                            n1.name,
-                                                            'file2.txt')) != remove_unnecessary_outputs
+                                                           wf.name,
+                                                           n1.name,
+                                                           'file2.txt')) != remove_unnecessary_outputs
             yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                            wf.name,
-                                                            n1.name,
-                                                            "subdir",
-                                                            'file1.txt')) != remove_unnecessary_outputs
+                                                           wf.name,
+                                                           n1.name,
+                                                           "subdir",
+                                                           'file1.txt')) != remove_unnecessary_outputs
             yield assert_true, os.path.exists(os.path.join(wf.base_dir,
                                                            wf.name,
                                                            n1.name,
@@ -279,37 +287,40 @@ def test_outputs_removal_wf():
                 rmtree(os.path.join(wf.base_dir, wf.name))
                 wf.run(plugin=plugin)
                 yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                                   wf.name,
-                                                                   n2.name,
-                                                                   'file1.txt'))
+                                                               wf.name,
+                                                               n2.name,
+                                                               'file1.txt'))
                 yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                                   wf.name,
-                                                                   n2.name,
-                                                                   'file2.txt')) != remove_unnecessary_outputs
+                                                               wf.name,
+                                                               n2.name,
+                                                               'file2.txt')) != remove_unnecessary_outputs
                 yield assert_true, os.path.exists(os.path.join(wf.base_dir,
-                                                                   wf.name,
-                                                                   n4.name,
-                                                                   'file1.txt')) == keep_inputs
+                                                               wf.name,
+                                                               n4.name,
+                                                               'file1.txt')) == keep_inputs
 
     rmtree(out_dir)
+
 
 def fwhm(fwhm):
     return fwhm
 
+
 def create_wf(name):
     pipe = pe.Workflow(name=name)
     process = pe.Node(niu.Function(input_names=['fwhm'],
-                            output_names=['fwhm'],
-                            function=fwhm),
-                   name='proc')
-    process.iterables = ('fwhm', [0])
-    process2 = pe.Node(niu.Function(input_names=['fwhm'],
                                    output_names=['fwhm'],
                                    function=fwhm),
-                      name='proc2')
+                      name='proc')
+    process.iterables = ('fwhm', [0])
+    process2 = pe.Node(niu.Function(input_names=['fwhm'],
+                                    output_names=['fwhm'],
+                                    function=fwhm),
+                       name='proc2')
     process2.iterables = ('fwhm', [0])
     pipe.connect(process, 'fwhm', process2, 'fwhm')
     return pipe
+
 
 def test_multi_disconnected_iterable():
     out_dir = mkdtemp()

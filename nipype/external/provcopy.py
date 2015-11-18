@@ -9,15 +9,16 @@ PROV-DM: http://www.w3.org/TR/prov-dm/
 @author: Trung Dong Huynh <trungdong@donggiang.com>
 @copyright: University of Southampton 2013
 '''
+from __future__ import absolute_import
+from builtins import zip
+from builtins import object
 
 import logging
 import datetime
 import json
-import re
 import dateutil.parser
 import collections
 from collections import defaultdict
-import six
 
 try:
     from rdflib.term import URIRef, BNode
@@ -34,6 +35,8 @@ try:
 except ImportError:
     from ordereddict import OrderedDict
 logger = logging.getLogger(__name__)
+
+from ..external.six import string_types
 
 #  # PROV record constants - PROV-DM LC
 #  C1. Entities/Activities
@@ -87,25 +90,25 @@ PROV_RECORD_TYPES = (
 )
 
 PROV_N_MAP = {
-    PROV_REC_ENTITY:               u'entity',
-    PROV_REC_ACTIVITY:             u'activity',
-    PROV_REC_GENERATION:           u'wasGeneratedBy',
-    PROV_REC_USAGE:                u'used',
-    PROV_REC_COMMUNICATION:        u'wasInformedBy',
-    PROV_REC_START:                u'wasStartedBy',
-    PROV_REC_END:                  u'wasEndedBy',
-    PROV_REC_INVALIDATION:         u'wasInvalidatedBy',
-    PROV_REC_DERIVATION:           u'wasDerivedFrom',
-    PROV_REC_AGENT:                u'agent',
-    PROV_REC_ATTRIBUTION:          u'wasAttributedTo',
-    PROV_REC_ASSOCIATION:          u'wasAssociatedWith',
-    PROV_REC_DELEGATION:           u'actedOnBehalfOf',
-    PROV_REC_INFLUENCE:            u'wasInfluencedBy',
-    PROV_REC_ALTERNATE:            u'alternateOf',
-    PROV_REC_SPECIALIZATION:       u'specializationOf',
-    PROV_REC_MENTION:              u'mentionOf',
-    PROV_REC_MEMBERSHIP:           u'hadMember',
-    PROV_REC_BUNDLE:               u'bundle',
+    PROV_REC_ENTITY: u'entity',
+    PROV_REC_ACTIVITY: u'activity',
+    PROV_REC_GENERATION: u'wasGeneratedBy',
+    PROV_REC_USAGE: u'used',
+    PROV_REC_COMMUNICATION: u'wasInformedBy',
+    PROV_REC_START: u'wasStartedBy',
+    PROV_REC_END: u'wasEndedBy',
+    PROV_REC_INVALIDATION: u'wasInvalidatedBy',
+    PROV_REC_DERIVATION: u'wasDerivedFrom',
+    PROV_REC_AGENT: u'agent',
+    PROV_REC_ATTRIBUTION: u'wasAttributedTo',
+    PROV_REC_ASSOCIATION: u'wasAssociatedWith',
+    PROV_REC_DELEGATION: u'actedOnBehalfOf',
+    PROV_REC_INFLUENCE: u'wasInfluencedBy',
+    PROV_REC_ALTERNATE: u'alternateOf',
+    PROV_REC_SPECIALIZATION: u'specializationOf',
+    PROV_REC_MENTION: u'mentionOf',
+    PROV_REC_MEMBERSHIP: u'hadMember',
+    PROV_REC_BUNDLE: u'bundle',
 }
 
 #  # Identifiers for PROV's attributes
@@ -177,18 +180,19 @@ PROV_ATTRIBUTES_ID_MAP = dict((attribute, prov_id) for (prov_id, attribute) in P
 
 
 # Converting an attribute to the normal form for comparison purposes
-_normalise_attributes = lambda attr: (unicode(attr[0]), unicode(attr[1]))
+_normalise_attributes = lambda attr: (str(attr[0]), str(attr[1]))
 
 
 #  Datatypes
 attr2rdf = lambda attr: PROV[PROV_ID_ATTRIBUTES_MAP[attr].split('prov:')[1]].rdf_representation()
+
 
 def _parse_xsd_dateTime(s):
     return dateutil.parser.parse(s)
 
 
 def _ensure_datetime(time):
-    if isinstance(time, six.string_types):
+    if isinstance(time, string_types):
         return _parse_xsd_dateTime(time)
     else:
         return time
@@ -212,14 +216,14 @@ def parse_datatype(value, datatype):
         return DATATYPE_PARSERS[datatype](value)
     else:
         #  No parser found for the given data type
-        raise Exception(u'No parser found for the data type <%s>' % unicode(datatype))
+        raise Exception(u'No parser found for the data type <%s>' % str(datatype))
 
 
 # Mappings for XSD datatypes to Python standard types
 XSD_DATATYPE_PARSERS = {
-    u"xsd:string": unicode,
+    u"xsd:string": str,
     u"xsd:double": float,
-    u"xsd:long": long,
+    u"xsd:long": int,
     u"xsd:int": int,
     u"xsd:boolean": bool,
     u"xsd:dateTime": parse_xsd_dateTime,
@@ -228,27 +232,27 @@ XSD_DATATYPE_PARSERS = {
 
 def parse_xsd_types(value, datatype):
     # if the datatype is a QName, convert it to a Unicode string
-    datatype = unicode(datatype)
+    datatype = str(datatype)
     return XSD_DATATYPE_PARSERS[datatype](value) if datatype in XSD_DATATYPE_PARSERS else None
 
 
 def _ensure_multiline_string_triple_quoted(s):
-    format_str = u'"""%s"""' if isinstance(s, six.string_types) and '\n' in s else u'"%s"'
+    format_str = u'"""%s"""' if isinstance(s, string_types) and '\n' in s else u'"%s"'
     return format_str % s
 
 
 def encoding_PROV_N_value(value):
-    if isinstance(value, six.string_types):
+    if isinstance(value, string_types):
         return _ensure_multiline_string_triple_quoted(value)
     elif isinstance(value, datetime.datetime):
         return value.isoformat()
     elif isinstance(value, float):
         return u'"%f" %%%% xsd:float' % value
     else:
-        return unicode(value)
+        return str(value)
 
 
-class AnonymousIDGenerator():
+class AnonymousIDGenerator(object):
     def __init__(self):
         self._cache = {}
         self._count = 0
@@ -277,7 +281,7 @@ class Literal(object):
         return self.provn_representation()
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
     def __eq__(self, other):
         return self._value == other._value and self._datatype == other._datatype and self._langtag == other._langtag if isinstance(other, Literal) else False
@@ -300,21 +304,20 @@ class Literal(object):
     def provn_representation(self):
         if self._langtag:
             #  a language tag can only go with prov:InternationalizedString
-            return u'%s@%s' % (_ensure_multiline_string_triple_quoted(self._value), unicode(self._langtag))
+            return u'%s@%s' % (_ensure_multiline_string_triple_quoted(self._value), str(self._langtag))
         else:
-            return u'%s %%%% %s' % (_ensure_multiline_string_triple_quoted(self._value), unicode(self._datatype))
+            return u'%s %%%% %s' % (_ensure_multiline_string_triple_quoted(self._value), str(self._datatype))
 
     def json_representation(self):
         if self._langtag:
             #  a language tag can only go with prov:InternationalizedString
-            return {'$': unicode(self._value), 'lang': self._langtag}
+            return {'$': str(self._value), 'lang': self._langtag}
         else:
             if isinstance(self._datatype, QName):
-                return {'$': unicode(self._value), 'type': unicode(self._datatype)}
+                return {'$': str(self._value), 'type': str(self._datatype)}
             else:
                 #  Assuming it is a valid identifier
-                return {'$': unicode(self._value), 'type': self._datatype.get_uri()}
-
+                return {'$': str(self._value), 'type': self._datatype.get_uri()}
 
     def rdf_representation(self):
         if self._langtag:
@@ -323,9 +326,10 @@ class Literal(object):
         else:
             return RDFLiteral(self._value, datatype=self._datatype.get_uri())
 
+
 class Identifier(object):
     def __init__(self, uri):
-        self._uri = unicode(uri)  # Ensure this is a unicode string
+        self._uri = str(uri)  # Ensure this is a unicode string
 
     def get_uri(self):
         return self._uri
@@ -334,7 +338,7 @@ class Identifier(object):
         return self._uri
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
     def __eq__(self, other):
         return self.get_uri() == other.get_uri() if isinstance(other, Identifier) else False
@@ -350,6 +354,7 @@ class Identifier(object):
 
     def rdf_representation(self):
         return URIRef(self.get_uri())
+
 
 class QName(Identifier):
     def __init__(self, namespace, localpart):
@@ -370,7 +375,7 @@ class QName(Identifier):
         return self._str
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
     def provn_representation(self):
         return u"'%s'" % self._str
@@ -392,11 +397,11 @@ class Namespace(object):
         return self._uri
 
     def contains(self, identifier):
-        uri = identifier if isinstance(identifier, (str, unicode)) else (identifier.get_uri() if isinstance(identifier, Identifier) else None)
+        uri = identifier if isinstance(identifier, (str, string_types)) else (identifier.get_uri() if isinstance(identifier, Identifier) else None)
         return uri.startswith(self._uri) if uri else False
 
     def qname(self, identifier):
-        uri = identifier if isinstance(identifier, (str, unicode)) else (identifier.get_uri() if isinstance(identifier, Identifier) else None)
+        uri = identifier if isinstance(identifier, (str, string_types)) else (identifier.get_uri() if isinstance(identifier, Identifier) else None)
         if uri and uri.startswith(self._uri):
             return QName(self, uri[len(self._uri):])
         else:
@@ -441,7 +446,7 @@ class ProvExceptionNotValidAttribute(ProvException):
         self.record_type = record_type
         self.attribute = attribute
         self.attribute_types = attribute_types
-        self.args += (PROV_N_MAP[record_type], unicode(attribute), attribute_types)
+        self.args += (PROV_N_MAP[record_type], str(attribute), attribute_types)
 
     def __str__(self):
         return 'Invalid attribute value: %s. %s expected' % (self.attribute, self.attribute_types)
@@ -537,8 +542,8 @@ class ProvRecord(object):
         if isinstance(literal, URIRef):
             return literal
 
-        if isinstance(literal, six.string_types):
-            return unicode(literal)
+        if isinstance(literal, string_types):
+            return str(literal)
 
         if isinstance(literal, Literal) and literal.has_no_langtag():
             # try convert generic Literal object to Python standard type if possible
@@ -553,7 +558,7 @@ class ProvRecord(object):
     def parse_extra_attributes(self, extra_attributes):
         if isinstance(extra_attributes, dict):
             #  Converting the dictionary into a list of tuples (i.e. attribute-value pairs)
-            extra_attributes = extra_attributes.items()
+            extra_attributes = list(extra_attributes.items())
         attr_set = set((self._bundle.valid_identifier(attribute),
                         self._auto_literal_conversion(value))
                        for attribute, value in extra_attributes)
@@ -572,7 +577,7 @@ class ProvRecord(object):
             if self._attributes is None:
                 self._attributes = attributes
             else:
-                self._attributes.update(dict((k, v) for k, v in attributes.iteritems() if v is not None))
+                self._attributes.update(dict((k, v) for k, v in attributes.items() if v is not None))
         self.add_extra_attributes(extra_attributes)
 
     def get_attributes(self):
@@ -620,7 +625,7 @@ class ProvRecord(object):
             attribute_types = (attribute_types,)
 
         # attempt to find an existing record having the same identifier
-        if any(map(lambda x: issubclass(x, ProvRecord), attribute_types)):
+        if any([issubclass(x, ProvRecord) for x in attribute_types]):
             record = self._parse_record(attribute, attribute_types)
             if record:
                 return record
@@ -679,7 +684,7 @@ class ProvRecord(object):
         if self._attributes and other._attributes:
             if len(self._attributes) != len(other._attributes):
                 return False
-            for attr, value_a in self._attributes.items():
+            for attr, value_a in list(self._attributes.items()):
                 value_b = other._attributes[attr]
                 if isinstance(value_a, ProvRecord) and value_a._identifier:
                     if not (value_a._identifier == value_b._identifier):
@@ -687,12 +692,12 @@ class ProvRecord(object):
                 elif not (value_a == value_b):
                     return False
         elif other._attributes and not self._attributes:
-            other_attrs = [(key, value) for key, value in other._attributes.items() if value is not None]
+            other_attrs = [(key, value) for key, value in list(other._attributes.items()) if value is not None]
             if other_attrs:
                 #  the other's attributes set is not empty.
                 return False
         elif self._attributes and not other._attributes:
-            my_attrs = [(key, value) for key, value in self._attributes.items() if value is not None]
+            my_attrs = [(key, value) for key, value in list(self._attributes.items()) if value is not None]
             if my_attrs:
                 #  my attributes set is not empty.
                 return False
@@ -713,23 +718,23 @@ class ProvRecord(object):
         return self.get_provn()
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return str(self).encode('utf-8')
 
     def get_provn(self, _indent_level=0):
         items = []
         if self._identifier:
-            items.append(unicode(self._identifier))
+            items.append(str(self._identifier))
         if self._attributes:
-            for (attr, value) in self._attributes.items():
+            for (attr, value) in list(self._attributes.items()):
                 if value is None:
                     items.append(u'-')
                 else:
                     if isinstance(value, ProvRecord):
                         record_id = value.get_identifier()
-                        items.append(unicode(record_id))
+                        items.append(str(record_id))
                     else:
                         #  Assuming this is a datetime or QName value
-                        items.append(value.isoformat() if isinstance(value, datetime.datetime) else unicode(value))
+                        items.append(value.isoformat() if isinstance(value, datetime.datetime) else str(value))
 
         if self._extra_attributes:
             extra = []
@@ -739,7 +744,7 @@ class ProvRecord(object):
                     provn_represenation = value.provn_representation()
                 except:
                     provn_represenation = encoding_PROV_N_value(value)
-                extra.append(u'%s=%s' % (unicode(attr), provn_represenation))
+                extra.append(u'%s=%s' % (str(attr), provn_represenation))
             if extra:
                 items.append(u'[%s]' % u', '.join(extra))
         prov_n = u'%s(%s)' % (PROV_N_MAP[self.get_type()], u', '.join(items))
@@ -752,7 +757,7 @@ class ProvRecord(object):
             # this method need a subject as relations may not have identifiers
             return graph
         if self._attributes:
-            for (attr, value) in self._attributes.items():
+            for (attr, value) in list(self._attributes.items()):
                 if value is None:
                     continue
                 pred = attr2rdf(attr)
@@ -767,7 +772,7 @@ class ProvRecord(object):
                 try:
                     # try if there is a RDF representation defined
                     obj = value.rdf_representation()
-                except Exception, e:
+                except Exception as e:
                     obj = RDFLiteral(value)
                 if attr == PROV['location']:
                     pred = PROV['atLocation'].rdf_representation()
@@ -823,8 +828,8 @@ class ProvRelation(ProvRecord):
             graph = Graph()
         pred = PROV[PROV_N_MAP[self.get_type()]].rdf_representation()
         items = []
-        subj=None
-        obj=None
+        subj = None
+        obj = None
         for idx, (attr, value) in enumerate(self._attributes.items()):
             if idx == 0:
                 subj = value.get_identifier().rdf_representation()
@@ -870,12 +875,14 @@ class ProvRelation(ProvRecord):
 
 #  ## Component 1: Entities and Activities
 
+
 class ProvEntity(ProvElement):
     def get_type(self):
         return PROV_REC_ENTITY
 
     def get_prov_type(self):
         return PROV['Entity']
+
 
 class ProvActivity(ProvElement):
     def get_type(self):
@@ -1207,13 +1214,13 @@ class ProvMention(ProvSpecialization):
         specificEntity = self.required_attribute(attributes, PROV_ATTR_SPECIFIC_ENTITY, (ProvEntity, ProvAgent))
         generalEntity = self.required_attribute(attributes, PROV_ATTR_GENERAL_ENTITY, Identifier)
         bundle = self.required_attribute(attributes, PROV_ATTR_BUNDLE, Identifier)
-        #=======================================================================
+        # =======================================================================
         #  # This is disabled so that mentionOf can refer to bundle that is not defined in the same place
         #  bundle = self.required_attribute(attributes, PROV_ATTR_BUNDLE, ProvBundle)
         #  # Check if generalEntity is in the bundle
         #  if generalEntity.get_bundle() is not bundle:
         #    raise ProvExceptionContraint(PROV_REC_MENTION, generalEntity, bundle, 'The generalEntity must belong to the bundle')
-        #=======================================================================
+        # =======================================================================
 
         attributes = OrderedDict()
         attributes[PROV_ATTR_SPECIFIC_ENTITY] = specificEntity
@@ -1243,24 +1250,24 @@ class ProvMembership(ProvRelation):
 
 #  Class mappings from PROV record type
 PROV_REC_CLS = {
-    PROV_REC_ENTITY                 : ProvEntity,
-    PROV_REC_ACTIVITY               : ProvActivity,
-    PROV_REC_GENERATION             : ProvGeneration,
-    PROV_REC_USAGE                  : ProvUsage,
-    PROV_REC_COMMUNICATION          : ProvCommunication,
-    PROV_REC_START                  : ProvStart,
-    PROV_REC_END                    : ProvEnd,
-    PROV_REC_INVALIDATION           : ProvInvalidation,
-    PROV_REC_DERIVATION             : ProvDerivation,
-    PROV_REC_AGENT                  : ProvAgent,
-    PROV_REC_ATTRIBUTION            : ProvAttribution,
-    PROV_REC_ASSOCIATION            : ProvAssociation,
-    PROV_REC_DELEGATION             : ProvDelegation,
-    PROV_REC_INFLUENCE              : ProvInfluence,
-    PROV_REC_SPECIALIZATION         : ProvSpecialization,
-    PROV_REC_ALTERNATE              : ProvAlternate,
-    PROV_REC_MENTION                : ProvMention,
-    PROV_REC_MEMBERSHIP             : ProvMembership,
+    PROV_REC_ENTITY: ProvEntity,
+    PROV_REC_ACTIVITY: ProvActivity,
+    PROV_REC_GENERATION: ProvGeneration,
+    PROV_REC_USAGE: ProvUsage,
+    PROV_REC_COMMUNICATION: ProvCommunication,
+    PROV_REC_START: ProvStart,
+    PROV_REC_END: ProvEnd,
+    PROV_REC_INVALIDATION: ProvInvalidation,
+    PROV_REC_DERIVATION: ProvDerivation,
+    PROV_REC_AGENT: ProvAgent,
+    PROV_REC_ATTRIBUTION: ProvAttribution,
+    PROV_REC_ASSOCIATION: ProvAssociation,
+    PROV_REC_DELEGATION: ProvDelegation,
+    PROV_REC_INFLUENCE: ProvInfluence,
+    PROV_REC_SPECIALIZATION: ProvSpecialization,
+    PROV_REC_ALTERNATE: ProvAlternate,
+    PROV_REC_MENTION: ProvMention,
+    PROV_REC_MEMBERSHIP: ProvMembership,
 }
 
 
@@ -1283,13 +1290,13 @@ class NamespaceManager(dict):
         self.add_namespaces(namespaces)
 
     def get_namespace(self, uri):
-        for namespace in self.values():
+        for namespace in list(self.values()):
             if uri == namespace._uri:
                 return namespace
         return None
 
     def get_registered_namespaces(self):
-        return self._namespaces.values()
+        return list(self._namespaces.values())
 
     def set_default_namespace(self, uri):
         self._default = Namespace('', uri)
@@ -1299,7 +1306,7 @@ class NamespaceManager(dict):
         return self._default
 
     def add_namespace(self, namespace):
-        if namespace in self.values():
+        if namespace in list(self.values()):
             #  no need to do anything
             return
         if namespace in self._rename_map:
@@ -1320,7 +1327,7 @@ class NamespaceManager(dict):
 
     def add_namespaces(self, namespaces):
         if namespaces:
-            for prefix, uri in namespaces.items():
+            for prefix, uri in list(namespaces.items()):
                 ns = Namespace(prefix, uri)
                 self.add_namespace(ns)
 
@@ -1345,7 +1352,7 @@ class NamespaceManager(dict):
             else:
                 #  return the original identifier
                 return identifier
-        elif isinstance(identifier, (str, unicode)):
+        elif isinstance(identifier, (str, string_types)):
             if identifier.startswith('_:'):
                 return None
             elif ':' in identifier:
@@ -1357,7 +1364,7 @@ class NamespaceManager(dict):
                 else:
                     #  treat as a URI (with the first part as its scheme)
                     #  check if the URI can be compacted
-                    for namespace in self.values():
+                    for namespace in list(self.values()):
                         if identifier.startswith(namespace.get_uri()):
                             #  create a QName with the namespace
                             return namespace[identifier.replace(namespace.get_uri(), '')]
@@ -1383,7 +1390,7 @@ class NamespaceManager(dict):
             return original_prefix
         count = 1
         while True:
-            new_prefix = '_'.join((original_prefix, unicode(count)))
+            new_prefix = '_'.join((original_prefix, str(count)))
             if new_prefix in self:
                 count += 1
             else:
@@ -1428,7 +1435,7 @@ class ProvBundle(ProvEntity):
         # Only returning asserted records
         results = [rec for rec in self._records if rec.is_asserted()]
         if class_or_type_or_tuple:
-            return filter(lambda rec: isinstance(rec, class_or_type_or_tuple), results)
+            return [rec for rec in results if isinstance(rec, class_or_type_or_tuple)]
         else:
             return results
 
@@ -1520,7 +1527,7 @@ class ProvBundle(ProvEntity):
 
             rec_type = record.get_type()
             rec_label = PROV_N_MAP[rec_type]
-            identifier = unicode(real_or_anon_id(record))
+            identifier = str(real_or_anon_id(record))
 
             if rec_type == PROV_REC_BUNDLE:
                 #  encoding the sub-bundle
@@ -1528,16 +1535,16 @@ class ProvBundle(ProvEntity):
             else:
                 record_json = {}
                 if record._attributes:
-                    for (attr, value) in record._attributes.items():
+                    for (attr, value) in list(record._attributes.items()):
                         if isinstance(value, ProvRecord):
                             attr_record_id = real_or_anon_id(value)
-                            record_json[PROV_ID_ATTRIBUTES_MAP[attr]] = unicode(attr_record_id)
+                            record_json[PROV_ID_ATTRIBUTES_MAP[attr]] = str(attr_record_id)
                         elif value is not None:
                             #  Assuming this is a datetime value
-                            record_json[PROV_ID_ATTRIBUTES_MAP[attr]] = value.isoformat() if isinstance(value, datetime.datetime) else unicode(value)
+                            record_json[PROV_ID_ATTRIBUTES_MAP[attr]] = value.isoformat() if isinstance(value, datetime.datetime) else str(value)
                 if record._extra_attributes:
                     for (attr, value) in record._extra_attributes:
-                        attr_id = unicode(attr)
+                        attr_id = str(attr)
                         value_json = self._encode_json_representation(value)
                         if attr_id in record_json:
                             #  Multi-value attribute
@@ -1558,7 +1565,7 @@ class ProvBundle(ProvEntity):
     def _decode_JSON_container(self, jc):
         if u'prefix' in jc:
             prefixes = jc[u'prefix']
-            for prefix, uri in prefixes.items():
+            for prefix, uri in list(prefixes.items()):
                 if prefix != 'default':
                     self.add_namespace(Namespace(prefix, uri))
                 else:
@@ -1569,7 +1576,7 @@ class ProvBundle(ProvEntity):
                          key=lambda tuple_rec: tuple_rec[0])
 
         record_map = {}
-        _parse_attr_value = lambda value: record_map[value] if (isinstance(value, six.string_types) and value in record_map) else self._decode_json_representation(value)
+        _parse_attr_value = lambda value: record_map[value] if (isinstance(value, string_types) and value in record_map) else self._decode_json_representation(value)
         #  Create all the records before setting their attributes
         for (record_type, identifier, content) in records:
             if record_type == PROV_REC_BUNDLE:
@@ -1593,7 +1600,7 @@ class ProvBundle(ProvEntity):
                     extra_attributes = []
                     #  Splitting PROV attributes and the others
                     membership_extra_members = None  # this is for the multiple-entity membership hack to come
-                    for attr, value in element.items():
+                    for attr, value in list(element.items()):
                         if attr in PROV_ATTRIBUTES_ID_MAP:
                             attr_id = PROV_ATTRIBUTES_ID_MAP[attr]
                             if isinstance(value, list):
@@ -1675,7 +1682,7 @@ class ProvBundle(ProvEntity):
             uri = self.get_identifier().rdf_representation()
             graph = Graph(graph.store, uri)
 
-        for prefix, namespace in self._namespaces.items():
+        for prefix, namespace in list(self._namespaces.items()):
             graph.bind(prefix, namespace.get_uri())
 
         for record in self._records:
@@ -1748,11 +1755,11 @@ class ProvBundle(ProvEntity):
                         continue
                     else:
                         logger.debug("Equality (ProvBundle): Unequal PROV records:")
-                        logger.debug("%s", unicode(record_a))
-                        logger.debug("%s", unicode(record_b))
+                        logger.debug("%s", str(record_a))
+                        logger.debug("%s", str(record_b))
                         return False
                 else:
-                    logger.debug("Equality (ProvBundle): Could not find a record with this identifier: %s", unicode(record_a._identifier))
+                    logger.debug("Equality (ProvBundle): Could not find a record with this identifier: %s", str(record_a._identifier))
                     return False
             else:
                 #  Manually look for the record
@@ -1763,7 +1770,7 @@ class ProvBundle(ProvEntity):
                         found = True
                         break
                 if not found:
-                    logger.debug("Equality (ProvBundle): Could not find this record: %s", unicode(record_a))
+                    logger.debug("Equality (ProvBundle): Could not find this record: %s", str(record_a))
                     return False
         return True
 
@@ -1780,7 +1787,7 @@ class ProvBundle(ProvEntity):
 
                     if not merge_target._asserted and record._asserted:
                         if record.__class__ in merge_target.get_allowed_types():
-                            for attribute_id, attribute in merge_target._infered_for._attributes.iteritems():
+                            for attribute_id, attribute in merge_target._infered_for._attributes.items():
                                 if attribute == merge_target:
                                     merge_target._infered_for._attributes[attribute_id] = record
                             self._records.remove(merge_target)
@@ -1813,7 +1820,7 @@ class ProvBundle(ProvEntity):
         '''Add a bundle to the current document
         '''
 
-        if identifier == None:
+        if identifier is None:
             identifier = bundle.get_identifier()
 
         if not identifier:

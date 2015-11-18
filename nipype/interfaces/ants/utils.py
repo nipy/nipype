@@ -10,9 +10,8 @@ import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec
 from ..base import (TraitedSpec, File, traits,
-                    isdefined)
+                    isdefined, InputMultiPath)
 from ...utils.filemanip import split_filename
-from nipype.interfaces.base import InputMultiPath
 
 
 class AverageAffineTransformInputSpec(ANTSCommandInputSpec):

@@ -5,23 +5,25 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 
     Change directory to provide relative paths for doctests
     >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> filepath = os.path.dirname(os.path.realpath( __file__ ))
     >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
     >>> os.chdir(datadir)
 
 '''
+from __future__ import division
+from builtins import zip
+
+import os
+import os.path as op
+from warnings import warn
 
 import numpy as np
 from numpy import linalg as nla
-import os
-import os.path as op
-from ..external import six
+
 from .. import logging
+from ..external.six import string_types
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
-from warnings import warn
-
-iflogger = logging.getLogger('interface')
 
 oldets = os.getenv('ETS_TOOLKIT')
 have_tvtk = False
@@ -101,7 +103,7 @@ class WarpPoints(TVTKBaseInterface):
 
         if fext == '.gz':
             fname, fext2 = op.splitext(fname)
-            fext = fext2+fext
+            fext = fext2 + fext
 
         if ext is None:
             ext = fext
@@ -121,13 +123,12 @@ class WarpPoints(TVTKBaseInterface):
         points = np.array(mesh.points)
         warp_dims = nb.funcs.four_to_three(nb.load(self.inputs.warp))
 
-        affine = warp_dims[0].get_affine()
-        voxsize = warp_dims[0].get_header().get_zooms()
+        affine = warp_dims[0].affine
+        voxsize = warp_dims[0].header.get_zooms()
         vox2ras = affine[0:3, 0:3]
         ras2vox = np.linalg.inv(vox2ras)
         origin = affine[0:3, 3]
-        voxpoints = np.array([np.dot(ras2vox,
-                                     (p-origin)) for p in points])
+        voxpoints = np.array([np.dot(ras2vox, (p - origin)) for p in points])
 
         warps = []
         for axis in warp_dims:
@@ -142,7 +143,7 @@ class WarpPoints(TVTKBaseInterface):
             warps.append(warp)
 
         disps = np.squeeze(np.dstack(warps))
-        newpoints = [p+d for p, d in zip(points, disps)]
+        newpoints = [p + d for p, d in zip(points, disps)]
         mesh.points = newpoints
         w = tvtk.PolyDataWriter()
         if self._vtk_major <= 5:
@@ -212,7 +213,7 @@ class ComputeMeshWarp(TVTKBaseInterface):
     >>> dist = m.ComputeMeshWarp()
     >>> dist.inputs.surface1 = 'surf1.vtk'
     >>> dist.inputs.surface2 = 'surf2.vtk'
-    >>> res = dist.run() # doctest: +SKIP
+    >>> res = dist.run()  # doctest: +SKIP
 
     """
 
@@ -344,7 +345,7 @@ class MeshWarpMaths(TVTKBaseInterface):
     >>> mmath.inputs.in_surf = 'surf1.vtk'
     >>> mmath.inputs.operator = 'surf2.vtk'
     >>> mmath.inputs.operation = 'mul'
-    >>> res = mmath.run() # doctest: +SKIP
+    >>> res = mmath.run()  # doctest: +SKIP
 
     """
 
@@ -363,7 +364,7 @@ class MeshWarpMaths(TVTKBaseInterface):
         operator = self.inputs.operator
         opfield = np.ones_like(points1)
 
-        if isinstance(operator, six.string_types):
+        if isinstance(operator, string_types):
             r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
             vtk2 = r2.output
             r2.update()

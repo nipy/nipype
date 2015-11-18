@@ -6,15 +6,18 @@ from nipype.interfaces.base import (TraitedSpec, BaseInterface,
                                     BaseInterfaceInputSpec, isdefined,
                                     OutputMultiPath, InputMultiPath)
 from nipype.interfaces.base import File, traits
-from nipype.utils.filemanip import split_filename, fname_presuffix, filename_to_list,list_to_filename
+from nipype.utils.filemanip import split_filename, fname_presuffix, filename_to_list, list_to_filename
 import os
 import numpy as np
+
 
 class Analyze2niiInputSpec(SPMCommandInputSpec):
     analyze_file = File(exists=True, mandatory=True)
 
+
 class Analyze2niiOutputSpec(SPMCommandInputSpec):
     nifti_file = File(exists=True)
+
 
 class Analyze2nii(SPMCommand):
 
@@ -22,11 +25,11 @@ class Analyze2nii(SPMCommand):
     output_spec = Analyze2niiOutputSpec
 
     def _make_matlab_command(self, _):
-        script = "V = spm_vol('%s');\n"%self.inputs.analyze_file
-        _, name,_ = split_filename(self.inputs.analyze_file)
+        script = "V = spm_vol('%s');\n" % self.inputs.analyze_file
+        _, name, _ = split_filename(self.inputs.analyze_file)
         self.output_name = os.path.join(os.getcwd(), name + ".nii")
         script += "[Y, XYZ] = spm_read_vols(V);\n"
-        script += "V.fname = '%s';\n"%self.output_name
+        script += "V.fname = '%s';\n" % self.output_name
         script += "spm_write_vol(V, Y);\n"
 
         return script
@@ -36,18 +39,19 @@ class Analyze2nii(SPMCommand):
         outputs['nifti_file'] = self.output_name
         return outputs
 
+
 class CalcCoregAffineInputSpec(SPMCommandInputSpec):
-    target = File( exists = True, mandatory = True,
-                   desc = 'target for generating affine transform')
-    moving = File( exists = True, mandatory = True, copyfile=False,
-                   desc = 'volume transform can be applied to register with target')
-    mat = File( desc = 'Filename used to store affine matrix')
-    invmat = File( desc = 'Filename used to store inverse affine matrix')
+    target = File(exists=True, mandatory=True,
+                  desc='target for generating affine transform')
+    moving = File(exists=True, mandatory=True, copyfile=False,
+                  desc='volume transform can be applied to register with target')
+    mat = File(desc='Filename used to store affine matrix')
+    invmat = File(desc='Filename used to store inverse affine matrix')
 
 
 class CalcCoregAffineOutputSpec(TraitedSpec):
-    mat = File(exists = True, desc = 'Matlab file holding transform')
-    invmat = File( desc = 'Matlab file holding inverse transform')
+    mat = File(exists=True, desc='Matlab file holding transform')
+    invmat = File(desc='Matlab file holding inverse transform')
 
 
 class CalcCoregAffine(SPMCommand):
@@ -78,14 +82,14 @@ class CalcCoregAffine(SPMCommand):
 
     def _make_inv_file(self):
         """ makes filename to hold inverse transform if not specified"""
-        invmat = fname_presuffix(self.inputs.mat, prefix = 'inverse_')
+        invmat = fname_presuffix(self.inputs.mat, prefix='inverse_')
         return invmat
 
     def _make_mat_file(self):
         """ makes name for matfile if doesn exist"""
-        pth, mv, _  = split_filename(self.inputs.moving)
+        pth, mv, _ = split_filename(self.inputs.moving)
         _, tgt, _ = split_filename(self.inputs.target)
-        mat = os.path.join(pth, '%s_to_%s.mat'%(mv,tgt))
+        mat = os.path.join(pth, '%s_to_%s.mat' % (mv, tgt))
         return mat
 
     def _make_matlab_command(self, _):
@@ -104,10 +108,10 @@ class CalcCoregAffine(SPMCommand):
         save('%s' , 'M' );
         M = inv(M);
         save('%s','M')
-        """%(self.inputs.target,
-             self.inputs.moving,
-             self.inputs.mat,
-             self.inputs.invmat)
+        """ % (self.inputs.target,
+               self.inputs.moving,
+               self.inputs.mat,
+               self.inputs.invmat)
         return script
 
     def _list_outputs(self):
@@ -116,16 +120,18 @@ class CalcCoregAffine(SPMCommand):
         outputs['invmat'] = os.path.abspath(self.inputs.invmat)
         return outputs
 
+
 class ApplyTransformInputSpec(SPMCommandInputSpec):
-    in_file = File( exists = True, mandatory = True, copyfile=True,
+    in_file = File(exists=True, mandatory=True, copyfile=True,
                    desc='file to apply transform to, (only updates header)')
-    mat = File( exists = True, mandatory = True,
-                desc='file holding transform to apply')
+    mat = File(exists=True, mandatory=True,
+               desc='file holding transform to apply')
     out_file = File(desc="output file name for transformed data",
                     genfile=True)
 
+
 class ApplyTransformOutputSpec(TraitedSpec):
-    out_file = File(exists = True, desc = 'Transformed image file')
+    out_file = File(exists=True, desc='Transformed image file')
 
 
 class ApplyTransform(SPMCommand):
@@ -160,11 +166,11 @@ class ApplyTransform(SPMCommand):
         V.fname = fullfile(outfile);
         spm_write_vol(V,X);
 
-        """%(self.inputs.in_file,
-             self.inputs.out_file,
-             self.inputs.mat)
-                #img_space = spm_get_space(infile);
-        #spm_get_space(infile, transform.M * img_space);
+        """ % (self.inputs.in_file,
+               self.inputs.out_file,
+               self.inputs.mat)
+        # img_space = spm_get_space(infile);
+        # spm_get_space(infile, transform.M * img_space);
         return script
 
     def _list_outputs(self):
@@ -179,21 +185,23 @@ class ApplyTransform(SPMCommand):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_trans.nii'
 
+
 class ResliceInputSpec(SPMCommandInputSpec):
-    in_file = File( exists = True, mandatory=True,
-                    desc='file to apply transform to, (only updates header)')
-    space_defining = File ( exists = True, mandatory = True,
-                            desc = 'Volume defining space to slice in_file into')
+    in_file = File(exists=True, mandatory=True,
+                   desc='file to apply transform to, (only updates header)')
+    space_defining = File(exists=True, mandatory=True,
+                          desc='Volume defining space to slice in_file into')
 
-    interp = traits.Range(low = 0, high = 7, usedefault = True,
-                          desc='degree of b-spline used for interpolation'\
-                                '0 is nearest neighbor (default)')
+    interp = traits.Range(low=0, high=7, usedefault=True,
+                          desc='degree of b-spline used for interpolation'
+                          '0 is nearest neighbor (default)')
 
+    out_file = File(desc='Optional file to save resliced volume')
 
-    out_file = File(desc = 'Optional file to save resliced volume')
 
 class ResliceOutputSpec(TraitedSpec):
-    out_file = File( exists = True, desc = 'resliced volume')
+    out_file = File(exists=True, desc='resliced volume')
+
 
 class Reslice(SPMCommand):
     """ uses  spm_reslice to resample in_file into space of space_defining"""
@@ -205,7 +213,7 @@ class Reslice(SPMCommand):
         """ generates script"""
         if not isdefined(self.inputs.out_file):
             self.inputs.out_file = fname_presuffix(self.inputs.in_file,
-                                                   prefix = 'r')
+                                                   prefix='r')
         script = """
         flags.mean = 0;
         flags.which = 1;
@@ -214,15 +222,16 @@ class Reslice(SPMCommand):
         infiles = strvcat(\'%s\', \'%s\');
         invols = spm_vol(infiles);
         spm_reslice(invols, flags);
-        """%(self.inputs.interp,
-             self.inputs.space_defining,
-             self.inputs.in_file)
+        """ % (self.inputs.interp,
+               self.inputs.space_defining,
+               self.inputs.in_file)
         return script
 
     def _list_outputs(self):
         outputs = self._outputs().get()
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
 
 class ApplyInverseDeformationInput(SPMCommandInputSpec):
     in_files = InputMultiPath(
@@ -375,6 +384,7 @@ class ResliceToReference(SPMCommand):
             outputs['out_files'].append(os.path.realpath('w%s' % fname))
         return outputs
 
+
 class DicomImportInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(
         File(exists=True),
@@ -387,25 +397,27 @@ class DicomImportInputSpec(SPMCommandInputSpec):
         usedefault=True,
         desc='directory structure for the output.')
     output_dir = traits.Str('./converted_dicom',
-        field='outdir',
-        usedefault=True,
-        desc='output directory.')
+                            field='outdir',
+                            usedefault=True,
+                            desc='output directory.')
     format = traits.Enum(
         'nii', 'img',
         field='convopts.format',
         usedefault=True,
         desc='output format.')
     icedims = traits.Bool(False,
-        field='convopts.icedims',
-        usedefault=True,
-        desc='If image sorting fails, one can try using the additional\
+                          field='convopts.icedims',
+                          usedefault=True,
+                          desc='If image sorting fails, one can try using the additional\
               SIEMENS ICEDims information to create unique filenames.\
               Use this only if there would be multiple volumes with\
               exactly the same file names.')
 
+
 class DicomImportOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True),
                                 desc='converted files')
+
 
 class DicomImport(SPMCommand):
     """ Uses spm to convert DICOM files to nii or img+hdr.
@@ -453,11 +465,11 @@ class DicomImport(SPMCommand):
 
         ext = self.inputs.format
         if self.inputs.output_dir_struct == "flat":
-            outputs['out_files'] = glob(os.path.join(od, '*.%s'%ext))
+            outputs['out_files'] = glob(os.path.join(od, '*.%s' % ext))
         elif self.inputs.output_dir_struct == 'series':
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*','*.%s'%ext)))
+            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*.%s' % ext)))
         elif self.inputs.output_dir_struct in ['patid', 'date_time', 'patname']:
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*','*','*.%s'%ext)))
+            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*', '*.%s' % ext)))
         elif self.inputs.output_dir_struct == 'patid_date':
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*','*','*','*.%s'%ext)))
+            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*', '*', '*.%s' % ext)))
         return outputs

@@ -7,6 +7,8 @@
    >>> os.chdir(datadir)
 """
 
+from builtins import range
+
 from ..base import (TraitedSpec, File, traits, InputMultiPath)
 from .base import ANTSCommand, ANTSCommandInputSpec
 import os
@@ -46,7 +48,7 @@ class ANTSInputSpec(ANTSCommandInputSpec):
 #
 #    Cost = Sum_i ( metricweight[i] Metric_i ( fixedimage[i], movingimage[i]) )
     metric = traits.List(traits.Enum('CC', 'MI', 'SMI', 'PR', 'SSD',
-                         'MSQ', 'PSE'), mandatory=True, desc='')
+                                     'MSQ', 'PSE'), mandatory=True, desc='')
 
     metric_weight = traits.List(traits.Float(), requires=['metric'], desc='')
     radius = traits.List(traits.Int(), requires=['metric'], desc='')
@@ -155,7 +157,7 @@ class ANTS(ANTSCommand):
         retval = ['--transformation-model %s' % model]
         parameters = []
         for elem in (stepLength, timeStep, deltaTime, symmetryType):
-            if not elem is traits.Undefined:
+            if elem is not traits.Undefined:
                 parameters.append('%#.2g' % elem)
         if len(parameters) > 0:
             if len(parameters) > 1:
@@ -283,11 +285,12 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         default=True, usedefault=True)
     interpolation = traits.Enum(
         'Linear', 'NearestNeighbor', 'CosineWindowedSinc', 'WelchWindowedSinc',
-        'HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline',
-        # MultiLabel[<sigma=imageSpacing>,<alpha=4.0>]
-        # Gaussian[<sigma=imageSpacing>,<alpha=1.0>]
-        # BSpline[<order=3>]
+        'HammingWindowedSinc', 'LanczosWindowedSinc', 'BSpline', 'MultiLabel', 'Gaussian',
         argstr='%s', usedefault=True)
+    interpolation_parameters = traits.Either(traits.Tuple(traits.Int()),  # BSpline (order)
+                                             traits.Tuple(traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
+                                                          traits.Float)
+                                             )
 
     write_composite_transform = traits.Bool(
         argstr='--write-composite-transform %d',
@@ -303,11 +306,11 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         argstr='--initialize-transforms-per-stage %d', default=False,
         usedefault=True,  # This should be true for explicit completeness
         desc=('Initialize linear transforms from the previous stage. By enabling this option, '
-          'the current linear stage transform is directly intialized from the previous '
-          'stages linear transform; this allows multiple linear stages to be run where '
-          'each stage directly updates the estimated linear transform from the previous '
-          'stage. (e.g. Translation -> Rigid -> Affine). '
-          ))
+              'the current linear stage transform is directly intialized from the previous '
+              'stages linear transform; this allows multiple linear stages to be run where '
+              'each stage directly updates the estimated linear transform from the previous '
+              'stage. (e.g. Translation -> Rigid -> Affine). '
+              ))
     # NOTE: Even though only 0=False and 1=True are allowed, ants uses integer
     # values instead of booleans
     float = traits.Bool(
@@ -319,21 +322,40 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                                          'GaussianDisplacementField', 'TimeVaryingVelocityField',
                                          'TimeVaryingBSplineVelocityField', 'SyN', 'BSplineSyN',
                                          'Exponential', 'BSplineExponential'), argstr='%s', mandatory=True)
-    # TODO: transform_parameters currently supports rigid, affine, composite
-    # affine, translation, bspline, gaussian displacement field (gdf), and SyN
-    # -----ONLY-----!
-    transform_parameters = traits.List(traits.Either(traits.Float(),
-                                                     traits.Tuple(
-                                                         traits.Float()),
-                                                     traits.Tuple(traits.Float(),  # gdf & syn
-                                                                  traits.Float(
+    # TODO: input checking and allow defaults
+    # All parameters must be specified for BSplineDisplacementField, TimeVaryingBSplineVelocityField, BSplineSyN,
+    # Exponential, and BSplineExponential. EVEN DEFAULTS!
+    transform_parameters = traits.List(traits.Either(traits.Tuple(traits.Float()),  # Translation, Rigid, Affine,
+                                                                                    # CompositeAffine, Similarity
+                                                     traits.Tuple(traits.Float(),  # GaussianDisplacementField, SyN
+                                                                  traits.Float(),
+                                                                  traits.Float()
                                                                   ),
-                                                                  traits.Float(
-                                                                  )),
-                                                     traits.Tuple(traits.Float(),  # BSplineSyn
+                                                     traits.Tuple(traits.Float(),  # BSplineSyn,
+                                                                  traits.Int(),    # BSplineDisplacementField,
+                                                                  traits.Int(),    # TimeVaryingBSplineVelocityField
+                                                                  traits.Int()
+                                                                  ),
+                                                     traits.Tuple(traits.Float(),  # TimeVaryingVelocityField
+                                                                  traits.Int(),
+                                                                  traits.Float(),
+                                                                  traits.Float(),
+                                                                  traits.Float(),
+                                                                  traits.Float()
+                                                                  ),
+                                                     traits.Tuple(traits.Float(),  # Exponential
+                                                                  traits.Float(),
+                                                                  traits.Float(),
+                                                                  traits.Int()
+                                                                  ),
+                                                     traits.Tuple(traits.Float(),  # BSplineExponential
                                                                   traits.Int(),
                                                                   traits.Int(),
-                                                                  traits.Int())))
+                                                                  traits.Int(),
+                                                                  traits.Int()
+                                                                  ),
+                                                     )
+                                       )
     # Convergence flags
     number_of_iterations = traits.List(traits.List(traits.Int()))
     smoothing_sigmas = traits.List(traits.List(traits.Float()), mandatory=True)
@@ -358,6 +380,9 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     winsorize_lower_quantile = traits.Range(
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
 
+    # Verbose Output
+    verbose = traits.Bool(True, argstr='--verbose %d', desc='enable verbose logging', usedefault=True)
+
 
 class RegistrationOutputSpec(TraitedSpec):
     forward_transforms = traits.List(
@@ -369,17 +394,18 @@ class RegistrationOutputSpec(TraitedSpec):
     reverse_invert_flags = traits.List(traits.Bool(
     ), desc='List of flags corresponding to the reverse transforms')
     composite_transform = File(exists=True, desc='Composite transform file')
-    inverse_composite_transform = File(exists=True, desc='Inverse composite transform file')
+    inverse_composite_transform = File(desc='Inverse composite transform file')
     warped_image = File(desc="Outputs warped image")
     inverse_warped_image = File(desc="Outputs the inverse of the warped image")
     save_state = File(desc="The saved registration state to be restored")
+
 
 class Registration(ANTSCommand):
 
     """
     Examples
     --------
-    >>> import copy
+    >>> import copy, pprint
     >>> from nipype.interfaces.ants import Registration
     >>> reg = Registration()
     >>> reg.inputs.fixed_image = 'fixed1.nii'
@@ -411,47 +437,68 @@ class Registration(ANTSCommand):
     >>> reg1 = copy.deepcopy(reg)
     >>> reg1.inputs.winsorize_lower_quantile = 0.025
     >>> reg1.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
-    >>> reg1.run()  #doctest: +SKIP
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
+    >>> reg1.run()  # doctest: +SKIP
 
     >>> reg2 = copy.deepcopy(reg)
     >>> reg2.inputs.winsorize_upper_quantile = 0.975
     >>> reg2.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1'
 
     >>> reg3 = copy.deepcopy(reg)
     >>> reg3.inputs.winsorize_lower_quantile = 0.025
     >>> reg3.inputs.winsorize_upper_quantile = 0.975
     >>> reg3.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
 
     >>> reg3a = copy.deepcopy(reg)
     >>> reg3a.inputs.float = True
     >>> reg3a.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --float 1 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --float 1 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
     >>> reg3b = copy.deepcopy(reg)
     >>> reg3b.inputs.float = False
     >>> reg3b.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --float 0 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --float 0 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
     >>> # Test collapse transforms flag
     >>> reg4 = copy.deepcopy(reg)
-    >>> reg.inputs.save_state = 'trans.mat'
-    >>> reg.inputs.restore_state = 'trans.mat'
+    >>> reg4.inputs.save_state = 'trans.mat'
+    >>> reg4.inputs.restore_state = 'trans.mat'
     >>> reg4.inputs.initialize_transforms_per_stage = True
     >>> reg4.inputs.collapse_output_transforms = True
     >>> outputs = reg4._list_outputs()
-    >>> print outputs #doctest: +ELLIPSIS
-    {'reverse_invert_flags': [], 'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5', 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [], 'reverse_transforms': [], 'save_state': <undefined>, 'composite_transform': '.../nipype/testing/data/output_Composite.h5', 'forward_transforms': []}
+    >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    {'composite_transform': '.../nipype/testing/data/output_Composite.h5',
+     'forward_invert_flags': [],
+     'forward_transforms': [],
+     'inverse_composite_transform': '.../nipype/testing/data/output_InverseComposite.h5',
+     'inverse_warped_image': <undefined>,
+     'reverse_invert_flags': [],
+     'reverse_transforms': [],
+     'save_state': '.../nipype/testing/data/trans.mat',
+     'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
+    >>> reg4.cmdline
+    'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
     >>> # Test collapse transforms flag
     >>> reg4b = copy.deepcopy(reg4)
     >>> reg4b.inputs.write_composite_transform = False
     >>> outputs = reg4b._list_outputs()
-    >>> print outputs #doctest: +ELLIPSIS
-    {'reverse_invert_flags': [True, False], 'inverse_composite_transform': <undefined>, 'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz', 'inverse_warped_image': <undefined>, 'forward_invert_flags': [False, False], 'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'], 'save_state': <undefined>, 'composite_transform': <undefined>, 'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1Warp.nii.gz']}
-    >>> reg4b.aggregate_outputs() #doctest: +SKIP
+    >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    {'composite_transform': <undefined>,
+     'forward_invert_flags': [False, False],
+     'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat',
+     '.../nipype/testing/data/output_1Warp.nii.gz'],
+     'inverse_composite_transform': <undefined>,
+     'inverse_warped_image': <undefined>,
+     'reverse_invert_flags': [True, False],
+     'reverse_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat', '.../nipype/testing/data/output_1InverseWarp.nii.gz'],
+     'save_state': '.../nipype/testing/data/trans.mat',
+     'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
+    >>> reg4b.aggregate_outputs()  # doctest: +SKIP
+    >>> reg4b.cmdline
+    'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 0'
 
     >>> # Test multiple metrics per stage
     >>> reg5 = copy.deepcopy(reg)
@@ -463,14 +510,35 @@ class Registration(ANTSCommand):
     >>> reg5.inputs.sampling_strategy = ['Random', None] # use default strategy in second stage
     >>> reg5.inputs.sampling_percentage = [0.05, [0.05, 0.10]]
     >>> reg5.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric CC[ fixed1.nii, moving1.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
     >>> # Test multiple inputs
     >>> reg6 = copy.deepcopy(reg5)
     >>> reg6.inputs.fixed_image = ['fixed1.nii', 'fixed2.nii']
     >>> reg6.inputs.moving_image = ['moving1.nii', 'moving2.nii']
     >>> reg6.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric CC[ fixed2.nii, moving2.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1   --write-composite-transform 1'
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] --metric CC[ fixed2.nii, moving2.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+
+    >>> # Test Interpolation Parameters (BSpline)
+    >>> reg7a = copy.deepcopy(reg)
+    >>> reg7a.inputs.interpolation = 'BSpline'
+    >>> reg7a.inputs.interpolation_parameters = (3,)
+    >>> reg7a.cmdline
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation BSpline[ 3 ] --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+
+    >>> # Test Interpolation Parameters (MultiLabel/Gaussian)
+    >>> reg7b = copy.deepcopy(reg)
+    >>> reg7b.inputs.interpolation = 'Gaussian'
+    >>> reg7b.inputs.interpolation_parameters = (1.0, 1.0)
+    >>> reg7b.cmdline
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Gaussian[ 1.0, 1.0 ] --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+
+    >>> # Test Extended Transform Parameters
+    >>> reg8 = copy.deepcopy(reg)
+    >>> reg8.inputs.transforms = ['Affine', 'BSplineSyN']
+    >>> reg8.inputs.transform_parameters = [(2.0,), (0.25, 26, 0, 3)]
+    >>> reg8.cmdline
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform BSplineSyN[ 0.25, 26, 0, 3 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
     """
     DEF_SAMPLING_STRATEGY = 'None'
     """The default sampling strategy argument."""
@@ -506,7 +574,6 @@ class Registration(ANTSCommand):
             sampling_strategy = self.inputs.sampling_strategy[index]
             if sampling_strategy:
                 stage_inputs['sampling_strategy'] = sampling_strategy
-            sampling_percentage = self.inputs.sampling_percentage
         if (isdefined(self.inputs.sampling_percentage) and self.inputs.sampling_percentage):
             sampling_percentage = self.inputs.sampling_percentage[index]
             if sampling_percentage:
@@ -519,8 +586,8 @@ class Registration(ANTSCommand):
         # Otherwise, make a singleton list of the metric specification
         # from the non-list inputs.
         if isinstance(name_input, list):
-            items = stage_inputs.items()
-            indexes = range(0, len(name_input))
+            items = list(stage_inputs.items())
+            indexes = list(range(0, len(name_input)))
             specs = list()
             for i in indexes:
                 temp = dict([(k, v[i]) for k, v in items])
@@ -534,7 +601,7 @@ class Registration(ANTSCommand):
                 else:
                     temp["moving_image"] = self.inputs.moving_image[i]
 
-                specs.append( temp )
+                specs.append(temp)
         else:
             specs = [stage_inputs]
 
@@ -550,9 +617,9 @@ class Registration(ANTSCommand):
                                          kwargs['radius_or_bins'])
 
         # The optional sampling strategy.
-        if kwargs.has_key('sampling_strategy'):
+        if 'sampling_strategy' in kwargs:
             sampling_strategy = kwargs['sampling_strategy']
-        elif kwargs.has_key('sampling_percentage'):
+        elif 'sampling_percentage' in kwargs:
             # The sampling percentage is specified but not the
             # sampling strategy. Use the default strategy.
             sampling_strategy = Registration.DEF_SAMPLING_STRATEGY
@@ -561,7 +628,7 @@ class Registration(ANTSCommand):
         # Format the optional sampling arguments.
         if sampling_strategy:
             retval += ', %s' % sampling_strategy
-            if kwargs.has_key('sampling_percentage'):
+            if 'sampling_percentage' in kwargs:
                 retval += ', %g' % kwargs['sampling_percentage']
 
         retval += ' ]'
@@ -586,9 +653,9 @@ class Registration(ANTSCommand):
             retval.append('--convergence %s' % self._formatConvergence(ii))
             if isdefined(self.inputs.sigma_units):
                 retval.append('--smoothing-sigmas %s%s' %
-                             (self._antsJoinList(self.inputs.smoothing_sigmas[
-                                 ii]),
-                              self.inputs.sigma_units[ii]))
+                              (self._antsJoinList(self.inputs.smoothing_sigmas[
+                                  ii]),
+                               self.inputs.sigma_units[ii]))
             else:
                 retval.append('--smoothing-sigmas %s' %
                               self._antsJoinList(self.inputs.smoothing_sigmas[ii]))
@@ -650,7 +717,6 @@ class Registration(ANTSCommand):
         self._quantilesDone = True
         return '--winsorize-image-intensities [ %s, %s ]' % (self.inputs.winsorize_lower_quantile, self.inputs.winsorize_upper_quantile)
 
-
     def _format_arg(self, opt, spec, val):
         if opt == 'fixed_image_mask':
             if isdefined(self.inputs.moving_image_mask):
@@ -679,8 +745,13 @@ class Registration(ANTSCommand):
                                                                       0],
                                                                   doCenterOfMassInit)
         elif opt == 'interpolation':
-            # TODO: handle multilabel, gaussian, and bspline options
-            return '--interpolation %s' % self.inputs.interpolation
+            if self.inputs.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
+                    isdefined(self.inputs.interpolation_parameters):
+                return '--interpolation %s[ %s ]' % (self.inputs.interpolation,
+                                                     ', '.join([str(param)
+                                                                for param in self.inputs.interpolation_parameters]))
+            else:
+                return '--interpolation %s' % self.inputs.interpolation
         elif opt == 'output_transform_prefix':
             out_filename = self._get_outputfilenames(inverse=False)
             inv_out_filename = self._get_outputfilenames(inverse=True)
@@ -696,7 +767,9 @@ class Registration(ANTSCommand):
         elif opt == 'winsorize_upper_quantile' or opt == 'winsorize_lower_quantile':
             if not self._quantilesDone:
                 return self._formatWinsorizeImageIntensities()
-            return ''  # Must return something for argstr!
+            else:
+                self._quantilesDone = False
+                return ''  # Must return something for argstr!
         # This feature was removed from recent versions of antsRegistration due to corrupt outputs.
         # elif opt == 'collapse_linear_transforms_to_fixed_image_header':
         #    return self._formatCollapseLinearTransformsToFixedImageHeader()
@@ -711,7 +784,7 @@ class Registration(ANTSCommand):
                                            'Translation': 'Translation.mat',
                                            'BSpline': 'BSpline.txt',
                                            'Initial': 'DerivedInitialMovingTranslation.mat'}
-        if transform in self.lowDimensionalTransformMap.keys():
+        if transform in list(self.lowDimensionalTransformMap.keys()):
             suffix = self.lowDimensionalTransformMap[transform]
             inverse_mode = inverse
         else:

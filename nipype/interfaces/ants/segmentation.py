@@ -8,6 +8,8 @@
 
 """
 
+from builtins import range
+
 from ..base import (TraitedSpec, File, traits, InputMultiPath, OutputMultiPath,
                     isdefined)
 from ...utils.filemanip import split_filename
@@ -309,6 +311,7 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4_4 = N4BiasFieldCorrection()
     >>> n4_4.inputs.input_image = 'structural.nii'
     >>> n4_4.inputs.save_bias = True
+    >>> n4_4.inputs.dimension = 3
     >>> n4_4.cmdline
     'N4BiasFieldCorrection -d 3 --input-image structural.nii \
 --output [ structural_corrected.nii, structural_bias.nii ]'
@@ -462,7 +465,7 @@ class antsCorticalThicknessInputSpec(ANTSCommandInputSpec):
                               'Requires single thread computation for complete reproducibility.'))
 
 
-class antsCorticalThicknessoutputSpec(TraitedSpec):
+class antsCorticalThicknessOutputSpec(TraitedSpec):
     BrainExtractionMask = File(exists=True, desc='brain extraction mask')
     BrainSegmentation = File(exists=True, desc='brain segmentaion image')
     BrainSegmentationN4 = File(exists=True, desc='N4 corrected image')
@@ -500,7 +503,7 @@ class antsCorticalThickness(ANTSCommand):
     """
 
     input_spec = antsCorticalThicknessInputSpec
-    output_spec = antsCorticalThicknessoutputSpec
+    output_spec = antsCorticalThicknessOutputSpec
     _cmd = 'antsCorticalThickness.sh'
 
     def _format_arg(self, opt, spec, val):
@@ -588,6 +591,86 @@ class antsCorticalThickness(ANTSCommand):
         outputs['BrainVolumes'] = os.path.join(os.getcwd(),
                                                self.inputs.out_prefix +
                                                'brainvols.csv')
+        return outputs
+
+
+class antsBrainExtractionInputSpec(ANTSCommandInputSpec):
+    dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
+                            desc='image dimension (2 or 3)')
+    anatomical_image = File(exists=True, argstr='-a %s',
+                            desc=('Structural image, typically T1.  If more than one'
+                                  'anatomical image is specified, subsequently specified'
+                                  'images are used during the segmentation process.  However,'
+                                  'only the first image is used in the registration of priors.'
+                                  'Our suggestion would be to specify the T1 as the first image.'
+                                  'Anatomical template created using e.g. LPBA40 data set with'
+                                  'buildtemplateparallel.sh in ANTs.'),
+                            mandatory=True)
+    brain_template = File(exists=True, argstr='-e %s',
+                          desc=('Anatomical template created using e.g. LPBA40 data set with'
+                                'buildtemplateparallel.sh in ANTs.'),
+                          mandatory=True)
+    brain_probability_mask = File(exists=True, argstr='-m %s',
+                                  desc=('Brain probability mask created using e.g. LPBA40 data set which'
+                                        'have brain masks defined, and warped to anatomical template and'
+                                        'averaged resulting in a probability image.'),
+                                  copyfile=False, mandatory=True)
+    out_prefix = traits.Str('highres001_', argstr='-o %s', usedefault=True,
+                            desc=('Prefix that is prepended to all output'
+                                  ' files (default = highress001_)'))
+
+    extraction_registration_mask = File(exists=True, argstr='-f %s',
+                                        desc=('Mask (defined in the template space) used during'
+                                              ' registration for brain extraction.'
+                                              'To limit the metric computation to a specific region.'))
+    image_suffix = traits.Str('nii.gz', desc=('any of standard ITK formats,'
+                                              ' nii.gz is default'),
+                              argstr='-s %s', usedefault=True)
+    use_random_seeding = traits.Enum(0, 1, argstr='-u %d',
+                                     desc=('Use random number generated from system clock in Atropos'
+                                           '(default = 1)'))
+    keep_temporary_files = traits.Int(argstr='-k %d',
+                                      desc='Keep brain extraction/segmentation warps, etc (default = 0).')
+    use_floatingpoint_precision = traits.Enum(0, 1, argstr='-q %d',
+                                              desc=('Use floating point precision '
+                                                    'in registrations (default = 0)'))
+    debug = traits.Bool(argstr='-z 1',
+                        desc=('If > 0, runs a faster version of the script.'
+                              'Only for testing. Implies -u 0.'
+                              'Requires single thread computation for complete reproducibility.'))
+
+
+class antsBrainExtractionOutputSpec(TraitedSpec):
+    BrainExtractionMask = File(exists=True, desc='brain extraction mask')
+    BrainExtractionBrain = File(exists=True, desc='brain extraction image')
+
+class antsBrainExtraction(ANTSCommand):
+    """
+    Examples
+    --------
+    >>> from nipype.interfaces.ants.segmentation import antsBrainExtraction
+    >>> brainextraction = antsBrainExtraction()
+    >>> brainextraction.inputs.dimension = 3
+    >>> brainextraction.inputs.anatomical_image ='T1.nii.gz'
+    >>> brainextraction.inputs.brain_template = 'study_template.nii.gz'
+    >>> brainextraction.inputs.brain_probability_mask ='ProbabilityMaskOfStudyTemplate.nii.gz'
+    >>> brainextraction.cmdline
+    'antsBrainExtraction.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -d 3 -s nii.gz -o highres001_'
+    """
+    input_spec = antsBrainExtractionInputSpec
+    output_spec = antsBrainExtractionOutputSpec
+    _cmd = 'antsBrainExtraction.sh'
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['BrainExtractionMask'] = os.path.join(os.getcwd(),
+                                                      self.inputs.out_prefix +
+                                                      'BrainExtractionMask.' +
+                                                      self.inputs.image_suffix)
+        outputs['BrainExtractionBrain'] = os.path.join(os.getcwd(),
+                                                       self.inputs.out_prefix +
+                                                       'BrainExtractionBrain.' +
+                                                       self.inputs.image_suffix)
         return outputs
 
 

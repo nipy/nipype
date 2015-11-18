@@ -6,13 +6,14 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
+
+from builtins import range
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec
 from ..base import (TraitedSpec, File, traits,
-                    isdefined)
+                    isdefined, InputMultiPath)
 from ...utils.filemanip import split_filename
-from nipype.interfaces.base import InputMultiPath
 
 
 class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
@@ -99,7 +100,7 @@ class WarpTimeSeriesImageMultiTransform(ANTSCommand):
         return outputs
 
     def _run_interface(self, runtime):
-        runtime = super(WarpTimeSeriesImageMultiTransform, self)._run_interface(runtime, correct_return_codes = [0,1])
+        runtime = super(WarpTimeSeriesImageMultiTransform, self)._run_interface(runtime, correct_return_codes=[0, 1])
         if "100 % complete" not in runtime.stdout:
             self.raise_exception(runtime)
         return runtime
@@ -112,7 +113,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
                        desc=('image to apply transformation to (generally a '
                               'coregistered functional)'), position=2)
     output_image = File(genfile=True, hash_files=False, argstr='%s',
-                        desc=('name of the output warped image'), position = 3, xor=['out_postfix'])
+                        desc=('name of the output warped image'), position=3, xor=['out_postfix'])
     out_postfix = File("_wimt", usedefault=True, hash_files=False,
                        desc=('Postfix that is prepended to all output '
                              'files (default = _wimt)'), xor=['output_image'])
@@ -381,7 +382,6 @@ class ApplyTransformsToPoints(ANTSCommand):
     input_spec = ApplyTransformsToPointsInputSpec
     output_spec = ApplyTransformsToPointsOutputSpec
 
-
     def _getTransformFileNames(self):
         retval = []
         for ii in range(len(self.inputs.transforms)):
@@ -401,4 +401,3 @@ class ApplyTransformsToPoints(ANTSCommand):
         if opt == "transforms":
             return self._getTransformFileNames()
         return super(ApplyTransformsToPoints, self)._format_arg(opt, spec, val)
-

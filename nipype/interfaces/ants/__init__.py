@@ -11,7 +11,7 @@ from .resampling import ApplyTransforms, ApplyTransformsToPoints, WarpImageMulti
 
 
 # Segmentation Programs
-from .segmentation import Atropos, LaplacianThickness, N4BiasFieldCorrection, JointFusion
+from .segmentation import Atropos, LaplacianThickness, N4BiasFieldCorrection, JointFusion, antsCorticalThickness, antsBrainExtraction
 
 # Visualization Programs
 from .visualization import ConvertScalarImageToRGB, CreateTiledMosaic

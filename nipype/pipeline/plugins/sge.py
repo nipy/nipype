@@ -1,6 +1,8 @@
 """Parallel workflow execution via SGE
 """
 
+from builtins import object
+
 import os
 import pwd
 import re
@@ -24,7 +26,7 @@ def sge_debug_print(message):
     # print DEBUGGING_PREFIX + " " + "=!" * 3 + "  " + message
 
 
-class QJobInfo:
+class QJobInfo(object):
 
     """Information about a single job created by OGE/SGE or similar
     Each job is responsible for knowing it's own refresh state
@@ -95,7 +97,7 @@ class QJobInfo:
         self._job_queue_state = new_state
 
 
-class QstatSubstitute:
+class QstatSubstitute(object):
 
     """A wrapper for Qstat to avoid overloading the
     SGE/OGS server with rapid continuous qstat requests"""
@@ -209,7 +211,7 @@ class QstatSubstitute:
         # were started and finished, and pushed out of the window of review
         # before their state being recorded.  The qacct command is slower, but
         # much more robust for ensuring that a job has completed.
-        for dictionary_job in self._task_dictionary.keys():
+        for dictionary_job in list(self._task_dictionary.keys()):
             if dictionary_job not in current_jobs_parsed:
                 is_completed = self._qacct_verified_complete(dictionary_job)
                 if is_completed:
@@ -271,7 +273,7 @@ class QstatSubstitute:
 
     def print_dictionary(self):
         """For debugging"""
-        for vv in self._task_dictionary.values():
+        for vv in list(self._task_dictionary.values()):
             sge_debug_print(str(vv))
 
     def is_job_pending(self, task_id):
@@ -398,7 +400,7 @@ class SGEPlugin(SGELikeBatchManagerBase):
         while True:
             try:
                 result = cmd.run()
-            except Exception, e:
+            except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
                     time.sleep(
