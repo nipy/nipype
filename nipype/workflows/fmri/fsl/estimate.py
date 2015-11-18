@@ -1,10 +1,12 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-import nipype.interfaces.fsl as fsl          # fsl
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
+from builtins import range
 
-from nipype import LooseVersion
+from ....interfaces import fsl as fsl          # fsl
+from ....interfaces import utility as util     # utility
+from ....pipeline import engine as pe          # pypeline engine
+
+from .... import LooseVersion
 
 
 def create_modelfit_workflow(name='modelfit', f_contrasts=False):
@@ -42,7 +44,7 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
 
     version = 0
     if fsl.Info.version() and \
-        LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
+            LooseVersion(fsl.Info.version()) > LooseVersion('5.0.6'):
         version = 507
 
     modelfit = pe.Workflow(name=name)
@@ -108,7 +110,6 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
                                                         'parameter_estimates']),
                          name='outputspec')
 
-
     """
     Setup the connections
     """
@@ -123,28 +124,28 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
         (inputspec, modelestimate, [('film_threshold', 'threshold'),
                                     ('functional_data', 'in_file')]),
         (level1design, modelgen, [('fsf_files', 'fsf_file'),
-                                ('ev_files', 'ev_files')]),
+                                  ('ev_files', 'ev_files')]),
         (modelgen, modelestimate, [('design_file', 'design_file')]),
 
-        (merge_contrasts, ztopval,[('out', 'in_file')]),
+        (merge_contrasts, ztopval, [('out', 'in_file')]),
         (ztopval, outputspec, [('out_file', 'pfiles')]),
-        (merge_contrasts, outputspec,[('out', 'zfiles')]),
+        (merge_contrasts, outputspec, [('out', 'zfiles')]),
         (modelestimate, outputspec, [('param_estimates', 'parameter_estimates'),
                                      ('dof_file', 'dof_file')]),
-        ])
+    ])
     if version < 507:
         modelfit.connect([
             (modelgen, conestimate, [('con_file', 'tcon_file'),
                                      ('fcon_file', 'fcon_file')]),
             (modelestimate, conestimate, [('param_estimates', 'param_estimates'),
-                                        ('sigmasquareds', 'sigmasquareds'),
-                                        ('corrections', 'corrections'),
-                                        ('dof_file', 'dof_file')]),
+                                          ('sigmasquareds', 'sigmasquareds'),
+                                          ('corrections', 'corrections'),
+                                          ('dof_file', 'dof_file')]),
             (conestimate, merge_contrasts, [('zstats', 'in1'),
-                                              ('zfstats', 'in2')]),
+                                            ('zfstats', 'in2')]),
             (conestimate, outputspec, [('copes', 'copes'),
                                        ('varcopes', 'varcopes')]),
-            ])
+        ])
     else:
         modelfit.connect([
             (modelgen, modelestimate, [('con_file', 'tcon_file'),
@@ -152,8 +153,8 @@ def create_modelfit_workflow(name='modelfit', f_contrasts=False):
             (modelestimate, merge_contrasts, [('zstats', 'in1'),
                                               ('zfstats', 'in2')]),
             (modelestimate, outputspec, [('copes', 'copes'),
-                                       ('varcopes', 'varcopes')]),
-            ])
+                                         ('varcopes', 'varcopes')]),
+        ])
     return modelfit
 
 
@@ -227,8 +228,8 @@ def create_fixed_effects_flow(name='fixedfx'):
                            name="copemerge")
 
     varcopemerge = pe.MapNode(interface=fsl.Merge(dimension='t'),
-                           iterfield=['in_files'],
-                           name="varcopemerge")
+                              iterfield=['in_files'],
+                              name="varcopemerge")
 
     """
     Use :class:`nipype.interfaces.fsl.L2Model` to generate subject and condition
@@ -250,15 +251,15 @@ def create_fixed_effects_flow(name='fixedfx'):
         import nibabel as nb
         import numpy as np
         img = nb.load(cope_files[0])
-        if len(img.get_shape()) > 3:
-            out_data = np.zeros(img.get_shape())
+        if len(img.shape) > 3:
+            out_data = np.zeros(img.shape)
         else:
-            out_data = np.zeros(list(img.get_shape()) + [1])
+            out_data = np.zeros(list(img.shape) + [1])
         for i in range(out_data.shape[-1]):
             dof = np.loadtxt(dof_files[i])
             out_data[:, :, :, i] = dof
         filename = os.path.join(os.getcwd(), 'dof_file.nii.gz')
-        newimg = nb.Nifti1Image(out_data, None, img.get_header())
+        newimg = nb.Nifti1Image(out_data, None, img.header)
         newimg.to_filename(filename)
         return filename
 
@@ -280,8 +281,8 @@ def create_fixed_effects_flow(name='fixedfx'):
                       (varcopemerge, flameo, [('merged_file',
                                                'var_cope_file')]),
                       (level2model, flameo, [('design_mat', 'design_file'),
-                                            ('design_con', 't_con_file'),
-                                            ('design_grp', 'cov_split_file')]),
+                                             ('design_con', 't_con_file'),
+                                             ('design_grp', 'cov_split_file')]),
                       (gendof, flameo, [('dof_volume', 'dof_var_cope_file')]),
                       (flameo, outputspec, [('res4d', 'res4d'),
                                             ('copes', 'copes'),

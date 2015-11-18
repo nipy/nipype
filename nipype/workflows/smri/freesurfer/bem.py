@@ -1,11 +1,10 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import nipype.pipeline.engine as pe
-
-import nipype.interfaces.mne as mne
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.utility as niu
+from ....pipeline import engine as pe
+from ....interfaces import mne as mne
+from ....interfaces import freesurfer as fs
+from ....interfaces import utility as niu
 
 
 def create_bem_flow(name='bem', out_format='stl'):
@@ -59,18 +58,18 @@ def create_bem_flow(name='bem', out_format='stl'):
     watershed_bem = pe.Node(interface=mne.WatershedBEM(), name='WatershedBEM')
 
     surfconvert = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
-                          iterfield=['in_file'],
-                          name='surfconvert')
+                             iterfield=['in_file'],
+                             name='surfconvert')
 
     """
     Connect the nodes
     """
 
     bemflow.connect([
-            (inputnode, watershed_bem, [('subject_id', 'subject_id'),
-                                   ('subjects_dir', 'subjects_dir')]),
-            (watershed_bem, surfconvert, [('mesh_files', 'in_file')]),
-            ])
+        (inputnode, watershed_bem, [('subject_id', 'subject_id'),
+                                    ('subjects_dir', 'subjects_dir')]),
+        (watershed_bem, surfconvert, [('mesh_files', 'in_file')]),
+    ])
 
     """
     Setup an outputnode that defines relevant inputs of the workflow.
@@ -79,6 +78,6 @@ def create_bem_flow(name='bem', out_format='stl'):
     outputnode = pe.Node(niu.IdentityInterface(fields=["meshes"]),
                          name="outputspec")
     bemflow.connect([
-            (surfconvert, outputnode, [("converted", "meshes")]),
-            ])
+        (surfconvert, outputnode, [("converted", "meshes")]),
+    ])
     return bemflow

@@ -6,23 +6,23 @@ Change directory to provide relative paths for doctests
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-from nipype.interfaces.base import (
-    TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
-    File, isdefined, traits)
-from nipype.utils.filemanip import split_filename
 import os.path as op
-import nibabel as nb
-import nibabel.trackvis as nbt
-from nipype.utils.misc import package_check
 import warnings
 
+import nibabel as nb
+import nibabel.trackvis as nbt
+
+from ..base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
+                    File, isdefined, traits)
+from ...utils.filemanip import split_filename
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_dipy = True
 try:
     package_check('dipy', version='0.6.0')
-except Exception, e:
+except Exception as e:
     have_dipy = False
 else:
     from dipy.tracking.utils import density_map
@@ -69,13 +69,14 @@ class TrackDensityMap(BaseInterface):
     output_spec = TrackDensityMapOutputSpec
 
     def _run_interface(self, runtime):
+        from numpy import min_scalar_type
         tracks, header = nbt.read(self.inputs.in_file)
         streams = ((ii[0]) for ii in tracks)
 
         if isdefined(self.inputs.reference):
             refnii = nb.load(self.inputs.reference)
-            affine = refnii.get_affine()
-            data_dims = refnii.get_shape()[:3]
+            affine = refnii.affine
+            data_dims = refnii.shape[:3]
             kwargs = dict(affine=affine)
         else:
             iflogger.warn(('voxel_dims and data_dims are deprecated'
@@ -95,17 +96,15 @@ class TrackDensityMap(BaseInterface):
             kwargs = dict(voxel_size=voxel_size)
 
         data = density_map(streams, data_dims, **kwargs)
-        data = data.astype(np.min_scalar_type(data.max()))
+        data = data.astype(min_scalar_type(data.max()))
         img = nb.Nifti1Image(data, affine)
         out_file = op.abspath(self.inputs.out_filename)
         nb.save(img, out_file)
 
         iflogger.info(
             ('Track density map saved as {i}, size={d}, '
-             'dimensions={v}').format(
-                i=out_file,
-                d=img.get_shape(),
-                v=img.get_header().get_zooms()))
+             'dimensions={v}').format(i=out_file, d=img.shape,
+                                      v=img.header.get_zooms()))
         return runtime
 
     def _list_outputs(self):

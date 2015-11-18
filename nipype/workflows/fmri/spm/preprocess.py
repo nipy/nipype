@@ -3,14 +3,15 @@
 
 import os
 
-import nipype.algorithms.rapidart as ra
-import nipype.interfaces.spm as spm
-import nipype.interfaces.utility as niu
-import nipype.pipeline.engine as pe
-logger = pe.logger
+from ....algorithms import rapidart as ra
+from ....interfaces import spm as spm
+from ....interfaces import utility as niu
+from ....pipeline import engine as pe
 from ....interfaces.matlab import no_matlab
-
 from ...smri.freesurfer.utils import create_getmask_flow
+
+logger = pe.logger
+
 
 def create_spm_preproc(name='preproc'):
     """Create an spm preprocessing workflow with freesurfer registration and
@@ -80,7 +81,7 @@ def create_spm_preproc(name='preproc'):
     realign = pe.Node(spm.Realign(), name='realign')
     workflow.connect(inputnode, 'functionals', realign, 'in_files')
     maskflow = create_getmask_flow()
-    workflow.connect([(inputnode, maskflow, [('subject_id','inputspec.subject_id'),
+    workflow.connect([(inputnode, maskflow, [('subject_id', 'inputspec.subject_id'),
                                              ('subjects_dir', 'inputspec.subjects_dir')])])
     maskflow.inputs.inputspec.contrast_type = 't2'
     workflow.connect(realign, 'mean_image', maskflow, 'inputspec.source_file')
@@ -89,13 +90,13 @@ def create_spm_preproc(name='preproc'):
     workflow.connect(realign, 'realigned_files', smooth, 'in_files')
     artdetect = pe.Node(ra.ArtifactDetect(mask_type='file',
                                           parameter_source='SPM',
-                                          use_differences=[True,False],
+                                          use_differences=[True, False],
                                           use_norm=True,
                                           save_plot=True),
                         name='artdetect')
-    workflow.connect([(inputnode, artdetect,[('norm_threshold', 'norm_threshold'),
-                                             ('zintensity_threshold',
-                                              'zintensity_threshold')])])
+    workflow.connect([(inputnode, artdetect, [('norm_threshold', 'norm_threshold'),
+                                              ('zintensity_threshold',
+                                               'zintensity_threshold')])])
     workflow.connect([(realign, artdetect, [('realigned_files', 'realigned_files'),
                                             ('realignment_parameters',
                                              'realignment_parameters')])])
@@ -116,15 +117,15 @@ def create_spm_preproc(name='preproc'):
                                                        ]),
                          name="outputspec")
     workflow.connect([
-            (maskflow, outputnode, [("outputspec.reg_file", "reg_file")]),
-            (maskflow, outputnode, [("outputspec.reg_cost", "reg_cost")]),
-            (maskflow, outputnode, [(("outputspec.mask_file", poplist), "mask_file")]),
-            (realign, outputnode, [('realignment_parameters', 'realignment_parameters')]),
-            (smooth, outputnode, [('smoothed_files', 'smoothed_files')]),
-            (artdetect, outputnode,[('outlier_files', 'outlier_files'),
-                                    ('statistic_files','outlier_stats'),
-                                    ('plot_files','outlier_plots')])
-            ])
+        (maskflow, outputnode, [("outputspec.reg_file", "reg_file")]),
+        (maskflow, outputnode, [("outputspec.reg_cost", "reg_cost")]),
+        (maskflow, outputnode, [(("outputspec.mask_file", poplist), "mask_file")]),
+        (realign, outputnode, [('realignment_parameters', 'realignment_parameters')]),
+        (smooth, outputnode, [('smoothed_files', 'smoothed_files')]),
+        (artdetect, outputnode, [('outlier_files', 'outlier_files'),
+                                 ('statistic_files', 'outlier_stats'),
+                                 ('plot_files', 'outlier_plots')])
+    ])
     return workflow
 
 
@@ -190,11 +191,11 @@ def create_vbm_preproc(name='vbmpreproc'):
         from numpy import prod
         icv = []
         for session in class_images:
-            voxel_volume = prod(load(session[0][0]).get_header().get_zooms())
+            voxel_volume = prod(load(session[0][0]).header.get_zooms())
             img = load(session[0][0]).get_data() + \
                 load(session[1][0]).get_data() + \
                 load(session[2][0]).get_data()
-            img_icv = (img>0.5).astype(int).sum()*voxel_volume*1e-3
+            img_icv = (img > 0.5).astype(int).sum() * voxel_volume * 1e-3
             icv.append(img_icv)
         return icv
 
@@ -214,12 +215,13 @@ def create_vbm_preproc(name='vbmpreproc'):
                                                        "icv"
                                                        ]),
                          name="outputspec")
-    workflow.connect([(dartel_template, outputnode, [('outputspec.template_file','template_file')]),
+    workflow.connect([(dartel_template, outputnode, [('outputspec.template_file', 'template_file')]),
                       (norm2mni, outputnode, [("normalized_files", "normalized_files")]),
                       (calc_icv, outputnode, [("icv", "icv")]),
                       ])
 
     return workflow
+
 
 def create_DARTEL_template(name='dartel_template'):
     """Create a vbm workflow that generates DARTEL-based template
@@ -251,28 +253,28 @@ def create_DARTEL_template(name='dartel_template'):
                         name='inputspec')
 
     segment = pe.MapNode(spm.NewSegment(),
-                             iterfield=['channel_files'],
-                             name='segment')
+                         iterfield=['channel_files'],
+                         name='segment')
     workflow.connect(inputnode, 'structural_files', segment, 'channel_files')
 
     version = spm.Info.version()
     if version:
         spm_path = version['path']
         if version['name'] == 'SPM8':
-            tissue1 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 1), 2, (True,True), (False, False))
-            tissue2 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 2), 2, (True,True), (False, False))
-            tissue3 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 3), 2, (True,False), (False, False))
-            tissue4 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 4), 3, (False,False), (False, False))
-            tissue5 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 5), 4, (False,False), (False, False))
-            tissue6 = ((os.path.join(spm_path,'toolbox/Seg/TPM.nii'), 6), 2, (False,False), (False, False))
+            tissue1 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 1), 2, (True, True), (False, False))
+            tissue2 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 2), 2, (True, True), (False, False))
+            tissue3 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 3), 2, (True, False), (False, False))
+            tissue4 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 4), 3, (False, False), (False, False))
+            tissue5 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 5), 4, (False, False), (False, False))
+            tissue6 = ((os.path.join(spm_path, 'toolbox/Seg/TPM.nii'), 6), 2, (False, False), (False, False))
         elif version['name'] == 'SPM12':
             spm_path = version['path']
-            tissue1 = ((os.path.join(spm_path,'tpm/TPM.nii'), 1), 1, (True,True), (False, False))
-            tissue2 = ((os.path.join(spm_path,'tpm/TPM.nii'), 2), 1, (True,True), (False, False))
-            tissue3 = ((os.path.join(spm_path,'tpm/TPM.nii'), 3), 2, (True,False), (False, False))
-            tissue4 = ((os.path.join(spm_path,'tpm/TPM.nii'), 4), 3, (False,False), (False, False))
-            tissue5 = ((os.path.join(spm_path,'tpm/TPM.nii'), 5), 4, (False,False), (False, False))
-            tissue6 = ((os.path.join(spm_path,'tpm/TPM.nii'), 6), 2, (False,False), (False, False))
+            tissue1 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 1), 1, (True, True), (False, False))
+            tissue2 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 2), 1, (True, True), (False, False))
+            tissue3 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 3), 2, (True, False), (False, False))
+            tissue4 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 4), 3, (False, False), (False, False))
+            tissue5 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 5), 4, (False, False), (False, False))
+            tissue6 = ((os.path.join(spm_path, 'tpm/TPM.nii'), 6), 2, (False, False), (False, False))
         else:
             logger.critical('Unsupported version of SPM')
 
@@ -301,8 +303,8 @@ def create_DARTEL_template(name='dartel_template'):
                                                        ]),
                          name="outputspec")
     workflow.connect([
-            (dartel, outputnode, [('final_template_file','template_file'),
-                                  ('dartel_flow_fields', 'flow_fields')]),
-            ])
+        (dartel, outputnode, [('final_template_file', 'template_file'),
+                              ('dartel_flow_fields', 'flow_fields')]),
+    ])
 
     return workflow
