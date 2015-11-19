@@ -11,8 +11,7 @@ from builtins import range
 import os
 
 from .base import ANTSCommand, ANTSCommandInputSpec
-from ..base import (TraitedSpec, File, traits,
-                    isdefined, InputMultiPath)
+from ..base import TraitedSpec, File, traits, isdefined, InputMultiPath
 from ...utils.filemanip import split_filename
 
 
@@ -64,7 +63,8 @@ class WarpTimeSeriesImageMultiTransform(ANTSCommand):
     >>> wtsimt.inputs.reference_image = 'ants_deformed.nii.gz'
     >>> wtsimt.inputs.transformation_series = ['ants_Warp.nii.gz','ants_Affine.txt']
     >>> wtsimt.cmdline
-    'WarpTimeSeriesImageMultiTransform 4 resting.nii resting_wtsimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt'
+    'WarpTimeSeriesImageMultiTransform 4 resting.nii resting_wtsimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz \
+ants_Affine.txt'
 
     """
 
@@ -99,7 +99,7 @@ class WarpTimeSeriesImageMultiTransform(ANTSCommand):
                                                         ext)))
         return outputs
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, correct_return_codes=[0]):
         runtime = super(WarpTimeSeriesImageMultiTransform, self)._run_interface(runtime, correct_return_codes=[0, 1])
         if "100 % complete" not in runtime.stdout:
             self.raise_exception(runtime)
@@ -113,7 +113,7 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
                        desc=('image to apply transformation to (generally a '
                               'coregistered functional)'), position=2)
     output_image = File(genfile=True, hash_files=False, argstr='%s',
-                        desc=('name of the output warped image'), position=3, xor=['out_postfix'])
+                        desc='name of the output warped image', position=3, xor=['out_postfix'])
     out_postfix = File("_wimt", usedefault=True, hash_files=False,
                        desc=('Postfix that is prepended to all output '
                              'files (default = _wimt)'), xor=['output_image'])
@@ -159,15 +159,18 @@ class WarpImageMultiTransform(ANTSCommand):
     >>> wimt.inputs.reference_image = 'ants_deformed.nii.gz'
     >>> wimt.inputs.transformation_series = ['ants_Warp.nii.gz','ants_Affine.txt']
     >>> wimt.cmdline
-    'WarpImageMultiTransform 3 structural.nii structural_wimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz ants_Affine.txt'
+    'WarpImageMultiTransform 3 structural.nii structural_wimt.nii -R ants_deformed.nii.gz ants_Warp.nii.gz \
+ants_Affine.txt'
 
     >>> wimt = WarpImageMultiTransform()
     >>> wimt.inputs.input_image = 'diffusion_weighted.nii'
     >>> wimt.inputs.reference_image = 'functional.nii'
-    >>> wimt.inputs.transformation_series = ['func2anat_coreg_Affine.txt','func2anat_InverseWarp.nii.gz','dwi2anat_Warp.nii.gz','dwi2anat_coreg_Affine.txt']
+    >>> wimt.inputs.transformation_series = ['func2anat_coreg_Affine.txt','func2anat_InverseWarp.nii.gz', \
+    'dwi2anat_Warp.nii.gz','dwi2anat_coreg_Affine.txt']
     >>> wimt.inputs.invert_affine = [1]
     >>> wimt.cmdline
-    'WarpImageMultiTransform 3 diffusion_weighted.nii diffusion_weighted_wimt.nii -R functional.nii -i func2anat_coreg_Affine.txt func2anat_InverseWarp.nii.gz dwi2anat_Warp.nii.gz dwi2anat_coreg_Affine.txt'
+    'WarpImageMultiTransform 3 diffusion_weighted.nii diffusion_weighted_wimt.nii -R functional.nii \
+-i func2anat_coreg_Affine.txt func2anat_InverseWarp.nii.gz dwi2anat_Warp.nii.gz dwi2anat_coreg_Affine.txt'
 
     """
 
@@ -221,9 +224,8 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
                        desc=('image to apply transformation to (generally a '
                               'coregistered functional)'),
                        exists=True)
-    output_image = traits.Str(argstr='--output %s',
-                              desc=('output file name'), genfile=True,
-                              hash_files=False)
+    output_image = traits.Str(argstr='--output %s', desc='output file name',
+                              genfile=True, hash_files=False)
     out_postfix = traits.Str("_trans", usedefault=True,
                              desc=('Postfix that is appended to all output '
                                    'files (default = _trans)'))
@@ -240,17 +242,17 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
                                 'Gaussian',
                                 'BSpline',
                                 argstr='%s', usedefault=True)
-    # TODO: Implement these options for multilabel, gaussian, and bspline
-    # interpolation_sigma = traits.Float(requires=['interpolation'])
-    # interpolation_alpha = traits.Float(requires=['interpolation_sigma'])
-    # bspline_order = traits.Int(3, requires=['interpolation'])
+    interpolation_parameters = traits.Either(traits.Tuple(traits.Int()),  # BSpline (order)
+                                             traits.Tuple(traits.Float(),  # Gaussian/MultiLabel (sigma, alpha)
+                                                          traits.Float())
+                                             )
     transforms = InputMultiPath(
-        File(exists=True), argstr='%s', mandatory=True, desc=(''))
+        File(exists=True), argstr='%s', mandatory=True, desc='transform files')
     invert_transform_flags = InputMultiPath(traits.Bool())
-    default_value = traits.Float(
-        0.0, argstr='--default-value %g', usedefault=True)
-    print_out_composite_warp_file = traits.Enum(
-        0, 1, requires=["output_image"], desc=(''))  # TODO: Change to boolean
+    default_value = traits.Float(0.0, argstr='--default-value %g', usedefault=True)
+    print_out_composite_warp_file = traits.Bool(False, requires=["output_image"],
+                                                desc='output a composite warp file instead of a transformed image')
+    float = traits.Bool(argstr='--float %d', default=False, desc='Use float instead of double for computations.')
 
 
 class ApplyTransformsOutputSpec(TraitedSpec):
@@ -275,7 +277,24 @@ class ApplyTransforms(ANTSCommand):
     >>> at.inputs.transforms = ['trans.mat', 'ants_Warp.nii.gz']
     >>> at.inputs.invert_transform_flags = [False, False]
     >>> at.cmdline
-    'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation Linear --output deformed_moving1.nii --reference-image fixed1.nii --transform [trans.mat,0] --transform [ants_Warp.nii.gz,0]'
+    'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation Linear \
+--output deformed_moving1.nii --reference-image fixed1.nii --transform [ trans.mat, 0 ] \
+--transform [ ants_Warp.nii.gz, 0 ]'
+
+    >>> at1 = ApplyTransforms()
+    >>> at1.inputs.dimension = 3
+    >>> at1.inputs.input_image = 'moving1.nii'
+    >>> at1.inputs.reference_image = 'fixed1.nii'
+    >>> at1.inputs.output_image = 'deformed_moving1.nii'
+    >>> at1.inputs.interpolation = 'BSpline'
+    >>> at1.inputs.interpolation_parameters = (5,)
+    >>> at1.inputs.default_value = 0
+    >>> at1.inputs.transforms = ['trans.mat', 'ants_Warp.nii.gz']
+    >>> at1.inputs.invert_transform_flags = [False, False]
+    >>> at1.cmdline
+    'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation BSpline[ 5 ] \
+--output deformed_moving1.nii --reference-image fixed1.nii --transform [ trans.mat, 0 ] \
+--transform [ ants_Warp.nii.gz, 0 ]'
 
 
     """
@@ -292,35 +311,42 @@ class ApplyTransforms(ANTSCommand):
             return output
         return None
 
-    def _getTransformFileNames(self):
+    def _get_transform_filenames(self):
         retval = []
         for ii in range(len(self.inputs.transforms)):
             if isdefined(self.inputs.invert_transform_flags):
                 if len(self.inputs.transforms) == len(self.inputs.invert_transform_flags):
                     invert_code = 1 if self.inputs.invert_transform_flags[
                         ii] else 0
-                    retval.append("--transform [%s,%d]" %
+                    retval.append("--transform [ %s, %d ]" %
                                   (self.inputs.transforms[ii], invert_code))
                 else:
-                    raise Exception("ERROR: The useInverse list must have the same number of entries as the transformsFileName list.")
+                    raise Exception(("ERROR: The useInverse list must have the same number "
+                                     "of entries as the transformsFileName list."))
             else:
                 retval.append("--transform %s" % self.inputs.transforms[ii])
         return " ".join(retval)
 
-    def _getOutputWarpedFileName(self):
+    def _get_output_warped_filename(self):
         if isdefined(self.inputs.print_out_composite_warp_file):
-            return "--output [%s,%s]" % (self._gen_filename("output_image"), self.inputs.print_out_composite_warp_file)
+            return "--output [ %s, %d ]" % (self._gen_filename("output_image"),
+                                            int(self.inputs.print_out_composite_warp_file))
         else:
             return "--output %s" % (self._gen_filename("output_image"))
 
     def _format_arg(self, opt, spec, val):
         if opt == "output_image":
-            return self._getOutputWarpedFileName()
+            return self._get_output_warped_filename()
         elif opt == "transforms":
-            return self._getTransformFileNames()
+            return self._get_transform_filenames()
         elif opt == 'interpolation':
-            # TODO: handle multilabel, gaussian, and bspline options
-            return '--interpolation %s' % self.inputs.interpolation
+            if self.inputs.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
+                    isdefined(self.inputs.interpolation_parameters):
+                return '--interpolation %s[ %s ]' % (self.inputs.interpolation,
+                                                     ', '.join([str(param)
+                                                                for param in self.inputs.interpolation_parameters]))
+            else:
+                return '--interpolation %s' % self.inputs.interpolation
         return super(ApplyTransforms, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
@@ -348,12 +374,12 @@ class ApplyTransformsToPointsInputSpec(ANTSCommandInputSpec):
                             "expecting."),
                       exists=True)
     output_file = traits.Str(argstr='--output %s',
-                             desc=('Name of the output CSV file'), name_source=['input_file'],
+                             desc='Name of the output CSV file', name_source=['input_file'],
                              hash_files=False, name_template='%s_transformed.csv')
     transforms = traits.List(File(exists=True), argstr='%s', mandatory=True,
-                             desc=('transforms that will be applied to the points'))
+                             desc='transforms that will be applied to the points')
     invert_transform_flags = traits.List(traits.Bool(),
-                                         desc=('list indicating if a transform should be reversed'))
+                                         desc='list indicating if a transform should be reversed')
 
 
 class ApplyTransformsToPointsOutputSpec(TraitedSpec):
@@ -374,7 +400,8 @@ class ApplyTransformsToPoints(ANTSCommand):
     >>> at.inputs.transforms = ['trans.mat', 'ants_Warp.nii.gz']
     >>> at.inputs.invert_transform_flags = [False, False]
     >>> at.cmdline
-    'antsApplyTransformsToPoints --dimensionality 3 --input moving.csv --output moving_transformed.csv --transform [trans.mat,0] --transform [ants_Warp.nii.gz,0]'
+    'antsApplyTransformsToPoints --dimensionality 3 --input moving.csv --output moving_transformed.csv \
+--transform [ trans.mat, 0 ] --transform [ ants_Warp.nii.gz, 0 ]'
 
 
     """
@@ -382,22 +409,23 @@ class ApplyTransformsToPoints(ANTSCommand):
     input_spec = ApplyTransformsToPointsInputSpec
     output_spec = ApplyTransformsToPointsOutputSpec
 
-    def _getTransformFileNames(self):
+    def _get_transform_filenames(self):
         retval = []
         for ii in range(len(self.inputs.transforms)):
             if isdefined(self.inputs.invert_transform_flags):
                 if len(self.inputs.transforms) == len(self.inputs.invert_transform_flags):
                     invert_code = 1 if self.inputs.invert_transform_flags[
                         ii] else 0
-                    retval.append("--transform [%s,%d]" %
+                    retval.append("--transform [ %s, %d ]" %
                                   (self.inputs.transforms[ii], invert_code))
                 else:
-                    raise Exception("ERROR: The useInverse list must have the same number of entries as the transformsFileName list.")
+                    raise Exception(("ERROR: The useInverse list must have the same number "
+                                     "of entries as the transformsFileName list."))
             else:
                 retval.append("--transform %s" % self.inputs.transforms[ii])
         return " ".join(retval)
 
     def _format_arg(self, opt, spec, val):
         if opt == "transforms":
-            return self._getTransformFileNames()
+            return self._get_transform_filenames()
         return super(ApplyTransformsToPoints, self)._format_arg(opt, spec, val)
