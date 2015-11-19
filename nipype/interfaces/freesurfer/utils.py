@@ -360,7 +360,7 @@ class SurfaceTransform(FSCommand):
                 source = self.inputs.source_file
             else:
                 source = self.inputs.source_annot_file
-                
+
             # Some recon-all files don't have a proper extension (e.g. "lh.thickness")
             # so we have to account for that here
             bad_extensions = [".%s" % e for e in ["area", "mid", "pial", "avg_curv", "curv", "inflated",
