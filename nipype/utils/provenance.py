@@ -83,7 +83,7 @@ def get_hashval(inputdict, skip=None):
         dict_nofilename[outname] = _get_sorteddict(val)
         dict_withhash[outname] = _get_sorteddict(val, True)
         sorted_dict = str(sorted(dict_nofilename.items()))
-    return (dict_withhash, md5(str(dict_nofilename).encode()).hexdigest())
+    return (dict_withhash, md5(sorted_dict.encode()).hexdigest())
 
 
 def _get_sorteddict(object, dictwithhash=False):
