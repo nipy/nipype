@@ -1136,7 +1136,7 @@ def merge_bundles(g1, g2):
     return g1
 
 
-def write_workflow_prov(graph, filename=None, format='turtle'):
+def write_workflow_prov(graph, filename=None, format='all'):
     """Write W3C PROV Model JSON file
     """
     if not filename:
@@ -1155,7 +1155,7 @@ def write_workflow_prov(graph, filename=None, format='turtle'):
                  nipype_ns['hashval']: hashval}
         process = ps.g.activity(get_id(), None, None, attrs)
         if isinstance(result.runtime, list):
-            process.add_extra_attributes({pm.PROV["type"]: nipype_ns["MapNode"]})
+            process.add_attributes({pm.PROV["type"]: nipype_ns["MapNode"]})
             # add info about sub processes
             for idx, runtime in enumerate(result.runtime):
                 subresult = InterfaceResult(result.interface[idx],
@@ -1185,18 +1185,11 @@ def write_workflow_prov(graph, filename=None, format='turtle'):
                           starter=processes[nodes.index(edgeinfo[0])])
 
     # write provenance
-    try:
-        if format in ['turtle', 'all']:
-            ps.g.rdf().serialize(filename + '.ttl', format='turtle')
-    except (ImportError, NameError):
-        format = 'all'
-    finally:
-        if format in ['provn', 'all']:
-            with open(filename + '.provn', 'wt') as fp:
-                fp.writelines(ps.g.get_provn())
-        if format in ['json', 'all']:
-            with open(filename + '.json', 'wt') as fp:
-                pm.json.dump(ps.g, fp, cls=pm.ProvBundle.JSONEncoder)
+    if format in ['provn', 'all']:
+        with open(filename + '.provn', 'wt') as fp:
+            fp.writelines(ps.g.get_provn())
+    if format in ['json', 'all']:
+        ps.g.serialize(filename + '.json', format='json')
     return ps.g
 
 

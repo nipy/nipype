@@ -7,3 +7,4 @@ nibabel>=2.0.1
 nose>=1.2
 future==0.15.2
 simplejson
+prov>=1.4.0
