@@ -202,9 +202,9 @@ def prov_encode(graph, value, create_container=True):
                     entities.append(item_entity)
                     if isinstance(item, list):
                         continue
-                    if not isinstance(item_entity.value[0], string_types):
+                    if not isinstance(list(item_entity.value)[0], string_types):
                         raise ValueError('Not a string literal')
-                    if 'file://' not in item_entity.value[0]:
+                    if 'file://' not in list(item_entity.value)[0]:
                         raise ValueError('No file found')
                 id = get_id()
                 entity = graph.collection(identifier=id)
