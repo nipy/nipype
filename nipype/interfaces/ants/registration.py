@@ -380,9 +380,6 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
     winsorize_lower_quantile = traits.Range(
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
 
-    # Verbose Output
-    verbose = traits.Bool(True, argstr='--verbose %d', desc='enable verbose logging', usedefault=True)
-
 
 class RegistrationOutputSpec(TraitedSpec):
     forward_transforms = traits.List(
@@ -444,7 +441,7 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
     >>> reg1.run()  # doctest: +SKIP
 
     >>> reg2 = copy.deepcopy(reg)
@@ -457,7 +454,7 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1'
 
     >>> reg3 = copy.deepcopy(reg)
     >>> reg3.inputs.winsorize_lower_quantile = 0.025
@@ -470,7 +467,7 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
 
     >>> reg3a = copy.deepcopy(reg)
     >>> reg3a.inputs.float = True
@@ -482,7 +479,7 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
 
     >>> reg3b = copy.deepcopy(reg)
@@ -495,7 +492,7 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
 
     >>> # Test collapse transforms flag
@@ -523,7 +520,7 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
 
     >>> # Test collapse transforms flag
@@ -551,7 +548,7 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 0'
 
     >>> # Test multiple metrics per stage
@@ -572,7 +569,7 @@ class Registration(ANTSCommand):
 --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] \
 --metric CC[ fixed1.nii, moving1.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
     >>> # Test multiple inputs
     >>> reg6 = copy.deepcopy(reg5)
@@ -587,7 +584,7 @@ class Registration(ANTSCommand):
 --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] \
 --metric CC[ fixed2.nii, moving2.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
     >>> # Test Interpolation Parameters (BSpline)
     >>> reg7a = copy.deepcopy(reg)
@@ -601,7 +598,7 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
     >>> # Test Interpolation Parameters (MultiLabel/Gaussian)
     >>> reg7b = copy.deepcopy(reg)
@@ -615,7 +612,7 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
 
     >>> # Test Extended Transform Parameters
@@ -630,7 +627,7 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform BSplineSyN[ 0.25, 26, 0, 3 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --verbose 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
     """
     DEF_SAMPLING_STRATEGY = 'None'
     """The default sampling strategy argument."""

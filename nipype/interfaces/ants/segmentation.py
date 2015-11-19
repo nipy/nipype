@@ -52,8 +52,6 @@ class AtroposInputSpec(ANTSCommandInputSpec):
     save_posteriors = traits.Bool()
     output_posteriors_name_template = traits.Str('POSTERIOR_%02d.nii.gz',
                                                  usedefault=True)
-    # Verbose Output
-    verbose = traits.Bool(True, argstr='--verbose %d', desc='enable verbose logging', usedefault=True)
 
 
 class AtroposOutputSpec(TraitedSpec):
@@ -95,8 +93,7 @@ class Atropos(ANTSCommand):
     'Atropos --image-dimensionality 3 --icm [1,1] \
 --initialization PriorProbabilityImages[2,priors/priorProbImages%02d.nii,0.8,1e-07] --intensity-image structural.nii \
 --likelihood-model Gaussian --mask-image mask.nii --mrf [0.2,1x1x1] --convergence [5,1e-06] \
---output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1] --use-random-seed 1 \
---verbose 1'
+--output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1] --use-random-seed 1'
     """
     input_spec = AtroposInputSpec
     output_spec = AtroposOutputSpec

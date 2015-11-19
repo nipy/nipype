@@ -253,8 +253,6 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
     print_out_composite_warp_file = traits.Bool(False, requires=["output_image"],
                                                 desc='output a composite warp file instead of a transformed image')
     float = traits.Bool(argstr='--float %d', default=False, desc='Use float instead of double for computations.')
-    # Verbose Output
-    verbose = traits.Bool(True, argstr='--verbose %d', desc='enable verbose logging', usedefault=True)
 
 
 class ApplyTransformsOutputSpec(TraitedSpec):
@@ -281,7 +279,7 @@ class ApplyTransforms(ANTSCommand):
     >>> at.cmdline
     'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation Linear \
 --output deformed_moving1.nii --reference-image fixed1.nii --transform [ trans.mat, 0 ] \
---transform [ ants_Warp.nii.gz, 0 ] --verbose 1'
+--transform [ ants_Warp.nii.gz, 0 ]'
 
     >>> at1 = ApplyTransforms()
     >>> at1.inputs.dimension = 3
@@ -296,7 +294,7 @@ class ApplyTransforms(ANTSCommand):
     >>> at1.cmdline
     'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation BSpline[ 5 ] \
 --output deformed_moving1.nii --reference-image fixed1.nii --transform [ trans.mat, 0 ] \
---transform [ ants_Warp.nii.gz, 0 ] --verbose 1'
+--transform [ ants_Warp.nii.gz, 0 ]'
 
 
     """

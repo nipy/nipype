@@ -64,9 +64,6 @@ def test_Atropos_inputs():
     use_random_seed=dict(argstr='--use-random-seed %d',
     usedefault=True,
     ),
-    verbose=dict(argstr='--verbose %d',
-    usedefault=True,
-    ),
     )
     inputs = Atropos.input_spec()
 
