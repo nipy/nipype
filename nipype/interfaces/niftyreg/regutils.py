@@ -170,6 +170,10 @@ class RegToolsInputSpec(NIFTYREGCommandInputSpec):
     smo_s_val = traits.Tuple(traits.Float, traits.Float, traits.Float,
                              desc='Smooth the input image using a cubic spline kernel',
                              argstr='-smoS %f %f %f')
+    # Change the resolution of the input image
+    chg_res_val = traits.Tuple(traits.Float, traits.Float, traits.Float,
+                               desc='Change the resolution of the input image',
+                               argstr='-chgres %f %f %f')
     # Smoothing using Gaussian kernel
     smo_g_val = traits.Tuple(traits.Float, traits.Float, traits.Float,
                              desc='Smooth the input image using a Gaussian kernel',
