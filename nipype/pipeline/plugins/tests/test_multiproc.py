@@ -103,7 +103,7 @@ def find_metrics(nodes, last_node):
             node_finish = parse(nodes[j]['finish'])
 
             if node_start < x and node_finish > x:
-                total_memory[i] += nodes[j]['memory']
+                total_memory[i] += nodes[j]['estimated_memory']
                 total_threads[i] += nodes[j]['num_threads']
                 start_index = j
 
@@ -140,10 +140,10 @@ def test_do_not_use_more_memory_then_specified():
     n3 = pe.Node(interface=TestInterfaceSingleNode(), name='n3')
     n4 = pe.Node(interface=TestInterfaceSingleNode(), name='n4')
 
-    n1.interface.memory = 1
-    n2.interface.memory = 1
-    n3.interface.memory = 10
-    n4.interface.memory = 1
+    n1.interface.estimated_memory = 1
+    n2.interface.estimated_memory = 1
+    n3.interface.estimated_memory = 10
+    n4.interface.estimated_memory = 1
 
     pipe.connect(n1, 'output1', n2, 'input1')
     pipe.connect(n1, 'output1', n3, 'input1')

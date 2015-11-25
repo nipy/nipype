@@ -133,7 +133,7 @@ def draw_memory_bar(start, total_duration, nodes, space_between_minutes, minute_
             node_finish = parser.parse(nodes[j]['finish'])
 
             if node_start <= now and node_finish >= now:
-                memory[i] += nodes[j]['memory']
+                memory[i] += nodes[j]['estimated_memory']
             if node_start > now:
                 break
         now += datetime.timedelta(minutes=1)

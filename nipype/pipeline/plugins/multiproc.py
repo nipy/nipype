@@ -177,7 +177,7 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
         busy_memory = 0
         busy_processors = 0
         for jobid in jobids:
-            busy_memory+= self.procs[jobid]._interface.memory
+            busy_memory+= self.procs[jobid]._interface.estimated_memory
             busy_processors+= self.procs[jobid]._interface.num_threads
                 
         free_memory = self.memory - busy_memory
@@ -190,7 +190,7 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
 
         #sort jobs ready to run first by memory and then by number of threads
         #The most resource consuming jobs run first
-        jobids = sorted(jobids, key=lambda item: (self.procs[item]._interface.memory, self.procs[item]._interface.num_threads))
+        jobids = sorted(jobids, key=lambda item: (self.procs[item]._interface.estimated_memory, self.procs[item]._interface.num_threads))
 
         logger.debug('Free memory: %d, Free processors: %d', free_memory, free_processors)
 
@@ -198,9 +198,9 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
         #while have enough memory and processors for first job
         #submit first job on the list
         for jobid in jobids:
-            logger.debug('Next Job: %d, memory: %d, threads: %d' %(jobid, self.procs[jobid]._interface.memory, self.procs[jobid]._interface.num_threads))
+            logger.debug('Next Job: %d, memory: %d, threads: %d' %(jobid, self.procs[jobid]._interface.estimated_memory, self.procs[jobid]._interface.num_threads))
 
-            if self.procs[jobid]._interface.memory <= free_memory and self.procs[jobid]._interface.num_threads <= free_processors:
+            if self.procs[jobid]._interface.estimated_memory <= free_memory and self.procs[jobid]._interface.num_threads <= free_processors:
                 logger.info('Executing: %s ID: %d' %(self.procs[jobid]._id, jobid))
                 executing_now.append(self.procs[jobid])
                 
@@ -220,7 +220,7 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
                 self.proc_done[jobid] = True
                 self.proc_pending[jobid] = True
 
-                free_memory -= self.procs[jobid]._interface.memory
+                free_memory -= self.procs[jobid]._interface.estimated_memory
                 free_processors -= self.procs[jobid]._interface.num_threads
 
                 # Send job to task manager and add to pending tasks

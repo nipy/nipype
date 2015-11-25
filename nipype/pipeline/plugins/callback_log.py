@@ -7,7 +7,7 @@ def log_nodes_cb(node, status):
     if status == 'start':
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' +\
         node._id + '"' + ',"start":' + '"' +str(datetime.datetime.now()) +\
-        '"' + ',"memory":' + str(node._interface.memory) + ',"num_threads":' \
+        '"' + ',"memory":' + str(node._interface.estimated_memory) + ',"num_threads":' \
         + str(node._interface.num_threads) +  '}'
 
         logger.debug(message)
@@ -15,7 +15,7 @@ def log_nodes_cb(node, status):
     elif status == 'end':
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' + \
         node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) +\
-        '"' + ',"memory":' + str(node._interface.memory) + ',"num_threads":' \
+        '"' + ',"memory":' + str(node._interface.estimated_memory) + ',"num_threads":' \
         + str(node._interface.num_threads) +  '}'
 
         logger.debug(message)
@@ -23,7 +23,7 @@ def log_nodes_cb(node, status):
     else:
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' + \
         node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) +\
-        '"' + ',"memory":' + str(node._interface.memory) + ',"num_threads":' \
+        '"' + ',"memory":' + str(node._interface.estimated_memory) + ',"num_threads":' \
         + str(node._interface.num_threads) + ',"error":"True"}'
 
         logger.debug(message)
