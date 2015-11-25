@@ -13,8 +13,18 @@ import sys
 from .base import (DistributedPluginBase, report_crash)
 
 
-def run_node(node, updatehash):
+def run_node(node, updatehash, plugin_args=None):
     result = dict(result=None, traceback=None)
+    try:
+        run_memory = plugin_args['memory_profile']
+    except Exception:
+        run_memory = False
+    if run_memory:
+        import memory_profiler
+        proc = (node.run(), (), {'updatehash' : updatehash})
+        mem_mb, retval = memory_profiler.memory_usage(proc, max_usage=True, retval=True)
+        result['result'] = retval
+        node._interface.real_memory = mem_mb[0]/1024.0
     try:
         result['result'] = node.run(updatehash=updatehash)
     except:
@@ -160,8 +170,9 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
                 node.inputs.terminal_output = 'allatonce'
         except:
             pass
-        self._taskresult[self._taskid] = self.pool.apply_async(run_node, (node,
-                                                                updatehash,), callback=release_lock)
+        self._taskresult[self._taskid] = self.pool.apply_async(run_node,
+                                                               (node, updatehash, self.plugin_args),
+                                                               callback=release_lock)
         return self._taskid
 
     def _send_procs_to_workers(self, updatehash=False, graph=None):
