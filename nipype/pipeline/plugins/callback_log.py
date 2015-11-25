@@ -1,7 +1,7 @@
 import datetime
 import logging
 
-def log_nodes_cb(node, status):
+def log_nodes_cb(node, status, result=None):
     print 'status', status
     logger = logging.getLogger('callback')
     if status == 'start':
@@ -16,7 +16,7 @@ def log_nodes_cb(node, status):
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' + \
         node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) +\
         '"' + ',"memory":' + str(node._interface.estimated_memory) + ',"num_threads":' \
-        + str(node._interface.num_threads) + ',"real memory":' str(node._interface.real_memory) + '}'
+        + str(node._interface.num_threads) + ',"real memory":' + str(result['real_memory']) + '}'
 
         logger.debug(message)
 

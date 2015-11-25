@@ -751,8 +751,16 @@ class BaseInterface(Interface):
                             self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
         self.estimated_memory = 1
-        self.real_memory = 0
+        self._real_memory = 0
         self.num_threads = 1
+
+    @property
+    def real_memory(self):
+        return self._real_memory
+
+    @real_memory.setter
+    def real_memory(self, value):
+        self._real_memory = value
 
     @classmethod
     def help(cls, returnhelp=False):

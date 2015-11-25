@@ -21,16 +21,20 @@ def run_node(node, updatehash, plugin_args=None):
         run_memory = False
     if run_memory:
         import memory_profiler
-        proc = (node.run(), (), {'updatehash' : updatehash})
+        proc = (node.run, (), {'updatehash' : updatehash})
         mem_mb, retval = memory_profiler.memory_usage(proc, max_usage=True, retval=True)
         result['result'] = retval
-        node._interface.real_memory = mem_mb[0]/1024.0
-    try:
-        result['result'] = node.run(updatehash=updatehash)
-    except:
-        etype, eval, etr = sys.exc_info()
-        result['traceback'] = format_exception(etype,eval,etr)
-        result['result'] = node.result
+        result['real_memory'] = 100
+        print 'Just populated task result!!!!!!!!!!!!!!!!!!!'
+        print result
+        #node._interface.real_memory = mem_mb[0]/1024.0
+    else:
+        try:
+            result['result'] = node.run(updatehash=updatehash)
+        except:
+            etype, eval, etr = sys.exc_info()
+            result['traceback'] = format_exception(etype,eval,etr)
+            result['result'] = node.result
     return result
 
 
@@ -173,6 +177,8 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
         self._taskresult[self._taskid] = self.pool.apply_async(run_node,
                                                                (node, updatehash, self.plugin_args),
                                                                callback=release_lock)
+        print 'Printing on output!!!!!!!!!!'
+        print self._taskresult, self._taskid
         return self._taskid
 
     def _send_procs_to_workers(self, updatehash=False, graph=None):
@@ -237,7 +243,6 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
                 # Send job to task manager and add to pending tasks
                 if self._status_callback:
                     self._status_callback(self.procs[jobid], 'start')
-                
                 if str2bool(self.procs[jobid].config['execution']['local_hash_check']):
                     logger.debug('checking hash locally')
                     try:

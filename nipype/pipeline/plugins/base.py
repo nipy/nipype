@@ -416,7 +416,10 @@ class DistributedPluginBase(PluginBase):
         logger.info('[Job finished] jobname: %s jobid: %d' %
                     (self.procs[jobid]._id, jobid))
         if self._status_callback:
-            self._status_callback(self.procs[jobid], 'end')
+            print '!!!!!!!!!!!!!!!!!!!'
+            print self._taskresult
+            print self._taskresult.keys()
+            self._status_callback(self.procs[jobid], 'end', self._taskresult[self.taskresultid])
         # Update job and worker queues
         self.proc_pending[jobid] = False
         # update the job dependency structure
