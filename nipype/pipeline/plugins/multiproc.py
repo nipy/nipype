@@ -22,12 +22,10 @@ def run_node(node, updatehash, plugin_args=None):
     if run_memory:
         import memory_profiler
         proc = (node.run, (), {'updatehash' : updatehash})
-        mem_mb, retval = memory_profiler.memory_usage(proc, max_usage=True, retval=True)
+        mem_mb, retval = memory_profiler.memory_usage(proc=proc, retval=True, include_children=True, max_usage=True)
         result['result'] = retval
-        result['real_memory'] = 100
-        print 'Just populated task result!!!!!!!!!!!!!!!!!!!'
-        print result
-        #node._interface.real_memory = mem_mb[0]/1024.0
+        result['real_memory'] = mem_mb[0]/1024.0
+        result['real_memory2'] = retval.runtime.get('real_memory2')
     else:
         try:
             result['result'] = node.run(updatehash=updatehash)
@@ -177,8 +175,6 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
         self._taskresult[self._taskid] = self.pool.apply_async(run_node,
                                                                (node, updatehash, self.plugin_args),
                                                                callback=release_lock)
-        print 'Printing on output!!!!!!!!!!'
-        print self._taskresult, self._taskid
         return self._taskid
 
     def _send_procs_to_workers(self, updatehash=False, graph=None):

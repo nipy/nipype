@@ -241,7 +241,8 @@ class DistributedPluginBase(PluginBase):
                             notrun.append(self._clean_queue(jobid, graph,
                                                             result=result))
                         else:
-                            self._task_finished_cb(jobid)
+                            print "DJC: Calling task finished for %s cb from DistributedPluginBase.run"%(str(taskid))
+                            self._task_finished_cb(jobid, result)
                             self._remove_node_dirs()
                         self._clear_task(taskid)
                     else:
@@ -379,6 +380,7 @@ class DistributedPluginBase(PluginBase):
                                  )
                                ):
                                 continue_with_submission = False
+                                print "DJC: Calling task finised cb from DistributedPluginBase._send_procs_to_workers hash==true"
                                 self._task_finished_cb(jobid)
                                 self._remove_node_dirs()
                         except Exception:
@@ -395,6 +397,7 @@ class DistributedPluginBase(PluginBase):
                                 self.procs[jobid].run()
                             except Exception:
                                 self._clean_queue(jobid, graph)
+                            print "DJC: Calling task finised cb from DistributedPluginBase._send_procs_to_workers continue_with_submission==true"
                             self._task_finished_cb(jobid)
                             self._remove_node_dirs()
                         else:
@@ -408,7 +411,7 @@ class DistributedPluginBase(PluginBase):
             else:
                 break
 
-    def _task_finished_cb(self, jobid):
+    def _task_finished_cb(self, jobid, result=None):
         """ Extract outputs and assign to inputs of dependent tasks
 
         This is called when a job is completed.
@@ -416,10 +419,15 @@ class DistributedPluginBase(PluginBase):
         logger.info('[Job finished] jobname: %s jobid: %d' %
                     (self.procs[jobid]._id, jobid))
         if self._status_callback:
-            print '!!!!!!!!!!!!!!!!!!!'
-            print self._taskresult
-            print self._taskresult.keys()
-            self._status_callback(self.procs[jobid], 'end', self._taskresult[self.taskresultid])
+            if result == None:
+                if self._taskresult.has_key(jobid):
+                    result = self._taskresult[jobid].get()
+                    print 'MMMM'
+                    print result['real_memory'], result['real_memory2']
+                else:
+                    print "DJC: %s not found, taskresult keys are: %s"%(str(jobid),":".join([str(k) for k in self._taskresult.keys()]))
+                    result = {'real_memory' : 'nokey'}
+            self._status_callback(self.procs[jobid], 'end', result)
         # Update job and worker queues
         self.proc_pending[jobid] = False
         # update the job dependency structure
