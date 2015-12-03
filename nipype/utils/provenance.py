@@ -119,7 +119,7 @@ def safe_encode(x, as_literal=True):
     if x is None:
         value = "Unknown"
         if as_literal:
-            return pm.Literal(value, pm.XSD['string'])
+            return pm.Literal(value.decode('utf-8'), pm.XSD['string'])
         else:
             return value
     try:
@@ -131,7 +131,7 @@ def safe_encode(x, as_literal=True):
                 try:
                     return pm.URIRef(value)
                 except AttributeError:
-                    return pm.Literal(value, pm.XSD['anyURI'])
+                    return pm.Literal(value.decode('utf-8'), pm.XSD['anyURI'])
             else:
                 if len(x) > max_text_len:
                     value = x[:max_text_len - 13] + ['...Clipped...']
@@ -139,7 +139,7 @@ def safe_encode(x, as_literal=True):
                     value = x
                 if not as_literal:
                     return value
-                return pm.Literal(value, pm.XSD['string'])
+                return pm.Literal(value.decode('utf-8'), pm.XSD['string'])
         if isinstance(x, int):
             if not as_literal:
                 return x
@@ -158,7 +158,7 @@ def safe_encode(x, as_literal=True):
                     outdict[key] = encoded_value
             if not as_literal:
                 return simplejson.dumps(outdict)
-            return pm.Literal(simplejson.dumps(outdict), pm.XSD['string'])
+            return pm.Literal(simplejson.dumps(outdict).decode('utf-8'), pm.XSD['string'])
         if isinstance(x, list):
             try:
                 nptype = np.array(x).dtype
@@ -176,7 +176,7 @@ def safe_encode(x, as_literal=True):
                 outlist = x
             if not as_literal:
                 return simplejson.dumps(outlist)
-            return pm.Literal(simplejson.dumps(outlist), pm.XSD['string'])
+            return pm.Literal(simplejson.dumps(outlist).decode('utf-8'), pm.XSD['string'])
         if not as_literal:
             return dumps(x)
         return pm.Literal(dumps(x), nipype_ns['pickle'])
@@ -185,7 +185,7 @@ def safe_encode(x, as_literal=True):
         value = "Could not encode: " + str(e)
         if not as_literal:
             return value
-        return pm.Literal(value, pm.XSD['string'])
+        return pm.Literal(value.decode('utf-8'), pm.XSD['string'])
 
 
 def prov_encode(graph, value, create_container=True):
