@@ -1173,7 +1173,7 @@ def write_workflow_prov(graph, filename=None, format='all'):
                 ps.g.wasGeneratedBy(sub_bundle, process)
         else:
             process.add_attributes({pm.PROV["type"]: nipype_ns["Node"]})
-            result_bundle = ProvStore().add_results(result)
+            result_bundle = ProvStore().add_results(result).bundle()
             ps.g = merge_bundles(ps.g, result_bundle)
             ps.g.wasGeneratedBy(result_bundle, process)
         processes.append(process)
