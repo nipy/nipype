@@ -125,7 +125,6 @@ def safe_encode(x, as_literal=True):
             return value
     try:
         if isinstance(x, (str, string_types)):
-            iflogger.info(type(x))
             if os.path.exists(x):
                 value = 'file://%s%s' % (getfqdn(), x)
                 if not as_literal:
