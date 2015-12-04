@@ -9,7 +9,7 @@ from ..base import (TraitedSpec, BaseInterface,
                     BaseInterfaceInputSpec, isdefined,
                     OutputMultiPath, InputMultiPath)
 from ..base import File, traits
-from ..utils.filemanip import split_filename, fname_presuffix, filename_to_list, list_to_filename
+from ...utils.filemanip import split_filename, fname_presuffix, filename_to_list, list_to_filename
 
 
 class Analyze2niiInputSpec(SPMCommandInputSpec):

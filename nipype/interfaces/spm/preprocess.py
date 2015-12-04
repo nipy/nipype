@@ -26,8 +26,8 @@ from ..base import (OutputMultiPath, TraitedSpec, isdefined,
 from .base import (SPMCommand, scans_for_fname,
                    func_is_3d, Info,
                    scans_for_fnames, SPMCommandInputSpec)
-from ..utils.filemanip import (fname_presuffix, filename_to_list,
-                               list_to_filename, split_filename)
+from ...utils.filemanip import (fname_presuffix, filename_to_list,
+                                list_to_filename, split_filename)
 
 
 class SliceTimingInputSpec(SPMCommandInputSpec):
