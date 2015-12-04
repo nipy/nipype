@@ -15,6 +15,7 @@ except:
 
 from .base import (DistributedPluginBase, logger, report_crash)
 
+
 class IPythonXPlugin(DistributedPluginBase):
     """Execute workflow with ipython
     """
@@ -36,11 +37,11 @@ class IPythonXPlugin(DistributedPluginBase):
             __import__(name)
             self.ipyclient = sys.modules[name]
         except ImportError:
-            raise ImportError("Ipython kernel not found. Parallel execution " \
+            raise ImportError("Ipython kernel not found. Parallel execution "
                               "will be unavailable")
         try:
             self.taskclient = self.ipyclient.TaskClient()
-        except Exception, e:
+        except Exception as e:
             if isinstance(e, ConnectionRefusedError):
                 raise Exception("No IPython clients found.")
             if isinstance(e, ValueError):
@@ -63,10 +64,10 @@ except:
     result = task.result
 """
         task = self.ipyclient.StringTask(cmdstr,
-                                         push = dict(task=node,
-                                                     updatehash=updatehash),
-                                         pull = ['result','traceback'])
-        return self.taskclient.run(task, block = False)
+                                         push=dict(task=node,
+                                                   updatehash=updatehash),
+                                         pull=['result', 'traceback'])
+        return self.taskclient.run(task, block=False)
 
     def _report_crash(self, node, result=None):
         if result and result['traceback']:
@@ -79,5 +80,5 @@ except:
 
     def _clear_task(self, taskid):
         if IPyversion >= '0.10.1':
-            logger.debug("Clearing id: %d"%taskid)
+            logger.debug("Clearing id: %d" % taskid)
             self.taskclient.clear(taskid)

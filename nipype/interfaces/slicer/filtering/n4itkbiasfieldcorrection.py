@@ -46,4 +46,4 @@ acknowledgements: The development of this module was partially supported by NIH 
     input_spec = N4ITKBiasFieldCorrectionInputSpec
     output_spec = N4ITKBiasFieldCorrectionOutputSpec
     _cmd = "N4ITKBiasFieldCorrection "
-    _outputs_filenames = {'outputimage':'outputimage.nii','outputbiasfield':'outputbiasfield.nii'}
+    _outputs_filenames = {'outputimage': 'outputimage.nii', 'outputbiasfield': 'outputbiasfield.nii'}

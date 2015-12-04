@@ -17,6 +17,11 @@
     >>> os.chdir(datadir)
 
 """
+
+from builtins import zip
+from builtins import filter
+from builtins import range
+
 import glob
 import fnmatch
 import string
@@ -29,11 +34,19 @@ import tempfile
 from warnings import warn
 
 import sqlite3
-from nipype.utils.misc import human_order_sorted
-from nipype.external import six
 
-from ..utils.misc import str2bool
+from .base import (TraitedSpec, traits, File, Directory,
+                   BaseInterface, InputMultiPath, isdefined,
+                   OutputMultiPath, DynamicTraitedSpec,
+                   Undefined, BaseInterfaceInputSpec)
 from .. import config
+from ..external.six import string_types
+from ..utils.filemanip import (copyfile, list_to_filename,
+                               filename_to_list)
+from ..utils.misc import human_order_sorted
+from ..utils.misc import str2bool
+from .. import logging
+iflogger = logging.getLogger('interface')
 
 try:
     import pyxnat
@@ -51,16 +64,6 @@ try:
 except:
     pass
 
-from nipype.interfaces.base import (TraitedSpec, traits, File, Directory,
-                                    BaseInterface, InputMultiPath, isdefined,
-                                    OutputMultiPath, DynamicTraitedSpec,
-                                    Undefined, BaseInterfaceInputSpec)
-from nipype.utils.filemanip import (copyfile, list_to_filename,
-                                    filename_to_list)
-
-from .. import logging
-iflogger = logging.getLogger('interface')
-
 
 def copytree(src, dst, use_hardlink=False):
     """Recursively copy a directory tree using
@@ -73,7 +76,7 @@ def copytree(src, dst, use_hardlink=False):
     names = os.listdir(src)
     try:
         os.makedirs(dst)
-    except OSError, why:
+    except OSError as why:
         if 'File exists' in why:
             pass
         else:
@@ -88,11 +91,11 @@ def copytree(src, dst, use_hardlink=False):
             else:
                 copyfile(srcname, dstname, True, hashmethod='content',
                          use_hardlink=use_hardlink)
-        except (IOError, os.error), why:
+        except (IOError, os.error) as why:
             errors.append((srcname, dstname, str(why)))
         # catch the Error from the recursive copytree so that we can
         # continue with other files
-        except Exception, err:
+        except Exception as err:
             errors.extend(err.args[0])
     if errors:
         raise Exception(errors)
@@ -216,7 +219,7 @@ class DataSink(IOBase):
         >>> ds.inputs.structural = 'structural.nii'
         >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
         >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
-        >>> ds.run() # doctest: +SKIP
+        >>> ds.run()  # doctest: +SKIP
 
         To use DataSink in a MapNode, its inputs have to be defined at the
         time the interface is created.
@@ -227,7 +230,7 @@ class DataSink(IOBase):
         >>> ds.inputs.structural = 'structural.nii'
         >>> setattr(ds.inputs, 'contrasts.@con', ['cont1.nii', 'cont2.nii'])
         >>> setattr(ds.inputs, 'contrasts.alt', ['cont1a.nii', 'cont2a.nii'])
-        >>> ds.run() # doctest: +SKIP
+        >>> ds.run()  # doctest: +SKIP
 
     """
     input_spec = DataSinkInputSpec
@@ -311,14 +314,14 @@ class DataSink(IOBase):
         if not os.path.exists(outdir):
             try:
                 os.makedirs(outdir)
-            except OSError, inst:
+            except OSError as inst:
                 if 'File exists' in inst:
                     pass
                 else:
                     raise(inst)
         use_hardlink = str2bool(config.get('execution',
-                                           'try_hard_link_datasink') )
-        for key, files in self.inputs._outputs.items():
+                                           'try_hard_link_datasink'))
+        for key, files in list(self.inputs._outputs.items()):
             if not isdefined(files):
                 continue
             iflogger.debug("key: %s files: %s" % (key, str(files)))
@@ -344,7 +347,7 @@ class DataSink(IOBase):
                     if not os.path.exists(path):
                         try:
                             os.makedirs(path)
-                        except OSError, inst:
+                        except OSError as inst:
                             if 'File exists' in inst:
                                 pass
                             else:
@@ -361,7 +364,7 @@ class DataSink(IOBase):
                     if not os.path.exists(path):
                         try:
                             os.makedirs(path)
-                        except OSError, inst:
+                        except OSError as inst:
                             if 'File exists' in inst:
                                 pass
                             else:
@@ -379,15 +382,15 @@ class DataSink(IOBase):
 
 class S3DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     testing = traits.Bool(False, usedefault=True,
-                                   desc='Flag for using local fakes3 server.'
-                                        ' (for testing purposes only)')
+                          desc='Flag for using local fakes3 server.'
+                          ' (for testing purposes only)')
     anon = traits.Bool(False, usedefault=True,
-                                   desc='Use anonymous connection to s3')
+                       desc='Use anonymous connection to s3')
     bucket = traits.Str(mandatory=True,
                         desc='Amazon S3 bucket where your data is stored')
     bucket_path = traits.Str('', usedefault=True,
                              desc='Location within your bucket to store '
-                                   'data.')
+                             'data.')
     base_directory = Directory(
         desc='Path to the base directory for storing data.')
     container = traits.Str(
@@ -423,7 +426,7 @@ class S3DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 class S3DataSink(DataSink):
     """ Works exactly like DataSink, except the specified files will
         also be uploaded to Amazon S3 storage in the specified bucket
-        and location.  'bucket_path' is the s3 analog for 
+        and location.  'bucket_path' is the s3 analog for
         'base_directory'.
 
     """
@@ -453,7 +456,7 @@ class S3DataSink(DataSink):
             # convert local path to s3 path
             bd_index = path.find(self.inputs.base_directory)
             if bd_index != -1:  # base_directory is in path, maintain directory structure
-                s3path = path[bd_index+len(self.inputs.base_directory):]  # cut out base directory
+                s3path = path[bd_index + len(self.inputs.base_directory):]  # cut out base directory
                 if s3path[0] == os.path.sep:
                     s3path = s3path[1:]
             else:  # base_directory isn't in path, simply place all files in bucket_path folder
@@ -472,16 +475,16 @@ class S3DataSink(DataSink):
 
 class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     anon = traits.Bool(False, usedefault=True,
-                                   desc='Use anonymous connection to s3')
+                       desc='Use anonymous connection to s3')
     region = traits.Str('us-east-1', usedefault=True,
-                             desc='Region of s3 bucket')
+                        desc='Region of s3 bucket')
     bucket = traits.Str(mandatory=True,
                         desc='Amazon S3 bucket where your data is stored')
     bucket_path = traits.Str('', usedefault=True,
                              desc='Location within your bucket for subject data.')
     local_directory = Directory(exists=True,
                                 desc='Path to the local directory for subject data to be downloaded '
-                                    'and accessed. Should be on HDFS for Spark jobs.')
+                                'and accessed. Should be on HDFS for Spark jobs.')
     raise_on_empty = traits.Bool(True, usedefault=True,
                                  desc='Generate exception if list is empty for a given field')
     sort_filelist = traits.Bool(mandatory=True,
@@ -543,7 +546,7 @@ class S3DataGrabber(IOBase):
         if not isdefined(self.inputs.template_args):
             self.inputs.template_args = {}
         for key in outfields:
-            if not key in self.inputs.template_args:
+            if key not in self.inputs.template_args:
                 if infields:
                     self.inputs.template_args[key] = [infields]
                 else:
@@ -584,8 +587,8 @@ class S3DataGrabber(IOBase):
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
                     key in self.inputs.field_template:
-                template = self.inputs.field_template[key] # template override for multiple outfields
-            if isdefined(self.inputs.bucket_path): 
+                template = self.inputs.field_template[key]  # template override for multiple outfields
+            if isdefined(self.inputs.bucket_path):
                 template = os.path.join(self.inputs.bucket_path, template)
             if not args:
                 filelist = []
@@ -606,7 +609,7 @@ class S3DataGrabber(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -617,7 +620,7 @@ class S3DataGrabber(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                        if isinstance(arg, string_types) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -786,7 +789,7 @@ class DataGrabber(IOBase):
         if not isdefined(self.inputs.template_args):
             self.inputs.template_args = {}
         for key in outfields:
-            if not key in self.inputs.template_args:
+            if key not in self.inputs.template_args:
                 if infields:
                     self.inputs.template_args[key] = [infields]
                 else:
@@ -800,7 +803,7 @@ class DataGrabber(IOBase):
         Using traits.Any instead out OutputMultiPath till add_trait bug
         is fixed.
         """
-        return add_traits(base, self.inputs.template_args.keys())
+        return add_traits(base, list(self.inputs.template_args.keys()))
 
     def _list_outputs(self):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
@@ -814,7 +817,7 @@ class DataGrabber(IOBase):
                     raise ValueError(msg)
 
         outputs = {}
-        for key, args in self.inputs.template_args.items():
+        for key, args in list(self.inputs.template_args.items()):
             outputs[key] = []
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
@@ -842,7 +845,7 @@ class DataGrabber(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -853,7 +856,7 @@ class DataGrabber(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                        if isinstance(arg, string_types) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -889,17 +892,17 @@ class DataGrabber(IOBase):
 class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     base_directory = Directory(exists=True,
-        desc="Root path common to templates.")
+                               desc="Root path common to templates.")
     sort_filelist = traits.Bool(True, usedefault=True,
-        desc="When matching mutliple files, return them in sorted order.")
+                                desc="When matching mutliple files, return them in sorted order.")
     raise_on_empty = traits.Bool(True, usedefault=True,
-        desc="Raise an exception if a template pattern matches no files.")
+                                 desc="Raise an exception if a template pattern matches no files.")
     force_lists = traits.Either(traits.Bool(), traits.List(traits.Str()),
-        default=False, usedefault=True,
-        desc=("Whether to return outputs as a list even when only one file "
-              "matches the template. Either a boolean that applies to all "
-              "output fields or a list of output field names to coerce to "
-              " a list"))
+                                default=False, usedefault=True,
+                                desc=("Whether to return outputs as a list even when only one file "
+                                      "matches the template. Either a boolean that applies to all "
+                                      "output fields or a list of output field names to coerce to "
+                                      " a list"))
 
 
 class SelectFiles(IOBase):
@@ -916,12 +919,13 @@ class SelectFiles(IOBase):
     Examples
     --------
 
+    >>> import pprint
     >>> from nipype import SelectFiles, Node
     >>> templates={"T1": "{subject_id}/struct/T1.nii",
     ...            "epi": "{subject_id}/func/f[0, 1].nii"}
     >>> dg = Node(SelectFiles(templates), "selectfiles")
     >>> dg.inputs.subject_id = "subj1"
-    >>> dg.outputs.get()
+    >>> pprint.pprint(dg.outputs.get())  # doctest: +NORMALIZE_WHITESPACE
     {'T1': <undefined>, 'epi': <undefined>}
 
     The same thing with dynamic grabbing of specific files:
@@ -956,7 +960,7 @@ class SelectFiles(IOBase):
 
         # Infer the infields and outfields from the template
         infields = []
-        for name, template in templates.iteritems():
+        for name, template in templates.items():
             for _, field_name, _, _ in string.Formatter().parse(template):
                 if field_name is not None and field_name not in infields:
                     infields.append(field_name)
@@ -974,12 +978,12 @@ class SelectFiles(IOBase):
 
     def _add_output_traits(self, base):
         """Add the dynamic output fields"""
-        return add_traits(base, self._templates.keys())
+        return add_traits(base, list(self._templates.keys()))
 
     def _list_outputs(self):
         """Find the files and expose them as interface outputs."""
         outputs = {}
-        info = dict([(k, v) for k, v in self.inputs.__dict__.items()
+        info = dict([(k, v) for k, v in list(self.inputs.__dict__.items())
                      if k in self._infields])
 
         force_lists = self.inputs.force_lists
@@ -994,7 +998,7 @@ class SelectFiles(IOBase):
                    "'templates'.") % (plural, bad_fields, verb)
             raise ValueError(msg)
 
-        for field, template in self._templates.iteritems():
+        for field, template in self._templates.items():
 
             # Build the full template path
             if isdefined(self.inputs.base_directory):
@@ -1036,10 +1040,10 @@ class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     match_regex = traits.Str('(.+)',
                              usedefault=True,
                              desc=("Regular expression for matching "
-                             "paths."))
+                                   "paths."))
     ignore_regexes = traits.List(desc=("List of regular expressions, "
-                                 "if any match the path it will be "
-                                 "ignored.")
+                                       "if any match the path it will be "
+                                       "ignored.")
                                  )
     max_depth = traits.Int(desc="The maximum depth to search beneath "
                            "the root_paths")
@@ -1067,17 +1071,17 @@ class DataFinder(IOBase):
     >>> df.inputs.root_paths = '.'
     >>> df.inputs.match_regex = '.+/(?P<series_dir>.+(qT1|ep2d_fid_T1).+)/(?P<basename>.+)\.nii.gz'
     >>> result = df.run() # doctest: +SKIP
-    >>> print result.outputs.out_paths # doctest: +SKIP
+    >>> result.outputs.out_paths  # doctest: +SKIP
     ['./027-ep2d_fid_T1_Gd4/acquisition.nii.gz',
      './018-ep2d_fid_T1_Gd2/acquisition.nii.gz',
      './016-ep2d_fid_T1_Gd1/acquisition.nii.gz',
      './013-ep2d_fid_T1_pre/acquisition.nii.gz']
-    >>> print result.outputs.series_dir # doctest: +SKIP
+    >>> result.outputs.series_dir  # doctest: +SKIP
     ['027-ep2d_fid_T1_Gd4',
      '018-ep2d_fid_T1_Gd2',
      '016-ep2d_fid_T1_Gd1',
      '013-ep2d_fid_T1_pre']
-    >>> print result.outputs.basename # doctest: +SKIP
+    >>> result.outputs.basename  # doctest: +SKIP
     ['acquisition',
      'acquisition'
      'acquisition',
@@ -1090,25 +1094,25 @@ class DataFinder(IOBase):
     _always_run = True
 
     def _match_path(self, target_path):
-        #Check if we should ignore the path
+        # Check if we should ignore the path
         for ignore_re in self.ignore_regexes:
             if ignore_re.search(target_path):
                 return
-        #Check if we can match the path
+        # Check if we can match the path
         match = self.match_regex.search(target_path)
-        if not match is None:
+        if match is not None:
             match_dict = match.groupdict()
             if self.result is None:
                 self.result = {'out_paths': []}
-                for key in match_dict.keys():
+                for key in list(match_dict.keys()):
                     self.result[key] = []
             self.result['out_paths'].append(target_path)
-            for key, val in match_dict.iteritems():
+            for key, val in match_dict.items():
                 self.result[key].append(val)
 
     def _run_interface(self, runtime):
-        #Prepare some of the inputs
-        if isinstance(self.inputs.root_paths, six.string_types):
+        # Prepare some of the inputs
+        if isinstance(self.inputs.root_paths, string_types):
             self.inputs.root_paths = [self.inputs.root_paths]
         self.match_regex = re.compile(self.inputs.match_regex)
         if self.inputs.max_depth is Undefined:
@@ -1127,24 +1131,24 @@ class DataFinder(IOBase):
                  for regex in self.inputs.ignore_regexes]
         self.result = None
         for root_path in self.inputs.root_paths:
-            #Handle tilda/env variables and remove extra seperators
+            # Handle tilda/env variables and remove extra seperators
             root_path = os.path.normpath(os.path.expandvars(os.path.expanduser(root_path)))
-            #Check if the root_path is a file
+            # Check if the root_path is a file
             if os.path.isfile(root_path):
                 if min_depth == 0:
                     self._match_path(root_path)
                 continue
-            #Walk through directory structure checking paths
+            # Walk through directory structure checking paths
             for curr_dir, sub_dirs, files in os.walk(root_path):
-                #Determine the current depth from the root_path
+                # Determine the current depth from the root_path
                 curr_depth = (curr_dir.count(os.sep) -
                               root_path.count(os.sep))
-                #If the max path depth has been reached, clear sub_dirs
-                #and files
+                # If the max path depth has been reached, clear sub_dirs
+                # and files
                 if max_depth is not None and curr_depth >= max_depth:
                     sub_dirs[:] = []
                     files = []
-                #Test the path for the curr_dir and all files
+                # Test the path for the curr_dir and all files
                 if curr_depth >= min_depth:
                     self._match_path(curr_dir)
                 if curr_depth >= (min_depth - 1):
@@ -1152,17 +1156,16 @@ class DataFinder(IOBase):
                         full_path = os.path.join(curr_dir, infile)
                         self._match_path(full_path)
         if (self.inputs.unpack_single and
-            len(self.result['out_paths']) == 1
-            ):
-            for key, vals in self.result.iteritems():
+                len(self.result['out_paths']) == 1):
+            for key, vals in self.result.items():
                 self.result[key] = vals[0]
         else:
-            #sort all keys acording to out_paths
-            for key in self.result.keys():
+            # sort all keys acording to out_paths
+            for key in list(self.result.keys()):
                 if key == "out_paths":
                     continue
-                sort_tuples = human_order_sorted(zip(self.result["out_paths"],
-                                                     self.result[key]))
+                sort_tuples = human_order_sorted(list(zip(self.result["out_paths"],
+                                                          self.result[key])))
                 self.result[key] = [x for (_, x) in sort_tuples]
             self.result["out_paths"] = human_order_sorted(self.result["out_paths"])
 
@@ -1312,7 +1315,7 @@ class FreeSurferSource(IOBase):
         subject_path = os.path.join(subjects_dir, self.inputs.subject_id)
         output_traits = self._outputs()
         outputs = output_traits.get()
-        for k in outputs.keys():
+        for k in list(outputs.keys()):
             val = self._get_files(subject_path, k,
                                   output_traits.traits()[k].loc,
                                   output_traits.traits()[k].altkey)
@@ -1415,7 +1418,7 @@ class XNATSource(IOBase):
                             desc="arguments that fit into query_template")
             )
             undefined_traits['field_template'] = Undefined
-            #self.inputs.remove_trait('query_template_args')
+            # self.inputs.remove_trait('query_template_args')
             outdict = {}
             for key in outfields:
                 outdict[key] = []
@@ -1428,7 +1431,7 @@ class XNATSource(IOBase):
         Using traits.Any instead out OutputMultiPath till add_trait bug
         is fixed.
         """
-        return add_traits(base, self.inputs.query_template_args.keys())
+        return add_traits(base, list(self.inputs.query_template_args.keys()))
 
     def _list_outputs(self):
         # infields are mandatory, however I could not figure out
@@ -1451,12 +1454,12 @@ class XNATSource(IOBase):
                 if not isdefined(value):
                     msg = ("%s requires a value for input '%s' "
                            "because it was listed in 'infields'" %
-                          (self.__class__.__name__, key)
+                           (self.__class__.__name__, key)
                            )
                     raise ValueError(msg)
 
         outputs = {}
-        for key, args in self.inputs.query_template_args.items():
+        for key, args in list(self.inputs.query_template_args.items()):
             outputs[key] = []
             template = self.inputs.query_template
             if hasattr(self.inputs, 'field_template') and \
@@ -1477,7 +1480,7 @@ class XNATSource(IOBase):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -1490,7 +1493,7 @@ class XNATSource(IOBase):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, six.string_types) and \
+                        if isinstance(arg, string_types) and \
                                 hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
@@ -1571,11 +1574,11 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     )
 
     share = traits.Bool(False,
-        desc=('Option to share the subjects from the original project'
-              'instead of creating new ones when possible - the created '
-              'experiments are then shared back to the original project'
-              ),
-        usedefault=True)
+                        desc=('Option to share the subjects from the original project'
+                              'instead of creating new ones when possible - the created '
+                              'experiments are then shared back to the original project'
+                              ),
+                        usedefault=True)
 
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
@@ -1654,7 +1657,7 @@ class XNATSink(IOBase):
             uri_template_args['reconstruction_id'] = quote_id(self.inputs.reconstruction_id)
 
         # gather outputs and upload them
-        for key, files in self.inputs._outputs.items():
+        for key, files in list(self.inputs._outputs.items()):
 
             for name in filename_to_list(files):
 
@@ -1685,7 +1688,7 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
                 if part.startswith('_') and len(part.split('_')) % 2
                 ]
 
-    keymap = dict(zip(val_list[1::2], val_list[2::2]))
+    keymap = dict(list(zip(val_list[1::2], val_list[2::2])))
 
     _label = []
     for key, val in sorted(keymap.items()):
@@ -1732,7 +1735,7 @@ def push_file(self, xnat, file_name, out_key, uri_template_args):
     )
 
     # unquote values before uploading
-    for key in uri_template_args.keys():
+    for key in list(uri_template_args.keys()):
         uri_template_args[key] = unquote_id(uri_template_args[key])
 
     # upload file
@@ -1869,18 +1872,19 @@ class MySQLSink(IOBase):
         c.close()
         return None
 
+
 class SSHDataGrabberInputSpec(DataGrabberInputSpec):
     hostname = traits.Str(mandatory=True, desc='Server hostname.')
     username = traits.Str(desc='Server username.')
     password = traits.Password(desc='Server password.')
     download_files = traits.Bool(True, usedefault=True,
-                                    desc='If false it will return the file names without downloading them')
+                                 desc='If false it will return the file names without downloading them')
     base_directory = traits.Str(mandatory=True,
-                               desc='Path to the base directory consisting of subject data.')
+                                desc='Path to the base directory consisting of subject data.')
     template_expression = traits.Enum(['fnmatch', 'regexp'], usedefault=True,
-                            desc='Use either fnmatch or regexp to express templates')
+                                      desc='Use either fnmatch or regexp to express templates')
     ssh_log_to_file = traits.Str('', usedefault=True,
-                            desc='If set SSH commands will be logged to the given file')
+                                 desc='If set SSH commands will be logged to the given file')
 
 
 class SSHDataGrabber(DataGrabber):
@@ -1965,7 +1969,7 @@ class SSHDataGrabber(DataGrabber):
             paramiko
         except NameError:
             warn(
-                "The library parmiko needs to be installed"
+                "The library paramiko needs to be installed"
                 " for this module to run."
             )
         if not outfields:
@@ -1988,13 +1992,12 @@ class SSHDataGrabber(DataGrabber):
         ):
             self.inputs.template += '$'
 
-
     def _list_outputs(self):
         try:
             paramiko
         except NameError:
             raise ImportError(
-                "The library parmiko needs to be installed"
+                "The library paramiko needs to be installed"
                 " for this module to run."
             )
 
@@ -2011,7 +2014,7 @@ class SSHDataGrabber(DataGrabber):
                     raise ValueError(msg)
 
         outputs = {}
-        for key, args in self.inputs.template_args.items():
+        for key, args in list(self.inputs.template_args.items()):
             outputs[key] = []
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
@@ -2027,7 +2030,7 @@ class SSHDataGrabber(DataGrabber):
                     filelist = fnmatch.filter(filelist, template)
                 elif self.inputs.template_expression == 'regexp':
                     regexp = re.compile(template)
-                    filelist = filter(regexp.match, filelist)
+                    filelist = list(filter(regexp.match, filelist))
                 else:
                     raise ValueError('template_expression value invalid')
                 if len(filelist) == 0:
@@ -2047,7 +2050,7 @@ class SSHDataGrabber(DataGrabber):
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
-                    if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                    if isinstance(arg, string_types) and hasattr(self.inputs, arg):
                         arg = getattr(self.inputs, arg)
                     if isinstance(arg, list):
                         if (maxlen > 1) and (len(arg) != maxlen):
@@ -2058,7 +2061,7 @@ class SSHDataGrabber(DataGrabber):
                 for i in range(maxlen):
                     argtuple = []
                     for arg in arglist:
-                        if isinstance(arg, six.string_types) and hasattr(self.inputs, arg):
+                        if isinstance(arg, string_types) and hasattr(self.inputs, arg):
                             arg = getattr(self.inputs, arg)
                         if isinstance(arg, list):
                             argtuple.append(arg[i])
@@ -2080,7 +2083,7 @@ class SSHDataGrabber(DataGrabber):
                         outfiles = fnmatch.filter(filelist, filledtemplate_base)
                     elif self.inputs.template_expression == 'regexp':
                         regexp = re.compile(filledtemplate_base)
-                        outfiles = filter(regexp.match, filelist)
+                        outfiles = list(filter(regexp.match, filelist))
                     else:
                         raise ValueError('template_expression value invalid')
                     if len(outfiles) == 0:
@@ -2107,7 +2110,7 @@ class SSHDataGrabber(DataGrabber):
             elif len(outputs[key]) == 1:
                 outputs[key] = outputs[key][0]
 
-        for k, v in outputs.items():
+        for k, v in list(outputs.items()):
             outputs[k] = os.path.join(os.getcwd(), v)
 
         return outputs
@@ -2134,7 +2137,7 @@ class SSHDataGrabber(DataGrabber):
 class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     in_file = File(exists=True, desc='JSON source file')
     defaults = traits.Dict(desc=('JSON dictionary that sets default output'
-                                'values, overridden by values found in in_file'))
+                                 'values, overridden by values found in in_file'))
 
 
 class JSONFileGrabber(IOBase):
@@ -2146,16 +2149,17 @@ class JSONFileGrabber(IOBase):
     Example
     -------
 
+    >>> import pprint
     >>> from nipype.interfaces.io import JSONFileGrabber
     >>> jsonSource = JSONFileGrabber()
-    >>> jsonSource.inputs.defaults = {'param1': u'overrideMe', 'param3': 1.0}
+    >>> jsonSource.inputs.defaults = {'param1': 'overrideMe', 'param3': 1.0}
     >>> res = jsonSource.run()
-    >>> res.outputs.get()
-    {'param3': 1.0, 'param1': u'overrideMe'}
+    >>> pprint.pprint(res.outputs.get())
+    {'param1': 'overrideMe', 'param3': 1.0}
     >>> jsonSource.inputs.in_file = 'jsongrabber.txt'
     >>> res = jsonSource.run()
-    >>> res.outputs.get()
-    {'param3': 1.0, 'param2': 4, 'param1': u'exampleStr'}
+    >>> pprint.pprint(res.outputs.get())  # doctest: +NORMALIZE_WHITESPACE
+    {'param1': 'exampleStr', 'param2': 4, 'param3': 1.0}
 
 
     """
@@ -2164,23 +2168,23 @@ class JSONFileGrabber(IOBase):
     _always_run = True
 
     def _list_outputs(self):
-        import json
+        import simplejson
 
         outputs = {}
         if isdefined(self.inputs.in_file):
             with open(self.inputs.in_file, 'r') as f:
-                data = json.load(f)
+                data = simplejson.load(f)
 
             if not isinstance(data, dict):
                 raise RuntimeError('JSON input has no dictionary structure')
 
-            for key, value in data.iteritems():
+            for key, value in data.items():
                 outputs[key] = value
 
         if isdefined(self.inputs.defaults):
             defaults = self.inputs.defaults
-            for key, value in defaults.iteritems():
-                if key not in outputs.keys():
+            for key, value in defaults.items():
+                if key not in list(outputs.keys()):
                     outputs[key] = value
 
         return outputs
@@ -2266,7 +2270,7 @@ class JSONFileSink(IOBase):
         return name, val
 
     def _list_outputs(self):
-        import json
+        import simplejson
         import os.path as op
 
         if not isdefined(self.inputs.out_file):
@@ -2277,14 +2281,14 @@ class JSONFileSink(IOBase):
         out_dict = self.inputs.in_dict
 
         # Overwrite in_dict entries automatically
-        for key, val in self.inputs._outputs.items():
+        for key, val in list(self.inputs._outputs.items()):
             if not isdefined(val) or key == 'trait_added':
                 continue
             key, val = self._process_name(key, val)
             out_dict[key] = val
 
         with open(out_file, 'w') as f:
-            json.dump(out_dict, f)
+            simplejson.dump(out_dict, f)
         outputs = self.output_spec().get()
         outputs['out_file'] = out_file
         return outputs
