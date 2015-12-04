@@ -36,6 +36,9 @@ def test_ReconAll_inputs():
     ),
     terminal_output=dict(nohash=True,
     ),
+    use_T2=dict(argstr='-T2pial',
+    min_ver='5.3.0',
+    ),
     )
     inputs = ReconAll.input_spec()
 
