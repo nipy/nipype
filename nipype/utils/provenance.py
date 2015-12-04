@@ -2,6 +2,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import object
 
+from copy import deepcopy
 from pickle import dumps
 import simplejson
 import os
@@ -244,18 +245,15 @@ def write_provenance(results, filename='provenance', format='turtle'):
 class ProvStore(object):
 
     def __init__(self):
-        self.g = pm.ProvDocument() #ProvBundle(identifier=get_id())
+        self.g = pm.ProvDocument()
         self.g.add_namespace(foaf)
         self.g.add_namespace(dcterms)
         self.g.add_namespace(nipype_ns)
         self.g.add_namespace(niiri)
 
-    def add_results(self, results):
-        if results.provenance:
-            try:
-                self.g.add_bundle(results.provenance)
-            except pm.ProvException:
-                self.g.add_bundle(results.provenance, get_id())
+    def add_results(self, results, keep_provenance=False):
+        if keep_provenance and results.provenance:
+            self.g = deepcopy(results.provenance)
             return self.g
         runtime = results.runtime
         interface = results.interface

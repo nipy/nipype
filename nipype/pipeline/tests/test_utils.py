@@ -335,10 +335,11 @@ def test_provenance():
     out_dir = mkdtemp()
     metawf = pe.Workflow(name='meta')
     metawf.base_dir = out_dir
-    metawf.add_nodes([create_wf('wf%d' % i) for i in range(30)])
+    metawf.add_nodes([create_wf('wf%d' % i) for i in range(1)])
     eg = metawf.run(plugin='Linear')
     prov_base = os.path.join(out_dir,
                              'workflow_provenance_test')
     psg = write_workflow_prov(eg, prov_base, format='all')
-    yield assert_equal, psg, 1
+    yield assert_equal, len(psg.bundles), 2
+    yield assert_equal, len(psg.get_records()), 7
     rmtree(out_dir)

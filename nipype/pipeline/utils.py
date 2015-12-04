@@ -1168,14 +1168,27 @@ def write_workflow_prov(graph, filename=None, format='all'):
                         values = getattr(result.outputs, key)
                         if isdefined(values) and idx < len(values):
                             subresult.outputs[key] = values[idx]
-                sub_bundle = ProvStore().add_results(subresult)
-                ps.g = merge_bundles(ps.g, sub_bundle)
-                ps.g.wasGeneratedBy(sub_bundle, process)
+                sub_doc = ProvStore().add_results(subresult)
+                sub_bundle = pm.ProvBundle(sub_doc.get_records(),
+                                           identifier=get_id())
+                ps.g.add_bundle(sub_bundle)
+                bundle_entity = ps.g.entity(sub_bundle.identifier,
+                                            other_attributes={'prov:type':
+                                                               pm.PROV_BUNDLE})
+                ps.g.wasGeneratedBy(bundle_entity, process)
         else:
             process.add_attributes({pm.PROV["type"]: nipype_ns["Node"]})
-            result_bundle = ProvStore().add_results(result).bundle()
-            ps.g = merge_bundles(ps.g, result_bundle)
-            ps.g.wasGeneratedBy(result_bundle, process)
+            if result.provenance:
+                prov_doc = result.provenance
+            else:
+                prov_doc = ProvStore().add_results(result)
+            result_bundle = pm.ProvBundle(prov_doc.get_records(),
+                                          identifier=get_id())
+            ps.g.add_bundle(result_bundle)
+            bundle_entity = ps.g.entity(result_bundle.identifier,
+                                        other_attributes={'prov:type':
+                                                              pm.PROV_BUNDLE})
+            ps.g.wasGeneratedBy(bundle_entity, process)
         processes.append(process)
 
     # add dependencies (edges)
