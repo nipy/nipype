@@ -122,7 +122,7 @@ class SGEGraphPlugin(GraphPluginBase):
                         for jobid in dependencies[idx]:
                             # Avoid dependancies of done jobs
                             if not self._dont_resubmit_completed_jobs or cache_doneness_per_node[jobid] == False:
-                                values += "${{{0}}},".format(make_job_name(jobid, nodes))
+                                values += "{0},".format(make_job_name(jobid, nodes))
                         if values != ' ':  # i.e. if some jobs were added to dependency list
                             values = values.rstrip(',')
                             deps = '-hold_jid%s' % values
