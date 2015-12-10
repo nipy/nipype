@@ -475,7 +475,8 @@ class S3DataSink(DataSink):
 
 class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     anon = traits.Bool(False, usedefault=True,
-                       desc='Use anonymous connection to s3')
+                       desc='Use anonymous connection to s3.  If this is set to True, boto may print' +
+                            ' a urlopen error, but this does not prevent data from being downloaded.')
     region = traits.Str('us-east-1', usedefault=True,
                         desc='Region of s3 bucket')
     bucket = traits.Str(mandatory=True,
