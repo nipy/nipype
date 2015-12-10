@@ -826,7 +826,6 @@ class DenoiseImageInputSpec(ANTSCommandInputSpec):
 class DenoiseImageOutputSpec(TraitedSpec):
     output_corrected_image = File(exists=True)
     output_noise_image = File(exists=True)
-    # TODO: optional outputs - output_noise_image
 
 
 class DenoiseImage(ANTSCommand):
@@ -865,7 +864,7 @@ class DenoiseImage(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_corrected_image'] = os.path.abspath(self.inputs.output_image[0][0])
+        outputs['output_corrected_image'] = os.path.abspath(self.inputs.output_image[0])
         if len(self.inputs.output_image) == 2:
-            outputs['output_noise_image'] = os.path.abspath(self.inputs.output_image[0][1])
+            outputs['output_noise_image'] = os.path.abspath(self.inputs.output_image[1])
         return outputs
