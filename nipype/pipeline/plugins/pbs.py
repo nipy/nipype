@@ -52,7 +52,7 @@ class PBSPlugin(SGELikeBatchManagerBase):
         return errmsg not in e
 
     def _submit_batchtask(self, scriptfile, node):
-        cmd = CommandLine('qsub', environ=os.environ.data,
+        cmd = CommandLine('qsub', environ=dict(os.environ),
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
         qsubargs = ''
@@ -69,11 +69,11 @@ class PBSPlugin(SGELikeBatchManagerBase):
         if '-e' not in qsubargs:
             qsubargs = '%s -e %s' % (qsubargs, path)
         if node._hierarchy:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()
