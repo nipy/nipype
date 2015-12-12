@@ -17,7 +17,7 @@ except ImportError:
     from ordereddict import OrderedDict
 
 import prov.model as pm
-from ..external.six import string_types
+from ..external.six import string_types, text_type
 
 from .. import get_info
 from .filemanip import (md5, hashlib, hash_infile)
@@ -140,7 +140,7 @@ def safe_encode(x, as_literal=True):
                     value = x
                 if not as_literal:
                     return value
-                return pm.Literal(value, pm.XSD['string'])
+                return pm.Literal(text_type(value, 'utf-8'), pm.XSD['string'])
         if isinstance(x, int):
             if not as_literal:
                 return x
@@ -183,7 +183,7 @@ def safe_encode(x, as_literal=True):
         return pm.Literal(dumps(x), nipype_ns['pickle'])
     except TypeError as e:
         iflogger.info(e)
-        value = "Could not encode: " + str(e)
+        value = "Could not encode: " + text_type(e, 'utf-8')
         if not as_literal:
             return value
         return pm.Literal(value, pm.XSD['string'])
