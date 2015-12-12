@@ -1870,9 +1870,18 @@ class WarpPoints(CommandLine):
         except ImportError:
             raise ImportError('This interface requires tvtk to run.')
 
+        vtk_major = 5
+        try:
+            from tvtk.tvtk_classes.vtk_version import vtk_build_version
+            vtk_major = int(vtk_build_version[0])
+        except ImportError:
+            iflogger.warning('VTK version-major inspection using tvtk failed.')
+
         reader = tvtk.PolyDataReader(file_name=in_file + '.vtk')
         reader.update()
-        points = reader.output.points
+
+        mesh = reader.output if vtk_major < 6 else reader.get_output()
+        points = mesh.points
 
         if out_file is None:
             out_file, _ = op.splitext(in_file) + '.txt'
@@ -1887,12 +1896,24 @@ class WarpPoints(CommandLine):
         except ImportError:
             raise ImportError('This interface requires tvtk to run.')
 
+        vtk_major = 5
+        try:
+            from tvtk.tvtk_classes.vtk_version import vtk_build_version
+            vtk_major = int(vtk_build_version[0])
+        except ImportError:
+            iflogger.warning('VTK version-major inspection using tvtk failed.')
+
         reader = tvtk.PolyDataReader(file_name=self.inputs.in_file)
         reader.update()
-        mesh = reader.output
+
+        mesh = reader.output if vtk_major < 6 else reader.get_output()
         mesh.points = points
 
-        writer = tvtk.PolyDataWriter(file_name=out_file, input=mesh)
+        writer = tvtk.PolyDataWriter(file_name=out_file)
+        if vtk_major < 6:
+            writer.input = mesh
+        else:
+            writer.set_input_data_object(mesh)
         writer.write()
 
     def _trk_to_coords(self, in_file, out_file=None):
