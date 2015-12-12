@@ -3,9 +3,9 @@
 from future import standard_library
 standard_library.install_aliases()
 
-from nipype.testing import assert_equal, assert_true, assert_false
+from ...testing import assert_equal, assert_true, assert_false
 
-from ..provenance import ProvStore
+from ..provenance import ProvStore, safe_encode, text_type
 
 
 def test_provenance():
@@ -16,3 +16,8 @@ def test_provenance():
     provn = ps.g.get_provn()
     prov_json = ps.g.serialize(format='json')
     yield assert_true, 'echo hello' in provn
+
+def test_safe_encode():
+    a = '\xc3\xa9lg'
+    out = safe_encode(a)
+    yield assert_equal, out.value, text_type(a, 'utf-8')
