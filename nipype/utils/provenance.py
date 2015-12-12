@@ -183,7 +183,7 @@ def safe_encode(x, as_literal=True):
         return pm.Literal(dumps(x), nipype_ns['pickle'])
     except TypeError as e:
         iflogger.info(e)
-        value = "Could not encode: " + text_type(e, 'utf-8')
+        value = "Could not encode: " + text_type(str(e), 'utf-8')
         if not as_literal:
             return value
         return pm.Literal(value, pm.XSD['string'])
