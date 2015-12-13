@@ -1,6 +1,8 @@
 Next release
 ============
 
+* FIX: Use released Prov python library (https://github.com/nipy/nipype/pull/1279)
+* ENH: Support for Python 3 (https://github.com/nipy/nipype/pull/1221)
 * FIX: VTK version check missing when using tvtk (https://github.com/nipy/nipype/pull/1219)
 * ENH: Added an OAR scheduler plugin (https://github.com/nipy/nipype/pull/1259)
 * ENH: New ANTs interface: antsBrainExtraction (https://github.com/nipy/nipype/pull/1231)

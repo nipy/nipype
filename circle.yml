@@ -15,7 +15,7 @@ dependencies:
     - if [[ ! -d ~/fsl ]]; then wget "http://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-5.0.9-centos6_64.tar.gz"; tar zxvf fsl-5.0.9-centos6_64.tar.gz; mv fsl ~/fsl; fi
     - if [[ ! -d ~/examples/data ]]; then wget "http://tcpdiag.dl.sourceforge.net/project/nipy/nipype/nipype-0.2/nipype-tutorial.tar.bz2"; tar jxvf nipype-tutorial.tar.bz2; mkdir ~/examples; mv nipype-tutorial/* ~/examples/; fi
     # we download this manually because CircleCI does not cache apt
-    - if [[ ! -d ~/examples/feeds ]]; then wget "http://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-5.0.9-feeds.tar.gz"; tar zxvf fsl-5.0.8-feeds.tar.gz; mv feeds ~/examples/; fi
+    - if [[ ! -d ~/examples/feeds ]]; then wget "http://fsl.fmrib.ox.ac.uk/fsldownloads/fsl-5.0.9-feeds.tar.gz"; tar zxvf fsl-5.0.9-feeds.tar.gz; mv feeds ~/examples/; fi
     - if [[ ! -d ~/examples/fsl_course_data ]]; then wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" ; wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz"; wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz"; mkdir ~/examples/fsl_course_data; tar zxvf fdt1.tar.gz -C ~/examples/fsl_course_data; tar zxvf fdt2.tar.gz -C ~/examples/fsl_course_data; tar zxvf tbss.tar.gz -C ~/examples/fsl_course_data; fi
     - bash ~/nipype/tools/install_spm_mcr.sh
     - mkdir -p ~/.nipype && echo "[logging]" > ~/.nipype/nipype.cfg && echo "workflow_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "interface_level = DEBUG" >> ~/.nipype/nipype.cfg && echo "filemanip_level = DEBUG" >> ~/.nipype/nipype.cfg
