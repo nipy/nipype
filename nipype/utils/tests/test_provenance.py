@@ -2,6 +2,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 from future import standard_library
 standard_library.install_aliases()
+from builtins import str
+
+import sys
 
 from ...testing import assert_equal, assert_true, assert_false
 
@@ -20,4 +23,6 @@ def test_provenance():
 def test_safe_encode():
     a = '\xc3\xa9lg'
     out = safe_encode(a)
-    yield assert_equal, out.value, text_type(a, 'utf-8')
+    if not isinstance(a, str):
+        a = text_type(a, 'utf-8')
+    yield assert_equal, out.value, a

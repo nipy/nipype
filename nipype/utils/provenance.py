@@ -1,6 +1,6 @@
 from future import standard_library
 standard_library.install_aliases()
-from builtins import object
+from builtins import object, str
 
 from copy import deepcopy
 from pickle import dumps
@@ -140,7 +140,10 @@ def safe_encode(x, as_literal=True):
                     value = x
                 if not as_literal:
                     return value
-                return pm.Literal(text_type(value, 'utf-8'), pm.XSD['string'])
+                if isinstance(value, str):
+                    return pm.Literal(value, pm.XSD['string'])
+                else:
+                    return pm.Literal(text_type(value, 'utf-8'), pm.XSD['string'])
         if isinstance(x, int):
             if not as_literal:
                 return x
@@ -183,7 +186,7 @@ def safe_encode(x, as_literal=True):
         return pm.Literal(dumps(x), nipype_ns['pickle'])
     except TypeError as e:
         iflogger.info(e)
-        value = "Could not encode: " + text_type(str(e), 'utf-8')
+        value = "Could not encode: " + str(e)
         if not as_literal:
             return value
         return pm.Literal(value, pm.XSD['string'])
