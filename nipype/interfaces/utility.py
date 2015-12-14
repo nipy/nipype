@@ -618,7 +618,6 @@ class CheckInterface(IOBase):
                 raise ValueError('CheckInterface input is not in the '
                                  'fields: %s' % in_field)
         self._fields = fields
-        self._check_inputs = [False]
         add_traits(self.inputs, fields + ['operation'])
 
         # Adding any traits wipes out all input values set in superclass initialization,
@@ -631,8 +630,7 @@ class CheckInterface(IOBase):
                              '\'%s\' as operation input' % operation)
         self.inputs.operation = operation
 
-    def _run_interface(self, runtime):
-        # Check operation again
+    def _check_result(self):
         if self.inputs.operation not in ['all', 'any']:
             raise ValueError('CheckInterface does not accept keyword '
                              '\'%s\' as operation input' % operation)
@@ -640,13 +638,11 @@ class CheckInterface(IOBase):
         results = [isdefined(getattr(self.inputs, key))
                    for key in self._fields if key != 'operation']
 
-        self._check_result = all(results)
         if self.inputs.operation == 'any':
-            self._check_result = any(results)
-
-        return runtime
+            return any(results)
+        return all(results)
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out'] = self._check_result
+        outputs['out'] = self._check_result()
         return outputs
