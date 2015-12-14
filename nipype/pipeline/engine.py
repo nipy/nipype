@@ -2358,9 +2358,6 @@ class ConditionalNode(Node):
     >>> from nipype import ConditionalNode
     >>> from nipype.interfaces import fsl
     >>> realign = ConditionalNode(fsl.MCFLIRT(), name='CNodeExample')
-    >>> realign.inputs.in_file = ['functional.nii',
-    ...                           'functional2.nii',
-    ...                           'functional3.nii']
     >>> realign.inputs.donotrun = True
     >>> realign.run() # doctest: +SKIP
 
