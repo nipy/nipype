@@ -332,6 +332,7 @@ class Workflow(WorkflowBase):
             if (destnode not in newnodes) and not self._has_node(destnode):
                 newnodes.append(destnode)
         if newnodes:
+            logger.debug('New nodes: %s' % newnodes)
             self._check_nodes(newnodes)
             for node in newnodes:
                 if node._hierarchy is None:
@@ -1115,7 +1116,7 @@ class CachedWorkflow(Workflow):
     of an input `cachenode` are set.
     """
 
-    def __init__(self, name, base_dir=None, condition_map=[]):
+    def __init__(self, name, base_dir=None, cache_map=[]):
         """Create a workflow object.
         Parameters
         ----------
@@ -1123,7 +1124,7 @@ class CachedWorkflow(Workflow):
             unique identifier for the workflow
         base_dir : string, optional
             path to workflow storage
-        condition_map : list of tuples, non-empty
+        cache_map : list of tuples, non-empty
             each tuple indicates the input port name and the node and output
             port name, for instance ('b', 'outputnode.sum') will map the
             workflow input 'conditions.b' to 'outputnode.sum'.
@@ -1134,72 +1135,43 @@ class CachedWorkflow(Workflow):
             IdentityInterface, Merge, Select
         super(CachedWorkflow, self).__init__(name, base_dir)
 
-        if condition_map is None or not condition_map:
-            raise ValueError('CachedWorkflow condition_map must be a '
+        if cache_map is None or not cache_map:
+            raise ValueError('CachedWorkflow cache_map must be a '
                              'non-empty list of tuples')
 
-        if isinstance(condition_map, tuple):
-            condition_map = [condition_map]
+        if isinstance(cache_map, tuple):
+            cache_map = [cache_map]
 
-        cond_in, cond_out = zip(*condition_map)
-
-        self._condition = Node(CheckInterface(fields=list(cond_in)),
-                               name='cachenode')
-        setattr(self._condition, 'condition_map', condition_map)
-        self.add_nodes([self._condition], conditional=False)
-        self._input_conditions = cond_in
-        self._map = condition_map
-
+        cond_in, cond_out = zip(*cache_map)
+        self._cache = Node(IdentityInterface(fields=list(cond_in)),
+                           name='cachenode')
+        self._check = Node(CheckInterface(fields=list(cond_in)),
+                           name='checknode')
         self._outputnode = Node(IdentityInterface(
             fields=cond_out), name='outputnode')
 
         def _switch_idx(val):
             return [int(val)]
 
+        def _fix_undefined(val):
+            from nipype.interfaces.base import isdefined
+            if isdefined(val):
+                return val
+            else:
+                return None
+
         self._switches = {}
-        for o in cond_out:
-            m = Node(Merge(2), name='Merge_%s' % o)
-            s = Node(Select(), name='Switch_%s' % o)
-            self.connect([
+        for ci, co in cache_map:
+            m = Node(Merge(2), name='Merge_%s' % co)
+            s = Node(Select(), name='Switch_%s' % co)
+            super(CachedWorkflow, self).connect([
                 (m, s, [('out', 'inlist')]),
-                (self._condition, s, [(('out', _switch_idx), 'index')]),
-                (self._condition, m, [(o, 'in2')]),
-                (s, self._outputnode, [('out', o)])
+                (self._cache, self._check, [(ci, ci)]),
+                (self._cache, m, [((ci, _fix_undefined), 'in2')]),
+                (self._check, s, [(('out', _switch_idx), 'index')]),
+                (s, self._outputnode, [('out', co)])
             ])
-            self._switches[o] = m
-
-    def add_nodes(self, nodes, conditional=True):
-        if not conditional:
-            super(CachedWorkflow, self).add_nodes(nodes)
-            return
-
-        newnodes = []
-        all_nodes = self._get_all_nodes()
-        for node in nodes:
-            if self._has_node(node):
-                raise IOError('Node %s already exists in the workflow' % node)
-            if isinstance(node, Workflow):
-                for subnode in node._get_all_nodes():
-                    if subnode in all_nodes:
-                        raise IOError(('Subnode %s of node %s already exists '
-                                       'in the workflow') % (subnode, node))
-            if isinstance(node, Node):
-                # explicit class cast
-                node.__class__ = pe.ConditionalNode
-                self.connect(self._condition, 'out', node, 'donotrun')
-            newnodes.append(node)
-        if not newnodes:
-            logger.debug('no new nodes to add')
-            return
-        for node in newnodes:
-            if not issubclass(node.__class__, WorkflowBase):
-                raise Exception('Node %s must be a subclass of WorkflowBase' %
-                                str(node))
-        self._check_nodes(newnodes)
-        for node in newnodes:
-            if node._hierarchy is None:
-                node._hierarchy = self.name
-        self._graph.add_nodes_from(newnodes)
+            self._switches[co] = m
 
     def connect(self, *args, **kwargs):
         """Connect nodes in the pipeline.
@@ -1244,6 +1216,7 @@ class CachedWorkflow(Workflow):
              function as we use the inspect module to get at the source code
              and execute it remotely
         """
+
         if len(args) == 1:
             flat_conns = args[0]
         elif len(args) == 4:
@@ -1252,22 +1225,54 @@ class CachedWorkflow(Workflow):
             raise Exception('unknown set of parameters to connect function')
         if not kwargs:
             disconnect = False
+            conditional = True
         else:
-            disconnect = kwargs['disconnect']
+            disconnect = kwargs.get('disconnect', False)
+            conditional = kwargs.get('conditional', True)
 
         list_conns = []
         for srcnode, dstnode, conns in flat_conns:
+            srcnode = self._check_conditional_node(srcnode)
             is_output = (isinstance(dstnode, string_types) and
                          dstnode == 'output')
             if not is_output:
                 list_conns.append((srcnode, dstnode, conns))
             else:
                 for srcport, dstport in conns:
-                    list_conns.append((srcnode, self._switches[dstport],
-                                      [(srcport, 'in1')]))
+                    mrgnode = self._switches.get(dstport, None)
+                    if mrgnode is None:
+                        raise RuntimeError('Destination port not found')
+                    logger.debug('Mapping %s to %s' % (srcport, dstport))
+                    list_conns.append((srcnode, mrgnode, [(srcport, 'in1')]))
 
-        return super(CachedWorkflow, self).connect(
-            list_conns, disconnect=disconnect)
+        super(CachedWorkflow, self).connect(list_conns, disconnect=disconnect)
+
+    def _check_conditional_node(self, node, checknode=None):
+        from nipype.interfaces.utility import IdentityInterface
+
+        if checknode is None:
+            checknode = self._check
+
+        allnodes = self._graph.nodes()
+        node_names = [n.name for n in allnodes]
+        node_lineage = [n._hierarchy for n in allnodes]
+
+        if node.name in node_names:
+            idx = node_names.index(node.name)
+            if node_lineage[idx] in [node._hierarchy, self.name]:
+                return allnodes[idx]
+
+            if (isinstance(node, Node) and
+                    not isinstance(node._interface, IdentityInterface)):
+                # explicit class cast
+                logger.debug('Casting node %s' % node)
+                newnode = ConditionalNode(node._interface, name=node.name)
+                newnode._hierarchy = node._hierarchy
+
+                super(CachedWorkflow, self).connect(
+                    [(self._check, newnode, [('out', 'donotrun')])])
+                return newnode
+        return node
 
 
 class Node(WorkflowBase):
