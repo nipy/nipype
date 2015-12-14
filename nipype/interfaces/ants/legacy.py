@@ -18,8 +18,7 @@ from glob import glob
 
 
 from .base import ANTSCommand, ANTSCommandInputSpec
-from ..base import (TraitedSpec, File, traits, InputMultiPath,
-                    isdefined, OutputMultiPath)
+from ..base import TraitedSpec, File, traits, isdefined, OutputMultiPath
 from ...utils.filemanip import split_filename
 
 

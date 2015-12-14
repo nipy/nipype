@@ -160,10 +160,10 @@ matlab_
   2008a or later
 
 SPM_
-  SPM5/8
+  SPM5 or later
 
 FreeSurfer_
-  FreeSurfer version 4 and higher
+  FreeSurfer v4.0.0 or later
 
 AFNI_
   2009_12_31_1431 or later

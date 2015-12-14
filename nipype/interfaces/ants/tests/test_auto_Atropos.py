@@ -61,6 +61,9 @@ def test_Atropos_inputs():
     ),
     use_mixture_model_proportions=dict(requires=['posterior_formulation'],
     ),
+    use_random_seed=dict(argstr='--use-random-seed %d',
+    usedefault=True,
+    ),
     )
     inputs = Atropos.input_spec()
 

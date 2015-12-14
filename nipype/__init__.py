@@ -17,6 +17,12 @@ from distutils.version import LooseVersion
 
 from .fixes.numpy.testing import nosetester
 
+try:
+    import faulthandler
+    faulthandler.enable()
+except ImportError:
+    pass
+
 
 class _NoseTester(nosetester.NoseTester):
     """ Subclass numpy's NoseTester to add doctests by default
