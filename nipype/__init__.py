@@ -83,6 +83,6 @@ except:
     pass
 
 
-from .pipeline import Node, MapNode, JoinNode, Workflow
+from .pipeline import Node, MapNode, JoinNode, Workflow, ConditionalNode
 from .interfaces import (DataGrabber, DataSink, SelectFiles,
                          IdentityInterface, Rename, Function, Select, Merge)
