@@ -2346,3 +2346,58 @@ class MapNode(Node):
         else:
             self._result = self._load_results(cwd)
         os.chdir(old_cwd)
+
+
+class ConditionalNode(Node):
+    """
+    A node that is executed only if its input 'donotrun' is False.
+
+    Examples
+    --------
+
+    >>> from nipype import ConditionalNode
+    >>> from nipype.interfaces import fsl
+    >>> realign = ConditionalNode(fsl.MCFLIRT(), name='CNodeExample')
+    >>> realign.inputs.in_file = ['functional.nii',
+    ...                           'functional2.nii',
+    ...                           'functional3.nii']
+    >>> realign.inputs.donotrun = True
+    >>> realign.run() # doctest: +SKIP
+
+    """
+
+    def __init__(self, interface, name, **kwargs):
+        """
+
+        Parameters
+        ----------
+        interface : interface object
+            node specific interface (fsl.Bet(), spm.Coregister())
+        name : alphanumeric string
+            node specific name
+
+        See Node docstring for additional keyword arguments.
+        """
+        from nipype.interfaces.io import add_traits
+
+        super(ConditionalNode, self).__init__(interface, name, **kwargs)
+        add_traits(interface.inputs, ['donotrun'], traits.Bool)
+        interface.inputs.donotrun = False
+
+    def run(self, updatehash=False):
+        """
+        Execute the node in its directory.
+
+        Parameters
+        ----------
+
+        updatehash: boolean
+            Update the hash stored in the output directory
+        """
+        if not self._interface.inputs.donotrun:
+            super(ConditionalNode, self).run(updatehash)
+        else:
+            logger.info('ConditionalNode %s skipped (donotrun is True)' %
+                        self.name)
+
+        return self._result
