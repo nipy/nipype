@@ -849,44 +849,33 @@ connected.
     def _check_inputs(self, parameter):
         return self._has_attr(parameter, subtype='in')
 
-    def _get_node_inputs(self, node, inputdict, onchange=None):
-        """
-        Returns the inputs of a node in a workflow
-        """
-        inputdict.add_trait(node.name, traits.Instance(TraitedSpec))
-        if isinstance(node, Workflow):
-            setattr(inputdict, node.name, node.inputs)
-        else:
-            taken_inputs = []
-            for _, _, d in self._graph.in_edges_iter(nbunch=node,
-                                                     data=True):
-                for cd in d['connect']:
-                    taken_inputs.append(cd[1])
-            unconnectedinputs = TraitedSpec()
-            for key, trait in list(node.inputs.items()):
-                if key not in taken_inputs:
-                    unconnectedinputs.add_trait(key,
-                                                traits.Trait(trait,
-                                                             node=node))
-                    value = getattr(node.inputs, key)
-                    setattr(unconnectedinputs, key, value)
-            setattr(inputdict, node.name, unconnectedinputs)
-
-            # Enable setting custom change hooks
-            if onchange is None:
-                onchange = getattr(self, '_set_input')
-            getattr(inputdict, node.name).on_trait_change(onchange)
-        return inputdict
-
     def _get_inputs(self):
         """Returns the inputs of a workflow
+
         This function does not return any input ports that are already
         connected
         """
         inputdict = TraitedSpec()
         for node in self._graph.nodes():
             inputdict.add_trait(node.name, traits.Instance(TraitedSpec))
-            inputdict = self._get_node_inputs(node, inputdict)
+            if isinstance(node, Workflow):
+                setattr(inputdict, node.name, node.inputs)
+            else:
+                taken_inputs = []
+                for _, _, d in self._graph.in_edges_iter(nbunch=node,
+                                                         data=True):
+                    for cd in d['connect']:
+                        taken_inputs.append(cd[1])
+                unconnectedinputs = TraitedSpec()
+                for key, trait in list(node.inputs.items()):
+                    if key not in taken_inputs:
+                        unconnectedinputs.add_trait(key,
+                                                    traits.Trait(trait,
+                                                                 node=node))
+                        value = getattr(node.inputs, key)
+                        setattr(unconnectedinputs, key, value)
+                setattr(inputdict, node.name, unconnectedinputs)
+                getattr(inputdict, node.name).on_trait_change(self._set_input)
         return inputdict
 
     def _get_outputs(self):
