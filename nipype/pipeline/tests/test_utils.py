@@ -14,7 +14,7 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.base as nib
 import nipype.interfaces.utility as niu
 from ... import config
-from ..utils import merge_dict, clean_working_directory
+from ..utils import merge_dict, clean_working_directory, write_workflow_prov
 
 
 def test_identitynode_removal():
@@ -329,4 +329,17 @@ def test_multi_disconnected_iterable():
     metawf.add_nodes([create_wf('wf%d' % i) for i in range(30)])
     eg = metawf.run(plugin='Linear')
     yield assert_equal, len(eg.nodes()), 60
+    rmtree(out_dir)
+
+def test_provenance():
+    out_dir = mkdtemp()
+    metawf = pe.Workflow(name='meta')
+    metawf.base_dir = out_dir
+    metawf.add_nodes([create_wf('wf%d' % i) for i in range(1)])
+    eg = metawf.run(plugin='Linear')
+    prov_base = os.path.join(out_dir,
+                             'workflow_provenance_test')
+    psg = write_workflow_prov(eg, prov_base, format='all')
+    yield assert_equal, len(psg.bundles), 2
+    yield assert_equal, len(psg.get_records()), 7
     rmtree(out_dir)
