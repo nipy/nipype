@@ -1120,6 +1120,167 @@ connected.
         return ('\n' + prefix).join(dotlist)
 
 
+class CachedWorkflow(Workflow):
+    """
+    Implements a kind of workflow that can be by-passed if all the fields
+    of an input `cachenode` are set.
+    """
+
+    def __init__(self, name, base_dir=None, condition_map=[]):
+        """Create a workflow object.
+        Parameters
+        ----------
+        name : alphanumeric string
+            unique identifier for the workflow
+        base_dir : string, optional
+            path to workflow storage
+        condition_map : list of tuples, non-empty
+            each tuple indicates the input port name and the node and output
+            port name, for instance ('b', 'outputnode.sum') will map the
+            workflow input 'conditions.b' to 'outputnode.sum'.
+            'b'
+        """
+
+        from nipype.interfaces.utility import CheckInterface, \
+            IdentityInterface, Merge, Select
+        super(CachedWorkflow, self).__init__(name, base_dir)
+
+        if condition_map is None or not condition_map:
+            raise ValueError('CachedWorkflow condition_map must be a '
+                             'non-empty list of tuples')
+
+        if isinstance(condition_map, tuple):
+            condition_map = [condition_map]
+
+        cond_in, cond_out = zip(*condition_map)
+
+        self._condition = Node(CheckInterface(fields=list(cond_in)),
+                               name='cachenode')
+        setattr(self._condition, 'condition_map', condition_map)
+        self.add_nodes([self._condition], conditional=False)
+        self._input_conditions = cond_in
+        self._map = condition_map
+
+        self._outputnode = Node(IdentityInterface(
+            fields=cond_out), name='outputnode')
+
+        def _switch_idx(val):
+            return [int(val)]
+
+        self._switches = {}
+        for o in cond_out:
+            m = Node(Merge(2), name='Merge_%s' % o)
+            s = Node(Select(), name='Switch_%s' % o)
+            self.connect([
+                (m, s, [('out', 'inlist')]),
+                (self._condition, s, [(('out', _switch_idx), 'index')]),
+                (self._condition, m, [(o, 'in2')]),
+                (s, self._outputnode, [('out', o)])
+            ])
+            self._switches[o] = m
+
+    def add_nodes(self, nodes, conditional=True):
+        if not conditional:
+            super(CachedWorkflow, self).add_nodes(nodes)
+            return
+
+        newnodes = []
+        all_nodes = self._get_all_nodes()
+        for node in nodes:
+            if self._has_node(node):
+                raise IOError('Node %s already exists in the workflow' % node)
+            if isinstance(node, Workflow):
+                for subnode in node._get_all_nodes():
+                    if subnode in all_nodes:
+                        raise IOError(('Subnode %s of node %s already exists '
+                                       'in the workflow') % (subnode, node))
+            if isinstance(node, Node):
+                # explicit class cast
+                node.__class__ = pe.ConditionalNode
+                self.connect(self._condition, 'out', node, 'donotrun')
+            newnodes.append(node)
+        if not newnodes:
+            logger.debug('no new nodes to add')
+            return
+        for node in newnodes:
+            if not issubclass(node.__class__, WorkflowBase):
+                raise Exception('Node %s must be a subclass of WorkflowBase' %
+                                str(node))
+        self._check_nodes(newnodes)
+        for node in newnodes:
+            if node._hierarchy is None:
+                node._hierarchy = self.name
+        self._graph.add_nodes_from(newnodes)
+
+    def connect(self, *args, **kwargs):
+        """Connect nodes in the pipeline.
+
+        This routine also checks if inputs and outputs are actually provided by
+        the nodes that are being connected.
+
+        Creates edges in the directed graph using the nodes and edges specified
+        in the `connection_list`.  Uses the NetworkX method
+        DiGraph.add_edges_from.
+
+        Parameters
+        ----------
+
+        args : list or a set of four positional arguments
+
+            Four positional arguments of the form::
+
+              connect(source, sourceoutput, dest, destinput)
+
+            source : nodewrapper node
+            sourceoutput : string (must be in source.outputs)
+            dest : nodewrapper node
+            destinput : string (must be in dest.inputs)
+
+            A list of 3-tuples of the following form::
+
+             [(source, target,
+                 [('sourceoutput/attribute', 'targetinput'),
+                 ...]),
+             ...]
+
+            Or::
+
+             [(source, target, [(('sourceoutput1', func, arg2, ...),
+                                         'targetinput'), ...]),
+             ...]
+             sourceoutput1 will always be the first argument to func
+             and func will be evaluated and the results sent ot targetinput
+
+             currently func needs to define all its needed imports within the
+             function as we use the inspect module to get at the source code
+             and execute it remotely
+        """
+        if len(args) == 1:
+            flat_conns = args[0]
+        elif len(args) == 4:
+            flat_conns = [(args[0], args[2], [(args[1], args[3])])]
+        else:
+            raise Exception('unknown set of parameters to connect function')
+        if not kwargs:
+            disconnect = False
+        else:
+            disconnect = kwargs['disconnect']
+
+        list_conns = []
+        for srcnode, dstnode, conns in flat_conns:
+            is_output = (isinstance(dstnode, string_types) and
+                         dstnode == 'output')
+            if not is_output:
+                list_conns.append((srcnode, dstnode, conns))
+            else:
+                for srcport, dstport in conns:
+                    list_conns.append((srcnode, self._switches[dstport],
+                                      [(srcport, 'in1')]))
+
+        return super(CachedWorkflow, self).connect(
+            list_conns, disconnect=disconnect)
+
+
 class Node(WorkflowBase):
     """Wraps interface objects for use in pipeline
 
