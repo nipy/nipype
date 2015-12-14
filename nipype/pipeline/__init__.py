@@ -7,4 +7,4 @@ Package contains modules for generating pipelines using interfaces
 
 from __future__ import absolute_import
 __docformat__ = 'restructuredtext'
-from .engine import Node, MapNode, JoinNode, Workflow
+from .engine import Node, MapNode, JoinNode, Workflow, ConditionalNode
