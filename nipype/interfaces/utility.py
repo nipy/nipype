@@ -566,3 +566,86 @@ class CSVReader(BaseInterface):
                 entry = self._parse_line(line)
                 outputs = self._append_entry(outputs, entry)
         return outputs
+
+
+class CheckInterfaceOutputSpec(TraitedSpec):
+    out = traits.Bool(False, desc='Inputs meet condition')
+
+
+class CheckInterface(IOBase):
+    """
+    Interface that performs checks on inputs
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.utility import CheckInterface
+    >>> checkif = CheckInterface(fields=['a', 'b'], operation='any')
+    >>> checkif._list_outputs()['out']
+    False
+
+    >>> checkif.inputs.a = 'foo'
+    >>> out = checkif.run()
+    >>> checkif._list_outputs()['out']
+    True
+
+    >>> checkif.inputs.operation = 'all'
+    >>> out = checkif.run()
+    >>> checkif._list_outputs()['out']
+    False
+
+    >>> checkif.inputs.b = 'bar'
+    >>> out = checkif.run()
+    >>> checkif._list_outputs()['out']
+    True
+    """
+    input_spec = DynamicTraitedSpec
+    output_spec = CheckInterfaceOutputSpec
+
+    def __init__(self, fields=None, operation='all', **inputs):
+        super(CheckInterface, self).__init__(**inputs)
+
+        if fields is None or not fields:
+            raise ValueError('CheckInterface fields must be a non-empty '
+                             'list')
+
+        if 'operation' in fields:
+            raise ValueError('CheckInterface does not allow fields using'
+                             ' special name \'operation\'')
+        # Each input must be in the fields.
+        for in_field in inputs:
+            if in_field not in fields:
+                raise ValueError('CheckInterface input is not in the '
+                                 'fields: %s' % in_field)
+        self._fields = fields
+        self._check_inputs = [False]
+        add_traits(self.inputs, fields + ['operation'])
+
+        # Adding any traits wipes out all input values set in superclass initialization,
+        # even it the trait is not in the add_traits argument. The work-around is to reset
+        # the values after adding the traits.
+        self.inputs.set(**inputs)
+
+        if operation not in ['all', 'any']:
+            raise ValueError('CheckInterface does not accept key word '
+                             '\'%s\' as operation input' % operation)
+        self.inputs.operation = operation
+
+    def _run_interface(self, runtime):
+        results = []
+
+        for key in self._fields:
+            if key != 'operation':
+                val = getattr(self.inputs, key)
+                results.append(isdefined(val))
+
+        if self.inputs.operation == 'any':
+            self._result = any(results)
+        else:
+            self._result = all(results)
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out'] = self._result
+        return outputs
