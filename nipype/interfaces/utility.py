@@ -632,20 +632,21 @@ class CheckInterface(IOBase):
         self.inputs.operation = operation
 
     def _run_interface(self, runtime):
-        results = []
+        # Check operation again
+        if self.inputs.operation not in ['all', 'any']:
+            raise ValueError('CheckInterface does not accept keyword '
+                             '\'%s\' as operation input' % operation)
 
-        for key in self._fields:
-            if key != 'operation':
-                val = getattr(self.inputs, key)
-                results.append(isdefined(val))
+        results = [isdefined(getattr(self.inputs, key))
+                   for key in self._fields if key != 'operation']
 
+        self._check_result = all(results)
         if self.inputs.operation == 'any':
-            self._result = any(results)
-        else:
-            self._result = all(results)
+            self._check_result = any(results)
+
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out'] = self._result
+        outputs['out'] = self._check_result
         return outputs

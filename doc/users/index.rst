@@ -33,6 +33,7 @@
    function_interface
    mapnode_and_iterables
    joinnode_and_itersource
+   runtime_decisions
    model_specification
    saving_workflows
    spmmcr
