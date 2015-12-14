@@ -28,3 +28,13 @@ conditional nodes, nipype provides the
 output `out` set to `True` if any/all the inputs are defined and `False`
 otherwise. The input `operation` allows to switch between the any and all
 conditions.
+
+Example: CachedWorkflow
+=======================
+
+An application of the mentioned elements is the
+:class:`nipype.pipeline.engine.CachedWorkflow`.
+This workflow is able to decide whether its nodes should be executed or
+not if all the inputs of the input node called `cachenode` are set.
+For instance, in https://github.com/nipy/nipype/pull/1081 this feature
+is requested.
