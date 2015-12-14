@@ -15,4 +15,16 @@ ConditionalNode
 The :class:`nipype.pipeline.engine.ConditionalNode` wrapping any interface
 will add an input called `donotrun` that will switch between run/donotrun
 modes. When the `run()` member of a node is called, the interface will run
-normally iif `donotrun == False` (default).
+normally *iff* `donotrun` is `False` (default case).
+
+Additional elements
+===================
+
+Therefore, :class:`nipype.pipeline.engine.ConditionalNode` can be connected
+from any Boolean output of other interfaces and using inline functions.
+To help introduce logical operations that produce boolean signals to switch
+conditional nodes, nipype provides the
+:class:`nipype.interfaces.utility.CheckInterface` which produces an
+output `out` set to `True` if any/all the inputs are defined and `False`
+otherwise. The input `operation` allows to switch between the any and all
+conditions.
