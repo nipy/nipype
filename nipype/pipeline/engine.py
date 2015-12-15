@@ -363,7 +363,7 @@ connected.
                 if not (hasattr(destnode, '_interface') and
                         '.io' in str(destnode._interface.__class__)):
                     if not destnode._check_inputs(dest):
-                        not_found.append(['in', destnode.name, dest])
+                        not_found.append(['in', '%s' % destnode, dest])
                 if not (hasattr(srcnode, '_interface') and
                         '.io' in str(srcnode._interface.__class__)):
                     if isinstance(source, tuple):
@@ -377,7 +377,7 @@ connected.
                                          'connection from output of %s') %
                                         srcnode.name)
                     if sourcename and not srcnode._check_outputs(sourcename):
-                        not_found.append(['out', srcnode.name, sourcename])
+                        not_found.append(['out', '%s' % srcnode, sourcename])
                 connected_ports[destnode] += [dest]
         infostr = []
         for info in not_found:
@@ -812,7 +812,7 @@ connected.
             if node.name in node_names:
                 idx = node_names.index(node.name)
                 if node_lineage[idx] in [node._hierarchy, self.name]:
-                    raise IOError('Duplicate node name %s found.' % node.name)
+                    raise IOError('Duplicate node %s found.' % node)
             else:
                 node_names.append(node.name)
 
