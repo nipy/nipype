@@ -1110,7 +1110,88 @@ connected.
         return ('\n' + prefix).join(dotlist)
 
 
-class CachedWorkflow(Workflow):
+class ConditionalWorkflow(Workflow):
+    """
+    Implements a kind of workflow that can be by-passed if the input of
+    `donotrun` of the condition node is `True`.
+    """
+
+    def __init__(self, name, base_dir=None):
+        """Create a workflow object.
+        Parameters
+        ----------
+        name : alphanumeric string
+            unique identifier for the workflow
+        base_dir : string, optional
+            path to workflow storage
+        """
+
+        from nipype.interfaces.utility import IdentityInterface
+        super(ConditionalWorkflow, self).__init__(name, base_dir)
+        self._condition = Node(IdentityInterface(fields=['donotrun']),
+                               name='checknode')
+
+    def _plain_connect(self, *args, **kwargs):
+        super(ConditionalWorkflow, self).connect(*args, **kwargs)
+
+    def connect(self, *args, **kwargs):
+        """Connect nodes in the pipeline.
+        """
+
+        if len(args) == 1:
+            flat_conns = args[0]
+        elif len(args) == 4:
+            flat_conns = [(args[0], args[2], [(args[1], args[3])])]
+        else:
+            raise Exception('unknown set of parameters to connect function')
+        if not kwargs:
+            disconnect = False
+        else:
+            disconnect = kwargs.get('disconnect', False)
+
+        list_conns = []
+        for srcnode, dstnode, conns in flat_conns:
+            srcnode = self._check_conditional_node(srcnode)
+            list_conns.append((srcnode, dstnode, conns))
+
+        self._plain_connect(list_conns, disconnect=disconnect)
+
+    def _check_conditional_node(self, node, checknode=None):
+        from nipype.interfaces.utility import IdentityInterface
+
+        def _checkdefined(val):
+            from nipype.interfaces.base import isdefined
+            if isdefined(val):
+                return bool(val)
+            return False
+
+        if checknode is None:
+            checknode = self._check
+
+        allnodes = self._graph.nodes()
+        node_names = [n.name for n in allnodes]
+        node_lineage = [n._hierarchy for n in allnodes]
+
+        if node.name in node_names:
+            idx = node_names.index(node.name)
+            if node_lineage[idx] in [node._hierarchy, self.name]:
+                return allnodes[idx]
+
+            if (isinstance(node, Node) and
+                    not isinstance(node._interface, IdentityInterface)):
+                # explicit class cast
+                logger.debug('Casting node %s' % node)
+                newnode = ConditionalNode(node._interface, name=node.name)
+                newnode._hierarchy = node._hierarchy
+
+                self._plain_connect(
+                    [(self._condition, newnode, [
+                        (('donotrun', _checkdefined), 'donotrun')])])
+                return newnode
+        return node
+
+
+class CachedWorkflow(ConditionalWorkflow):
     """
     Implements a kind of workflow that can be by-passed if all the fields
     of an input `cachenode` are set.
@@ -1146,7 +1227,7 @@ class CachedWorkflow(Workflow):
         self._cache = Node(IdentityInterface(fields=list(cond_in)),
                            name='cachenode')
         self._check = Node(CheckInterface(fields=list(cond_in)),
-                           name='checknode')
+                           name='decidenode')
         self._outputnode = Node(IdentityInterface(
             fields=cond_out), name='outputnode')
 
@@ -1160,61 +1241,22 @@ class CachedWorkflow(Workflow):
             else:
                 return None
 
+        self._plain_connect(self._check, 'out', self._condition, 'donotrun')
         self._switches = {}
         for ci, co in cache_map:
             m = Node(Merge(2), name='Merge_%s' % co)
             s = Node(Select(), name='Switch_%s' % co)
-            super(CachedWorkflow, self).connect([
+            self._plain_connect([
                 (m, s, [('out', 'inlist')]),
                 (self._cache, self._check, [(ci, ci)]),
                 (self._cache, m, [((ci, _fix_undefined), 'in2')]),
-                (self._check, s, [(('out', _switch_idx), 'index')]),
+                (self._condition, s, [(('donotrun', _switch_idx), 'index')]),
                 (s, self._outputnode, [('out', co)])
             ])
             self._switches[co] = m
 
     def connect(self, *args, **kwargs):
         """Connect nodes in the pipeline.
-
-        This routine also checks if inputs and outputs are actually provided by
-        the nodes that are being connected.
-
-        Creates edges in the directed graph using the nodes and edges specified
-        in the `connection_list`.  Uses the NetworkX method
-        DiGraph.add_edges_from.
-
-        Parameters
-        ----------
-
-        args : list or a set of four positional arguments
-
-            Four positional arguments of the form::
-
-              connect(source, sourceoutput, dest, destinput)
-
-            source : nodewrapper node
-            sourceoutput : string (must be in source.outputs)
-            dest : nodewrapper node
-            destinput : string (must be in dest.inputs)
-
-            A list of 3-tuples of the following form::
-
-             [(source, target,
-                 [('sourceoutput/attribute', 'targetinput'),
-                 ...]),
-             ...]
-
-            Or::
-
-             [(source, target, [(('sourceoutput1', func, arg2, ...),
-                                         'targetinput'), ...]),
-             ...]
-             sourceoutput1 will always be the first argument to func
-             and func will be evaluated and the results sent ot targetinput
-
-             currently func needs to define all its needed imports within the
-             function as we use the inspect module to get at the source code
-             and execute it remotely
         """
 
         if len(args) == 1:
@@ -1225,10 +1267,8 @@ class CachedWorkflow(Workflow):
             raise Exception('unknown set of parameters to connect function')
         if not kwargs:
             disconnect = False
-            conditional = True
         else:
             disconnect = kwargs.get('disconnect', False)
-            conditional = kwargs.get('conditional', True)
 
         list_conns = []
         for srcnode, dstnode, conns in flat_conns:
@@ -1246,33 +1286,6 @@ class CachedWorkflow(Workflow):
                     list_conns.append((srcnode, mrgnode, [(srcport, 'in1')]))
 
         super(CachedWorkflow, self).connect(list_conns, disconnect=disconnect)
-
-    def _check_conditional_node(self, node, checknode=None):
-        from nipype.interfaces.utility import IdentityInterface
-
-        if checknode is None:
-            checknode = self._check
-
-        allnodes = self._graph.nodes()
-        node_names = [n.name for n in allnodes]
-        node_lineage = [n._hierarchy for n in allnodes]
-
-        if node.name in node_names:
-            idx = node_names.index(node.name)
-            if node_lineage[idx] in [node._hierarchy, self.name]:
-                return allnodes[idx]
-
-            if (isinstance(node, Node) and
-                    not isinstance(node._interface, IdentityInterface)):
-                # explicit class cast
-                logger.debug('Casting node %s' % node)
-                newnode = ConditionalNode(node._interface, name=node.name)
-                newnode._hierarchy = node._hierarchy
-
-                super(CachedWorkflow, self).connect(
-                    [(self._check, newnode, [('out', 'donotrun')])])
-                return newnode
-        return node
 
 
 class Node(WorkflowBase):
