@@ -601,6 +601,7 @@ class CheckInterface(IOBase):
     """
     input_spec = DynamicTraitedSpec
     output_spec = CheckInterfaceOutputSpec
+    _always_run = True
 
     def __init__(self, fields=None, operation='all', **inputs):
         super(CheckInterface, self).__init__(**inputs)

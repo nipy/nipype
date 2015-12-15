@@ -1130,6 +1130,7 @@ class ConditionalWorkflow(Workflow):
         super(ConditionalWorkflow, self).__init__(name, base_dir)
         self._condition = Node(IdentityInterface(fields=['donotrun']),
                                name='checknode')
+        self.add_nodes([self._condition])
 
     def _plain_connect(self, *args, **kwargs):
         super(ConditionalWorkflow, self).connect(*args, **kwargs)
@@ -1517,6 +1518,7 @@ class Node(WorkflowBase):
         logger.debug(('updatehash, overwrite, always_run, hash_exists',
                       updatehash, self.overwrite, self._interface.always_run,
                       hash_exists))
+
         if (not updatehash and (((self.overwrite is None and
                                   self._interface.always_run) or
                                  self.overwrite) or not
