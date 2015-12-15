@@ -33,8 +33,6 @@ install:
 - pip install python-coveralls
 - pip install nose-cov
 - pip install -r requirements.txt  # finish remaining requirements
-- pip install https://github.com/RDFLib/rdflib/archive/master.zip
-- pip install https://github.com/trungdong/prov/archive/rdf.zip
 - python setup.py install
 script:
 - python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-cov --cover-package nipype --cov-config .coveragerc --logging-level=INFO
