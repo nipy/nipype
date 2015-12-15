@@ -205,7 +205,8 @@ class WorkflowBase(object):
     def _verify_name(self, name):
         valid_name = bool(re.match('^[\w-]+$', name))
         if not valid_name:
-            raise Exception('the name must not contain any special characters')
+            raise ValueError('[Workflow|Node] name \'%s\' contains'
+                             ' special characters' % name)
 
     def __repr__(self):
         if self._hierarchy:
