@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: Introduced runtime decisions (https://github.com/nipy/nipype/pull/1299)
 * FIX: Minor bugfix logging hash differences (https://github.com/nipy/nipype/pull/1298)
 * FIX: VTK version check missing when using tvtk (https://github.com/nipy/nipype/pull/1219)
 * ENH: Added an OAR scheduler plugin (https://github.com/nipy/nipype/pull/1259)
