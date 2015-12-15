@@ -1136,7 +1136,7 @@ def merge_bundles(g1, g2):
     return g1
 
 
-def write_workflow_prov(graph, filename=None, format='turtle'):
+def write_workflow_prov(graph, filename=None, format='all'):
     """Write W3C PROV Model JSON file
     """
     if not filename:
@@ -1155,7 +1155,7 @@ def write_workflow_prov(graph, filename=None, format='turtle'):
                  nipype_ns['hashval']: hashval}
         process = ps.g.activity(get_id(), None, None, attrs)
         if isinstance(result.runtime, list):
-            process.add_extra_attributes({pm.PROV["type"]: nipype_ns["MapNode"]})
+            process.add_attributes({pm.PROV["type"]: nipype_ns["MapNode"]})
             # add info about sub processes
             for idx, runtime in enumerate(result.runtime):
                 subresult = InterfaceResult(result.interface[idx],
@@ -1168,14 +1168,27 @@ def write_workflow_prov(graph, filename=None, format='turtle'):
                         values = getattr(result.outputs, key)
                         if isdefined(values) and idx < len(values):
                             subresult.outputs[key] = values[idx]
-                sub_bundle = ProvStore().add_results(subresult)
-                ps.g = merge_bundles(ps.g, sub_bundle)
-                ps.g.wasGeneratedBy(sub_bundle, process)
+                sub_doc = ProvStore().add_results(subresult)
+                sub_bundle = pm.ProvBundle(sub_doc.get_records(),
+                                           identifier=get_id())
+                ps.g.add_bundle(sub_bundle)
+                bundle_entity = ps.g.entity(sub_bundle.identifier,
+                                            other_attributes={'prov:type':
+                                                               pm.PROV_BUNDLE})
+                ps.g.wasGeneratedBy(bundle_entity, process)
         else:
-            process.add_extra_attributes({pm.PROV["type"]: nipype_ns["Node"]})
-            result_bundle = ProvStore().add_results(result)
-            ps.g = merge_bundles(ps.g, result_bundle)
-            ps.g.wasGeneratedBy(result_bundle, process)
+            process.add_attributes({pm.PROV["type"]: nipype_ns["Node"]})
+            if result.provenance:
+                prov_doc = result.provenance
+            else:
+                prov_doc = ProvStore().add_results(result)
+            result_bundle = pm.ProvBundle(prov_doc.get_records(),
+                                          identifier=get_id())
+            ps.g.add_bundle(result_bundle)
+            bundle_entity = ps.g.entity(result_bundle.identifier,
+                                        other_attributes={'prov:type':
+                                                              pm.PROV_BUNDLE})
+            ps.g.wasGeneratedBy(bundle_entity, process)
         processes.append(process)
 
     # add dependencies (edges)
@@ -1185,18 +1198,11 @@ def write_workflow_prov(graph, filename=None, format='turtle'):
                           starter=processes[nodes.index(edgeinfo[0])])
 
     # write provenance
-    try:
-        if format in ['turtle', 'all']:
-            ps.g.rdf().serialize(filename + '.ttl', format='turtle')
-    except (ImportError, NameError):
-        format = 'all'
-    finally:
-        if format in ['provn', 'all']:
-            with open(filename + '.provn', 'wt') as fp:
-                fp.writelines(ps.g.get_provn())
-        if format in ['json', 'all']:
-            with open(filename + '.json', 'wt') as fp:
-                pm.json.dump(ps.g, fp, cls=pm.ProvBundle.JSONEncoder)
+    if format in ['provn', 'all']:
+        with open(filename + '.provn', 'wt') as fp:
+            fp.writelines(ps.g.get_provn())
+    if format in ['json', 'all']:
+        ps.g.serialize(filename + '.json', format='json')
     return ps.g
 
 
