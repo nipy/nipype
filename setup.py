@@ -274,6 +274,7 @@ pkg_chk('traits', TRAITS_MIN_VERSION)
 pkg_chk('nose', NOSE_MIN_VERSION)
 pkg_chk('future', FUTURE_MIN_VERSION)
 pkg_chk('simplejson', SIMPLEJSON_MIN_VERSION)
+pkg_chk('prov', PROV_MIN_VERSION)
 custom_dateutil_messages = {'missing opt': ('Missing optional package "%s"'
                                             ' provided by package '
                                             '"python-dateutil"')}
