@@ -385,8 +385,10 @@ connected.
                                                                 info[0],
                                                                 info[2])]
         if not_found:
-            raise Exception('\n'.join(['Some connections were not found'] +
-                                      infostr))
+            infostr.insert(
+                0, 'Some connections were not found connecting %s.%s to '
+                '%s.%s' % (srcnode, source, destnode, dest))
+            raise Exception('\n'.join(infostr))
 
         # turn functions into strings
         for srcnode, destnode, connects in connection_list:
@@ -1110,6 +1112,9 @@ connected.
                     logger.debug('cross connection: ' + dotlist[-1])
         return ('\n' + prefix).join(dotlist)
 
+    def _plain_connect(self, *args, **kwargs):
+        super(ConditionalWorkflow, self).connect(*args, **kwargs)
+
 
 class ConditionalWorkflow(Workflow):
     """
@@ -1133,32 +1138,7 @@ class ConditionalWorkflow(Workflow):
                                name='checknode')
         self.add_nodes([self._condition])
 
-    def _plain_connect(self, *args, **kwargs):
-        super(ConditionalWorkflow, self).connect(*args, **kwargs)
-
-    def connect(self, *args, **kwargs):
-        """Connect nodes in the pipeline.
-        """
-
-        if len(args) == 1:
-            flat_conns = args[0]
-        elif len(args) == 4:
-            flat_conns = [(args[0], args[2], [(args[1], args[3])])]
-        else:
-            raise Exception('unknown set of parameters to connect function')
-        if not kwargs:
-            disconnect = False
-        else:
-            disconnect = kwargs.get('disconnect', False)
-
-        list_conns = []
-        for srcnode, dstnode, conns in flat_conns:
-            srcnode = self._check_conditional_node(srcnode)
-            list_conns.append((srcnode, dstnode, conns))
-
-        self._plain_connect(list_conns, disconnect=disconnect)
-
-    def _check_conditional_node(self, node, checknode=None):
+    def _check_conditional_nodes(self):
         from nipype.interfaces.utility import IdentityInterface
 
         def _checkdefined(val):
@@ -1178,14 +1158,13 @@ class ConditionalWorkflow(Workflow):
             idx = node_names.index(node.name)
             if node_lineage[idx] in [node._hierarchy, self.name]:
                 return allnodes[idx]
-
+        else:
             if (isinstance(node, Node) and
                     not isinstance(node._interface, IdentityInterface)):
                 # explicit class cast
                 logger.debug('Casting node %s' % node)
                 newnode = ConditionalNode(node._interface, name=node.name)
                 newnode._hierarchy = node._hierarchy
-
                 self._plain_connect(
                     [(self._condition, newnode, [
                         (('donotrun', _checkdefined), 'donotrun')])])
