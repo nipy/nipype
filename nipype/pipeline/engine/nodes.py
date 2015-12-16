@@ -17,10 +17,7 @@ The `Workflow` class provides core functionality for batch processing.
 from future import standard_library
 standard_library.install_aliases()
 from builtins import range
-from builtins import object
 
-from datetime import datetime
-from nipype.utils.misc import flatten, unflatten
 try:
     from collections import OrderedDict
 except ImportError:
@@ -30,44 +27,32 @@ from copy import deepcopy
 import pickle
 from glob import glob
 import gzip
-import inspect
 import os
 import os.path as op
-import re
 import shutil
 import errno
 import socket
 from shutil import rmtree
 import sys
 from tempfile import mkdtemp
-from warnings import warn
 from hashlib import sha1
-import numpy as np
-import networkx as nx
 
 from nipype.interfaces.base import (
-    traits, InputMultiPath, CommandLine, Undefined, TraitedSpec,
-    DynamicTraitedSpec, Bunch, InterfaceResult, md5, Interface,
-    TraitDictObject, TraitListObject, isdefined)
-from .workflows import WorkflowBase
-from nipype.utils.misc import (getsource, create_function_from_source,
-                          flatten, unflatten)
-from nipype.utils.filemanip import (save_json, FileNotFoundError,
-                               filename_to_list, list_to_filename,
-                               copyfiles, fnames_presuffix, loadpkl,
-                               split_filename, load_json, savepkl,
-                               write_rst_header, write_rst_dict,
-                               write_rst_list)
-from ..utils import (generate_expanded_graph, modify_paths,
-                     export_graph, make_output_dir, write_workflow_prov,
-                     clean_working_directory, format_dot, topological_sort,
+    traits, InputMultiPath, CommandLine, Undefined, DynamicTraitedSpec,
+    Bunch, InterfaceResult, md5, Interface, isdefined)
+from .base import WorkflowBase
+from nipype.utils.misc import flatten, unflatten
+from nipype.utils.filemanip import (
+    save_json, FileNotFoundError, filename_to_list, list_to_filename,
+    copyfiles, fnames_presuffix, loadpkl, split_filename, load_json,
+    savepkl, write_rst_header, write_rst_dict, write_rst_list)
+from ..utils import (modify_paths, make_output_dir, clean_working_directory,
                      get_print_name, merge_dict, evaluate_connect_function)
 
 from nipype.external.six import string_types
 from nipype import config, logging
-from nipype.utils.misc import package_check, str2bool
+from nipype.utils.misc import str2bool
 logger = logging.getLogger('workflow')
-package_check('networkx', '1.3')
 
 
 class Node(WorkflowBase):

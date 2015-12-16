@@ -16,11 +16,8 @@ The `Workflow` class provides core functionality for batch processing.
 
 from future import standard_library
 standard_library.install_aliases()
-from builtins import range
-from builtins import object
 
 from datetime import datetime
-from nipype.utils.misc import flatten, unflatten
 try:
     from collections import OrderedDict
 except ImportError:
@@ -28,136 +25,31 @@ except ImportError:
 
 from copy import deepcopy
 import pickle
-from glob import glob
-import gzip
-import inspect
 import os
 import os.path as op
-import re
 import shutil
-import errno
-import socket
-from shutil import rmtree
 import sys
-from tempfile import mkdtemp
 from warnings import warn
-from hashlib import sha1
 import numpy as np
 import networkx as nx
 
-from nipype.interfaces.base import (
-    traits, InputMultiPath, CommandLine, Undefined, TraitedSpec,
-    DynamicTraitedSpec, Bunch, InterfaceResult, md5, Interface,
-    TraitDictObject, TraitListObject, isdefined)
+from nipype.interfaces.base import (traits, TraitedSpec, TraitDictObject, TraitListObject)
 
-from nipype.utils.misc import (getsource, create_function_from_source,
-                          flatten, unflatten)
-from nipype.utils.filemanip import (save_json, FileNotFoundError,
-                               filename_to_list, list_to_filename,
-                               copyfiles, fnames_presuffix, loadpkl,
-                               split_filename, load_json, savepkl,
-                               write_rst_header, write_rst_dict,
-                               write_rst_list)
-from ..utils import (generate_expanded_graph, modify_paths,
-                     export_graph, make_output_dir, write_workflow_prov,
-                     clean_working_directory, format_dot, topological_sort,
-                     get_print_name, merge_dict, evaluate_connect_function)
+from nipype.utils.misc import getsource, create_function_from_source
+from nipype.utils.filemanip import save_json
+from ..utils import (generate_expanded_graph, export_graph, make_output_dir,
+                     write_workflow_prov, format_dot, topological_sort,
+                     get_print_name, merge_dict)
 
 from nipype.external.six import string_types
 from nipype import config, logging
 from nipype.utils.misc import package_check, str2bool
+
+from .base import WorkflowBase
+from .nodes import Node, MapNode
+
 logger = logging.getLogger('workflow')
 package_check('networkx', '1.3')
-
-
-class WorkflowBase(object):
-    """Defines common attributes and functions for workflows and nodes."""
-
-    def __init__(self, name=None, base_dir=None):
-        """ Initialize base parameters of a workflow or node
-
-        Parameters
-        ----------
-        name : string (mandatory)
-            Name of this node. Name must be alphanumeric and not contain any
-            special characters (e.g., '.', '@').
-        base_dir : string
-            base output directory (will be hashed before creations)
-            default=None, which results in the use of mkdtemp
-
-        """
-        self.base_dir = base_dir
-        self.config = None
-        self._verify_name(name)
-        self.name = name
-        # for compatibility with node expansion using iterables
-        self._id = self.name
-        self._hierarchy = None
-
-    @property
-    def inputs(self):
-        raise NotImplementedError
-
-    @property
-    def outputs(self):
-        raise NotImplementedError
-
-    @property
-    def fullname(self):
-        fullname = self.name
-        if self._hierarchy:
-            fullname = self._hierarchy + '.' + self.name
-        return fullname
-
-    def clone(self, name):
-        """Clone a workflowbase object
-
-        Parameters
-        ----------
-
-        name : string (mandatory)
-            A clone of node or workflow must have a new name
-        """
-        if (name is None) or (name == self.name):
-            raise Exception('Cloning requires a new name')
-        self._verify_name(name)
-        clone = deepcopy(self)
-        clone.name = name
-        clone._id = name
-        clone._hierarchy = None
-        return clone
-
-    def _check_outputs(self, parameter):
-        return hasattr(self.outputs, parameter)
-
-    def _check_inputs(self, parameter):
-        if isinstance(self.inputs, DynamicTraitedSpec):
-            return True
-        return hasattr(self.inputs, parameter)
-
-    def _verify_name(self, name):
-        valid_name = bool(re.match('^[\w-]+$', name))
-        if not valid_name:
-            raise ValueError('[Workflow|Node] name \'%s\' contains'
-                             ' special characters' % name)
-
-    def __repr__(self):
-        if self._hierarchy:
-            return '.'.join((self._hierarchy, self._id))
-        else:
-            return self._id
-
-    def save(self, filename=None):
-        if filename is None:
-            filename = 'temp.pklz'
-        savepkl(filename, self)
-
-    def load(self, filename):
-        if '.npz' in filename:
-            DeprecationWarning(('npz files will be deprecated in the next '
-                                'release. you can use numpy to open them.'))
-            return np.load(filename)
-        return loadpkl(filename)
 
 
 class Workflow(WorkflowBase):
