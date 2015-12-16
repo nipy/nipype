@@ -163,6 +163,7 @@ class Node(WorkflowBase):
         self.itersource = itersource
         self.overwrite = overwrite
         self.parameterization = None
+        self._donotrun = False
         self.run_without_submitting = run_without_submitting
         self.input_source = {}
         self.needed_outputs = []
@@ -440,6 +441,20 @@ class Node(WorkflowBase):
             else:
                 logger.critical('Unable to open the file in write mode: %s' %
                                 hashfile)
+
+    def _add_donotrun_trait(self):
+        if not hasattr(self._interface.inputs, 'donotrun'):
+            self._interface.inputs.add_trait('donotrun', traits.Bool)
+            self._interface.inputs.trait_set(trait_change_notify=False,
+                                             donotrun=False)
+            _ = getattr(self._interface.inputs, 'donotrun')
+            self._interface.inputs.on_trait_change(self._donotrun_update,
+                                                   'donotrun')
+
+    def _donotrun_update(self):
+        self._donotrun = getattr(self._interface.inputs, 'donotrun')
+        logger.debug('State donotrun updated: donotrun is now %s' %
+                     self._donotrun)
 
     def _get_inputs(self):
         """Retrieve inputs from pointers to results file
@@ -738,6 +753,43 @@ class Node(WorkflowBase):
                 fp.writelines(write_rst_header('Environment', level=2))
                 fp.writelines(write_rst_dict(self.result.runtime.environ))
         fp.close()
+
+
+class ConditionalNode(Node):
+    """
+    A node that is executed only if its input 'donotrun' is False.
+
+    Examples
+    --------
+
+    >>> from nipype import ConditionalNode
+    >>> from nipype.interfaces import fsl
+    >>> realign = ConditionalNode(fsl.MCFLIRT(), name='CNodeExample')
+    >>> realign.inputs.donotrun = True
+    >>> realign.run() # doctest: +SKIP
+
+    """
+
+    def __init__(self, interface, name, **kwargs):
+        """
+
+        Parameters
+        ----------
+        interface : interface object
+            node specific interface (fsl.Bet(), spm.Coregister())
+        name : alphanumeric string
+            node specific name
+
+        See Node docstring for additional keyword arguments.
+        """
+        super(ConditionalNode, self).__init__(interface, name, **kwargs)
+        self._add_donotrun_trait()
+
+    def run(self, updatehash=False):
+        if self._donotrun:
+            logger.debug('ConditionalNode: node %s skipped' % self)
+            return self._result
+        return super(ConditionalNode, self).run(updatehash)
 
 
 class JoinNode(Node):
@@ -1293,55 +1345,3 @@ class MapNode(Node):
         else:
             self._result = self._load_results(cwd)
         os.chdir(old_cwd)
-
-
-class ConditionalNode(Node):
-    """
-    A node that is executed only if its input 'donotrun' is False.
-
-    Examples
-    --------
-
-    >>> from nipype import ConditionalNode
-    >>> from nipype.interfaces import fsl
-    >>> realign = ConditionalNode(fsl.MCFLIRT(), name='CNodeExample')
-    >>> realign.inputs.donotrun = True
-    >>> realign.run() # doctest: +SKIP
-
-    """
-
-    def __init__(self, interface, name, **kwargs):
-        """
-
-        Parameters
-        ----------
-        interface : interface object
-            node specific interface (fsl.Bet(), spm.Coregister())
-        name : alphanumeric string
-            node specific name
-
-        See Node docstring for additional keyword arguments.
-        """
-        from nipype.interfaces.io import add_traits
-
-        super(ConditionalNode, self).__init__(interface, name, **kwargs)
-        add_traits(interface.inputs, ['donotrun'], traits.Bool)
-        interface.inputs.donotrun = False
-
-    def run(self, updatehash=False):
-        """
-        Execute the node in its directory.
-
-        Parameters
-        ----------
-
-        updatehash: boolean
-            Update the hash stored in the output directory
-        """
-        if not self._interface.inputs.donotrun:
-            super(ConditionalNode, self).run(updatehash)
-        else:
-            logger.info('ConditionalNode %s skipped (donotrun is True)' %
-                        self.name)
-
-        return self._result
