@@ -444,12 +444,15 @@ class Node(WorkflowBase):
 
     def _add_donotrun_trait(self):
         if not hasattr(self._interface.inputs, 'donotrun'):
+            logger.debug('Trait donotrun added to node %s' % self)
             self._interface.inputs.add_trait('donotrun', traits.Bool)
             self._interface.inputs.trait_set(trait_change_notify=False,
                                              donotrun=False)
             _ = getattr(self._interface.inputs, 'donotrun')
             self._interface.inputs.on_trait_change(self._donotrun_update,
                                                    'donotrun')
+            return True
+        return False
 
     def _donotrun_update(self):
         self._donotrun = getattr(self._interface.inputs, 'donotrun')
@@ -753,6 +756,11 @@ class Node(WorkflowBase):
                 fp.writelines(write_rst_header('Environment', level=2))
                 fp.writelines(write_rst_dict(self.result.runtime.environ))
         fp.close()
+
+
+class RegularNode(Node):
+    def _add_donotrun_trait(self):
+        return False
 
 
 class ConditionalNode(Node):

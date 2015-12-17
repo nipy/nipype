@@ -46,7 +46,7 @@ from nipype import config, logging
 from nipype.utils.misc import package_check, str2bool
 
 from .base import WorkflowBase
-from .nodes import Node, MapNode
+from .nodes import Node, MapNode, RegularNode
 
 logger = logging.getLogger('workflow')
 package_check('networkx', '1.3')
@@ -554,7 +554,7 @@ connected.
                                 'report_template.html'),
                         op.join(report_dir, 'index.html'))
         shutil.copyfile(op.join(op.dirname(__file__),
-                                '..', 'external', 'd3.js'),
+                                '..', '..', 'external', 'd3.js'),
                         op.join(report_dir, 'd3.js'))
         nodes, groups = topological_sort(graph, depth_first=True)
         graph_file = op.join(report_dir, 'graph1.json')
@@ -939,8 +939,33 @@ connected.
                     logger.debug('cross connection: ' + dotlist[-1])
         return ('\n' + prefix).join(dotlist)
 
-    def _plain_connect(self, *args, **kwargs):
-        super(ConditionalWorkflow, self).connect(*args, **kwargs)
+    def _make_conditional(self):
+        from nipype.interfaces.utility import IdentityInterface
+
+        if not getattr(self, '_condition', False):
+            self._condition = Node(IdentityInterface(fields=['donotrun']),
+                                   name='checknode')
+            self.add_nodes([self._condition])
+
+        def _checkdefined(val):
+            from nipype.interfaces.base import isdefined
+            if isdefined(val):
+                return bool(val)
+            return False
+
+        for node in self._graph.nodes():
+            if isinstance(node, Workflow):
+                node._make_conditional()
+                self.connect([(self._condition, node, [
+                    (('donotrun', _checkdefined), 'checknode.donotrun')])
+                ])
+                return newnode
+
+            if not isinstance(node._interface, IdentityInterface):
+                if node._add_donotrun_trait():
+                    self.connect([(self._condition, node, [
+                        (('donotrun', _checkdefined), 'donotrun')])
+                    ])
 
 
 class ConditionalWorkflow(Workflow):
@@ -961,42 +986,25 @@ class ConditionalWorkflow(Workflow):
 
         from nipype.interfaces.utility import IdentityInterface
         super(ConditionalWorkflow, self).__init__(name, base_dir)
-        self._condition = Node(IdentityInterface(fields=['donotrun']),
-                               name='checknode')
+        self._condition = RegularNode(
+            IdentityInterface(fields=['donotrun']), name='checknode')
         self.add_nodes([self._condition])
 
-    def _check_conditional_nodes(self):
-        from nipype.interfaces.utility import IdentityInterface
+    @property
+    def condition(self):
+        return self._condition
 
-        def _checkdefined(val):
-            from nipype.interfaces.base import isdefined
-            if isdefined(val):
-                return bool(val)
-            return False
+    def write_graph(self, **kwargs):
+        self._make_conditional()
+        return super(ConditionalWorkflow, self).write_graph(**kwargs)
 
-        if checknode is None:
-            checknode = self._check
+    def run(self, **kwargs):
+        self._make_conditional()
+        return super(ConditionalWorkflow, self).run(**kwargs)
 
-        allnodes = self._graph.nodes()
-        node_names = [n.name for n in allnodes]
-        node_lineage = [n._hierarchy for n in allnodes]
-
-        if node.name in node_names:
-            idx = node_names.index(node.name)
-            if node_lineage[idx] in [node._hierarchy, self.name]:
-                return allnodes[idx]
-        else:
-            if (isinstance(node, Node) and
-                    not isinstance(node._interface, IdentityInterface)):
-                # explicit class cast
-                logger.debug('Casting node %s' % node)
-                newnode = ConditionalNode(node._interface, name=node.name)
-                newnode._hierarchy = node._hierarchy
-                self._plain_connect(
-                    [(self._condition, newnode, [
-                        (('donotrun', _checkdefined), 'donotrun')])])
-                return newnode
-        return node
+    def export(self, **kwargs):
+        self._make_conditional()
+        return super(ConditionalWorkflow, self).export(**kwargs)
 
 
 class CachedWorkflow(ConditionalWorkflow):
@@ -1032,11 +1040,11 @@ class CachedWorkflow(ConditionalWorkflow):
             cache_map = [cache_map]
 
         cond_in, cond_out = zip(*cache_map)
-        self._cache = Node(IdentityInterface(fields=list(cond_in)),
-                           name='cachenode')
-        self._check = Node(CheckInterface(fields=list(cond_in)),
-                           name='decidenode')
-        self._outputnode = Node(IdentityInterface(
+        self._cache = RegularNode(IdentityInterface(
+            fields=list(cond_in)), name='cachenode')
+        self._check = RegularNode(CheckInterface(
+            fields=list(cond_in)), name='decidenode')
+        self._outputnode = RegularNode(IdentityInterface(
             fields=cond_out), name='outputnode')
 
         def _switch_idx(val):
@@ -1052,8 +1060,8 @@ class CachedWorkflow(ConditionalWorkflow):
         self._plain_connect(self._check, 'out', self._condition, 'donotrun')
         self._switches = {}
         for ci, co in cache_map:
-            m = Node(Merge(2), name='Merge_%s' % co)
-            s = Node(Select(), name='Switch_%s' % co)
+            m = RegularNode(Merge(2), name='Merge_%s' % co)
+            s = RegularNode(Select(), name='Switch_%s' % co)
             self._plain_connect([
                 (m, s, [('out', 'inlist')]),
                 (self._cache, self._check, [(ci, ci)]),
@@ -1062,6 +1070,9 @@ class CachedWorkflow(ConditionalWorkflow):
                 (s, self._outputnode, [('out', co)])
             ])
             self._switches[co] = m
+
+    def _plain_connect(self, *args, **kwargs):
+        super(CachedWorkflow, self).connect(*args, **kwargs)
 
     def connect(self, *args, **kwargs):
         """Connect nodes in the pipeline.
@@ -1080,7 +1091,7 @@ class CachedWorkflow(ConditionalWorkflow):
 
         list_conns = []
         for srcnode, dstnode, conns in flat_conns:
-            srcnode = self._check_conditional_node(srcnode)
+            srcnode._add_donotrun_trait()
             is_output = (isinstance(dstnode, string_types) and
                          dstnode == 'output')
             if not is_output:
