@@ -835,19 +835,19 @@ class DenoiseImage(ANTSCommand):
     >>> from nipype.interfaces.ants import DenoiseImage
     >>> denoise = DenoiseImage()
     >>> denoise.inputs.dimension = 3
-    >>> denoise.inputs.input_image = 'input_scalar_image.nii.gz'
+    >>> denoise.inputs.input_image = 'im1.nii'
     >>> denoise.inputs.output_image = ['output_corrected_image.nii.gz']
     >>> denoise.cmdline
-    'DenoiseImage -d 3 -i input_scalar_image.nii.gz -n Gaussian -o output_corrected_image.nii.gz -s 1'
+    'DenoiseImage -d 3 -i im1.nii -n Gaussian -o output_corrected_image.nii.gz -s 1'
 
     >>> denoise.inputs.noise_model = 'Rician'
     >>> denoise.inputs.shrink_factor = 2
     >>> denoise.cmdline
-    'DenoiseImage -d 3 -i input_scalar_image.nii.gz -n Rician -o output_corrected_image.nii.gz -s 2
+    'DenoiseImage -d 3 -i im1.nii -n Rician -o output_corrected_image.nii.gz -s 2
 
     >>> denoise.inputs.output_image = ['output_corrected_image.nii.gz', 'output_noise_image.nii.gz']
     >>> denoise.cmdline
-    'DenoiseImage -d 3 -i input_scalar_image.nii.gz -n Rician -o [output_corrected_image.nii.gz,output_noise_image.nii.gz] -s 2
+    'DenoiseImage -d 3 -i im1.nii -n Rician -o [output_corrected_image.nii.gz,output_noise_image.nii.gz] -s 2
     """
     input_spec = DenoiseImageInputSpec
     output_spec = DenoiseImageOutputSpec
