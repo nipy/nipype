@@ -335,6 +335,11 @@ def main(**extra_args):
                     'nipype.interfaces.mrtrix.tests',
                     'nipype.interfaces.nipy',
                     'nipype.interfaces.nipy.tests',
+                    'nipype.interfaces.niftyreg',
+                    'nipype.interfaces.niftyseg',
+                    'nipype.interfaces.niftyfit',
+                    'nipype.interfaces.susceptibility',
+                    'nipype.interfaces.ttk',
                     'nipype.interfaces.nitime',
                     'nipype.interfaces.nitime.tests',
                     'nipype.interfaces.script_templates',
@@ -418,7 +423,7 @@ def main(**extra_args):
           # python -- duplicating things into MANIFEST.in but this is admittedly
           # only a workaround to get things started -- not a solution
           package_data={'nipype':
-                        [pjoin('testing', 'data', '*'),
+                        [pjoin('testing', 'data', '*.*'),
                          pjoin('testing', 'data', 'dicomdir', '*'),
                          pjoin('testing', 'data', 'bedpostxout', '*'),
                          pjoin('testing', 'data', 'tbss_dir', '*'),
