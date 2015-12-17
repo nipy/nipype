@@ -252,7 +252,7 @@ class Level1Design(BaseInterface):
                                                               element=count,
                                                               ctype=ctype, val=val)
                         ev_txt += "\n"
-                        
+
                     for fconidx in ftest_idx:
                         fval=0
                         if con[0] in con_map.keys() and fconidx in con_map[con[0]]:
