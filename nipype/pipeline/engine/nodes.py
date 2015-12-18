@@ -147,14 +147,18 @@ class Node(NodeBase):
             multiprocessing pool
 
         """
-        base_dir = None
-        if 'base_dir' in kwargs:
-            base_dir = kwargs['base_dir']
-        super(Node, self).__init__(name, base_dir)
+        base_dir = kwargs.get('base_dir', None)
+
         if interface is None:
             raise IOError('Interface must be provided')
         if not isinstance(interface, Interface):
             raise IOError('interface must be an instance of an Interface')
+
+        control = kwargs.get('control', True)
+        if isinstance(interface, IdentityInterface):
+            control = False
+
+        super(Node, self).__init__(name, base_dir, control)
         self._interface = interface
         self.name = name
         self._result = None
@@ -163,7 +167,6 @@ class Node(NodeBase):
         self.itersource = itersource
         self.overwrite = overwrite
         self.parameterization = None
-        self._donotrun = False
         self.run_without_submitting = run_without_submitting
         self.input_source = {}
         self.needed_outputs = []
@@ -227,7 +230,7 @@ class Node(NodeBase):
                                                                str(val)))
         if isinstance(self._interface, IdentityInterface):
             self.set_input(parameter, val)
-        else:
+        elif self.signals is not None:
             setattr(self.signals, parameter, deepcopy(val))
 
     def get_output(self, parameter):
@@ -282,8 +285,7 @@ class Node(NodeBase):
         updatehash: boolean
             Update the hash stored in the output directory
         """
-        if (self.signals.disable and
-                not isinstance(self._interface, IdentityInterface)):
+        if (self.signals is not None and self.signals.disable):
             logger.debug('Node: %s skipped' % self.fullname)
             return self._result
 

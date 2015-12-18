@@ -146,7 +146,7 @@ class BaseSignals(WorkflowSignalTraits):
 
 
 class NodeBase(EngineBase):
-    def __init__(self, name, base_dir=None):
+    def __init__(self, name, base_dir=None, control=True):
         """Create a workflow object.
 
         Parameters
@@ -159,16 +159,15 @@ class NodeBase(EngineBase):
         """
         super(NodeBase, self).__init__(name, base_dir)
         # Initialize signals
-        self._signals = BaseSignals()
-        for elem in self._signals.copyable_trait_names():
-            self._signals.on_trait_change(self._update_disable, elem)
+        self._signals = None
+        if control:
+            self._signals = BaseSignals()
+            for elem in self._signals.copyable_trait_names():
+                self._signals.on_trait_change(self._update_disable, elem)
 
     @property
     def signals(self):
         return self._signals
-
-    def set_signal(self, parameter, val):
-        raise NotImplementedError
 
     def _update_disable(self):
         pass

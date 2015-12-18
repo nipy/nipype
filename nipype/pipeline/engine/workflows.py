@@ -81,7 +81,7 @@ class Workflow(NodeBase):
     def _update_disable(self):
         logger.debug('Signal disable is now %s for workflow %s' %
                      (self.signals.disable, self.fullname))
-        self.inputs.signalnode.disable = self.signals.disable
+        self._signalnode.inputs.disable = self.signals.disable
 
     # PUBLIC API
     def clone(self, name):
@@ -158,53 +158,63 @@ class Workflow(NodeBase):
             kwargs = {}
 
         disconnect = kwargs.get('disconnect', False)
-        conn_type = kwargs.get('conn_type', 'data')
 
+        if disconnect:
+            self.disconnect(connection_list)
+            return
+
+        conn_type = kwargs.get('conn_type', 'data')
+        logger.debug('connect(disconnect=%s, conn_type=%s): %s' %
+                     (disconnect, conn_type, connection_list))
+
+        # Check if nodes are already in the graph
         newnodes = []
-        for srcnode, destnode, _ in connection_list:
-            if self in [srcnode, destnode]:
+        for srcnode, dstnode, _ in connection_list:
+            if self in [srcnode, dstnode]:
                 msg = ('Workflow connect cannot contain itself as node:'
                        ' src[%s] dest[%s] workflow[%s]') % (srcnode,
-                                                            destnode,
+                                                            dstnode,
                                                             self.name)
 
                 raise IOError(msg)
             if (srcnode not in newnodes) and not self._has_node(srcnode):
                 newnodes.append(srcnode)
-            if (destnode not in newnodes) and not self._has_node(destnode):
-                newnodes.append(destnode)
+            if (dstnode not in newnodes) and not self._has_node(dstnode):
+                newnodes.append(dstnode)
         if newnodes:
             logger.debug('New nodes: %s' % newnodes)
             self._check_nodes(newnodes)
             for node in newnodes:
                 if node._hierarchy is None:
                     node._hierarchy = self.name
+
+        # check correctness of required connections
         not_found = []
         connected_ports = {}
-        for srcnode, destnode, connects in connection_list:
-            if destnode not in connected_ports:
-                connected_ports[destnode] = []
-            # check to see which ports of destnode are already
+        for srcnode, dstnode, connects in connection_list:
+            logger.debug('Checking connection %s to %s' % (srcnode, dstnode))
+
+            if dstnode not in connected_ports:
+                connected_ports[dstnode] = []
+            # check to see which ports of dstnode are already
             # connected.
-            if not disconnect and (destnode in self._graph.nodes()):
-                for edge in self._graph.in_edges_iter(destnode):
+            if dstnode in self._graph.nodes():
+                for edge in self._graph.in_edges_iter(dstnode):
                     data = self._graph.get_edge_data(*edge)
                     for sourceinfo, destname, _ in data['connect']:
-                        if destname not in connected_ports[destnode]:
-                            connected_ports[destnode] += [destname]
+                        if destname not in connected_ports[dstnode]:
+                            connected_ports[dstnode] += [destname]
             for source, dest in connects:
                 # Currently datasource/sink/grabber.io modules
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
-                if dest in connected_ports[destnode]:
-                    raise Exception("""
-Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
-connected.
-""" % (srcnode, source, destnode, dest, dest, destnode))
-                if not (hasattr(destnode, '_interface') and
-                        '.io' in str(destnode._interface.__class__)):
-                    if not destnode._check_inputs(dest):
-                        not_found.append(['in', '%s' % destnode, dest])
+                if dest in connected_ports[dstnode]:
+                    raise Exception('Already connected (%s.%s -> %s.%s' % (
+                        srcnode, source, dstnode, dest))
+                if not (hasattr(dstnode, '_interface') and
+                        '.io' in str(dstnode._interface.__class__)):
+                    if not dstnode._check_inputs(dest):
+                        not_found.append(['in', '%s' % dstnode, dest])
                 if not (hasattr(srcnode, '_interface') and
                         '.io' in str(srcnode._interface.__class__)):
                     if isinstance(source, tuple):
@@ -219,7 +229,7 @@ connected.
                                         srcnode.name)
                     if sourcename and not srcnode._check_outputs(sourcename):
                         not_found.append(['out', '%s' % srcnode, sourcename])
-                connected_ports[destnode] += [dest]
+                connected_ports[dstnode] += [dest]
         infostr = []
         for info in not_found:
             infostr += ["Module %s has no %sput called %s\n" % (info[1],
@@ -228,44 +238,79 @@ connected.
         if not_found:
             infostr.insert(
                 0, 'Some connections were not found connecting %s.%s to '
-                '%s.%s' % (srcnode, source, destnode, dest))
+                '%s.%s' % (srcnode, source, dstnode, dest))
             raise Exception('\n'.join(infostr))
 
         # turn functions into strings
-        for srcnode, destnode, connects in connection_list:
+        for srcnode, dstnode, connects in connection_list:
             for idx, (src, dest) in enumerate(connects):
                 if isinstance(src, tuple) and not isinstance(src[1], string_types):
                     function_source = getsource(src[1])
                     connects[idx] = ((src[0], function_source, src[2:]), dest)
 
         # add connections
-        for srcnode, destnode, connects in connection_list:
+        for srcnode, dstnode, connects in connection_list:
             edge_data = self._graph.get_edge_data(
-                srcnode, destnode, {'connect': []})
+                srcnode, dstnode, {'connect': []})
 
             msg = 'No existing connections' if not edge_data['connect'] else \
                 'Previous connections exist'
-            msg += ' from %s to %s' % (srcnode.fullname, destnode.fullname)
+            msg += ' from %s to %s %s' % (srcnode.fullname, dstnode.fullname,
+                                          connects)
             logger.debug(msg)
 
-            if not disconnect:
-                edge_data['connect'] += [(c[0], c[1], conn_type)
-                                         for c in connects]
-                logger.debug('(%s, %s): new edge data: %s' %
-                             (srcnode, destnode, str(edge_data)))
+            edge_data['connect'] += [(c[0], c[1], conn_type)
+                                     for c in connects]
+            logger.debug('(%s, %s): new edge data: %s' %
+                         (srcnode, dstnode, str(edge_data)))
 
-            self._graph.add_edges_from([(srcnode, destnode, edge_data)])
-            # edge_data = self._graph.get_edge_data(srcnode, destnode)
-
-    # def connect_signal(self, node, port, signal):
+            self._graph.add_edges_from([(srcnode, dstnode, edge_data)])
+            # edge_data = self._graph.get_edge_data(srcnode, dstnode)
 
     def disconnect(self, *args):
-        """Disconnect two nodes
-
+        """Disconnect nodes
         See the docstring for connect for format.
         """
-        # yoh: explicit **dict was introduced for compatibility with Python 2.5
-        return self.connect(*args, **dict(disconnect=True))
+        if len(args) == 1:
+            connection_list = args[0]
+        elif len(args) == 4:
+            connection_list = [(args[0], args[2], [(args[1], args[3])])]
+        else:
+            raise TypeError('disconnect() takes either 4 arguments, or 1 list '
+                            'of connection tuples (%d args given)' % len(args))
+
+        for srcnode, dstnode, conn in connection_list:
+            logger.debug('disconnect(): %s->%s %s' % (srcnode, dstnode, conn))
+            if self in [srcnode, dstnode]:
+                raise IOError(
+                    'Workflow connect cannot contain itself as node: src[%s] '
+                    'dest[%s] workflow[%s]') % (srcnode, dstnode, self.name)
+
+            # If node is not in the graph, not connected
+            if not self._has_node(srcnode) or not self._has_node(dstnode):
+                continue
+
+            edge_data = self._graph.get_edge_data(
+                srcnode, dstnode, {'connect': []})
+            ed_conns = [(c[0], c[1]) for c in edge_data['connect']]
+            ed_meta = [c[2] for c in edge_data['connect']]
+
+            remove = []
+            for edge in conn:
+                if edge in ed_conns:
+                    idx = ed_conns.index(edge)
+                    remove.append((edge[0], edge[1], ed_meta[idx]))
+
+            logger.debug('disconnect(): remove list %s' % remove)
+            for el in remove:
+                edge_data['connect'].remove(el)
+                logger.debug('disconnect(): removed connection %s' % str(el))
+
+            if not edge_data['connect']:
+                self._graph.remove_edge(srcnode, dstnode)
+            else:
+                self._graph.add_edges_from(
+                    [(srcnode, dstnode, edge_data)])
 
     def add_nodes(self, nodes):
         """ Add nodes to a workflow
@@ -635,7 +680,8 @@ connected.
             node.input_source = {}
             for edge in graph.in_edges_iter(node):
                 data = graph.get_edge_data(*edge)
-                for sourceinfo, field, _ in sorted(data['connect']):
+                for conn in sorted(data['connect']):
+                    sourceinfo, field = conn[0], conn[1]
                     node.input_source[field] = \
                         (op.join(edge[0].output_dir(),
                                  'result_%s.pklz' % edge[0].name),
@@ -738,6 +784,8 @@ connected.
     def _set_input(self, object, name, newvalue):
         """Trait callback function to update a node input
         """
+        logger.debug('_set_input(%s, %s) on %s.' % (
+            name, newvalue, self.fullname))
         object.traits()[name].node.set_input(name, newvalue)
 
     def _set_node_input(self, node, param, source, sourceinfo):
@@ -781,8 +829,7 @@ connected.
             if node == self._signalnode:
                 continue
 
-            if (isinstance(node, Node) and
-                    isinstance(node._interface, IdentityInterface)):
+            if node.signals is None:
                 continue
 
             prefix = ''
@@ -971,48 +1018,8 @@ connected.
                     logger.debug('cross connection: ' + dotlist[-1])
         return ('\n' + prefix).join(dotlist)
 
-    def _make_conditional(self):
-        logger.debug('Turning conditional the workflow %s' % self.fullname)
 
-        if not getattr(self, '_condition', False):
-            self._condition = Node(IdentityInterface(fields=['donotrun']),
-                                   name='checknode')
-            self.add_nodes([self._condition])
-
-        self._make_nodes_conditional()
-
-    def _make_nodes_conditional(self, nodes=None):
-        def _checkdefined(val):
-            from nipype.interfaces.base import isdefined
-            if isdefined(val):
-                return bool(val)
-            return False
-
-        if nodes is None:
-            nodes = self._graph.nodes()
-
-        node_names = ['%s' % n for n in nodes]
-        print self.fullname, node_names
-        if self.name in node_names:
-            idx = node_names.index(self.name)
-            del nodes[idx]
-            print nodes
-
-        for node in nodes:
-            if isinstance(node, Workflow):
-                node._make_conditional()
-                self.connect([(self._condition, node, [
-                    (('donotrun', _checkdefined), 'checknode.donotrun')])
-                ])
-            else:
-                if not isinstance(node._interface, IdentityInterface):
-                    if node._add_donotrun_trait():
-                        self.connect([(self._condition, node, [
-                            (('donotrun', _checkdefined), 'donotrun')])
-                        ])
-
-
-class CachedWorkflow(ConditionalWorkflow):
+class CachedWorkflow(Workflow):
     """
     Implements a kind of workflow that can be by-passed if all the fields
     of an input `cachenode` are set.
@@ -1047,7 +1054,7 @@ class CachedWorkflow(ConditionalWorkflow):
         self._cache = Node(IdentityInterface(
             fields=list(cond_in)), name='cachenode')
         self._check = Node(CheckInterface(
-            fields=list(cond_in)), name='decidenode')
+            fields=list(cond_in)), 'decidenode', control=False)
         self._outputnode = Node(IdentityInterface(
             fields=cond_out), name='outputnode')
 
@@ -1063,8 +1070,8 @@ class CachedWorkflow(ConditionalWorkflow):
         self._plain_connect(self._check, 'out', self._signalnode, 'disable')
         self._switches = {}
         for ci, co in cache_map:
-            m = Node(Merge(2), name='Merge_%s' % co)
-            s = Node(Select(), name='Switch_%s' % co)
+            m = Node(Merge(2), 'Merge_%s' % co, control=False)
+            s = Node(Select(), 'Switch_%s' % co, control=False)
             self._plain_connect([
                 (m, s, [('out', 'inlist')]),
                 (self._cache, self._check, [(ci, ci)]),
@@ -1094,7 +1101,6 @@ class CachedWorkflow(ConditionalWorkflow):
 
         list_conns = []
         for srcnode, dstnode, conns in flat_conns:
-            self._make_nodes_conditional([srcnode, dstnode])
             is_output = (isinstance(dstnode, string_types) and
                          dstnode == 'output')
             if not is_output:

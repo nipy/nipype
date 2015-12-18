@@ -406,8 +406,8 @@ def _remove_identity_node(graph, node):
     """Remove identity nodes from an execution graph
     """
     portinputs, portoutputs, signals = _node_ports(graph, node)
-    logger.debug('Portinputs=%s\nportoutputs=%s\nsignals=%s' %
-                 (portinputs, portoutputs, signals))
+    # logger.debug('Portinputs=%s\nportoutputs=%s\nsignals=%s' %
+    #              (portinputs, portoutputs, signals))
     for field, connections in list(portoutputs.items()):
         if portinputs:
             _propagate_internal_output(graph, node, field, connections,
