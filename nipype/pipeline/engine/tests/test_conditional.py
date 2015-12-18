@@ -39,7 +39,7 @@ def test_cw_removal_cond_unset():
     # check result
     tmpfile = op.join(mkdtemp(), 'result.json')
     jsonsink = pe.Node(nio.JSONFileSink(out_file=tmpfile), name='sink')
-    cwf.connect([('output', jsonsink, [('out', 'sum')])])
+    # cwf.connect([('output', jsonsink, [('out', 'sum')])])
     res = cwf.run()
 
     with open(tmpfile, 'r') as f:
@@ -69,7 +69,7 @@ def test_cw_removal_cond_set():
 
     cwf.inputs.inputnode.a = 2
     cwf.inputs.inputnode.b = 3
-    cwf.conditions.c = 0
+    cwf.inputs.cachenode.c = 0
 
     # check result
     tmpfile = op.join(mkdtemp(), 'result.json')
@@ -107,7 +107,7 @@ def test_cw_removal_cond_connected_not_set():
 
     outernode = pe.Node(niu.IdentityInterface(fields=['c']), name='outer')
     wf = pe.Workflow('OuterWorkflow')
-    wf.connect(outernode, 'c', cwf, 'conditions.c')
+    wf.connect(outernode, 'c', cwf, 'cachenode.c')
 
     # check result
     tmpfile = op.join(mkdtemp(), 'result.json')
@@ -142,7 +142,7 @@ def test_cw_removal_cond_connected_and_set():
     wf = pe.Workflow('OuterWorkflow')
     wf.connect([
         (outernode, cwf, [('a', 'inputnode.a'), ('b', 'inputnode.b'),
-                          ('c', 'conditions.c')])
+                          ('c', 'cachenode.c')])
     ])
     outernode.inputs.a = 2
     outernode.inputs.b = 3

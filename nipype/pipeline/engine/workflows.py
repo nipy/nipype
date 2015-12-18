@@ -888,7 +888,7 @@ class Workflow(NodeBase):
                         logger.debug('in edges: %s %s %s %s' %
                                      (srcnode, srcout, dstnode, dstin))
                         self.disconnect(u, cd[0], node, cd[1])
-                        self.connect(srcnode, srcout, dstnode, dstin, 
+                        self.connect(srcnode, srcout, dstnode, dstin,
                                      conn_type=cd[2])
                 # do not use out_edges_iter for reasons stated in in_edges
                 for _, v, d in self._graph.out_edges(nbunch=node, data=True):
