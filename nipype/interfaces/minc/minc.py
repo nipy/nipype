@@ -1,3 +1,21 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""The minc module provides classes for interfacing with the `MINC
+<http://www.bic.mni.mcgill.ca/ServicesSoftware/MINC>`_ command line tools.  This
+module was written to work with MINC version 2.2.00.
+
+Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
+        http://carlo-hamalainen.net
+
+
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
+
 from nipype.interfaces.base import (
     TraitedSpec,
     CommandLineInputSpec,
@@ -184,7 +202,7 @@ class Extract(StdOutCommandLine):
     --------
 
     >>> from nipype.interfaces.minc import Extract
-    >>> from testdata import minc2Dfile
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
 
     >>> extract = Extract(input_file=minc2Dfile)
     >>> extract.run() # doctest: +SKIP
@@ -301,7 +319,7 @@ class ToRaw(StdOutCommandLine):
     --------
 
     >>> from nipype.interfaces.minc import ToRaw
-    >>> from testdata import minc2Dfile
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
 
     >>> toraw = ToRaw(input_file=minc2Dfile)
     >>> toraw.run() # doctest: +SKIP
@@ -374,7 +392,7 @@ class Convert(CommandLine):
     --------
 
     >>> from nipype.interfaces.minc import Convert
-    >>> from testdata import minc2Dfile
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
     >>> c = Convert(input_file=minc2Dfile, output_file='/tmp/out.mnc', two=True) # Convert to MINC2 format.
     >>> c.run() # doctest: +SKIP
     """
@@ -525,7 +543,7 @@ class ToEcat(CommandLine):
     --------
 
     >>> from nipype.interfaces.minc import ToEcat
-    >>> from testdata import minc2Dfile
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
 
     >>> c = ToEcat(input_file=minc2Dfile)
     >>> c.run() # doctest: +SKIP
@@ -626,7 +644,7 @@ class Dump(StdOutCommandLine):
     --------
 
     >>> from nipype.interfaces.minc import Dump
-    >>> from testdata import minc2Dfile
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
 
     >>> dump = Dump(input_file=minc2Dfile)
     >>> dump.run() # doctest: +SKIP
@@ -772,7 +790,7 @@ class Average(CommandLine):
     --------
 
     >>> from nipype.interfaces.minc import Average
-    >>> from testdata import nonempty_minc_data
+    >>> from nipype.interfaces.minc.testdata import nonempty_minc_data
 
     >>> files = [nonempty_minc_data(i) for i in range(3)]
     >>> average = Average(input_files=files, output_file='/tmp/tmp.mnc')
@@ -832,7 +850,7 @@ class Blob(CommandLine):
     --------
 
     >>> from nipype.interfaces.minc import Blob
-    >>> from testdata import minc2Dfile
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
 
     >>> blob = Blob(input_file=minc2Dfile, output_file='/tmp/tmp.mnc', trace=True)
     >>> blob.run() # doctest: +SKIP
@@ -960,7 +978,7 @@ class Calc(CommandLine):
     --------
 
     >>> from nipype.interfaces.minc import Calc
-    >>> from testdata import nonempty_minc_data
+    >>> from nipype.interfaces.minc.testdata import nonempty_minc_data
 
     >>> file0 = nonempty_minc_data(0)
     >>> file1 = nonempty_minc_data(1)
@@ -1368,7 +1386,7 @@ class Blur(StdOutCommandLine):
     --------
 
     >>> from nipype.interfaces.minc import Blur
-    >>> from testdata import minc3Dfile
+    >>> from nipype.interfaces.minc.testdata import minc3Dfile
 
     (1) Blur  an  input  volume with a 6mm fwhm isotropic Gaussian
     blurring kernel:
@@ -1613,7 +1631,7 @@ class Math(StdOutCommandLine):
     --------
 
     >>> from nipype.interfaces.minc import Math
-    >>> from testdata import minc2Dfile
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
 
     Scale: volume*3.0 + 2:
 
@@ -1988,7 +2006,7 @@ class Resample(StdOutCommandLine):
     --------
 
     >>> from nipype.interfaces.minc import Resample
-    >>> from testdata import minc2Dfile
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
     >>> r = Resample(input_file=minc2Dfile, output_file='/tmp/out.mnc') # Resample the file.
     >>> r.run() # doctest: +SKIP
 
@@ -2089,7 +2107,7 @@ class Norm(CommandLine):
     --------
 
     >>> from nipype.interfaces.minc import Norm
-    >>> from testdata import minc2Dfile
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
     >>> n = Norm(input_file=minc2Dfile, output_file='/tmp/out.mnc') # Normalise the file.
     >>> n.run() # doctest: +SKIP
     """
