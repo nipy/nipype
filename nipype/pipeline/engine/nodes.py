@@ -40,22 +40,23 @@ from hashlib import sha1
 from nipype.interfaces.base import (
     traits, InputMultiPath, CommandLine, Undefined, DynamicTraitedSpec,
     Bunch, InterfaceResult, md5, Interface, isdefined)
-from .base import WorkflowBase
-from nipype.utils.misc import flatten, unflatten
+from nipype.interfaces.utility import IdentityInterface
+from nipype.utils.misc import flatten, unflatten, str2bool
 from nipype.utils.filemanip import (
     save_json, FileNotFoundError, filename_to_list, list_to_filename,
     copyfiles, fnames_presuffix, loadpkl, split_filename, load_json,
     savepkl, write_rst_header, write_rst_dict, write_rst_list)
-from ..utils import (modify_paths, make_output_dir, clean_working_directory,
-                     get_print_name, merge_dict, evaluate_connect_function)
+from .utils import (modify_paths, make_output_dir, clean_working_directory,
+                    get_print_name, merge_dict)
+from .base import NodeBase
+from .graph import evaluate_connect_function
 
 from nipype.external.six import string_types
 from nipype import config, logging
-from nipype.utils.misc import str2bool
 logger = logging.getLogger('workflow')
 
 
-class Node(WorkflowBase):
+class Node(NodeBase):
     """Wraps interface objects for use in pipeline
 
     A Node creates a sandbox-like directory for executing the underlying
@@ -68,11 +69,10 @@ class Node(WorkflowBase):
     --------
 
     >>> from nipype import Node
-    >>> from nipype.interfaces import spm
-    >>> realign = Node(spm.Realign(), 'realign')
-    >>> realign.inputs.in_files = 'functional.nii'
-    >>> realign.inputs.register_to_mean = True
-    >>> realign.run() # doctest: +SKIP
+    >>> from nipype.interfaces import fsl
+    >>> bet = Node(fsl.BET(), 'BET')
+    >>> bet.inputs.in_file = 'T1.nii'
+    >>> bet.run() # doctest: +SKIP
 
     """
 
@@ -220,6 +220,16 @@ class Node(WorkflowBase):
                                                               str(val)))
         setattr(self.inputs, parameter, deepcopy(val))
 
+    def set_signal(self, parameter, val):
+        """ Set interface input value"""
+        logger.debug('setting nodelevel(%s) signal %s = %s' % (str(self),
+                                                               parameter,
+                                                               str(val)))
+        if isinstance(self._interface, IdentityInterface):
+            self.set_input(parameter, val)
+        else:
+            setattr(self.signals, parameter, deepcopy(val))
+
     def get_output(self, parameter):
         """Retrieve a particular output of the node"""
         val = None
@@ -259,6 +269,10 @@ class Node(WorkflowBase):
             self._save_hashfile(hashfile, hashed_inputs)
         return op.exists(hashfile), hashvalue, hashfile, hashed_inputs
 
+    def _update_disable(self):
+        logger.debug('Signal disable is now %s for node %s' %
+                     (self.signals.disable, self.fullname))
+
     def run(self, updatehash=False):
         """Execute the node in its directory.
 
@@ -268,6 +282,11 @@ class Node(WorkflowBase):
         updatehash: boolean
             Update the hash stored in the output directory
         """
+        if (self.signals.disable and
+                not isinstance(self._interface, IdentityInterface)):
+            logger.debug('Node: %s skipped' % self.fullname)
+            return self._result
+
         # check to see if output directory and hash exist
         if self.config is None:
             self.config = deepcopy(config._sections)
@@ -441,23 +460,6 @@ class Node(WorkflowBase):
             else:
                 logger.critical('Unable to open the file in write mode: %s' %
                                 hashfile)
-
-    def _add_donotrun_trait(self):
-        if not hasattr(self._interface.inputs, 'donotrun'):
-            logger.debug('Trait donotrun added to node %s' % self)
-            self._interface.inputs.add_trait('donotrun', traits.Bool)
-            self._interface.inputs.trait_set(trait_change_notify=False,
-                                             donotrun=False)
-            _ = getattr(self._interface.inputs, 'donotrun')
-            self._interface.inputs.on_trait_change(self._donotrun_update,
-                                                   'donotrun')
-            return True
-        return False
-
-    def _donotrun_update(self):
-        self._donotrun = getattr(self._interface.inputs, 'donotrun')
-        logger.debug('State donotrun updated: donotrun is now %s' %
-                     self._donotrun)
 
     def _get_inputs(self):
         """Retrieve inputs from pointers to results file
@@ -756,48 +758,6 @@ class Node(WorkflowBase):
                 fp.writelines(write_rst_header('Environment', level=2))
                 fp.writelines(write_rst_dict(self.result.runtime.environ))
         fp.close()
-
-
-class RegularNode(Node):
-    def _add_donotrun_trait(self):
-        return False
-
-
-class ConditionalNode(Node):
-    """
-    A node that is executed only if its input 'donotrun' is False.
-
-    Examples
-    --------
-
-    >>> from nipype import ConditionalNode
-    >>> from nipype.interfaces import fsl
-    >>> realign = ConditionalNode(fsl.MCFLIRT(), name='CNodeExample')
-    >>> realign.inputs.donotrun = True
-    >>> realign.run() # doctest: +SKIP
-
-    """
-
-    def __init__(self, interface, name, **kwargs):
-        """
-
-        Parameters
-        ----------
-        interface : interface object
-            node specific interface (fsl.Bet(), spm.Coregister())
-        name : alphanumeric string
-            node specific name
-
-        See Node docstring for additional keyword arguments.
-        """
-        super(ConditionalNode, self).__init__(interface, name, **kwargs)
-        self._add_donotrun_trait()
-
-    def run(self, updatehash=False):
-        if self._donotrun:
-            logger.debug('ConditionalNode: node %s skipped' % self)
-            return self._result
-        return super(ConditionalNode, self).run(updatehash)
 
 
 class JoinNode(Node):

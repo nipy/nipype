@@ -33,26 +33,27 @@ from warnings import warn
 import numpy as np
 import networkx as nx
 
-from nipype.interfaces.base import (traits, TraitedSpec, TraitDictObject, TraitListObject)
-
-from nipype.utils.misc import getsource, create_function_from_source
+from nipype.utils.misc import (getsource, create_function_from_source,
+                               package_check, str2bool)
 from nipype.utils.filemanip import save_json
-from ..utils import (generate_expanded_graph, export_graph, make_output_dir,
-                     write_workflow_prov, format_dot, topological_sort,
-                     get_print_name, merge_dict)
-
 from nipype.external.six import string_types
 from nipype import config, logging
-from nipype.utils.misc import package_check, str2bool
 
-from .base import WorkflowBase
-from .nodes import Node, MapNode, RegularNode
+from nipype.interfaces.base import (traits, TraitedSpec, TraitDictObject,
+                                    TraitListObject)
+from nipype.interfaces.utility import IdentityInterface
+
+from .utils import (make_output_dir, get_print_name, merge_dict)
+from .graph import (generate_expanded_graph, export_graph, write_workflow_prov,
+                    format_dot, topological_sort)
+from .base import NodeBase
+from .nodes import Node, MapNode
 
 logger = logging.getLogger('workflow')
 package_check('networkx', '1.3')
 
 
-class Workflow(WorkflowBase):
+class Workflow(NodeBase):
     """Controls the setup and execution of a pipeline of processes."""
 
     def __init__(self, name, base_dir=None):
@@ -69,6 +70,18 @@ class Workflow(WorkflowBase):
         super(Workflow, self).__init__(name, base_dir)
         self._graph = nx.DiGraph()
         self.config = deepcopy(config._sections)
+        self._signalnode = Node(IdentityInterface(
+            fields=self.signals.copyable_trait_names()), 'signalnode')
+        self.add_nodes([self._signalnode])
+
+        # Automatically initialize signal
+        for s in self.signals.copyable_trait_names():
+            setattr(self._signalnode.inputs, s, getattr(self.signals, s))
+
+    def _update_disable(self):
+        logger.debug('Signal disable is now %s for workflow %s' %
+                     (self.signals.disable, self.fullname))
+        self.inputs.signalnode.disable = self.signals.disable
 
     # PUBLIC API
     def clone(self, name):
@@ -139,11 +152,14 @@ class Workflow(WorkflowBase):
         elif len(args) == 4:
             connection_list = [(args[0], args[2], [(args[1], args[3])])]
         else:
-            raise Exception('unknown set of parameters to connect function')
+            raise TypeError('connect() takes either 4 arguments, or 1 list of'
+                            ' connection tuples (%d args given)' % len(args))
         if not kwargs:
-            disconnect = False
-        else:
-            disconnect = kwargs['disconnect']
+            kwargs = {}
+
+        disconnect = kwargs.get('disconnect', False)
+        conn_type = kwargs.get('conn_type', 'data')
+
         newnodes = []
         for srcnode, destnode, _ in connection_list:
             if self in [srcnode, destnode]:
@@ -173,7 +189,7 @@ class Workflow(WorkflowBase):
             if not disconnect and (destnode in self._graph.nodes()):
                 for edge in self._graph.in_edges_iter(destnode):
                     data = self._graph.get_edge_data(*edge)
-                    for sourceinfo, destname in data['connect']:
+                    for sourceinfo, destname, _ in data['connect']:
                         if destname not in connected_ports[destnode]:
                             connected_ports[destnode] += [destname]
             for source, dest in connects:
@@ -224,32 +240,24 @@ connected.
 
         # add connections
         for srcnode, destnode, connects in connection_list:
-            edge_data = self._graph.get_edge_data(srcnode, destnode, None)
-            if edge_data:
-                logger.debug('(%s, %s): Edge data exists: %s'
-                             % (srcnode, destnode, str(edge_data)))
-                for data in connects:
-                    if data not in edge_data['connect']:
-                        edge_data['connect'].append(data)
-                    if disconnect:
-                        logger.debug('Removing connection: %s' % str(data))
-                        edge_data['connect'].remove(data)
-                if edge_data['connect']:
-                    self._graph.add_edges_from([(srcnode,
-                                                 destnode,
-                                                 edge_data)])
-                else:
-                    # pass
-                    logger.debug('Removing connection: %s->%s' % (srcnode,
-                                                                  destnode))
-                    self._graph.remove_edges_from([(srcnode, destnode)])
-            elif not disconnect:
-                logger.debug('(%s, %s): No edge data' % (srcnode, destnode))
-                self._graph.add_edges_from([(srcnode, destnode,
-                                             {'connect': connects})])
-            edge_data = self._graph.get_edge_data(srcnode, destnode)
-            logger.debug('(%s, %s): new edge data: %s' % (srcnode, destnode,
-                                                          str(edge_data)))
+            edge_data = self._graph.get_edge_data(
+                srcnode, destnode, {'connect': []})
+
+            msg = 'No existing connections' if not edge_data['connect'] else \
+                'Previous connections exist'
+            msg += ' from %s to %s' % (srcnode.fullname, destnode.fullname)
+            logger.debug(msg)
+
+            if not disconnect:
+                edge_data['connect'] += [(c[0], c[1], conn_type)
+                                         for c in connects]
+                logger.debug('(%s, %s): new edge data: %s' %
+                             (srcnode, destnode, str(edge_data)))
+
+            self._graph.add_edges_from([(srcnode, destnode, edge_data)])
+            # edge_data = self._graph.get_edge_data(srcnode, destnode)
+
+    # def connect_signal(self, node, port, signal):
 
     def disconnect(self, *args):
         """Disconnect two nodes
@@ -265,7 +273,7 @@ connected.
         Parameters
         ----------
         nodes : list
-            A list of WorkflowBase-based objects
+            A list of NodeBase-based objects
         """
         newnodes = []
         all_nodes = self._get_all_nodes()
@@ -282,8 +290,8 @@ connected.
             logger.debug('no new nodes to add')
             return
         for node in newnodes:
-            if not issubclass(node.__class__, WorkflowBase):
-                raise Exception('Node %s must be a subclass of WorkflowBase' %
+            if not issubclass(node.__class__, NodeBase):
+                raise Exception('Node %s must be a subclass of NodeBase' %
                                 str(node))
         self._check_nodes(newnodes)
         for node in newnodes:
@@ -297,7 +305,7 @@ connected.
         Parameters
         ----------
         nodes : list
-            A list of WorkflowBase-based objects
+            A list of NodeBase-based objects
         """
         self._graph.remove_nodes_from(nodes)
 
@@ -362,6 +370,8 @@ connected.
             False.
 
         """
+        self._connect_signals()
+
         graphtypes = ['orig', 'flat', 'hierarchical', 'exec', 'colored']
         if graph2use not in graphtypes:
             raise ValueError('Unknown graph2use keyword. Must be one of: ' +
@@ -612,7 +622,7 @@ connected.
             for edge in graph.out_edges_iter(node):
                 data = graph.get_edge_data(*edge)
                 sourceinfo = [v1[0] if isinstance(v1, tuple) else v1
-                              for v1, v2 in data['connect']]
+                              for v1, v2, _ in data['connect']]
                 node.needed_outputs += [v for v in sourceinfo
                                         if v not in node.needed_outputs]
             if node.needed_outputs:
@@ -625,7 +635,7 @@ connected.
             node.input_source = {}
             for edge in graph.in_edges_iter(node):
                 data = graph.get_edge_data(*edge)
-                for sourceinfo, field in sorted(data['connect']):
+                for sourceinfo, field, _ in sorted(data['connect']):
                     node.input_source[field] = \
                         (op.join(edge[0].output_dir(),
                                  'result_%s.pklz' % edge[0].name),
@@ -764,6 +774,27 @@ connected.
                     return True
         return False
 
+    def _connect_signals(self):
+        signals = self.signals.copyable_trait_names()
+
+        for node in self._graph.nodes():
+            if node == self._signalnode:
+                continue
+
+            if (isinstance(node, Node) and
+                    isinstance(node._interface, IdentityInterface)):
+                continue
+
+            prefix = ''
+            if isinstance(node, Workflow):
+                node._connect_signals()
+                prefix = 'signalnode.'
+
+            for s in signals:
+                sdest = prefix + s
+                self.connect(self._signalnode, s, node, sdest,
+                             conn_type='control')
+
     def _create_flat_graph(self):
         """Make a simple DAG where no node is a workflow."""
         logger.debug('Creating flat graph for workflow: %s', self.name)
@@ -810,7 +841,8 @@ connected.
                         logger.debug('in edges: %s %s %s %s' %
                                      (srcnode, srcout, dstnode, dstin))
                         self.disconnect(u, cd[0], node, cd[1])
-                        self.connect(srcnode, srcout, dstnode, dstin)
+                        self.connect(srcnode, srcout, dstnode, dstin, 
+                                     conn_type=cd[2])
                 # do not use out_edges_iter for reasons stated in in_edges
                 for _, v, d in self._graph.out_edges(nbunch=node, data=True):
                     logger.debug('out: connections-> %s' % str(d['connect']))
@@ -917,7 +949,7 @@ connected.
         for u, v, d in self._graph.edges_iter(data=True):
             uname = '.'.join(hierarchy + [u.fullname])
             vname = '.'.join(hierarchy + [v.fullname])
-            for src, dest in d['connect']:
+            for src, dest, _ in d['connect']:
                 uname1 = uname
                 vname1 = vname
                 if isinstance(src, tuple):
@@ -940,71 +972,44 @@ connected.
         return ('\n' + prefix).join(dotlist)
 
     def _make_conditional(self):
-        from nipype.interfaces.utility import IdentityInterface
+        logger.debug('Turning conditional the workflow %s' % self.fullname)
 
         if not getattr(self, '_condition', False):
             self._condition = Node(IdentityInterface(fields=['donotrun']),
                                    name='checknode')
             self.add_nodes([self._condition])
 
+        self._make_nodes_conditional()
+
+    def _make_nodes_conditional(self, nodes=None):
         def _checkdefined(val):
             from nipype.interfaces.base import isdefined
             if isdefined(val):
                 return bool(val)
             return False
 
-        for node in self._graph.nodes():
+        if nodes is None:
+            nodes = self._graph.nodes()
+
+        node_names = ['%s' % n for n in nodes]
+        print self.fullname, node_names
+        if self.name in node_names:
+            idx = node_names.index(self.name)
+            del nodes[idx]
+            print nodes
+
+        for node in nodes:
             if isinstance(node, Workflow):
                 node._make_conditional()
                 self.connect([(self._condition, node, [
                     (('donotrun', _checkdefined), 'checknode.donotrun')])
                 ])
-                return newnode
-
-            if not isinstance(node._interface, IdentityInterface):
-                if node._add_donotrun_trait():
-                    self.connect([(self._condition, node, [
-                        (('donotrun', _checkdefined), 'donotrun')])
-                    ])
-
-
-class ConditionalWorkflow(Workflow):
-    """
-    Implements a kind of workflow that can be by-passed if the input of
-    `donotrun` of the condition node is `True`.
-    """
-
-    def __init__(self, name, base_dir=None):
-        """Create a workflow object.
-        Parameters
-        ----------
-        name : alphanumeric string
-            unique identifier for the workflow
-        base_dir : string, optional
-            path to workflow storage
-        """
-
-        from nipype.interfaces.utility import IdentityInterface
-        super(ConditionalWorkflow, self).__init__(name, base_dir)
-        self._condition = RegularNode(
-            IdentityInterface(fields=['donotrun']), name='checknode')
-        self.add_nodes([self._condition])
-
-    @property
-    def condition(self):
-        return self._condition
-
-    def write_graph(self, **kwargs):
-        self._make_conditional()
-        return super(ConditionalWorkflow, self).write_graph(**kwargs)
-
-    def run(self, **kwargs):
-        self._make_conditional()
-        return super(ConditionalWorkflow, self).run(**kwargs)
-
-    def export(self, **kwargs):
-        self._make_conditional()
-        return super(ConditionalWorkflow, self).export(**kwargs)
+            else:
+                if not isinstance(node._interface, IdentityInterface):
+                    if node._add_donotrun_trait():
+                        self.connect([(self._condition, node, [
+                            (('donotrun', _checkdefined), 'donotrun')])
+                        ])
 
 
 class CachedWorkflow(ConditionalWorkflow):
@@ -1028,8 +1033,7 @@ class CachedWorkflow(ConditionalWorkflow):
             'b'
         """
 
-        from nipype.interfaces.utility import CheckInterface, \
-            IdentityInterface, Merge, Select
+        from nipype.interfaces.utility import CheckInterface, Merge, Select
         super(CachedWorkflow, self).__init__(name, base_dir)
 
         if cache_map is None or not cache_map:
@@ -1040,11 +1044,11 @@ class CachedWorkflow(ConditionalWorkflow):
             cache_map = [cache_map]
 
         cond_in, cond_out = zip(*cache_map)
-        self._cache = RegularNode(IdentityInterface(
+        self._cache = Node(IdentityInterface(
             fields=list(cond_in)), name='cachenode')
-        self._check = RegularNode(CheckInterface(
+        self._check = Node(CheckInterface(
             fields=list(cond_in)), name='decidenode')
-        self._outputnode = RegularNode(IdentityInterface(
+        self._outputnode = Node(IdentityInterface(
             fields=cond_out), name='outputnode')
 
         def _switch_idx(val):
@@ -1054,19 +1058,18 @@ class CachedWorkflow(ConditionalWorkflow):
             from nipype.interfaces.base import isdefined
             if isdefined(val):
                 return val
-            else:
-                return None
+            return None
 
-        self._plain_connect(self._check, 'out', self._condition, 'donotrun')
+        self._plain_connect(self._check, 'out', self._signalnode, 'disable')
         self._switches = {}
         for ci, co in cache_map:
-            m = RegularNode(Merge(2), name='Merge_%s' % co)
-            s = RegularNode(Select(), name='Switch_%s' % co)
+            m = Node(Merge(2), name='Merge_%s' % co)
+            s = Node(Select(), name='Switch_%s' % co)
             self._plain_connect([
                 (m, s, [('out', 'inlist')]),
                 (self._cache, self._check, [(ci, ci)]),
                 (self._cache, m, [((ci, _fix_undefined), 'in2')]),
-                (self._condition, s, [(('donotrun', _switch_idx), 'index')]),
+                (self._signalnode, s, [(('disable', _switch_idx), 'index')]),
                 (s, self._outputnode, [('out', co)])
             ])
             self._switches[co] = m
@@ -1091,7 +1094,7 @@ class CachedWorkflow(ConditionalWorkflow):
 
         list_conns = []
         for srcnode, dstnode, conns in flat_conns:
-            srcnode._add_donotrun_trait()
+            self._make_nodes_conditional([srcnode, dstnode])
             is_output = (isinstance(dstnode, string_types) and
                          dstnode == 'output')
             if not is_output:

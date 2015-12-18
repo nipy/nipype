@@ -26,11 +26,15 @@ except ImportError:
 from copy import deepcopy
 import re
 import numpy as np
+from nipype.interfaces.traits_extension import traits, Undefined
 from nipype.interfaces.base import DynamicTraitedSpec
 from nipype.utils.filemanip import loadpkl, savepkl
 
+from nipype import logging
+logger = logging.getLogger('workflow')
 
-class WorkflowBase(object):
+
+class EngineBase(object):
     """Defines common attributes and functions for workflows and nodes."""
 
     def __init__(self, name=None, base_dir=None):
@@ -118,3 +122,53 @@ class WorkflowBase(object):
                                 'release. you can use numpy to open them.'))
             return np.load(filename)
         return loadpkl(filename)
+
+
+class WorkflowSignalTraits(traits.HasTraits):
+    def __init__(self, **kwargs):
+        """ Initialize handlers and inputs"""
+        # NOTE: In python 2.6, object.__init__ no longer accepts input
+        # arguments.  HasTraits does not define an __init__ and
+        # therefore these args were being ignored.
+        # super(TraitedSpec, self).__init__(*args, **kwargs)
+        super(WorkflowSignalTraits, self).__init__(**kwargs)
+        traits.push_exception_handler(reraise_exceptions=True)
+        undefined_traits = {}
+        for trait in self.copyable_trait_names():
+            if not self.traits()[trait].usedefault:
+                undefined_traits[trait] = Undefined
+        self.trait_set(trait_change_notify=False, **undefined_traits)
+        self.set(**kwargs)
+
+
+class BaseSignals(WorkflowSignalTraits):
+    disable = traits.Bool(False, usedefault=True)
+
+
+class NodeBase(EngineBase):
+    def __init__(self, name, base_dir=None):
+        """Create a workflow object.
+
+        Parameters
+        ----------
+        name : alphanumeric string
+            unique identifier for the workflow
+        base_dir : string, optional
+            path to workflow storage
+
+        """
+        super(NodeBase, self).__init__(name, base_dir)
+        # Initialize signals
+        self._signals = BaseSignals()
+        for elem in self._signals.copyable_trait_names():
+            self._signals.on_trait_change(self._update_disable, elem)
+
+    @property
+    def signals(self):
+        return self._signals
+
+    def set_signal(self, parameter, val):
+        raise NotImplementedError
+
+    def _update_disable(self):
+        pass
