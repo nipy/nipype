@@ -9,7 +9,7 @@ The `Workflow` class provides core functionality for batch processing.
    Change directory to provide relative paths for doctests
    >>> import os
    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 
 """
@@ -68,7 +68,7 @@ class Node(NodeBase):
     Examples
     --------
 
-    >>> from nipype import Node
+    >>> from nipype.pipeline.engine import Node
     >>> from nipype.interfaces import fsl
     >>> bet = Node(fsl.BET(), 'BET')
     >>> bet.inputs.in_file = 'T1.nii'
@@ -769,7 +769,7 @@ class JoinNode(Node):
     --------
 
     >>> import nipype.pipeline.engine as pe
-    >>> from nipype import Node, JoinNode, Workflow
+    >>> from nipype.pipeline.engine import Node, JoinNode, Workflow
     >>> from nipype.interfaces.utility import IdentityInterface
     >>> from nipype.interfaces import (ants, dcm2nii, fsl)
     >>> wf = Workflow(name='preprocess')
@@ -862,7 +862,7 @@ class JoinNode(Node):
 
         >>> from nipype.interfaces.utility import IdentityInterface
         >>> import nipype.pipeline.engine as pe
-        >>> from nipype import Node, JoinNode, Workflow
+        >>> from nipype.pipeline.engine import Node, JoinNode, Workflow
         >>> inputspec = Node(IdentityInterface(fields=['image']),
         ...    name='inputspec'),
         >>> join = JoinNode(IdentityInterface(fields=['images', 'mask']),
@@ -995,7 +995,7 @@ class MapNode(Node):
     Examples
     --------
 
-    >>> from nipype import MapNode
+    >>> from nipype.pipeline.engine import MapNode
     >>> from nipype.interfaces import fsl
     >>> realign = MapNode(fsl.MCFLIRT(), 'in_file', 'realign')
     >>> realign.inputs.in_file = ['functional.nii',

@@ -182,7 +182,7 @@ def walk(children, level=0, path=None, usename=True):
 
     Examples
     --------
-    >>> from nipype.pipeline.utils import walk
+    >>> from nipype.pipeline.engine.graph import walk
     >>> iterables = [('a', lambda: [1, 2]), ('b', lambda: [3, 4])]
     >>> [val['a'] for val in walk(iterables)]
     [1, 1, 2, 2]
@@ -443,7 +443,11 @@ def _node_ports(graph, node):
         for src, dest, _ in d['connect']:
             portinputs[dest] = (u, src)
     for _, v, d in graph.out_edges_iter(node, data=True):
-        for src, dest, ctype in d['connect']:
+        for c in d['connect']:
+            src, dest = c[0], c[1]
+            ctype = 'data'
+            if len(c) == 3:
+                ctype = c[-1]
             if isinstance(src, tuple):
                 srcport = src[0]
             else:
@@ -673,7 +677,7 @@ def generate_expanded_graph(graph_in):
                     # join node with join fields image and mask
                     slots = slot_dicts[in_idx]
                     for con_idx, connect in enumerate(connects):
-                        src_field, dest_field = connect
+                        src_field, dest_field = connect[0], connect[1]
                         # qualify a join destination field name
                         if dest_field in slots:
                             slot_field = slots[dest_field]
