@@ -35,7 +35,6 @@ import networkx as nx
 
 from nipype.utils.misc import (getsource, create_function_from_source,
                                package_check, str2bool)
-from nipype.utils.filemanip import save_json
 from nipype.external.six import string_types
 from nipype import config, logging
 
@@ -600,6 +599,7 @@ class Workflow(NodeBase):
     # PRIVATE API AND FUNCTIONS
 
     def _write_report_info(self, workingdir, name, graph):
+        from nipype.utils.filemanip import save_json
         if workingdir is None:
             workingdir = os.getcwd()
         report_dir = op.join(workingdir, name)
