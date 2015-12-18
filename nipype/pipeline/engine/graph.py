@@ -665,8 +665,8 @@ def generate_expanded_graph(graph_in):
                     # the (source, destination) field tuples
                     connects = newdata['connect']
                     # the join fields connected to the source
-                    join_fields = [field for _, field in connects
-                                   if field in jnode.joinfield]
+                    join_fields = [c[1] for c in connects
+                                   if c[1] in jnode.joinfield]
                     # the {field: slot fields} maps assigned to the input
                     # node, e.g. {'image': 'imageJ3', 'mask': 'maskJ3'}
                     # for the third join source expansion replicate of a

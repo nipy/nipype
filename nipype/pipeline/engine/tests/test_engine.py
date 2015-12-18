@@ -54,7 +54,8 @@ def test_connect():
 
     yield assert_true, mod1 in pipe._graph.nodes()
     yield assert_true, mod2 in pipe._graph.nodes()
-    yield assert_equal, pipe._graph.get_edge_data(mod1, mod2), {'connect': [('output1', 'input1')]}
+    yield assert_equal, pipe._graph.get_edge_data(
+        mod1, mod2), {'connect': [('output1', 'input1', 'data')]}
 
 
 def test_add_nodes():
@@ -514,27 +515,21 @@ def test_mapnode_nested():
     cwd = os.getcwd()
     wd = mkdtemp()
     os.chdir(wd)
-    from nipype import MapNode, Function
+    from nipype import Function
 
     def func1(in1):
         return in1 + 1
-    n1 = MapNode(Function(input_names=['in1'],
-                          output_names=['out'],
-                          function=func1),
-                 iterfield=['in1'],
-                 nested=True,
-                 name='n1')
+    n1 = pe.MapNode(Function(
+        input_names=['in1'], output_names=['out'], function=func1),
+        iterfield=['in1'], nested=True, name='n1')
     n1.inputs.in1 = [[1, [2]], 3, [4, 5]]
     n1.run()
     print(n1.get_output('out'))
     yield assert_equal, n1.get_output('out'), [[2, [3]], 4, [5, 6]]
 
-    n2 = MapNode(Function(input_names=['in1'],
-                          output_names=['out'],
-                          function=func1),
-                 iterfield=['in1'],
-                 nested=False,
-                 name='n1')
+    n2 = pe.MapNode(Function(
+        input_names=['in1'], output_names=['out'], function=func1),
+        iterfield=['in1'], nested=False, name='n1')
     n2.inputs.in1 = [[1, [2]], 3, [4, 5]]
     error_raised = False
     try:
@@ -556,14 +551,10 @@ def test_node_hash():
 
     def func2(a):
         return a + 1
-    n1 = pe.Node(Function(input_names=[],
-                          output_names=['a'],
-                          function=func1),
-                 name='n1')
-    n2 = pe.Node(Function(input_names=['a'],
-                          output_names=['b'],
-                          function=func2),
-                 name='n2')
+    n1 = pe.Node(Function(
+        input_names=[], output_names=['a'], function=func1), name='n1')
+    n2 = pe.Node(Function(
+        input_names=['a'], output_names=['b'], function=func2), name='n2')
     w1 = pe.Workflow(name='test')
     modify = lambda x: x + 1
     n1.inputs.a = 1
@@ -617,14 +608,10 @@ def test_old_config():
 
     def func2(a):
         return a + 1
-    n1 = pe.Node(Function(input_names=[],
-                          output_names=['a'],
-                          function=func1),
-                 name='n1')
-    n2 = pe.Node(Function(input_names=['a'],
-                          output_names=['b'],
-                          function=func2),
-                 name='n2')
+    n1 = pe.Node(Function(
+        input_names=[], output_names=['a'], function=func1), name='n1')
+    n2 = pe.Node(Function(
+        input_names=['a'], output_names=['b'], function=func2), name='n2')
     w1 = pe.Workflow(name='test')
     modify = lambda x: x + 1
     n1.inputs.a = 1
@@ -650,17 +637,15 @@ def test_mapnode_json():
     cwd = os.getcwd()
     wd = mkdtemp()
     os.chdir(wd)
-    from nipype import MapNode, Function, Workflow
+    from nipype import Function
 
     def func1(in1):
         return in1 + 1
-    n1 = MapNode(Function(input_names=['in1'],
-                          output_names=['out'],
-                          function=func1),
-                 iterfield=['in1'],
-                 name='n1')
+    n1 = pe.MapNode(Function(
+        input_names=['in1'], output_names=['out'], function=func1),
+        iterfield=['in1'], name='n1')
     n1.inputs.in1 = [1]
-    w1 = Workflow(name='test')
+    w1 = pe.Workflow(name='test')
     w1.base_dir = wd
     w1.config['execution']['crashdump_dir'] = wd
     w1.add_nodes([n1])
@@ -693,18 +678,16 @@ def test_serial_input():
     cwd = os.getcwd()
     wd = mkdtemp()
     os.chdir(wd)
-    from nipype import MapNode, Function, Workflow
+    from nipype import Function
 
     def func1(in1):
         return in1
-    n1 = MapNode(Function(input_names=['in1'],
-                          output_names=['out'],
-                          function=func1),
-                 iterfield=['in1'],
-                 name='n1')
+    n1 = pe.MapNode(Function(
+        input_names=['in1'], output_names=['out'],
+        function=func1), iterfield=['in1'], name='n1')
     n1.inputs.in1 = [1, 2, 3]
 
-    w1 = Workflow(name='test')
+    w1 = pe.Workflow(name='test')
     w1.base_dir = wd
     w1.add_nodes([n1])
     # set local check
