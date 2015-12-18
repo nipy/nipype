@@ -13,7 +13,7 @@ import pickle
 import inspect
 from nipype import logging, config
 from nipype.external.six import string_types
-from nipype.interfaces.base import isdefined
+from nipype.interfaces.base import isdefined, Undefined
 from nipype.utils.misc import create_function_from_source, str2bool
 from nipype.utils.filemanip import (FileNotFoundError, filename_to_list,
                                     get_related_files)

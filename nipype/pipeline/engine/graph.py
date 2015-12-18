@@ -217,7 +217,7 @@ def synchronize_iterables(iterables):
 
     Examples
     --------
-    >>> from nipype.pipeline.utils import synchronize_iterables
+    >>> from nipype.pipeline.engine.graph import synchronize_iterables
     >>> iterables = dict(a=lambda: [1, 2], b=lambda: [3, 4])
     >>> synced = synchronize_iterables(iterables)
     >>> synced == [{'a': 1, 'b': 3}, {'a': 2, 'b': 4}]

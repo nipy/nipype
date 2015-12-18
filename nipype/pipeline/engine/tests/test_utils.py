@@ -14,7 +14,8 @@ import nipype.pipeline.engine as pe
 import nipype.interfaces.base as nib
 import nipype.interfaces.utility as niu
 from nipype import config
-from ..utils import merge_dict, clean_working_directory, write_workflow_prov
+from ..utils import merge_dict, clean_working_directory
+from ..graph import write_workflow_prov
 
 
 def test_identitynode_removal():
