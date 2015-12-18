@@ -21,8 +21,8 @@ import numpy as np
 import scipy.sparse as ssp
 
 
-from ..utils import (nx, dfs_preorder, topological_sort)
-from ..engine import (MapNode, str2bool)
+from ..engine.graph import (nx, dfs_preorder, topological_sort)
+from ..engine.nodes import (MapNode, str2bool)
 
 from nipype.utils.filemanip import savepkl, loadpkl
 
