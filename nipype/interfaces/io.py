@@ -921,7 +921,7 @@ class SelectFiles(IOBase):
 
     >>> import pprint
     >>> from nipype.pipeline.engine import Node
-    >>> from nipype.interfaces.io import SelectFiles,
+    >>> from nipype.interfaces.io import SelectFiles
     >>> templates={"T1": "{subject_id}/struct/T1.nii",
     ...            "epi": "{subject_id}/func/f[0, 1].nii"}
     >>> dg = Node(SelectFiles(templates), "selectfiles")
