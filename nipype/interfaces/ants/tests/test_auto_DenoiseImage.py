@@ -12,13 +12,13 @@ def test_DenoiseImage_inputs():
     environ=dict(nohash=True,
     usedefault=True,
     ),
-    help=dict(argstr='--help',
-    ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
     input_image=dict(argstr='-i %s',
     mandatory=True,
+    ),
+    noise_image=dict(hash_files=False,
     ),
     noise_model=dict(argstr='-n %s',
     usedefault=True,
@@ -26,9 +26,13 @@ def test_DenoiseImage_inputs():
     num_threads=dict(nohash=True,
     usedefault=True,
     ),
-    output_image=dict(argstr='',
+    output_image=dict(argstr='-o %s',
+    genfile=True,
+    hash_files=False,
     ),
-    short_help=dict(argstr='-h',
+    save_noise=dict(mandatory=True,
+    usedefault=True,
+    xor=['noise_image'],
     ),
     shrink_factor=dict(argstr='-s %s',
     usedefault=True,
@@ -36,8 +40,6 @@ def test_DenoiseImage_inputs():
     terminal_output=dict(nohash=True,
     ),
     verbose=dict(argstr='-v',
-    ),
-    version=dict(argstr='--version',
     ),
     )
     inputs = DenoiseImage.input_spec()
@@ -48,8 +50,8 @@ def test_DenoiseImage_inputs():
 
 
 def test_DenoiseImage_outputs():
-    output_map = dict(output_corrected_image=dict(),
-    output_noise_image=dict(),
+    output_map = dict(noise_image=dict(),
+    output_image=dict(),
     )
     outputs = DenoiseImage.output_spec()
 
