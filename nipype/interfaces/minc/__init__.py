@@ -8,8 +8,10 @@ Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
         http://carlo-hamalainen.net
 """
 
-from .base import ( aggregate_filename,
-                    Average,
+from .base import ( Info )
+
+
+from .minc import ( Average,
                     BBox,
                     Beast,
                     BestLinReg,
@@ -22,7 +24,6 @@ from .base import ( aggregate_filename,
                     Dump,
                     Extract,
                     Gennlxfm,
-                    Info,
                     Math,
                     NlpFit,
                     Norm,
