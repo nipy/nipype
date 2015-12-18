@@ -38,14 +38,14 @@ from .utils import get_print_name
 
 
 package_check('networkx', '1.3')
+logger = logging.getLogger('workflow')
+
 import networkx as nx
 try:
     dfs_preorder = nx.dfs_preorder
     logger.debug('detected networkx < 1.4 dev')
 except AttributeError:
     dfs_preorder = nx.dfs_preorder_nodes
-
-logger = logging.getLogger('workflow')
 
 
 def _create_dot_graph(graph, show_connectinfo=False, simple_form=True):
