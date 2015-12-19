@@ -5,6 +5,7 @@
 
 from nipype.testing import (assert_raises, assert_equal,
                             assert_true, assert_false)
+from nipype.interfaces import base as nib
 from nipype.interfaces import utility as niu
 from nipype.interfaces import io as nio
 from nipype.pipeline import engine as pe
@@ -13,6 +14,72 @@ import os.path as op
 from tempfile import mkdtemp
 from shutil import rmtree
 import json
+
+
+ifresult = None
+
+
+class SetInputSpec(nib.TraitedSpec):
+    val = nib.traits.Int(2, mandatory=True, desc='input')
+
+
+class SetOutputSpec(nib.TraitedSpec):
+    out = nib.traits.Int(desc='ouput')
+
+
+class SetInterface(nib.BaseInterface):
+    input_spec = SetInputSpec
+    output_spec = SetOutputSpec
+
+    def _run_interface(self, runtime):
+        runtime.returncode = 0
+        return runtime
+
+    def _list_outputs(self):
+        global ifresult
+        outputs = self._outputs().get()
+        ifresult = outputs['out'] = self.inputs.val
+        return outputs
+
+
+def test_workflow_disable():
+    global ifresult
+
+    def _myfunc(val):
+        return val + 1
+
+    wf = pe.Workflow('InnerWorkflow')
+    inputnode = pe.Node(niu.IdentityInterface(
+                        fields=['in_value']), 'inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(
+                         fields=['out_value']), 'outputnode')
+    func = pe.Node(niu.Function(
+        input_names=['val'], output_names=['out'],
+        function=_myfunc), 'Function')
+    ifset = pe.Node(SetInterface(), 'SetIface')
+
+    wf.connect([
+        (inputnode, func, [('in_value', 'val')]),
+        (func, ifset, [('out', 'val')]),
+        (ifset, outputnode, [('out', 'out_value')])
+    ])
+
+    ifresult = None
+    wf.inputs.inputnode.in_value = 0
+    wf.run()
+    yield assert_equal, ifresult, 1
+
+    ifresult = None
+    wf.signals.disable = True
+    wf.run()
+    yield assert_equal, ifresult, None
+
+    ifresult = None
+    wf.signals.disable = False
+    wf.run()
+    yield assert_equal, ifresult, 1
+
+    
 
 
 #def test_cw_cond_unset():
