@@ -74,6 +74,10 @@ class Node(NodeBase):
     >>> bet.inputs.in_file = 'T1.nii'
     >>> bet.run() # doctest: +SKIP
 
+    >>> bet.signals.disable = True
+    >>> bet.run() is None
+    True
+
     """
 
     def __init__(self, interface, name, iterables=None, itersource=None,
