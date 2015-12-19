@@ -42,8 +42,7 @@ class SetInterface(nib.BaseInterface):
         return outputs
 
 
-def test_workflow_disable():
-    global ifresult
+def _base_workflow():
 
     def _myfunc(val):
         return val + 1
@@ -63,6 +62,12 @@ def test_workflow_disable():
         (func, ifset, [('out', 'val')]),
         (ifset, outputnode, [('out', 'out_value')])
     ])
+    return wf
+
+
+def test_workflow_disable():
+    global ifresult
+    wf = _base_workflow()
 
     ifresult = None
     wf.inputs.inputnode.in_value = 0
@@ -79,8 +84,67 @@ def test_workflow_disable():
     wf.run()
     yield assert_equal, ifresult, 1
 
-    
 
+def test_workflow_disable_nested_A():
+    global ifresult
+
+    inner = _base_workflow()
+    dn = pe.Node(niu.IdentityInterface(
+        fields=['donotrun', 'value']), 'decisionnode')
+
+    outer = pe.Workflow('OuterWorkflow')
+
+    outer.connect([
+        (dn, inner, [('donotrun', 'signals.disable')])
+    ], conn_type='signal')
+
+    outer.connect([
+        (dn, inner, [('value', 'inputnode.in_value')])
+    ])
+
+    ifresult = None
+    outer.inputs.decisionnode.value = 0
+    outer.run()
+    yield assert_equal, ifresult, 1
+
+    ifresult = None
+    outer.inputs.decisionnode.donotrun = True
+    outer.run()
+    yield assert_equal, ifresult, None
+
+    ifresult = None
+    outer.inputs.decisionnode.donotrun = False
+    outer.run()
+    yield assert_equal, ifresult, 1
+
+
+def test_workflow_disable_nested_B():
+    global ifresult
+
+    inner = _base_workflow()
+    dn = pe.Node(niu.IdentityInterface(
+        fields=['value']), 'inputnode')
+
+    outer = pe.Workflow('OuterWorkflow')
+
+    outer.connect([
+        (dn, inner, [('value', 'inputnode.in_value')])
+    ])
+
+    ifresult = None
+    outer.inputs.inputnode.value = 0
+    outer.run()
+    yield assert_equal, ifresult, 1
+
+    ifresult = None
+    outer.signals.disable = True
+    outer.run()
+    yield assert_equal, ifresult, None
+
+    ifresult = None
+    outer.signals.disable = False
+    outer.run()
+    yield assert_equal, ifresult, 1
 
 #def test_cw_cond_unset():
 #    def _sum(a, b):
