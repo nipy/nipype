@@ -65,6 +65,29 @@ def _base_workflow():
     return wf
 
 
+def _base_cachedworkflow():
+
+    def _myfunc(a, b):
+        return a + b
+
+    wf = pe.CachedWorkflow('InnerWorkflow',
+                           cache_map=('c', 'out'))
+
+    inputnode = pe.Node(niu.IdentityInterface(
+                        fields=['a', 'b']), 'inputnode')
+    func = pe.Node(niu.Function(
+        input_names=['a', 'b'], output_names=['out'],
+        function=_myfunc), 'Function')
+    ifset = pe.Node(SetInterface(), 'SetIface')
+
+    wf.connect([
+        (inputnode, func, [('a', 'a'), ('b', 'b')]),
+        (func, ifset, [('out', 'val')]),
+        (ifset, 'output', [('out', 'out')])
+    ])
+    return wf
+
+
 def test_workflow_disable():
     global ifresult
     wf = _base_workflow()
@@ -146,40 +169,25 @@ def test_workflow_disable_nested_B():
     outer.run()
     yield assert_equal, ifresult, 1
 
-#def test_cw_cond_unset():
-#    def _sum(a, b):
-#        return a + b
-#
-#    cwf = pe.CachedWorkflow(
-#        'TestCachedWorkflow', cache_map=[('c', 'out')])
-#
-#    inputnode = pe.Node(niu.IdentityInterface(fields=['a', 'b']),
-#                        name='inputnode')
-#
-#    sumnode = pe.Node(niu.Function(
-#        input_names=['a', 'b'], output_names=['sum'],
-#        function=_sum), name='SumNode')
-#    cwf.connect([
-#        (inputnode, sumnode, [('a', 'a'), ('b', 'b')]),
-#        (sumnode, 'output', [('sum', 'out')])
-#    ])
-#
-#    cwf.inputs.inputnode.a = 2
-#    cwf.inputs.inputnode.b = 3
-#
-#    # check result
-#    tmpfile = op.join(mkdtemp(), 'result.json')
-#    jsonsink = pe.Node(nio.JSONFileSink(out_file=tmpfile), name='sink')
-#    # cwf.connect([('output', jsonsink, [('out', 'sum')])])
-#    res = cwf.run()
-#
-#    with open(tmpfile, 'r') as f:
-#        result = json.dumps(json.load(f))
-#
-#    rmtree(op.dirname(tmpfile))
-#    yield assert_equal, result, '{"sum": 5}'
-#
-#
+
+def test_cw_cond_unset():
+    global ifresult
+
+    cwf = _base_cachedworkflow()
+    cwf.inputs.inputnode.a = 2
+    cwf.inputs.inputnode.b = 3
+
+    # check results
+    ifresult = None
+    res = cwf.run()
+    yield assert_equal, ifresult, 5
+
+    ifresult = None
+    cwf.inputs.cachenode.c = 7
+    res = cwf.run()
+    yield assert_equal, ifresult, 7
+
+
 #def test_cw_removal_cond_set():
 #    def _sum(a, b):
 #        return a + b
