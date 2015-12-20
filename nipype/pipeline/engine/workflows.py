@@ -203,31 +203,32 @@ class Workflow(NodeBase):
                     for sourceinfo, destname, _ in data['connect']:
                         if destname not in connected_ports[dstnode]:
                             connected_ports[dstnode] += [destname]
-            for source, dest in connects:
-                # Currently datasource/sink/grabber.io modules
-                # determine their inputs/outputs depending on
-                # connection settings.  Skip these modules in the check
-                if dest in connected_ports[dstnode]:
-                    raise Exception('Already connected (%s.%s -> %s.%s' % (
-                        srcnode, source, dstnode, dest))
-                if not (hasattr(dstnode, '_interface') and
-                        '.io' in str(dstnode._interface.__class__)):
-                    if not dstnode._check_inputs(dest):
-                        not_found.append(['in', '%s' % dstnode, dest])
-                if not (hasattr(srcnode, '_interface') and
-                        '.io' in str(srcnode._interface.__class__)):
-                    if isinstance(source, tuple):
-                        # handles the case that source is specified
-                        # with a function
-                        sourcename = source[0]
-                    elif isinstance(source, string_types):
-                        sourcename = source
-                    else:
-                        raise Exception(('Unknown source specification in '
-                                         'connection from output of %s') %
-                                        srcnode.name)
-                    if sourcename and not srcnode._check_outputs(sourcename):
-                        not_found.append(['out', '%s' % srcnode, sourcename])
+            if conn_type != 'control':
+                for source, dest in connects:
+                    # Currently datasource/sink/grabber.io modules
+                    # determine their inputs/outputs depending on
+                    # connection settings.  Skip these modules in the check
+                    if dest in connected_ports[dstnode]:
+                        raise Exception('Already connected (%s.%s -> %s.%s' % (
+                            srcnode, source, dstnode, dest))
+                    if not (hasattr(dstnode, '_interface') and
+                            '.io' in str(dstnode._interface.__class__)):
+                        if not dstnode._check_inputs(dest):
+                            not_found.append(['in', '%s' % dstnode, dest])
+                    if not (hasattr(srcnode, '_interface') and
+                            '.io' in str(srcnode._interface.__class__)):
+                        if isinstance(source, tuple):
+                            # handles the case that source is specified
+                            # with a function
+                            sourcename = source[0]
+                        elif isinstance(source, string_types):
+                            sourcename = source
+                        else:
+                            raise Exception(('Unknown source specification in '
+                                             'connection from output of %s') %
+                                            srcnode.name)
+                        if sourcename and not srcnode._check_outputs(sourcename):
+                            not_found.append(['out', '%s' % srcnode, sourcename])
                 connected_ports[dstnode] += [dest]
         infostr = []
         for info in not_found:
@@ -264,7 +265,11 @@ class Workflow(NodeBase):
                          (srcnode, dstnode, str(edge_data)))
 
             self._graph.add_edges_from([(srcnode, dstnode, edge_data)])
-            # edge_data = self._graph.get_edge_data(srcnode, dstnode)
+
+            # Check that connections are actually created
+            edge_data = self._graph.get_edge_data(srcnode, dstnode)
+            if not edge_data['connect']:
+                self._graph.remove_edge(srcnode, dstnode)
 
     def disconnect(self, *args):
         """Disconnect nodes
@@ -552,6 +557,8 @@ class Workflow(NodeBase):
         plugin_args : dictionary containing arguments to be sent to plugin
             constructor. see individual plugin doc strings for details.
         """
+        self._connect_signals()
+
         if plugin is None:
             plugin = config.get('execution', 'plugin')
         if not isinstance(plugin, string_types):
@@ -823,6 +830,8 @@ class Workflow(NodeBase):
         return False
 
     def _connect_signals(self):
+        logger.debug('Workflow %s called _connect_signals()' %
+                     self.fullname)
         signals = self.signals.copyable_trait_names()
 
         for node in self._graph.nodes():

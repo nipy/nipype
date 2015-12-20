@@ -97,8 +97,42 @@ def test_workflow_disable():
     wf.run()
     yield assert_equal, ifresult, 1
 
+    # Check if direct signal setting works
     ifresult = None
     wf.signals.disable = True
+    wf.run()
+    yield assert_equal, ifresult, None
+
+    ifresult = None
+    wf.signals.disable = False
+    wf.run()
+    yield assert_equal, ifresult, 1
+
+    # Check if signalnode way works
+    ifresult = None
+    wf.inputs.signalnode.disable = True
+    wf.run()
+    yield assert_equal, ifresult, None
+
+    ifresult = None
+    wf.inputs.signalnode.disable = False
+    wf.run()
+    yield assert_equal, ifresult, 1
+
+    # Check if one can set signal then node
+    ifresult = None
+    wf.signals.disable = True
+    wf.run()
+    yield assert_equal, ifresult, None
+
+    ifresult = None
+    wf.inputs.signalnode.disable = False
+    wf.run()
+    yield assert_equal, ifresult, 1
+
+    # Check if one can set node then signal
+    ifresult = None
+    wf.inputs.signalnode.disable = True
     wf.run()
     yield assert_equal, ifresult, None
 
