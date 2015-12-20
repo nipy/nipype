@@ -152,7 +152,7 @@ def test_workflow_disable_nested_A():
     outer = pe.Workflow('OuterWorkflow')
 
     outer.connect([
-        (dn, inner, [('donotrun', 'signals.disable')])
+        (dn, inner, [('donotrun', 'signalnode.disable')])
     ], conn_type='signal')
 
     outer.connect([
@@ -179,8 +179,8 @@ def test_workflow_disable_nested_B():
     global ifresult
 
     inner = _base_workflow()
-    dn = pe.Node(niu.IdentityInterface(
-        fields=['value']), 'inputnode')
+    dn = pe.Node(niu.IdentityInterface(fields=['value']),
+                 'inputnode')
 
     outer = pe.Workflow('OuterWorkflow')
 
