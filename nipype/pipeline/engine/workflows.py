@@ -166,52 +166,43 @@ class Workflow(NodeBase):
         logger.debug('connect(disconnect=%s, conn_type=%s): %s' %
                      (disconnect, conn_type, connection_list))
 
-        # Check if nodes are already in the graph
-        newnodes = []
-        for srcnode, dstnode, _ in connection_list:
-            if self in [srcnode, dstnode]:
-                msg = ('Workflow connect cannot contain itself as node:'
-                       ' src[%s] dest[%s] workflow[%s]') % (srcnode,
-                                                            dstnode,
-                                                            self.name)
+        all_srcnodes = set([c[0] for c in connection_list])
+        all_dstnodes = set([c[1] for c in connection_list])
+        allnodes = all_srcnodes | all_dstnodes
 
-                raise IOError(msg)
-            if (srcnode not in newnodes) and not self._has_node(srcnode):
-                newnodes.append(srcnode)
-            if (dstnode not in newnodes) and not self._has_node(dstnode):
-                newnodes.append(dstnode)
+        if self in allnodes:
+            raise IOError(
+                'Workflow connect cannot contain itself as node: src[%s] '
+                'dest[%s] workflow[%s]') % (srcnode, dstnode, self.fullname)
+
+        # Check if nodes are already in the graph
+        nodesingraph = set(self._graph.nodes())
+        newnodes = list(allnodes - nodesingraph)
         if newnodes:
-            logger.debug('New nodes: %s' % newnodes)
-            self._check_nodes(newnodes)
+            logger.debug('New nodes: %s, existing nodes: %s' % (newnodes, nodesingraph))
             for node in newnodes:
                 if node._hierarchy is None:
                     node._hierarchy = self.name
+            self._check_nodes(newnodes)
+            self._graph.add_nodes_from(newnodes)
 
         # check correctness of required connections
+        connected_ports = self._check_connected(list(all_dstnodes))
+
         not_found = []
-        connected_ports = {}
         for srcnode, dstnode, connects in connection_list:
-            logger.debug('Checking connection %s to %s' % (srcnode, dstnode))
-
-            if dstnode not in connected_ports:
-                connected_ports[dstnode] = []
-            # check to see which ports of dstnode are already
-            # connected.
-            if dstnode in self._graph.nodes():
-                for edge in self._graph.in_edges_iter(dstnode):
-                    data = self._graph.get_edge_data(*edge)
-                    for sourceinfo, destname, _ in data['connect']:
-                        if destname not in connected_ports[dstnode]:
-                            connected_ports[dstnode] += [destname]
-
             duplicated = []
+            nodeconns = connected_ports.get(dstnode, [])
+
             for source, dest in connects:
                 # Currently datasource/sink/grabber.io modules
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
-                if dest in connected_ports[dstnode]:
-                    duplicated.append((srcnode, source, dstnode, dest))
-                    continue
+                if dest in nodeconns:
+                    raise Exception(
+                        'connect(): found duplicated connection %s.%s'
+                        ' -> %s.%s' % (srcnode, source, dstnode, dest))
+
                 if not (hasattr(dstnode, '_interface') and
                         '.io' in str(dstnode._interface.__class__)):
                     if conn_type == 'data' and not dstnode._check_inputs(dest):
@@ -230,11 +221,8 @@ class Workflow(NodeBase):
                                         srcnode.name)
                     if sourcename and not srcnode._check_outputs(sourcename):
                         not_found.append(['out', '%s' % srcnode, sourcename])
+                nodeconns += [dest]
 
-                if duplicated and conn_type == 'data':
-                    raise Exception('Duplicated connections: %s' % duplicated)
-                    
-            connected_ports[dstnode] += [dest]
         infostr = []
         for info in not_found:
             infostr += ["Module %s has no %sput called %s\n" % (info[1],
@@ -699,16 +687,41 @@ class Workflow(NodeBase):
                                  'result_%s.pklz' % edge[0].name),
                          sourceinfo)
 
+    def _check_connected(self, nodes):
+        allnodes = self._graph.nodes()
+
+        connected = {}
+        for node in nodes:
+            if node in allnodes:
+                logger.debug('Checking input connections of %s' % nodes)
+                edges = self._graph.in_edges_iter(node)
+                data = [self._graph.get_edge_data(*e)['connect']
+                        for e in edges]
+                data = [v for d in data for v in d]
+
+                connected[node] = []
+                for d in data:
+                    is_control = (len(d) == 3 and d[2] == 'control')
+                    if not is_control:
+                        connected[node].append(d[1])
+
+                if not connected[node]:
+                    connected.pop(node, None)
+
+        if connected:
+            logger.debug('Connected ports found: %s' % connected)
+        return connected
+
     def _check_nodes(self, nodes):
         """Checks if any of the nodes are already in the graph
 
         """
-        node_names = [node.name for node in self._graph.nodes()]
+        node_names = [node.fullname for node in self._graph.nodes()]
         node_lineage = [node._hierarchy for node in self._graph.nodes()]
         for node in nodes:
-            if node.name in node_names:
-                idx = node_names.index(node.name)
-                if node_lineage[idx] in [node._hierarchy, self.name]:
+            if node.fullname in node_names:
+                idx = node_names.index(node.fullname)
+                if node_lineage[idx] in [node._hierarchy, self.fullname]:
                     raise IOError('Duplicate node %s found.' % node)
             else:
                 node_names.append(node.name)
