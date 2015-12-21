@@ -727,7 +727,6 @@ class Workflow(NodeBase):
 
     def _check_nodes(self, nodes):
         """Checks if any of the nodes are already in the graph
-
         """
         node_names = [node.fullname for node in self._graph.nodes()]
         node_lineage = [node._hierarchy for node in self._graph.nodes()]
@@ -786,19 +785,20 @@ class Workflow(NodeBase):
             if isinstance(node, Workflow):
                 setattr(inputdict, node.name, node.inputs)
             else:
-                taken_inputs = []
-                for _, _, d in self._graph.in_edges_iter(nbunch=node,
-                                                         data=True):
-                    for cd in d['connect']:
-                        taken_inputs.append(cd[1])
+                taken_inputs = set([
+                    cd[1] for _, _, d in self._graph.in_edges_iter(
+                        nbunch=node, data=True) for cd in d['connect']])
+                av_inputs = set(node.inputs.get())
+
                 unconnectedinputs = TraitedSpec()
-                for key, trait in list(node.inputs.items()):
-                    if key not in taken_inputs:
-                        unconnectedinputs.add_trait(key,
-                                                    traits.Trait(trait,
-                                                                 node=node))
-                        value = getattr(node.inputs, key)
-                        setattr(unconnectedinputs, key, value)
+                for key in (av_inputs - taken_inputs):
+                    trait = node.inputs.trait(key)
+                    unconnectedinputs.add_trait(
+                        key, traits.Trait(trait, node=node))
+
+                    value = getattr(node.inputs, key)
+                    setattr(unconnectedinputs, key, value)
+
                 setattr(inputdict, node.name, unconnectedinputs)
                 getattr(inputdict, node.name).on_trait_change(self._set_input)
         return inputdict
