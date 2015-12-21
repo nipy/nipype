@@ -2000,3 +2000,54 @@ class EditWMwithAseg(FSCommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class ConcatenateLTAInputSpec(FSTraitedSpec):
+    # required
+    in_lta1 = File(exists=True, mandatory=True, argstr='%s', position=-3,
+                   desc="maps some src1 to dst1")
+    in_lta2 = File(exists=True, mandatory=True, argstr='%s', position=-2,
+                   desc="maps dst1(src2) to dst2")
+    out_file = File(exists=False, mandatory=True, genfile=True, position=-1,
+                    argstr='%s',
+                     desc="the combined LTA maps: src1 to dst2 = LTA2*LTA1")
+
+                     
+class ConcatenateLTAOutputSpec(TraitedSpec):
+    out_file = File(
+        exists=False, desc='the combined LTA maps: src1 to dst2 = LTA2*LTA1')
+
+
+class ConcatenateLTA(FSCommand):
+    """concatenates two consecutive LTA transformations
+    into one overall transformation, Out = LTA2*LTA1
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import ConcatenateLTA
+    >>> conc_lta = ConcatenateLTA()
+    >>> conc_lta.inputs.in_lta1 = '001.lta' #doctest: +SKIP 
+    >>> conc_lta.inputs.in_lta2 = '002.lta' #doctest: +SKIP
+    >>> conc_lta.inputs.out_file = '003.lta'
+    >>> conc_lta.cmdline
+    'mri_concatenate_lta 001.lta 002.lta 003.lta'
+    """
+
+    _cmd = 'mri_concatenate_lta'
+    input_spec = ConcatenateLTAInputSpec
+    output_spec = ConcatenateLTAOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(
+                self.inputs.out_file)
+        else:
+            outputs['out_file'] = os.path.abspath(
+                self.inputs.out_file).replace('.lta', '-long.lta')
+        return outputs
+    
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
