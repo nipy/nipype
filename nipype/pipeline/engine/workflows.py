@@ -189,7 +189,6 @@ class Workflow(NodeBase):
 
         not_found = []
         for srcnode, dstnode, connects in connection_list:
-            duplicated = []
             nodeconns = connected_ports.get(dstnode, [])
 
             src_io = (hasattr(srcnode, '_interface') and
@@ -197,14 +196,14 @@ class Workflow(NodeBase):
             dst_io = (hasattr(dstnode, '_interface') and
                       '.io' in str(dstnode._interface.__class__))
 
+            duplicated = []
             for source, dest in connects:
                 logger.debug('connect(%s): evaluating %s:%s -> %s:%s' %
                              (conn_type, srcnode, source, dstnode, dest))
                 # Check port is not taken
                 if dest in nodeconns:
-                    raise Exception(
-                        'connect(): found duplicated connection %s.%s'
-                        ' -> %s.%s' % (srcnode, source, dstnode, dest))
+                    duplicated.append((srcnode, source, dstnode, dest))
+                    continue
 
                 # Currently datasource/sink/grabber.io modules
                 # determine their inputs/outputs depending on
@@ -231,6 +230,10 @@ class Workflow(NodeBase):
                 nodeconns += [dest]
 
         if conn_type == 'data':
+            if duplicated:
+                raise Exception(
+                    'connect(): found duplicated connection.\n\t' +
+                    '\n\t'.join(['%s.%s -> %s.%s' % c for c in duplicated]))
             infostr = []
             for info in not_found:
                 infostr += ["Module %s has no %sput called %s\n" % (info[1],
@@ -781,6 +784,9 @@ class Workflow(NodeBase):
         """
         inputdict = TraitedSpec()
         for node in self._graph.nodes():
+            # if node == self._signalnode:
+            #     continue
+
             inputdict.add_trait(node.name, traits.Instance(TraitedSpec))
             if isinstance(node, Workflow):
                 setattr(inputdict, node.name, node.inputs)
