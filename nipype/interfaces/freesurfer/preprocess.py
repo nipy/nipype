@@ -1652,3 +1652,69 @@ class CANormalize(FSCommand):
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         outputs['control_points'] = os.path.abspath(self.inputs.control_points)
         return outputs
+
+
+class CARegisterInputSpec(FSTraitedSpecOpenMP):
+    #required
+    in_file = File(argstr='%s', exists=True, mandatory=True,
+                   position=-3, desc="The input volume for CARegister")
+    out_file = File(argstr='%s', mandatory=False, position=-1,
+                    genfile=True, desc="The output volume for CARegister")
+    template = File(argstr='%s', exists=True, mandatory=False,
+                    position=-2, desc="The template file in gca format")
+    # optional
+    mask = File(argstr='-mask %s', exists=True, mandatory=False,
+                desc="Specifies volume to use as mask")
+    invert_and_save = traits.Bool(argstr='-invert-and-save', mandatory=False, position=-4,
+                                  desc="Invert and save the .m3z multi-dimensional talaraich transform to x, y, and z .mgz files")
+    no_big_ventricles = traits.Bool(
+        argstr='-nobigventricles', mandatory=False, desc="No big ventricles")
+    transform = File(argstr='-T %s', exists=True, mandatory=False,
+                     desc="Specifies transform in lta format")
+    align = traits.String(argstr='-align-%s', mandatory=False,
+                          desc="Specifies when to perform alignment")
+    levels = traits.Int(
+        argstr='-levels %d',
+        desc="defines how many surrounding voxels will be used in interpolations, default is 6")
+    A = traits.Int(
+        argstr='-A %d', desc='undocumented flag used in longitudinal processing')
+    l_files = InputMultiPath(
+        File(exists=False), argstr='-l %s',
+        desc='undocumented flag used in longitudinal processing')
+    
+
+class CARegisterOutputSpec(TraitedSpec):
+    out_file = traits.File(exists=False, desc="The output file for CARegister")
+
+
+class CARegister(FSCommandOpenMP):
+    """Generates a multi-dimensional talairach transform from a gca file and talairach.lta file
+
+    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_register>`_
+
+    Examples
+    ========
+    >>> from nipype.interfaces import freesurfer
+    >>> ca_register = freesurfer.CARegister()
+    >>> ca_register.inputs.in_file = "norm.mgz"  # doctest: +SKIP
+    >>> ca_register.inputs.out_file = "talairach.m3z" # doctest: +SKIP
+    >>> ca_register.cmdline  # doctest: +SKIP
+    """
+    _cmd = "mri_ca_register"
+    input_spec = CARegisterInputSpec
+    output_spec = CARegisterOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == "l_files" and len(value) == 1:
+            value.append('identity.nofile')
+        return super(CARegister, self)._format_arg(name, spec, value)
+    
+    def _gen_fname(self, name):
+        if name == 'out_file':
+            return os.path.abspath('talairach.m3z')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
