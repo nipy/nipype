@@ -20,7 +20,8 @@ from builtins import object
 import os
 
 from ..base import (CommandLine, Directory,
-                    CommandLineInputSpec, isdefined)
+                    CommandLineInputSpec, isdefined,
+                    traits)
 from ...utils.filemanip import fname_presuffix
 
 
@@ -166,18 +167,18 @@ class FSCommand(CommandLine):
 class FSTraitedSpecOpenMP(FSTraitedSpec):
     num_threads = traits.Int(desc='allows for specifying more threads')
 
-    
+
 class FSCommandOpenMP(FSCommand):
     """Support for FS commands that utilize OpenMP
-    
+
     Sets the environment variable 'OMP_NUM_THREADS' to the number
     of threads specified by the input num_threads.
     """
 
     input_spec = FSTraitedSpecOpenMP
-    
+
     _num_threads = None
-    
+
     def __init__(self, **inputs):
         super(FSCommandOpenMP, self).__init__(**inputs)
         self.inputs.on_trait_change(self._num_threads_update, 'num_threads')
