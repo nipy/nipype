@@ -1857,3 +1857,103 @@ class MRIsCALabel(FSCommandOpenMP):
             filename = hemisphere + '.aparc.annot'
             outputs['out_file'] = os.path.join(head, filename)
         return outputs
+
+
+class SegmentCCInputSpec(FSTraitedSpec):
+    in_file = File(argstr="-aseg %s", mandatory=True, exists=True,
+                   desc="Input aseg file to read from subjects directory")
+    in_norm = File(mandatory=True, exists=True,
+                   desc="Required undocumented input {subject}/mri/norm.mgz")
+    out_file = File(argstr="-o %s", mandatory=True, exists=False,
+                    desc="Filename to write aseg including CC")
+    out_rotation = File(argstr="-lta %s", mandatory=True, exists=False,
+                        desc="Global filepath for writing rotation lta")
+    subject_id = traits.String(argstr="%s", mandatory=True, position=-1,
+                               desc="Subject name")
+
+
+class SegmentCCOutputSpec(TraitedSpec):
+    out_file = File(exists=False,
+                    desc="Output segmentation uncluding corpus collosum")
+    out_rotation = File(exists=False,
+                        desc="Output lta rotation file")
+
+
+class SegmentCC(FSCommand):
+    """
+    This program segments the corpus callosum into five separate labels in
+    the subcortical segmentation volume 'aseg.mgz'. The divisions of the
+    cc are equally spaced in terms of distance along the primary
+    eigendirection (pretty much the long axis) of the cc. The lateral
+    extent can be changed with the -T <thickness> parameter, where
+    <thickness> is the distance off the midline (so -T 1 would result in
+    the who CC being 3mm thick). The default is 2 so it's 5mm thick. The
+    aseg.stats values should be volume.
+
+    Examples
+    ========
+    >>> from nipype.interfaces import freesurfer
+    >>> SegmentCC_node = freesurfer.SegmentCC()
+    >>> SegmentCC_node.inputs.in_file = "aseg.mgz"
+    >>> SegmentCC_node.inputs.in_norm = "norm.mgz"
+    >>> SegmentCC_node.inputs.out_file = "aseg.auto.mgz"
+    >>> SegmentCC_node.inputs.out_rotation = "cc.lta"
+    >>> SegmentCC_node.inputs.subject_id = "10335"
+    >>> SegmentCC_node.cmdline
+    'mri_cc -aseg aseg.mgz -o aseg.auto.mgz -lta cc.lta 10335'
+    """
+
+    _cmd = "mri_cc"
+    input_spec = SegmentCCInputSpec
+    output_spec = SegmentCCOutputSpec
+
+    # remove absolute filepath names for in_file because mri_cc will look for the file in
+    # <SUBJECTS_DIR>/<subject_id>/<filename>
+    def _format_arg(self, name, spec, value):
+        if name in ["in_file", "out_file"]:
+            return spec.argstr % os.path.basename(value)
+        return super(SegmentCC, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs['out_rotation'] = os.path.abspath(self.inputs.out_rotation)
+        return outputs
+
+
+class SegmentWMInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", exists=True, mandatory=True,
+                   position=-2, desc="Input file for SegmentWM")
+    out_file = File(argstr="%s", exists=False, mandatory=True,
+                    position=-1, desc="File to be written as output for SegmentWM")
+
+
+class SegmentWMOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output white matter segmentation")
+
+
+class SegmentWM(FSCommand):
+    """
+    This program segments white matter from the input volume.  The input
+    volume should be normalized such that white matter voxels are
+    ~110-valued, and the volume is conformed to 256^3.
+
+
+    Examples
+    ========
+    >>> from nipype.interfaces import freesurfer
+    >>> SegmentWM_node = freesurfer.SegmentWM()
+    >>> SegmentWM_node.inputs.in_file = "brain.mgz" # doctest: +SKIP
+    >>> SegmentWM_node.inputs.out_file = "wm.seg.mgz" # doctest: +SKIP
+    >>> SegmentWM_node.cmdline # doctest: +SKIP
+    'mri_segment brain.mgz wm.seg.mgz'
+    """
+
+    _cmd = "mri_segment"
+    input_spec = SegmentWMInputSpec
+    output_spec = SegmentWMOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
