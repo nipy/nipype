@@ -813,13 +813,16 @@ class DenoiseImageInputSpec(ANTSCommandInputSpec):
                                      'the input image can be resampled. The shrink '
                                      'factor, specified as a single integer, describes '
                                      'this resampling. Shrink factor = 1 is the default.'))
-    output_image = traits.Str(argstr="-o %s", genfile=True, hash_files=False,
-                              desc='The output consists of the noise corrected '
-                                   'version of the input image.')
+    output_image = File(argstr="-o %s", name_source=['input_image'], hash_files=False,
+                        keep_extension=True, name_template='%s_noise_corrected',
+                        desc='The output consists of the noise corrected '
+                             'version of the input image.')
     save_noise = traits.Bool(False, mandatory=True, usedefault=True,
                              desc=('True if the estimated noise should be saved '
                                    'to file.'), xor=['noise_image'])
-    noise_image = File(desc='Filename for the estimated noise.', hash_files=False)
+    noise_image = File(name_source=['input_image'], hash_files=False,
+                       keep_extension=True, name_template='%s_noise',
+                       desc='Filename for the estimated noise.')
     verbose = traits.Bool(False, argstr="-v", desc=('Verbose output.'))
 
 
@@ -857,45 +860,12 @@ class DenoiseImage(ANTSCommand):
     output_spec = DenoiseImageOutputSpec
     _cmd = 'DenoiseImage'
 
-    def _gen_filename(self, name):
-        if name == 'output_image':
-            output = self.inputs.output_image
-            if not isdefined(output):
-                _, name, ext = split_filename(self.inputs.input_image)
-                output = name + '_noise_corrected' + ext
-            return output
-
-        if name == 'noise_image':
-            output = self.inputs.noise_image
-            if not isdefined(output):
-                _, name, ext = split_filename(self.inputs.input_image)
-                output = name + '_noise' + ext
-            return output
-        return None
-
     def _format_arg(self, name, trait_spec, value):
         if ((name == 'output_image') and
                 (self.inputs.save_noise or isdefined(self.inputs.noise_image))):
-            noise_image = self._gen_filename('noise_image')
-            output = self._gen_filename('output_image')
-            newval = '[ %s, %s ]' % (output, noise_image)
+            newval = '[ %s, %s ]' % (self._filename_from_source('output_image'),
+                                     self._filename_from_source('noise_image'))
             return trait_spec.argstr % newval
 
         return super(DenoiseImage,
                      self)._format_arg(name, trait_spec, value)
-
-    def _parse_inputs(self, skip=None):
-        if skip is None:
-            skip = []
-        skip += ['save_noise', 'noise_image']
-        return super(DenoiseImage, self)._parse_inputs(skip=skip)
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output_image'] = os.path.abspath(
-            self._gen_filename('output_image'))
-
-        if self.inputs.save_noise or isdefined(self.inputs.noise_image):
-            outputs['noise_image'] = os.path.abspath(
-                self._gen_filename('noise_image'))
-        return outputs
