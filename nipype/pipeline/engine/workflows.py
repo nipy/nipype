@@ -203,33 +203,37 @@ class Workflow(NodeBase):
                     for sourceinfo, destname, _ in data['connect']:
                         if destname not in connected_ports[dstnode]:
                             connected_ports[dstnode] += [destname]
-            if conn_type != 'control':
-                for source, dest in connects:
-                    # Currently datasource/sink/grabber.io modules
-                    # determine their inputs/outputs depending on
-                    # connection settings.  Skip these modules in the check
-                    if dest in connected_ports[dstnode]:
-                        raise Exception('Already connected (%s.%s -> %s.%s' % (
-                            srcnode, source, dstnode, dest))
-                    if not (hasattr(dstnode, '_interface') and
-                            '.io' in str(dstnode._interface.__class__)):
-                        if not dstnode._check_inputs(dest):
-                            not_found.append(['in', '%s' % dstnode, dest])
-                    if not (hasattr(srcnode, '_interface') and
-                            '.io' in str(srcnode._interface.__class__)):
-                        if isinstance(source, tuple):
-                            # handles the case that source is specified
-                            # with a function
-                            sourcename = source[0]
-                        elif isinstance(source, string_types):
-                            sourcename = source
-                        else:
-                            raise Exception(('Unknown source specification in '
-                                             'connection from output of %s') %
-                                            srcnode.name)
-                        if sourcename and not srcnode._check_outputs(sourcename):
-                            not_found.append(['out', '%s' % srcnode, sourcename])
-                connected_ports[dstnode] += [dest]
+
+            duplicated = []
+            for source, dest in connects:
+                # Currently datasource/sink/grabber.io modules
+                # determine their inputs/outputs depending on
+                # connection settings.  Skip these modules in the check
+                if dest in connected_ports[dstnode]:
+                    duplicated.append((srcnode, source, dstnode, dest))
+                    continue
+                if not (hasattr(dstnode, '_interface') and
+                        '.io' in str(dstnode._interface.__class__)):
+                    if conn_type == 'data' and not dstnode._check_inputs(dest):
+                        not_found.append(['in', '%s' % dstnode, dest])
+                if not (hasattr(srcnode, '_interface') and
+                        '.io' in str(srcnode._interface.__class__)):
+                    if isinstance(source, tuple):
+                        # handles the case that source is specified
+                        # with a function
+                        sourcename = source[0]
+                    elif isinstance(source, string_types):
+                        sourcename = source
+                    else:
+                        raise Exception(('Unknown source specification in '
+                                         'connection from output of %s') %
+                                        srcnode.name)
+                    if sourcename and not srcnode._check_outputs(sourcename):
+                        not_found.append(['out', '%s' % srcnode, sourcename])
+
+                if duplicated and not conn_type == 'control':
+                    raise Exception('Duplicated connections: %s' % duplicated)
+            connected_ports[dstnode] += [dest]
         infostr = []
         for info in not_found:
             infostr += ["Module %s has no %sput called %s\n" % (info[1],
