@@ -274,6 +274,8 @@ class MRIConvertInputSpec(FSTraitedSpec):
                               desc='conform to smallest size')
     conform_size = traits.Float(argstr='--conform_size %s',
                                 desc='conform to size_in_mm')
+    cw256 = traits.Bool(argstr='--cw256',
+                        desc='confrom to dimensions of 256^3')
     parse_only = traits.Bool(argstr='--parse_only',
                              desc='parse input only')
     subject_name = traits.Str(argstr='--subject_name %s',
