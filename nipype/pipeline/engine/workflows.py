@@ -171,9 +171,7 @@ class Workflow(NodeBase):
         allnodes = all_srcnodes | all_dstnodes
 
         if self in allnodes:
-            raise IOError(
-                'Workflow connect cannot contain itself as node: src[%s] '
-                'dest[%s] workflow[%s]') % (srcnode, dstnode, self.fullname)
+            raise IOError('Workflow connect cannot contain itself as node')
 
         # Check if nodes are already in the graph
         nodesingraph = set(self._graph.nodes())
