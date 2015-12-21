@@ -269,7 +269,7 @@ class MRIConvertInputSpec(FSTraitedSpec):
                     position=-1, genfile=True,
                     desc='output filename or True to generate one')
     conform = traits.Bool(argstr='--conform',
-                          desc='conform to 256^3')
+                          desc='conform to 1mm voxel size in coronal slice direction with 256^3 or more')
     conform_min = traits.Bool(argstr='--conform_min',
                               desc='conform to smallest size')
     conform_size = traits.Float(argstr='--conform_size %s',
