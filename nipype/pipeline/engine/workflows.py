@@ -231,8 +231,9 @@ class Workflow(NodeBase):
                     if sourcename and not srcnode._check_outputs(sourcename):
                         not_found.append(['out', '%s' % srcnode, sourcename])
 
-                if duplicated and not conn_type == 'control':
+                if duplicated and conn_type == 'data':
                     raise Exception('Duplicated connections: %s' % duplicated)
+                    
             connected_ports[dstnode] += [dest]
         infostr = []
         for info in not_found:
