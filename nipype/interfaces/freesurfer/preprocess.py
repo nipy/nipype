@@ -1481,3 +1481,65 @@ class MNIBiasCorrection(FSCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class WatershedSkullStripInputSpec(FSTraitedSpec):
+    # required
+    in_file = File(argstr="%s", exists=True, mandatory=True,
+                   position=-2, desc="input volume")
+    out_file = File(argstr="%s", exists=False, mandatory=True,
+                    position=-1, genfile=True, desc="output volume")
+    # optional
+    t1 = traits.Bool(
+        argstr="-T1", desc="specify T1 input volume (T1 grey value = 110)")
+    brain_atlas = File(argstr="-brain_atlas %s",
+                       exists=True, position=-4, desc="")
+    transform = File(argstr="%s", exists=False,
+                     position=-3, desc="undocumented")
+
+
+class WatershedSkullStripOutputSpec(TraitedSpec):
+    brain_vol = File(exists=False, desc="skull stripped brain volume")
+
+
+class WatershedSkullStrip(FSCommand):
+    """ This program strips skull and other outer non-brain tissue and 
+    produces the brain volume from T1 volume or the scanned volume.
+
+    The "watershed" segmentation algorithm was used to dertermine the 
+    intensity values for white matter, grey matter, and CSF. 
+    A force field was then used to fit a spherical surface to the brain. 
+    The shape of the surface fit was then evaluated against a previously 
+    derived template. 
+
+    The default parameters are: -w 0.82 -b 0.32 -h 10 -seedpt -ta -wta 
+
+    (Segonne 2004)
+
+    Examples
+    ========
+    >>> from nipype.interfaces.freesurfer import WatershedSkullStrip
+    >>> skullstrip = WatershedSkullStrip()
+    >>> skullstrip.inputs.in_file = "T1.mgz" # doctest: +SKIP
+    >>> skullstrip.inputs.t1 = True
+    >>> skullstrip.inputs.transform = "transforms/talairach_with_skull.lta"
+    >>> skullstrip.inputs.out_file = "brainmask.auto.mgz"
+    >>> skullstrip.cmdline # doctest: +SKIP
+    'mri_watershed -T1 transforms/talairach_with_skull.lta T1.mgz brainmask.auto.mgz'
+    """
+    _cmd = 'mri_watershed'
+    input_spec = WatershedSkullStripInputSpec
+    output_spec = WatershedSkullStripOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs['brain_vol'] = os.path.abspath(self.inputs.out_file)
+        else:
+            outputs['brain_vol'] = 'brainmask.auto.mgz'
+        return outputs
