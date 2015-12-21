@@ -1718,3 +1718,142 @@ class CARegister(FSCommandOpenMP):
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class CALabelInputSpec(FSTraitedSpecOpenMP):
+    #required
+    in_file = File(argstr="%s", position=-4, mandatory=True,
+                   exists=True, desc="Input volume for CALabel")
+    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False, genfile=True,
+                    desc="Output file for CALabel")
+    transform = File(argstr="%s", position=-3, mandatory=True,
+                     exists=True, desc="Input transform for CALabel")
+    template = File(argstr="%s", position=-2, mandatory=True,
+                    exists=True, desc="Input template for CALabel")
+    # optional
+    in_vol = File(argstr="-r %s", exists=True,
+                  desc="set input volume")
+    intensities = File(argstr="-r %s", exists=True,
+                       desc="input label intensities file(used in longitudinal processing)")
+    no_big_ventricles = traits.Bool(
+        argstr="-nobigventricles", mandatory=False, desc="No big ventricles")
+    align = traits.Bool(argstr="-align", mandatory=False, desc="Align CALabel")
+    prior = traits.Float(argstr="-prior %.1f",
+                         mandatory=False, desc="Prior for CALabel")
+    relabel_unlikely = traits.Tuple(traits.Int, traits.Float,
+                                    argstr="-relabel_unlikely %d %.1f",
+                                    desc="Reclassify voxels at least some std devs from the mean using some size Gaussian window",
+                                    mandatory=False)
+    label = traits.File(argstr="-l %s", mandatory=False, exists=True,
+                        desc="Undocumented flag. Autorecon3 uses ../label/{hemisphere}.cortex.label as input file")
+    aseg = traits.File(argstr="-aseg %s", mandatory=False, exists=True,
+                       desc="Undocumented flag. Autorecon3 uses ../mri/aseg.presurf.mgz as input file")
+
+
+class CALabelOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output volume from CALabel")
+
+
+class CALabel(FSCommandOpenMP):
+    """
+    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_register>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import freesurfer
+    >>> ca_label = freesurfer.CALabel()
+    >>> ca_label.inputs.in_file = "file.mgz" # doctest: +SKIP
+    >>> ca_label.inputs.out_file = "out.mgz" # doctest: +SKIP
+    >>> ca_label.inputs.transform = "transform.lta" # doctest: +SKIP
+    >>> ca_label.inputs.template = "template.gcs" # doctest: +SKIP
+    >>> ca_label.cmdline # doctest: +SKIP
+    >>> ca_label.run() # doctest: +SKIP
+    """
+    _cmd = "mri_ca_label"
+    input_spec = CALabelInputSpec
+    output_spec = CALabelOutputSpec
+
+    def _gen_fname(self, name):
+        if name == 'out_file':
+            return os.path.abspath('aseg.auto_noCCseg.mgz')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
+
+
+class MRIsCALabelInputSpec(FSTraitedSpecOpenMP):
+    # required
+    subject_id = traits.String(
+        argstr="%s", position=-5, mandatory=True, desc="Subject name or ID")
+    hemisphere = traits.String(
+        argstr="%s", position=-4, mandatory=True, desc="Hemisphere ('lh' or 'rh')")
+    canonsurf = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                     desc="Input canonical surface file")
+    classifier = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                      desc="Classifier array input file")
+    smoothwm = File(mandatory=True, exists=True,
+                    desc="Undocumented input {hemisphere}.smoothwm must exist in the subjects directory")
+    # optional
+    out_file = File(argstr="%s", position=-1, exists=False, mandatory=False, genfile=True,
+                    desc="Annotated surface output file")
+    label = traits.File(argstr="-l %s", mandatory=False, exists=True,
+                        desc="Undocumented flag. Autorecon3 uses ../label/{hemisphere}.cortex.label as input file")
+    aseg = traits.File(argstr="-aseg %s", mandatory=False, exists=True,
+                       desc="Undocumented flag. Autorecon3 uses ../mri/aseg.presurf.mgz as input file")
+    seed = traits.Int(argstr="-seed %d", mandatory=False,
+                      desc="")
+
+
+class MRIsCALabelOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output volume from MRIsCALabel")
+
+
+class MRIsCALabel(FSCommandOpenMP):
+    """
+    For a single subject, produces an annotation file, in which each
+    cortical surface vertex is assigned a neuroanatomical label.This
+    automatic procedure employs data from a previously-prepared atlas
+    file. An atlas file is created from a training set, capturing region
+    data manually drawn by neuroanatomists combined with statistics on
+    variability correlated to geometric information derived from the
+    cortical model (sulcus and curvature). Besides the atlases provided
+    with FreeSurfer, new ones can be prepared using mris_ca_train).
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import freesurfer
+    >>> ca_label = freesurfer.MRIsCALabel()
+    >>> ca_label.inputs.subject_id = "10335"
+    >>> ca_label.inputs.hemisphere = "lh"
+    >>> ca_label.inputs.canonsurf = "lh.sphere.reg" # doctest: +SKIP
+    >>> ca_label.inputs.classifier = "lh.curvature.gcs" # doctest: +SKIP
+    >>> ca_label.inputs.smoothwm = "lh.smoothwm" # doctest: +SKIP
+    >>> ca_label.inputs.out_file = "aparc.annot" # doctest: +SKIP
+    >>> ca_label.cmdline # doctest: +SKIP
+    'mris_ca_label 10335 lh lh.sphere.reg lh.curvature.gcs lh.aparc.annot'
+    """
+    _cmd = "mris_ca_label"
+    input_spec = MRIsCALabelInputSpec
+    output_spec = MRIsCALabelOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        else:
+            head = os.path.join(self.inputs.subjects_dir,
+                                self.inputs.subject_id, 'label')
+            hemisphere = self.inputs.hemisphere
+            filename = hemisphere + '.aparc.annot'
+            outputs['out_file'] = os.path.join(head, filename)
+        return outputs
