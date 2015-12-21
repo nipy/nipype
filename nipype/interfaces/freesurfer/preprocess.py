@@ -1595,3 +1595,60 @@ class Normalize(FSCommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class CANormalizeInputSpec(FSTraitedSpec):
+    in_file = File(argstr='%s', exists=True, mandatory=True,
+                   position=-4, desc="The input file for CANormalize")
+    out_file = File(argstr='%s', mandatory=True, position=-1,
+                    genfile=True, desc="The output file for CANormalize")
+    atlas = File(argstr='%s', exists=True, mandatory=True,
+                 position=-3, desc="The atlas file in gca format")
+    transform = File(argstr='%s', exists=True, mandatory=True,
+                     position=-2, desc="The tranform file in lta format")
+    # optional
+    mask = File(argstr='-mask %s', exists=True, mandatory=False,
+                desc="Specifies volume to use as mask")
+    control_points = File(argstr='-c %s', mandatory=False,
+                          desc="File name for the output control points")
+    long_file = File(argstr='-long %s',
+                     desc='undocumented flag used in longitudinal processing')
+    
+class CANormalizeOutputSpec(TraitedSpec):
+    out_file = traits.File(exists=False, desc="The output file for Normalize")
+    control_points = File(
+        exists=False, desc="The output control points for Normalize")
+
+
+class CANormalize(FSCommand):
+    """This program creates a normalized volume using the brain volume and an
+    input gca file.
+
+    For complete details, see the `FS Documentation <http://surfer.nmr.mgh.harvard.edu/fswiki/mri_ca_normalize>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import freesurfer
+    >>> ca_normalize = freesurfer.CANormalize()
+    >>> ca_normalize.inputs.in_file = "nu.mgz" # doctest: +SKIP
+    >>> ca_normalize.inputs.out_file = "norm.mgz" # doctest: +SKIP
+    >>> ca_normalize.inputs.atlas = "RB_all_2014-08-21.gca" # doctest: +SKIP
+    >>> ca_normalize.inputs.transform = "transforms/talairach.lta" # doctest: +SKIP
+    >>> ca_normalize.cmdline # doctest: +SKIP
+    'mri_ca_normalize nu.mgz RB_all_2014-08-21.gca transforms/talairach.lta norm.mgz'
+    """
+    _cmd = "mri_ca_normalize"
+    input_spec = CANormalizeInputSpec
+    output_spec = CANormalizeOutputSpec
+
+    def _gen_fname(self, name):
+        if name == 'out_file':
+            return os.path.abspath('norm.mgz')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        outputs['control_points'] = os.path.abspath(self.inputs.control_points)
+        return outputs
