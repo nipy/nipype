@@ -1543,3 +1543,55 @@ class WatershedSkullStrip(FSCommand):
         else:
             outputs['brain_vol'] = 'brainmask.auto.mgz'
         return outputs
+
+
+class NormalizeInputSpec(FSTraitedSpec):
+    # required
+    in_file = File(argstr='%s', exists=True, mandatory=True,
+                   position=-2, desc="The input file for Normalize")
+    out_file = File(argstr='%s', mandatory=True, position=-1,
+                    genfile=True, desc="The output file for Normalize")
+    # optional
+    gradient = traits.Int(1, argstr="-g %d", usedefault=False,
+                          desc="use max intensity/mm gradient g (default=1)")
+    mask = File(argstr="-mask %s", mandatory=False, exists=True,
+                desc="The input mask file for Normalize")
+    segmentation = File(argstr="-aseg %s", mandatory=False,
+                        exists=True, desc="The input segmentation for Normalize")
+    transform = File(exists=True, mandatory=False,
+                     desc="Tranform file from the header of the input file")
+
+
+class NormalizeOutputSpec(TraitedSpec):
+    out_file = traits.File(exists=False, desc="The output file for Normalize")
+
+
+class Normalize(FSCommand):
+    """
+    Normalize the white-matter, optionally based on control points. The
+    input volume is converted into a new volume where white matter image
+    values all range around 110.
+
+    Examples
+    ========
+    >>> from nipype.interfaces import freesurfer
+    >>> normalize = freesurfer.Normalize()
+    >>> normalize.inputs.in_file = "orig_nu.mgz" # doctest: +SKIP
+    >>> normalize.inputs.out_file = "T1.mgz" # doctest: +SKIP
+    >>> normalize.inputs.gradient = 1
+    >>> normalize.cmdline # doctest: +SKIP
+    'mri_normalize -g 1 orig_nu.mgz T1.mgz'
+    """
+    _cmd = "mri_normalize"
+    input_spec = NormalizeInputSpec
+    output_spec = NormalizeOutputSpec
+
+    def _gen_fname(self, name):
+        if name == 'out_file':
+            return os.path.abspath('T1.mgz')
+        return None
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
