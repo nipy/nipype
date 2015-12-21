@@ -1957,3 +1957,46 @@ class SegmentWM(FSCommand):
         outputs = self.output_spec().get()
         outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class EditWMwithAsegInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-4, mandatory=True, exists=True,
+                   desc="Input white matter segmentation file")
+    brain_file = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                      desc="Input brain/T1 file")
+    seg_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                    desc="Input presurf segmentation file")
+    out_file = File(argstr="%s", position=-1, mandtaory=True, exists=False,
+                    desc="File to be written as output")
+    # optional
+    keep_in = traits.Bool(argstr="-keep-in", mandatory=False,
+                          desc="Keep edits as found in input volume")
+
+class EditWMwithAsegOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output edited WM file")
+
+
+class EditWMwithAseg(FSCommand):
+    """
+    Edits a wm file using a segmentation
+
+    Examples
+    ========
+    >>> from nipype.interfaces.freesurfer import EditWMwithAseg
+    >>> editwm = EditWMwithAseg()
+    >>> editwm.inputs.in_file = "wm.seg.mgz" # doctest: +SKIP
+    >>> editwm.inputs.brain_file = "brain.mgz" # doctest: +SKIP
+    >>> editwm.inputs.seg_file = "aseg.presurf.mgz" # doctest: +SKIP
+    >>> editwm.inputs.out_file = "wm.asegedit.mgz"
+    >>> editwm.inputs.keep_in = True
+    >>> editwm.cmdline # doctest: +SKIP
+    'mri_edit_wm_with_aseg -keep-in wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz'
+    """
+    _cmd = 'mri_edit_wm_with_aseg'
+    input_spec = EditWMwithAsegInputSpec
+    output_spec = EditWMwithAsegOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        return outputs
