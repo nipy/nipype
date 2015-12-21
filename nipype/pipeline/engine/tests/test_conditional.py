@@ -165,6 +165,11 @@ def test_workflow_disable_nested_A():
     yield assert_equal, ifresult, 1
 
     ifresult = None
+    outer.inputs.decisionnode.donotrun = False
+    outer.run()
+    yield assert_equal, ifresult, 1
+
+    ifresult = None
     outer.inputs.decisionnode.donotrun = True
     outer.run()
     yield assert_equal, ifresult, None
