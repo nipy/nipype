@@ -54,7 +54,7 @@ def _base_workflow():
                          fields=['out_value']), 'outputnode')
     func = pe.Node(niu.Function(
         input_names=['val'], output_names=['out'],
-        function=_myfunc), 'Function')
+        function=_myfunc), 'functionnode')
     ifset = pe.Node(SetInterface(), 'SetIface')
 
     wf.connect([
@@ -77,7 +77,7 @@ def _base_cachedworkflow():
                         fields=['a', 'b']), 'inputnode')
     func = pe.Node(niu.Function(
         input_names=['a', 'b'], output_names=['out'],
-        function=_myfunc), 'Function')
+        function=_myfunc), 'functionnode')
     ifset = pe.Node(SetInterface(), 'SetIface')
 
     wf.connect([

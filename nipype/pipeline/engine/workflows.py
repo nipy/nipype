@@ -192,21 +192,28 @@ class Workflow(NodeBase):
             duplicated = []
             nodeconns = connected_ports.get(dstnode, [])
 
+            src_io = (hasattr(srcnode, '_interface') and
+                      '.io' in str(srcnode._interface.__class__))
+            dst_io = (hasattr(dstnode, '_interface') and
+                      '.io' in str(dstnode._interface.__class__))
+
             for source, dest in connects:
-                # Currently datasource/sink/grabber.io modules
-                # determine their inputs/outputs depending on
-                # connection settings.  Skip these modules in the check
+                logger.debug('connect(%s): evaluating %s:%s -> %s:%s' %
+                             (conn_type, srcnode, source, dstnode, dest))
+                # Check port is not taken
                 if dest in nodeconns:
                     raise Exception(
                         'connect(): found duplicated connection %s.%s'
                         ' -> %s.%s' % (srcnode, source, dstnode, dest))
 
-                if not (hasattr(dstnode, '_interface') and
-                        '.io' in str(dstnode._interface.__class__)):
-                    if conn_type == 'data' and not dstnode._check_inputs(dest):
+                # Currently datasource/sink/grabber.io modules
+                # determine their inputs/outputs depending on
+                # connection settings.  Skip these modules in the check
+                if not dst_io:
+                    if not dstnode._check_inputs(dest):
                         not_found.append(['in', '%s' % dstnode, dest])
-                if not (hasattr(srcnode, '_interface') and
-                        '.io' in str(srcnode._interface.__class__)):
+
+                if not src_io:
                     if isinstance(source, tuple):
                         # handles the case that source is specified
                         # with a function
@@ -214,23 +221,26 @@ class Workflow(NodeBase):
                     elif isinstance(source, string_types):
                         sourcename = source
                     else:
-                        raise Exception(('Unknown source specification in '
-                                         'connection from output of %s') %
-                                        srcnode.name)
+                        raise Exception(
+                            'Unknown source specification in connection from '
+                            'output of %s' % srcnode.name)
+
                     if sourcename and not srcnode._check_outputs(sourcename):
                         not_found.append(['out', '%s' % srcnode, sourcename])
+
                 nodeconns += [dest]
 
-        infostr = []
-        for info in not_found:
-            infostr += ["Module %s has no %sput called %s\n" % (info[1],
-                                                                info[0],
-                                                                info[2])]
-        if not_found:
-            infostr.insert(
-                0, 'Some connections were not found connecting %s.%s to '
-                '%s.%s' % (srcnode, source, dstnode, dest))
-            raise Exception('\n'.join(infostr))
+        if conn_type == 'data':
+            infostr = []
+            for info in not_found:
+                infostr += ["Module %s has no %sput called %s\n" % (info[1],
+                                                                    info[0],
+                                                                    info[2])]
+            if not_found:
+                infostr.insert(
+                    0, 'Some connections were not found connecting %s.%s to '
+                    '%s.%s' % (srcnode, source, dstnode, dest))
+                raise Exception('\n'.join(infostr))
 
         # turn functions into strings
         for srcnode, dstnode, connects in connection_list:
@@ -676,22 +686,27 @@ class Workflow(NodeBase):
         """
         for node in graph.nodes():
             node.input_source = {}
+
             for edge in graph.in_edges_iter(node):
                 data = graph.get_edge_data(*edge)
                 for conn in sorted(data['connect']):
                     sourceinfo, field = conn[0], conn[1]
-                    node.input_source[field] = \
-                        (op.join(edge[0].output_dir(),
-                                 'result_%s.pklz' % edge[0].name),
-                         sourceinfo)
+                    
+                    if node._check_inputs(field):
+                        node.input_source[field] = \
+                            (op.join(edge[0].output_dir(),
+                                     'result_%s.pklz' % edge[0].name),
+                             sourceinfo)
+
+            logger.debug('Node %s input_source is %s' % (node, node.input_source))
 
     def _check_connected(self, nodes):
+        logger.debug('Checking input connections of %s' % nodes)
         allnodes = self._graph.nodes()
 
         connected = {}
         for node in nodes:
             if node in allnodes:
-                logger.debug('Checking input connections of %s' % nodes)
                 edges = self._graph.in_edges_iter(node)
                 data = [self._graph.get_edge_data(*e)['connect']
                         for e in edges]
@@ -1092,7 +1107,8 @@ class CachedWorkflow(Workflow):
                 return val
             return None
 
-        self._plain_connect(self._check, 'out', self._signalnode, 'disable')
+        self._plain_connect(self._check, 'out', self._signalnode, 'disable',
+                            conn_type='control')
         self._switches = {}
         for ci, co in cache_map:
             m = Node(Merge(2), 'Merge_%s' % co, control=False)
@@ -1112,20 +1128,26 @@ class CachedWorkflow(Workflow):
     def connect(self, *args, **kwargs):
         """Connect nodes in the pipeline.
         """
-
         if len(args) == 1:
-            flat_conns = args[0]
+            connection_list = args[0]
         elif len(args) == 4:
-            flat_conns = [(args[0], args[2], [(args[1], args[3])])]
+            connection_list = [(args[0], args[2], [(args[1], args[3])])]
         else:
-            raise Exception('unknown set of parameters to connect function')
+            raise TypeError('connect() takes either 4 arguments, or 1 list of'
+                            ' connection tuples (%d args given)' % len(args))
         if not kwargs:
-            disconnect = False
-        else:
-            disconnect = kwargs.get('disconnect', False)
+            kwargs = {}
+
+        disconnect = kwargs.get('disconnect', False)
+
+        if disconnect:
+            self.disconnect(connection_list)
+            return
+
+        conn_type = kwargs.get('conn_type', 'data')
 
         list_conns = []
-        for srcnode, dstnode, conns in flat_conns:
+        for srcnode, dstnode, conns in connection_list:
             is_output = (isinstance(dstnode, string_types) and
                          dstnode == 'output')
             if not is_output:
@@ -1138,4 +1160,27 @@ class CachedWorkflow(Workflow):
                     logger.debug('Mapping %s to %s' % (srcport, dstport))
                     list_conns.append((srcnode, mrgnode, [(srcport, 'in1')]))
 
-        super(CachedWorkflow, self).connect(list_conns, disconnect=disconnect)
+        super(CachedWorkflow, self).connect(list_conns, disconnect=disconnect,
+                                            conn_type=conn_type)
+
+#     def _connect_signals(self):
+#         logger.debug('CachedWorkflow %s called _connect_signals()' %
+#                      self.fullname)
+#         signals = self.signals.copyable_trait_names()
+# 
+#         for node in self._graph.nodes():
+#             if node == self._signalnode:
+#                 continue
+# 
+#             if node.signals is None:
+#                 continue
+# 
+#             prefix = ''
+#             if isinstance(node, Workflow):
+#                 node._connect_signals()
+#                 prefix = 'signalnode.'
+# 
+#             for s in signals:
+#                 sdest = prefix + s
+#                 self._plain_connect(self._signalnode, s, node, sdest,
+#                                     conn_type='control')

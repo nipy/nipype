@@ -473,7 +473,7 @@ class Node(NodeBase):
         This mechanism can be easily extended/replaced to retrieve data from
         other data sources (e.g., XNAT, HTTP, etc.,.)
         """
-        logger.debug('Setting node inputs')
+        logger.debug('Setting node inputs: %s' % self.input_source.keys())
         for key, info in list(self.input_source.items()):
             logger.debug('input: %s' % key)
             results_file = info[0]
