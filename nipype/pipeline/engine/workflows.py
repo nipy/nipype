@@ -6,11 +6,12 @@
 
 The `Workflow` class provides core functionality for batch processing.
 
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
+  .. testsetup::
+     # Change directory to provide relative paths for doctests
+     import os
+     filepath = os.path.dirname(os.path.realpath( __file__ ))
+     datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+     os.chdir(datadir)
 
 """
 
@@ -1081,17 +1082,18 @@ class CachedWorkflow(Workflow):
 
     def __init__(self, name, base_dir=None, cache_map=[]):
         """Create a workflow object.
+
         Parameters
         ----------
+        
         name : alphanumeric string
             unique identifier for the workflow
         base_dir : string, optional
             path to workflow storage
         cache_map : list of tuples, non-empty
             each tuple indicates the input port name and the node and output
-            port name, for instance ('b', 'outputnode.sum') will map the
-            workflow input 'conditions.b' to 'outputnode.sum'.
-            'b'
+            port name, for instance ('b', 'sum') will map the
+            workflow input 'cachenode.b' to 'outputnode.sum'.
         """
 
         from nipype.interfaces.utility import CheckInterface, Merge, Select

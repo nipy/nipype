@@ -4,13 +4,14 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Defines functionality for pipelined execution of interfaces
 
-The `Workflow` class provides core functionality for batch processing.
+The `Node` class provides core functionality for atomic tasks processing.
 
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-   >>> os.chdir(datadir)
+  .. testsetup::
+     # Change directory to provide relative paths for doctests
+     import os
+     filepath = os.path.dirname(os.path.realpath( __file__ ))
+     datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+     os.chdir(datadir)
 
 """
 
