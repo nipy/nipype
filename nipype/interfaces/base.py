@@ -1560,7 +1560,7 @@ class CommandLine(BaseInterface):
 
         trait_spec = self.inputs.trait(name)
         retval = getattr(self.inputs, name)
-
+        source_ext = None
         if not isdefined(retval) or "%s" in retval:
             if not trait_spec.name_source:
                 return retval
@@ -1589,7 +1589,7 @@ class CommandLine(BaseInterface):
 
                 # special treatment for files
                 try:
-                    _, base, _ = split_filename(source)
+                    _, base, source_ext = split_filename(source)
                 except AttributeError:
                     base = source
             else:
@@ -1598,14 +1598,17 @@ class CommandLine(BaseInterface):
 
                 chain.append(name)
                 base = self._filename_from_source(ns, chain)
+                if isdefined(base):
+                    _, _, source_ext = split_filename(base)
 
             chain = None
             retval = name_template % base
             _, _, ext = split_filename(retval)
-            if trait_spec.keep_extension and ext:
-                return retval
-            return self._overload_extension(retval, name)
-
+            if trait_spec.keep_extension and (ext or source_ext):
+                if (ext is None or not ext) and source_ext:
+                    retval = retval + source_ext
+            else:
+                retval = self._overload_extension(retval, name)
         return retval
 
     def _gen_filename(self, name):
