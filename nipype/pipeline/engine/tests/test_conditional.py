@@ -30,15 +30,18 @@ class SetOutputSpec(nib.TraitedSpec):
 class SetInterface(nib.BaseInterface):
     input_spec = SetInputSpec
     output_spec = SetOutputSpec
+    _always_run = True
 
     def _run_interface(self, runtime):
+        global ifresult
         runtime.returncode = 0
+        ifresult = self.inputs.val
         return runtime
 
     def _list_outputs(self):
         global ifresult
         outputs = self._outputs().get()
-        ifresult = outputs['out'] = self.inputs.val
+        outputs['out'] = self.inputs.val
         return outputs
 
 
@@ -82,8 +85,8 @@ def _base_cachedworkflow():
 
     wf.connect([
         (inputnode, func, [('a', 'a'), ('b', 'b')]),
-        (func, ifset, [('out', 'val')]),
-        (ifset, 'output', [('out', 'out')])
+        (func, 'output', [('out', 'out')]),
+        ('output', ifset, [('out', 'val')])
     ])
     return wf
 
@@ -209,7 +212,7 @@ def test_workflow_disable_nested_B():
     yield assert_equal, ifresult, 1
 
 
-def test_cw_cond_unset():
+def test_cached_workflow():
     global ifresult
 
     cwf = _base_cachedworkflow()
@@ -221,119 +224,13 @@ def test_cw_cond_unset():
     res = cwf.run()
     yield assert_equal, ifresult, 5
 
+    # check disable
+    # ifresult = None
+    # cwf.signals.disable = True
+    # res = cwf.run()
+    # yield assert_equal, ifresult, None
+
     ifresult = None
     cwf.inputs.cachenode.c = 7
     res = cwf.run()
     yield assert_equal, ifresult, 7
-
-
-#def test_cw_removal_cond_set():
-#    def _sum(a, b):
-#        return a + b
-#
-#    cwf = pe.CachedWorkflow(
-#        'TestCachedWorkflow', cache_map=[('c', 'out')])
-#
-#    inputnode = pe.Node(niu.IdentityInterface(fields=['a', 'b']),
-#                        name='inputnode')
-#
-#    sumnode = pe.Node(niu.Function(
-#        input_names=['a', 'b'], output_names=['sum'],
-#        function=_sum), name='SumNode')
-#    cwf.connect([
-#        (inputnode, sumnode, [('a', 'a'), ('b', 'b')]),
-#        (sumnode, 'output', [('sum', 'out')])
-#    ])
-#
-#    cwf.inputs.inputnode.a = 2
-#    cwf.inputs.inputnode.b = 3
-#    cwf.inputs.cachenode.c = 0
-#
-#    # check result
-#    tmpfile = op.join(mkdtemp(), 'result.json')
-#    jsonsink = pe.Node(nio.JSONFileSink(out_file=tmpfile), name='sink')
-#    cwf.connect([('output', jsonsink, [('out', 'sum')])])
-#    res = cwf.run()
-#
-#    with open(tmpfile, 'r') as f:
-#        result = json.dumps(json.load(f))
-#
-#    rmtree(op.dirname(tmpfile))
-#    yield assert_equal, result, '{"sum": 0}'
-#
-#
-#def test_cw_removal_cond_connected_not_set():
-#    def _sum(a, b):
-#        return a + b
-#
-#    cwf = pe.CachedWorkflow(
-#        'TestCachedWorkflow', cache_map=[('c', 'out')])
-#
-#    inputnode = pe.Node(niu.IdentityInterface(fields=['a', 'b']),
-#                        name='inputnode')
-#
-#    sumnode = pe.Node(niu.Function(
-#        input_names=['a', 'b'], output_names=['sum'],
-#        function=_sum), name='SumNode')
-#    cwf.connect([
-#        (inputnode, sumnode, [('a', 'a'), ('b', 'b')]),
-#        (sumnode, 'output', [('sum', 'out')])
-#    ])
-#
-#    cwf.inputs.inputnode.a = 2
-#    cwf.inputs.inputnode.b = 3
-#
-#    outernode = pe.Node(niu.IdentityInterface(fields=['c']), name='outer')
-#    wf = pe.Workflow('OuterWorkflow')
-#    wf.connect(outernode, 'c', cwf, 'cachenode.c')
-#
-#    # check result
-#    tmpfile = op.join(mkdtemp(), 'result.json')
-#    jsonsink = pe.Node(nio.JSONFileSink(out_file=tmpfile), name='sink')
-#    wf.connect([(cwf, jsonsink, [('outputnode.out', 'sum')])])
-#    res = wf.run()
-#
-#    with open(tmpfile, 'r') as f:
-#        result = json.dumps(json.load(f))
-#
-#    rmtree(op.dirname(tmpfile))
-#    yield assert_equal, result, '{"sum": 5}'
-#
-#
-#def test_cw_removal_cond_connected_and_set():
-#    def _sum(a, b):
-#        return a + b
-#
-#    cwf = pe.CachedWorkflow(
-#        'TestCachedWorkflow', cache_map=[('c', 'out')])
-#
-#    inputnode = pe.Node(niu.IdentityInterface(fields=['a', 'b']),
-#                        name='inputnode')
-#    sumnode = pe.Node(niu.Function(
-#        input_names=['a', 'b'], output_names=['sum'],
-#        function=_sum), name='SumNode')
-#    cwf.connect([
-#        (inputnode, sumnode, [('a', 'a'), ('b', 'b')]),
-#        (sumnode, 'output', [('sum', 'out')])
-#    ])
-#
-#    wf = pe.Workflow('OuterWorkflow')
-#    wf.connect([
-#        (outernode, cwf, [('a', 'inputnode.a'), ('b', 'inputnode.b'),
-#                          ('c', 'cachenode.c')])
-#    ])
-#    outernode.inputs.a = 2
-#    outernode.inputs.b = 3
-#    outernode.inputs.c = 7
-#
-#    # check result
-#    tmpfile = op.join(mkdtemp(), 'result.json')
-#    jsonsink = pe.Node(nio.JSONFileSink(out_file=tmpfile), name='sink')
-#    wf.connect([(cwf, jsonsink, [('outputnode.out', 'sum')])])
-#    res = wf.run()
-#
-#    with open(tmpfile, 'r') as f:
-#        result = json.dumps(json.load(f))
-#
-#    rmtree(op.dirname(tmpfile))
-#    yield assert_equal, result, '{"sum": 7}'

@@ -1164,37 +1164,17 @@ class CachedWorkflow(Workflow):
         for srcnode, dstnode, conns in connection_list:
             is_output = (isinstance(dstnode, string_types) and
                          dstnode == 'output')
-            if not is_output:
-                list_conns.append((srcnode, dstnode, conns))
-            else:
+            if is_output:
                 for srcport, dstport in conns:
                     mrgnode = self._switches.get(dstport, None)
                     if mrgnode is None:
                         raise RuntimeError('Destination port not found')
                     logger.debug('Mapping %s to %s' % (srcport, dstport))
                     list_conns.append((srcnode, mrgnode, [(srcport, 'in1')]))
-
+            else:
+                if (isinstance(srcnode, string_types) and
+                        srcnode == 'output'):
+                    srcnode = self._outputnode
+                list_conns.append((srcnode, dstnode, conns))
         super(CachedWorkflow, self).connect(list_conns, disconnect=disconnect,
                                             conn_type=conn_type)
-
-#     def _connect_signals(self):
-#         logger.debug('CachedWorkflow %s called _connect_signals()' %
-#                      self.fullname)
-#         signals = self.signals.copyable_trait_names()
-# 
-#         for node in self._graph.nodes():
-#             if node == self._signalnode:
-#                 continue
-# 
-#             if node.signals is None:
-#                 continue
-# 
-#             prefix = ''
-#             if isinstance(node, Workflow):
-#                 node._connect_signals()
-#                 prefix = 'signalnode.'
-# 
-#             for s in signals:
-#                 sdest = prefix + s
-#                 self._plain_connect(self._signalnode, s, node, sdest,
-#                                     conn_type='control')

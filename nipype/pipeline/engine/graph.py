@@ -440,8 +440,8 @@ def _node_ports(graph, node):
     portoutputs = {}
     signals = {}
     for u, _, d in graph.in_edges_iter(node, data=True):
-        for src, dest, _ in d['connect']:
-            portinputs[dest] = (u, src)
+        for c in d['connect']:
+            portinputs[c[1]] = (u, c[0])
     for _, v, d in graph.out_edges_iter(node, data=True):
         for c in d['connect']:
             src, dest = c[0], c[1]
