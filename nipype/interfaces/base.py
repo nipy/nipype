@@ -1270,6 +1270,10 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = [r[1] for r in temp]
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
+        if stdout and isinstance(stdout, bytes):
+            stdout = stdout.decode()
+        if stderr and isinstance(stderr, bytes):
+            stderr = stderr.decode()
         result['stdout'] = str(stdout).split('\n')
         result['stderr'] = str(stderr).split('\n')
         result['merged'] = ''
