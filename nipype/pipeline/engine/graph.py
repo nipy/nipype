@@ -8,7 +8,7 @@
      filepath = os.path.dirname(os.path.realpath( __file__ ))
      datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
      os.chdir(datadir)
-     
+
 """
 
 from future import standard_library
@@ -416,19 +416,19 @@ def _remove_identity_node(graph, node):
     portinputs, portoutputs, signals = _node_ports(graph, node)
     logger.debug('Portinputs=%s\nportoutputs=%s\nsignals=%s' %
                  (portinputs, portoutputs, signals))
-    for field, connections in list(portoutputs.items()):
-        if portinputs:
-            _propagate_internal_output(graph, node, field, connections,
-                                       portinputs)
-        else:
-            _propagate_root_output(graph, node, field, connections)
-
     for field, connections in list(signals.items()):
         if portinputs:
             _propagate_internal_output(graph, node, field, connections,
                                        portinputs)
         else:
             _propagate_signal(graph, node, field, connections)
+
+    for field, connections in list(portoutputs.items()):
+        if portinputs:
+            _propagate_internal_output(graph, node, field, connections,
+                                       portinputs)
+        else:
+            _propagate_root_output(graph, node, field, connections)
 
     graph.remove_nodes_from([node])
     logger.debug("Removed the identity node %s from the graph." % node)
