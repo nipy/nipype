@@ -21,7 +21,9 @@ import numpy as np
 from nibabel import load
 
 from ..io import FreeSurferSource
-from ..freesurfer.base import FSCommand, FSTraitedSpec
+from ..freesurfer.base import (FSCommand, FSTraitedSpec,
+                               FSTraitedSpecOpenMP,
+                               FSCommandOpenMP)
 from ..base import (TraitedSpec, File, traits,
                     Directory, InputMultiPath,
                     OutputMultiPath, CommandLine,
@@ -1405,12 +1407,13 @@ class MNIBiasCorrection(FSCommand):
     --------
     >>> from nipype.interfaces.freesurfer import MNIBiasCorrection
     >>> correct = MNIBiasCorrection()
-    >>> correct.inputs.in_file = "structural.mgz" # doctest: +SKIP
+    >>> correct.inputs.in_file = "norm.mgz"
+    >>> correct.inputs.out_file = "out.mgz"
     >>> correct.inputs.iterations = 6
     >>> correct.inputs.protocol_iterations = 1000
     >>> correct.inputs.distance = 50
-    >>> correct.cmdline # doctest: +SKIP
-    'mri_nu_correct.mni --distance 50 --i structural.mgz --n 6 --o structural_output.mgz --proto-iters 1000'
+    >>> correct.cmdline
+    'mri_nu_correct.mni --distance 50 --i norm.mgz --n 6 --o out.mgz --proto-iters 1000'
 
     References:
     ----------
@@ -1503,16 +1506,16 @@ class WatershedSkullStripOutputSpec(TraitedSpec):
 
 
 class WatershedSkullStrip(FSCommand):
-    """ This program strips skull and other outer non-brain tissue and 
+    """ This program strips skull and other outer non-brain tissue and
     produces the brain volume from T1 volume or the scanned volume.
 
-    The "watershed" segmentation algorithm was used to dertermine the 
-    intensity values for white matter, grey matter, and CSF. 
-    A force field was then used to fit a spherical surface to the brain. 
-    The shape of the surface fit was then evaluated against a previously 
-    derived template. 
+    The "watershed" segmentation algorithm was used to dertermine the
+    intensity values for white matter, grey matter, and CSF.
+    A force field was then used to fit a spherical surface to the brain.
+    The shape of the surface fit was then evaluated against a previously
+    derived template.
 
-    The default parameters are: -w 0.82 -b 0.32 -h 10 -seedpt -ta -wta 
+    The default parameters are: -w 0.82 -b 0.32 -h 10 -seedpt -ta -wta
 
     (Segonne 2004)
 
@@ -1520,11 +1523,11 @@ class WatershedSkullStrip(FSCommand):
     ========
     >>> from nipype.interfaces.freesurfer import WatershedSkullStrip
     >>> skullstrip = WatershedSkullStrip()
-    >>> skullstrip.inputs.in_file = "T1.mgz" # doctest: +SKIP
+    >>> skullstrip.inputs.in_file = "T1.mgz"
     >>> skullstrip.inputs.t1 = True
     >>> skullstrip.inputs.transform = "transforms/talairach_with_skull.lta"
     >>> skullstrip.inputs.out_file = "brainmask.auto.mgz"
-    >>> skullstrip.cmdline # doctest: +SKIP
+    >>> skullstrip.cmdline
     'mri_watershed -T1 transforms/talairach_with_skull.lta T1.mgz brainmask.auto.mgz'
     """
     _cmd = 'mri_watershed'
@@ -1576,11 +1579,11 @@ class Normalize(FSCommand):
     ========
     >>> from nipype.interfaces import freesurfer
     >>> normalize = freesurfer.Normalize()
-    >>> normalize.inputs.in_file = "orig_nu.mgz" # doctest: +SKIP
-    >>> normalize.inputs.out_file = "T1.mgz" # doctest: +SKIP
+    >>> normalize.inputs.in_file = "T1.mgz"
+    >>> normalize.inputs.out_file = "out.mgz"
     >>> normalize.inputs.gradient = 1
-    >>> normalize.cmdline # doctest: +SKIP
-    'mri_normalize -g 1 orig_nu.mgz T1.mgz'
+    >>> normalize.cmdline
+    'mri_normalize -g 1 T1.mgz out.mgz'
     """
     _cmd = "mri_normalize"
     input_spec = NormalizeInputSpec
@@ -1613,7 +1616,7 @@ class CANormalizeInputSpec(FSTraitedSpec):
                           desc="File name for the output control points")
     long_file = File(argstr='-long %s',
                      desc='undocumented flag used in longitudinal processing')
-    
+
 class CANormalizeOutputSpec(TraitedSpec):
     out_file = traits.File(exists=False, desc="The output file for Normalize")
     control_points = File(
@@ -1631,12 +1634,12 @@ class CANormalize(FSCommand):
 
     >>> from nipype.interfaces import freesurfer
     >>> ca_normalize = freesurfer.CANormalize()
-    >>> ca_normalize.inputs.in_file = "nu.mgz" # doctest: +SKIP
-    >>> ca_normalize.inputs.out_file = "norm.mgz" # doctest: +SKIP
-    >>> ca_normalize.inputs.atlas = "RB_all_2014-08-21.gca" # doctest: +SKIP
-    >>> ca_normalize.inputs.transform = "transforms/talairach.lta" # doctest: +SKIP
-    >>> ca_normalize.cmdline # doctest: +SKIP
-    'mri_ca_normalize nu.mgz RB_all_2014-08-21.gca transforms/talairach.lta norm.mgz'
+    >>> ca_normalize.inputs.in_file = "T1.mgz"
+    >>> ca_normalize.inputs.out_file = "norm.mgz"
+    >>> ca_normalize.inputs.atlas = "atlas.nii.gz" # in practice use .gca atlases
+    >>> ca_normalize.inputs.transform = "trans.mat" # in practice use .lta transforms
+    >>> ca_normalize.cmdline
+    'mri_ca_normalize T1.mgz atlas.nii.gz trans.mat norm.mgz'
     """
     _cmd = "mri_ca_normalize"
     input_spec = CANormalizeInputSpec
@@ -1681,7 +1684,7 @@ class CARegisterInputSpec(FSTraitedSpecOpenMP):
     l_files = InputMultiPath(
         File(exists=False), argstr='-l %s',
         desc='undocumented flag used in longitudinal processing')
-    
+
 
 class CARegisterOutputSpec(TraitedSpec):
     out_file = traits.File(exists=False, desc="The output file for CARegister")
@@ -1696,9 +1699,10 @@ class CARegister(FSCommandOpenMP):
     ========
     >>> from nipype.interfaces import freesurfer
     >>> ca_register = freesurfer.CARegister()
-    >>> ca_register.inputs.in_file = "norm.mgz"  # doctest: +SKIP
-    >>> ca_register.inputs.out_file = "talairach.m3z" # doctest: +SKIP
-    >>> ca_register.cmdline  # doctest: +SKIP
+    >>> ca_register.inputs.in_file = "norm.mgz"
+    >>> ca_register.inputs.out_file = "talairach.m3z"
+    >>> ca_register.cmdline
+    'mri_ca_register norm.mgz talairach.m3z'
     """
     _cmd = "mri_ca_register"
     input_spec = CARegisterInputSpec
@@ -1708,7 +1712,7 @@ class CARegister(FSCommandOpenMP):
         if name == "l_files" and len(value) == 1:
             value.append('identity.nofile')
         return super(CARegister, self)._format_arg(name, spec, value)
-    
+
     def _gen_fname(self, name):
         if name == 'out_file':
             return os.path.abspath('talairach.m3z')
@@ -1763,12 +1767,12 @@ class CALabel(FSCommandOpenMP):
 
     >>> from nipype.interfaces import freesurfer
     >>> ca_label = freesurfer.CALabel()
-    >>> ca_label.inputs.in_file = "file.mgz" # doctest: +SKIP
-    >>> ca_label.inputs.out_file = "out.mgz" # doctest: +SKIP
-    >>> ca_label.inputs.transform = "transform.lta" # doctest: +SKIP
-    >>> ca_label.inputs.template = "template.gcs" # doctest: +SKIP
-    >>> ca_label.cmdline # doctest: +SKIP
-    >>> ca_label.run() # doctest: +SKIP
+    >>> ca_label.inputs.in_file = "norm.mgz"
+    >>> ca_label.inputs.out_file = "out.mgz"
+    >>> ca_label.inputs.transform = "trans.mat"
+    >>> ca_label.inputs.template = "Template_6.nii" # in practice use .gcs extension
+    >>> ca_label.cmdline
+    'mri_ca_label norm.mgz trans.mat Template_6.nii out.mgz'
     """
     _cmd = "mri_ca_label"
     input_spec = CALabelInputSpec
@@ -1828,14 +1832,14 @@ class MRIsCALabel(FSCommandOpenMP):
 
     >>> from nipype.interfaces import freesurfer
     >>> ca_label = freesurfer.MRIsCALabel()
-    >>> ca_label.inputs.subject_id = "10335"
+    >>> ca_label.inputs.subject_id = "test"
     >>> ca_label.inputs.hemisphere = "lh"
-    >>> ca_label.inputs.canonsurf = "lh.sphere.reg" # doctest: +SKIP
-    >>> ca_label.inputs.classifier = "lh.curvature.gcs" # doctest: +SKIP
-    >>> ca_label.inputs.smoothwm = "lh.smoothwm" # doctest: +SKIP
-    >>> ca_label.inputs.out_file = "aparc.annot" # doctest: +SKIP
-    >>> ca_label.cmdline # doctest: +SKIP
-    'mris_ca_label 10335 lh lh.sphere.reg lh.curvature.gcs lh.aparc.annot'
+    >>> ca_label.inputs.canonsurf = "lh.pial"
+    >>> ca_label.inputs.classifier = "im1.nii" # in pracice, use .gcs extension
+    >>> ca_label.inputs.smoothwm = "lh.pial"
+    >>> ca_label.inputs.out_file = "aparc.annot"
+    >>> ca_label.cmdline
+    'mris_ca_label test lh lh.pial im1.nii aparc.annot'
     """
     _cmd = "mris_ca_label"
     input_spec = MRIsCALabelInputSpec
@@ -1898,9 +1902,9 @@ class SegmentCC(FSCommand):
     >>> SegmentCC_node.inputs.in_norm = "norm.mgz"
     >>> SegmentCC_node.inputs.out_file = "aseg.auto.mgz"
     >>> SegmentCC_node.inputs.out_rotation = "cc.lta"
-    >>> SegmentCC_node.inputs.subject_id = "10335"
+    >>> SegmentCC_node.inputs.subject_id = "test"
     >>> SegmentCC_node.cmdline
-    'mri_cc -aseg aseg.mgz -o aseg.auto.mgz -lta cc.lta 10335'
+    'mri_cc -aseg aseg.mgz -o aseg.auto.mgz -lta cc.lta test'
     """
 
     _cmd = "mri_cc"
@@ -1943,10 +1947,10 @@ class SegmentWM(FSCommand):
     ========
     >>> from nipype.interfaces import freesurfer
     >>> SegmentWM_node = freesurfer.SegmentWM()
-    >>> SegmentWM_node.inputs.in_file = "brain.mgz" # doctest: +SKIP
-    >>> SegmentWM_node.inputs.out_file = "wm.seg.mgz" # doctest: +SKIP
-    >>> SegmentWM_node.cmdline # doctest: +SKIP
-    'mri_segment brain.mgz wm.seg.mgz'
+    >>> SegmentWM_node.inputs.in_file = "norm.mgz"
+    >>> SegmentWM_node.inputs.out_file = "wm.seg.mgz"
+    >>> SegmentWM_node.cmdline
+    'mri_segment norm.mgz wm.seg.mgz'
     """
 
     _cmd = "mri_segment"
@@ -1984,13 +1988,13 @@ class EditWMwithAseg(FSCommand):
     ========
     >>> from nipype.interfaces.freesurfer import EditWMwithAseg
     >>> editwm = EditWMwithAseg()
-    >>> editwm.inputs.in_file = "wm.seg.mgz" # doctest: +SKIP
-    >>> editwm.inputs.brain_file = "brain.mgz" # doctest: +SKIP
-    >>> editwm.inputs.seg_file = "aseg.presurf.mgz" # doctest: +SKIP
+    >>> editwm.inputs.in_file = "T1.mgz"
+    >>> editwm.inputs.brain_file = "norm.mgz"
+    >>> editwm.inputs.seg_file = "aseg.mgz"
     >>> editwm.inputs.out_file = "wm.asegedit.mgz"
     >>> editwm.inputs.keep_in = True
-    >>> editwm.cmdline # doctest: +SKIP
-    'mri_edit_wm_with_aseg -keep-in wm.seg.mgz brain.mgz aseg.presurf.mgz wm.asegedit.mgz'
+    >>> editwm.cmdline
+    'mri_edit_wm_with_aseg -keep-in T1.mgz norm.mgz aseg.mgz wm.asegedit.mgz'
     """
     _cmd = 'mri_edit_wm_with_aseg'
     input_spec = EditWMwithAsegInputSpec
@@ -2012,7 +2016,7 @@ class ConcatenateLTAInputSpec(FSTraitedSpec):
                     argstr='%s',
                      desc="the combined LTA maps: src1 to dst2 = LTA2*LTA1")
 
-                     
+
 class ConcatenateLTAOutputSpec(TraitedSpec):
     out_file = File(
         exists=False, desc='the combined LTA maps: src1 to dst2 = LTA2*LTA1')
@@ -2026,11 +2030,11 @@ class ConcatenateLTA(FSCommand):
     --------
     >>> from nipype.interfaces.freesurfer import ConcatenateLTA
     >>> conc_lta = ConcatenateLTA()
-    >>> conc_lta.inputs.in_lta1 = '001.lta' #doctest: +SKIP 
-    >>> conc_lta.inputs.in_lta2 = '002.lta' #doctest: +SKIP
-    >>> conc_lta.inputs.out_file = '003.lta'
+    >>> conc_lta.inputs.in_lta1 = 'trans.mat'
+    >>> conc_lta.inputs.in_lta2 = 'trans.mat'
+    >>> conc_lta.inputs.out_file = 'out.lta'
     >>> conc_lta.cmdline
-    'mri_concatenate_lta 001.lta 002.lta 003.lta'
+    'mri_concatenate_lta trans.mat trans.mat out.lta'
     """
 
     _cmd = 'mri_concatenate_lta'
@@ -2046,7 +2050,7 @@ class ConcatenateLTA(FSCommand):
             outputs['out_file'] = os.path.abspath(
                 self.inputs.out_file).replace('.lta', '-long.lta')
         return outputs
-    
+
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._list_outputs()[name]
