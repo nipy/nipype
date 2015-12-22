@@ -384,13 +384,12 @@ def test_doubleconnect():
     b = pe.Node(IdentityInterface(fields=['a', 'b']), name='b')
     flow1 = pe.Workflow(name='test')
     flow1.connect(a, 'a', b, 'a')
-    val = assert_raises(Exception, flow1.connect, a, 'b', b, 'a')
-    yield assert_equal, val, None
+    x = lambda: flow1.connect(a, 'b', b, 'a')
+    yield assert_raises, Exception, x
     c = pe.Node(IdentityInterface(fields=['a', 'b']), name='c')
     flow1 = pe.Workflow(name='test2')
-    val = assert_raises(Exception, flow1.connect,
-                        [(a, c, [('b', 'b')]), (b, c, [('a', 'b')])])
-    yield assert_equal, val, None
+    x = lambda: flow1.connect([(a, c, [('b', 'b')]), (b, c, [('a', 'b')])])
+    yield assert_raises, Exception, x
 
 
 '''

@@ -228,12 +228,13 @@ class Workflow(NodeBase):
                         not_found.append(['out', '%s' % srcnode, sourcename])
 
                 nodeconns += [dest]
+            connected_ports[dstnode] = nodeconns
 
         if conn_type == 'data':
             if duplicated:
                 raise Exception(
-                    'connect(): found duplicated connection.\n\t' +
-                    '\n\t'.join(['%s.%s -> %s.%s' % c for c in duplicated]))
+                    'connect(): found duplicated connections.\n\t\t' +
+                    '\n\t\t'.join(['%s.%s -> %s.%s' % c for c in duplicated]))
             infostr = []
             for info in not_found:
                 infostr += ["Module %s has no %sput called %s\n" % (info[1],
@@ -330,9 +331,16 @@ class Workflow(NodeBase):
         """
         newnodes = []
         all_nodes = self._get_all_nodes()
+        all_nodenames = [n.name for n in all_nodes]
         for node in nodes:
             if self._has_node(node):
                 raise IOError('Node %s already exists in the workflow' % node)
+
+            logger.debug('Node: %s, names: %s' % (node.name, all_nodenames))
+            if node.name in all_nodenames:
+                raise IOError('Workflow %s already contains a node called'
+                              ' %s' % (self, node.name))
+
             if isinstance(node, Workflow):
                 for subnode in node._get_all_nodes():
                     if subnode in all_nodes:
