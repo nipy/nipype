@@ -731,6 +731,9 @@ class Node(NodeBase):
                                           'Exec ID : %s' % self._id]))
             fp.writelines(write_rst_header('Original Inputs', level=1))
             fp.writelines(write_rst_dict(self.inputs.get()))
+
+            fp.writelines(write_rst_header('Signals', level=1))
+            fp.writelines(write_rst_dict(self.signals.get()))
         if report_type == 'postexec':
             logger.debug('writing post-exec report to %s' % report_file)
             fp = open(report_file, 'at')
