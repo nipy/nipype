@@ -40,7 +40,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
-            if  'max_tries' in kwargs['plugin_args']:
+            if 'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
         super(CondorPlugin, self).__init__(template, **kwargs)
 
@@ -95,7 +95,7 @@ class CondorPlugin(SGELikeBatchManagerBase):
         while True:
             try:
                 result = cmd.run()
-            except Exception, e:
+            except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
                     sleep(self._retry_timeout)  # sleep 2 seconds and try again.

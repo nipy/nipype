@@ -44,4 +44,4 @@ acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the C
     input_spec = DWIUnbiasedNonLocalMeansFilterInputSpec
     output_spec = DWIUnbiasedNonLocalMeansFilterOutputSpec
     _cmd = "DWIUnbiasedNonLocalMeansFilter "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}

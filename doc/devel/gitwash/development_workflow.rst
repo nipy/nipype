@@ -22,7 +22,7 @@ Workflow summary
 This way of working really helps to keep work well organized, and in
 keeping history as clear as possible.
 
-See |emdash| for example |emdash| `linux git workflow`_. 
+See |emdash| for example |emdash| `linux git workflow`_.
 
 Making a new feature branch
 ===========================
@@ -44,7 +44,7 @@ In git >1.7 you can ensure that the link is correctly set by using the
 ``--set-upstream`` option::
 
    git push --set-upstream origin my-new-feature
-   
+
 From now on git_ will know that ``my-new-feature`` is related to the
 ``my-new-feature`` branch in the github_ repo.
 
@@ -83,7 +83,7 @@ In more detail
 
 #. Check what the actual changes are with ``git diff`` (`git diff`_).
 #. Add any new files to version control ``git add new_file_name`` (see
-   `git add`_). 
+   `git add`_).
 #. To commit all modified files into the local copy of your repo,, do
    ``git commit -am 'A commit message'``.  Note the ``-am`` options to
    ``commit``. The ``m`` flag just signals that you're going to type a
@@ -92,7 +92,7 @@ In more detail
    description in the `tangled working copy problem`_. The `git commit`_ manual
    page might also be useful.
 #. To push the changes up to your forked repo on github_, do a ``git
-   push`` (see `git push`). 
+   push`` (see `git push`).
 
 Asking for code review
 ======================
@@ -121,7 +121,7 @@ Asking for code review
 The generated comparison, is between your feature branch
 ``my-new-feature``, and the place in ``master`` from which you branched
 ``my-new-feature``.  In other words, you can keep updating ``master``
-without interfering with the output from the comparison.  More detail? 
+without interfering with the output from the comparison.  More detail?
 Note the three dots in the URL above (``master...my-new-feature``).
 
 .. admonition:: Two vs three dots
@@ -165,7 +165,7 @@ When you are ready to ask for the merge of your code:
 Merging from trunk
 ==================
 
-This updates your code from the upstream `nipype github`_  repo. 
+This updates your code from the upstream `nipype github`_  repo.
 
 Overview
 --------

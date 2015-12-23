@@ -27,16 +27,16 @@ class CondorDAGManPlugin(GraphPluginBase):
                  submit file
     - override_specs : additional submit specs that are appended to any job's
                  submit file
-    - wrapper_cmd : path to an exectuable that will be started instead of a node
+    - wrapper_cmd : path to an executable that will be started instead of a node
                  script. This is useful for wrapper script that execute certain
                  functionality prior or after a node runs. If this option is
                  given the wrapper command is called with the respective Python
-                 exectuable and the path to the node script as final arguments
+                 executable and the path to the node script as final arguments
     - wrapper_args : optional additional arguments to a wrapper command
     - dagman_args : arguments to be prepended to the arguments of the
                     condor_submit_dag call
     - block : if True the plugin call will block until Condor has finished
-                 prcoessing the entire workflow (default: False)
+                 processing the entire workflow (default: False)
     """
 
     default_submit_template = """
@@ -49,6 +49,7 @@ error = %(basename)s.err
 log = %(basename)s.log
 getenv = True
 """
+
     def _get_str_or_file(self, arg):
         if os.path.isfile(arg):
             content = open(arg).read()
@@ -75,8 +76,8 @@ getenv = True
              ('_block', 'block', False),
              ('_dagman_args', 'dagman_args', '')):
             if 'plugin_args' in kwargs \
-                and not kwargs['plugin_args'] is None \
-                and id_ in kwargs['plugin_args']:
+                    and not kwargs['plugin_args'] is None \
+                    and id_ in kwargs['plugin_args']:
                     if id_ == 'wrapper_cmd':
                         val = os.path.abspath(kwargs['plugin_args'][id_])
                     elif id_ == 'block':
@@ -86,7 +87,7 @@ getenv = True
             setattr(self, var, val)
         # TODO remove after some time
         if 'plugin_args' in kwargs \
-            and not kwargs['plugin_args'] is None:
+                and not kwargs['plugin_args'] is None:
             plugin_args = kwargs['plugin_args']
             if 'template' in plugin_args:
                 warn("the 'template' argument is deprecated, use 'initial_specs' instead")
@@ -113,9 +114,9 @@ getenv = True
                                     "wrapper_args"])
                 # add required slots to the template
                 template = '%s\n%s\n%s\nqueue\n' % (
-                                '%(initial_specs)s',
-                                template,
-                                '%(override_specs)s')
+                    '%(initial_specs)s',
+                    template,
+                    '%(override_specs)s')
                 batch_dir, name = os.path.split(pyscript)
                 name = '.'.join(name.split('.')[:-1])
                 specs = dict(
@@ -125,13 +126,13 @@ getenv = True
                     nodescript=pyscript,
                     basename=os.path.join(batch_dir, name),
                     override_specs=override_specs
-                    )
-                if not wrapper_cmd is None:
+                )
+                if wrapper_cmd is not None:
                     specs['executable'] = wrapper_cmd
                     specs['nodescript'] = \
-                            '%s %s %s' % (wrapper_args % specs, # give access to variables
-                                          sys.executable,
-                                          pyscript)
+                        '%s %s %s' % (wrapper_args % specs,  # give access to variables
+                                      sys.executable,
+                                      pyscript)
                 submitspec = template % specs
                 # write submit spec for this job
                 submitfile = os.path.join(batch_dir,

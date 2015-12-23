@@ -9,6 +9,7 @@ dMRI: TBSS on NKI RS data
 A pipeline to do a TBSS analysis on the NKI rockland sample data
 
 """
+
 from nipype.workflows.dmri.fsl.dti import create_eddy_correct_pipeline
 from nipype.workflows.dmri.fsl.tbss import create_tbss_non_FA, create_tbss_all
 
@@ -119,7 +120,7 @@ tbssproc.connect([(tbss_all, tbss_MD, [('tbss2.outputnode.field_list',
                                         'inputnode.distance_map')]),
                   (tbss_source, tbss_MD, [('md_list',
                                            'inputnode.file_list')]),
-            ])
+                  ])
 
 if __name__ == '__main__':
     tbssproc.write_graph()

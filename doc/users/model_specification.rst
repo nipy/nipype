@@ -69,7 +69,7 @@ condition names. Words.run001.txt may look like::
 
       # Word Onsets Durations
        0   10
-       20   10  
+       20   10
        ...
 
 or with amplitudes::
@@ -84,11 +84,11 @@ Together with this information, one needs to specify:
 - whether the durations and event onsets are specified in terms of scan volumes
   or secs.
 
-- the high-pass filter cutoff, 
+- the high-pass filter cutoff,
 
 - the repetition time per scan
 
-- functional data files corresponding to each run. 
+- functional data files corresponding to each run.
 
 Optionally you can specify realignment parameters, outlier indices.
 Outlier files should contain a list of numbers, one per row indicating
@@ -104,7 +104,7 @@ provide temporal and parametric modulators in the Bunch attributes tmod
 and pmod. The following example adds a linear parametric modulator for
 speaking rate for the events specified earlier::
 
- pmod = [None, Bunch(name=['Rate'], param=[[.300, .500, .600]], 
+ pmod = [None, Bunch(name=['Rate'], param=[[.300, .500, .600]],
                                       poly=[1]), None]
  subject_info = Bunch(conditions=condnames,
                                      onsets = event_onsets,

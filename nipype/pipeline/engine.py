@@ -2,7 +2,7 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Defines functionality for pipelined execution of interfaces
 
-The `Pipeline` class provides core functionality for batch processing.
+The `Workflow` class provides core functionality for batch processing.
 
    Change directory to provide relative paths for doctests
    >>> import os
@@ -12,13 +12,20 @@ The `Pipeline` class provides core functionality for batch processing.
 
 """
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
+
 from datetime import datetime
+from nipype.utils.misc import flatten, unflatten
 try:
     from collections import OrderedDict
 except ImportError:
     from ordereddict import OrderedDict
+
 from copy import deepcopy
-import cPickle
+import pickle
 from glob import glob
 import gzip
 import inspect
@@ -26,19 +33,19 @@ import os
 import os.path as op
 import re
 import shutil
+import errno
+import socket
 from shutil import rmtree
-from socket import gethostname
-from string import Template
 import sys
 from tempfile import mkdtemp
 from warnings import warn
 from hashlib import sha1
 
 import numpy as np
+import networkx as nx
 
 from ..utils.misc import package_check, str2bool
 package_check('networkx', '1.3')
-import networkx as nx
 
 from .. import config, logging
 logger = logging.getLogger('workflow')
@@ -46,14 +53,15 @@ from ..interfaces.base import (traits, InputMultiPath, CommandLine,
                                Undefined, TraitedSpec, DynamicTraitedSpec,
                                Bunch, InterfaceResult, md5, Interface,
                                TraitDictObject, TraitListObject, isdefined)
-from ..utils.misc import getsource, create_function_from_source
+from ..utils.misc import (getsource, create_function_from_source,
+                          flatten, unflatten)
 from ..utils.filemanip import (save_json, FileNotFoundError,
                                filename_to_list, list_to_filename,
                                copyfiles, fnames_presuffix, loadpkl,
                                split_filename, load_json, savepkl,
                                write_rst_header, write_rst_dict,
                                write_rst_list)
-
+from ..external.six import string_types
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,
@@ -63,18 +71,18 @@ from .utils import (generate_expanded_graph, modify_paths,
 def _write_inputs(node):
     lines = []
     nodename = node.fullname.replace('.', '_')
-    for key, _ in node.inputs.items():
+    for key, _ in list(node.inputs.items()):
         val = getattr(node.inputs, key)
         if isdefined(val):
             if type(val) == str:
                 try:
                     func = create_function_from_source(val)
-                except RuntimeError, e:
+                except RuntimeError as e:
                     lines.append("%s.inputs.%s = '%s'" % (nodename, key, val))
                 else:
-                    funcname = [name for name in func.func_globals
+                    funcname = [name for name in func.__globals__
                                 if name != '__builtins__'][0]
-                    lines.append(cPickle.loads(val))
+                    lines.append(pickle.loads(val))
                     if funcname == nodename:
                         lines[-1] = lines[-1].replace(' %s(' % funcname,
                                                       ' %s_1(' % funcname)
@@ -97,12 +105,12 @@ def format_node(node, format='python', include_config=False):
         importline = 'from %s import %s' % (klass.__module__,
                                             klass.__class__.__name__)
         comment = '# Node: %s' % node.fullname
-        spec = inspect.getargspec(node._interface.__init__)
+        spec = inspect.signature(node._interface.__init__)
         args = spec.args[1:]
         if args:
             filled_args = []
             for arg in args:
-                if  hasattr(node._interface, '_%s' % arg):
+                if hasattr(node._interface, '_%s' % arg):
                     filled_args.append('%s=%s' % (arg, getattr(node._interface,
                                                                '_%s' % arg)))
             args = ', '.join(filled_args)
@@ -190,6 +198,8 @@ class WorkflowBase(object):
         return hasattr(self.outputs, parameter)
 
     def _check_inputs(self, parameter):
+        if isinstance(self.inputs, DynamicTraitedSpec):
+            return True
         return hasattr(self.inputs, parameter)
 
     def _verify_name(self, name):
@@ -205,11 +215,15 @@ class WorkflowBase(object):
 
     def save(self, filename=None):
         if filename is None:
-            filename = 'temp.npz'
-        np.savez(filename, object=self)
+            filename = 'temp.pklz'
+        savepkl(filename, self)
 
     def load(self, filename):
-        return np.load(filename)
+        if '.npz' in filename:
+            DeprecationWarning(('npz files will be deprecated in the next '
+                                'release. you can use numpy to open them.'))
+            return np.load(filename)
+        return loadpkl(filename)
 
 
 class Workflow(WorkflowBase):
@@ -354,7 +368,7 @@ connected.
                         # handles the case that source is specified
                         # with a function
                         sourcename = source[0]
-                    elif isinstance(source, str):
+                    elif isinstance(source, string_types):
                         sourcename = source
                     else:
                         raise Exception(('Unknown source specification in '
@@ -375,7 +389,7 @@ connected.
         # turn functions into strings
         for srcnode, destnode, connects in connection_list:
             for idx, (src, dest) in enumerate(connects):
-                if isinstance(src, tuple) and not isinstance(src[1], str):
+                if isinstance(src, tuple) and not isinstance(src[1], string_types):
                     function_source = getsource(src[1])
                     connects[idx] = ((src[0], function_source, src[2:]), dest)
 
@@ -396,7 +410,7 @@ connected.
                                                  destnode,
                                                  edge_data)])
                 else:
-                    #pass
+                    # pass
                     logger.debug('Removing connection: %s->%s' % (srcnode,
                                                                   destnode))
                     self._graph.remove_edges_from([(srcnode, destnode)])
@@ -501,10 +515,14 @@ connected.
         Parameters
         ----------
 
-        graph2use: 'orig', 'hierarchical' (default), 'flat', 'exec'
+        graph2use: 'orig', 'hierarchical' (default), 'flat', 'exec', 'colored'
             orig - creates a top level graph without expanding internal
             workflow nodes;
             flat - expands workflow nodes recursively;
+            hierarchical - expands workflow nodes recursively with a
+            notion on hierarchy;
+            colored - expands workflow nodes recursively with a
+            notion on hierarchy in color;
             exec - expands workflows to depict iterables
 
         format: 'png', 'svg'
@@ -515,23 +533,23 @@ connected.
             False.
 
         """
-        graphtypes = ['orig', 'flat', 'hierarchical', 'exec']
+        graphtypes = ['orig', 'flat', 'hierarchical', 'exec', 'colored']
         if graph2use not in graphtypes:
             raise ValueError('Unknown graph2use keyword. Must be one of: ' +
                              str(graphtypes))
-        base_dir, dotfilename = os.path.split(dotfilename)
+        base_dir, dotfilename = op.split(dotfilename)
         if base_dir == '':
             if self.base_dir:
                 base_dir = self.base_dir
                 if self.name:
-                    base_dir = os.path.join(base_dir, self.name)
+                    base_dir = op.join(base_dir, self.name)
             else:
                 base_dir = os.getcwd()
         base_dir = make_output_dir(base_dir)
-        if graph2use == 'hierarchical':
-            dotfilename = os.path.join(base_dir, dotfilename)
+        if graph2use in ['hierarchical', 'colored']:
+            dotfilename = op.join(base_dir, dotfilename)
             self.write_hierarchical_dotfile(dotfilename=dotfilename,
-                                            colored=False,
+                                            colored=graph2use == "colored",
                                             simple_form=simple_form)
             format_dot(dotfilename, format=format)
         else:
@@ -543,11 +561,9 @@ connected.
             export_graph(graph, base_dir, dotfilename=dotfilename,
                          format=format, simple_form=simple_form)
 
-    def write_hierarchical_dotfile(self, dotfilename=None, colored=True,
+    def write_hierarchical_dotfile(self, dotfilename=None, colored=False,
                                    simple_form=True):
         dotlist = ['digraph %s{' % self.name]
-        if colored:
-            dotlist.append('  ' + 'colorscheme=pastel28;')
         dotlist.append(self._get_dot(prefix='  ', colored=colored,
                                      simple_form=simple_form))
         dotlist.append('}')
@@ -614,7 +630,7 @@ connected.
                                 funcname = functions[args[1]]
                             else:
                                 func = create_function_from_source(args[1])
-                                funcname = [name for name in func.func_globals
+                                funcname = [name for name in func.__globals__
                                             if name != '__builtins__'][0]
                                 functions[args[1]] = funcname
                             args[1] = funcname
@@ -630,7 +646,7 @@ connected.
                             lines.append(connect_template2 % line_args)
             functionlines = ['# Functions']
             for function in functions:
-                functionlines.append(cPickle.loads(function).rstrip())
+                functionlines.append(pickle.loads(function).rstrip())
             all_lines = importlines + functionlines + lines
 
             if not filename:
@@ -653,7 +669,7 @@ connected.
         """
         if plugin is None:
             plugin = config.get('execution', 'plugin')
-        if type(plugin) is not str:
+        if not isinstance(plugin, string_types):
             runner = plugin
         else:
             name = 'nipype.pipeline.plugins'
@@ -689,8 +705,8 @@ connected.
         runner.run(execgraph, updatehash=updatehash, config=self.config)
         datestr = datetime.utcnow().strftime('%Y%m%dT%H%M%S')
         if str2bool(self.config['execution']['write_provenance']):
-            prov_base = os.path.join(self.base_dir,
-                                     'workflow_provenance_%s' % datestr)
+            prov_base = op.join(self.base_dir,
+                                'workflow_provenance_%s' % datestr)
             logger.info('Provenance file prefix: %s' % prov_base)
             write_workflow_prov(execgraph, prov_base, format='all')
         return execgraph
@@ -700,17 +716,17 @@ connected.
     def _write_report_info(self, workingdir, name, graph):
         if workingdir is None:
             workingdir = os.getcwd()
-        report_dir = os.path.join(workingdir, name)
-        if not os.path.exists(report_dir):
+        report_dir = op.join(workingdir, name)
+        if not op.exists(report_dir):
             os.makedirs(report_dir)
-        shutil.copyfile(os.path.join(os.path.dirname(__file__),
-                                     'report_template.html'),
-                        os.path.join(report_dir, 'index.html'))
-        shutil.copyfile(os.path.join(os.path.dirname(__file__),
-                                     '..', 'external', 'd3.v3.min.js'),
-                        os.path.join(report_dir, 'd3.v3.min.js'))
+        shutil.copyfile(op.join(op.dirname(__file__),
+                                'report_template.html'),
+                        op.join(report_dir, 'index.html'))
+        shutil.copyfile(op.join(op.dirname(__file__),
+                                '..', 'external', 'd3.js'),
+                        op.join(report_dir, 'd3.js'))
         nodes, groups = topological_sort(graph, depth_first=True)
-        graph_file = os.path.join(report_dir, 'graph1.json')
+        graph_file = op.join(report_dir, 'graph1.json')
         json_dict = {'nodes': [], 'links': [], 'groups': [], 'maxN': 0}
         for i, node in enumerate(nodes):
             report_file = "%s/_report/report.rst" % \
@@ -737,11 +753,12 @@ connected.
                                            target=nodes.index(v),
                                            value=1))
         save_json(graph_file, json_dict)
-        graph_file = os.path.join(report_dir, 'graph.json')
+        graph_file = op.join(report_dir, 'graph.json')
         template = '%%0%dd_' % np.ceil(np.log10(len(nodes))).astype(int)
+
         def getname(u, i):
             name_parts = u.fullname.split('.')
-            #return '.'.join(name_parts[:-1] + [template % i + name_parts[-1]])
+            # return '.'.join(name_parts[:-1] + [template % i + name_parts[-1]])
             return template % i + name_parts[-1]
         json_dict = []
         for i, node in enumerate(nodes):
@@ -763,13 +780,10 @@ connected.
             node.needed_outputs = []
             for edge in graph.out_edges_iter(node):
                 data = graph.get_edge_data(*edge)
-                for sourceinfo, _ in sorted(data['connect']):
-                    if isinstance(sourceinfo, tuple):
-                        input_name = sourceinfo[0]
-                    else:
-                        input_name = sourceinfo
-                    if input_name not in node.needed_outputs:
-                        node.needed_outputs += [input_name]
+                sourceinfo = [v1[0] if isinstance(v1, tuple) else v1
+                              for v1, v2 in data['connect']]
+                node.needed_outputs += [v for v in sourceinfo
+                                        if v not in node.needed_outputs]
             if node.needed_outputs:
                 node.needed_outputs = sorted(node.needed_outputs)
 
@@ -782,8 +796,8 @@ connected.
                 data = graph.get_edge_data(*edge)
                 for sourceinfo, field in sorted(data['connect']):
                     node.input_source[field] = \
-                        (os.path.join(edge[0].output_dir(),
-                         'result_%s.pklz' % edge[0].name),
+                        (op.join(edge[0].output_dir(),
+                                 'result_%s.pklz' % edge[0].name),
                          sourceinfo)
 
     def _check_nodes(self, nodes):
@@ -853,7 +867,7 @@ connected.
                     for cd in d['connect']:
                         taken_inputs.append(cd[1])
                 unconnectedinputs = TraitedSpec()
-                for key, trait in node.inputs.items():
+                for key, trait in list(node.inputs.items()):
                     if key not in taken_inputs:
                         unconnectedinputs.add_trait(key,
                                                     traits.Trait(trait,
@@ -874,7 +888,7 @@ connected.
                 setattr(outputdict, node.name, node.outputs)
             elif node.outputs:
                 outputs = TraitedSpec()
-                for key, _ in node.outputs.items():
+                for key, _ in list(node.outputs.items()):
                     outputs.add_trait(key, traits.Any(node=node))
                     setattr(outputs, key, None)
                 setattr(outputdict, node.name, outputs)
@@ -887,7 +901,7 @@ connected.
 
     def _set_node_input(self, node, param, source, sourceinfo):
         """Set inputs of a node given the edge connection"""
-        if isinstance(sourceinfo, str):
+        if isinstance(sourceinfo, string_types):
             val = source.get_output(sourceinfo)
         elif isinstance(sourceinfo, tuple):
             if callable(sourceinfo[1]):
@@ -992,7 +1006,7 @@ connected.
                         self.disconnect(node, cd[0], v, cd[1])
                         self.connect(srcnode, srcout, dstnode, dstin)
                 # expand the workflow node
-                #logger.debug('expanding workflow: %s', node)
+                # logger.debug('expanding workflow: %s', node)
                 node._generate_flatgraph()
                 for innernode in node._graph.nodes():
                     innernode._hierarchy = '.'.join((self.name,
@@ -1003,18 +1017,18 @@ connected.
             self._graph.remove_nodes_from(nodes2remove)
         logger.debug('finished expanding workflow: %s', self)
 
-    def _get_dot(self, prefix=None, hierarchy=None, colored=True,
-                 simple_form=True):
+    def _get_dot(self, prefix=None, hierarchy=None, colored=False,
+                 simple_form=True, level=0):
         """Create a dot file with connection info
         """
         if prefix is None:
             prefix = '  '
         if hierarchy is None:
             hierarchy = []
-        level = (len(prefix) / 2) + 1
+        colorset = ['#FFFFC8', '#0000FF', '#B4B4FF', '#E6E6FF', '#FF0000',
+                    '#FFB4B4', '#FFE6E6', '#00A300', '#B4FFB4', '#E6FFE6']
+
         dotlist = ['%slabel="%s";' % (prefix, self.name)]
-        if colored:
-            dotlist.append('%scolor=%d;' % (prefix, level))
         for node in nx.topological_sort(self._graph):
             fullname = '.'.join(hierarchy + [node.fullname])
             nodename = fullname.replace('.', '_')
@@ -1023,24 +1037,36 @@ connected.
                 if not simple_form:
                     node_class_name = '.'.join(node_class_name.split('.')[1:])
                 if hasattr(node, 'iterables') and node.iterables:
-                    dotlist.append(('%s[label="%s", style=filled, colorscheme'
-                                    '=greys7 color=2];') % (nodename,
-                                                            node_class_name))
+                    dotlist.append(('%s[label="%s", shape=box3d,'
+                                    'style=filled, color=black, colorscheme'
+                                    '=greys7 fillcolor=2];') % (nodename,
+                                                                node_class_name))
                 else:
-                    dotlist.append('%s[label="%s"];' % (nodename,
-                                                        node_class_name))
+                    if colored:
+                        dotlist.append(('%s[label="%s", style=filled,'
+                                        ' fillcolor="%s"];')
+                                       % (nodename, node_class_name,
+                                           colorset[level]))
+                    else:
+                        dotlist.append(('%s[label="%s"];')
+                                       % (nodename, node_class_name))
+
         for node in nx.topological_sort(self._graph):
             if isinstance(node, Workflow):
                 fullname = '.'.join(hierarchy + [node.fullname])
                 nodename = fullname.replace('.', '_')
                 dotlist.append('subgraph cluster_%s {' % nodename)
                 if colored:
+                    dotlist.append(prefix + prefix + 'edge [color="%s"];' % (colorset[level + 1]))
                     dotlist.append(prefix + prefix + 'style=filled;')
+                    dotlist.append(prefix + prefix + 'fillcolor="%s";' % (colorset[level + 2]))
                 dotlist.append(node._get_dot(prefix=prefix + prefix,
                                              hierarchy=hierarchy + [self.name],
                                              colored=colored,
-                                             simple_form=simple_form))
+                                             simple_form=simple_form, level=level + 3))
                 dotlist.append('}')
+                if level == 6:
+                    level = 2
             else:
                 for subnode in self._graph.successors_iter(node):
                     if node._hierarchy != subnode._hierarchy:
@@ -1095,7 +1121,8 @@ class Node(WorkflowBase):
     Examples
     --------
 
-    >>> from nipype import Node, spm
+    >>> from nipype import Node
+    >>> from nipype.interfaces import spm
     >>> realign = Node(spm.Realign(), 'realign')
     >>> realign.inputs.in_files = 'functional.nii'
     >>> realign.inputs.register_to_mean = True
@@ -1120,26 +1147,29 @@ class Node(WorkflowBase):
             Input field and list to iterate using the pipeline engine
             for example to iterate over different frac values in fsl.Bet()
             for a single field the input can be a tuple, otherwise a list
-            of tuples
-            node.iterables = ('frac',[0.5,0.6,0.7])
-            node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
+            of tuples ::
+
+                node.iterables = ('frac',[0.5,0.6,0.7])
+                node.iterables = [('fwhm',[2,4]),('fieldx',[0.5,0.6,0.7])]
 
             If this node has an itersource, then the iterables values
             is a dictionary which maps an iterable source field value
-            to the target iterables field values, e.g.:
-            inputspec.iterables = ('images',['img1.nii', 'img2.nii']])
-            node.itersource = ('inputspec', ['frac'])
-            node.iterables = ('frac', {'img1.nii': [0.5, 0.6],
-                                       img2.nii': [0.6, 0.7]})
+            to the target iterables field values, e.g.: ::
+
+                inputspec.iterables = ('images',['img1.nii', 'img2.nii']])
+                node.itersource = ('inputspec', ['frac'])
+                node.iterables = ('frac', {'img1.nii': [0.5, 0.6],
+                                           'img2.nii': [0.6, 0.7]})
 
             If this node's synchronize flag is set, then an alternate
             form of the iterables is a [fields, values] list, where
             fields is the list of iterated fields and values is the
-            list of value tuples for the given fields, e.g.:
-            node.synchronize = True
-            node.iterables = [('frac', 'threshold'),
-                              [(0.5, True),
-                               (0.6, False)]]
+            list of value tuples for the given fields, e.g.: ::
+
+                node.synchronize = True
+                node.iterables = [('frac', 'threshold'),
+                                  [(0.5, True),
+                                   (0.6, False)]]
 
         itersource: tuple
             The (name, fields) iterables source which specifies the name
@@ -1225,16 +1255,16 @@ class Node(WorkflowBase):
             self.base_dir = mkdtemp()
         outputdir = self.base_dir
         if self._hierarchy:
-            outputdir = os.path.join(outputdir, *self._hierarchy.split('.'))
+            outputdir = op.join(outputdir, *self._hierarchy.split('.'))
         if self.parameterization:
             if not str2bool(self.config['execution']['parameterize_dirs']):
                 param_dirs = [self._parameterization_dir(p) for p in
                               self.parameterization]
-                outputdir = os.path.join(outputdir, *param_dirs)
+                outputdir = op.join(outputdir, *param_dirs)
             else:
-                outputdir = os.path.join(outputdir, *self.parameterization)
-        return os.path.abspath(os.path.join(outputdir,
-                                            self.name))
+                outputdir = op.join(outputdir, *self.parameterization)
+        return op.abspath(op.join(outputdir,
+                                  self.name))
 
     def set_input(self, parameter, val):
         """ Set interface input value"""
@@ -1264,23 +1294,23 @@ class Node(WorkflowBase):
         # of the dictionary itself.
         hashed_inputs, hashvalue = self._get_hashval()
         outdir = self.output_dir()
-        if os.path.exists(outdir):
+        if op.exists(outdir):
             logger.debug(os.listdir(outdir))
-        hashfiles = glob(os.path.join(outdir, '_0x*.json'))
+        hashfiles = glob(op.join(outdir, '_0x*.json'))
         logger.debug(hashfiles)
         if len(hashfiles) > 1:
             logger.info(hashfiles)
             logger.info('Removing multiple hashfiles and forcing node to rerun')
             for hashfile in hashfiles:
                 os.unlink(hashfile)
-        hashfile = os.path.join(outdir, '_0x%s.json' % hashvalue)
+        hashfile = op.join(outdir, '_0x%s.json' % hashvalue)
         logger.debug(hashfile)
-        if updatehash and os.path.exists(outdir):
+        if updatehash and op.exists(outdir):
             logger.debug("Updating hash: %s" % hashvalue)
-            for file in glob(os.path.join(outdir, '_0x*.json')):
+            for file in glob(op.join(outdir, '_0x*.json')):
                 os.remove(file)
             self._save_hashfile(hashfile, hashed_inputs)
-        return os.path.exists(hashfile), hashvalue, hashfile, hashed_inputs
+        return op.exists(hashfile), hashvalue, hashfile, hashed_inputs
 
     def run(self, updatehash=False):
         """Execute the node in its directory.
@@ -1301,26 +1331,26 @@ class Node(WorkflowBase):
             self._got_inputs = True
         outdir = self.output_dir()
         logger.info("Executing node %s in dir: %s" % (self._id, outdir))
-        if os.path.exists(outdir):
+        if op.exists(outdir):
             logger.debug(os.listdir(outdir))
         hash_info = self.hash_exists(updatehash=updatehash)
         hash_exists, hashvalue, hashfile, hashed_inputs = hash_info
         logger.debug(('updatehash, overwrite, always_run, hash_exists',
                       updatehash, self.overwrite, self._interface.always_run,
                       hash_exists))
-        if (not updatehash and (((self.overwrite is None
-                                  and self._interface.always_run)
-                                 or self.overwrite) or
-                                not hash_exists)):
+        if (not updatehash and (((self.overwrite is None and
+                                  self._interface.always_run) or
+                                 self.overwrite) or not
+                                hash_exists)):
             logger.debug("Node hash: %s" % hashvalue)
 
             # by rerunning we mean only nodes that did finish to run previously
             json_pat = op.join(outdir, '_0x*.json')
             json_unfinished_pat = op.join(outdir, '_0x*_unfinished.json')
-            need_rerun = (os.path.exists(outdir)
-                          and not isinstance(self, MapNode)
-                          and len(glob(json_pat)) != 0
-                          and len(glob(json_unfinished_pat)) == 0)
+            need_rerun = (op.exists(outdir) and not
+                          isinstance(self, MapNode) and
+                          len(glob(json_pat)) != 0 and
+                          len(glob(json_unfinished_pat)) == 0)
             if need_rerun:
                 logger.debug("Rerunning node")
                 logger.debug(("updatehash = %s, "
@@ -1332,7 +1362,7 @@ class Node(WorkflowBase):
                               str(self.overwrite),
                               str(self._interface.always_run),
                               hashfile,
-                              str(os.path.exists(hashfile)),
+                              str(op.exists(hashfile)),
                               self.config['execution']['hash_method'].lower()))
                 log_debug = config.get('logging', 'workflow_level') == 'DEBUG'
                 if log_debug and not op.exists(hashfile):
@@ -1350,37 +1380,51 @@ class Node(WorkflowBase):
                             logging.logdebug_dict_differences(prev_inputs,
                                                               hashed_inputs)
                 cannot_rerun = (str2bool(
-                    self.config['execution']['stop_on_first_rerun'])
-                    and not (self.overwrite is None
-                         and self._interface.always_run))
+                    self.config['execution']['stop_on_first_rerun']) and not
+                    (self.overwrite is None and self._interface.always_run))
                 if cannot_rerun:
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
                                      "is set to True"))
-            hashfile_unfinished = os.path.join(outdir,
-                                               '_0x%s_unfinished.json' %
-                                               hashvalue)
+            hashfile_unfinished = op.join(outdir,
+                                          '_0x%s_unfinished.json' %
+                                          hashvalue)
             if op.exists(hashfile):
                 os.remove(hashfile)
-            rm_outdir = (op.exists(outdir)
-                         and not (op.exists(hashfile_unfinished)
-                                  and self._interface.can_resume)
-                         and not isinstance(self, MapNode))
+            rm_outdir = (op.exists(outdir) and not
+                         (op.exists(hashfile_unfinished) and
+                             self._interface.can_resume) and not
+                         isinstance(self, MapNode))
             if rm_outdir:
                 logger.debug("Removing old %s and its contents" % outdir)
-                rmtree(outdir)
+                try:
+                    rmtree(outdir)
+                except OSError as ex:
+                    outdircont = os.listdir(outdir)
+                    if ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) == 0)):
+                        logger.warn(('An exception was raised trying to remove old %s, '
+                                     'but the path seems empty. Is it an NFS mount?. '
+                                     'Passing the exception.') % outdir)
+                        pass
+                    elif ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) != 0)):
+                        logger.debug(('Folder contents (%d items): '
+                                      '%s') % (len(outdircont), outdircont))
+                        raise ex
+                    else:
+                        raise ex
+
             else:
                 logger.debug(("%s found and can_resume is True or Node is a "
                               "MapNode - resuming execution") %
                              hashfile_unfinished)
                 if isinstance(self, MapNode):
                     # remove old json files
-                    for filename in glob(os.path.join(outdir, '_0x*.json')):
+                    for filename in glob(op.join(outdir, '_0x*.json')):
                         os.unlink(filename)
             outdir = make_output_dir(outdir)
             self._save_hashfile(hashfile_unfinished, hashed_inputs)
             self.write_report(report_type='preexec', cwd=outdir)
-            savepkl(os.path.join(outdir, '_node.pklz'), self)
-            savepkl(os.path.join(outdir, '_inputs.pklz'),
+            savepkl(op.join(outdir, '_node.pklz'), self)
+            savepkl(op.join(outdir, '_inputs.pklz'),
                     self.inputs.get_traitsfree())
             try:
                 self._run_interface()
@@ -1390,13 +1434,13 @@ class Node(WorkflowBase):
             shutil.move(hashfile_unfinished, hashfile)
             self.write_report(report_type='postexec', cwd=outdir)
         else:
-            if not os.path.exists(os.path.join(outdir, '_inputs.pklz')):
+            if not op.exists(op.join(outdir, '_inputs.pklz')):
                 logger.debug('%s: creating inputs file' % self.name)
-                savepkl(os.path.join(outdir, '_inputs.pklz'),
+                savepkl(op.join(outdir, '_inputs.pklz'),
                         self.inputs.get_traitsfree())
-            if not os.path.exists(os.path.join(outdir, '_node.pklz')):
+            if not op.exists(op.join(outdir, '_node.pklz')):
                 logger.debug('%s: creating node file' % self.name)
-                savepkl(os.path.join(outdir, '_node.pklz'), self)
+                savepkl(op.join(outdir, '_node.pklz'), self)
             logger.debug("Hashfile exists. Skipping execution")
             self._run_interface(execute=False, updatehash=updatehash)
         logger.debug('Finished running %s in dir: %s\n' % (self._id, outdir))
@@ -1425,11 +1469,11 @@ class Node(WorkflowBase):
         rm_extra = self.config['execution']['remove_unnecessary_outputs']
         if str2bool(rm_extra) and self.needed_outputs:
             hashobject = md5()
-            hashobject.update(hashvalue)
+            hashobject.update(hashvalue.encode())
             sorted_outputs = sorted(self.needed_outputs)
-            hashobject.update(str(sorted_outputs))
+            hashobject.update(str(sorted_outputs).encode())
             hashvalue = hashobject.hexdigest()
-            hashed_inputs['needed_outputs'] = sorted_outputs
+            hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
 
     def _save_hashfile(self, hashfile, hashed_inputs):
@@ -1441,9 +1485,9 @@ class Node(WorkflowBase):
                 # XXX - SG current workaround is to just
                 # create the hashed file and not put anything
                 # in it
-                fd = open(hashfile, 'wt')
-                fd.writelines(str(hashed_inputs))
-                fd.close()
+                with open(hashfile, 'wt') as fd:
+                    fd.writelines(str(hashed_inputs))
+
                 logger.debug(('Unable to write a particular type to the json '
                               'file'))
             else:
@@ -1457,7 +1501,7 @@ class Node(WorkflowBase):
         other data sources (e.g., XNAT, HTTP, etc.,.)
         """
         logger.debug('Setting node inputs')
-        for key, info in self.input_source.items():
+        for key, info in list(self.input_source.items()):
             logger.debug('input: %s' % key)
             results_file = info[0]
             logger.debug('results file: %s' % results_file)
@@ -1479,7 +1523,7 @@ class Node(WorkflowBase):
             logger.debug('output: %s' % output_name)
             try:
                 self.set_input(key, deepcopy(output_value))
-            except traits.TraitError, e:
+            except traits.TraitError as e:
                 msg = ['Error setting node input:',
                        'Node: %s' % self.name,
                        'input: %s' % key,
@@ -1497,7 +1541,7 @@ class Node(WorkflowBase):
         os.chdir(old_cwd)
 
     def _save_results(self, result, cwd):
-        resultsfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        resultsfile = op.join(cwd, 'result_%s.pklz' % self.name)
         if result.outputs:
             try:
                 outputs = result.outputs.get()
@@ -1530,14 +1574,14 @@ class Node(WorkflowBase):
             rerun
         """
         aggregate = True
-        resultsoutputfile = os.path.join(cwd, 'result_%s.pklz' % self.name)
+        resultsoutputfile = op.join(cwd, 'result_%s.pklz' % self.name)
         result = None
         attribute_error = False
-        if os.path.exists(resultsoutputfile):
+        if op.exists(resultsoutputfile):
             pkl_file = gzip.open(resultsoutputfile, 'rb')
             try:
-                result = cPickle.load(pkl_file)
-            except (traits.TraitError, AttributeError, ImportError), err:
+                result = pickle.load(pkl_file)
+            except (traits.TraitError, AttributeError, ImportError) as err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
                     logger.debug(('attribute error: %s probably using '
@@ -1569,7 +1613,7 @@ class Node(WorkflowBase):
         if aggregate:
             logger.debug('aggregating results')
             if attribute_error:
-                old_inputs = loadpkl(os.path.join(cwd, '_inputs.pklz'))
+                old_inputs = loadpkl(op.join(cwd, '_inputs.pklz'))
                 self.inputs.set(**old_inputs)
             if not isinstance(self, MapNode):
                 self._copyfiles_to_wd(cwd, True, linksonly=True)
@@ -1577,8 +1621,8 @@ class Node(WorkflowBase):
                     needed_outputs=self.needed_outputs)
                 runtime = Bunch(cwd=cwd,
                                 returncode=0,
-                                environ=deepcopy(os.environ.data),
-                                hostname=gethostname())
+                                environ=dict(os.environ),
+                                hostname=socket.gethostname())
                 result = InterfaceResult(
                     interface=self._interface.__class__,
                     runtime=runtime,
@@ -1597,8 +1641,8 @@ class Node(WorkflowBase):
             self._originputs = deepcopy(self._interface.inputs)
         if execute:
             runtime = Bunch(returncode=1,
-                            environ=deepcopy(os.environ.data),
-                            hostname=gethostname())
+                            environ=dict(os.environ),
+                            hostname=socket.gethostname())
             result = InterfaceResult(
                 interface=self._interface.__class__,
                 runtime=runtime,
@@ -1610,23 +1654,23 @@ class Node(WorkflowBase):
             if issubclass(self._interface.__class__, CommandLine):
                 try:
                     cmd = self._interface.cmdline
-                except Exception, msg:
+                except Exception as msg:
                     self._result.runtime.stderr = msg
                     raise
-                cmdfile = os.path.join(cwd, 'command.txt')
+                cmdfile = op.join(cwd, 'command.txt')
                 fd = open(cmdfile, 'wt')
                 fd.writelines(cmd + "\n")
                 fd.close()
                 logger.info('Running: %s' % cmd)
             try:
                 result = self._interface.run()
-            except Exception, msg:
+            except Exception as msg:
                 self._result.runtime.stderr = msg
                 raise
 
             dirs2keep = None
             if isinstance(self, MapNode):
-                dirs2keep = [os.path.join(cwd, 'mapflow')]
+                dirs2keep = [op.join(cwd, 'mapflow')]
             result.outputs = clean_working_directory(result.outputs, cwd,
                                                      self._interface.inputs,
                                                      self.needed_outputs,
@@ -1650,7 +1694,7 @@ class Node(WorkflowBase):
             if isinstance(f, list):
                 out.append(self._strip_temp(f, wd))
             else:
-                out.append(f.replace(os.path.join(wd, '_tempinput'), wd))
+                out.append(f.replace(op.join(wd, '_tempinput'), wd))
         return out
 
     def _copyfiles_to_wd(self, outdir, execute, linksonly=False):
@@ -1660,7 +1704,7 @@ class Node(WorkflowBase):
                          (str(execute), str(linksonly)))
             if execute and linksonly:
                 olddir = outdir
-                outdir = os.path.join(outdir, '_tempinput')
+                outdir = op.join(outdir, '_tempinput')
                 os.makedirs(outdir)
             for info in self._interface._get_filecopy_info():
                 files = self.inputs.get().get(info['key'])
@@ -1680,7 +1724,7 @@ class Node(WorkflowBase):
                                                             newpath=outdir)
                             newfiles = self._strip_temp(
                                 newfiles,
-                                op.abspath(olddir).split(os.path.sep)[-1])
+                                op.abspath(olddir).split(op.sep)[-1])
                         else:
                             newfiles = copyfiles(infiles,
                                                  [outdir],
@@ -1700,9 +1744,9 @@ class Node(WorkflowBase):
     def write_report(self, report_type=None, cwd=None):
         if not str2bool(self.config['execution']['create_report']):
             return
-        report_dir = os.path.join(cwd, '_report')
-        report_file = os.path.join(report_dir, 'report.rst')
-        if not os.path.exists(report_dir):
+        report_dir = op.join(cwd, '_report')
+        report_file = op.join(report_dir, 'report.rst')
+        if not op.exists(report_dir):
             os.makedirs(report_dir)
         if report_type == 'preexec':
             logger.debug('writing pre-exec report to %s' % report_file)
@@ -1718,8 +1762,8 @@ class Node(WorkflowBase):
             fp = open(report_file, 'at')
             fp.writelines(write_rst_header('Execution Inputs', level=1))
             fp.writelines(write_rst_dict(self.inputs.get()))
-            exit_now = (not hasattr(self.result, 'outputs')
-                        or self.result.outputs is None)
+            exit_now = (not hasattr(self.result, 'outputs') or
+                        self.result.outputs is None)
             if exit_now:
                 return
             fp.writelines(write_rst_header('Execution Outputs', level=1))
@@ -1779,7 +1823,7 @@ class JoinNode(Node):
     """
 
     def __init__(self, interface, name, joinsource, joinfield=None,
-        unique=False, **kwargs):
+                 unique=False, **kwargs):
         """
 
         Parameters
@@ -1805,7 +1849,7 @@ class JoinNode(Node):
         if not joinfield:
             # default is the interface fields
             joinfield = self._interface.inputs.copyable_trait_names()
-        elif isinstance(joinfield, str):
+        elif isinstance(joinfield, string_types):
             joinfield = [joinfield]
         self.joinfield = joinfield
         """the fields to join"""
@@ -1902,13 +1946,14 @@ class JoinNode(Node):
                 if not basetraits.trait(field):
                     raise ValueError("The JoinNode %s does not have a field"
                                      " named %s" % (self.name, field))
-        for name, trait in basetraits.items():
+        for name, trait in list(basetraits.items()):
             # if a join field has a single inner trait, then the item
             # trait is that inner trait. Otherwise, the item trait is
             # a new Any trait.
             if name in fields and len(trait.inner_traits) == 1:
                 item_trait = trait.inner_traits[0]
                 dyntraits.add_trait(name, item_trait)
+                setattr(dyntraits, name, Undefined)
                 logger.debug("Converted the join node %s field %s"
                              " trait type from %s to %s"
                              % (self, name, trait.trait_type.info(),
@@ -1971,8 +2016,9 @@ class JoinNode(Node):
             return getattr(self._inputs, slot_field)
         except AttributeError as e:
             raise AttributeError("The join node %s does not have a slot field %s"
-                         " to hold the %s value at index %d: %s"
-                         % (self, slot_field, field, index, e))
+                                 " to hold the %s value at index %d: %s"
+                                 % (self, slot_field, field, index, e))
+
 
 class MapNode(Node):
     """Wraps interface objects that need to be iterated on a list of inputs.
@@ -1980,7 +2026,8 @@ class MapNode(Node):
     Examples
     --------
 
-    >>> from nipype import MapNode, fsl
+    >>> from nipype import MapNode
+    >>> from nipype.interfaces import fsl
     >>> realign = MapNode(fsl.MCFLIRT(), 'in_file', 'realign')
     >>> realign.inputs.in_file = ['functional.nii',
     ...                           'functional2.nii',
@@ -1989,7 +2036,7 @@ class MapNode(Node):
 
     """
 
-    def __init__(self, interface, iterfield, name, **kwargs):
+    def __init__(self, interface, iterfield, name, serial=False, nested=False, **kwargs):
         """
 
         Parameters
@@ -2003,17 +2050,24 @@ class MapNode(Node):
             paired (i.e. it does not compute a combinatorial product).
         name : alphanumeric string
             node specific name
-
+        serial : boolean
+            flag to enforce executing the jobs of the mapnode in a serial manner rather than parallel
+        nested : boolea
+            support for nested lists, if set the input list will be flattened before running, and the
+            nested list structure of the outputs will be resored
         See Node docstring for additional keyword arguments.
         """
+
         super(MapNode, self).__init__(interface, name, **kwargs)
-        if isinstance(iterfield, str):
+        if isinstance(iterfield, string_types):
             iterfield = [iterfield]
         self.iterfield = iterfield
+        self.nested = nested
         self._inputs = self._create_dynamic_traits(self._interface.inputs,
                                                    fields=self.iterfield)
         self._inputs.on_trait_change(self._set_mapnode_input)
         self._got_inputs = False
+        self._serial = serial
 
     def _create_dynamic_traits(self, basetraits, fields=None, nitems=None):
         """Convert specific fields of a trait to accept multiple inputs
@@ -2021,10 +2075,13 @@ class MapNode(Node):
         output = DynamicTraitedSpec()
         if fields is None:
             fields = basetraits.copyable_trait_names()
-        for name, spec in basetraits.items():
+        for name, spec in list(basetraits.items()):
             if name in fields and ((nitems is None) or (nitems > 1)):
                 logger.debug('adding multipath trait: %s' % name)
-                output.add_trait(name, InputMultiPath(spec.trait_type))
+                if self.nested:
+                    output.add_trait(name, InputMultiPath(traits.Any()))
+                else:
+                    output.add_trait(name, InputMultiPath(spec.trait_type))
             else:
                 output.add_trait(name, traits.Trait(spec))
             setattr(output, name, Undefined)
@@ -2068,17 +2125,20 @@ class MapNode(Node):
                     self._interface.inputs.traits()[name].trait_type))
             logger.debug('setting hashinput %s-> %s' %
                          (name, getattr(self._inputs, name)))
-            setattr(hashinputs, name, getattr(self._inputs, name))
+            if self.nested:
+                setattr(hashinputs, name, flatten(getattr(self._inputs, name)))
+            else:
+                setattr(hashinputs, name, getattr(self._inputs, name))
         hashed_inputs, hashvalue = hashinputs.get_hashval(
             hash_method=self.config['execution']['hash_method'])
         rm_extra = self.config['execution']['remove_unnecessary_outputs']
         if str2bool(rm_extra) and self.needed_outputs:
             hashobject = md5()
-            hashobject.update(hashvalue)
+            hashobject.update(hashvalue.encode())
             sorted_outputs = sorted(self.needed_outputs)
-            hashobject.update(str(sorted_outputs))
+            hashobject.update(str(sorted_outputs).encode())
             hashvalue = hashobject.hexdigest()
-            hashed_inputs['needed_outputs'] = sorted_outputs
+            hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
 
     @property
@@ -2095,7 +2155,10 @@ class MapNode(Node):
     def _make_nodes(self, cwd=None):
         if cwd is None:
             cwd = self.output_dir()
-        nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
+        if self.nested:
+            nitems = len(flatten(filename_to_list(getattr(self.inputs, self.iterfield[0]))))
+        else:
+            nitems = len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
         for i in range(nitems):
             nodename = '_' + self.name + str(i)
             node = Node(deepcopy(self._interface), name=nodename)
@@ -2105,13 +2168,16 @@ class MapNode(Node):
             node._interface.inputs.set(
                 **deepcopy(self._interface.inputs.get()))
             for field in self.iterfield:
-                fieldvals = filename_to_list(getattr(self.inputs, field))
+                if self.nested:
+                    fieldvals = flatten(filename_to_list(getattr(self.inputs, field)))
+                else:
+                    fieldvals = filename_to_list(getattr(self.inputs, field))
                 logger.debug('setting input %d %s %s' % (i, field,
                                                          fieldvals[i]))
                 setattr(node.inputs, field,
                         fieldvals[i])
             node.config = self.config
-            node.base_dir = os.path.join(cwd, 'mapflow')
+            node.base_dir = op.join(cwd, 'mapflow')
             yield i, node
 
     def _node_runner(self, nodes, updatehash=False):
@@ -2119,7 +2185,7 @@ class MapNode(Node):
             err = None
             try:
                 node.run(updatehash=updatehash)
-            except Exception, err:
+            except Exception as err:
                 if str2bool(self.config['execution']['stop_on_first_crash']):
                     self._result = node.result
                     raise
@@ -2141,7 +2207,7 @@ class MapNode(Node):
                     self._result.provenance.insert(i, node.result.provenance)
             returncode.insert(i, err)
             if self.outputs:
-                for key, _ in self.outputs.items():
+                for key, _ in list(self.outputs.items()):
                     rm_extra = (self.config['execution']
                                 ['remove_unnecessary_outputs'])
                     if str2bool(rm_extra) and self.needed_outputs:
@@ -2157,6 +2223,14 @@ class MapNode(Node):
                     defined_vals = [isdefined(val) for val in values]
                     if any(defined_vals) and self._result.outputs:
                         setattr(self._result.outputs, key, values)
+
+        if self.nested:
+            for key, _ in list(self.outputs.items()):
+                values = getattr(self._result.outputs, key)
+                if isdefined(values):
+                    values = unflatten(values, filename_to_list(getattr(self.inputs, self.iterfield[0])))
+                setattr(self._result.outputs, key, values)
+
         if returncode and any([code is not None for code in returncode]):
             msg = []
             for i, code in enumerate(returncode):
@@ -2173,8 +2247,8 @@ class MapNode(Node):
             super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
         if report_type == 'postexec':
             super(MapNode, self).write_report(report_type=report_type, cwd=cwd)
-            report_dir = os.path.join(cwd, '_report')
-            report_file = os.path.join(report_dir, 'report.rst')
+            report_dir = op.join(cwd, '_report')
+            report_file = op.join(report_dir, 'report.rst')
             fp = open(report_file, 'at')
             fp.writelines(write_rst_header('Subnode reports', level=1))
             nitems = len(filename_to_list(
@@ -2183,11 +2257,11 @@ class MapNode(Node):
             for i in range(nitems):
                 nodename = '_' + self.name + str(i)
                 subnode_report_files.insert(i, 'subnode %d' % i + ' : ' +
-                                               os.path.join(cwd,
-                                                            'mapflow',
-                                                            nodename,
-                                                            '_report',
-                                                            'report.rst'))
+                                               op.join(cwd,
+                                                       'mapflow',
+                                                       nodename,
+                                                       '_report',
+                                                       'report.rst'))
             fp.writelines(write_rst_list(subnode_report_files))
             fp.close()
 
@@ -2204,7 +2278,13 @@ class MapNode(Node):
             self._get_inputs()
             self._got_inputs = True
         self._check_iterfield()
-        return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
+        if self._serial:
+            return 1
+        else:
+            if self.nested:
+                return len(filename_to_list(flatten(getattr(self.inputs, self.iterfield[0]))))
+            else:
+                return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
 
     def _get_inputs(self):
         old_inputs = self._inputs.get()
@@ -2244,8 +2324,12 @@ class MapNode(Node):
         os.chdir(cwd)
         self._check_iterfield()
         if execute:
-            nitems = len(filename_to_list(getattr(self.inputs,
-                                                  self.iterfield[0])))
+            if self.nested:
+                nitems = len(filename_to_list(flatten(getattr(self.inputs,
+                                                              self.iterfield[0]))))
+            else:
+                nitems = len(filename_to_list(getattr(self.inputs,
+                                                      self.iterfield[0])))
             nodenames = ['_' + self.name + str(i) for i in range(nitems)]
             # map-reduce formulation
             self._collate_results(self._node_runner(self._make_nodes(cwd),
@@ -2253,9 +2337,9 @@ class MapNode(Node):
             self._save_results(self._result, cwd)
             # remove any node directories no longer required
             dirs2remove = []
-            for path in glob(os.path.join(cwd, 'mapflow', '*')):
-                if os.path.isdir(path):
-                    if path.split(os.path.sep)[-1] not in nodenames:
+            for path in glob(op.join(cwd, 'mapflow', '*')):
+                if op.isdir(path):
+                    if path.split(op.sep)[-1] not in nodenames:
                         dirs2remove.append(path)
             for path in dirs2remove:
                 shutil.rmtree(path)

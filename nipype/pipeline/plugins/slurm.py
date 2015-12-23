@@ -16,8 +16,6 @@ from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 from nipype.interfaces.base import CommandLine
 
 
-
-
 class SLURMPlugin(SGELikeBatchManagerBase):
     '''
     Execute using SLURM
@@ -32,10 +30,9 @@ class SLURMPlugin(SGELikeBatchManagerBase):
 
     '''
 
-
     def __init__(self, **kwargs):
 
-        template="#!/bin/bash"
+        template = "#!/bin/bash"
 
         self._retry_timeout = 2
         self._max_tries = 2
@@ -45,7 +42,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
-            if  'max_tries' in kwargs['plugin_args']:
+            if 'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
             if 'template' in kwargs['plugin_args']:
                 self._template = kwargs['plugin_args']['template']
@@ -54,11 +51,11 @@ class SLURMPlugin(SGELikeBatchManagerBase):
             if 'sbatch_args' in kwargs['plugin_args']:
                 self._sbatch_args = kwargs['plugin_args']['sbatch_args']
         self._pending = {}
-        super(SLURMPlugin, self).__init__(template, **kwargs)
+        super(SLURMPlugin, self).__init__(self._template, **kwargs)
 
     def _is_pending(self, taskid):
         #  subprocess.Popen requires taskid to be a string
-        proc = subprocess.Popen(["showq", '-u'],
+        proc = subprocess.Popen(["squeue", '-j', '%s' % taskid],
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         o, _ = proc.communicate()
@@ -87,12 +84,6 @@ class SLURMPlugin(SGELikeBatchManagerBase):
             sbatch_args = '%s -o %s' % (sbatch_args, os.path.join(path, 'slurm-%j.out'))
         if '-e' not in sbatch_args:
             sbatch_args = '%s -e %s' % (sbatch_args, os.path.join(path, 'slurm-%j.out'))
-        if '-p' not in sbatch_args:
-            sbatch_args = '%s -p normal' % (sbatch_args)
-        if '-n' not in sbatch_args:
-            sbatch_args = '%s -n 16' % (sbatch_args)
-        if '-t' not in sbatch_args:
-            sbatch_args = '%s -t 1:00:00' % (sbatch_args)
         if node._hierarchy:
             jobname = '.'.join((os.environ.data['LOGNAME'],
                                 node._hierarchy,
@@ -112,7 +103,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         while True:
             try:
                 result = cmd.run()
-            except Exception, e:
+            except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
                     sleep(self._retry_timeout)  # sleep 2 seconds and try again.

@@ -34,7 +34,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
-            if  'max_tries' in kwargs['plugin_args']:
+            if 'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
             if 'bsub_args' in kwargs['plugin_args']:
                 self._bsub_args = kwargs['plugin_args']['bsub_args']
@@ -96,7 +96,7 @@ class LSFPlugin(SGELikeBatchManagerBase):
         while True:
             try:
                 result = cmd.run()
-            except Exception, e:
+            except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
                     sleep(

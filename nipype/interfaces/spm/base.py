@@ -5,7 +5,7 @@
 In order to use the standalone MCR version of spm, you need to ensure that
 the following commands are executed at the beginning of your script::
 
-   from nipype import spm
+   from nipype.interfaces import spm
    matlab_cmd = '/path/to/run_spm8.sh /path/to/Compiler_Runtime/v713/ script'
    spm.SPMCommand.set_mlab_paths(matlab_cmd=matlab_cmd, use_mcr=True)
 
@@ -13,6 +13,10 @@ you can test by calling::
 
    spm.SPMCommand().version
 """
+
+from __future__ import print_function
+from builtins import range
+from builtins import object
 
 __docformat__ = 'restructuredtext'
 
@@ -30,7 +34,7 @@ from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
                     BaseInterfaceInputSpec, Directory, Undefined)
 from ..matlab import MatlabCommand
 from ...utils import spm_docs as sd
-
+from ...external.six import string_types
 from ... import logging
 logger = logging.getLogger('interface')
 
@@ -42,7 +46,7 @@ def func_is_3d(in_file):
         return func_is_3d(in_file[0])
     else:
         img = load(in_file)
-        shape = img.get_shape()
+        shape = img.shape
         if len(shape) == 3 or (len(shape) == 4 and shape[3] == 1):
             return True
         else:
@@ -70,10 +74,10 @@ def scans_for_fname(fname):
             scans[sno] = '%s,1' % f
         return scans
     img = load(fname)
-    if len(img.get_shape()) == 3:
+    if len(img.shape) == 3:
         return np.array(('%s,1' % fname,), dtype=object)
     else:
-        n_scans = img.get_shape()[3]
+        n_scans = img.shape[3]
         scans = np.zeros((n_scans,), dtype=object)
         for sno in range(n_scans):
             scans[sno] = '%s,%d' % (fname, sno + 1)
@@ -180,7 +184,7 @@ exit;
         """
         try:
             out = mlab.run()
-        except (IOError, RuntimeError), e:
+        except (IOError, RuntimeError) as e:
             # if no Matlab at all -- exception could be raised
             # No Matlab -- no spm
             logger.debug(str(e))
@@ -199,7 +203,7 @@ def no_spm():
     used with nosetests skipif to skip tests
     that will fail if spm is not installed"""
 
-    if Info.version() is None or 'NIPYPE_NO_MATLAB' in os.environ:
+    if 'NIPYPE_NO_MATLAB' in os.environ or Info.version() is None:
         return True
     else:
         return False
@@ -276,9 +280,9 @@ class SPMCommand(BaseInterface):
 
     @property
     def version(self):
-        version_dict = Info.version(matlab_cmd=self._matlab_cmd,
-                                    paths=self._paths,
-                                    use_mcr=self._use_mcr)
+        version_dict = Info.version(matlab_cmd=self.inputs.matlab_cmd,
+                                    paths=self.inputs.paths,
+                                    use_mcr=self.inputs.use_mcr)
         if version_dict:
             return '.'.join((version_dict['name'].split('SPM')[-1],
                              version_dict['release']))
@@ -329,7 +333,7 @@ class SPMCommand(BaseInterface):
     def _parse_inputs(self, skip=()):
         spmdict = {}
         metadata = dict(field=lambda t: t is not None)
-        for name, spec in self.inputs.traits(**metadata).items():
+        for name, spec in list(self.inputs.traits(**metadata).items()):
             if skip and name in skip:
                 continue
             value = getattr(self.inputs, name)
@@ -340,7 +344,7 @@ class SPMCommand(BaseInterface):
                 fields = field.split('.')
                 dictref = spmdict
                 for f in fields[:-1]:
-                    if f not in dictref.keys():
+                    if f not in list(dictref.keys()):
                         dictref[f] = {}
                     dictref = dictref[f]
                 dictref[fields[-1]] = self._format_arg(name, spec, value)
@@ -365,7 +369,7 @@ class SPMCommand(BaseInterface):
         """
         newdict = {}
         try:
-            for key, value in contents.items():
+            for key, value in list(contents.items()):
                 if isinstance(value, dict):
                     if value:
                         newdict[key] = self._reformat_dict_for_savemat(value)
@@ -375,7 +379,7 @@ class SPMCommand(BaseInterface):
 
             return [newdict]
         except TypeError:
-            print 'Requires dict input'
+            print('Requires dict input')
 
     def _generate_job(self, prefix='', contents=None):
         """Recursive function to generate spm job specification as a string
@@ -402,7 +406,7 @@ class SPMCommand(BaseInterface):
                 jobstring += self._generate_job(newprefix, value)
             return jobstring
         if isinstance(contents, dict):
-            for key, value in contents.items():
+            for key, value in list(contents.items()):
                 newprefix = "%s.%s" % (prefix, key)
                 jobstring += self._generate_job(newprefix, value)
             return jobstring
@@ -416,7 +420,7 @@ class SPMCommand(BaseInterface):
                     if isinstance(val, np.ndarray):
                         jobstring += self._generate_job(prefix=None,
                                                         contents=val)
-                    elif isinstance(val, str):
+                    elif isinstance(val, string_types):
                         jobstring += '\'%s\';...\n' % (val)
                     else:
                         jobstring += '%s;...\n' % str(val)
@@ -431,7 +435,7 @@ class SPMCommand(BaseInterface):
                         jobstring += self._generate_job(newprefix,
                                                         val[field])
             return jobstring
-        if isinstance(contents, str):
+        if isinstance(contents, string_types):
             jobstring += "%s = '%s';\n" % (prefix, contents)
             return jobstring
         jobstring += "%s = %s;\n" % (prefix, str(contents))
@@ -466,9 +470,9 @@ class SPMCommand(BaseInterface):
         fprintf('SPM path: %s\\n', which('spm'));
         spm('Defaults','fMRI');
 
-        if strcmp(name, 'SPM8') || strcmp(name, 'SPM12b'),
+        if strcmp(name, 'SPM8') || strcmp(name(1:5), 'SPM12'),
            spm_jobman('initcfg');
-           spm_get_defaults('CmdLine', 1);
+           spm_get_defaults('cmdline', 1);
         end\n
         """
         if self.mlab.inputs.mfile:
@@ -478,14 +482,14 @@ class SPMCommand(BaseInterface):
                                               contents[0])
             else:
                 if self.jobname in ['st', 'smooth', 'preproc', 'preproc8',
-                                'fmri_spec', 'fmri_est', 'factorial_design',
-                                'defs']:
+                                    'fmri_spec', 'fmri_est', 'factorial_design',
+                                    'defs']:
                     # parentheses
                     mscript += self._generate_job('jobs{1}.%s{1}.%s(1)' %
                                                   (self.jobtype, self.jobname),
                                                   contents[0])
                 else:
-                    #curly brackets
+                    # curly brackets
                     mscript += self._generate_job('jobs{1}.%s{1}.%s{1}' %
                                                   (self.jobtype, self.jobname),
                                                   contents[0])
@@ -499,6 +503,12 @@ class SPMCommand(BaseInterface):
         mscript += """
         spm_jobman(\'run\', jobs);\n
         """
+        if self.inputs.use_mcr:
+            mscript += """
+        if strcmp(name, 'SPM8') || strcmp(name(1:5), 'SPM12'),
+            close(\'all\', \'force\');
+        end;
+            """
         if postscript is not None:
             mscript += postscript
         return mscript
