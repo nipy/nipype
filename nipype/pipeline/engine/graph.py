@@ -405,7 +405,9 @@ def _identity_nodes(graph, include_iterables):
     are included if and only if the include_iterables flag is set
     to True.
     """
-    return [node for node in nx.topological_sort(graph)
+    sorted_nodes = nx.topological_sort(graph)
+    logger.debug('Get identity nodes: %s' % [n.fullname for n in sorted_nodes])
+    return [node for node in sorted_nodes
             if isinstance(node._interface, IdentityInterface) and
             (include_iterables or getattr(node, 'iterables') is None)]
 
@@ -414,8 +416,8 @@ def _remove_identity_node(graph, node):
     """Remove identity nodes from an execution graph
     """
     portinputs, portoutputs, signals = _node_ports(graph, node)
-    logger.debug('Portinputs=%s\nportoutputs=%s\nsignals=%s' %
-                 (portinputs, portoutputs, signals))
+    logger.debug('Remove Identity Node %s\n\tPortinputs=%s\n\tportoutputs=%s\n'
+                 '\tsignals=%s' % (node, portinputs, portoutputs, signals))
     for field, connections in list(signals.items()):
         if portinputs:
             _propagate_internal_output(graph, node, field, connections,
@@ -447,10 +449,21 @@ def _node_ports(graph, node):
     portinputs = {}
     portoutputs = {}
     signals = {}
-    for u, _, d in graph.in_edges_iter(node, data=True):
+
+    in_edges = graph.in_edges_iter(node, data=True)
+    out_edges = graph.out_edges_iter(node, data=True)
+
+    logger.debug('Edges of %s, (inputs=%s, signals=%s)' % (node, node.inputs,
+                                                           node.signals))
+    logger.debug('In edges')
+    for u, _, d in in_edges:
+        logger.debug('%s' % d)
         for c in d['connect']:
             portinputs[c[1]] = (u, c[0])
-    for _, v, d in graph.out_edges_iter(node, data=True):
+
+    logger.debug('Out edges')
+    for _, v, d in out_edges:
+        logger.debug('%s' % d)
         for c in d['connect']:
             src, dest = c[0], c[1]
             ctype = 'data'
@@ -489,6 +502,9 @@ def _propagate_signal(graph, node, field, connections):
         if isinstance(src, tuple):
             value = evaluate_connect_function(src[1], src[2],
                                               value)
+        logger.debug(
+            'Propagating signal %s.%s (value=%s) to %s.%s' %
+            (node, field, value, destnode, inport))
         destnode.set_signal(inport, value)
 
 

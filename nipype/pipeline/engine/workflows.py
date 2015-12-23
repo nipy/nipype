@@ -55,8 +55,9 @@ package_check('networkx', '1.3')
 
 class Workflow(NodeBase):
     """Controls the setup and execution of a pipeline of processes."""
+    _control = True
 
-    def __init__(self, name, base_dir=None):
+    def __init__(self, name, base_dir=None, control=True):
         """Create a workflow object.
 
         Parameters
@@ -69,14 +70,17 @@ class Workflow(NodeBase):
         """
         super(Workflow, self).__init__(name, base_dir)
         self._graph = nx.DiGraph()
+        self._control = control
         self.config = deepcopy(config._sections)
-        self._signalnode = Node(IdentityInterface(
-            fields=self.signals.copyable_trait_names()), 'signalnode')
-        self.add_nodes([self._signalnode])
 
-        # Automatically initialize signal
-        for s in self.signals.copyable_trait_names():
-            setattr(self._signalnode.inputs, s, getattr(self.signals, s))
+        if control:
+            self._signalnode = Node(IdentityInterface(
+                fields=self.signals.copyable_trait_names()), 'signalnode')
+            self.add_nodes([self._signalnode])
+
+            # Automatically initialize signal
+            for s in self.signals.copyable_trait_names():
+                setattr(self._signalnode.inputs, s, getattr(self.signals, s))
 
     def _update_disable(self):
         logger.debug('Signal disable is now %s for workflow %s' %
@@ -189,14 +193,14 @@ class Workflow(NodeBase):
         connected_ports = self._check_connected(list(all_dstnodes))
 
         not_found = []
+        redirected = []
         for srcnode, dstnode, connects in connection_list:
-            nodeconns = connected_ports.get(dstnode, [])
-
             src_io = (hasattr(srcnode, '_interface') and
                       '.io' in str(srcnode._interface.__class__))
             dst_io = (hasattr(dstnode, '_interface') and
                       '.io' in str(dstnode._interface.__class__))
 
+            nodeconns = connected_ports.get(dstnode, [])
             duplicated = []
             for source, dest in connects:
                 logger.debug('connect(%s): evaluating %s:%s -> %s:%s' %
@@ -246,6 +250,10 @@ class Workflow(NodeBase):
                     0, 'Some connections were not found connecting %s.%s to '
                     '%s.%s' % (srcnode, source, dstnode, dest))
                 raise Exception('\n'.join(infostr))
+        else:
+            if duplicated:
+                logger.debug('Duplicated signal' + '\n\t\t'.join(
+                    ['%s.%s -> %s.%s' % c for c in duplicated]))
 
         # turn functions into strings
         for srcnode, dstnode, connects in connection_list:
@@ -399,7 +407,9 @@ class Workflow(NodeBase):
         """List names of all nodes in a workflow
         """
         outlist = []
-        for node in nx.topological_sort(self._graph):
+        sorted_nodes = nx.topological_sort(self._graph)
+        logger.debug('list_node_names(): sorted nodes %s' % sorted_nodes)
+        for node in sorted_nodes:
             if isinstance(node, Workflow):
                 outlist.extend(['.'.join((node.name, nodename)) for nodename in
                                 node.list_node_names()])
@@ -878,24 +888,30 @@ class Workflow(NodeBase):
     def _connect_signals(self):
         logger.debug('Workflow %s called _connect_signals()' %
                      self.fullname)
-        signals = self.signals.copyable_trait_names()
 
         for node in self._graph.nodes():
-            if node == self._signalnode:
-                continue
-
-            if node.signals is None:
-                continue
-
-            prefix = ''
             if isinstance(node, Workflow):
                 node._connect_signals()
-                prefix = 'signalnode.'
 
-            for s in signals:
-                sdest = prefix + s
-                self.connect(self._signalnode, s, node, sdest,
-                             conn_type='control')
+        if self._control:
+            signals = self.signals.copyable_trait_names()
+
+            for node in self._graph.nodes():
+                if node == self._signalnode:
+                    continue
+
+                logger.debug('connect_signals(%s) %s' % (self, node))
+                if node.signals is None:
+                    continue
+
+                prefix = ''
+                if isinstance(node, Workflow):
+                    prefix = 'signalnode.'
+
+                for s in signals:
+                    sdest = prefix + s
+                    self.connect(self._signalnode, s, node, sdest,
+                                 conn_type='control')
 
     def _create_flat_graph(self):
         """Make a simple DAG where no node is a workflow."""
@@ -924,8 +940,9 @@ class Workflow(NodeBase):
         if not nx.is_directed_acyclic_graph(self._graph):
             raise Exception(('Workflow: %s is not a directed acyclic graph '
                              '(DAG)') % self.name)
-        nodes = nx.topological_sort(self._graph)
-        for node in nodes:
+        sorted_nodes = nx.topological_sort(self._graph)
+        logger.debug('_generate_flatgraph(): sorted nodes %s' % sorted_nodes)
+        for node in sorted_nodes:
             logger.debug('processing node: %s' % node)
             if isinstance(node, Workflow):
                 nodes2remove.append(node)
