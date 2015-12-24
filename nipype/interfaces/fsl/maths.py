@@ -83,8 +83,8 @@ class ThresholdInputSpec(MathsInput):
                           desc="threshold value")
     direction = traits.Enum("below", "above", usedefault=True,
                             desc="zero-out either below or above thresh value")
-    use_robust_range = traits.Bool(desc="inteperet thresh as percentage (0-100) of robust range")
-    use_nonzero_voxels = traits.Bool(desc="use nonzero voxels to caluclate robust range",
+    use_robust_range = traits.Bool(desc="interpret thresh as percentage (0-100) of robust range")
+    use_nonzero_voxels = traits.Bool(desc="use nonzero voxels to calculate robust range",
                                      requires=["use_robust_range"])
 
 
