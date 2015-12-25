@@ -31,16 +31,19 @@ import warnings
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
+
 def check_minc():
     """Returns True if and only if MINC is installed.'
     """
 
     return Info.version() is not None
 
+
 def no_minc():
     """Returns True if and only if MINC is *not* installed.
     """
     return not check_minc()
+
 
 class Info(object):
     """Handle MINC version information.
@@ -91,21 +94,21 @@ class Info(object):
                 return s.split(':')[1].strip()
             return None
 
-        versions = {'minc':    None,
+        versions = {'minc': None,
                     'libminc': None,
-                    'netcdf':  None,
-                    'hdf5':    None,
-                   }
+                    'netcdf': None,
+                    'hdf5': None, }
 
         for l in out.split('\n'):
-            for (name, f) in [('minc',      read_program_version),
-                              ('libminc',   read_libminc_version),
-                              ('netcdf',    read_netcdf_version),
-                              ('hdf5',      read_hdf5_version),
-                             ]:
-                if f(l) is not None: versions[name] = f(l)
+            for (name, f) in [('minc', read_program_version),
+                              ('libminc', read_libminc_version),
+                              ('netcdf', read_netcdf_version),
+                              ('hdf5', read_hdf5_version), ]:
+                if f(l) is not None:
+                    versions[name] = f(l)
 
         return versions
+
 
 def aggregate_filename(files, new_suffix):
     """
@@ -127,9 +130,9 @@ def aggregate_filename(files, new_suffix):
 
     """
 
-    path            = os.path.split(files[0])[0]
-    names           = [os.path.splitext(os.path.split(x)[1])[0] for x in files]
-    common_prefix   = os.path.commonprefix(names)
+    path = os.path.split(files[0])[0]
+    names = [os.path.splitext(os.path.split(x)[1])[0] for x in files]
+    common_prefix = os.path.commonprefix(names)
 
     path = os.getcwd()
 
