@@ -664,6 +664,9 @@ class S3DataGrabber(IOBase):
                     outputs[key][i] = self.s3tolocal(path, bkt)
             elif type(outputs[key]) == str:
                 outputs[key] = self.s3tolocal(outputs[key], bkt)
+            else:
+                outputs[key] = self.s3tolocal(outputs[key], bkt)
+
 
         return outputs
 
