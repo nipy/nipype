@@ -1344,9 +1344,17 @@ class BBoxOutputSpec(TraitedSpec):
 
 
 class BBox(StdOutCommandLine):
-    """Determine a bounding box.
+    """Determine a bounding box of image.
 
-    FIXME doctests
+    Examples
+    --------
+
+    >>> from nipype.interfaces.minc import BBox
+    >>> from nipype.interfaces.minc.testdata import nonempty_minc_data
+
+    >>> file0 = nonempty_minc_data(0)
+    >>> bbox = BBox(input_file=file0)
+    >>> bbox.run() # doctest: +SKIP
     """
 
     input_spec = BBoxInputSpec
@@ -1507,7 +1515,18 @@ class BeastOutputSpec(TraitedSpec):
 
 
 class Beast(CommandLine):
-    """FIXME
+    """Extract brain image using BEaST (Brain Extraction using
+    non-local Segmentation Technique).
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.minc import Beast
+    >>> from nipype.interfaces.minc.testdata import nonempty_minc_data
+
+    >>> file0 = nonempty_minc_data(0)
+    >>> beast = Beast(input_file=file0)
+    >>> beast .run() # doctest: +SKIP
     """
 
     input_spec = BeastInputSpec
@@ -1669,7 +1688,21 @@ class PikOutputSpec(TraitedSpec):
 
 
 class Pik(CommandLine):
-    """FIXME
+    """Generate images from minc files.
+
+    Mincpik uses Imagemagick to generate images
+    from Minc files.
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.minc import Pik
+    >>> from nipype.interfaces.minc.testdata import nonempty_minc_data
+
+    >>> file0 = nonempty_minc_data(0)
+    >>> pik = Pik(input_file=file0, title='foo')
+    >>> pik .run() # doctest: +SKIP
+
     """
 
     input_spec = PikInputSpec
@@ -2968,10 +3001,13 @@ class VolcentreOutputSpec(TraitedSpec):
 class Volcentre(CommandLine):
     """Centre a MINC image's sampling about a point, typically (0,0,0).
 
-    Examples
+    Example
     --------
 
-    FIXME
+    >>> from nipype.interfaces.minc import Volcentre
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
+    >>> vc = Volcentre(input_file=minc2Dfile)
+    >>> vc.run() # doctest: +SKIP
     """
 
     input_spec = VolcentreInputSpec
@@ -3076,7 +3112,10 @@ class Volpad(CommandLine):
     Examples
     --------
 
-    FIXME
+    >>> from nipype.interfaces.minc import Volpad
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
+    >>> vp = Volpad(input_file=minc2Dfile, smooth=True, smooth_distance=4)
+    >>> vp.run() # doctest: +SKIP
     """
 
     input_spec = VolpadInputSpec
@@ -3152,7 +3191,10 @@ class Voliso(CommandLine):
     Examples
     --------
 
-    FIXME
+    >>> from nipype.interfaces.minc import Voliso
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
+    >>> viso = Voliso(input_file=minc2Dfile, minstep=0.1, avgstep=True)
+    >>> viso.run() # doctest: +SKIP
     """
 
     input_spec = VolisoInputSpec
@@ -3214,8 +3256,20 @@ class GennlxfmOutputSpec(TraitedSpec):
 
 
 class Gennlxfm(CommandLine):
-    """
-    FIXME
+    """Generate nonlinear xfms. Currently only identity xfms
+    are supported!
+
+    This tool is part of minc-widgets:
+
+    https://github.com/BIC-MNI/minc-widgets/blob/master/gennlxfm/gennlxfm
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.minc import Gennlxfm
+    >>> gennlxfm = Gennlxfm(step=1)
+    >>> gennlxfmiso.run() # doctest: +SKIP
+
     """
 
     input_spec = GennlxfmInputSpec
@@ -3287,8 +3341,17 @@ class XfmConcatOutputSpec(TraitedSpec):
 
 
 class XfmConcat(CommandLine):
-    """
-    FIXME
+    """Concatenate transforms together. The output transformation
+    is equivalent to applying input1.xfm, then input2.xfm, ..., in
+    that order.
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.minc import XfmConcat
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
+    >>> conc = XfmConcat(input_files=['input1.xfm', 'input1.xfm'])
+    >>> conc.run() # doctest: +SKIP
     """
 
     input_spec = XfmConcatInputSpec
@@ -3384,10 +3447,20 @@ class BestLinRegOutputSpec(TraitedSpec):
 class BestLinReg(CommandLine):
     """Hierachial linear fitting between two files.
 
+    The bestlinreg script is part of the EZminc package:
+
+    https://github.com/BIC-MNI/EZminc/blob/master/scripts/bestlinreg.pl
+
     Examples
     --------
 
-    FIXME
+    >>> from nipype.interfaces.minc import BestLinReg
+    >>> from nipype.interfaces.minc.testdata import nonempty_minc_data
+
+    >>> input_file = nonempty_minc_data(0)
+    >>> target_file = nonempty_minc_data(1)
+    >>> linreg = BestLinReg(source=input_file, target=target_file)
+    >>> linreg.run() # doctest: +SKIP
     """
 
     input_spec = BestLinRegInputSpec
@@ -3499,8 +3572,26 @@ class NlpFitOutputSpec(TraitedSpec):
 
 
 class NlpFit(CommandLine):
-    """
-    FIXME
+    """Hierarchial non-linear fitting with bluring.
+
+    This tool is part of the minc-widgets package:
+
+    https://github.com/BIC-MNI/minc-widgets/blob/master/nlpfit/nlpfit
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.minc import NlpFit
+    >>> from nipype.interfaces.minc.testdata import nonempty_minc_data, nlp_config
+    >>> from nipype.testing import example_data
+
+    >>> source = nonempty_minc_data(0)
+    >>> target = nonempty_minc_data(1)
+    >>> source_mask = nonempty_minc_data(2)
+    >>> config = nlp_config
+    >>> initial = example_data('minc_initial.xfm')
+    >>> nlpfit = NlpFit(config_file=config, init_xfm=initial, source_mask=source_mask, source=source, target=target)
+    >>> nlpfit.run() # doctest: +SKIP
     """
 
     input_spec = NlpFitInputSpec
@@ -3591,8 +3682,24 @@ class XfmAvgOutputSpec(TraitedSpec):
 
 
 class XfmAvg(CommandLine):
-    """
-    FIXME
+    """Average a number of xfm transforms using matrix logs and exponents.
+    The program xfmavg calls Octave for numerical work.
+
+    This tool is part of the minc-widgets package:
+
+    https://github.com/BIC-MNI/minc-widgets/tree/master/xfmavg
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.minc import XfmAvg
+    >>> from nipype.interfaces.minc.testdata import nonempty_minc_data, nlp_config
+    >>> from nipype.testing import example_data
+
+    >>> xfm1 = example_data('minc_initial.xfm')
+    >>> xfm2 = example_data('minc_initial.xfm')  # cheating for doctest
+    >>> xfmavg = XfmAvg(input_files=[xfm1, xfm2])
+    >>> xfmavg.run() # doctest: +SKIP
     """
 
     input_spec = XfmAvgInputSpec
@@ -3660,8 +3767,17 @@ class XfmInvertOutputSpec(TraitedSpec):
 
 
 class XfmInvert(CommandLine):
-    """
-    FIXME
+    """Invert an xfm transform file.
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.minc import XfmAvg
+    >>> from nipype.testing import example_data
+
+    >>> xfm = example_data('minc_initial.xfm')
+    >>> invert = XfmInvert(input_file=xfm)
+    >>> invert.run() # doctest: +SKIP
     """
 
     input_spec = XfmInvertInputSpec
@@ -3747,8 +3863,36 @@ class BigAverageOutputSpec(TraitedSpec):
 
 
 class BigAverage(CommandLine):
-    """
-    FIXME
+    """Average 1000's of MINC files in linear time.
+
+    mincbigaverage is designed to discretise the problem of averaging either
+    a large number of input files or averaging a smaller number of large
+    files. (>1GB each). There is also some code included to perform "robust"
+    averaging in which only the most common features are kept via down-weighting
+    outliers beyond a standard deviation.
+
+    One advantage of mincbigaverage is that it avoids issues around the number
+    of possible open files in HDF/netCDF. In short if you have more than 100
+    files open at once while averaging things will slow down significantly.
+
+    mincbigaverage does this via a iterative approach to averaging files and
+    is a direct drop in replacement for mincaverage. That said not all the
+    arguments of mincaverage are supported in mincbigaverage but they should
+    be.
+
+    This tool is part of the minc-widgets package:
+
+    https://github.com/BIC-MNI/minc-widgets/blob/master/mincbigaverage/mincbigaverage
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.minc import BigAverage
+    >>> from nipype.interfaces.minc.testdata import nonempty_minc_data
+
+    >>> files = [nonempty_minc_data(i) for i in range(3)]
+    >>> average = BigAverage(input_files=files, output_float=True, robust=True)
+    >>> average.run() # doctest: +SKIP
     """
 
     input_spec = BigAverageInputSpec
@@ -3822,8 +3966,21 @@ class ReshapeOutputSpec(TraitedSpec):
 
 
 class Reshape(CommandLine):
-    """
-    FIXME
+    """Cut a hyperslab out of a minc file, with dimension reordering.
+
+    This is also useful for rewriting with a different format, for
+    example converting to short (see example below).
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.minc import Reshape
+    >>> from nipype.interfaces.minc.testdata import nonempty_minc_data
+
+    >>> input_file = nonempty_minc_data(0)
+    >>> reshape_to_short = Reshape(input_file=input_file, write_short=True)
+    >>> reshape_to_short.run() # doctest: +SKIP
+
     """
 
     input_spec = ReshapeInputSpec
@@ -3916,8 +4073,24 @@ class VolSymmOutputSpec(TraitedSpec):
 
 
 class VolSymm(CommandLine):
-    """
-    FIXME
+    """Make a volume symmetric about an axis either linearly
+    and/or nonlinearly. This is done by registering a volume
+    to a flipped image of itself.
+
+    This tool is part of the minc-widgets package:
+
+    https://github.com/BIC-MNI/minc-widgets/blob/master/volsymm/volsymm
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces.minc import VolSymm
+    >>> from nipype.interfaces.minc.testdata import nonempty_minc_data
+
+    >>> input_file = nonempty_minc_data(0)
+    >>> volsymm = VolSymm(input_file=input_file)
+    >>> volsymm.run() # doctest: +SKIP
+
     """
 
     input_spec = VolSymmInputSpec
