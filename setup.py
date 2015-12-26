@@ -328,6 +328,7 @@ def main(**extra_args):
                     'nipype.interfaces.freesurfer.tests',
                     'nipype.interfaces.fsl',
                     'nipype.interfaces.fsl.tests',
+                    'nipype.interfaces.minc',
                     'nipype.interfaces.mipav',
                     'nipype.interfaces.mipav.tests',
                     'nipype.interfaces.mne',
