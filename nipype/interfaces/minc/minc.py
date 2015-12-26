@@ -149,11 +149,13 @@ class ExtractInputSpec(StdOutCommandLineInputSpec):
         argstr='-image_range %s %s')
 
     image_minimum = traits.Float(
-        desc='Specify the minimum real image value for normalization. Default value: 1.79769e+308.',
+        desc=('Specify the minimum real image value for normalization.'
+              'Default value: 1.79769e+308.'),
         argstr='-image_minimum %s')
 
     image_maximum = traits.Float(
-        desc='Specify the maximum real image value for normalization. Default value: 1.79769e+308.',
+        desc=('Specify the maximum real image value for normalization.'
+              'Default value: 1.79769e+308.'),
         argstr='-image_maximum %s')
 
     start = InputMultiPath(
@@ -338,7 +340,8 @@ class ToRawInputSpec(StdOutCommandLineInputSpec):
 
     write_range = traits.Tuple(
         traits.Float, traits.Float, argstr='-range %s %s',
-        desc='Specify the range of output values\nDefault value: 1.79769e+308 1.79769e+308.',)
+        desc=('Specify the range of output values.'
+              'Default value: 1.79769e+308 1.79769e+308.'),)
 
     _xor_normalize = ('normalize', 'nonormalize',)
 
@@ -420,7 +423,8 @@ class ConvertInputSpec(CommandLineInputSpec):
     two = traits.Bool(desc='Create a MINC 2 output file.', argstr='-2')
 
     template = traits.Bool(
-        desc='Create a template file. The dimensions, variables, and attributes of the input file are preserved but all data it set to zero.',
+        desc=('Create a template file. The dimensions, variables, and'
+              'attributes of the input file are preserved but all data it set to zero.'),
         argstr='-template',
     )
 
@@ -601,7 +605,8 @@ class ToEcatInputSpec(CommandLineInputSpec):
         argstr='-no_decay_corr_fctr',)
 
     voxels_as_integers = traits.Bool(
-        desc='Voxel values are treated as integers, scale and calibration factors are set to unity',
+        desc=('Voxel values are treated as integers, scale and'
+              'calibration factors are set to unity'),
         argstr='-label',)
 
 
@@ -926,7 +931,8 @@ class AverageInputSpec(CommandLineInputSpec):
         desc='Specify a range for binarization. Default value: 1.79769e+308 -1.79769e+308.')
 
     binvalue = traits.Float(
-        desc='Specify a target value (+/- 0.5) for binarization. Default value: -1.79769e+308',
+        desc=('Specify a target value (+/- 0.5) for'
+              'binarization. Default value: -1.79769e+308'),
         argstr='-binvalue %s')
 
     weights = InputMultiPath(
@@ -1230,7 +1236,11 @@ class CalcInputSpec(CommandLineInputSpec):
             traits.Str,
             traits.File,
             argstr='-outfile %s %s',
-            desc='List of (symbol, file) tuples indicating that output should be written to the specified file, taking values from the symbol which should be created in the expression (see the EXAMPLES section). If this option is given, then all non-option arguments are taken as input files. This option can be used multiple times for multiple output files.'))
+            desc=('List of (symbol, file) tuples indicating that output should be written'
+                  'to the specified file, taking values from the symbol which should be'
+                  'created in the expression (see the EXAMPLES section). If this option'
+                  'is given, then all non-option arguments are taken as input files.'
+                  'This option can be used multiple times for multiple output files.')))
 
     eval_width = traits.Int(
         200,
@@ -1429,7 +1439,8 @@ class BeastInputSpec(CommandLineInputSpec):
         desc='Flip images around the mid-sagittal plane to increase patch count.',
         argstr='-flip')
     load_moments = traits.Bool(
-        desc='Do not calculate moments instead use precalculated library moments. (for optimization purposes)',
+        desc=('Do not calculate moments instead use precalculated'
+              'library moments. (for optimization purposes)'),
         argstr='-load_moments')
     fill_holes = traits.Bool(
         desc='Fill holes in the binary output.',
@@ -1453,7 +1464,9 @@ class BeastInputSpec(CommandLineInputSpec):
 
     voxel_size = traits.Int(
         4,
-        desc='Specify voxel size for calculations (4, 2, or 1). Default value: 4. Assumes no multiscale. Use configuration file for multiscale.',
+        desc=('Specify voxel size for calculations (4, 2, or 1).'
+              'Default value: 4. Assumes no multiscale. Use configuration'
+              'file for multiscale.'),
         argstr='-voxel_size %s')
 
     abspath = traits.Bool(
@@ -1579,7 +1592,8 @@ class PikInputSpec(CommandLineInputSpec):
 
     scale = traits.Int(
         2,
-        desc='Scaling factor for resulting image, by default images are output at twice their original resolution.',
+        desc=('Scaling factor for resulting image. By default images are'
+              'output at twice their original resolution.'),
         argstr='--scale %s')
 
     width = traits.Int(
@@ -1821,7 +1835,8 @@ class BlurInputSpec(CommandLineInputSpec):
         traits.Float,
         traits.Float,
         argstr='-3dfwhm %s %s %s',
-        desc='Full-width-half-maximum of gaussian kernel. Default value: -1.79769e+308 -1.79769e+308 -1.79769e+308.',
+        desc=('Full-width-half-maximum of gaussian kernel.'
+              'Default value: -1.79769e+308 -1.79769e+308 -1.79769e+308.'),
         xor=_xor_main_options,
         mandatory=True)
 
@@ -2078,7 +2093,8 @@ class MathInputSpec(CommandLineInputSpec):
         argstr='-zero',
         xor=_xor_nan_zero_illegal)
     output_illegal = traits.Bool(
-        desc='Value to write out when an illegal operation is done. Default value: 1.79769e+308',
+        desc=('Value to write out when an illegal operation'
+              'is done. Default value: 1.79769e+308'),
         argstr='-illegal_value',
         xor=_xor_nan_zero_illegal)
 
@@ -2565,7 +2581,8 @@ class ResampleInputSpec(CommandLineInputSpec):
         xor=_xor_fill)
 
     fill_value = traits.Float(
-        desc='Specify a fill value for points outside of input volume. Default value: 1.79769e+308.',
+        desc=('Specify a fill value for points outside of input volume.'
+              'Default value: 1.79769e+308.'),
         argstr='-fillvalue %s',
         requires=['fill'])
 
@@ -2592,7 +2609,8 @@ class ResampleInputSpec(CommandLineInputSpec):
 
     origin = traits.Tuple(
         traits.Float, traits.Float, traits.Float,
-        desc='Origin of first pixel in 3D space. Default value: 1.79769e+308 1.79769e+308 1.79769e+308.',
+        desc=('Origin of first pixel in 3D space.'
+              'Default value: 1.79769e+308 1.79769e+308 1.79769e+308.'),
         argstr='-origin %s %s %s')
 
     standard_sampling = traits.Bool(
@@ -2675,7 +2693,8 @@ class ResampleInputSpec(CommandLineInputSpec):
         traits.Float,
         traits.Float,
         traits.Float,
-        desc='Start point along each dimension (X, Y, Z). Default value: 1.79769e+308 1.79769e+308 1.79769e+308.',
+        desc=('Start point along each dimension (X, Y, Z).'
+              'Default value: 1.79769e+308 1.79769e+308 1.79769e+308.'),
         argstr='-start %s %s %s',
         xor=_xor_nelements)
 
@@ -2709,13 +2728,16 @@ class ResampleInputSpec(CommandLineInputSpec):
         traits.Float,
         traits.Float,
         traits.Float,
-        desc='Direction cosines along each dimension (X, Y, Z). Default value: 1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308.',
+        desc=('Direction cosines along each dimension (X, Y, Z). Default value:'
+              '1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308 ...'
+              '  1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308 1.79769e+308.'),
         argstr='-dircos %s %s %s',
         xor=_xor_nelements)
 
     # FIXME Use the requires=...?
     xdircos = traits.Float(
-        desc='Direction cosines along the X dimension. Default value: 1.79769e+308 1.79769e+308 1.79769e+308.',
+        desc=('Direction cosines along the X dimension.'
+              'Default value: 1.79769e+308 1.79769e+308 1.79769e+308.'),
         argstr='-xdircos %s',
         requires=(
             'ydircos',
@@ -2723,7 +2745,8 @@ class ResampleInputSpec(CommandLineInputSpec):
         xor=_xor_dircos)
 
     ydircos = traits.Float(
-        desc='Direction cosines along the Y dimension. Default value: 1.79769e+308 1.79769e+308 1.79769e+308.',
+        desc=('Direction cosines along the Y dimension.'
+              'Default value: 1.79769e+308 1.79769e+308 1.79769e+308.'),
         argstr='-ydircos %s',
         requires=(
             'xdircos',
@@ -2731,7 +2754,8 @@ class ResampleInputSpec(CommandLineInputSpec):
         xor=_xor_dircos)
 
     zdircos = traits.Float(
-        desc='Direction cosines along the Z dimension. Default value: 1.79769e+308 1.79769e+308 1.79769e+308.',
+        desc=('Direction cosines along the Z dimension.'
+              'Default value: 1.79769e+308 1.79769e+308 1.79769e+308.'),
         argstr='-zdircos %s',
         requires=(
             'xdircos',
@@ -3846,7 +3870,10 @@ class BigAverageInputSpec(CommandLineInputSpec):
         argstr='--float')
 
     robust = traits.Bool(
-        desc='Perform robust averaging, features that are outside 1 standard deviation from the mean are downweighted. Works well for noisy data with artifacts. see the --tmpdir option if you have a large number of input files.',
+        desc=('Perform robust averaging, features that are outside 1 standard'
+              'deviation from the mean are downweighted. Works well for noisy'
+              'data with artifacts. see the --tmpdir option if you have a'
+              'large number of input files.'),
         argstr='-robust')
 
     # Should Nipype deal with where the temp directory is?
