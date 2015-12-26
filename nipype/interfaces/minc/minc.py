@@ -16,7 +16,7 @@ Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
 
 """
 
-from nipype.interfaces.base import (
+from ..base import (
     TraitedSpec,
     CommandLineInputSpec,
     CommandLine,
@@ -35,7 +35,7 @@ import os
 import os.path
 import re
 
-from nipype.interfaces.minc.base import check_minc, no_minc, Info, aggregate_filename
+from ..minc.base import check_minc, no_minc, Info, aggregate_filename
 
 import warnings
 warn = warnings.warn

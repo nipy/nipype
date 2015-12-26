@@ -8,7 +8,7 @@ Author: Carlo Hamalainen <carlo@carlo-hamalainen.net>
         http://carlo-hamalainen.net
 """
 
-from nipype.interfaces.base import (
+from ..base import (
     TraitedSpec,
     CommandLineInputSpec,
     CommandLine,
