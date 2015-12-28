@@ -4047,13 +4047,20 @@ class VolSymmInputSpec(CommandLineInputSpec):
         desc='output xfm trans file',
         genfile=True,
         argstr='%s',
-        position=-2)
+        position=-2,
+        name_source=['input_file'],
+        hash_files=False,
+        name_template='%s_vol_symm.xfm',
+        keep_extension=False)
 
     output_file = File(
         desc='output file',
         genfile=True,
         argstr='%s',
-        position=-1,)
+        position=-1,
+        name_source=['input_file'],
+        hash_files=False,
+        name_template='%s_vol_symm.mnc')
 
     # This is a dummy input.
     input_grid_files = InputMultiPath(
@@ -4124,42 +4131,12 @@ class VolSymm(CommandLine):
     output_spec = VolSymmOutputSpec
     _cmd = 'volsymm'
 
-    def _gen_filename(self, name):
-        if name == 'output_file':
-            output_file = self.inputs.output_file
-
-            if isdefined(output_file):
-                return os.path.abspath(output_file)
-            else:
-                return aggregate_filename(
-                    [self.inputs.input_file], 'volsymm_output')
-        elif name == 'trans_file':
-            trans_file = self.inputs.trans_file
-
-            if isdefined(trans_file):
-                return os.path.abspath(trans_file)
-            else:
-                return aggregate_filename(
-                    [self.inputs.input_file], 'volsymm_output') + '.xfm'
-        else:
-            raise NotImplemented
-
-    def _gen_outfilename(self):
-        return self._gen_filename('output_file')
-
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(
-            self._gen_filename('output_file'))
-        outputs['trans_file'] = os.path.abspath(
-            self._gen_filename('trans_file'))
+        outputs = super(VolSymm, self)._list_outputs()
 
-        # FIXME Is this the sensible? No other way to tell if the grid files
-        # were produced.
-        # FIXME This is safe to assume?
-        assert os.path.exists(outputs['trans_file'])
-        if 'grid' in open(outputs['trans_file'], 'r').read():
-            outputs['output_grid'] = re.sub(
-                '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['trans_file'])
+        # Have to manually check for the grid files.
+        if os.path.exists(outputs['trans_file']):
+            if 'grid' in open(outputs['trans_file'], 'r').read():
+                outputs['output_grid'] = re.sub('.(nlxfm|xfm)$', '_grid_0.mnc', outputs['trans_file'])
 
         return outputs
