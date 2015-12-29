@@ -1553,13 +1553,6 @@ class Pik(CommandLine):
 
 
 class BlurInputSpec(CommandLineInputSpec):
-    """ FIXME not implemented
-    -verbose:     Write messages indicating progress
-    -quiet:       Do not write log messages
-    -debug:       Print out debug info.
-    -version:     Print out version info and exit.
-    """
-
     input_file = File(
         desc='input file',
         exists=True,
@@ -1570,11 +1563,7 @@ class BlurInputSpec(CommandLineInputSpec):
     output_file_base = File(
         desc='output file base',
         argstr='%s',
-        position=-1,
-        name_source=['input_file'],
-        hash_files=False,
-        name_template='%s_blur',
-        keep_extension=False)
+        position=-1)
 
     clobber = traits.Bool(
         desc='Overwrite existing file.',
@@ -1709,8 +1698,9 @@ class Blur(StdOutCommandLine):
             return output_base
 
     def _list_outputs(self):
-        outputs = super(Blur, self)._list_outputs()
-        output_file_base = outputs['output_file_base']
+        outputs = self.output_spec().get()
+
+        output_file_base = self._gen_output_base()
 
         outputs['output_file'] = output_file_base + '_blur.mnc'
 
