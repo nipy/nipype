@@ -509,7 +509,10 @@ class ToEcatInputSpec(CommandLineInputSpec):
         mandatory=False,
         genfile=True,
         argstr='%s',
-        position=-1,)
+        position=-1,
+        name_source=['input_file'],
+        hash_files=False,
+        name_template='%s_to_ecat.v')
 
     ignore_patient_variable = traits.Bool(
         desc='Ignore informations from the minc patient variable.',
@@ -570,25 +573,6 @@ class ToEcat(CommandLine):
     input_spec = ToEcatInputSpec
     output_spec = ToEcatOutputSpec
     _cmd = 'minctoecat'
-
-    def _gen_outfilename(self):
-        """
-        If the user specified output_file then return that, otherwise
-        return the full path to the input file with the extension
-        changed to '.v'.
-        """
-
-        output_file = self.inputs.output_file
-
-        if isdefined(output_file):
-            return output_file
-        else:
-            return os.path.splitext(self.inputs.input_file)[0] + '.v'
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(self._gen_outfilename())
-        return outputs
 
 
 class DumpInputSpec(StdOutCommandLineInputSpec):
