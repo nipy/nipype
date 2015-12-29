@@ -893,7 +893,10 @@ class BlobInputSpec(CommandLineInputSpec):
         desc='output file',
         genfile=True,
         argstr='%s',
-        position=-1,)
+        position=-1,
+        name_source=['input_file'],
+        hash_files=False,
+        name_template='%s_blob.mnc')
 
     trace = traits.Bool(
         desc='compute the trace (approximate growth and shrinkage) -- FAST',
@@ -929,25 +932,6 @@ class Blob(CommandLine):
     input_spec = BlobInputSpec
     output_spec = BlobOutputSpec
     _cmd = 'mincblob'
-
-    def _gen_filename(self, name):
-        if name == 'output_file':
-            output_file = self.inputs.output_file
-
-            if isdefined(output_file):
-                return os.path.abspath(output_file)
-            else:
-                return aggregate_filename([self.inputs.input_file], 'blob')
-        else:
-            raise NotImplemented
-
-    def _gen_outfilename(self):
-        return self._gen_filename('output_file')
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(self._gen_outfilename())
-        return outputs
 
 
 class CalcInputSpec(CommandLineInputSpec):
