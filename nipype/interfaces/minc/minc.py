@@ -1731,6 +1731,7 @@ class Blur(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = super(Blur, self)._list_outputs()
+        output_file_base = outputs['output_file_base']
 
         outputs['output_file'] = output_file_base + '_blur.mnc'
 
