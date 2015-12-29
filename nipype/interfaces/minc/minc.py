@@ -2603,12 +2603,17 @@ class NormInputSpec(CommandLineInputSpec):
         desc='output file',
         genfile=True,
         argstr='%s',
-        position=-1,)
+        position=-1,
+        name_source=['input_file'],
+        hash_files=False,
+        name_template='%s_norm.mnc')
 
     output_threshold_mask = traits.File(
         desc='File in which to store the threshold mask.',
         argstr='-threshold_mask %s',
-        genfile=True)
+        name_source=['input_file'],
+        hash_files=False,
+        name_template='%s_norm_threshold_mask.mnc')
 
     clobber = traits.Bool(
         desc='Overwrite existing file.',
@@ -2685,36 +2690,6 @@ class Norm(CommandLine):
     input_spec = NormInputSpec
     output_spec = NormOutputSpec
     _cmd = 'mincnorm'
-
-    def _gen_filename(self, name):
-        if name == 'output_file':
-            output_file = self.inputs.output_file
-
-            if isdefined(output_file):
-                return os.path.abspath(output_file)
-            else:
-                return aggregate_filename(
-                    [self.inputs.input_file], 'norm_output')
-        elif name == 'output_threshold_mask':
-            output_threshold_mask = self.inputs.output_threshold_mask
-
-            if isdefined(output_threshold_mask):
-                return os.path.abspath(output_threshold_mask)
-            else:
-                return aggregate_filename(
-                    [self.inputs.input_file], 'norm_output_threshold_mask')
-        else:
-            raise NotImplemented
-
-    def _gen_outfilename(self):
-        return self._gen_filename('output_file')
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(self._gen_outfilename())
-        outputs['output_threshold_mask'] = self._gen_filename(
-            'output_threshold_mask')
-        return outputs
 
 
 """
