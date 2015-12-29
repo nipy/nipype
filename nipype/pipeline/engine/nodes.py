@@ -367,7 +367,6 @@ class Node(EngineBase):
                         logger.warn(('An exception was raised trying to remove old %s, '
                                      'but the path seems empty. Is it an NFS mount?. '
                                      'Passing the exception.') % outdir)
-                        pass
                     elif ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) != 0)):
                         logger.debug(('Folder contents (%d items): '
                                       '%s') % (len(outdircont), outdircont))
