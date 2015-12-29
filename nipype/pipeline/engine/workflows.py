@@ -326,7 +326,7 @@ connected.
         Parameters
         ----------
         nodes : list
-            A list of WorkflowBase-based objects
+            A list of EngineBase-based objects
         """
         newnodes = []
         all_nodes = self._get_all_nodes()
@@ -343,8 +343,8 @@ connected.
             logger.debug('no new nodes to add')
             return
         for node in newnodes:
-            if not issubclass(node.__class__, WorkflowBase):
-                raise Exception('Node %s must be a subclass of WorkflowBase' %
+            if not issubclass(node.__class__, EngineBase):
+                raise Exception('Node %s must be a subclass of EngineBase' %
                                 str(node))
         self._check_nodes(newnodes)
         for node in newnodes:
@@ -358,7 +358,7 @@ connected.
         Parameters
         ----------
         nodes : list
-            A list of WorkflowBase-based objects
+            A list of EngineBase-based objects
         """
         self._graph.remove_nodes_from(nodes)
 

@@ -11,3 +11,4 @@ from __future__ import absolute_import
 __docformat__ = 'restructuredtext'
 from .workflows import Workflow
 from .nodes import Node, MapNode, JoinNode
+from .utils import generate_expanded_graph

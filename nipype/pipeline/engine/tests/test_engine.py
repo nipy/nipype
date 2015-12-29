@@ -540,7 +540,8 @@ def test_mapnode_nested():
     try:
         n2.run()
     except Exception as e:
-        pe.logger.info('Exception: %s' % str(e))
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_true, error_raised
 

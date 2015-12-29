@@ -75,7 +75,7 @@ class EngineBase(object):
         return fullname
 
     def clone(self, name):
-        """Clone a workflowbase object
+        """Clone an EngineBase object
 
         Parameters
         ----------
