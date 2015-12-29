@@ -1591,7 +1591,11 @@ class BlurInputSpec(CommandLineInputSpec):
     output_file_base = File(
         desc='output file base',
         argstr='%s',
-        position=-1)
+        position=-1,
+        name_source=['input_file'],
+        hash_files=False,
+        name_template='%s_blur',
+        keep_extension=False)
 
     clobber = traits.Bool(
         desc='Overwrite existing file.',
@@ -1726,9 +1730,7 @@ class Blur(StdOutCommandLine):
             return output_base
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-
-        output_file_base = self._gen_output_base()
+        outputs = super(Gennlxfm, self)._list_outputs()
 
         outputs['output_file'] = output_file_base + '_blur.mnc'
 
