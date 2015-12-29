@@ -1730,7 +1730,7 @@ class Blur(StdOutCommandLine):
             return output_base
 
     def _list_outputs(self):
-        outputs = super(Gennlxfm, self)._list_outputs()
+        outputs = super(Blur, self)._list_outputs()
 
         outputs['output_file'] = output_file_base + '_blur.mnc'
 
