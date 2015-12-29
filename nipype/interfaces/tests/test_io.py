@@ -96,7 +96,8 @@ def test_selectfiles_valueerror():
 
 @skipif(noboto)
 def test_s3datagrabber_communication():
-    dg = nio.S3DataGrabber(infields=['subj_id', 'run_num'], outfields=['func', 'struct'])
+    dg = nio.S3DataGrabber(
+        infields=['subj_id', 'run_num'], outfields=['func', 'struct'])
     dg.inputs.anon = True
     dg.inputs.bucket = 'openfmri'
     dg.inputs.bucket_path = 'ds001/'
@@ -108,20 +109,20 @@ def test_s3datagrabber_communication():
                                     struct='%s/anatomy/highres001_brain.nii.gz')
     dg.inputs.subj_id = ['sub001', 'sub002']
     dg.inputs.run_num = ['run001', 'run003']
-    dg.inputs.template_args = dg.inputs.template_args = dict(
+    dg.inputs.template_args = dict(
         func=[['subj_id', 'run_num']], struct=[['subj_id']])
     res = dg.run()
     func_outfiles = res.outputs.func
     struct_outfiles = res.outputs.struct
 
     # check for all files
-    yield assert_true, '/sub001/BOLD/task001_run001/bold.nii.gz' in func_outfiles[0]
+    yield assert_true, os.path.join(dg.inputs.local_directory, '/sub001/BOLD/task001_run001/bold.nii.gz') in func_outfiles[0]
     yield assert_true, os.path.exists(func_outfiles[0])
-    yield assert_true, '/sub001/anatomy/highres001_brain.nii.gz' in struct_outfiles[0]
+    yield assert_true, os.path.join(dg.inputs.local_directory, '/sub001/anatomy/highres001_brain.nii.gz') in struct_outfiles[0]
     yield assert_true, os.path.exists(struct_outfiles[0])
-    yield assert_true, '/sub002/BOLD/task001_run003/bold.nii.gz' in func_outfiles[1]
+    yield assert_true, os.path.join(dg.inputs.local_directory, '/sub002/BOLD/task001_run003/bold.nii.gz') in func_outfiles[1]
     yield assert_true, os.path.exists(func_outfiles[1])
-    yield assert_true, '/sub002/anatomy/highres001_brain.nii.gz' in struct_outfiles[1]
+    yield assert_true, os.path.join(dg.inputs.local_directory, '/sub002/anatomy/highres001_brain.nii.gz') in struct_outfiles[1]
     yield assert_true, os.path.exists(struct_outfiles[1])
 
     shutil.rmtree(tempdir)
@@ -220,7 +221,8 @@ def test_s3datasink_substitutions():
     # run fakes3 server and set up bucket
     fakes3dir = op.expanduser('~/fakes3')
     try:
-        proc = Popen(['fakes3', '-r', fakes3dir, '-p', '4567'], stdout=open(os.devnull, 'wb'))
+        proc = Popen(
+            ['fakes3', '-r', fakes3dir, '-p', '4567'], stdout=open(os.devnull, 'wb'))
     except OSError as ose:
         if 'No such file or directory' in str(ose):
             return  # fakes3 not installed. OK!
