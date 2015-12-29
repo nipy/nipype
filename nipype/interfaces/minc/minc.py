@@ -512,7 +512,8 @@ class ToEcatInputSpec(CommandLineInputSpec):
         position=-1,
         name_source=['input_file'],
         hash_files=False,
-        name_template='%s_to_ecat.v')
+        name_template='%s_to_ecat.v',
+        keep_extension=False)
 
     ignore_patient_variable = traits.Bool(
         desc='Ignore informations from the minc patient variable.',
