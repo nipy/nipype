@@ -27,11 +27,11 @@ except ImportError:
 from copy import deepcopy
 import re
 import numpy as np
-from nipype.interfaces.traits_extension import traits, Undefined
-from nipype.interfaces.base import DynamicTraitedSpec
-from nipype.utils.filemanip import loadpkl, savepkl
+from ...interfaces.traits_extension import traits, Undefined
+from ...interfaces.base import DynamicTraitedSpec
+from ...utils.filemanip import loadpkl, savepkl
 
-from nipype import logging
+from ... import logging
 logger = logging.getLogger('workflow')
 
 

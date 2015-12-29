@@ -32,16 +32,16 @@ package_check('networkx', '1.3')
 
 import networkx as nx
 
-from ..external.six import string_types
-from ..utils.filemanip import (fname_presuffix, FileNotFoundError,
-                               filename_to_list, get_related_files)
-from ..utils.misc import create_function_from_source, str2bool
-from ..interfaces.base import (CommandLine, isdefined, Undefined,
-                               InterfaceResult)
-from ..interfaces.utility import IdentityInterface
-from ..utils.provenance import ProvStore, pm, nipype_ns, get_id
+from ...external.six import string_types
+from ...utils.filemanip import (fname_presuffix, FileNotFoundError,
+                                filename_to_list, get_related_files)
+from ...utils.misc import create_function_from_source, str2bool
+from ...interfaces.base import (CommandLine, isdefined, Undefined,
+                                InterfaceResult)
+from ...interfaces.utility import IdentityInterface
+from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 
-from .. import logging, config
+from ... import logging, config
 logger = logging.getLogger('workflow')
 
 try:
@@ -361,7 +361,7 @@ def walk(children, level=0, path=None, usename=True):
 
     Examples
     --------
-    >>> from nipype.pipeline.utils import walk
+    >>> from nipype.pipeline.engine.utils import walk
     >>> iterables = [('a', lambda: [1, 2]), ('b', lambda: [3, 4])]
     >>> [val['a'] for val in walk(iterables)]
     [1, 1, 2, 2]
@@ -396,7 +396,7 @@ def synchronize_iterables(iterables):
 
     Examples
     --------
-    >>> from nipype.pipeline.utils import synchronize_iterables
+    >>> from nipype.pipeline.engine.utils import synchronize_iterables
     >>> iterables = dict(a=lambda: [1, 2], b=lambda: [3, 4])
     >>> synced = synchronize_iterables(iterables)
     >>> synced == [{'a': 1, 'b': 3}, {'a': 2, 'b': 4}]
