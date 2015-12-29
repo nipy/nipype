@@ -3,7 +3,7 @@
 ============
  User Guide
 ============
-	
+
 :Release: |version|
 :Date: |today|
 
@@ -40,7 +40,7 @@
    mipav
    nipypecmd
 
- 
+
 
 
 

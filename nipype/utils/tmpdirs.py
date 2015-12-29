@@ -1,3 +1,4 @@
+from builtins import object
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
@@ -43,5 +44,3 @@ class InTemporaryDirectory(TemporaryDirectory):
     def __exit__(self, exc, value, tb):
         os.chdir(self._pwd)
         return super(InTemporaryDirectory, self).__exit__(exc, value, tb)
-
-

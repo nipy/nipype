@@ -11,23 +11,24 @@ was written to work with FSL version 4.1.4.
     >>> os.chdir(datadir)
 """
 
+from __future__ import print_function
+from __future__ import division
+from builtins import range
+
 import os
 import os.path as op
 import warnings
 
 import numpy as np
-
-from nipype.interfaces.fsl.base import FSLCommand, FSLCommandInputSpec
-from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
-                                    OutputMultiPath, Undefined, traits,
-                                    isdefined, OutputMultiPath)
-from nipype.utils.filemanip import split_filename
-
 from nibabel import load
 
+from ..fsl.base import FSLCommand, FSLCommandInputSpec
+from ..base import (TraitedSpec, File, InputMultiPath,
+                    OutputMultiPath, Undefined, traits,
+                    isdefined, OutputMultiPath)
+from ...utils.filemanip import split_filename
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class BETInputSpec(FSLCommandInputSpec):
@@ -239,11 +240,11 @@ class FASTInputSpec(FSLCommandInputSpec):
                           argstr='-N')
     use_priors = traits.Bool(desc='use priors throughout',
                              argstr='-P')   # must also set -a!,
-                                              # mutually inclusive??
-                                              # No, conditional
-                                              # mandatory... need to
-                                              # figure out how to
-                                              # handle with traits.
+                                            # mutually inclusive??
+                                            # No, conditional
+                                            # mandatory... need to
+                                            # figure out how to
+                                            # handle with traits.
     segment_iters = traits.Range(low=1, high=50,
                                  desc='number of segmentation-initialisation'
                                  ' iterations',
@@ -695,7 +696,7 @@ class MCFLIRT(FSLCommand):
         if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
             _, filename = os.path.split(outputs['out_file'])
             matpathname = os.path.join(cwd, filename + '.mat')
-            _, _, _, timepoints = load(self.inputs.in_file).get_shape()
+            _, _, _, timepoints = load(self.inputs.in_file).shape
             outputs['mat_file'] = []
             for t in range(timepoints):
                 outputs['mat_file'].append(os.path.join(matpathname,
@@ -891,7 +892,7 @@ class FNIRT(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        for key, suffix in self.filemap.items():
+        for key, suffix in list(self.filemap.items()):
             inval = getattr(self.inputs, key)
             change_ext = True
             if key in ['warped_file', 'log_file']:
@@ -914,7 +915,7 @@ class FNIRT(FSLCommand):
         return outputs
 
     def _format_arg(self, name, spec, value):
-        if name in self.filemap.keys():
+        if name in list(self.filemap.keys()):
             return spec.argstr % self._list_outputs()[name]
         return super(FNIRT, self)._format_arg(name, spec, value)
 
@@ -937,7 +938,7 @@ class FNIRT(FSLCommand):
         except IOError:
             print ('unable to create config_file %s' % (configfile))
 
-        for item in self.inputs.get().items():
+        for item in list(self.inputs.get().items()):
             fid.write('%s\n' % (item))
         fid.close()
 
@@ -1022,12 +1023,12 @@ class ApplyWarp(FSLCommand):
 
 class SliceTimerInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='--in=%s',
-                  mandatory=True, position=0,
-                  desc='filename of input timeseries')
+                   mandatory=True, position=0,
+                   desc='filename of input timeseries')
     out_file = File(argstr='--out=%s', genfile=True,
-                   desc='filename of output timeseries', hash_files=False)
+                    desc='filename of output timeseries', hash_files=False)
     index_dir = traits.Bool(argstr='--down',
-              desc='slice indexing from top to bottom')
+                            desc='slice indexing from top to bottom')
     time_repetition = traits.Float(argstr='--repeat=%f',
                                    desc='Specify TR of data - default is 3s')
     slice_direction = traits.Enum(1, 2, 3, argstr='--direction=%d',
@@ -1070,7 +1071,7 @@ class SliceTimer(FSLCommand):
         out_file = self.inputs.out_file
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
-                                      suffix='_st')
+                                       suffix='_st')
         outputs['slice_time_corrected_file'] = os.path.abspath(out_file)
         return outputs
 
@@ -1086,23 +1087,23 @@ class SUSANInputSpec(FSLCommandInputSpec):
                    desc='filename of input timeseries')
     brightness_threshold = traits.Float(argstr='%.10f',
                                         position=2, mandatory=True,
-                   desc='brightness threshold and should be greater than '
-                        'noise level and less than contrast of edges to '
-                        'be preserved.')
+                                        desc='brightness threshold and should be greater than '
+                                        'noise level and less than contrast of edges to '
+                                        'be preserved.')
     fwhm = traits.Float(argstr='%.10f',
                         position=3, mandatory=True,
                         desc='fwhm of smoothing, in mm, gets converted using sqrt(8*log(2))')
     dimension = traits.Enum(3, 2, argstr='%d', position=4, usedefault=True,
                             desc='within-plane (2) or fully 3D (3)')
     use_median = traits.Enum(1, 0, argstr='%d', position=5, usedefault=True,
-                        desc='whether to use a local median filter in the cases where single-point noise is detected')
+                             desc='whether to use a local median filter in the cases where single-point noise is detected')
     usans = traits.List(
         traits.Tuple(File(exists=True), traits.Float), maxlen=2,
-                        argstr='', position=6, default=[], usedefault=True,
-             desc='determines whether the smoothing area (USAN) is to be '
-                  'found from secondary images (0, 1 or 2). A negative '
-                  'value for any brightness threshold will auto-set the '
-                  'threshold at 10% of the robust range')
+        argstr='', position=6, default=[], usedefault=True,
+        desc='determines whether the smoothing area (USAN) is to be '
+             'found from secondary images (0, 1 or 2). A negative '
+             'value for any brightness threshold will auto-set the '
+             'threshold at 10% of the robust range')
     out_file = File(argstr='%s', position=-1, genfile=True,
                     desc='output file name', hash_files=False)
 
@@ -1119,13 +1120,13 @@ class SUSAN(FSLCommand):
 
     >>> from nipype.interfaces import fsl
     >>> from nipype.testing import example_data
-    >>> print anatfile #doctest: +SKIP
-    anatomical.nii #doctest: +SKIP
+    >>> anatfile  # doctest: +SKIP
+    anatomical.nii  # doctest: +SKIP
     >>> sus = fsl.SUSAN()
     >>> sus.inputs.in_file = example_data('structural.nii')
     >>> sus.inputs.brightness_threshold = 2000.0
     >>> sus.inputs.fwhm = 8.0
-    >>> result = sus.run() #doctest: +SKIP
+    >>> result = sus.run()  # doctest: +SKIP
     """
 
     _cmd = 'susan'
@@ -1149,7 +1150,7 @@ class SUSAN(FSLCommand):
         out_file = self.inputs.out_file
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
-                                      suffix='_smooth')
+                                       suffix='_smooth')
         outputs['smoothed_file'] = os.path.abspath(out_file)
         return outputs
 
@@ -1184,7 +1185,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     asym_se_time = traits.Float(argstr='--asym=%.10f',
                                 desc='set the fieldmap asymmetric spin echo time (sec)')
     median_2dfilter = traits.Bool(argstr='--median',
-                                desc='apply 2D median filtering')
+                                  desc='apply 2D median filtering')
     despike_2dfilter = traits.Bool(argstr='--despike',
                                    desc='apply a 2D de-spiking filter')
     no_gap_fill = traits.Bool(argstr='--nofill',
@@ -1202,7 +1203,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     pava = traits.Bool(argstr='--pava',
                        desc='apply monotonic enforcement via PAVA')
     despike_threshold = traits.Float(argstr='--despikethreshold=%s',
-                                    desc='specify the threshold for de-spiking (default=3.0)')
+                                     desc='specify the threshold for de-spiking (default=3.0)')
     unwarp_direction = traits.Enum('x', 'y', 'z', 'x-', 'y-', 'z-',
                                    argstr='--unwarpdir=%s',
                                    desc='specifies direction of warping (default y)')
@@ -1230,8 +1231,6 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                                      desc='saves the unmasked fieldmap when using --savefmap')
 
 
-
-
 class FUGUEOutputSpec(TraitedSpec):
     unwarped_file = File(desc='unwarped file')
     warped_file = File(desc='forward warped file')
@@ -1255,7 +1254,7 @@ class FUGUE(FSLCommand):
     --------
 
 
-    Unwarping an input image (shift map is known) ::
+    Unwarping an input image (shift map is known)
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
@@ -1269,7 +1268,7 @@ class FUGUE(FSLCommand):
     >>> fugue.run() #doctest: +SKIP
 
 
-    Warping an input image (shift map is known) ::
+    Warping an input image (shift map is known)
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
@@ -1284,7 +1283,7 @@ class FUGUE(FSLCommand):
     >>> fugue.run() #doctest: +SKIP
 
 
-    Computing the vsm (unwrapped phase map is known) ::
+    Computing the vsm (unwrapped phase map is known)
 
     >>> from nipype.interfaces.fsl.preprocess import FUGUE
     >>> fugue = FUGUE()
@@ -1350,7 +1349,7 @@ class FUGUE(FSLCommand):
                     trait_spec.name_source = 'shift_in_file'
                 else:
                     raise RuntimeError(('Either phasemap_in_file, shift_in_file or '
-                                       'fmap_in_file must be set.'))
+                                        'fmap_in_file must be set.'))
 
                 if vsm_save_unmasked:
                     trait_spec.name_template = '%s_vsm_unmasked'
@@ -1363,7 +1362,7 @@ class FUGUE(FSLCommand):
         if not isdefined(self.inputs.fmap_out_file):
             fmap_save_masked = (isdefined(self.inputs.save_fmap) and self.inputs.save_fmap)
             fmap_save_unmasked = (isdefined(self.inputs.save_unmasked_fmap) and
-                                 self.inputs.save_unmasked_fmap)
+                                  self.inputs.save_unmasked_fmap)
 
             if (fmap_save_masked or fmap_save_unmasked):
                 trait_spec = self.inputs.trait('fmap_out_file')
@@ -1377,7 +1376,7 @@ class FUGUE(FSLCommand):
                     trait_spec.name_source = 'fmap_in_file'
                 else:
                     raise RuntimeError(('Either phasemap_in_file, shift_in_file or '
-                                       'fmap_in_file must be set.'))
+                                        'fmap_in_file must be set.'))
 
                 if fmap_save_unmasked:
                     trait_spec.name_template = '%s_fieldmap_unmasked'
@@ -1388,26 +1387,6 @@ class FUGUE(FSLCommand):
 
         return super(FUGUE, self)._parse_inputs(skip=skip)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        if self.inputs.forward_warping:
-            out_field = 'warped_file'
-        else:
-            out_field = 'unwarped_file'
-        out_file = getattr(self.inputs, out_field)
-        if not isdefined(out_file):
-            if isdefined(self.inputs.in_file):
-                out_file = self._gen_fname(self.inputs.in_file,
-                                           suffix='_'+out_field[:-5])
-        if isdefined(out_file):
-            outputs[out_field] = os.path.abspath(out_file)
-        if isdefined(self.inputs.fmap_out_file):
-            outputs['fmap_out_file'] = os.path.abspath(
-                self.inputs.fmap_out_file)
-        if isdefined(self.inputs.shift_out_file):
-            outputs['shift_out_file'] = os.path.abspath(
-                self.inputs.shift_out_file)
-        return outputs
 
 class PRELUDEInputSpec(FSLCommandInputSpec):
     complex_phase_file = File(exists=True, argstr='--complex=%s',
@@ -1495,52 +1474,59 @@ class PRELUDE(FSLCommand):
 
 
 class FIRSTInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, mandatory=True, position=-2, copyfile=False,
-                  argstr='-i %s',
-                  desc='input data file')
-    out_file = File('segmented', usedefault=True, mandatory=True, position=-1,
-                  argstr='-o %s',
-                  desc='output data file', hash_files=False)
+    in_file = File(
+        exists=True, mandatory=True, position=-2, copyfile=False,
+        argstr='-i %s', desc='input data file')
+    out_file = File(
+        'segmented', usedefault=True, mandatory=True, position=-1,
+        argstr='-o %s', desc='output data file', hash_files=False)
     verbose = traits.Bool(argstr='-v', position=1,
-        desc="Use verbose logging.")
-    brain_extracted = traits.Bool(argstr='-b', position=2,
+                          desc="Use verbose logging.")
+    brain_extracted = traits.Bool(
+        argstr='-b', position=2,
         desc="Input structural image is already brain-extracted")
-    no_cleanup = traits.Bool(argstr='-d', position=3,
+    no_cleanup = traits.Bool(
+        argstr='-d', position=3,
         desc="Input structural image is already brain-extracted")
-    method = traits.Enum('auto', 'fast', 'none',
-                         xor=['method_as_numerical_threshold'],
-                         argstr='-m', position=4,
+    method = traits.Enum(
+        'auto', 'fast', 'none', xor=['method_as_numerical_threshold'],
+        argstr='-m %s', position=4, usedefault=True,
         desc=("Method must be one of auto, fast, none, or it can be entered "
               "using the 'method_as_numerical_threshold' input"))
-    method_as_numerical_threshold = traits.Float(argstr='-m', position=4,
+    method_as_numerical_threshold = traits.Float(
+        argstr='-m %.4f', position=4,
         desc=("Specify a numerical threshold value or use the 'method' input "
               "to choose auto, fast, or none"))
-    list_of_specific_structures = traits.List(traits.Str, argstr='-s %s',
-                                              sep=',', position=5, minlen=1,
+    list_of_specific_structures = traits.List(
+        traits.Str, argstr='-s %s', sep=',', position=5, minlen=1,
         desc='Runs only on the specified structures (e.g. L_Hipp, R_Hipp'
-                          'L_Accu, R_Accu, L_Amyg, R_Amyg'
-                          'L_Caud, R_Caud, L_Pall, R_Pall'
-                          'L_Puta, R_Puta, L_Thal, R_Thal, BrStem')
-    affine_file = File(exists=True, position=6,
-                  argstr='-a %s',
-                  desc=('Affine matrix to use (e.g. img2std.mat) (does not '
-                        're-run registration)'))
+             'L_Accu, R_Accu, L_Amyg, R_Amyg'
+             'L_Caud, R_Caud, L_Pall, R_Pall'
+             'L_Puta, R_Puta, L_Thal, R_Thal, BrStem')
+    affine_file = File(
+        exists=True, position=6, argstr='-a %s',
+        desc=('Affine matrix to use (e.g. img2std.mat) (does not '
+              're-run registration)'))
 
 
 class FIRSTOutputSpec(TraitedSpec):
-    vtk_surfaces = OutputMultiPath(File(exists=True),
-          desc='VTK format meshes for each subcortical region')
-    bvars = OutputMultiPath(File(exists=True),
-          desc='bvars for each subcortical region')
-    original_segmentations = File(exists=True,
-          desc=('3D image file containing the segmented regions as integer '
-                'values. Uses CMA labelling'))
-    segmentation_file = File(exists=True,
-          desc='4D image file containing a single volume per segmented region')
+    vtk_surfaces = OutputMultiPath(
+        File(exists=True),
+        desc='VTK format meshes for each subcortical region')
+    bvars = OutputMultiPath(
+        File(exists=True),
+        desc='bvars for each subcortical region')
+    original_segmentations = File(
+        exists=True, desc=('3D image file containing the segmented regions '
+                           'as integer values. Uses CMA labelling'))
+    segmentation_file = File(
+        exists=True, desc=('4D image file containing a single volume per '
+                           'segmented region'))
 
 
 class FIRST(FSLCommand):
-    """Use FSL's run_first_all command to segment subcortical volumes
+    """
+    Use FSL's run_first_all command to segment subcortical volumes
 
     http://www.fmrib.ox.ac.uk/fsl/first/index.html
 
@@ -1574,7 +1560,7 @@ class FIRST(FSLCommand):
                           'L_Thal', 'R_Thal',
                           'BrStem']
         outputs['original_segmentations'] = \
-                                      self._gen_fname('original_segmentations')
+            self._gen_fname('original_segmentations')
         outputs['segmentation_file'] = self._gen_fname('segmentation_file')
         outputs['vtk_surfaces'] = self._gen_mesh_names('vtk_surfaces',
                                                        structures)
@@ -1583,10 +1569,20 @@ class FIRST(FSLCommand):
 
     def _gen_fname(self, name):
         path, outname, ext = split_filename(self.inputs.out_file)
+
+        method = 'none'
+        if isdefined(self.inputs.method) and self.inputs.method == 'fast':
+            method = 'fast'
+
+        if isdefined(self.inputs.method_as_numerical_threshold):
+            thres = '%.4f' % self.inputs.method_as_numerical_threshold
+            method = thres.replace('.', '')
+
         if name == 'original_segmentations':
-            return op.abspath(outname + '_all_fast_origsegs.nii.gz')
+            return op.abspath('%s_all_%s_origsegs.nii.gz' % (outname, method))
         if name == 'segmentation_file':
-            return op.abspath(outname + '_all_fast_firstseg.nii.gz')
+            return op.abspath('%s_all_%s_firstseg.nii.gz' % (outname, method))
+
         return None
 
     def _gen_mesh_names(self, name, structures):

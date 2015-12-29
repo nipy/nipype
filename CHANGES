@@ -2,6 +2,43 @@ Next release
 ============
 
 * ENH: [Interfaced|Graft]Workflows (https://github.com/nipy/nipype/pull/882)
+* ENH: Provides a Nipype wrapper for ANTs DenoiseImage (https://github.com/nipy/nipype/pull/1291)
+* FIX: Minor bugfix logging hash differences (https://github.com/nipy/nipype/pull/1298)
+* FIX: Use released Prov python library (https://github.com/nipy/nipype/pull/1279)
+* ENH: Support for Python 3 (https://github.com/nipy/nipype/pull/1221)
+* FIX: VTK version check missing when using tvtk (https://github.com/nipy/nipype/pull/1219)
+* ENH: Added an OAR scheduler plugin (https://github.com/nipy/nipype/pull/1259)
+* ENH: New ANTs interface: antsBrainExtraction (https://github.com/nipy/nipype/pull/1231)
+* API: Default model level for the bedpostx workflow has been set to "2" following FSL 5.0.9 lead
+* ENH: New interfaces for interacting with AWS S3: S3DataSink and S3DataGrabber (https://github.com/nipy/nipype/pull/1201)
+
+
+Release 0.11.0 (September 15, 2015)
+============
+
+* API: Change how hash values are computed (https://github.com/nipy/nipype/pull/1174)
+* ENH: New algorithm: mesh.WarpPoints applies displacements fields to point sets
+       (https://github.com/nipy/nipype/pull/889).
+* ENH: New interfaces for MRTrix3 (https://github.com/nipy/nipype/pull/1126)
+* ENH: New option in afni.3dRefit - zdel, ydel, zdel etc. (https://github.com/nipy/nipype/pull/1079)
+* FIX: ants.Registration composite transform outputs are no longer returned as lists (https://github.com/nipy/nipype/pull/1183)
+* BUG: ANTs Registration interface failed with multi-modal inputs
+    (https://github.com/nipy/nipype/pull/1176) (https://github.com/nipy/nipype/issues/1175)
+* ENH: dipy.TrackDensityMap interface now accepts a reference image (https://github.com/nipy/nipype/pull/1091)
+* FIX: Bug in XFibres5 (https://github.com/nipy/nipype/pull/1168)
+* ENH: Attempt to use hard links for data sink.
+    (https://github.com/nipy/nipype/pull/1161)
+* FIX: Updates to SGE Plugins
+    (https://github.com/nipy/nipype/pull/1129)
+* ENH: Add ants JointFusion() node with testing
+    (https://github.com/nipy/nipype/pull/1160)
+* ENH: Add --float option for antsRegistration calls
+    (https://github.com/nipy/nipype/pull/1159)
+* ENH: Added interface to simulate DWIs using the multi-tensor model
+       (https://github.com/nipy/nipype/pull/1085)
+* ENH: New interface for FSL fslcpgeom utility (https://github.com/nipy/nipype/pull/1152)
+* ENH: Added SLURMGraph plugin for submitting jobs to SLURM with dependencies (https://github.com/nipy/nipype/pull/1136)
+>>>>>>> enh/RefactorEngineModule
 * FIX: Enable absolute path definitions in DCMStack (https://github.com/nipy/nipype/pull/1089,
        replaced by https://github.com/nipy/nipype/pull/1093)
 * ENH: New mesh.MeshWarpMaths to operate on surface-defined warpings
@@ -13,6 +50,7 @@ Next release
 * FIX: FUGUE is now properly listing outputs. (https://github.com/nipy/nipype/pull/978)
 * ENH: Improved FieldMap-Based (FMB) workflow for correction of susceptibility distortions in EPI seqs.
        (https://github.com/nipy/nipype/pull/1019)
+* FIX: In the FSLXcommand _list_outputs function fixed for loop range (https://github.com/nipy/nipype/pull/1071)
 * ENH: Dropped support for now 7 years old Python 2.6 (https://github.com/nipy/nipype/pull/1069)
 * FIX: terminal_output is not mandatory anymore (https://github.com/nipy/nipype/pull/1070)
 * ENH: Added "nipype_cmd" tool for running interfaces from the command line (https://github.com/nipy/nipype/pull/795)
@@ -54,6 +92,13 @@ Next release
 * ENH: Added csvReader() utility (https://github.com/nipy/nipype/pull/1044)
 * FIX: typo in nipype.interfaces.freesurfer.utils.py Tkregister2 (https://github.com/nipy/nipype/pull/1083)
 * FIX: SSHDataGrabber outputs now return full path to the grabbed/downloaded files. (https://github.com/nipy/nipype/pull/1086)
+* FIX: Add QA output for TSNR to resting workflow (https://github.com/nipy/nipype/pull/1088)
+* FIX: Change N4BiasFieldCorrection to use short tag for dimensionality (backward compatible) (https://github.com/nipy/nipype/pull/1096)
+* ENH: Added -newgrid input to Warp in AFNI (3dWarp wrapper) (https://github.com/nipy/nipype/pull/1128)
+* FIX: Fixed AFNI Copy interface to use positional inputs as required (https://github.com/nipy/nipype/pull/1131)
+* ENH: Added a check in Dcm2nii to check if nipype created the config.ini file and remove if true (https://github.com/nipy/nipype/pull/1132)
+* ENH: Use a while loop to wait for Xvfb (up to a max wait time "xvfb_max_wait" in config file, default 10)
+       (https://github.com/nipy/nipype/pull/1142)
 
 Release 0.10.0 (October 10, 2014)
 ============

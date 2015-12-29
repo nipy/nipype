@@ -7,14 +7,16 @@
    >>> os.chdir(datadir)
 """
 
-from nipype.interfaces.base import (CommandLine, CommandLineInputSpec,
-                                    InputMultiPath, traits, TraitedSpec,
-                                    OutputMultiPath, isdefined,
-                                    File, Directory)
 import os
-from copy import deepcopy
-from nipype.utils.filemanip import split_filename
 import re
+from copy import deepcopy
+
+from .base import (CommandLine, CommandLineInputSpec,
+                   InputMultiPath, traits, TraitedSpec,
+                   OutputMultiPath, isdefined,
+                   File, Directory)
+from ..utils.filemanip import split_filename
+
 
 class Dcm2niiInputSpec(CommandLineInputSpec):
     source_names = InputMultiPath(File(exists=True), argstr="%s", position=-1,
@@ -37,12 +39,14 @@ class Dcm2niiInputSpec(CommandLineInputSpec):
     convert_all_pars = traits.Bool(True, argstr='-v', usedefault=True)
     reorient_and_crop = traits.Bool(False, argstr='-x', usedefault=True)
 
+
 class Dcm2niiOutputSpec(TraitedSpec):
     converted_files = OutputMultiPath(File(exists=True))
     reoriented_files = OutputMultiPath(File(exists=True))
     reoriented_and_cropped_files = OutputMultiPath(File(exists=True))
     bvecs = OutputMultiPath(File(exists=True))
     bvals = OutputMultiPath(File(exists=True))
+
 
 class Dcm2nii(CommandLine):
     """Uses MRICRON's dcm2nii to convert dicom files
@@ -55,14 +59,12 @@ class Dcm2nii(CommandLine):
     >>> converter.inputs.source_names = ['functional_1.dcm', 'functional_2.dcm']
     >>> converter.inputs.gzip_output = True
     >>> converter.inputs.output_dir = '.'
-    >>> converter.cmdline #doctest: +ELLIPSIS
+    >>> converter.cmdline
     'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
-    >>> converter.run() # doctest: +SKIP
     """
 
-    input_spec=Dcm2niiInputSpec
-    output_spec=Dcm2niiOutputSpec
-
+    input_spec = Dcm2niiInputSpec
+    output_spec = Dcm2niiOutputSpec
     _cmd = 'dcm2nii'
 
     def _format_arg(self, opt, spec, val):
@@ -81,12 +83,14 @@ class Dcm2nii(CommandLine):
         return super(Dcm2nii, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime):
-
+        self._config_created = False
         new_runtime = super(Dcm2nii, self)._run_interface(runtime)
         (self.output_files,
          self.reoriented_files,
          self.reoriented_and_cropped_files,
          self.bvecs, self.bvals) = self._parse_stdout(new_runtime.stdout)
+        if self._config_created:
+            os.remove('config.ini')
         return new_runtime
 
     def _parse_stdout(self, stdout):
@@ -99,35 +103,47 @@ class Dcm2nii(CommandLine):
         last_added_file = None
         for line in stdout.split("\n"):
             if not skip:
-                file = None
+                out_file = None
                 if line.startswith("Saving "):
-                    file = line[len("Saving "):]
+                    out_file = line[len("Saving "):]
                 elif line.startswith("GZip..."):
-                    #for gzipped outpus files are not absolute
+                    # for gzipped outpus files are not absolute
+                    fname = line[len("GZip..."):]
+                    if len(files) and os.path.basename(files[-1]) == fname[:-3]:
+                        # we are seeing a previously reported conversion
+                        # as being saved in gzipped form -- remove the
+                        # obsolete, uncompressed file
+                        files.pop()
                     if isdefined(self.inputs.output_dir):
                         output_dir = self.inputs.output_dir
                     else:
                         output_dir = self._gen_filename('output_dir')
-                    file = os.path.abspath(os.path.join(output_dir,
-                                                        line[len("GZip..."):]))
+                    out_file = os.path.abspath(os.path.join(output_dir, fname))
                 elif line.startswith("Number of diffusion directions "):
                     if last_added_file:
                         base, filename, ext = split_filename(last_added_file)
-                        bvecs.append(os.path.join(base,filename + ".bvec"))
-                        bvals.append(os.path.join(base,filename + ".bval"))
-                elif re.search('.*-->(.*)', line):
-                    val = re.search('.*-->(.*)', line)
+                        bvecs.append(os.path.join(base, filename + ".bvec"))
+                        bvals.append(os.path.join(base, filename + ".bval"))
+                elif line.startswith("Removed DWI from DTI scan"):
+                    # such line can only follow the 'diffusion' case handled
+                    # just above
+                    for l in (bvecs, bvals):
+                        l[-1] = os.path.join(
+                            os.path.dirname(l[-1]),
+                            'x%s' % (os.path.basename(l[-1]),))
+                elif re.search('.*->(.*)', line):
+                    val = re.search('.*->(.*)', line)
                     val = val.groups()[0]
                     if isdefined(self.inputs.output_dir):
                         output_dir = self.inputs.output_dir
                     else:
                         output_dir = self._gen_filename('output_dir')
                     val = os.path.join(output_dir, val)
-                    file = val
+                    out_file = val
 
-                if file:
-                    files.append(file)
-                    last_added_file = file
+                if out_file:
+                    files.append(out_file)
+                    last_added_file = out_file
                     continue
 
                 if line.startswith("Reorienting as "):
@@ -156,6 +172,7 @@ class Dcm2nii(CommandLine):
         if name == 'output_dir':
             return os.getcwd()
         elif name == 'config_file':
+            self._config_created = True
             config_file = "config.ini"
             f = open(config_file, "w")
             # disable interactive mode
@@ -163,4 +180,3 @@ class Dcm2nii(CommandLine):
             f.close()
             return config_file
         return None
-

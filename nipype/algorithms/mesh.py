@@ -10,19 +10,145 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
     >>> os.chdir(datadir)
 
 '''
+from __future__ import division
+from builtins import zip
 
+import os.path as op
+from warnings import warn
 
 import numpy as np
 from numpy import linalg as nla
-import os.path as op
-from nipype.external import six
 
 from .. import logging
-
+from ..external.six import string_types
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
-from warnings import warn
 iflogger = logging.getLogger('interface')
+
+
+class TVTKBaseInterface(BaseInterface):
+    _redirect_x = True
+    _vtk_major = 6
+
+    def __init__(self, **inputs):
+        try:
+            from tvtk.tvtk_classes.vtk_version import vtk_build_version
+            self._vtk_major = int(vtk_build_version[0])
+        except ImportError:
+            iflogger.warning('VTK version-major inspection using tvtk failed.')
+
+        super(TVTKBaseInterface, self).__init__(**inputs)
+
+
+class WarpPointsInputSpec(BaseInterfaceInputSpec):
+    points = File(exists=True, mandatory=True,
+                  desc=('file containing the point set'))
+    warp = File(exists=True, mandatory=True,
+                desc=('dense deformation field to be applied'))
+    interp = traits.Enum('cubic', 'nearest', 'linear', usedefault=True,
+                         mandatory=True, desc='interpolation')
+    out_points = File(name_source='points', name_template='%s_warped',
+                      output_name='out_points', keep_extension=True,
+                      desc='the warped point set')
+
+
+class WarpPointsOutputSpec(TraitedSpec):
+    out_points = File(desc='the warped point set')
+
+
+class WarpPoints(TVTKBaseInterface):
+
+    """
+    Applies a displacement field to a point set given in vtk format.
+    Any discrete deformation field, given in physical coordinates and
+    which volume covers the extent of the vtk point set, is a valid
+    ``warp`` file. FSL interfaces are compatible, for instance any
+    field computed with :class:`nipype.interfaces.fsl.utils.ConvertWarp`.
+
+    Example
+    -------
+
+    >>> from nipype.algorithms.mesh import WarpPoints
+    >>> wp = WarpPoints()
+    >>> wp.inputs.points = 'surf1.vtk'
+    >>> wp.inputs.warp = 'warpfield.nii'
+    >>> res = wp.run() # doctest: +SKIP
+    """
+    input_spec = WarpPointsInputSpec
+    output_spec = WarpPointsOutputSpec
+
+    def _gen_fname(self, in_file, suffix='generated', ext=None):
+        import os.path as op
+
+        fname, fext = op.splitext(op.basename(in_file))
+
+        if fext == '.gz':
+            fname, fext2 = op.splitext(fname)
+            fext = fext2 + fext
+
+        if ext is None:
+            ext = fext
+
+        if ext[0] == '.':
+            ext = ext[1:]
+        return op.abspath('%s_%s.%s' % (fname, suffix, ext))
+
+    def _run_interface(self, runtime):
+        import nibabel as nb
+        import numpy as np
+        from scipy import ndimage
+
+        try:
+            from tvtk.api import tvtk
+        except ImportError:
+            raise ImportError('Interface requires tvtk')
+
+        r = tvtk.PolyDataReader(file_name=self.inputs.points)
+        r.update()
+        mesh = r.output
+        points = np.array(mesh.points)
+        warp_dims = nb.funcs.four_to_three(nb.load(self.inputs.warp))
+
+        affine = warp_dims[0].affine
+        voxsize = warp_dims[0].header.get_zooms()
+        vox2ras = affine[0:3, 0:3]
+        ras2vox = np.linalg.inv(vox2ras)
+        origin = affine[0:3, 3]
+        voxpoints = np.array([np.dot(ras2vox, (p - origin)) for p in points])
+
+        warps = []
+        for axis in warp_dims:
+            wdata = axis.get_data()
+            if np.any(wdata != 0):
+
+                warp = ndimage.map_coordinates(wdata,
+                                               voxpoints.transpose())
+            else:
+                warp = np.zeros((points.shape[0],))
+
+            warps.append(warp)
+
+        disps = np.squeeze(np.dstack(warps))
+        newpoints = [p + d for p, d in zip(points, disps)]
+        mesh.points = newpoints
+        w = tvtk.PolyDataWriter()
+        if self._vtk_major <= 5:
+            w.input = mesh
+        else:
+            w.set_input_data_object(mesh)
+
+        w.file_name = self._gen_fname(self.inputs.points,
+                                      suffix='warped',
+                                      ext='.vtk')
+        w.write()
+        return runtime
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_points'] = self._gen_fname(self.inputs.points,
+                                                suffix='warped',
+                                                ext='.vtk')
+        return outputs
 
 
 class ComputeMeshWarpInputSpec(BaseInterfaceInputSpec):
@@ -30,6 +156,7 @@ class ComputeMeshWarpInputSpec(BaseInterfaceInputSpec):
                     desc=('Reference surface (vtk format) to which compute '
                           'distance.'))
     surface2 = File(exists=True, mandatory=True,
+
                     desc=('Test surface (vtk format) from which compute '
                           'distance.'))
     metric = traits.Enum('euclidean', 'sqeuclidean', usedefault=True,
@@ -53,7 +180,7 @@ class ComputeMeshWarpOutputSpec(TraitedSpec):
                     desc='numpy file keeping computed distances and weights')
 
 
-class ComputeMeshWarp(BaseInterface):
+class ComputeMeshWarp(TVTKBaseInterface):
 
     """
     Calculates a the vertex-wise warping to get surface2 from surface1.
@@ -72,7 +199,7 @@ class ComputeMeshWarp(BaseInterface):
     >>> dist = m.ComputeMeshWarp()
     >>> dist.inputs.surface1 = 'surf1.vtk'
     >>> dist.inputs.surface2 = 'surf2.vtk'
-    >>> res = dist.run() # doctest: +SKIP
+    >>> res = dist.run()  # doctest: +SKIP
 
     """
 
@@ -93,17 +220,7 @@ class ComputeMeshWarp(BaseInterface):
         try:
             from tvtk.api import tvtk
         except ImportError:
-            raise ImportError('Interface ComputeMeshWarp requires tvtk')
-
-        try:
-            from enthought.etsconfig.api import ETSConfig
-            ETSConfig.toolkit = 'null'
-        except ImportError:
-            iflogger.warn(('ETS toolkit could not be imported'))
-            pass
-        except ValueError:
-            iflogger.warn(('ETS toolkit is already set'))
-            pass
+            raise ImportError('Interface requires tvtk')
 
         r1 = tvtk.PolyDataReader(file_name=self.inputs.surface1)
         r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
@@ -123,7 +240,6 @@ class ComputeMeshWarp(BaseInterface):
             errvector = nla.norm(diff, axis=1)
         except TypeError:  # numpy < 1.9
             errvector = np.apply_along_axis(nla.norm, 1, diff)
-            pass
 
         if self.inputs.metric == 'sqeuclidean':
             errvector = errvector ** 2
@@ -153,7 +269,12 @@ class ComputeMeshWarp(BaseInterface):
         out_mesh.point_data.vectors.name = 'warpings'
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_warp))
-        writer.set_input_data(out_mesh)
+
+        if self._vtk_major <= 5:
+            writer.input = mesh
+        else:
+            writer.set_input_data_object(mesh)
+
         writer.write()
 
         self._distance = np.average(errvector, weights=weights)
@@ -195,7 +316,7 @@ class MeshWarpMathsOutputSpec(TraitedSpec):
                     desc='vtk with surface warped')
 
 
-class MeshWarpMaths(BaseInterface):
+class MeshWarpMaths(TVTKBaseInterface):
 
     """
     Performs the most basic mathematical operations on the warping field
@@ -215,7 +336,7 @@ class MeshWarpMaths(BaseInterface):
     >>> mmath.inputs.in_surf = 'surf1.vtk'
     >>> mmath.inputs.operator = 'surf2.vtk'
     >>> mmath.inputs.operation = 'mul'
-    >>> res = mmath.run() # doctest: +SKIP
+    >>> res = mmath.run()  # doctest: +SKIP
 
     """
 
@@ -226,17 +347,7 @@ class MeshWarpMaths(BaseInterface):
         try:
             from tvtk.api import tvtk
         except ImportError:
-            raise ImportError('Interface ComputeMeshWarp requires tvtk')
-
-        try:
-            from enthought.etsconfig.api import ETSConfig
-            ETSConfig.toolkit = 'null'
-        except ImportError:
-            iflogger.warn(('ETS toolkit could not be imported'))
-            pass
-        except ValueError:
-            iflogger.warn(('ETS toolkit is already set'))
-            pass
+            raise ImportError('Interface requires tvtk')
 
         r1 = tvtk.PolyDataReader(file_name=self.inputs.in_surf)
         vtk1 = r1.output
@@ -249,7 +360,7 @@ class MeshWarpMaths(BaseInterface):
         operator = self.inputs.operator
         opfield = np.ones_like(points1)
 
-        if isinstance(operator, six.string_types):
+        if isinstance(operator, string_types):
             r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
             vtk2 = r2.output
             r2.update()
@@ -286,14 +397,21 @@ class MeshWarpMaths(BaseInterface):
         vtk1.point_data.vectors = warping
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_warp))
-        writer.set_input_data(vtk1)
+        if self._vtk_major <= 5:
+            writer.input = vtk1
+        else:
+            writer.set_input_data_object(vtk1)
         writer.write()
 
         vtk1.point_data.vectors = None
         vtk1.points = points1 + warping
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_file))
-        writer.set_input_data(vtk1)
+
+        if self._vtk_major <= 5:
+            writer.input = vtk1
+        else:
+            writer.set_input_data_object(vtk1)
         writer.write()
 
         return runtime

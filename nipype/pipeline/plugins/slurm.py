@@ -16,8 +16,6 @@ from .base import (SGELikeBatchManagerBase, logger, iflogger, logging)
 from nipype.interfaces.base import CommandLine
 
 
-
-
 class SLURMPlugin(SGELikeBatchManagerBase):
     '''
     Execute using SLURM
@@ -32,10 +30,9 @@ class SLURMPlugin(SGELikeBatchManagerBase):
 
     '''
 
-
     def __init__(self, **kwargs):
 
-        template="#!/bin/bash"
+        template = "#!/bin/bash"
 
         self._retry_timeout = 2
         self._max_tries = 2
@@ -45,7 +42,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
-            if  'max_tries' in kwargs['plugin_args']:
+            if 'max_tries' in kwargs['plugin_args']:
                 self._max_tries = kwargs['plugin_args']['max_tries']
             if 'template' in kwargs['plugin_args']:
                 self._template = kwargs['plugin_args']['template']
@@ -106,7 +103,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         while True:
             try:
                 result = cmd.run()
-            except Exception, e:
+            except Exception as e:
                 if tries < self._max_tries:
                     tries += 1
                     sleep(self._retry_timeout)  # sleep 2 seconds and try again.
