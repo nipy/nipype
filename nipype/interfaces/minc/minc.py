@@ -1167,7 +1167,11 @@ class BBoxInputSpec(StdOutCommandLineInputSpec):
 
     output_file = File(
         desc='output file containing bounding box corners',
-        position=-1)
+        position=-1,
+        name_source=['input_file'],
+        hash_files=False,
+        name_template='%s_bbox.txt',
+        keep_extension=False)
 
     threshold = traits.Int(
         0,
@@ -1226,20 +1230,6 @@ class BBox(StdOutCommandLine):
     input_spec = BBoxInputSpec
     output_spec = BBoxOutputSpec
     _cmd = 'mincbbox'
-
-    # FIXME Does this play nicely with a workflow?
-    def _gen_outfilename(self):
-        output_file = self.inputs.output_file
-
-        if isdefined(output_file):
-            return output_file
-        else:
-            return os.path.splitext(self.inputs.input_file)[0] + '_bbox.txt'
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(self._gen_outfilename())
-        return outputs
 
 
 class BeastInputSpec(CommandLineInputSpec):
