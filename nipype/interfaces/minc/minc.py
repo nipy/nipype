@@ -3099,13 +3099,21 @@ class BestLinRegInputSpec(CommandLineInputSpec):
         desc='output xfm file',
         genfile=True,
         argstr='%s',
-        position=-2,)
+        position=-2,
+        name_source=['source'],
+        hash_files=False,
+        name_template='%s_bestlinreg.xfm',
+        keep_extension=False)
 
     output_mnc = File(
         desc='output mnc file',
         genfile=True,
         argstr='%s',
-        position=-1,)
+        position=-1,
+        name_source=['source'],
+        hash_files=False,
+        name_template='%s_bestlinreg.mnc',
+        keep_extension=False)
 
     verbose = traits.Bool(
         desc='Print out log messages. Default: False.',
@@ -3154,42 +3162,6 @@ class BestLinReg(CommandLine):
     input_spec = BestLinRegInputSpec
     output_spec = BestLinRegOutputSpec
     _cmd = 'bestlinreg'
-
-    def _gen_filename(self, name):
-        if name == 'output_mnc':
-            output_mnc = self.inputs.output_mnc
-
-            if isdefined(output_mnc):
-                return os.path.abspath(output_mnc)
-            else:
-                return aggregate_filename(
-                    [self.inputs.source, self.inputs.target], 'bestlinreg_output')
-        elif name == 'output_xfm':
-            output_xfm = self.inputs.output_xfm
-
-            if isdefined(output_xfm):
-                return os.path.abspath(output_xfm)
-            else:
-                return aggregate_filename(
-                    [
-                        self.inputs.source,
-                        self.inputs.target],
-                    'bestlinreg_output') + 'output_xfm.xfm'  # FIXME, tidy up
-        else:
-            raise NotImplemented
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_mnc'] = os.path.abspath(
-            self._gen_filename('output_mnc'))
-        outputs['output_xfm'] = os.path.abspath(
-            self._gen_filename('output_xfm'))
-        return outputs
-
-
-"""
-"$isomodel_base.mnc", $fitfiles[$f], $modxfm[$f]);
-"""
 
 
 class NlpFitInputSpec(CommandLineInputSpec):
