@@ -275,7 +275,11 @@ class ToRawInputSpec(StdOutCommandLineInputSpec):
 
     output_file = File(
         desc='output file',
-        position=-1)
+        position=-1,
+        name_source=['input_file'],
+        hash_files=False,
+        name_template='%s.raw',
+        keep_extension=False)
 
     _xor_write = ('write_byte', 'write_short', 'write_int',
                   'write_long', 'write_float', 'write_double')
@@ -364,25 +368,6 @@ class ToRaw(StdOutCommandLine):
     input_spec = ToRawInputSpec
     output_spec = ToRawOutputSpec
     _cmd = 'minctoraw'
-
-    def _gen_outfilename(self):
-        """
-        If the user specified output_file then return that, otherwise
-        return the full path to the input file with the extension
-        changed to '.raw'.
-        """
-
-        output_file = self.inputs.output_file
-
-        if isdefined(output_file):
-            return output_file
-        else:
-            return os.path.splitext(self.inputs.input_file)[0] + '.raw'
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(self._gen_outfilename())
-        return outputs
 
 
 class ConvertInputSpec(CommandLineInputSpec):
