@@ -1366,11 +1366,13 @@ class BeastInputSpec(CommandLineInputSpec):
         desc='output file',
         position=-1,
         argstr='%s',
-        genfile=True)
+        name_source=['input_file'],
+        hash_files=False,
+        name_template='%s_beast_mask.mnc')
 
 
 class BeastOutputSpec(TraitedSpec):
-    output_file = File(desc='output file in raw/text format', exists=True)
+    output_file = File(desc='output mask file', exists=True)
 
 
 class Beast(CommandLine):
@@ -1391,20 +1393,6 @@ class Beast(CommandLine):
     input_spec = BeastInputSpec
     output_spec = BeastOutputSpec
     _cmd = 'mincbeast'
-
-    # FIXME Does this play nicely with a workflow?
-    def _gen_outfilename(self):
-        output_file = self.inputs.output_file
-
-        if isdefined(output_file):
-            return output_file
-        else:
-            return os.path.splitext(self.inputs.input_file)[0] + '_mask.mnc'
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(self._gen_outfilename())
-        return outputs
 
 
 class PikInputSpec(CommandLineInputSpec):
