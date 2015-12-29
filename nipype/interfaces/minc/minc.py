@@ -2947,7 +2947,10 @@ class GennlxfmInputSpec(CommandLineInputSpec):
         desc='output file',
         genfile=True,
         argstr='%s',
-        position=-1,)
+        position=-1,
+        name_source=['like'],
+        hash_files=False,
+        name_template='%s_gennlxfm.xfm')
 
     verbose = traits.Bool(
         desc='Print out log messages. Default: False.',
@@ -2987,8 +2990,9 @@ class Gennlxfm(CommandLine):
     --------
 
     >>> from nipype.interfaces.minc import Gennlxfm
-    >>> gennlxfm = Gennlxfm(step=1)
-    >>> gennlxfmiso.run() # doctest: +SKIP
+    >>> from nipype.interfaces.minc.testdata import minc2Dfile
+    >>> gennlxfm = Gennlxfm(step=1, like=minc2Dfile)
+    >>> gennlxfm.run() # doctest: +SKIP
 
     """
 
@@ -2996,30 +3000,9 @@ class Gennlxfm(CommandLine):
     output_spec = GennlxfmOutputSpec
     _cmd = 'gennlxfm'
 
-    def _gen_filename(self, name):
-        if name == 'output_file':
-            output_file = self.inputs.output_file
-
-            if isdefined(output_file):
-                return os.path.abspath(output_file)
-            elif isdefined(self.inputs.like):
-                return aggregate_filename(
-                    [self.inputs.like], 'gennlxfm_output') + '.xfm'
-            else:
-                assert False, 'Cannot determine output file as neither "output_file" nor "like" were specified.'
-        else:
-            raise NotImplemented
-
-    def _gen_outfilename(self):
-        return self._gen_filename('output_file')
-
     def _list_outputs(self):
-        # FIXME The xfm output has only the basename of the grid file, will this cause problems?
-        # See also lines 89-92 of gennlxfm.
-        outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(self._gen_outfilename())
-        outputs['output_grid'] = re.sub(
-            '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
+        outputs = super(Gennlxfm, self)._list_outputs()
+        outputs['output_grid'] = re.sub('.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
         return outputs
 
 
