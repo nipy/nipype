@@ -1,6 +1,14 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Utility routines for workflow graphs
+
+  .. testsetup::
+     # Change directory to provide relative paths for doctests
+     import os
+     filepath = os.path.dirname(os.path.realpath( __file__ ))
+     datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+     os.chdir(datadir)
+
 """
 
 from future import standard_library
@@ -18,142 +26,34 @@ except ImportError:
 
 from collections import OrderedDict
 from copy import deepcopy
-from glob import glob
 from collections import defaultdict
 import os
 import re
 import numpy as np
-from nipype.utils.misc import package_check
 from functools import reduce
 
+from nipype.utils.misc import package_check
+from nipype.external.six import string_types
+from nipype.utils.filemanip import fname_presuffix
+from nipype.utils.misc import create_function_from_source
+from nipype.interfaces.base import (CommandLine, isdefined, Undefined,
+                                    InterfaceResult)
+from nipype.interfaces.utility import IdentityInterface
+from nipype.utils.provenance import ProvStore, pm, nipype_ns, get_id
+
+from nipype import logging, config
+from .utils import get_print_name
+
+
 package_check('networkx', '1.3')
-
-import networkx as nx
-
-from ..external.six import string_types
-from ..utils.filemanip import (fname_presuffix, FileNotFoundError,
-                               filename_to_list, get_related_files)
-from ..utils.misc import create_function_from_source, str2bool
-from ..interfaces.base import (CommandLine, isdefined, Undefined,
-                               InterfaceResult)
-from ..interfaces.utility import IdentityInterface
-from ..utils.provenance import ProvStore, pm, nipype_ns, get_id
-
-from .. import logging, config
 logger = logging.getLogger('workflow')
 
+import networkx as nx
 try:
     dfs_preorder = nx.dfs_preorder
+    logger.debug('detected networkx < 1.4 dev')
 except AttributeError:
     dfs_preorder = nx.dfs_preorder_nodes
-    logger.debug('networkx 1.4 dev or higher detected')
-
-try:
-    from os.path import relpath
-except ImportError:
-    import os.path as op
-
-    def relpath(path, start=None):
-        """Return a relative version of a path"""
-        if start is None:
-            start = os.curdir
-        if not path:
-            raise ValueError("no path specified")
-        start_list = op.abspath(start).split(op.sep)
-        path_list = op.abspath(path).split(op.sep)
-        if start_list[0].lower() != path_list[0].lower():
-            unc_path, rest = op.splitunc(path)
-            unc_start, rest = op.splitunc(start)
-            if bool(unc_path) ^ bool(unc_start):
-                raise ValueError(("Cannot mix UNC and non-UNC paths "
-                                  "(%s and %s)") % (path, start))
-            else:
-                raise ValueError("path is on drive %s, start on drive %s"
-                                 % (path_list[0], start_list[0]))
-        # Work out how much of the filepath is shared by start and path.
-        for i in range(min(len(start_list), len(path_list))):
-            if start_list[i].lower() != path_list[i].lower():
-                break
-        else:
-            i += 1
-
-        rel_list = [op.pardir] * (len(start_list) - i) + path_list[i:]
-        if not rel_list:
-            return os.curdir
-        return op.join(*rel_list)
-
-
-def modify_paths(object, relative=True, basedir=None):
-    """Convert paths in data structure to either full paths or relative paths
-
-    Supports combinations of lists, dicts, tuples, strs
-
-    Parameters
-    ----------
-
-    relative : boolean indicating whether paths should be set relative to the
-               current directory
-    basedir : default os.getcwd()
-              what base directory to use as default
-    """
-    if not basedir:
-        basedir = os.getcwd()
-    if isinstance(object, dict):
-        out = {}
-        for key, val in sorted(object.items()):
-            if isdefined(val):
-                out[key] = modify_paths(val, relative=relative,
-                                        basedir=basedir)
-    elif isinstance(object, (list, tuple)):
-        out = []
-        for val in object:
-            if isdefined(val):
-                out.append(modify_paths(val, relative=relative,
-                                        basedir=basedir))
-        if isinstance(object, tuple):
-            out = tuple(out)
-    else:
-        if isdefined(object):
-            if isinstance(object, string_types) and os.path.isfile(object):
-                if relative:
-                    if config.getboolean('execution', 'use_relative_paths'):
-                        out = relpath(object, start=basedir)
-                    else:
-                        out = object
-                else:
-                    out = os.path.abspath(os.path.join(basedir, object))
-                if not os.path.exists(out):
-                    raise FileNotFoundError('File %s not found' % out)
-            else:
-                out = object
-    return out
-
-
-def get_print_name(node, simple_form=True):
-    """Get the name of the node
-
-    For example, a node containing an instance of interfaces.fsl.BET
-    would be called nodename.BET.fsl
-
-    """
-    name = node.fullname
-    if hasattr(node, '_interface'):
-        pkglist = node._interface.__class__.__module__.split('.')
-        interface = node._interface.__class__.__name__
-        destclass = ''
-        if len(pkglist) > 2:
-            destclass = '.%s' % pkglist[2]
-        if simple_form:
-            name = node.fullname + destclass
-        else:
-            name = '.'.join([node.fullname, interface]) + destclass
-    if simple_form:
-        parts = name.split('.')
-        if len(parts) > 2:
-            return ' ('.join(parts[1:]) + ')'
-        elif len(parts) == 2:
-            return parts[1]
-    return name
 
 
 def _create_dot_graph(graph, show_connectinfo=False, simple_form=True):
@@ -290,7 +190,7 @@ def walk(children, level=0, path=None, usename=True):
 
     Examples
     --------
-    >>> from nipype.pipeline.utils import walk
+    >>> from nipype.pipeline.engine.graph import walk
     >>> iterables = [('a', lambda: [1, 2]), ('b', lambda: [3, 4])]
     >>> [val['a'] for val in walk(iterables)]
     [1, 1, 2, 2]
@@ -325,7 +225,7 @@ def synchronize_iterables(iterables):
 
     Examples
     --------
-    >>> from nipype.pipeline.utils import synchronize_iterables
+    >>> from nipype.pipeline.engine.graph import synchronize_iterables
     >>> iterables = dict(a=lambda: [1, 2], b=lambda: [3, 4])
     >>> synced = synchronize_iterables(iterables)
     >>> synced == [{'a': 1, 'b': 3}, {'a': 2, 'b': 4}]
@@ -473,16 +373,15 @@ def _merge_graphs(supergraph, nodes, subgraph, nodeid, iterables,
             node._id += template % i
     return supergraph
 
-
-def _connect_nodes(graph, srcnode, destnode, connection_info):
-    """Add a connection between two nodes
-    """
-    data = graph.get_edge_data(srcnode, destnode, default=None)
-    if not data:
-        data = {'connect': connection_info}
-        graph.add_edges_from([(srcnode, destnode, data)])
-    else:
-        data['connect'].extend(connection_info)
+# def _connect_nodes(graph, srcnode, destnode, connection_info):
+#     """Add a connection between two nodes
+#     """
+#     data = graph.get_edge_data(srcnode, destnode, default=None)
+#     if not data:
+#         data = {'connect': connection_info}
+#         graph.add_edges_from([(srcnode, destnode, data)])
+#     else:
+#         data['connect'].extend(connection_info)
 
 
 def _remove_nonjoin_identity_nodes(graph, keep_iterables=False):
@@ -506,7 +405,9 @@ def _identity_nodes(graph, include_iterables):
     are included if and only if the include_iterables flag is set
     to True.
     """
-    return [node for node in nx.topological_sort(graph)
+    sorted_nodes = nx.topological_sort(graph)
+    logger.debug('Get identity nodes: %s' % [n.fullname for n in sorted_nodes])
+    return [node for node in sorted_nodes
             if isinstance(node._interface, IdentityInterface) and
             (include_iterables or getattr(node, 'iterables') is None)]
 
@@ -514,13 +415,23 @@ def _identity_nodes(graph, include_iterables):
 def _remove_identity_node(graph, node):
     """Remove identity nodes from an execution graph
     """
-    portinputs, portoutputs = _node_ports(graph, node)
+    portinputs, portoutputs, signals = _node_ports(graph, node)
+    logger.debug('Remove Identity Node %s\n\tPortinputs=%s\n\tportoutputs=%s\n'
+                 '\tsignals=%s' % (node, portinputs, portoutputs, signals))
+    for field, connections in list(signals.items()):
+        if portinputs:
+            _propagate_internal_output(graph, node, field, connections,
+                                       portinputs)
+        else:
+            _propagate_signal(graph, node, field, connections)
+
     for field, connections in list(portoutputs.items()):
         if portinputs:
             _propagate_internal_output(graph, node, field, connections,
                                        portinputs)
         else:
             _propagate_root_output(graph, node, field, connections)
+
     graph.remove_nodes_from([node])
     logger.debug("Removed the identity node %s from the graph." % node)
 
@@ -537,19 +448,39 @@ def _node_ports(graph, node):
     """
     portinputs = {}
     portoutputs = {}
-    for u, _, d in graph.in_edges_iter(node, data=True):
-        for src, dest in d['connect']:
-            portinputs[dest] = (u, src)
-    for _, v, d in graph.out_edges_iter(node, data=True):
-        for src, dest in d['connect']:
+    signals = {}
+
+    in_edges = graph.in_edges_iter(node, data=True)
+    out_edges = graph.out_edges_iter(node, data=True)
+
+    logger.debug('Edges of %s, (inputs=%s, signals=%s)' % (node, node.inputs,
+                                                           node.signals))
+    logger.debug('In edges')
+    for u, _, d in in_edges:
+        logger.debug('%s' % d)
+        for c in d['connect']:
+            portinputs[c[1]] = (u, c[0])
+
+    logger.debug('Out edges')
+    for _, v, d in out_edges:
+        logger.debug('%s' % d)
+        for c in d['connect']:
+            src, dest = c[0], c[1]
+            ctype = 'data'
+            if len(c) == 3:
+                ctype = c[-1]
             if isinstance(src, tuple):
                 srcport = src[0]
             else:
                 srcport = src
-            if srcport not in portoutputs:
-                portoutputs[srcport] = []
-            portoutputs[srcport].append((v, dest, src))
-    return (portinputs, portoutputs)
+
+            if ctype == 'control':
+                signals[srcport] = signals.get(srcport, []) + \
+                    [(v, dest, src)]
+            else:
+                portoutputs[srcport] = portoutputs.get(srcport, []) + \
+                    [(v, dest, src)]
+    return (portinputs, portoutputs, signals)
 
 
 def _propagate_root_output(graph, node, field, connections):
@@ -561,6 +492,20 @@ def _propagate_root_output(graph, node, field, connections):
             value = evaluate_connect_function(src[1], src[2],
                                               value)
         destnode.set_input(inport, value)
+
+
+def _propagate_signal(graph, node, field, connections):
+    """Propagates the given graph root node output port
+    field connections to the out-edge destination nodes."""
+    for destnode, inport, src in connections:
+        value = getattr(node.inputs, field)
+        if isinstance(src, tuple):
+            value = evaluate_connect_function(src[1], src[2],
+                                              value)
+        logger.debug(
+            'Propagating signal %s.%s (value=%s) to %s.%s' %
+            (node, field, value, destnode, inport))
+        destnode.set_signal(inport, value)
 
 
 def _propagate_internal_output(graph, node, field, connections, portinputs):
@@ -748,15 +693,15 @@ def generate_expanded_graph(graph_in):
                     # the (source, destination) field tuples
                     connects = newdata['connect']
                     # the join fields connected to the source
-                    join_fields = [field for _, field in connects
-                                   if field in jnode.joinfield]
+                    join_fields = [c[1] for c in connects
+                                   if c[1] in jnode.joinfield]
                     # the {field: slot fields} maps assigned to the input
                     # node, e.g. {'image': 'imageJ3', 'mask': 'maskJ3'}
                     # for the third join source expansion replicate of a
                     # join node with join fields image and mask
                     slots = slot_dicts[in_idx]
                     for con_idx, connect in enumerate(connects):
-                        src_field, dest_field = connect
+                        src_field, dest_field = connect[0], connect[1]
                         # qualify a join destination field name
                         if dest_field in slots:
                             slot_field = slots[dest_field]
@@ -975,165 +920,6 @@ def format_dot(dotfilename, format=None):
             raise ioe
     else:
         logger.info('Converting dotfile: %s to %s format' % (dotfilename, format))
-
-
-def make_output_dir(outdir):
-    """Make the output_dir if it doesn't exist.
-
-    Parameters
-    ----------
-    outdir : output directory to create
-
-    """
-    if not os.path.exists(os.path.abspath(outdir)):
-        logger.debug("Creating %s" % outdir)
-        os.makedirs(outdir)
-    return outdir
-
-
-def get_all_files(infile):
-    files = [infile]
-    if infile.endswith(".img"):
-        files.append(infile[:-4] + ".hdr")
-        files.append(infile[:-4] + ".mat")
-    if infile.endswith(".img.gz"):
-        files.append(infile[:-7] + ".hdr.gz")
-    return files
-
-
-def walk_outputs(object):
-    """Extract every file and directory from a python structure
-    """
-    out = []
-    if isinstance(object, dict):
-        for key, val in sorted(object.items()):
-            if isdefined(val):
-                out.extend(walk_outputs(val))
-    elif isinstance(object, (list, tuple)):
-        for val in object:
-            if isdefined(val):
-                out.extend(walk_outputs(val))
-    else:
-        if isdefined(object) and isinstance(object, string_types):
-            if os.path.islink(object) or os.path.isfile(object):
-                out = [(filename, 'f') for filename in get_all_files(object)]
-            elif os.path.isdir(object):
-                out = [(object, 'd')]
-    return out
-
-
-def walk_files(cwd):
-    for path, _, files in os.walk(cwd):
-        for f in files:
-            yield os.path.join(path, f)
-
-
-def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
-                            files2keep=None, dirs2keep=None):
-    """Removes all files not needed for further analysis from the directory
-    """
-    if not outputs:
-        return
-    outputs_to_keep = list(outputs.get().keys())
-    if needed_outputs and \
-       str2bool(config['execution']['remove_unnecessary_outputs']):
-        outputs_to_keep = needed_outputs
-    # build a list of needed files
-    output_files = []
-    outputdict = outputs.get()
-    for output in outputs_to_keep:
-        output_files.extend(walk_outputs(outputdict[output]))
-    needed_files = [path for path, type in output_files if type == 'f']
-    if str2bool(config['execution']['keep_inputs']):
-        input_files = []
-        inputdict = inputs.get()
-        input_files.extend(walk_outputs(inputdict))
-        needed_files += [path for path, type in input_files if type == 'f']
-    for extra in ['_0x*.json', 'provenance.*', 'pyscript*.m', 'pyjobs*.mat',
-                  'command.txt', 'result*.pklz', '_inputs.pklz', '_node.pklz']:
-        needed_files.extend(glob(os.path.join(cwd, extra)))
-    if files2keep:
-        needed_files.extend(filename_to_list(files2keep))
-    needed_dirs = [path for path, type in output_files if type == 'd']
-    if dirs2keep:
-        needed_dirs.extend(filename_to_list(dirs2keep))
-    for extra in ['_nipype', '_report']:
-        needed_dirs.extend(glob(os.path.join(cwd, extra)))
-    temp = []
-    for filename in needed_files:
-        temp.extend(get_related_files(filename))
-    needed_files = temp
-    logger.debug('Needed files: %s' % (';'.join(needed_files)))
-    logger.debug('Needed dirs: %s' % (';'.join(needed_dirs)))
-    files2remove = []
-    if str2bool(config['execution']['remove_unnecessary_outputs']):
-        for f in walk_files(cwd):
-            if f not in needed_files:
-                if len(needed_dirs) == 0:
-                    files2remove.append(f)
-                elif not any([f.startswith(dname) for dname in needed_dirs]):
-                    files2remove.append(f)
-    else:
-        if not str2bool(config['execution']['keep_inputs']):
-            input_files = []
-            inputdict = inputs.get()
-            input_files.extend(walk_outputs(inputdict))
-            input_files = [path for path, type in input_files if type == 'f']
-            for f in walk_files(cwd):
-                if f in input_files and f not in needed_files:
-                    files2remove.append(f)
-    logger.debug('Removing files: %s' % (';'.join(files2remove)))
-    for f in files2remove:
-        os.remove(f)
-    for key in outputs.copyable_trait_names():
-        if key not in outputs_to_keep:
-            setattr(outputs, key, Undefined)
-    return outputs
-
-
-def merge_dict(d1, d2, merge=lambda x, y: y):
-    """
-    Merges two dictionaries, non-destructively, combining
-    values on duplicate keys as defined by the optional merge
-    function.  The default behavior replaces the values in d1
-    with corresponding values in d2.  (There is no other generally
-    applicable merge strategy, but often you'll have homogeneous
-    types in your dicts, so specifying a merge technique can be
-    valuable.)
-
-    Examples:
-
-    >>> d1 = {'a': 1, 'c': 3, 'b': 2}
-    >>> d2 = merge_dict(d1, d1)
-    >>> len(d2)
-    3
-    >>> [d2[k] for k in ['a', 'b', 'c']]
-    [1, 2, 3]
-
-    >>> d3 = merge_dict(d1, d1, lambda x,y: x+y)
-    >>> len(d3)
-    3
-    >>> [d3[k] for k in ['a', 'b', 'c']]
-    [2, 4, 6]
-
-    """
-    if not isinstance(d1, dict):
-        return merge(d1, d2)
-    result = dict(d1)
-    if d2 is None:
-        return result
-    for k, v in list(d2.items()):
-        if k in result:
-            result[k] = merge_dict(result[k], v, merge=merge)
-        else:
-            result[k] = v
-    return result
-
-
-def merge_bundles(g1, g2):
-    for rec in g2.get_records():
-        g1._add_record(rec)
-    return g1
 
 
 def write_workflow_prov(graph, filename=None, format='all'):

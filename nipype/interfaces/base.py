@@ -40,9 +40,8 @@ from .traits_extension import (traits, Undefined, TraitDictObject,
                                TraitListObject, TraitError,
                                isdefined, File, Directory,
                                has_metadata)
-from ..utils.filemanip import (md5, hash_infile, FileNotFoundError,
-                               hash_timestamp, save_json,
-                               split_filename)
+from ..utils.filemanip import md5, \
+    FileNotFoundError, save_json, split_filename
 from ..utils.misc import is_container, trim, str2bool
 from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
@@ -463,6 +462,7 @@ class BaseTraitedSpec(traits.HasTraits):
 
     def _hash_infile(self, adict, key):
         """ Inject file hashes into adict[key]"""
+        from nipype.utils.filemanip import hash_infile, hash_timestamp
         stuff = adict[key]
         if not is_container(stuff):
             stuff = [stuff]
@@ -578,6 +578,7 @@ class BaseTraitedSpec(traits.HasTraits):
 
     def _get_sorteddict(self, object, dictwithhash=False, hash_method=None,
                         hash_files=True):
+        from nipype.utils.filemanip import hash_infile, hash_timestamp
         if isinstance(object, dict):
             out = []
             for key, val in sorted(object.items()):
