@@ -1412,7 +1412,11 @@ class PikInputSpec(CommandLineInputSpec):
         desc='output file',
         argstr='%s',
         genfile=True,
-        position=-1)
+        position=-1,
+        name_source=['input_file'],
+        hash_files=False,
+        name_template='%s.png',
+        keep_extension=False)
 
     clobber = traits.Bool(
         desc='Overwrite existing file.',
@@ -1567,37 +1571,6 @@ class Pik(CommandLine):
                 raise ValueError(
                     'Unknown value for "title" argument: ' + str(value))
         return super(Pik, self)._format_arg(name, spec, value)
-
-    def _gen_outfilename(self):
-        return self._gen_filename('output_file')
-
-    def _gen_filename(self, name):
-        if name == 'output_file':
-            output_file = self.inputs.output_file
-
-            if isdefined(output_file):
-                # FIXME make a warning instead?
-                assert not isdefined(self.inputs.png)
-                # FIXME make a warning instead?
-                assert not isdefined(self.inputs.jpg)
-                return os.path.abspath(output_file)
-            else:
-                b = aggregate_filename([self.inputs.input_file], 'pik_output')
-                if isdefined(self.inputs.png) and self.inputs.png:
-                    return b + '.png'
-                elif isdefined(self.inputs.jpg) and self.inputs.jpg:
-                    return b + '.jpg'
-                else:
-                    # By default we'll write a png file.
-                    return b + '.png'
-        else:
-            raise NotImplemented
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(
-            self._gen_filename('output_file'))
-        return outputs
 
 
 class BlurInputSpec(CommandLineInputSpec):
