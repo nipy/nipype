@@ -3005,7 +3005,8 @@ class Gennlxfm(CommandLine):
 
     def _list_outputs(self):
         outputs = super(Gennlxfm, self)._list_outputs()
-        outputs['output_grid'] = re.sub('.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
+        outputs['output_grid'] = re.sub(
+            '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
         return outputs
 
 
@@ -3674,6 +3675,7 @@ class VolSymm(CommandLine):
         # Have to manually check for the grid files.
         if os.path.exists(outputs['trans_file']):
             if 'grid' in open(outputs['trans_file'], 'r').read():
-                outputs['output_grid'] = re.sub('.(nlxfm|xfm)$', '_grid_0.mnc', outputs['trans_file'])
+                outputs['output_grid'] = re.sub(
+                    '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['trans_file'])
 
         return outputs
