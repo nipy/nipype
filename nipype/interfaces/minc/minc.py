@@ -41,27 +41,6 @@ import warnings
 warn = warnings.warn
 warnings.filterwarnings('always', category=UserWarning)
 
-# TODO Check exit-code behaviour of minc commands.
-
-# FIXME double-check behaviour of usedefault=True on ranges with values specified, and also int traits. Don't want
-# command line options to be specified if the user doesn't set the value.
-
-# FIXME -filelist options accept '-' for stdin. Can we support this?
-
-# FIXME Can we check the arguments to "-range min max" to avoid min > max?
-
-# FIXME output_file(s) should be optional, in line with the Nipype convention.
-
-# FIXME check all interface .help() outputs for out_file vs output_file.
-
-# FIXME Range() produces an Int, not suitable for percentage ranges. Check
-# all of these.
-
-# FIXME Check that *all* genfile outputs end up in the cwd, not as a mash of the
-# input file.
-
-# FIXME check that ALL output_file things have genfile=True.
-
 
 class ExtractInputSpec(StdOutCommandLineInputSpec):
     input_file = File(
