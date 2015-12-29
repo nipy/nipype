@@ -12,9 +12,9 @@ from tempfile import mkdtemp
 
 import networkx as nx
 
-from nipype.testing import (assert_raises, assert_equal, assert_true, assert_false)
-import nipype.interfaces.base as nib
-import nipype.pipeline.engine as pe
+from ....testing import (assert_raises, assert_equal, assert_true, assert_false)
+from ... import engine as pe
+from ....interfaces import base as nib
 
 
 class InputSpec(nib.TraitedSpec):
