@@ -3028,7 +3028,10 @@ class XfmConcatInputSpec(CommandLineInputSpec):
         desc='output file',
         genfile=True,
         argstr='%s',
-        position=-1,)
+        position=-1,
+        name_source=['input_files'],
+        hash_files=False,
+        name_template='%s_xfmconcat.xfm')
 
     verbose = traits.Bool(
         desc='Print out log messages. Default: False.',
@@ -3042,7 +3045,6 @@ class XfmConcatInputSpec(CommandLineInputSpec):
 
 class XfmConcatOutputSpec(TraitedSpec):
     output_file = File(desc='output file', exists=True)
-    # FIXME is exists=True always the case?
     output_grids = OutputMultiPath(desc='output grids', exists=True)
 
 
@@ -3064,36 +3066,16 @@ class XfmConcat(CommandLine):
     output_spec = XfmConcatOutputSpec
     _cmd = 'xfmconcat'
 
-    def _gen_filename(self, name):
-        if name == 'output_file':
-            output_file = self.inputs.output_file
-
-            if isdefined(output_file):
-                return os.path.abspath(output_file)
-            else:
-                return aggregate_filename(
-                    self.inputs.input_files,
-                    'xfmconcat_output') + '.xfm'
-        else:
-            raise NotImplemented
-
-    def _gen_outfilename(self):
-        return self._gen_filename('output_file')
-
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(self._gen_outfilename())
+        outputs = super(XfmConcat, self)._list_outputs()
 
-        # FIXME Is this the sensible? No other way to tell if the grid files
-        # were produced.
-        # FIXME This is safe to assume?
-        assert os.path.exists(outputs['output_file'])
-        if 'grid' in open(outputs['output_file'], 'r').read():
-            outputs['output_grids'] = glob.glob(
-                re.sub(
-                    '.(nlxfm|xfm)$',
-                    '_grid_*.mnc',
-                    outputs['output_file']))
+        if os.path.exists(outputs['output_file']):
+            if 'grid' in open(outputs['output_file'], 'r').read():
+                outputs['output_grids'] = glob.glob(
+                    re.sub(
+                        '.(nlxfm|xfm)$',
+                        '_grid_*.mnc',
+                        outputs['output_file']))
 
         return outputs
 
