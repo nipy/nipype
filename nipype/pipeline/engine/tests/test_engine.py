@@ -586,7 +586,8 @@ def test_node_hash():
     try:
         w1.run(plugin=RaiseError())
     except Exception as e:
-        pe.logger.info('Exception: %s' % str(e))
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_true, error_raised
     # yield assert_true, 'Submit called' in e
@@ -600,7 +601,8 @@ def test_node_hash():
     try:
         w1.run(plugin=RaiseError())
     except Exception as e:
-        pe.logger.info('Exception: %s' % str(e))
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
     os.chdir(cwd)
@@ -638,7 +640,8 @@ def test_old_config():
     try:
         w1.run(plugin='Linear')
     except Exception as e:
-        pe.logger.info('Exception: %s' % str(e))
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
     os.chdir(cwd)
@@ -722,7 +725,8 @@ def test_serial_input():
     try:
         w1.run(plugin='MultiProc')
     except Exception as e:
-        pe.logger.info('Exception: %s' % str(e))
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
 
@@ -735,7 +739,8 @@ def test_serial_input():
     try:
         w1.run(plugin='MultiProc')
     except Exception as e:
-        pe.logger.info('Exception: %s' % str(e))
+        from nipype.pipeline.engine.base import logger
+        logger.info('Exception: %s' % str(e))
         error_raised = True
     yield assert_false, error_raised
 
