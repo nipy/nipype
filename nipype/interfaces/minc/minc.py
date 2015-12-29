@@ -3183,31 +3183,33 @@ class NlpFitInputSpec(CommandLineInputSpec):
         desc='output xfm file',
         genfile=True,
         argstr='%s',
-        position=-1,)
+        position=-1,
+        name_source=['source'],
+        hash_files=False,
+        name_template='%s_nlpfit.mnc',
+        keep_extension=False)
 
     # This is a dummy input.
     input_grid_files = InputMultiPath(
         traits.File,
         desc='input grid file(s)',)
 
-    # FIXME outout_mnc?
-
     config_file = File(
         desc='File containing the fitting configuration use.',
         argstr='-config_file %s',
-        mandatory=True,  # FIXME debugging
+        mandatory=True,
         exists=True)
 
     init_xfm = File(
         desc='Initial transformation (default identity).',
         argstr='-init_xfm %s',
-        mandatory=True,  # FIXME debugging
+        mandatory=True,
         exists=True)
 
     source_mask = File(
         desc='Source mask to use during fitting.',
         argstr='-source_mask %s',
-        mandatory=True,  # FIXME Just for debugging...
+        mandatory=True,
         exists=True)
 
     verbose = traits.Bool(
@@ -3219,15 +3221,9 @@ class NlpFitInputSpec(CommandLineInputSpec):
         usedefault=True,
         default_value=True)
 
-    # FIXME Very bare implementation, many parameters not done yet.
-
 
 class NlpFitOutputSpec(TraitedSpec):
-    # FIXME nlpfit has two modes... deal with output.xfm vs output.mnc
-    # depending on whether -config_file is passed.
-
     output_xfm = File(desc='output xfm file', exists=True)
-    # FIXME Is this always the case, that exists=True?
     output_grid = File(desc='output grid file', exists=True)
 
 
@@ -3258,32 +3254,13 @@ class NlpFit(CommandLine):
     output_spec = NlpFitOutputSpec
     _cmd = 'nlpfit'
 
-    def _gen_filename(self, name):
-        if name == 'output_xfm':
-            output_xfm = self.inputs.output_xfm
-
-            if isdefined(output_xfm):
-                return os.path.abspath(output_xfm)
-            else:
-                return aggregate_filename(
-                    [self.inputs.source, self.inputs.target], 'nlpfit_xfm_output') + '.xfm'
-        else:
-            raise NotImplemented
-
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-        # FIXME see above.
-        # outputs['output_mnc'] = os.path.abspath(self._gen_filename('output_mnc'))
-        outputs['output_xfm'] = os.path.abspath(
-            self._gen_filename('output_xfm'))
+        outputs = super(NlpFit, self)._list_outputs()
 
-        # FIXME Is this the sensible? No other way to tell if the grid files
-        # were produced.
-        # FIXME This is safe to assume?
-        assert os.path.exists(outputs['output_xfm'])
-        if 'grid' in open(outputs['output_xfm'], 'r').read():
-            outputs['output_grid'] = re.sub(
-                '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_xfm'])
+        if os.path.exists(outputs['output_xfm']):
+            if 'grid' in open(outputs['output_xfm'], 'r').read():
+                outputs['output_grid'] = re.sub(
+                    '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_xfm'])
 
         return outputs
 
