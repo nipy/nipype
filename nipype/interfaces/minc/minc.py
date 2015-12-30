@@ -3153,11 +3153,7 @@ class NlpFitInputSpec(CommandLineInputSpec):
         desc='output xfm file',
         genfile=True,
         argstr='%s',
-        position=-1,
-        name_source=['source'],
-        hash_files=False,
-        name_template='%s_nlpfit.mnc',
-        keep_extension=False)
+        position=-1,)
 
     # This is a dummy input.
     input_grid_files = InputMultiPath(
@@ -3224,13 +3220,27 @@ class NlpFit(CommandLine):
     output_spec = NlpFitOutputSpec
     _cmd = 'nlpfit'
 
-    def _list_outputs(self):
-        outputs = super(NlpFit, self)._list_outputs()
+    def _gen_filename(self, name):
+        if name == 'output_xfm':
+            output_xfm = self.inputs.output_xfm
 
-        if os.path.exists(outputs['output_xfm']):
-            if 'grid' in open(outputs['output_xfm'], 'r').read():
-                outputs['output_grid'] = re.sub(
-                    '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_xfm'])
+            if isdefined(output_xfm):
+                return os.path.abspath(output_xfm)
+            else:
+                return aggregate_filename(
+                    [self.inputs.source, self.inputs.target], 'nlpfit_xfm_output') + '.xfm'
+        else:
+            raise NotImplemented
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        outputs['output_xfm'] = os.path.abspath(
+            self._gen_filename('output_xfm'))
+
+        assert os.path.exists(outputs['output_xfm'])
+        if 'grid' in open(outputs['output_xfm'], 'r').read():
+            outputs['output_grid'] = re.sub(
+                '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_xfm'])
 
         return outputs
 
