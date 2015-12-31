@@ -9,11 +9,11 @@ from copy import deepcopy
 from tempfile import mkdtemp
 from shutil import rmtree
 
-from ...testing import (assert_equal, assert_true, assert_false)
-import nipype.pipeline.engine as pe
-import nipype.interfaces.base as nib
-import nipype.interfaces.utility as niu
-from ... import config
+from ....testing import (assert_equal, assert_true, assert_false)
+from ... import engine as pe
+from ....interfaces import base as nib
+from ....interfaces import utility as niu
+from .... import config
 from ..utils import merge_dict, clean_working_directory, write_workflow_prov
 
 

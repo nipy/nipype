@@ -4,7 +4,7 @@
 """
 
 from .base import (PluginBase, logger)
-from ..utils import (nx)
+from ..engine.utils import (nx)
 
 
 class DebugPlugin(PluginBase):
