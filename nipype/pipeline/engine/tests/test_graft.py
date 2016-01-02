@@ -19,11 +19,11 @@ ifresult = None
 
 
 class SetInputSpec(nib.TraitedSpec):
-    val = nib.traits.Int(2, mandatory=True, desc='input')
+    val = nib.traits.Any(mandatory=True, desc='input')
 
 
 class SetOutputSpec(nib.TraitedSpec):
-    out = nib.traits.Int(desc='ouput')
+    out = nib.traits.Any(desc='ouput')
 
 
 class SetInterface(nib.BaseInterface):
