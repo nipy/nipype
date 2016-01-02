@@ -234,12 +234,11 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
 
     initial_moving_transform = File(argstr='%s', exists=True, desc='',
                                     xor=['initial_moving_transform_com'])
-    invert_initial_moving_transform = traits.Bool(
-        default=False, requires=["initial_moving_transform"], usedefault=True,
+    invert_initial_moving_transform = traits.Bool(requires=["initial_moving_transform"],
         desc='', xor=['initial_moving_transform_com'])
 
     initial_moving_transform_com = traits.Enum(0, 1, 2, argstr='%s',
-                                               default=0, xor=['initial_moving_transform'],
+                                               default=0, xor=['initial_moving_transform', 'invert_initial_moving_transform'],
                                                desc="Use center of mass for moving transform")
     metric_item_trait = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
                                     "Mattes")
