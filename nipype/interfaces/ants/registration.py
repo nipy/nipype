@@ -238,7 +238,7 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         desc='', xor=['initial_moving_transform_com'])
 
     initial_moving_transform_com = traits.Enum(0, 1, 2, argstr='%s',
-                                               default=0, xor=['initial_moving_transform', 'invert_initial_moving_transform'],
+                                               default=0, xor=['initial_moving_transform'],
                                                desc="Use center of mass for moving transform")
     metric_item_trait = traits.Enum("CC", "MeanSquares", "Demons", "GC", "MI",
                                     "Mattes")
