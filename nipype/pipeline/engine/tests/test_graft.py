@@ -63,30 +63,31 @@ def test_interfaced_workflow():
     outputs = wf.outputs.get()
     yield assert_equal, outputs, {'output0': None}
 
-    inputs = wf.inputs.get()
-    yield assert_equal, inputs, {'input0': None}
-
     # test connections
     mynode = pe.Node(SetInterface(), name='internalnode')
     wf.connect('in', 'input0', mynode, 'val')
     wf.connect(mynode, 'out', 'out', 'output0')
 
     wf.inputs.input0 = 5
+    yield assert_equal, wf.inputs.get(), {'input0': 5}
+
     wf.run()
 
     yield assert_equal, ifresult, 5
 
 
 def _base_workflow(name='InterfacedWorkflow', b=0):
-    def _sum(a):
+    def _sum(a, b):
         return a + b + 1
 
     wf = pe.InterfacedWorkflow(
         name=name, input_names=['input0'],
         output_names=['output0'])
     sum0 = pe.Node(niu.Function(
-        input_names=['a'], output_names=['out'], function=_sum),
+        input_names=['a', 'b'], output_names=['out'], function=_sum),
         name='testnode')
+    sum0.inputs.b = b
+
     # test connections
     wf.connect('in', 'input0', sum0, 'a')
     wf.connect(sum0, 'out', 'out', 'output0')
@@ -105,11 +106,11 @@ def test_graft_workflow():
     mynode = pe.Node(SetInterface(), name='internalnode')
 
     outer.connect([
-        (wf, mynode, [('outputnode.out', 'val')])
+        (wf, mynode, [('outputnode.output0', 'val')])
     ])
 
     wf.inputs.input0 = 3
 
     ifresult = None
-    wf.run()
+    outer.run()
     yield assert_equal, ifresult, [4, 6]
