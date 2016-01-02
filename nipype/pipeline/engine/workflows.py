@@ -209,10 +209,11 @@ class Workflow(EngineBase):
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
                 if dest in connected_ports[destnode]:
-                    raise Exception("""
-Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
-connected.
-""" % (srcnode, source, destnode, dest, dest, destnode))
+                    raise Exception(
+                        'Trying to connect %s:%s to %s:%s but input \'%s\' of '
+                        'node \'%s\' is already connected.' %
+                        (srcnode, source, destnode, dest, dest, destnode))
+
                 if not (hasattr(destnode, '_interface') and
                         '.io' in str(destnode._interface.__class__)):
                     if not destnode._check_inputs(dest):
@@ -708,9 +709,9 @@ connected.
         """Checks if a parameter is available as an input or output
         """
         if subtype == 'in':
-            subobject = self.inputs
+            subobject = self._get_all_inputs()
         else:
-            subobject = self.outputs
+            subobject = self._get_all_outputs()
         attrlist = parameter.split('.')
         cur_out = subobject
         for attr in attrlist:
@@ -724,9 +725,9 @@ connected.
         output parameter
         """
         if subtype == 'in':
-            subobject = self.inputs
+            subobject = self._get_all_inputs()
         else:
-            subobject = self.outputs
+            subobject = self._get_all_outputs()
         attrlist = parameter.split('.')
         cur_out = subobject
         for attr in attrlist[:-1]:
@@ -740,8 +741,10 @@ connected.
         return self._has_attr(parameter, subtype='in')
 
     def _get_inputs(self):
-        """Returns the inputs of a workflow
+        return self._get_all_inputs()
 
+    def _get_all_inputs(self):
+        """Returns the inputs of a workflow
         This function does not return any input ports that are already
         connected
         """
@@ -749,7 +752,7 @@ connected.
         for node in self._graph.nodes():
             inputdict.add_trait(node.name, traits.Instance(TraitedSpec))
             if isinstance(node, Workflow):
-                setattr(inputdict, node.name, node.inputs)
+                setattr(inputdict, node.name, node._get_all_inputs())
             else:
                 taken_inputs = []
                 for _, _, d in self._graph.in_edges_iter(nbunch=node,
@@ -757,7 +760,7 @@ connected.
                     for cd in d['connect']:
                         taken_inputs.append(cd[1])
                 unconnectedinputs = TraitedSpec()
-                for key, trait in list(node.inputs.items()):
+                for key, trait in node.inputs.items():
                     if key not in taken_inputs:
                         unconnectedinputs.add_trait(key,
                                                     traits.Trait(trait,
@@ -769,16 +772,19 @@ connected.
         return inputdict
 
     def _get_outputs(self):
+        return self._get_all_outputs()
+
+    def _get_all_outputs(self):
         """Returns all possible output ports that are not already connected
         """
         outputdict = TraitedSpec()
         for node in self._graph.nodes():
             outputdict.add_trait(node.name, traits.Instance(TraitedSpec))
             if isinstance(node, Workflow):
-                setattr(outputdict, node.name, node.outputs)
+                setattr(outputdict, node.name, node._get_all_outputs())
             elif node.outputs:
                 outputs = TraitedSpec()
-                for key, _ in list(node.outputs.items()):
+                for key, _ in node.outputs.items():
                     outputs.add_trait(key, traits.Any(node=node))
                     setattr(outputs, key, None)
                 setattr(outputdict, node.name, outputs)
@@ -1065,7 +1071,16 @@ class InterfacedWorkflow(Workflow):
         elif len(args) == 4:
             conns = [(args[0], args[2], [(args[1], args[3])])]
         else:
-            raise Exception('unknown set of parameters to connect function')
+            raise TypeError('connect() takes either 4 arguments, or 1 list of'
+                            ' connection tuples (%d args given)' % len(args))
+
+        disconnect = False
+        if kwargs:
+            disconnect = kwargs.get('disconnect', False)
+
+        if disconnect:
+            self.disconnect(conns)
+            return
 
         connection_list = []
         for conn in conns:
