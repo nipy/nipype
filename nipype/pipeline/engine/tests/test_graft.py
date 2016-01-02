@@ -8,12 +8,12 @@ import os.path as op
 from tempfile import mkdtemp
 from shutil import rmtree
 
-from ...testing import (assert_raises, assert_equal,
-                        assert_true, assert_false)
-from ...interfaces import base as nib
-from ...interfaces import utility as niu
-from ...interfaces import io as nio
-from ...pipeline import engine as pe
+from ....testing import (assert_raises, assert_equal,
+                         assert_true, assert_false)
+from ... import engine as pe
+from ....interfaces import base as nib
+from ....interfaces import utility as niu
+
 
 ifresult = None
 
