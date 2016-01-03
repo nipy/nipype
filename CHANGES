@@ -38,7 +38,6 @@ Release 0.11.0 (September 15, 2015)
        (https://github.com/nipy/nipype/pull/1085)
 * ENH: New interface for FSL fslcpgeom utility (https://github.com/nipy/nipype/pull/1152)
 * ENH: Added SLURMGraph plugin for submitting jobs to SLURM with dependencies (https://github.com/nipy/nipype/pull/1136)
->>>>>>> enh/RefactorEngineModule
 * FIX: Enable absolute path definitions in DCMStack (https://github.com/nipy/nipype/pull/1089,
        replaced by https://github.com/nipy/nipype/pull/1093)
 * ENH: New mesh.MeshWarpMaths to operate on surface-defined warpings
