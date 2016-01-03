@@ -1,8 +1,8 @@
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+
 from copy import deepcopy
 import os.path as op
 from tempfile import mkdtemp
@@ -60,6 +60,10 @@ def test_interfaced_workflow():
         name='InterfacedWorkflow', input_names=['input0'],
         output_names=['output0'])
 
+    # Check it doesn't expose inputs/outputs of internal nodes
+    inputs = wf.inputs.get()
+    yield assert_equal, inputs, {'input0': nib.Undefined}
+
     outputs = wf.outputs.get()
     yield assert_equal, outputs, {'output0': None}
 
@@ -68,12 +72,32 @@ def test_interfaced_workflow():
     wf.connect('in', 'input0', mynode, 'val')
     wf.connect(mynode, 'out', 'out', 'output0')
 
+    # test setting input
     wf.inputs.input0 = 5
     yield assert_equal, wf.inputs.get(), {'input0': 5}
 
     wf.run()
-
     yield assert_equal, ifresult, 5
+
+    # Try to insert a sub-workflow with an outbound connection
+    outernode = pe.Node(SetInterface(), name='outernode')
+    wf.connect(mynode, 'out', outernode, 'val')
+    wf2 = pe.InterfacedWorkflow(
+        name='InterfacedWorkflow2', input_names=['input0'],
+        output_names=['output0'])
+    x = lambda: wf2.connect('in', 'input0', wf, 'input0')
+    yield assert_raises, Exception, x
+
+    # Try to insert a sub-workflow without an outbound
+    # connection, and add it later
+    wf.disconnect(mynode, 'out', outernode, 'val')
+    wf3 = pe.InterfacedWorkflow(
+        name='InterfacedWorkflow3', input_names=['input0'],
+        output_names=['output0'])
+    wf3.connect('in', 'input0', wf, 'input0')
+    wf3.connect(wf, 'output0', 'out', 'output0')
+    wf.connect(mynode, 'out', outernode, 'val')
+    yield assert_raises, Exception, wf3.run
 
 
 def _base_workflow(name='InterfacedWorkflow', b=0):

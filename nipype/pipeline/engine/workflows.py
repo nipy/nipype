@@ -1055,6 +1055,7 @@ class InterfacedWorkflow(Workflow):
                                name='inputnode')
         self._outputnode = Node(IdentityInterface(fields=output_names),
                                 name='outputnode')
+        self.add_nodes([self._inputnode, self._outputnode])
 
     def connect(self, *args, **kwargs):
         """
@@ -1140,7 +1141,7 @@ class InterfacedWorkflow(Workflow):
         node = self._inputnode
 
         taken_inputs = []
-        for _, _, d in self._graph.in_edges_iter(nbunch=node,
+        for _, _, d in self._graph.in_edges_iter(nbunch=[node],
                                                  data=True):
             for cd in d['connect']:
                 taken_inputs.append(cd[1])
