@@ -44,6 +44,36 @@ class SetInterface(nib.BaseInterface):
         return outputs
 
 
+def _base_workflow(name='InterfacedWorkflow'):
+    wf = pe.InterfacedWorkflow(
+        name=name, input_names=['input0'], output_names=['output0'])
+    
+    mynode = pe.Node(SetInterface(), name='internalnode')
+    wf.connect('in', 'input0', mynode, 'val')
+    wf.connect(mynode, 'out', 'out', 'output0')
+    return wf
+
+
+def _sum_workflow(name='InterfacedSumWorkflow', b=0):
+    name += '%02d' % b
+
+    def _sum(a, b):
+        return a + b + 1
+
+    wf = pe.InterfacedWorkflow(
+        name=name, input_names=['input0'],
+        output_names=['output0'])
+    sum0 = pe.Node(niu.Function(
+        input_names=['a', 'b'], output_names=['out'], function=_sum),
+        name='testnode')
+    sum0.inputs.b = b
+
+    # test connections
+    wf.connect('in', 'input0', sum0, 'a')
+    wf.connect(sum0, 'out', 'out', 'output0')
+    return wf
+
+
 def test_interfaced_workflow():
     global ifresult
 
@@ -79,52 +109,74 @@ def test_interfaced_workflow():
     wf.run()
     yield assert_equal, ifresult, 5
 
-    # Try to insert a sub-workflow with an outbound connection
-    outernode = pe.Node(SetInterface(), name='outernode')
-    wf.connect(mynode, 'out', outernode, 'val')
-    wf2 = pe.InterfacedWorkflow(
-        name='InterfacedWorkflow2', input_names=['input0'],
-        output_names=['output0'])
-    x = lambda: wf2.connect('in', 'input0', wf, 'input0')
+    # Try to create an outbound connection from an inner node
+    wf = _base_workflow()
+    outerwf = pe.Workflow('OuterWorkflow')
+    outernode = pe.Node(niu.IdentityInterface(fields=['val']),
+                        name='outernode')
+    x = lambda: outerwf.connect(wf, 'internalnode.out', outernode, 'val')
     yield assert_raises, Exception, x
 
-    # Try to insert a sub-workflow without an outbound
-    # connection, and add it later
-    wf.disconnect(mynode, 'out', outernode, 'val')
-    wf3 = pe.InterfacedWorkflow(
-        name='InterfacedWorkflow3', input_names=['input0'],
-        output_names=['output0'])
-    wf3.connect('in', 'input0', wf, 'input0')
-    wf3.connect(wf, 'output0', 'out', 'output0')
-    wf.connect(mynode, 'out', outernode, 'val')
-    yield assert_raises, Exception, wf3.run
+    # Try to create an inbound connection from an outer node
+    wf = _base_workflow()
+    outerwf = pe.Workflow('OuterWorkflow')
+    outernode = pe.Node(niu.IdentityInterface(fields=['val']),
+                        name='outernode')
+    x = lambda: outerwf.connect(outernode, 'val', wf, 'internalnode.val')
+    yield assert_raises, Exception, x
 
+    # Try to insert a sub-workflow with an outbound connection
+    outerwf = pe.Workflow('OuterWorkflow')
+    outernode = pe.Node(niu.IdentityInterface(fields=['val']),
+                        name='outernode')
 
-def _base_workflow(name='InterfacedWorkflow', b=0):
-    def _sum(a, b):
-        return a + b + 1
+    subwf = pe.Workflow('SubWorkflow')
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in']), name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out']),
+                         name='outputnode')
+    subnode = pe.Node(SetInterface(), name='internalnode')
+    subwf.connect([
+        (inputnode, subnode, [('in', 'val')]),
+        (subnode, outputnode, [('out', 'out')]),
+    ])
+
+    outerwf.connect(subwf, 'internalnode.out', outernode, 'val')
 
     wf = pe.InterfacedWorkflow(
-        name=name, input_names=['input0'],
+        name='InterfacedWorkflow', input_names=['input0'],
         output_names=['output0'])
-    sum0 = pe.Node(niu.Function(
-        input_names=['a', 'b'], output_names=['out'], function=_sum),
-        name='testnode')
-    sum0.inputs.b = b
+    x = lambda: wf.connect('in', 'input0', subwf, 'inputnode.in')
+    yield assert_raises, Exception, x
 
-    # test connections
-    wf.connect('in', 'input0', sum0, 'a')
-    wf.connect(sum0, 'out', 'out', 'output0')
-    return wf
+    # Try to insert a sub-workflow with an inbound connection
+    outerwf = pe.Workflow('OuterWorkflow')
+    outernode = pe.Node(niu.IdentityInterface(fields=['val']),
+                        name='outernode')
 
+    subwf = pe.Workflow('SubWorkflow')
+    inputnode = pe.Node(niu.IdentityInterface(fields=['in']), name='inputnode')
+    outputnode = pe.Node(niu.IdentityInterface(fields=['out']),
+                         name='outputnode')
+    subnode = pe.Node(SetInterface(), name='internalnode')
+    subwf.connect([
+        (subnode, outputnode, [('out', 'out')]),
+    ])
+
+    outerwf.connect(outernode, 'val', subwf, 'internalnode.val')
+
+    wf = pe.InterfacedWorkflow(
+        name='InterfacedWorkflow', input_names=['input0'],
+        output_names=['output0'])
+    x = lambda: wf.connect('in', 'input0', subwf, 'inputnode.in')
+    yield assert_raises, Exception, x
 
 def test_graft_workflow():
     global ifresult
-    wf1 = _base_workflow('Inner0')
+    wf1 = _sum_workflow()
     wf = pe.GraftWorkflow(
         name='GraftWorkflow', fields_from=wf1)
     wf.insert(wf1)
-    wf.insert(_base_workflow('Inner1', 2))
+    wf.insert(_sum_workflow(b=2))
 
     outer = pe.Workflow('OuterWorkflow')
     mynode = pe.Node(SetInterface(), name='internalnode')
