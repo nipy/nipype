@@ -1273,12 +1273,12 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         if stdout and isinstance(stdout, bytes):
             try:
                 stdout = stdout.decode()
-            except:
+            except UnicodeDecodeError:
                 stdout = stdout.decode("ISO-8859-1")
         if stderr and isinstance(stderr, bytes):
             try:
                 stderr = stderr.decode()
-            except:
+            except UnicodeDecodeError:
                 stderr = stderr.decode("ISO-8859-1")
 
         result['stdout'] = str(stdout).split('\n')
