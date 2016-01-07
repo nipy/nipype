@@ -205,6 +205,11 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                               'access')
     encrypt_bucket_keys = traits.Bool(desc='Flag indicating whether to use S3 '\
                                         'server-side AES-256 encryption')
+    # Set this if user wishes to override the bucket with their own
+    bucket = traits.Generic(mandatory=False,
+                            desc='Boto3 S3 bucket for manual override of bucket')
+    # Set this if user wishes to have local copy of files as well
+    local_dir = traits.Str(desc='Copy files locally as well as to S3 bucket')
 
     # Set call-able inputs attributes
     def __setattr__(self, key, value):
@@ -385,7 +390,6 @@ class DataSink(IOBase):
 
         # Init variables
         s3_str = 's3://'
-        sep = os.path.sep
         base_directory = self.inputs.base_directory
 
         # Explicitly lower-case the "s3"
@@ -396,11 +400,16 @@ class DataSink(IOBase):
 
         # Check if 's3://' in base dir
         if base_directory.startswith(s3_str):
+            # Attempt to access bucket
             try:
                 # Expects bucket name to be 's3://bucket_name/base_dir/..'
-                bucket_name = base_directory.split(s3_str)[1].split(sep)[0]
+                bucket_name = base_directory.split(s3_str)[1].split('/')[0]
                 # Get the actual bucket object
-                self.bucket = self._fetch_bucket(bucket_name)
+                if self.inputs.bucket:
+                    self.bucket = self.inputs.bucket
+                else:
+                    self.bucket = self._fetch_bucket(bucket_name)
+            # Report error in case of exception
             except Exception as exc:
                 err_msg = 'Unable to access S3 bucket. Error:\n%s. Exiting...'\
                           % exc
@@ -566,7 +575,7 @@ class DataSink(IOBase):
         bucket = self.bucket
         iflogger = logging.getLogger('interface')
         s3_str = 's3://'
-        s3_prefix = os.path.join(s3_str, bucket.name)
+        s3_prefix = s3_str + bucket.name
 
         # Explicitly lower-case the "s3"
         if dst.lower().startswith(s3_str):
@@ -629,41 +638,53 @@ class DataSink(IOBase):
         iflogger = logging.getLogger('interface')
         outputs = self.output_spec().get()
         out_files = []
-        outdir = self.inputs.base_directory
+        # Use hardlink
         use_hardlink = str2bool(config.get('execution', 'try_hard_link_datasink'))
 
-        # If base directory isn't given, assume current directory
-        if not isdefined(outdir):
-            outdir = '.'
+        # Set local output directory if specified
+        if isdefined(self.inputs.local_copy):
+            outdir = self.inputs.local_copy
+        else:
+            outdir = self.inputs.base_directory
+            # If base directory isn't given, assume current directory
+            if not isdefined(outdir):
+                outdir = '.'
 
-        # Check if base directory reflects S3-bucket upload
+        # Check if base directory reflects S3 bucket upload
         try:
             s3_flag = self._check_s3_base_dir()
+            s3dir = self.inputs.base_directory
+            if isdefined(self.inputs.container):
+                s3dir = os.path.join(s3dir, self.inputs.container)
         # If encountering an exception during bucket access, set output
         # base directory to a local folder
         except Exception as exc:
-            local_out_exception = os.path.join(os.path.expanduser('~'),
-                                               'data_output')
+            if not isdefined(self.inputs.local_copy):
+                local_out_exception = os.path.join(os.path.expanduser('~'),
+                                                   's3_datasink_' + self.bucket.name)
+                outdir = local_out_exception
+            else:
+                outdir = self.inputs.local_copy
+            # Log local copying directory
             iflogger.info('Access to S3 failed! Storing outputs locally at: '\
-                          '%s\nError: %s' %(local_out_exception, exc))
-            self.inputs.base_directory = local_out_exception
-
-        # If not accessing S3, just set outdir to local absolute path 
-        if not s3_flag:
-            outdir = os.path.abspath(outdir)
+                          '%s\nError: %s' %(outdir, exc))
 
         # If container input is given, append that to outdir
         if isdefined(self.inputs.container):
             outdir = os.path.join(outdir, self.inputs.container)
-        # Create the directory if it doesn't exist
-        if not os.path.exists(outdir):
-            try:
-                os.makedirs(outdir)
-            except OSError, inst:
-                if 'File exists' in inst:
-                    pass
-                else:
-                    raise(inst)
+
+        # If doing a localy output
+        if not outdir.lower().startswith('s3://'):
+            outdir = os.path.abspath(outdir)
+            # Create the directory if it doesn't exist
+            if not os.path.exists(outdir):
+                try:
+                    os.makedirs(outdir)
+                except OSError, inst:
+                    if 'File exists' in inst:
+                        pass
+                    else:
+                        raise(inst)
 
         # Iterate through outputs attributes {key : path(s)}
         for key, files in self.inputs._outputs.items():
@@ -672,10 +693,14 @@ class DataSink(IOBase):
             iflogger.debug("key: %s files: %s" % (key, str(files)))
             files = filename_to_list(files)
             tempoutdir = outdir
+            if s3_flag:
+                s3tempoutdir = s3dir
             for d in key.split('.'):
                 if d[0] == '@':
                     continue
                 tempoutdir = os.path.join(tempoutdir, d)
+                if s3_flag:
+                    s3tempoutdir = os.path.join(s3tempoutdir, d)
 
             # flattening list
             if isinstance(files, list):
@@ -690,25 +715,26 @@ class DataSink(IOBase):
                     src = os.path.join(src, '')
                 dst = self._get_dst(src)
                 dst = os.path.join(tempoutdir, dst)
+                s3dst = os.path.join(s3tempoutdir, dst)
                 dst = self._substitute(dst)
                 path, _ = os.path.split(dst)
 
-                # Create output directory if it doesnt exist
-                if not os.path.exists(path):
-                    try:
-                        os.makedirs(path)
-                    except OSError, inst:
-                        if 'File exists' in inst:
-                            pass
-                        else:
-                            raise(inst)
-
                 # If we're uploading to S3
                 if s3_flag:
+                    dst = dst.replace(outdir, self.inputs.base_directory)
                     self._upload_to_s3(src, dst)
                     out_files.append(dst)
                 # Otherwise, copy locally src -> dst
                 else:
+                    # Create output directory if it doesnt exist
+                    if not os.path.exists(path):
+                        try:
+                            os.makedirs(path)
+                        except OSError, inst:
+                            if 'File exists' in inst:
+                                pass
+                            else:
+                                raise(inst)
                     # If src is a file, copy it to dst
                     if os.path.isfile(src):
                         iflogger.debug('copyfile: %s %s' % (src, dst))

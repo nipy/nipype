@@ -13,6 +13,7 @@ from nipype.testing import assert_equal, assert_true, assert_false, skipif
 import nipype.interfaces.io as nio
 from nipype.interfaces.base import Undefined
 
+# Check for boto
 noboto = False
 try:
     import boto
@@ -20,6 +21,13 @@ try:
 except:
     noboto = True
 
+# Check for boto3
+noboto3 = False
+try:
+    import boto3
+    from botocore.utils import fix_s3_host
+except:
+    noboto3 = True
 
 def test_datagrabber():
     dg = nio.DataGrabber()
@@ -154,6 +162,102 @@ def test_datasink():
     yield assert_equal, ds.inputs.base_directory, 'foo'
     ds = nio.DataSink(infields=['test'])
     yield assert_true, 'test' in ds.inputs.copyable_trait_names()
+
+# Function to check for fakes3
+def _check_for_fakes3():
+    '''
+    Function used internally to check for fakes3 installation
+    '''
+
+    # Import packages
+    import subprocess
+
+    # Init variables
+    fakes3_found = False
+
+    # Check for fakes3
+    try:
+        ret_code = subprocess.check_call(['which', 'fakes3'])
+        if ret_code == 0:
+            fakes3_found = True
+    except subprocess.CalledProcessError as exc:
+        print 'fakes3 not found, install via \'gem install fakes3\', skipping test...'
+    except:
+        print 'Unable to check for fakes3 installation, skipping test...'
+
+    # Return if found
+    return fakes3_found
+
+@skipif(noboto3)
+# Test datasink writes to s3 properly
+def test_datasink_to_s3():
+    '''
+    This function tests to see if the S3 functionality of a DataSink
+    works properly
+    '''
+
+    # Import packages
+    import hashlib
+    import tempfile
+
+    # Init variables
+    ds = nio.DataSink()
+    bucket_name = 'test'
+    container = 'outputs'
+    attr_folder = 'text_file'
+    output_dir = 's3://' + bucket_name
+    # Local temporary filepaths for testing
+    fakes3_dir = tempfile.mkdtemp()
+    input_dir = tempfile.mkdtemp()
+    input_path = os.path.join(input_dir, 'datasink_test_s3.txt')
+
+    # Check for fakes3
+    fakes3_found = _check_for_fakes3()
+    if not fakes3_found:
+        return
+
+    # Start up fake-S3 server
+    proc = Popen(['fakes3', '-r', fakes3_dir, '-p', '4567'], stdout=open(os.devnull, 'wb'))
+
+    # Init boto3 s3 resource to talk with fakes3
+    resource = boto3.resource(aws_access_key_id='mykey',
+                              aws_secret_access_key='mysecret',
+                              service_name='s3',
+                              endpoint_url='http://localhost:4567',
+                              use_ssl=False)
+    resource.meta.client.meta.events.unregister('before-sign.s3', fix_s3_host)
+
+    # Create bucket
+    bucket = resource.create_bucket(Bucket=bucket_name)
+
+    # Create input file
+    with open(input_path, 'wb') as f:
+        f.write('ABCD1234')
+
+    # Prep datasink
+    ds.inputs.base_directory = output_dir
+    ds.inputs.container = container
+    ds.inputs.bucket = bucket
+    setattr(ds.inputs, attr_folder, input_path)
+
+    # Run datasink
+    ds.run()
+
+    # Get MD5sums and compare
+    key = '/'.join([container, attr_folder, os.path.basename(input_path)])
+    obj = bucket.Object(key=key)
+    dst_md5 = obj.e_tag.replace('"', '')
+    src_md5 = hashlib.md5(open(input_path, 'rb').read()).hexdigest()
+
+    # Make sure md5sums match
+    yield assert_equal, src_md5, dst_md5
+
+    # Kill fakes3
+    proc.kill()
+
+    # Delete fakes3 folder and input file
+    shutil.rmtree(fakes3_dir)
+    shutil.rmtree(input_dir)
 
 @skipif(noboto)
 def test_s3datasink():
