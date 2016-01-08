@@ -1207,13 +1207,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
 
-    # Import packages
-    try:
-        from memory_profiler import _get_memory
-        mem_prof = True
-    except:
-        mem_prof = False
-
     # Init variables
     PIPE = subprocess.PIPE
     cmdline = runtime.cmdline

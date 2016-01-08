@@ -442,12 +442,7 @@ class Function(IOBase):
             if isdefined(value):
                 args[name] = value
 
-        # mem stuff
-        import memory_profiler
-        proc = (function_handle, (), args)
-        mem_mb, out = memory_profiler.memory_usage(proc=proc, retval=True, include_children=True, max_usage=True)
-        setattr(runtime, 'real_memory2', mem_mb[0]/1024.0)
-        #out = function_handle(**args)
+        out = function_handle(**args)
 
         if len(self._output_names) == 1:
             self._out[self._output_names[0]] = out
