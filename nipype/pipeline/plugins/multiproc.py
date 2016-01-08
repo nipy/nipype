@@ -13,7 +13,7 @@ import sys
 from .base import (DistributedPluginBase, report_crash)
 
 
-def run_node(node, updatehash, plugin_args=None):
+def run_node(node, updatehash):
     result = dict(result=None, traceback=None)
     try:
         result['result'] = node.run(updatehash=updatehash)
