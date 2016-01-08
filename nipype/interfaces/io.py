@@ -226,14 +226,9 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
 # DataSink outputs
 class DataSinkOutputSpec(TraitedSpec):
-    '''
-    '''
-
-    # Import packages
-    import traits.api as tapi
 
     # Init out file
-    out_file = tapi.Any(desc='datasink output')
+    out_file = traits.Any(desc='datasink output')
 
 
 # Custom DataSink class
