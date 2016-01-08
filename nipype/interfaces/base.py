@@ -751,16 +751,7 @@ class BaseInterface(Interface):
                             self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
         self.estimated_memory = 1
-        self._real_memory = 0
         self.num_threads = 1
-
-    @property
-    def real_memory(self):
-        return self._real_memory
-
-    @real_memory.setter
-    def real_memory(self, value):
-        self._real_memory = value
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -1240,9 +1231,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
 
-    # Init variables for memory profiling
-    ret = -1
-    interval = 0.1
 
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
@@ -1260,9 +1248,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                 for stream in res[0]:
                     stream.read(drain)
         while proc.returncode is None:
-            if mem_prof:
-                ret = max([ret, _get_memory(proc.pid, include_children=True)])
-                time.sleep(interval)
             proc.poll()
             _process()
         _process(drain=1)
@@ -1278,21 +1263,11 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = [r[1] for r in temp]
 
     if output == 'allatonce':
-        if mem_prof:
-            while proc.returncode is None:
-                ret = max([ret, _get_memory(proc.pid, include_children=True)])
-                time.sleep(interval)
-                proc.poll()
         stdout, stderr = proc.communicate()
         result['stdout'] = stdout.split('\n')
         result['stderr'] = stderr.split('\n')
         result['merged'] = ''
     if output == 'file':
-        if mem_prof:
-            while proc.returncode is None:
-                ret = max([ret, _get_memory(proc.pid, include_children=True)])
-                time.sleep(interval)
-                proc.poll()
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
@@ -1300,17 +1275,11 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stderr'] = [line.strip() for line in open(errfile).readlines()]
         result['merged'] = ''
     if output == 'none':
-        if mem_prof:
-            while proc.returncode is None:
-                ret = max([ret, _get_memory(proc.pid, include_children=True)])
-                time.sleep(interval)
-                proc.poll()
         proc.communicate()
         result['stdout'] = []
         result['stderr'] = []
         result['merged'] = ''
 
-    setattr(runtime, 'real_memory2', ret/1024.0)
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = result['merged']

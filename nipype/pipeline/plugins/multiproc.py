@@ -83,8 +83,8 @@ class MultiProcPlugin(DistributedPluginBase):
                 node.inputs.terminal_output = 'allatonce'
         except:
             pass
-        self._taskresult[self._taskid] = self.pool.apply_async(run_node, (node,
-                                                                updatehash,))
+        self._taskresult[self._taskid] = self.pool.apply_async(run_node,
+                                                               (node, updatehash,))
         return self._taskid
 
     def _report_crash(self, node, result=None):
@@ -161,7 +161,7 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
         except:
             pass
         self._taskresult[self._taskid] = self.pool.apply_async(run_node,
-                                                               (node, updatehash, self.plugin_args),
+                                                               (node, updatehash,),
                                                                callback=release_lock)
         return self._taskid
 
