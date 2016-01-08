@@ -177,7 +177,7 @@ def _check_for_fakes3():
 
     # Check for fakes3
     try:
-        ret_code = subprocess.check_call(['which', 'fakes3'])
+        ret_code = subprocess.check_call(['which', 'fakes3'], stdout=open(os.devnull, 'wb'))
         if ret_code == 0:
             fakes3_found = True
     except subprocess.CalledProcessError as exc:
@@ -188,7 +188,29 @@ def _check_for_fakes3():
     # Return if found
     return fakes3_found
 
-@skipif(noboto3)
+def _make_dummy_input():
+    '''
+    '''
+
+    # Import packages
+    import tempfile
+
+    # Init variables
+    input_dir = tempfile.mkdtemp()
+    input_path = os.path.join(input_dir, 'datasink_test_s3.txt')
+
+    # Create input file
+    with open(input_path, 'wb') as f:
+        f.write('ABCD1234')
+
+    # Return path
+    return input_path
+
+# Check for fakes3
+fakes3 = _check_for_fakes3()
+
+
+@skipif(noboto3 or not fakes3)
 # Test datasink writes to s3 properly
 def test_datasink_to_s3():
     '''
@@ -208,13 +230,7 @@ def test_datasink_to_s3():
     output_dir = 's3://' + bucket_name
     # Local temporary filepaths for testing
     fakes3_dir = tempfile.mkdtemp()
-    input_dir = tempfile.mkdtemp()
-    input_path = os.path.join(input_dir, 'datasink_test_s3.txt')
-
-    # Check for fakes3
-    fakes3_found = _check_for_fakes3()
-    if not fakes3_found:
-        return
+    input_path = _make_dummy_input()
 
     # Start up fake-S3 server
     proc = Popen(['fakes3', '-r', fakes3_dir, '-p', '4567'], stdout=open(os.devnull, 'wb'))
@@ -229,10 +245,6 @@ def test_datasink_to_s3():
 
     # Create bucket
     bucket = resource.create_bucket(Bucket=bucket_name)
-
-    # Create input file
-    with open(input_path, 'wb') as f:
-        f.write('ABCD1234')
 
     # Prep datasink
     ds.inputs.base_directory = output_dir
@@ -249,15 +261,59 @@ def test_datasink_to_s3():
     dst_md5 = obj.e_tag.replace('"', '')
     src_md5 = hashlib.md5(open(input_path, 'rb').read()).hexdigest()
 
-    # Make sure md5sums match
-    yield assert_equal, src_md5, dst_md5
-
     # Kill fakes3
     proc.kill()
 
     # Delete fakes3 folder and input file
     shutil.rmtree(fakes3_dir)
-    shutil.rmtree(input_dir)
+    shutil.rmtree(os.path.dirname(input_path))
+
+    # Make sure md5sums match
+    yield assert_equal, src_md5, dst_md5
+
+# Test the local copy attribute
+def test_datasink_localcopy():
+    '''
+    Function to validate DataSink will make local copy via local_copy
+    attribute
+    '''
+
+    # Import packages
+    import hashlib
+    import tempfile
+
+    # Init variables
+    local_dir = tempfile.mkdtemp()
+    container = 'outputs'
+    attr_folder = 'text_file'
+
+    # Make dummy input file and datasink
+    input_path = _make_dummy_input()
+    ds = nio.DataSink()
+
+    # Set up datasink
+    ds.inputs.container = container
+    ds.inputs.local_copy = local_dir
+    setattr(ds.inputs, attr_folder, input_path)
+
+    # Expected local copy path
+    local_copy = os.path.join(local_dir, container, attr_folder,
+                              os.path.basename(input_path))
+
+    # Run the datasink
+    ds.run()
+
+    # Check md5sums of both
+    src_md5 = hashlib.md5(open(input_path, 'rb').read()).hexdigest()
+    dst_md5 = hashlib.md5(open(local_copy, 'rb').read()).hexdigest()
+
+    # Delete temp diretories
+    shutil.rmtree(os.path.dirname(input_path))
+    shutil.rmtree(local_dir)
+
+    # Perform test
+    yield assert_equal, src_md5, dst_md5
+
 
 @skipif(noboto)
 def test_s3datasink():
@@ -300,7 +356,7 @@ def test_datasink_substitutions():
     shutil.rmtree(indir)
     shutil.rmtree(outdir)
 
-@skipif(noboto)
+@skipif(noboto or not fakes3)
 def test_s3datasink_substitutions():
     indir = mkdtemp(prefix='-Tmp-nipype_ds_subs_in')
     outdir = mkdtemp(prefix='-Tmp-nipype_ds_subs_out')

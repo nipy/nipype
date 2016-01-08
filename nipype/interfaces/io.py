@@ -209,7 +209,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     bucket = traits.Generic(mandatory=False,
                             desc='Boto3 S3 bucket for manual override of bucket')
     # Set this if user wishes to have local copy of files as well
-    local_dir = traits.Str(desc='Copy files locally as well as to S3 bucket')
+    local_copy = traits.Str(desc='Copy files locally as well as to S3 bucket')
 
     # Set call-able inputs attributes
     def __setattr__(self, key, value):
@@ -391,6 +391,10 @@ class DataSink(IOBase):
         # Init variables
         s3_str = 's3://'
         base_directory = self.inputs.base_directory
+
+        if not isdefined(base_directory):
+            s3_flag = False
+            return s3_flag
 
         # Explicitly lower-case the "s3"
         if base_directory.lower().startswith(s3_str):
@@ -616,7 +620,7 @@ class DataSink(IOBase):
                 else:
                     iflogger.info('Overwriting previous S3 file...')
 
-            except ClientError as exc:
+            except ClientError:
                 iflogger.info('New file to S3')
 
             # Copy file up to S3 (either encrypted or not)
@@ -653,18 +657,21 @@ class DataSink(IOBase):
         # Check if base directory reflects S3 bucket upload
         try:
             s3_flag = self._check_s3_base_dir()
-            s3dir = self.inputs.base_directory
-            if isdefined(self.inputs.container):
-                s3dir = os.path.join(s3dir, self.inputs.container)
+            if s3_flag:
+                s3dir = self.inputs.base_directory
+                if isdefined(self.inputs.container):
+                    s3dir = os.path.join(s3dir, self.inputs.container)
+            else:
+                s3dir = '<N/A>'
         # If encountering an exception during bucket access, set output
         # base directory to a local folder
         except Exception as exc:
+            s3dir = '<N/A>'
+            s3_flag = False
             if not isdefined(self.inputs.local_copy):
                 local_out_exception = os.path.join(os.path.expanduser('~'),
                                                    's3_datasink_' + self.bucket.name)
                 outdir = local_out_exception
-            else:
-                outdir = self.inputs.local_copy
             # Log local copying directory
             iflogger.info('Access to S3 failed! Storing outputs locally at: '\
                           '%s\nError: %s' %(outdir, exc))
@@ -673,8 +680,8 @@ class DataSink(IOBase):
         if isdefined(self.inputs.container):
             outdir = os.path.join(outdir, self.inputs.container)
 
-        # If doing a localy output
-        if not outdir.lower().startswith('s3://'):
+        # If sinking to local folder
+        if outdir != s3dir:
             outdir = os.path.abspath(outdir)
             # Create the directory if it doesn't exist
             if not os.path.exists(outdir):
@@ -714,18 +721,19 @@ class DataSink(IOBase):
                 if not os.path.isfile(src):
                     src = os.path.join(src, '')
                 dst = self._get_dst(src)
+                if s3_flag:
+                    s3dst = os.path.join(s3tempoutdir, dst)
+                    s3dst = self._substitute(s3dst)
                 dst = os.path.join(tempoutdir, dst)
-                s3dst = os.path.join(s3tempoutdir, dst)
                 dst = self._substitute(dst)
                 path, _ = os.path.split(dst)
 
                 # If we're uploading to S3
                 if s3_flag:
-                    dst = dst.replace(outdir, self.inputs.base_directory)
-                    self._upload_to_s3(src, dst)
-                    out_files.append(dst)
+                    self._upload_to_s3(src, s3dst)
+                    out_files.append(s3dst)
                 # Otherwise, copy locally src -> dst
-                else:
+                if not s3_flag or isdefined(self.inputs.local_copy):
                     # Create output directory if it doesnt exist
                     if not os.path.exists(path):
                         try:
@@ -787,6 +795,8 @@ class S3DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
     remove_dest_dir = traits.Bool(False, usedefault=True,
                                   desc='remove dest directory when copying dirs')
+    # Set this if user wishes to have local copy of files as well
+    local_copy = traits.Str(desc='Copy files locally as well as to S3 bucket')
 
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
