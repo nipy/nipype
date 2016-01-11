@@ -14,7 +14,7 @@ from nipype.interfaces.base import (TraitedSpec, File, traits, isdefined)
 class FitQt1InputSpec(NIFTYFITCommandInputSpec):
 
     source_file = File(exists=True, desc='Filename of the 4D Multi-Echo T1 source image (mandatory)',
-                       argstr='-source %s', mandatory=True)
+                       argstr='-source %s', mandatory=True, position=2)
 
 # *** Output options:
     t1map = File(genfile=True, exists=True, desc='Filename of the estimated output T1 map (in ms).',
@@ -42,7 +42,8 @@ class FitQt1InputSpec(NIFTYFITCommandInputSpec):
 
     SR = traits.Bool(desc='Saturation Recovery fitting [default].', argstr='-SR')
     IR = traits.Bool(desc='Inversion Recovery fitting [default].', argstr='-SR')
-    T1s = traits.ListFloat(desc='Inversion times for T1 data as a list (in s)', argstr='-T1s %f %f %f')
+    TIs = traits.List(traits.Float, minlen=3, maxlen=3, desc='Inversion times for T1 data as a list (in s)',
+                      argstr='-TIs %s', sep=' ')
     T1Lists = traits.File(exists=True, desc='Filename of list of pre-defined TIs', argstr='-T1List %s')
 
 # SPGR options
