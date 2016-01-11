@@ -8,3 +8,4 @@ Top-level namespace for niftyfit
 from .base import (Info)
 from .dwi import (FitDwi, DwiTool)
 from .asl import (FitAsl)
+from .qt1 import (FitQt1)
