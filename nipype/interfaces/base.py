@@ -750,8 +750,6 @@ class BaseInterface(Interface):
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
-        self.estimated_memory = 1
-        self.num_threads = 1
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -1197,11 +1195,9 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
 
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
-
-    # Init variables
     PIPE = subprocess.PIPE
-    cmdline = runtime.cmdline
 
+    cmdline = runtime.cmdline
     if redirect_x:
         exist_xvfb, _ = _exists_in_path('xvfb-run', runtime.environ)
         if not exist_xvfb:
@@ -1230,8 +1226,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     result = {}
     errfile = os.path.join(runtime.cwd, 'stderr.nipype')
     outfile = os.path.join(runtime.cwd, 'stdout.nipype')
-
-
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
 
@@ -1247,6 +1241,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             else:
                 for stream in res[0]:
                     stream.read(drain)
+
         while proc.returncode is None:
             proc.poll()
             _process()
@@ -1261,7 +1256,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             result[stream._name] = [r[2] for r in rows]
         temp.sort()
         result['merged'] = [r[1] for r in temp]
-
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
         result['stdout'] = stdout.split('\n')
@@ -1279,7 +1273,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stdout'] = []
         result['stderr'] = []
         result['merged'] = ''
-
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = result['merged']

@@ -250,17 +250,14 @@ class Level1Design(BaseInterface):
                                                               element=count,
                                                               ctype=ctype, val=val)
                         ev_txt += "\n"
-
-                    for fconidx in ftest_idx:
-                        fval=0
-                        if con[0] in con_map.keys() and fconidx in con_map[con[0]]:
-                            fval=1
-                        ev_txt += contrast_ftest_element.substitute(
-                            cnum=ftest_idx.index(fconidx) + 1,
-                            element=tidx,
-                            ctype=ctype,
-                            val=fval)
-                    ev_txt += "\n"
+                    if con[0] in con_map.keys():
+                        for fconidx in con_map[con[0]]:
+                            ev_txt += contrast_ftest_element.substitute(
+                                cnum=ftest_idx.index(fconidx) + 1,
+                                element=tidx,
+                                ctype=ctype,
+                                val=1)
+                        ev_txt += "\n"
 
             # add contrast mask info
             ev_txt += contrastmask_header.substitute()
@@ -1959,4 +1956,3 @@ class GLM(FSLCommand):
                 self.inputs.out_vnscales_name)
 
         return outputs
-

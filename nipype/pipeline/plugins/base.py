@@ -260,14 +260,9 @@ class DistributedPluginBase(PluginBase):
                                             graph=graph)
             else:
                 logger.debug('Not submitting')
-            self._wait()
+            sleep(float(self._config['execution']['poll_sleep_duration']))
         self._remove_node_dirs()
         report_nodes_not_run(notrun)
-
-
-
-    def _wait(self):
-        sleep(float(self._config['execution']['poll_sleep_duration']))
 
     def _get_result(self, taskid):
         raise NotImplementedError
