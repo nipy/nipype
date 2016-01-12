@@ -1,7 +1,16 @@
-Next Release
+Next release
 ============
+
+* ENH: Provides a Nipype wrapper for ANTs DenoiseImage (https://github.com/nipy/nipype/pull/1291)
+* FIX: Minor bugfix logging hash differences (https://github.com/nipy/nipype/pull/1298)
+* FIX: Use released Prov python library (https://github.com/nipy/nipype/pull/1279)
+* ENH: Support for Python 3 (https://github.com/nipy/nipype/pull/1221)
+* FIX: VTK version check missing when using tvtk (https://github.com/nipy/nipype/pull/1219)
+* ENH: Added an OAR scheduler plugin (https://github.com/nipy/nipype/pull/1259)
+* ENH: New ANTs interface: antsBrainExtraction (https://github.com/nipy/nipype/pull/1231)
 * API: Default model level for the bedpostx workflow has been set to "2" following FSL 5.0.9 lead
 * ENH: New interfaces for interacting with AWS S3: S3DataSink and S3DataGrabber (https://github.com/nipy/nipype/pull/1201)
+* ENH: Interfaces for MINC tools (https://github.com/nipy/nipype/pull/1304)
 
 Release 0.11.0 (September 15, 2015)
 ============

@@ -71,34 +71,39 @@ aparc.a2009s+aseg.mgz, one would also have to write/obtain a network resolution 
 regions.
 """
 
+
 def get_vox_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume)
-    hdr = nii.get_header()
+    hdr = nii.header
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
+
 
 def get_data_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume)
-    hdr = nii.get_header()
+    hdr = nii.header
     datadims = hdr.get_data_shape()
     return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
+
 
 def get_affine(volume):
     import nibabel as nb
     nii = nb.load(volume)
-    return nii.get_affine()
+    return nii.affine
+
 
 def select_aparc(list_of_files):
     for in_file in list_of_files:
         if 'aparc+aseg.mgz' in in_file:
             idx = list_of_files.index(in_file)
     return list_of_files[idx]
+
 
 def select_aparc_annot(list_of_files):
     for in_file in list_of_files:
@@ -113,7 +118,7 @@ Recon-all must have been run on subj1 from the FSL course data.
 """
 
 fs_dir = op.abspath('/usr/local/freesurfer')
-subjects_dir = op.abspath(op.join(op.curdir,'./subjects'))
+subjects_dir = op.abspath(op.join(op.curdir, './subjects'))
 fsl.FSLCommand.set_default_output_type('NIFTI')
 
 """
@@ -136,8 +141,8 @@ infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']), na
 infosource.iterables = ('subject_id', subject_list)
 
 info = dict(dwi=[['subject_id', 'data']],
-            bvecs=[['subject_id','bvecs']],
-            bvals=[['subject_id','bvals']])
+            bvecs=[['subject_id', 'bvecs']],
+            bvals=[['subject_id', 'bvals']])
 
 """
 A datasource node is used to perform the actual data grabbing.
@@ -146,8 +151,8 @@ The data are assumed to lie in data_dir/subject_id/.
 """
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                               outfields=info.keys()),
-                     name = 'datasource')
+                                               outfields=list(info.keys())),
+                     name='datasource')
 
 datasource.inputs.template = "%s/%s"
 datasource.inputs.base_directory = data_dir
@@ -185,7 +190,7 @@ fsl2scheme.inputs.usegradmod = True
 FSL's Brain Extraction tool is used to create a mask from the b0 image
 """
 
-b0Strip = pe.Node(interface=fsl.BET(mask = True), name = 'bet_b0')
+b0Strip = pe.Node(interface=fsl.BET(mask=True), name='bet_b0')
 
 """
 FSL's FLIRT function is used to coregister the b0 mask and the structural image.
@@ -193,16 +198,16 @@ A convert_xfm node is then used to obtain the inverse of the transformation matr
 FLIRT is used once again to apply the inverse transformation to the parcellated brain image.
 """
 
-coregister = pe.Node(interface=fsl.FLIRT(dof=6), name = 'coregister')
+coregister = pe.Node(interface=fsl.FLIRT(dof=6), name='coregister')
 coregister.inputs.cost = ('corratio')
 
-convertxfm = pe.Node(interface=fsl.ConvertXFM(), name = 'convertxfm')
+convertxfm = pe.Node(interface=fsl.ConvertXFM(), name='convertxfm')
 convertxfm.inputs.invert_xfm = True
 
-inverse = pe.Node(interface=fsl.FLIRT(), name = 'inverse')
+inverse = pe.Node(interface=fsl.FLIRT(), name='inverse')
 inverse.inputs.interp = ('nearestneighbour')
 
-inverse_AparcAseg = pe.Node(interface=fsl.FLIRT(), name = 'inverse_AparcAseg')
+inverse_AparcAseg = pe.Node(interface=fsl.FLIRT(), name='inverse_AparcAseg')
 inverse_AparcAseg.inputs.interp = ('nearestneighbour')
 
 """
@@ -254,7 +259,7 @@ Second, diffusion tensors are fit to the voxel-order data.
 If desired, these tensors can be converted to a Nifti tensor image using the DT2NIfTI interface.
 """
 
-dtifit = pe.Node(interface=camino.DTIFit(),name='dtifit')
+dtifit = pe.Node(interface=camino.DTIFit(), name='dtifit')
 
 """
 Next, a lookup table is generated from the schemefile and the
@@ -310,16 +315,16 @@ fractional anisotropy and diffusivity trace maps and their associated headers, a
 into a single .nii file.
 """
 
-fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(),name='fa')
-trace = pe.Node(interface=camino.ComputeTensorTrace(),name='trace')
+fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(), name='fa')
+trace = pe.Node(interface=camino.ComputeTensorTrace(), name='trace')
 dteig = pe.Node(interface=camino.ComputeEigensystem(), name='dteig')
 
-analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_fa')
+analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(), name='analyzeheader_fa')
 analyzeheader_fa.inputs.datatype = 'double'
-analyzeheader_trace = pe.Node(interface=camino.AnalyzeHeader(),name='analyzeheader_trace')
+analyzeheader_trace = pe.Node(interface=camino.AnalyzeHeader(), name='analyzeheader_trace')
 analyzeheader_trace.inputs.datatype = 'double'
 
-fa2nii = pe.Node(interface=misc.CreateNifti(),name='fa2nii')
+fa2nii = pe.Node(interface=misc.CreateNifti(), name='fa2nii')
 trace2nii = fa2nii.clone("trace2nii")
 
 """
@@ -334,7 +339,7 @@ Freesurfer LUT (/freesurfer/FreeSurferColorLUT.txt).
 """
 
 roigen = pe.Node(interface=cmtk.ROIGen(), name="ROIGen")
-cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme = "NativeFreesurfer")
+cmp_config = cmp.configuration.PipelineConfiguration(parcellation_scheme="NativeFreesurfer")
 cmp_config.parcellation_scheme = "NativeFreesurfer"
 roigen.inputs.LUT_file = cmp_config.get_freeview_lut("NativeFreesurfer")['freesurferaparc']
 roigen_structspace = roigen.clone('ROIGen_structspace')
@@ -377,41 +382,41 @@ First, we connect the input node to the early conversion functions.
 FreeSurfer input nodes:
 """
 
-mapping.connect([(inputnode, FreeSurferSource,[("subject_id","subject_id")])])
-mapping.connect([(inputnode, FreeSurferSourceLH,[("subject_id","subject_id")])])
-mapping.connect([(inputnode, FreeSurferSourceRH,[("subject_id","subject_id")])])
+mapping.connect([(inputnode, FreeSurferSource, [("subject_id", "subject_id")])])
+mapping.connect([(inputnode, FreeSurferSourceLH, [("subject_id", "subject_id")])])
+mapping.connect([(inputnode, FreeSurferSourceRH, [("subject_id", "subject_id")])])
 
 """
 Required conversions for processing in Camino:
 """
 
 mapping.connect([(inputnode, image2voxel, [("dwi", "in_file")]),
-                       (inputnode, fsl2scheme, [("bvecs", "bvec_file"),
-                                                ("bvals", "bval_file")]),
-                       (image2voxel, dtifit,[['voxel_order','in_file']]),
-                       (fsl2scheme, dtifit,[['scheme','scheme_file']])
-                      ])
+                 (inputnode, fsl2scheme, [("bvecs", "bvec_file"),
+                                          ("bvals", "bval_file")]),
+                 (image2voxel, dtifit, [['voxel_order', 'in_file']]),
+                 (fsl2scheme, dtifit, [['scheme', 'scheme_file']])
+                 ])
 
 """
 Nifti conversions for the parcellated white matter image (used in Camino's conmap),
 and the subject's stripped brain image from Freesurfer:
 """
 
-mapping.connect([(FreeSurferSource, mri_convert_WMParc,[('wmparc','in_file')])])
-mapping.connect([(FreeSurferSource, mri_convert_Brain,[('brain','in_file')])])
+mapping.connect([(FreeSurferSource, mri_convert_WMParc, [('wmparc', 'in_file')])])
+mapping.connect([(FreeSurferSource, mri_convert_Brain, [('brain', 'in_file')])])
 
 """
 Surface conversions to GIFTI (pial, white, inflated, and sphere for both hemispheres)
 """
 
-mapping.connect([(FreeSurferSourceLH, mris_convertLH,[('pial','in_file')])])
-mapping.connect([(FreeSurferSourceRH, mris_convertRH,[('pial','in_file')])])
-mapping.connect([(FreeSurferSourceLH, mris_convertLHwhite,[('white','in_file')])])
-mapping.connect([(FreeSurferSourceRH, mris_convertRHwhite,[('white','in_file')])])
-mapping.connect([(FreeSurferSourceLH, mris_convertLHinflated,[('inflated','in_file')])])
-mapping.connect([(FreeSurferSourceRH, mris_convertRHinflated,[('inflated','in_file')])])
-mapping.connect([(FreeSurferSourceLH, mris_convertLHsphere,[('sphere','in_file')])])
-mapping.connect([(FreeSurferSourceRH, mris_convertRHsphere,[('sphere','in_file')])])
+mapping.connect([(FreeSurferSourceLH, mris_convertLH, [('pial', 'in_file')])])
+mapping.connect([(FreeSurferSourceRH, mris_convertRH, [('pial', 'in_file')])])
+mapping.connect([(FreeSurferSourceLH, mris_convertLHwhite, [('white', 'in_file')])])
+mapping.connect([(FreeSurferSourceRH, mris_convertRHwhite, [('white', 'in_file')])])
+mapping.connect([(FreeSurferSourceLH, mris_convertLHinflated, [('inflated', 'in_file')])])
+mapping.connect([(FreeSurferSourceRH, mris_convertRHinflated, [('inflated', 'in_file')])])
+mapping.connect([(FreeSurferSourceLH, mris_convertLHsphere, [('sphere', 'in_file')])])
+mapping.connect([(FreeSurferSourceRH, mris_convertRHsphere, [('sphere', 'in_file')])])
 
 """
 The annotation files are converted using the pial surface as a map via the MRIsConvert interface.
@@ -419,8 +424,8 @@ One of the functions defined earlier is used to select the lh.aparc.annot and rh
 specifically (rather than i.e. rh.aparc.a2009s.annot) from the output list given by the FreeSurferSource.
 """
 
-mapping.connect([(FreeSurferSourceLH, mris_convertLHlabels,[('pial','in_file')])])
-mapping.connect([(FreeSurferSourceRH, mris_convertRHlabels,[('pial','in_file')])])
+mapping.connect([(FreeSurferSourceLH, mris_convertLHlabels, [('pial', 'in_file')])])
+mapping.connect([(FreeSurferSourceRH, mris_convertRHlabels, [('pial', 'in_file')])])
 mapping.connect([(FreeSurferSourceLH, mris_convertLHlabels, [(('annot', select_aparc_annot), 'annot_file')])])
 mapping.connect([(FreeSurferSourceRH, mris_convertRHlabels, [(('annot', select_aparc_annot), 'annot_file')])])
 
@@ -430,24 +435,24 @@ At present the conmap node connection is left commented, as there have been rece
 code that have presented some users with errors.
 """
 
-mapping.connect([(inputnode, b0Strip,[('dwi','in_file')])])
-mapping.connect([(b0Strip, coregister,[('out_file','in_file')])])
-mapping.connect([(mri_convert_Brain, coregister,[('out_file','reference')])])
-mapping.connect([(coregister, convertxfm,[('out_matrix_file','in_file')])])
-mapping.connect([(b0Strip, inverse,[('out_file','reference')])])
-mapping.connect([(convertxfm, inverse,[('out_file','in_matrix_file')])])
-mapping.connect([(mri_convert_WMParc, inverse,[('out_file','in_file')])])
+mapping.connect([(inputnode, b0Strip, [('dwi', 'in_file')])])
+mapping.connect([(b0Strip, coregister, [('out_file', 'in_file')])])
+mapping.connect([(mri_convert_Brain, coregister, [('out_file', 'reference')])])
+mapping.connect([(coregister, convertxfm, [('out_matrix_file', 'in_file')])])
+mapping.connect([(b0Strip, inverse, [('out_file', 'reference')])])
+mapping.connect([(convertxfm, inverse, [('out_file', 'in_matrix_file')])])
+mapping.connect([(mri_convert_WMParc, inverse, [('out_file', 'in_file')])])
 
 """
 The tractography pipeline consists of the following nodes. Further information about the tractography
 can be found in nipype/examples/dmri_camino_dti.py.
 """
 
-mapping.connect([(b0Strip, track,[("mask_file","seed_file")])])
-mapping.connect([(fsl2scheme, dtlutgen,[("scheme","scheme_file")])])
-mapping.connect([(dtlutgen, picopdfs,[("dtLUT","luts")])])
-mapping.connect([(dtifit, picopdfs,[("tensor_fitted","in_file")])])
-mapping.connect([(picopdfs, track,[("pdfs","in_file")])])
+mapping.connect([(b0Strip, track, [("mask_file", "seed_file")])])
+mapping.connect([(fsl2scheme, dtlutgen, [("scheme", "scheme_file")])])
+mapping.connect([(dtlutgen, picopdfs, [("dtLUT", "luts")])])
+mapping.connect([(dtifit, picopdfs, [("tensor_fitted", "in_file")])])
+mapping.connect([(picopdfs, track, [("pdfs", "in_file")])])
 
 """
 Connecting the Fractional Anisotropy and Trace nodes is simple, as they obtain their input from the
@@ -456,36 +461,36 @@ along with the original DWI image from the input node, to the header-generating 
 files will be correct and readable.
 """
 
-mapping.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
-mapping.connect([(fa, analyzeheader_fa,[("fa","in_file")])])
-mapping.connect([(inputnode, analyzeheader_fa,[(('dwi', get_vox_dims), 'voxel_dims'),
-    (('dwi', get_data_dims), 'data_dims')])])
-mapping.connect([(fa, fa2nii,[('fa','data_file')])])
-mapping.connect([(inputnode, fa2nii,[(('dwi', get_affine), 'affine')])])
-mapping.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
+mapping.connect([(dtifit, fa, [("tensor_fitted", "in_file")])])
+mapping.connect([(fa, analyzeheader_fa, [("fa", "in_file")])])
+mapping.connect([(inputnode, analyzeheader_fa, [(('dwi', get_vox_dims), 'voxel_dims'),
+                                                (('dwi', get_data_dims), 'data_dims')])])
+mapping.connect([(fa, fa2nii, [('fa', 'data_file')])])
+mapping.connect([(inputnode, fa2nii, [(('dwi', get_affine), 'affine')])])
+mapping.connect([(analyzeheader_fa, fa2nii, [('header', 'header_file')])])
 
 
-mapping.connect([(dtifit, trace,[("tensor_fitted","in_file")])])
-mapping.connect([(trace, analyzeheader_trace,[("trace","in_file")])])
-mapping.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
-    (('dwi', get_data_dims), 'data_dims')])])
-mapping.connect([(trace, trace2nii,[('trace','data_file')])])
-mapping.connect([(inputnode, trace2nii,[(('dwi', get_affine), 'affine')])])
-mapping.connect([(analyzeheader_trace, trace2nii,[('header', 'header_file')])])
+mapping.connect([(dtifit, trace, [("tensor_fitted", "in_file")])])
+mapping.connect([(trace, analyzeheader_trace, [("trace", "in_file")])])
+mapping.connect([(inputnode, analyzeheader_trace, [(('dwi', get_vox_dims), 'voxel_dims'),
+                                                   (('dwi', get_data_dims), 'data_dims')])])
+mapping.connect([(trace, trace2nii, [('trace', 'data_file')])])
+mapping.connect([(inputnode, trace2nii, [(('dwi', get_affine), 'affine')])])
+mapping.connect([(analyzeheader_trace, trace2nii, [('header', 'header_file')])])
 
-mapping.connect([(dtifit, dteig,[("tensor_fitted","in_file")])])
+mapping.connect([(dtifit, dteig, [("tensor_fitted", "in_file")])])
 
 """
 The output tracts are converted to Trackvis format (and back). Here we also use the voxel- and data-grabbing
 functions defined at the beginning of the pipeline.
 """
 
-mapping.connect([(track, camino2trackvis, [('tracked','in_file')]),
-                       (track, vtkstreamlines,[['tracked','in_file']]),
-                       (camino2trackvis, trk2camino,[['trackvis','in_file']])
-                      ])
-mapping.connect([(inputnode, camino2trackvis,[(('dwi', get_vox_dims), 'voxel_dims'),
-    (('dwi', get_data_dims), 'data_dims')])])
+mapping.connect([(track, camino2trackvis, [('tracked', 'in_file')]),
+                 (track, vtkstreamlines, [['tracked', 'in_file']]),
+                 (camino2trackvis, trk2camino, [['trackvis', 'in_file']])
+                 ])
+mapping.connect([(inputnode, camino2trackvis, [(('dwi', get_vox_dims), 'voxel_dims'),
+                                               (('dwi', get_data_dims), 'data_dims')])])
 
 """
 Here the CMTK connectivity mapping nodes are connected.
@@ -498,45 +503,45 @@ mapping.connect(createnodes, 'node_network',
                 creatematrix, 'resolution_network_file')
 mapping.connect([(FreeSurferSource, mri_convert_AparcAseg, [(('aparc_aseg', select_aparc), 'in_file')])])
 
-mapping.connect([(b0Strip, inverse_AparcAseg,[('out_file','reference')])])
-mapping.connect([(convertxfm, inverse_AparcAseg,[('out_file','in_matrix_file')])])
-mapping.connect([(mri_convert_AparcAseg, inverse_AparcAseg,[('out_file','in_file')])])
-mapping.connect([(mri_convert_AparcAseg, roigen_structspace,[('out_file','aparc_aseg_file')])])
-mapping.connect([(roigen_structspace, createnodes,[("roi_file","roi_file")])])
+mapping.connect([(b0Strip, inverse_AparcAseg, [('out_file', 'reference')])])
+mapping.connect([(convertxfm, inverse_AparcAseg, [('out_file', 'in_matrix_file')])])
+mapping.connect([(mri_convert_AparcAseg, inverse_AparcAseg, [('out_file', 'in_file')])])
+mapping.connect([(mri_convert_AparcAseg, roigen_structspace, [('out_file', 'aparc_aseg_file')])])
+mapping.connect([(roigen_structspace, createnodes, [("roi_file", "roi_file")])])
 
-mapping.connect([(inverse_AparcAseg, roigen,[("out_file","aparc_aseg_file")])])
-mapping.connect([(roigen, creatematrix,[("roi_file","roi_file")])])
-mapping.connect([(camino2trackvis, creatematrix,[("trackvis","tract_file")])])
-mapping.connect([(inputnode, creatematrix,[("subject_id","out_matrix_file")])])
-mapping.connect([(inputnode, creatematrix,[("subject_id","out_matrix_mat_file")])])
+mapping.connect([(inverse_AparcAseg, roigen, [("out_file", "aparc_aseg_file")])])
+mapping.connect([(roigen, creatematrix, [("roi_file", "roi_file")])])
+mapping.connect([(camino2trackvis, creatematrix, [("trackvis", "tract_file")])])
+mapping.connect([(inputnode, creatematrix, [("subject_id", "out_matrix_file")])])
+mapping.connect([(inputnode, creatematrix, [("subject_id", "out_matrix_mat_file")])])
 
 """
 The merge nodes defined earlier are used here to create lists of the files which are
 destined for the CFFConverter.
 """
 
-mapping.connect([(creatematrix, gpickledNetworks,[("matrix_files","in1")])])
+mapping.connect([(creatematrix, gpickledNetworks, [("matrix_files", "in1")])])
 
-mapping.connect([(mris_convertLH, giftiSurfaces,[("converted","in1")])])
-mapping.connect([(mris_convertRH, giftiSurfaces,[("converted","in2")])])
-mapping.connect([(mris_convertLHwhite, giftiSurfaces,[("converted","in3")])])
-mapping.connect([(mris_convertRHwhite, giftiSurfaces,[("converted","in4")])])
-mapping.connect([(mris_convertLHinflated, giftiSurfaces,[("converted","in5")])])
-mapping.connect([(mris_convertRHinflated, giftiSurfaces,[("converted","in6")])])
-mapping.connect([(mris_convertLHsphere, giftiSurfaces,[("converted","in7")])])
-mapping.connect([(mris_convertRHsphere, giftiSurfaces,[("converted","in8")])])
+mapping.connect([(mris_convertLH, giftiSurfaces, [("converted", "in1")])])
+mapping.connect([(mris_convertRH, giftiSurfaces, [("converted", "in2")])])
+mapping.connect([(mris_convertLHwhite, giftiSurfaces, [("converted", "in3")])])
+mapping.connect([(mris_convertRHwhite, giftiSurfaces, [("converted", "in4")])])
+mapping.connect([(mris_convertLHinflated, giftiSurfaces, [("converted", "in5")])])
+mapping.connect([(mris_convertRHinflated, giftiSurfaces, [("converted", "in6")])])
+mapping.connect([(mris_convertLHsphere, giftiSurfaces, [("converted", "in7")])])
+mapping.connect([(mris_convertRHsphere, giftiSurfaces, [("converted", "in8")])])
 
-mapping.connect([(mris_convertLHlabels, giftiLabels,[("converted","in1")])])
-mapping.connect([(mris_convertRHlabels, giftiLabels,[("converted","in2")])])
+mapping.connect([(mris_convertLHlabels, giftiLabels, [("converted", "in1")])])
+mapping.connect([(mris_convertRHlabels, giftiLabels, [("converted", "in2")])])
 
-mapping.connect([(roigen, niftiVolumes,[("roi_file","in1")])])
-mapping.connect([(inputnode, niftiVolumes,[("dwi","in2")])])
-mapping.connect([(mri_convert_Brain, niftiVolumes,[("out_file","in3")])])
+mapping.connect([(roigen, niftiVolumes, [("roi_file", "in1")])])
+mapping.connect([(inputnode, niftiVolumes, [("dwi", "in2")])])
+mapping.connect([(mri_convert_Brain, niftiVolumes, [("out_file", "in3")])])
 
-mapping.connect([(creatematrix, fiberDataArrays,[("endpoint_file","in1")])])
-mapping.connect([(creatematrix, fiberDataArrays,[("endpoint_file_mm","in2")])])
-mapping.connect([(creatematrix, fiberDataArrays,[("fiber_length_file","in3")])])
-mapping.connect([(creatematrix, fiberDataArrays,[("fiber_label_file","in4")])])
+mapping.connect([(creatematrix, fiberDataArrays, [("endpoint_file", "in1")])])
+mapping.connect([(creatematrix, fiberDataArrays, [("endpoint_file_mm", "in2")])])
+mapping.connect([(creatematrix, fiberDataArrays, [("fiber_length_file", "in3")])])
+mapping.connect([(creatematrix, fiberDataArrays, [("fiber_label_file", "in4")])])
 
 """
 This block actually connects the merged lists to the CFF converter. We pass the surfaces
@@ -547,13 +552,13 @@ product.
 """
 
 CFFConverter.inputs.script_files = op.abspath(inspect.getfile(inspect.currentframe()))
-mapping.connect([(giftiSurfaces, CFFConverter,[("out","gifti_surfaces")])])
-mapping.connect([(giftiLabels, CFFConverter,[("out","gifti_labels")])])
-mapping.connect([(gpickledNetworks, CFFConverter,[("out","gpickled_networks")])])
-mapping.connect([(niftiVolumes, CFFConverter,[("out","nifti_volumes")])])
-mapping.connect([(fiberDataArrays, CFFConverter,[("out","data_files")])])
-mapping.connect([(creatematrix, CFFConverter,[("filtered_tractographies","tract_files")])])
-mapping.connect([(inputnode, CFFConverter,[("subject_id","title")])])
+mapping.connect([(giftiSurfaces, CFFConverter, [("out", "gifti_surfaces")])])
+mapping.connect([(giftiLabels, CFFConverter, [("out", "gifti_labels")])])
+mapping.connect([(gpickledNetworks, CFFConverter, [("out", "gpickled_networks")])])
+mapping.connect([(niftiVolumes, CFFConverter, [("out", "nifti_volumes")])])
+mapping.connect([(fiberDataArrays, CFFConverter, [("out", "data_files")])])
+mapping.connect([(creatematrix, CFFConverter, [("filtered_tractographies", "tract_files")])])
+mapping.connect([(inputnode, CFFConverter, [("subject_id", "title")])])
 
 """
 Finally, we create another higher-level workflow to connect our mapping workflow with the info and datagrabbing nodes
@@ -564,13 +569,13 @@ their names to the subject list and their data to the proper folders.
 connectivity = pe.Workflow(name="connectivity")
 connectivity.base_dir = op.abspath('dmri_connectivity')
 connectivity.connect([
-                    (infosource,datasource,[('subject_id', 'subject_id')]),
-                    (datasource,mapping,[('dwi','inputnode.dwi'),
-                                               ('bvals','inputnode.bvals'),
-                                               ('bvecs','inputnode.bvecs')
-                                               ]),
-        (infosource,mapping,[('subject_id','inputnode.subject_id')])
-                ])
+                    (infosource, datasource, [('subject_id', 'subject_id')]),
+                    (datasource, mapping, [('dwi', 'inputnode.dwi'),
+                                           ('bvals', 'inputnode.bvals'),
+                                           ('bvecs', 'inputnode.bvecs')
+                                           ]),
+    (infosource, mapping, [('subject_id', 'inputnode.subject_id')])
+])
 
 """
 The following functions run the whole workflow and produce graphs describing the processing pipeline.

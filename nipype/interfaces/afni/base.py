@@ -2,6 +2,8 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provide interface to AFNI commands."""
 
+from builtins import object
+
 
 import os
 import warnings
@@ -11,7 +13,6 @@ from ..base import (
     CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
 
 warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
 
 
 class Info(object):
@@ -73,7 +74,7 @@ class Info(object):
         -------
         None
         """
-        #warn(('AFNI has no environment variable that sets filetype '
+        # warn(('AFNI has no environment variable that sets filetype '
         #      'Nipype uses NIFTI_GZ as default'))
         return 'AFNI'
 
@@ -93,11 +94,12 @@ class Info(object):
 
 
 class AFNICommandInputSpec(CommandLineInputSpec):
-    outputtype = traits.Enum('AFNI', Info.ftypes.keys(),
+    outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
                              desc='AFNI output filetype')
     out_file = File(name_template="%s_afni", desc='output image file name',
                     argstr='-prefix %s',
                     name_source=["in_file"])
+
 
 class AFNICommandOutputSpec(TraitedSpec):
     out_file = File(desc='output file',
@@ -108,7 +110,6 @@ class AFNICommand(CommandLine):
 
     input_spec = AFNICommandInputSpec
     _outputtype = None
-
 
     def __init__(self, **inputs):
         super(AFNICommand, self).__init__(**inputs)
@@ -151,11 +152,11 @@ class AFNICommand(CommandLine):
     def _list_outputs(self):
         outputs = super(AFNICommand, self)._list_outputs()
         metadata = dict(name_source=lambda t: t is not None)
-        out_names = self.inputs.traits(**metadata).keys()
+        out_names = list(self.inputs.traits(**metadata).keys())
         if out_names:
             for name in out_names:
                 if outputs[name]:
-                    _,_,ext = split_filename(outputs[name])
+                    _, _, ext = split_filename(outputs[name])
                     if ext == "":
                         outputs[name] = outputs[name] + "+orig.BRIK"
         return outputs
