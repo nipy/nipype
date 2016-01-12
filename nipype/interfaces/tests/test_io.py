@@ -34,6 +34,17 @@ try:
 except:
     noboto3 = True
 
+# Check for fakes3
+import subprocess
+try:
+    ret_code = subprocess.check_call(['which', 'fakes3'], stdout=open(os.devnull, 'wb'))
+    if ret_code == 0:
+        fakes3_found = True
+    else:
+        fakes3_found = False
+except:
+    fakes3_found = False
+
 def test_datagrabber():
     dg = nio.DataGrabber()
     yield assert_equal, dg.inputs.template, Undefined
@@ -173,30 +184,6 @@ def test_datasink():
     ds = nio.DataSink(infields=['test'])
     yield assert_true, 'test' in ds.inputs.copyable_trait_names()
 
-# Function to check for fakes3
-def _check_for_fakes3():
-    '''
-    Function used internally to check for fakes3 installation
-    '''
-
-    # Import packages
-    import subprocess
-
-    # Init variables
-    fakes3_found = False
-
-    # Check for fakes3
-    try:
-        ret_code = subprocess.check_call(['which', 'fakes3'], stdout=open(os.devnull, 'wb'))
-        if ret_code == 0:
-            fakes3_found = True
-    except subprocess.CalledProcessError as exc:
-        print 'fakes3 not found, install via \'gem install fakes3\', skipping test...'
-    except:
-        print 'Unable to check for fakes3 installation, skipping test...'
-
-    # Return if found
-    return fakes3_found
 
 def _make_dummy_input():
     '''
@@ -215,10 +202,6 @@ def _make_dummy_input():
 
     # Return path
     return input_path
-
-# Check for fakes3
-fakes3 = _check_for_fakes3()
-
 
 @skipif(noboto3 or not fakes3)
 # Test datasink writes to s3 properly
