@@ -20,16 +20,11 @@ from warnings import warn
 import numpy as np
 import scipy.sparse as ssp
 
-<<<<<<< HEAD
-from ..utils import (nx, dfs_preorder, topological_sort)
-from ..engine import (MapNode, str2bool)
-=======
 
 from ...utils.filemanip import savepkl, loadpkl
 from ...utils.misc import str2bool
 from ..engine.utils import (nx, dfs_preorder, topological_sort)
 from ..engine import MapNode
->>>>>>> 77ffab33003e8c69712bc3015c213c6979ef77ff
 
 
 from ... import logging
