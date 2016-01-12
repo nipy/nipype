@@ -10,9 +10,11 @@ Contributors to Nipype include but are not limited to:
   * Aimi Watanabe
   * Alexander Schaefer
   * Alexandre Gramfort
+  * Alexandre Savio
   * Anisha Keshavan
   * Ariel Rokem
   * Ben Acland
+  * Ben Cipollini
   * Basile Pinsard
   * Brendan Moloney
   * Brian Cheung

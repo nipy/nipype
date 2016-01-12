@@ -8,16 +8,20 @@ hash_method : content, timestamp
 
 @author: Chris Filo Gorgolewski
 '''
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 
-import ConfigParser
+import configparser
 from json import load, dump
 import os
 import shutil
 import errno
-from StringIO import StringIO
 from warnings import warn
 
 from ..external import portalocker
+from ..external.six import StringIO
+
 
 # Get home directory in platform-agnostic way
 homedir = os.path.expanduser('~')
@@ -74,7 +78,7 @@ class NipypeConfig(object):
     """
 
     def __init__(self, *args, **kwargs):
-        self._config = ConfigParser.ConfigParser()
+        self._config = configparser.ConfigParser()
         config_dir = os.path.expanduser('~/.nipype')
         mkdir_p(config_dir)
         old_config_file = os.path.expanduser('~/.nipype.cfg')
@@ -82,12 +86,12 @@ class NipypeConfig(object):
         # To be deprecated in two releases
         if os.path.exists(old_config_file):
             if os.path.exists(new_config_file):
-                msg=("Detected presence of both old (%s, used by versions "
-                     "< 0.5.2) and new (%s) config files.  This version will "
-                     "proceed with the new one. We advise to merge settings "
-                     "and remove old config file if you are not planning to "
-                     "use previous releases of nipype.") % (old_config_file,
-                                                            new_config_file)
+                msg = ("Detected presence of both old (%s, used by versions "
+                       "< 0.5.2) and new (%s) config files.  This version will "
+                       "proceed with the new one. We advise to merge settings "
+                       "and remove old config file if you are not planning to "
+                       "use previous releases of nipype.") % (old_config_file,
+                                                              new_config_file)
                 warn(msg)
             else:
                 warn("Moving old config file from: %s to %s" % (old_config_file,
@@ -121,6 +125,9 @@ class NipypeConfig(object):
         return self._config.get(section, option)
 
     def set(self, section, option, value):
+        if isinstance(value, bool):
+            value = str(value)
+
         return self._config.set(section, option, value)
 
     def getboolean(self, section, option):
@@ -157,7 +164,7 @@ class NipypeConfig(object):
     def update_config(self, config_dict):
         for section in ['execution', 'logging', 'check']:
             if section in config_dict:
-                for key, val in config_dict[section].items():
+                for key, val in list(config_dict[section].items()):
                     if not key.startswith('__'):
                         self._config.set(section, key, str(val))
 
@@ -168,4 +175,3 @@ class NipypeConfig(object):
     def enable_provenance(self):
         self._config.set('execution', 'write_provenance', 'true')
         self._config.set('execution', 'hash_method', 'content')
-

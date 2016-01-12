@@ -78,10 +78,9 @@ def test_create_bedpostx_pipeline():
                       (slice_dwi, original_bedpostx, [("roi_file", "dwi")]),
                       (slice_dwi, nipype_bedpostx, [("roi_file", "inputnode.dwi")]),
 
-                      (nipype_bedpostx, test_f1, [(("outputnode.mean_fsamples",list_to_filename), "volume1")]),
+                      (nipype_bedpostx, test_f1, [(("outputnode.mean_fsamples", list_to_filename), "volume1")]),
                       (original_bedpostx, test_f1, [("mean_fsamples", "volume2")]),
                       ])
 
     pipeline.run(plugin='Linear')
     shutil.rmtree(pipeline.base_dir)
-

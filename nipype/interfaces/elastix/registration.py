@@ -8,12 +8,14 @@ displacement maps to images and points.
 
 """
 
+from __future__ import absolute_import
+
 import os.path as op
 import re
 
 from ..base import (CommandLine, CommandLineInputSpec, isdefined,
                     TraitedSpec, File, traits, InputMultiPath)
-from base import ElastixBaseInputSpec
+from .base import ElastixBaseInputSpec
 
 from ... import logging
 logger = logging.getLogger('interface')
@@ -21,9 +23,9 @@ logger = logging.getLogger('interface')
 
 class RegistrationInputSpec(ElastixBaseInputSpec):
     fixed_image = File(exists=True, mandatory=True, argstr='-f %s',
-           desc='fixed image')
+                       desc='fixed image')
     moving_image = File(exists=True, mandatory=True, argstr='-m %s',
-           desc='moving image')
+                        desc='moving image')
     parameters = InputMultiPath(File(exists=True), mandatory=True, argstr='-p %s...',
                                 desc='parameter file, elastix handles 1 or more -p')
     fixed_mask = File(exists=True, argstr='-fMask %s', desc='mask for fixed image')
@@ -38,7 +40,7 @@ class RegistrationOutputSpec(TraitedSpec):
     warped_files = InputMultiPath(File(exists=False),
                                   desc=('input moving image warped to fixed image at each level'))
     warped_files_flags = traits.List(traits.Bool(False),
-                                    desc='flag indicating if warped image was generated')
+                                     desc='flag indicating if warped image was generated')
 
 
 class Registration(CommandLine):
@@ -50,10 +52,10 @@ class Registration(CommandLine):
 
     >>> from nipype.interfaces.elastix import Registration
     >>> reg = Registration()
-    >>> reg.inputs.fixed_image = 'fixed1.nii'
-    >>> reg.inputs.moving_image = 'moving1.nii'
-    >>> reg.inputs.parameters = ['elastix.txt']
-    >>> reg.cmdline
+    >>> reg.inputs.fixed_image = 'fixed1.nii'  # doctest: +SKIP
+    >>> reg.inputs.moving_image = 'moving1.nii'  # doctest: +SKIP
+    >>> reg.inputs.parameters = ['elastix.txt']  # doctest: +SKIP
+    >>> reg.cmdline  # doctest: +SKIP
     'elastix -f fixed1.nii -m moving1.nii -out ./ -p elastix.txt'
 
 
@@ -68,14 +70,14 @@ class Registration(CommandLine):
 
         out_dir = op.abspath(self.inputs.output_path)
 
-        opts = [ 'WriteResultImage', 'ResultImageFormat' ]
+        opts = ['WriteResultImage', 'ResultImageFormat']
         regex = re.compile(r'^\((\w+)\s(.+)\)$')
 
         outputs['transform'] = []
         outputs['warped_files'] = []
         outputs['warped_files_flags'] = []
 
-        for i,params in enumerate(self.inputs.parameters):
+        for i, params in enumerate(self.inputs.parameters):
             config = {}
 
             with open(params, 'r') as f:
@@ -88,12 +90,12 @@ class Registration(CommandLine):
                             config[m.group(1).strip()] = value
 
             outputs['transform'].append(op.join(out_dir,
-                                        'TransformParameters.%01d.txt' % i ))
+                                                'TransformParameters.%01d.txt' % i))
 
             warped_file = None
             if config['WriteResultImage']:
                 warped_file = op.join(out_dir,
-                                      'result.%01d.%s' %(i,config['ResultImageFormat']))
+                                      'result.%01d.%s' % (i, config['ResultImageFormat']))
 
             outputs['warped_files'].append(warped_file)
             outputs['warped_files_flags'].append(config['WriteResultImage'])
@@ -103,8 +105,7 @@ class Registration(CommandLine):
 
         return outputs
 
-
-    def _cast(self,val):
+    def _cast(self, val):
         if val.startswith('"') and val.endswith('"'):
             if val == '"true"':
                 return True
@@ -121,6 +122,7 @@ class Registration(CommandLine):
             except ValueError:
                 return val
 
+
 class ApplyWarpInputSpec(ElastixBaseInputSpec):
     transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
                           desc='transform-parameter file, only 1')
@@ -129,9 +131,9 @@ class ApplyWarpInputSpec(ElastixBaseInputSpec):
                         desc='input image to deform')
 
 
-
 class ApplyWarpOutputSpec(TraitedSpec):
     warped_file = File(desc='input moving image warped to fixed image')
+
 
 class ApplyWarp(CommandLine):
     """
@@ -143,9 +145,9 @@ class ApplyWarp(CommandLine):
 
     >>> from nipype.interfaces.elastix import ApplyWarp
     >>> reg = ApplyWarp()
-    >>> reg.inputs.moving_image = 'moving1.nii'
-    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> reg.cmdline
+    >>> reg.inputs.moving_image = 'moving1.nii'  # doctest: +SKIP
+    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'  # doctest: +SKIP
+    >>> reg.cmdline  # doctest: +SKIP
     'transformix -in moving1.nii -out ./ -tp TransformParameters.0.txt'
 
 
@@ -158,7 +160,7 @@ class ApplyWarp(CommandLine):
     def _list_outputs(self):
         outputs = self._outputs().get()
         out_dir = op.abspath(self.inputs.output_path)
-        outputs['warped_file'] = op.join(out_dir,'result.nii.gz')
+        outputs['warped_file'] = op.join(out_dir, 'result.nii.gz')
         return outputs
 
 
@@ -172,6 +174,7 @@ class AnalyzeWarpOutputSpec(TraitedSpec):
     jacdet_map = File(desc='det(Jacobian) map')
     jacmat_map = File(desc='Jacobian matrix map')
 
+
 class AnalyzeWarp(CommandLine):
     """
     Use transformix to get details from the input transform (generate
@@ -183,8 +186,8 @@ class AnalyzeWarp(CommandLine):
 
     >>> from nipype.interfaces.elastix import AnalyzeWarp
     >>> reg = AnalyzeWarp()
-    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> reg.cmdline
+    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'  # doctest: +SKIP
+    >>> reg.cmdline  # doctest: +SKIP
     'transformix -def all -jac all -jacmat all -out ./ -tp TransformParameters.0.txt'
 
 
@@ -197,9 +200,9 @@ class AnalyzeWarp(CommandLine):
     def _list_outputs(self):
         outputs = self._outputs().get()
         out_dir = op.abspath(self.inputs.output_path)
-        outputs['disp_field'] = op.join(out_dir,'deformationField.nii.gz')
-        outputs['jacdet_map'] = op.join(out_dir,'spatialJacobian.nii.gz')
-        outputs['jacmat_map'] = op.join(out_dir,'fullSpatialJacobian.nii.gz')
+        outputs['disp_field'] = op.join(out_dir, 'deformationField.nii.gz')
+        outputs['jacdet_map'] = op.join(out_dir, 'spatialJacobian.nii.gz')
+        outputs['jacmat_map'] = op.join(out_dir, 'fullSpatialJacobian.nii.gz')
         return outputs
 
 
@@ -210,9 +213,9 @@ class PointsWarpInputSpec(ElastixBaseInputSpec):
                           desc='transform-parameter file, only 1')
 
 
-
 class PointsWarpOutputSpec(TraitedSpec):
     warped_file = File(desc='input points displaced in fixed image domain')
+
 
 class PointsWarp(CommandLine):
     """Use ``transformix`` to apply a transform on an input point set.
@@ -223,9 +226,9 @@ class PointsWarp(CommandLine):
 
     >>> from nipype.interfaces.elastix import PointsWarp
     >>> reg = PointsWarp()
-    >>> reg.inputs.points_file = 'surf1.vtk'
-    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'
-    >>> reg.cmdline
+    >>> reg.inputs.points_file = 'surf1.vtk'  # doctest: +SKIP
+    >>> reg.inputs.transform_file = 'TransformParameters.0.txt'  # doctest: +SKIP
+    >>> reg.cmdline  # doctest: +SKIP
     'transformix -out ./ -def surf1.vtk -tp TransformParameters.0.txt'
 
 
@@ -241,5 +244,5 @@ class PointsWarp(CommandLine):
 
         fname, ext = op.splitext(op.basename(self.inputs.points_file))
 
-        outputs['warped_file'] = op.join(out_dir,'outputpoints%s' % ext)
+        outputs['warped_file'] = op.join(out_dir, 'outputpoints%s' % ext)
         return outputs

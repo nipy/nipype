@@ -3,6 +3,9 @@
 """Common graph operations for execution
 """
 
+from builtins import range
+from builtins import object
+
 from copy import deepcopy
 from glob import glob
 import os
@@ -17,10 +20,17 @@ from warnings import warn
 import numpy as np
 import scipy.sparse as ssp
 
+<<<<<<< HEAD
 from ..utils import (nx, dfs_preorder, topological_sort)
 from ..engine import (MapNode, str2bool)
+=======
 
-from nipype.utils.filemanip import savepkl, loadpkl
+from ...utils.filemanip import savepkl, loadpkl
+from ...utils.misc import str2bool
+from ..engine.utils import (nx, dfs_preorder, topological_sort)
+from ..engine import MapNode
+>>>>>>> 77ffab33003e8c69712bc3015c213c6979ef77ff
+
 
 from ... import logging
 logger = logging.getLogger('workflow')
@@ -53,8 +63,8 @@ def report_crash(node, traceback=None, hostname=None):
     timeofcrash = strftime('%Y%m%d-%H%M%S')
     login_name = getpass.getuser()
     crashfile = 'crash-%s-%s-%s.pklz' % (timeofcrash,
-                                        login_name,
-                                        name)
+                                         login_name,
+                                         name)
     crashdir = node.config['execution']['crashdump_dir']
     if crashdir is None:
         crashdir = os.getcwd()
@@ -64,7 +74,7 @@ def report_crash(node, traceback=None, hostname=None):
     logger.info('Saving crash info to %s' % crashfile)
     logger.info(''.join(traceback))
     savepkl(crashfile, dict(node=node, traceback=traceback))
-    #np.savez(crashfile, node=node, traceback=traceback)
+    # np.savez(crashfile, node=node, traceback=traceback)
     return crashfile
 
 
@@ -229,7 +239,7 @@ class DistributedPluginBase(PluginBase):
         # setup polling - TODO: change to threaded model
         notrun = []
         while np.any(self.proc_done == False) | \
-                    np.any(self.proc_pending == True):
+                np.any(self.proc_pending == True):
             toappend = []
             # trigger callbacks for any pending results
             while self.pending_tasks:
@@ -307,7 +317,7 @@ class DistributedPluginBase(PluginBase):
         self.procs.extend(mapnodesubids)
         self.depidx = ssp.vstack((self.depidx,
                                   ssp.lil_matrix(np.zeros(
-                                  (numnodes, self.depidx.shape[1])))),
+                                      (numnodes, self.depidx.shape[1])))),
                                  'lil')
         self.depidx = ssp.hstack((self.depidx,
                                   ssp.lil_matrix(
@@ -338,7 +348,10 @@ class DistributedPluginBase(PluginBase):
                                     (self.depidx.sum(axis=0) == 0).__array__())
             if len(jobids) > 0:
                 # send all available jobs
-                logger.info('Submitting %d jobs' % len(jobids[:slots]))
+                if slots:
+                    logger.info('Pending[%d] Submitting[%d] jobs Slots[%d]' % (num_jobs, len(jobids[:slots]), slots))
+                else:
+                    logger.info('Pending[%d] Submitting[%d] jobs Slots[inf]' % (num_jobs, len(jobids)))
                 for jobid in jobids[:slots]:
                     if isinstance(self.procs[jobid], MapNode):
                         try:
@@ -356,23 +369,20 @@ class DistributedPluginBase(PluginBase):
                     self.proc_pending[jobid] = True
                     # Send job to task manager and add to pending tasks
                     logger.info('Executing: %s ID: %d' %
-                               (self.procs[jobid]._id, jobid))
+                                (self.procs[jobid]._id, jobid))
                     if self._status_callback:
                         self._status_callback(self.procs[jobid], 'start')
                     continue_with_submission = True
                     if str2bool(self.procs[jobid].config['execution']
-                                                          ['local_hash_check']):
+                                ['local_hash_check']):
                         logger.debug('checking hash locally')
                         try:
                             hash_exists, _, _, _ = self.procs[
                                 jobid].hash_exists()
                             logger.debug('Hash exists %s' % str(hash_exists))
-                            if (hash_exists and
-                                 (self.procs[jobid].overwrite == False or
-                                   (self.procs[jobid].overwrite == None and
-                                    not self.procs[jobid]._interface.always_run)
-                                 )
-                               ):
+                            if (hash_exists and (self.procs[jobid].overwrite is False or
+                                (self.procs[jobid].overwrite is None and not
+                                    self.procs[jobid]._interface.always_run))):
                                 continue_with_submission = False
                                 self._task_finished_cb(jobid)
                                 self._remove_node_dirs()
@@ -400,6 +410,8 @@ class DistributedPluginBase(PluginBase):
                                 self.proc_pending[jobid] = False
                             else:
                                 self.pending_tasks.insert(0, (tid, jobid))
+                    logger.info('Finished executing: %s ID: %d' %
+                                (self.procs[jobid]._id, jobid))
             else:
                 break
 
@@ -506,13 +518,10 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
         timed_out = True
         while (time() - t) < timeout:
             try:
-                logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
-                                                                      '..'))))
-                logger.debug(os.listdir(node_dir))
                 glob(os.path.join(node_dir, 'result_*.pklz')).pop()
                 timed_out = False
                 break
-            except Exception, e:
+            except Exception as e:
                 logger.debug(e)
             sleep(2)
         if timed_out:
@@ -526,9 +535,9 @@ class SGELikeBatchManagerBase(DistributedPluginBase):
                                  'seconds. Batch dir contains crashdump file '
                                  'if node raised an exception.\n'
                                  'Node working directory: ({2}) '.format(
-                                 taskid,timeout,node_dir) )
+                                     taskid, timeout, node_dir))
                 raise IOError(error_message)
-            except IOError, e:
+            except IOError as e:
                 result_data['traceback'] = format_exc()
         else:
             results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
@@ -603,18 +612,18 @@ class GraphPluginBase(PluginBase):
                 value = open(value).read()
             if (hasattr(node, "plugin_args") and
                     isinstance(node.plugin_args, dict) and
-                        keyword in node.plugin_args):
-                    if (keyword == "template" and
-                            os.path.isfile(node.plugin_args[keyword])):
-                        tmp_value = open(node.plugin_args[keyword]).read()
-                    else:
-                        tmp_value = node.plugin_args[keyword]
+                    keyword in node.plugin_args):
+                if (keyword == "template" and
+                        os.path.isfile(node.plugin_args[keyword])):
+                    tmp_value = open(node.plugin_args[keyword]).read()
+                else:
+                    tmp_value = node.plugin_args[keyword]
 
-                    if ('overwrite' in node.plugin_args and
-                            node.plugin_args['overwrite']):
-                        value = tmp_value
-                    else:
-                        value += tmp_value
+                if ('overwrite' in node.plugin_args and
+                        node.plugin_args['overwrite']):
+                    value = tmp_value
+                else:
+                    value += tmp_value
             values += (value, )
         return values
 
@@ -625,8 +634,6 @@ class GraphPluginBase(PluginBase):
         """
         raise NotImplementedError
 
-
-
     def _get_result(self, taskid):
         if taskid not in self._pending:
             raise Exception('Task %d not found' % taskid)
@@ -634,10 +641,6 @@ class GraphPluginBase(PluginBase):
             return None
         node_dir = self._pending[taskid]
 
-
-        logger.debug(os.listdir(os.path.realpath(os.path.join(node_dir,
-                                                              '..'))))
-        logger.debug(os.listdir(node_dir))
         glob(os.path.join(node_dir, 'result_*.pklz')).pop()
 
         results_file = glob(os.path.join(node_dir, 'result_*.pklz'))[0]
@@ -655,4 +658,3 @@ class GraphPluginBase(PluginBase):
             result_out['result'] = result_data
 
         return result_out
-

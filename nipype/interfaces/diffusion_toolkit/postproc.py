@@ -9,19 +9,23 @@
    >>> os.chdir(datadir)
 
 """
-import os
 __docformat__ = 'restructuredtext'
 
-from nipype.interfaces.base import (TraitedSpec, File, traits, CommandLine,
-    InputMultiPath, CommandLineInputSpec)
+import os
+
+from ..base import (TraitedSpec, File, traits, CommandLine,
+                    InputMultiPath, CommandLineInputSpec)
+
 
 class SplineFilterInputSpec(CommandLineInputSpec):
     track_file = File(exists=True, desc="file containing tracks to be filtered", position=0, argstr="%s", mandatory=True)
     step_length = traits.Float(desc="in the unit of minimum voxel size", position=1, argstr="%f", mandatory=True)
     output_file = File("spline_tracks.trk", desc="target file for smoothed tracks", position=2, argstr="%s", usedefault=True)
 
+
 class SplineFilterOutputSpec(TraitedSpec):
     smoothed_track_file = File(exists=True)
+
 
 class SplineFilter(CommandLine):
     """
@@ -41,8 +45,8 @@ class SplineFilter(CommandLine):
     >>> filt.inputs.step_length = 0.5
     >>> filt.run()                                 # doctest: +SKIP
     """
-    input_spec=SplineFilterInputSpec
-    output_spec=SplineFilterOutputSpec
+    input_spec = SplineFilterInputSpec
+    output_spec = SplineFilterOutputSpec
 
     _cmd = "spline_filter"
 
@@ -56,8 +60,10 @@ class TrackMergeInputSpec(CommandLineInputSpec):
     track_files = InputMultiPath(File(exists=True), desc="file containing tracks to be filtered", position=0, argstr="%s...", mandatory=True)
     output_file = File("merged_tracks.trk", desc="target file for merged tracks", position=-1, argstr="%s", usedefault=True)
 
+
 class TrackMergeOutputSpec(TraitedSpec):
     track_file = File(exists=True)
+
 
 class TrackMerge(CommandLine):
     """
@@ -79,8 +85,8 @@ class TrackMerge(CommandLine):
     >>> mrg.inputs.track_files = ['track1.trk','track2.trk']
     >>> mrg.run()                                 # doctest: +SKIP
     """
-    input_spec=TrackMergeInputSpec
-    output_spec=TrackMergeOutputSpec
+    input_spec = TrackMergeInputSpec
+    output_spec = TrackMergeOutputSpec
 
     _cmd = "track_merge"
 
