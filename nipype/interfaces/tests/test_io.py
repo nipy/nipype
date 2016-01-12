@@ -39,11 +39,11 @@ import subprocess
 try:
     ret_code = subprocess.check_call(['which', 'fakes3'], stdout=open(os.devnull, 'wb'))
     if ret_code == 0:
-        fakes3_found = True
+        fakes3 = True
     else:
-        fakes3_found = False
+        fakes3 = False
 except:
-    fakes3_found = False
+    fakes3 = False
 
 def test_datagrabber():
     dg = nio.DataGrabber()
