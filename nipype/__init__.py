@@ -20,7 +20,7 @@ from .fixes.numpy.testing import nosetester
 try:
     import faulthandler
     faulthandler.enable()
-except:
+except (ImportError,IOError) as e:
     pass
 
 
