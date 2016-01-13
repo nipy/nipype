@@ -23,7 +23,7 @@ noboto = False
 try:
     import boto
     from boto.s3.connection import S3Connection, OrdinaryCallingFormat
-except:
+except ImportError:
     noboto = True
 
 # Check for boto3
@@ -31,7 +31,7 @@ noboto3 = False
 try:
     import boto3
     from botocore.utils import fix_s3_host
-except:
+except ImportError:
     noboto3 = True
 
 # Check for fakes3
@@ -42,7 +42,7 @@ try:
         fakes3 = True
     else:
         fakes3 = False
-except:
+except subprocess.CalledProcessError:
     fakes3 = False
 
 def test_datagrabber():
