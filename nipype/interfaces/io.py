@@ -205,7 +205,9 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     # AWS S3 data attributes
     creds_path = traits.Str(desc='Filepath to AWS credentials file for S3 bucket '\
-                              'access')
+                                 'access; if not specified, the credentials will '\
+                                 'be taken from the AWS_ACCESS_KEY_ID and '\
+                                 'AWS_SECRET_ACCESS_KEY environment variables')
     encrypt_bucket_keys = traits.Bool(desc='Flag indicating whether to use S3 '\
                                         'server-side AES-256 encryption')
     # Set this if user wishes to override the bucket with their own
@@ -426,16 +428,15 @@ class DataSink(IOBase):
         return s3_flag
 
     # Function to return AWS secure environment variables
-    def _return_aws_keys(self, creds_path):
+    def _return_aws_keys(self):
         '''
         Method to return AWS access key id and secret access key using
         credentials found in a local file.
 
         Parameters
         ----------
-        creds_path : string (filepath)
-            path to the csv file downloaded from AWS; can either be root
-            or user credentials
+        self : nipype.interfaces.io.DataSink
+            self for instance method
 
         Returns
         -------
@@ -445,28 +446,38 @@ class DataSink(IOBase):
             string of the AWS secret access key
         '''
 
+        # Import packages
+        import os
+
         # Init variables
-        with open(creds_path, 'r') as creds_in:
-            # Grab csv rows
-            row1 = creds_in.readline()
-            row2 = creds_in.readline()
+        creds_path = self.inputs.creds_path
 
-        # Are they root or user keys
-        if 'User Name' in row1:
-            # And split out for keys
-            aws_access_key_id = row2.split(',')[1]
-            aws_secret_access_key = row2.split(',')[2]
-        elif 'AWSAccessKeyId' in row1:
-            # And split out for keys
-            aws_access_key_id = row1.split('=')[1]
-            aws_secret_access_key = row2.split('=')[1]
+        # Check if creds exist
+        if creds_path and os.path.exists(creds_path):
+            with open(creds_path, 'r') as creds_in:
+                # Grab csv rows
+                row1 = creds_in.readline()
+                row2 = creds_in.readline()
+
+            # Are they root or user keys
+            if 'User Name' in row1:
+                # And split out for keys
+                aws_access_key_id = row2.split(',')[1]
+                aws_secret_access_key = row2.split(',')[2]
+            elif 'AWSAccessKeyId' in row1:
+                # And split out for keys
+                aws_access_key_id = row1.split('=')[1]
+                aws_secret_access_key = row2.split('=')[1]
+            else:
+                err_msg = 'Credentials file not recognized, check file is correct'
+                raise Exception(err_msg)
+
+            # Strip any carriage return/line feeds
+            aws_access_key_id = aws_access_key_id.replace('\r', '').replace('\n', '')
+            aws_secret_access_key = aws_secret_access_key.replace('\r', '').replace('\n', '')
         else:
-            err_msg = 'Credentials file not recognized, check file is correct'
-            raise Exception(err_msg)
-
-        # Strip any carriage return/line feeds
-        aws_access_key_id = aws_access_key_id.replace('\r', '').replace('\n', '')
-        aws_secret_access_key = aws_secret_access_key.replace('\r', '').replace('\n', '')
+            aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+            aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
 
         # Return keys
         return aws_access_key_id, aws_secret_access_key
@@ -479,6 +490,8 @@ class DataSink(IOBase):
 
         Parameters
         ----------
+        self : nipype.interfaces.io.DataSink
+            self for instance method
         bucket_name : string
             string corresponding to the name of the bucket on S3
 
@@ -504,19 +517,21 @@ class DataSink(IOBase):
         creds_path = self.inputs.creds_path
         iflogger = logging.getLogger('interface')
 
+        # Get AWS credentials
+        try:
+            aws_access_key_id, aws_secret_access_key = \
+                self._return_aws_keys()
+        except Exception as exc:
+            err_msg = 'There was a problem extracting the AWS credentials '\
+                      'from the credentials file provided: %s. Error:\n%s'\
+                      % (creds_path, exc)
+            raise Exception(err_msg)
+
         # Try and get AWS credentials if a creds_path is specified
-        if creds_path:
-            try:
-                aws_access_key_id, aws_secret_access_key = \
-                    self._return_aws_keys(creds_path)
-            except Exception as exc:
-                err_msg = 'There was a problem extracting the AWS credentials '\
-                          'from the credentials file provided: %s. Error:\n%s'\
-                          % (creds_path, exc)
-                raise Exception(err_msg)
+        if aws_access_key_id and aws_secret_access_key:
             # Init connection
-            iflogger.info('Connecting to S3 bucket: %s with credentials from '\
-                          '%s ...' % (bucket_name, creds_path))
+            iflogger.info('Connecting to S3 bucket: %s with credentials...'\
+                          % bucket_name)
             # Use individual session for each instance of DataSink
             # Better when datasinks are being used in multi-threading, see:
             # http://boto3.readthedocs.org/en/latest/guide/resources.html#multithreading
@@ -760,101 +775,6 @@ class DataSink(IOBase):
         outputs['out_file'] = out_files
 
         return outputs
-
-
-class S3DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    testing = traits.Bool(False, usedefault=True,
-                          desc='Flag for using local fakes3 server.'
-                          ' (for testing purposes only)')
-    anon = traits.Bool(False, usedefault=True,
-                       desc='Use anonymous connection to s3')
-    bucket = traits.Str(mandatory=True,
-                        desc='Amazon S3 bucket where your data is stored')
-    bucket_path = traits.Str('', usedefault=True,
-                             desc='Location within your bucket to store '
-                             'data.')
-    base_directory = Directory(
-        desc='Path to the base directory for storing data.')
-    container = traits.Str(
-        desc='Folder within base directory in which to store output')
-    parameterization = traits.Bool(True, usedefault=True,
-                                   desc='store output in parametrized structure')
-    strip_dir = Directory(desc='path to strip out of filename')
-    substitutions = InputMultiPath(traits.Tuple(traits.Str, traits.Str),
-                                   desc=('List of 2-tuples reflecting string '
-                                         'to substitute and string to replace '
-                                         'it with'))
-    regexp_substitutions = InputMultiPath(traits.Tuple(traits.Str, traits.Str),
-                                          desc=('List of 2-tuples reflecting a pair '
-                                                'of a Python regexp pattern and a '
-                                                'replacement string. Invoked after '
-                                                'string `substitutions`'))
-
-    _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
-    remove_dest_dir = traits.Bool(False, usedefault=True,
-                                  desc='remove dest directory when copying dirs')
-    # Set this if user wishes to have local copy of files as well
-    local_copy = traits.Str(desc='Copy files locally as well as to S3 bucket')
-
-    def __setattr__(self, key, value):
-        if key not in self.copyable_trait_names():
-            if not isdefined(value):
-                super(S3DataSinkInputSpec, self).__setattr__(key, value)
-            self._outputs[key] = value
-        else:
-            if key in self._outputs:
-                self._outputs[key] = value
-            super(S3DataSinkInputSpec, self).__setattr__(key, value)
-
-
-class S3DataSink(DataSink):
-    """ Works exactly like DataSink, except the specified files will
-        also be uploaded to Amazon S3 storage in the specified bucket
-        and location.  'bucket_path' is the s3 analog for
-        'base_directory'.
-
-    """
-    input_spec = S3DataSinkInputSpec
-
-    def _list_outputs(self):
-        """Execute this module.
-        """
-        outputs = super(S3DataSink, self)._list_outputs()
-
-        self.localtos3(outputs['out_file'])
-
-        return outputs
-
-    def localtos3(self, paths):
-        if self.inputs.testing:
-            conn = S3Connection(anon=True, is_secure=False, port=4567,
-                                host='localhost',
-                                calling_format=OrdinaryCallingFormat())
-
-        else:
-            conn = S3Connection(anon=self.inputs.anon)
-        bkt = conn.get_bucket(self.inputs.bucket)
-        s3paths = []
-
-        for path in paths:
-            # convert local path to s3 path
-            bd_index = path.find(self.inputs.base_directory)
-            if bd_index != -1:  # base_directory is in path, maintain directory structure
-                s3path = path[bd_index + len(self.inputs.base_directory):]  # cut out base directory
-                if s3path[0] == os.path.sep:
-                    s3path = s3path[1:]
-            else:  # base_directory isn't in path, simply place all files in bucket_path folder
-                s3path = os.path.split(path)[1]  # take filename from path
-            s3path = os.path.join(self.inputs.bucket_path, s3path)
-            if s3path[-1] == os.path.sep:
-                s3path = s3path[:-1]
-            s3paths.append(s3path)
-
-            k = boto.s3.key.Key(bkt)
-            k.key = s3path
-            k.set_contents_from_filename(path)
-
-        return s3paths
 
 
 class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
