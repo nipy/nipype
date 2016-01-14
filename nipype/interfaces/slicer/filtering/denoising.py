@@ -40,7 +40,7 @@ acknowledgements: This command module was derived from Insight/Examples (copyrig
     input_spec = GradientAnisotropicDiffusionInputSpec
     output_spec = GradientAnisotropicDiffusionOutputSpec
     _cmd = "GradientAnisotropicDiffusion "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
 
 class CurvatureAnisotropicDiffusionInputSpec(CommandLineInputSpec):
@@ -79,7 +79,7 @@ acknowledgements: This command module was derived from Insight/Examples (copyrig
     input_spec = CurvatureAnisotropicDiffusionInputSpec
     output_spec = CurvatureAnisotropicDiffusionOutputSpec
     _cmd = "CurvatureAnisotropicDiffusion "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
 
 class GaussianBlurImageFilterInputSpec(CommandLineInputSpec):
@@ -112,7 +112,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = GaussianBlurImageFilterInputSpec
     output_spec = GaussianBlurImageFilterOutputSpec
     _cmd = "GaussianBlurImageFilter "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
 
 class MedianImageFilterInputSpec(CommandLineInputSpec):
@@ -145,4 +145,4 @@ acknowledgements: This command module was derived from Insight/Examples/Filterin
     input_spec = MedianImageFilterInputSpec
     output_spec = MedianImageFilterOutputSpec
     _cmd = "MedianImageFilter "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
