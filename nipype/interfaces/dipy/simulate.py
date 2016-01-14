@@ -6,26 +6,24 @@
    >>> os.chdir(datadir)
 """
 
-from nipype.interfaces.base import (
-    traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File,
-    InputMultiPath, isdefined)
-from nipype.utils.filemanip import split_filename
+from __future__ import division
+from builtins import range
+
 import os.path as op
+from multiprocessing import (Pool, cpu_count)
+
 import nibabel as nb
-import numpy as np
-from nipype.utils.misc import package_check
-import warnings
 
-from multiprocessing import (Process, Pool, cpu_count, pool,
-                             Manager, TimeoutError)
-
+from ..base import (traits, TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
+                    File, InputMultiPath, isdefined)
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_dipy = True
 try:
     package_check('dipy', version='0.8.0')
-except Exception, e:
+except Exception as e:
     have_dipy = False
 else:
     import numpy as np
@@ -118,9 +116,9 @@ class SimulateMultiTensor(BaseInterface):
 
         # Load the baseline b0 signal
         b0_im = nb.load(self.inputs.baseline)
-        hdr = b0_im.get_header()
-        shape = b0_im.get_shape()
-        aff = b0_im.get_affine()
+        hdr = b0_im.header
+        shape = b0_im.shape
+        aff = b0_im.affine
 
         # Check and load sticks and their volume fractions
         nsticks = len(self.inputs.in_dirs)
@@ -328,7 +326,7 @@ def _generate_gradients(ndirs=64, values=[1000, 3000], nb0s=1):
         bvecs = np.vstack((bvecs, vertices))
         bvals = np.hstack((bvals, v * np.ones(vertices.shape[0])))
 
-    for i in xrange(0, nb0s):
+    for i in range(0, nb0s):
         bvals = bvals.tolist()
         bvals.insert(0, 0)
 

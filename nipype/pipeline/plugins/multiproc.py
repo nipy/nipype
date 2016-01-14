@@ -33,16 +33,21 @@ def run_node(node, updatehash, plugin_args=None):
 
     # If we're profiling the run
     if runtime_profile:
-        # Init function tuple
-        proc = (node.run, (), {'updatehash' : updatehash})
-        start = datetime.datetime.now()
-        mem_mb, retval = memory_profiler.memory_usage(proc=proc, retval=True, include_children=True, max_usage=True)
-        runtime = (datetime.datetime.now() - start).total_seconds()
-        result['result'] = retval
-        result['node_memory'] = mem_mb[0]/1024.0
-        result['cmd_memory'] = retval.runtime.get('cmd_memory')
-        result['cmd_threads'] = retval.runtime.get('cmd_threads')
-        result['run_seconds'] = runtime
+        try:
+            # Init function tuple
+            proc = (node.run, (), {'updatehash' : updatehash})
+            start = datetime.datetime.now()
+            mem_mb, retval = memory_profiler.memory_usage(proc=proc, retval=True, include_children=True, max_usage=True)
+            runtime = (datetime.datetime.now() - start).total_seconds()
+            result['result'] = retval
+            result['node_memory'] = mem_mb[0]/1024.0
+            result['cmd_memory'] = retval.runtime.get('cmd_memory')
+            result['cmd_threads'] = retval.runtime.get('cmd_threads')
+            result['run_seconds'] = runtime
+        except:
+            etype, eval, etr = sys.exc_info()
+            result['traceback'] = format_exception(etype,eval,etr)
+            result['result'] = node.result
     # Otherwise, execute node.run as normal
     else:
         try:
@@ -65,10 +70,12 @@ class NonDaemonProcess(Process):
 
     daemon = property(_get_daemon, _set_daemon)
 
+
 class NonDaemonPool(pool.Pool):
     """A process pool with non-daemon processes.
     """
     Process = NonDaemonProcess
+
 
 class MultiProcPlugin(DistributedPluginBase):
     """Execute workflow with multiprocessing
@@ -101,7 +108,7 @@ class MultiProcPlugin(DistributedPluginBase):
 
     def _get_result(self, taskid):
         if taskid not in self._taskresult:
-            raise RuntimeError('Multiproc task %d not found'%taskid)
+            raise RuntimeError('Multiproc task %d not found' % taskid)
         if not self._taskresult[taskid].ready():
             return None
         return self._taskresult[taskid].get()

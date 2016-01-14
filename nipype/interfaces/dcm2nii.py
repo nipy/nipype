@@ -7,14 +7,15 @@
    >>> os.chdir(datadir)
 """
 
-from nipype.interfaces.base import (CommandLine, CommandLineInputSpec,
-                                    InputMultiPath, traits, TraitedSpec,
-                                    OutputMultiPath, isdefined,
-                                    File, Directory)
 import os
-from copy import deepcopy
-from nipype.utils.filemanip import split_filename
 import re
+from copy import deepcopy
+
+from .base import (CommandLine, CommandLineInputSpec,
+                   InputMultiPath, traits, TraitedSpec,
+                   OutputMultiPath, isdefined,
+                   File, Directory)
+from ..utils.filemanip import split_filename
 
 
 class Dcm2niiInputSpec(CommandLineInputSpec):
@@ -107,18 +108,31 @@ class Dcm2nii(CommandLine):
                     out_file = line[len("Saving "):]
                 elif line.startswith("GZip..."):
                     # for gzipped outpus files are not absolute
+                    fname = line[len("GZip..."):]
+                    if len(files) and os.path.basename(files[-1]) == fname[:-3]:
+                        # we are seeing a previously reported conversion
+                        # as being saved in gzipped form -- remove the
+                        # obsolete, uncompressed file
+                        files.pop()
                     if isdefined(self.inputs.output_dir):
                         output_dir = self.inputs.output_dir
                     else:
                         output_dir = self._gen_filename('output_dir')
-                    out_file = os.path.abspath(os.path.join(output_dir, line[len("GZip..."):]))
+                    out_file = os.path.abspath(os.path.join(output_dir, fname))
                 elif line.startswith("Number of diffusion directions "):
                     if last_added_file:
                         base, filename, ext = split_filename(last_added_file)
                         bvecs.append(os.path.join(base, filename + ".bvec"))
                         bvals.append(os.path.join(base, filename + ".bval"))
-                elif re.search('.*-->(.*)', line):
-                    val = re.search('.*-->(.*)', line)
+                elif line.startswith("Removed DWI from DTI scan"):
+                    # such line can only follow the 'diffusion' case handled
+                    # just above
+                    for l in (bvecs, bvals):
+                        l[-1] = os.path.join(
+                            os.path.dirname(l[-1]),
+                            'x%s' % (os.path.basename(l[-1]),))
+                elif re.search('.*->(.*)', line):
+                    val = re.search('.*->(.*)', line)
                     val = val.groups()[0]
                     if isdefined(self.inputs.output_dir):
                         output_dir = self.inputs.output_dir

@@ -7,6 +7,8 @@ Workflow from scratch
 
 """
 
+from builtins import range
+
 import nipype.interfaces.io as nio           # Data i/o
 import nipype.interfaces.spm as spm          # spm
 import nipype.pipeline.engine as pe          # pypeline engine
@@ -61,36 +63,36 @@ and sparse designs. Contrasts provided to ContrastEstimate are defined using
 the same names of regressors as defined in the SpecifyModel."""
 
 specify_model = pe.Node(interface=model.SpecifyModel(), name="specify_model")
-specify_model.inputs.input_units             = 'secs'
-specify_model.inputs.time_repetition         = 3.
+specify_model.inputs.input_units = 'secs'
+specify_model.inputs.time_repetition = 3.
 specify_model.inputs.high_pass_filter_cutoff = 120
-specify_model.inputs.subject_info = [Bunch(conditions=['Task-Odd','Task-Even'],
-                                           onsets=[range(15,240,60),
-                                                   range(45,240,60)],
-                                           durations=[[15], [15]])]*4
+specify_model.inputs.subject_info = [Bunch(conditions=['Task-Odd', 'Task-Even'],
+                                           onsets=[list(range(15, 240, 60)),
+                                                   list(range(45, 240, 60))],
+                                           durations=[[15], [15]])] * 4
 
-level1design = pe.Node(interface=spm.Level1Design(), name= "level1design")
-level1design.inputs.bases = {'hrf':{'derivs': [0,0]}}
+level1design = pe.Node(interface=spm.Level1Design(), name="level1design")
+level1design.inputs.bases = {'hrf': {'derivs': [0, 0]}}
 level1design.inputs.timing_units = 'secs'
 level1design.inputs.interscan_interval = specify_model.inputs.time_repetition
 
 level1estimate = pe.Node(interface=spm.EstimateModel(), name="level1estimate")
-level1estimate.inputs.estimation_method = {'Classical' : 1}
+level1estimate.inputs.estimation_method = {'Classical': 1}
 
-contrastestimate = pe.Node(interface = spm.EstimateContrast(),
+contrastestimate = pe.Node(interface=spm.EstimateContrast(),
                            name="contrastestimate")
-cont1 = ('Task>Baseline','T', ['Task-Odd','Task-Even'],[0.5,0.5])
-cont2 = ('Task-Odd>Task-Even','T', ['Task-Odd','Task-Even'],[1,-1])
+cont1 = ('Task>Baseline', 'T', ['Task-Odd', 'Task-Even'], [0.5, 0.5])
+cont2 = ('Task-Odd>Task-Even', 'T', ['Task-Odd', 'Task-Even'], [1, -1])
 contrastestimate.inputs.contrasts = [cont1, cont2]
 
 modelling = pe.Workflow(name="modelling")
 modelling.connect(specify_model, 'session_info', level1design, 'session_info')
 modelling.connect(level1design, 'spm_mat_file', level1estimate, 'spm_mat_file')
-modelling.connect(level1estimate,'spm_mat_file',
-                  contrastestimate,'spm_mat_file')
-modelling.connect(level1estimate,'beta_images', contrastestimate,'beta_images')
-modelling.connect(level1estimate,'residual_image',
-                  contrastestimate,'residual_image')
+modelling.connect(level1estimate, 'spm_mat_file',
+                  contrastestimate, 'spm_mat_file')
+modelling.connect(level1estimate, 'beta_images', contrastestimate, 'beta_images')
+modelling.connect(level1estimate, 'residual_image',
+                  contrastestimate, 'residual_image')
 
 """Having preprocessing and modelling workflows we need to connect them
 together, add data grabbing facility and save the results. For this we will
@@ -117,11 +119,11 @@ Its output will be connected to realignment node from preprocessing workflow."""
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
                                                outfields=['func']),
-                     name = 'datasource')
+                     name='datasource')
 datasource.inputs.base_directory = os.path.abspath('data')
 datasource.inputs.template = '%s/%s.nii'
 datasource.inputs.template_args = dict(func=[['subject_id',
-                                              ['f3','f5','f7','f10']]])
+                                              ['f3', 'f5', 'f7', 'f10']]])
 datasource.inputs.subject_id = 's1'
 datasource.inputs.sort_filelist = True
 

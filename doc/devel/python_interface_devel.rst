@@ -41,7 +41,7 @@ do is to define inputs, outputs, _run_interface() (not run()), and _list_outputs
             thresholded_map = np.zeros(data.shape)
             thresholded_map[active_map] = data[active_map]
 
-            new_img = nb.Nifti1Image(thresholded_map, img.get_affine(), img.get_header())
+            new_img = nb.Nifti1Image(thresholded_map, img.affine, img.header)
             _, base, _ = split_filename(fname)
             nb.save(new_img, base + '_thresholded.nii')
 

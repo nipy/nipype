@@ -1,5 +1,7 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import division
+
 import numpy as np
 
 from ...testing import (assert_equal, assert_false, assert_true,
@@ -76,7 +78,7 @@ def test_sc_populate_inputs():
                    intensity_values=None,
                    spm_mat_file=None,
                    concatenated_design=None)
-    yield assert_equal, sc.inputs.__dict__.keys(), inputs.__dict__.keys()
+    yield assert_equal, set(sc.inputs.__dict__.keys()), set(inputs.__dict__.keys())
 
 
 def test_sc_output_filenames():

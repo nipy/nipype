@@ -33,7 +33,7 @@ def create_files_in_directory():
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
         nb.save(nb.Nifti1Image(img, np.eye(4), hdr),
-                 os.path.join(outdir, f))
+                os.path.join(outdir, f))
     return filelist, outdir, cwd
 
 
@@ -70,6 +70,7 @@ def test_use_mfile():
 
 def test_find_mlab_cmd_defaults():
     saved_env = dict(os.environ)
+
     class TestClass(spm.SPMCommand):
         pass
     # test without FORCE_SPMMCR, SPMMCRCMD set
@@ -92,7 +93,7 @@ def test_find_mlab_cmd_defaults():
     yield assert_equal, dc._use_mcr, True
     yield assert_equal, dc._matlab_cmd, 'spmcmd'
     # restore environment
-    os.environ.clear();
+    os.environ.clear()
     os.environ.update(saved_env)
 
 
@@ -151,6 +152,7 @@ def test_generate_job():
     out = dc._generate_job(prefix='test', contents=contents)
     yield assert_equal, out, 'test.onsets = {...\n[1, 2, 3, 4];...\n};\n'
 
+
 def test_bool():
     class TestClassInputSpec(SPMCommandInputSpec):
         test_in = include_intercept = traits.Bool(field='testfield')
@@ -166,6 +168,7 @@ def test_bool():
     dc.inputs.use_v8struct = False
     out = dc._make_matlab_command(dc._parse_inputs())
     yield assert_equal, out.find('jobs{1}.jobtype{1}.jobname{1}.testfield = 1;') > 0, 1
+
 
 def test_make_matlab_command():
     class TestClass(spm.SPMCommand):

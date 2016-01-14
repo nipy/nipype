@@ -14,9 +14,18 @@ if not no_matlab:
     mlab.MatlabCommand.set_default_matlab_cmd(matlab_cmd)
 
 
+def clean_workspace_and_get_default_script_file():
+    # Make sure things are clean.
+    default_script_file = mlab.MatlabInputSpec().script_file
+    if os.path.exists(default_script_file):
+        os.remove(default_script_file)  # raise Exception('Default script file needed for tests; please remove %s!' % default_script_file)
+    return default_script_file
+
+
 @skipif(no_matlab)
 def test_cmdline():
-    basedir = mkdtemp()
+    default_script_file = clean_workspace_and_get_default_script_file()
+
     mi = mlab.MatlabCommand(script='whos',
                             script_file='testscript', mfile=False)
 
@@ -31,13 +40,13 @@ def test_cmdline():
 
     yield assert_equal, mi.inputs.script, 'whos'
     yield assert_equal, mi.inputs.script_file, 'testscript'
-    path_exists = os.path.exists(os.path.join(basedir, 'testscript.m'))
-    yield assert_false, path_exists
-    rmtree(basedir)
+    yield assert_false, os.path.exists(mi.inputs.script_file), 'scriptfile should not exist'
+    yield assert_false, os.path.exists(default_script_file), 'default scriptfile should not exist.'
 
 
 @skipif(no_matlab)
 def test_mlab_inputspec():
+    default_script_file = clean_workspace_and_get_default_script_file()
     spec = mlab.MatlabInputSpec()
     for k in ['paths', 'script', 'nosplash', 'mfile', 'logfile', 'script_file',
               'nodesktop']:
@@ -45,11 +54,13 @@ def test_mlab_inputspec():
     yield assert_true, spec.nodesktop
     yield assert_true, spec.nosplash
     yield assert_true, spec.mfile
-    yield assert_equal, spec.script_file, 'pyscript.m'
+    yield assert_equal, spec.script_file, default_script_file
 
 
 @skipif(no_matlab)
 def test_mlab_init():
+    default_script_file = clean_workspace_and_get_default_script_file()
+
     yield assert_equal, mlab.MatlabCommand._cmd, 'matlab'
     yield assert_equal, mlab.MatlabCommand.input_spec, mlab.MatlabInputSpec
 
@@ -60,26 +71,48 @@ def test_mlab_init():
 
 @skipif(no_matlab)
 def test_run_interface():
+    default_script_file = clean_workspace_and_get_default_script_file()
+
     mc = mlab.MatlabCommand(matlab_cmd='foo_m')
+    yield assert_false, os.path.exists(default_script_file), 'scriptfile should not exist 1.'
     yield assert_raises, ValueError, mc.run  # script is mandatory
+    yield assert_false, os.path.exists(default_script_file), 'scriptfile should not exist 2.'
+    if os.path.exists(default_script_file):  # cleanup
+        os.remove(default_script_file)
+
     mc.inputs.script = 'a=1;'
+    yield assert_false, os.path.exists(default_script_file), 'scriptfile should not exist 3.'
     yield assert_raises, IOError, mc.run  # foo_m is not an executable
+    yield assert_true, os.path.exists(default_script_file), 'scriptfile should exist 3.'
+    if os.path.exists(default_script_file):  # cleanup
+        os.remove(default_script_file)
+
     cwd = os.getcwd()
     basedir = mkdtemp()
     os.chdir(basedir)
+
     # bypasses ubuntu dash issue
     mc = mlab.MatlabCommand(script='foo;', paths=[basedir], mfile=True)
+    yield assert_false, os.path.exists(default_script_file), 'scriptfile should not exist 4.'
     yield assert_raises, RuntimeError, mc.run
+    yield assert_true, os.path.exists(default_script_file), 'scriptfile should exist 4.'
+    if os.path.exists(default_script_file):  # cleanup
+        os.remove(default_script_file)
+
     # bypasses ubuntu dash issue
     res = mlab.MatlabCommand(script='a=1;', paths=[basedir], mfile=True).run()
     yield assert_equal, res.runtime.returncode, 0
+    yield assert_true, os.path.exists(default_script_file), 'scriptfile should exist 5.'
     os.chdir(cwd)
     rmtree(basedir)
 
 
 @skipif(no_matlab)
 def test_set_matlabcmd():
+    default_script_file = clean_workspace_and_get_default_script_file()
+
     mi = mlab.MatlabCommand()
     mi.set_default_matlab_cmd('foo')
+    yield assert_false, os.path.exists(default_script_file), 'scriptfile should not exist.'
     yield assert_equal, mi._default_matlab_cmd, 'foo'
     mi.set_default_matlab_cmd(matlab_cmd)
