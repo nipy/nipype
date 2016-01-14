@@ -42,6 +42,7 @@ class SLURMGraphPlugin(GraphPluginBase):
     _template = "#!/bin/bash"
 
     def __init__(self, **kwargs):
+        self._sbatch_args = ''
         if 'plugin_args' in kwargs and kwargs['plugin_args']:
             if 'retry_timeout' in kwargs['plugin_args']:
                 self._retry_timeout = kwargs['plugin_args']['retry_timeout']
@@ -53,8 +54,6 @@ class SLURMGraphPlugin(GraphPluginBase):
                     self._template = open(self._template).read()
             if 'sbatch_args' in kwargs['plugin_args']:
                 self._sbatch_args = kwargs['plugin_args']['sbatch_args']
-            else:  # default argument for _sbatch_args
-                self._sbatch_args = ''
             if 'dont_resubmit_completed_jobs' in kwargs['plugin_args']:
                 self._dont_resubmit_completed_jobs = kwargs['plugin_args']['dont_resubmit_completed_jobs']
             else:
