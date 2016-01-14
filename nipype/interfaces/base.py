@@ -751,16 +751,7 @@ class BaseInterface(Interface):
                             self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
         self.estimated_memory = 1
-        self._real_memory = 0
         self.num_threads = 1
-
-    @property
-    def real_memory(self):
-        return self._real_memory
-
-    @real_memory.setter
-    def real_memory(self, value):
-        self._real_memory = value
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -1269,7 +1260,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                     stream.read(drain)
         while proc.returncode is None:
             if mem_prof:
-                mem_mb = max([mem_mb, _get_memory(proc.pid, include_children=True)])
+                mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
+                num_threads = max(num_threads, psutil.Process(proc.pid).num_threads())
                 time.sleep(interval)
             proc.poll()
             _process()
@@ -1288,8 +1280,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     if output == 'allatonce':
         if mem_prof:
             while proc.returncode is None:
-                mem_mb = max([mem_mb, _get_memory(proc.pid, include_children=True)])
-                num_threads = max([num_threads, psutil.Proc(proc.pid).num_threads()])
+                mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
+                num_threads = max(num_threads, psutil.Process(proc.pid).num_threads())
                 time.sleep(interval)
                 proc.poll()
         stdout, stderr = proc.communicate()
@@ -1299,8 +1291,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     if output == 'file':
         if mem_prof:
             while proc.returncode is None:
-                mem_mb = max([mem_mb, _get_memory(proc.pid, include_children=True)])
-                num_threads = max([num_threads, psutil.Proc(proc.pid).num_threads()])
+                mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
+                num_threads = max(num_threads, psutil.Process(proc.pid).num_threads())
                 time.sleep(interval)
                 proc.poll()
         ret_code = proc.wait()
@@ -1312,8 +1304,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     if output == 'none':
         if mem_prof:
             while proc.returncode is None:
-                mem_mb = max([mem_mb, _get_memory(proc.pid, include_children=True)])
-                num_threads = max([num_threads, psutil.Proc(proc.pid).num_threads()])
+                mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
+                num_threads = max(num_threads, psutil.Process(proc.pid).num_threads())
                 time.sleep(interval)
                 proc.poll()
         proc.communicate()
@@ -1322,7 +1314,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = ''
 
     setattr(runtime, 'cmd_memory', mem_mb/1024.0)
-    setattr(runtime, 'num_threads', num_threads)
+    setattr(runtime, 'cmd_threads', num_threads)
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = result['merged']

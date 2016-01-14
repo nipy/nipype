@@ -13,17 +13,27 @@ import sys
 from .base import (DistributedPluginBase, report_crash)
 
 
+# Run node
 def run_node(node, updatehash, plugin_args=None):
-    result = dict(result=None, traceback=None)
+    """docstring
+    """
+
+    # Import packages
     try:
-        run_memory = plugin_args['memory_profile']
+        runtime_profile = plugin_args['runtime_profile']
         import memory_profiler
-    except KeyError:
-        run_memory = False
-    except ImportError:
-        run_memory = False
-    if run_memory:
         import datetime
+    except KeyError:
+        runtime_profile = False
+    except ImportError:
+        runtime_profile = False
+
+    # Init variables
+    result = dict(result=None, traceback=None)
+
+    # If we're profiling the run
+    if runtime_profile:
+        # Init function tuple
         proc = (node.run, (), {'updatehash' : updatehash})
         start = datetime.datetime.now()
         mem_mb, retval = memory_profiler.memory_usage(proc=proc, retval=True, include_children=True, max_usage=True)
@@ -31,7 +41,9 @@ def run_node(node, updatehash, plugin_args=None):
         result['result'] = retval
         result['node_memory'] = mem_mb[0]/1024.0
         result['cmd_memory'] = retval.runtime.get('cmd_memory')
+        result['cmd_threads'] = retval.runtime.get('cmd_threads')
         result['run_seconds'] = runtime
+    # Otherwise, execute node.run as normal
     else:
         try:
             result['result'] = node.run(updatehash=updatehash)
@@ -141,15 +153,15 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
     the number of threads and memory of the system is used.
 
     System consuming nodes should be tagged:
-    memory_consuming_node.interface.memory = 8 #Gb
+    memory_consuming_node.interface.estimated_memory = 8 #Gb
     thread_consuming_node.interface.num_threads = 16
 
     The default number of threads and memory for a node is 1. 
 
     Currently supported options are:
 
-    - num_thread: maximum number of threads to be executed in parallel
-    - memory: maximum memory that can be used at once.
+    - num_threads: maximum number of threads to be executed in parallel
+    - estimated_memory: maximum memory that can be used at once.
 
     """
 
@@ -198,7 +210,7 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
         for jobid in jobids:
             busy_memory+= self.procs[jobid]._interface.estimated_memory
             busy_processors+= self.procs[jobid]._interface.num_threads
-                
+
         free_memory = self.memory - busy_memory
         free_processors = self.processors - busy_processors
 
@@ -222,7 +234,7 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
             if self.procs[jobid]._interface.estimated_memory <= free_memory and self.procs[jobid]._interface.num_threads <= free_processors:
                 logger.info('Executing: %s ID: %d' %(self.procs[jobid]._id, jobid))
                 executing_now.append(self.procs[jobid])
-                
+
                 if isinstance(self.procs[jobid], MapNode):
                     try:
                         num_subnodes = self.procs[jobid].num_subnodes()

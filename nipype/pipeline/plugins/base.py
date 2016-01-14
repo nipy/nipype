@@ -419,8 +419,6 @@ class DistributedPluginBase(PluginBase):
             if result == None:
                 if self._taskresult.has_key(jobid):
                     result = self._taskresult[jobid].get()
-                else:
-                    result = {'real_memory' : 'nokey'}
             self._status_callback(self.procs[jobid], 'end', result)
         # Update job and worker queues
         self.proc_pending[jobid] = False
