@@ -25,6 +25,13 @@ chmod +x miniconda.sh
 ./miniconda.sh -b
 echo "export PATH=$HOME/miniconda/bin:\\$PATH" >> .bashrc
 
+# install nipype dependencies' dependencies:
+sudo apt-get -y update
+# lxml requires binary libs libxml2 and libxslt, which entails building the wheel on Ubuntu
+# (unfortunately none of this is explicit in this script or the Vagrant file containing it); therefore:
+sudo apt-get -y install libxml2-dev
+sudo apt-get -y install libxslt1-dev
+
 # install nipype dependencies
 $HOME/miniconda/bin/conda update --yes conda
 $HOME/miniconda/bin/conda install --yes pip numpy scipy nose traits networkx
