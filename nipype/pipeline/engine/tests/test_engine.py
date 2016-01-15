@@ -714,8 +714,7 @@ def test_serial_input():
     # set local check
     w1.config['execution'] = {'stop_on_first_crash': 'true',
                               'local_hash_check': 'true',
-                              'crashdump_dir': wd,
-                              'poll_sleep_duration': 2}
+                              'crashdump_dir': wd}
 
     # test output of num_subnodes method when serial is default (False)
     yield assert_equal, n1.num_subnodes(), len(n1.inputs.in1)
@@ -723,7 +722,7 @@ def test_serial_input():
     # test running the workflow on default conditions
     error_raised = False
     try:
-        w1.run(plugin='MultiProc')
+        w1.run(plugin='ResourceMultiProc')
     except Exception as e:
         from nipype.pipeline.engine.base import logger
         logger.info('Exception: %s' % str(e))
@@ -737,7 +736,7 @@ def test_serial_input():
     # test running the workflow on serial conditions
     error_raised = False
     try:
-        w1.run(plugin='MultiProc')
+        w1.run(plugin='ResourceMultiProc')
     except Exception as e:
         from nipype.pipeline.engine.base import logger
         logger.info('Exception: %s' % str(e))

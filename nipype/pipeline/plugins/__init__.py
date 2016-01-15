@@ -9,7 +9,6 @@ from .oar import OARPlugin
 from .sge import SGEPlugin
 from .condor import CondorPlugin
 from .dagman import CondorDAGManPlugin
-from .multiproc import MultiProcPlugin
 from .multiproc import ResourceMultiProcPlugin
 from .ipython import IPythonPlugin
 from .somaflow import SomaFlowPlugin

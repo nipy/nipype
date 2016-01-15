@@ -76,68 +76,6 @@ class NonDaemonPool(pool.Pool):
     """
     Process = NonDaemonProcess
 
-
-class MultiProcPlugin(DistributedPluginBase):
-    """Execute workflow with multiprocessing
-
-    The plugin_args input to run can be used to control the multiprocessing
-    execution. Currently supported options are:
-
-    - n_procs : number of processes to use
-    - non_daemon : boolean flag to execute as non-daemon processes
-
-    """
-
-    def __init__(self, plugin_args=None):
-        super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
-        self._taskresult = {}
-        self._taskid = 0
-        non_daemon = True
-        n_procs = cpu_count()
-        if plugin_args:
-            if 'n_procs' in plugin_args:
-                n_procs = plugin_args['n_procs']
-            if 'non_daemon' in plugin_args:
-                non_daemon = plugin_args['non_daemon']
-        if non_daemon:
-            # run the execution using the non-daemon pool subclass
-            self.pool = NonDaemonPool(processes=n_procs)
-        else:
-            self.pool = Pool(processes=n_procs)
-
-
-    def _get_result(self, taskid):
-        if taskid not in self._taskresult:
-            raise RuntimeError('Multiproc task %d not found' % taskid)
-        if not self._taskresult[taskid].ready():
-            return None
-        return self._taskresult[taskid].get()
-
-    def _submit_job(self, node, updatehash=False):
-        self._taskid += 1
-        try:
-            if node.inputs.terminal_output == 'stream':
-                node.inputs.terminal_output = 'allatonce'
-        except:
-            pass
-        self._taskresult[self._taskid] = self.pool.apply_async(run_node, (node,
-                                                                updatehash,))
-        return self._taskid
-
-    def _report_crash(self, node, result=None):
-        if result and result['traceback']:
-            node._result = result['result']
-            node._traceback = result['traceback']
-            return report_crash(node,
-                                traceback=result['traceback'])
-        else:
-            return report_crash(node)
-
-    def _clear_task(self, taskid):
-        del self._taskresult[taskid]
-
-
-
 import numpy as np
 from copy import deepcopy
 from ..engine import (MapNode, str2bool)
@@ -150,8 +88,8 @@ logger = logging.getLogger('workflow')
 def release_lock(args):
     semaphore_singleton.semaphore.release()
 
-class ResourceMultiProcPlugin(MultiProcPlugin):
-    """Execute workflow with multiprocessing not sending more jobs at once
+class ResourceMultiProcPlugin(DistributedPluginBase):
+    """Execute workflow with multiprocessing, not sending more jobs at once
     than the system can support.
 
     The plugin_args input to run can be used to control the multiprocessing
@@ -167,6 +105,7 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
 
     Currently supported options are:
 
+    - non_daemon : boolean flag to execute as non-daemon processes
     - num_threads: maximum number of threads to be executed in parallel
     - estimated_memory: maximum memory that can be used at once.
 
@@ -174,21 +113,52 @@ class ResourceMultiProcPlugin(MultiProcPlugin):
 
     def __init__(self, plugin_args=None):
         super(ResourceMultiProcPlugin, self).__init__(plugin_args=plugin_args)
+        self._taskresult = {}
+        self._taskid = 0
+        non_daemon = True
         self.plugin_args = plugin_args
         self.processors = cpu_count()
         memory = psutil.virtual_memory()
         self.memory = memory.total / (1024*1024*1024)
         if self.plugin_args:
+            if 'non_daemon' in self.plugin_args:
+                non_daemon = plugin_args['non_daemon']
             if 'n_procs' in self.plugin_args:
                 self.processors = self.plugin_args['n_procs']
             if 'memory' in self.plugin_args:
                 self.memory = self.plugin_args['memory']
+
+        if non_daemon:
+            # run the execution using the non-daemon pool subclass
+            self.pool = NonDaemonPool(processes=n_procs)
+        else:
+            self.pool = Pool(processes=n_procs)
 
     def _wait(self):
         if len(self.pending_tasks) > 0:
             semaphore_singleton.semaphore.acquire()
         semaphore_singleton.semaphore.release()
 
+
+    def _get_result(self, taskid):
+        if taskid not in self._taskresult:
+            raise RuntimeError('Multiproc task %d not found' % taskid)
+        if not self._taskresult[taskid].ready():
+            return None
+        return self._taskresult[taskid].get()
+
+
+    def _report_crash(self, node, result=None):
+        if result and result['traceback']:
+            node._result = result['result']
+            node._traceback = result['traceback']
+            return report_crash(node,
+                                traceback=result['traceback'])
+        else:
+            return report_crash(node)
+
+    def _clear_task(self, taskid):
+        del self._taskresult[taskid]
 
     def _submit_job(self, node, updatehash=False):
         self._taskid += 1
