@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: Add new flags to the BRAINSABC for new featues (https://github.com/nipy/nipype/pull/1322)
 * ENH: Provides a Nipype wrapper for ANTs DenoiseImage (https://github.com/nipy/nipype/pull/1291)
 * FIX: Minor bugfix logging hash differences (https://github.com/nipy/nipype/pull/1298)
 * FIX: Use released Prov python library (https://github.com/nipy/nipype/pull/1279)
