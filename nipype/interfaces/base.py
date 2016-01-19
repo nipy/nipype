@@ -1204,6 +1204,25 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
+def _get_num_threads(proc):
+    '''
+    '''
+
+    # Import packages
+    import psutil
+
+    # Init variables
+    num_threads = proc.num_threads()
+    try:
+        for child in proc.children():
+            num_threads = max(num_threads, child.num_threads(),
+                              len(child.children()), _get_num_threads(child))
+    except psutil.NoSuchProcess:
+        dummy = 1
+
+    return num_threads
+
+
 def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
@@ -1213,6 +1232,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     # Import packages
     try:
         from memory_profiler import _get_memory
+        import psutil
         mem_prof = True
     except:
         mem_prof = False
@@ -1253,7 +1273,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     # Init variables for memory profiling
     mem_mb = -1
     num_threads = -1
-    interval = 0.1
+    interval = 1
 
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
@@ -1273,8 +1293,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         while proc.returncode is None:
             if mem_prof:
                 mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
-                num_threads = max(num_threads, psutil.Process(proc.pid).num_threads())
-                time.sleep(interval)
+                num_threads = max(num_threads, _get_num_threads(psutil.Process(proc.pid)))
             proc.poll()
             _process()
         _process(drain=1)
@@ -1293,8 +1312,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         if mem_prof:
             while proc.returncode is None:
                 mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
-                num_threads = max(num_threads, psutil.Process(proc.pid).num_threads())
-                time.sleep(interval)
+                num_threads = max(num_threads, _get_num_threads(psutil.Process(proc.pid)))
                 proc.poll()
         stdout, stderr = proc.communicate()
         if stdout and isinstance(stdout, bytes):
@@ -1315,8 +1333,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         if mem_prof:
             while proc.returncode is None:
                 mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
-                num_threads = max(num_threads, psutil.Process(proc.pid).num_threads())
-                time.sleep(interval)
+                num_threads = max(num_threads, _get_num_threads(psutil.Process(proc.pid)))
                 proc.poll()
         ret_code = proc.wait()
         stderr.flush()
@@ -1328,8 +1345,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         if mem_prof:
             while proc.returncode is None:
                 mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
-                num_threads = max(num_threads, psutil.Process(proc.pid).num_threads())
-                time.sleep(interval)
+                num_threads = max(num_threads, _get_num_threads(psutil.Process(proc.pid)))
                 proc.poll()
         proc.communicate()
         result['stdout'] = []
