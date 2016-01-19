@@ -9,7 +9,14 @@ http://stackoverflow.com/a/8963618/1183453
 from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
 import sys
-
+import numpy as np
+from copy import deepcopy
+from ..engine import MapNode
+from ...utils.misc import str2bool
+import datetime
+import psutil
+from ... import logging
+import semaphore_singleton
 from .base import (DistributedPluginBase, report_crash)
 
 
@@ -76,13 +83,7 @@ class NonDaemonPool(pool.Pool):
     """
     Process = NonDaemonProcess
 
-import numpy as np
-from copy import deepcopy
-from ..engine import (MapNode, str2bool)
-import datetime
-import psutil
-from ... import logging
-import semaphore_singleton
+
 logger = logging.getLogger('workflow')
 
 def release_lock(args):
@@ -130,9 +131,9 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
 
         if non_daemon:
             # run the execution using the non-daemon pool subclass
-            self.pool = NonDaemonPool(processes=n_procs)
+            self.pool = NonDaemonPool(processes=self.processors)
         else:
-            self.pool = Pool(processes=n_procs)
+            self.pool = Pool(processes=self.processors)
 
     def _wait(self):
         if len(self.pending_tasks) > 0:

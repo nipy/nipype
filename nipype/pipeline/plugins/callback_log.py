@@ -13,27 +13,27 @@ def log_nodes_cb(node, status, result=None):
     if status == 'start':
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' +\
         node._id + '"' + ',"start":' + '"' +str(datetime.datetime.now()) +\
-        '"' + ',"estimate memory":' + str(node._interface.estimated_memory) + ',"num_threads":' \
+        '"' + ',"estimated_memory":' + str(node._interface.estimated_memory) + ',"num_threads":' \
         + str(node._interface.num_threads) + '}'
 
         logger.debug(message)
 
     elif status == 'end':
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' + \
-        node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) + \
-        '"' + ',"estimate memory":' + str(node._interface.estimated_memory) + \
-        ',"num_threads":' + str(node._interface.num_threads) + \
-        ',"cmd-level threads":' + str(cmd_threads) + \
-        ',"node-level memory":' + str(node_mem) + \
-        ',"cmd-level memory":' + str(cmd_mem) + \
-        ',"run_seconds":' + str(run_seconds) + '}'
+        node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) +  \
+        '"' + ',"estimated_memory":' + '"'+ str(node._interface.estimated_memory) + '"'+ \
+        ',"num_threads":' + '"'+ str(node._interface.num_threads) + '"'+ \
+        ',"cmd-level_threads":' + '"'+ str(cmd_threads) + '"'+ \
+        ',"node-level_memory":' + '"'+ str(node_mem) + '"'+ \
+        ',"cmd-level_memory":' + '"'+ str(cmd_mem) + '"' + \
+        ',"run_seconds":' + '"'+ str(run_seconds) + '"'+ '}'
 
         logger.debug(message)
 
     else:
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' + \
         node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) +\
-        '"' + ',"estimate memory":' + str(node._interface.estimated_memory) + ',"num_threads":' \
+        '"' + ',"estimated_memory":' + str(node._interface.estimated_memory) + ',"num_threads":' \
         + str(node._interface.num_threads) + ',"error":"True"}'
 
         logger.debug(message)

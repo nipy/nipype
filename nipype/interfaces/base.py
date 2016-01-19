@@ -1213,6 +1213,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     # Import packages
     try:
         from memory_profiler import _get_memory
+        import psutil
         mem_prof = True
     except:
         mem_prof = False
