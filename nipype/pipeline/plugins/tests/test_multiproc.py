@@ -6,7 +6,7 @@ from shutil import rmtree
 from nipype.testing import assert_equal, assert_less_equal
 import nipype.pipeline.engine as pe
 
-
+ 
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
     input2 = nib.traits.Int(desc='a random int')
@@ -180,6 +180,8 @@ def test_do_not_use_more_memory_then_specified():
     yield assert_equal, result, True, "using more threads than system has (threads is not specified by user)"
 
     os.remove(LOG_FILENAME)
+
+
 
 
 def test_do_not_use_more_threads_then_specified():
