@@ -642,6 +642,8 @@ class SegStatsInputSpec(FSTraitedSpec):
     mask_erode = traits.Int(argstr='--maskerode %d', desc='Erode mask by some amount')
     brain_vol = traits.Enum('brain-vol-from-seg', 'brainmask', '--%s',
                             desc='Compute brain volume either with ``brainmask`` or ``brain-vol-from-seg``')
+    brainmask_file = File(argstr="--brainmask %s", exists=True,
+                          desc="Load brain mask and compute the volume of the brain as the non-zero voxels in this volume")
     etiv = traits.Bool(argstr='--etiv', desc='Compute ICV from talairach transform')
     etiv_only = traits.Enum('etiv', 'old-etiv', '--%s-only',
                             desc='Compute etiv and exit.  Use ``etiv`` or ``old-etiv``')
@@ -653,6 +655,18 @@ class SegStatsInputSpec(FSTraitedSpec):
                                 desc='Save mean across space and time')
     vox = traits.List(traits.Int, argstr='--vox %s',
                       desc='Replace seg with all 0s except at C R S (three int inputs)')
+    supratent = traits.Bool(argstr="--supratent",
+                            desc="Undocumented input flag")
+    subcort_gm = traits.Bool(argstr="--subcortgray",
+                             desc="Compute volume of subcortical gray matter")
+    total_gray = traits.Bool(argstr="--totalgray",
+                             desc="Compute volume of total gray matter")
+    euler = traits.Bool(argstr="--euler",
+                        desc="Write out number of defect holes in orig.nofix based on the euler number")
+    in_intensity = File(argstr="--in %s --in-intensity-name %s", mandatory=False,
+                        desc="Undocumented input norm.mgz file")
+    intensity_units = traits.Enum('MR', argstr="--in-intensity-units %s",
+                                  requires=["in_intensity"], desc="Intensity units")
 
 
 class SegStatsOutputSpec(TraitedSpec):
