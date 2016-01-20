@@ -1925,3 +1925,50 @@ class MakeSurfaces(FSCommand):
             outputs["out_cortex"] = os.path.join(
                 label_dir, self.inputs.hemisphere + '.cortex.label')
         return outputs
+
+
+class CurvatureInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                   desc="Input file for Curvature")
+    # optional
+    threshold = traits.Float(
+        argstr="-thresh %.3f", mandatory=False, desc="Undocumented input threshold")
+    n = traits.Bool(argstr="-n", mandatory=False,
+                    desc="Undocumented boolean flag")
+    averages = traits.Int(argstr="-a %d", mandatory=False,
+                          desc="Perform this number iterative averages of curvature measure before saving")
+    save = traits.Bool(argstr="-w", mandatory=False,
+                       desc="Save curvature files (will only generate screen output without this option)")
+    distances = traits.Tuple(traits.Int, traits.Int, argstr="-distances %d %d",
+                             desc="Undocumented input integer distances")
+
+
+class CurvatureOutputSpec(TraitedSpec):
+    out_mean = File(exists=False, desc="Mean curvature output file")
+    out_gauss = File(exists=False, desc="Gaussian curvature output file")
+
+
+class Curvature(FSCommand):
+    """
+    This program will compute the second fundamental form of a cortical
+    surface. It will create two new files <hemi>.<surface>.H and
+    <hemi>.<surface>.K with the mean and Gaussian curvature respectively.
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import Curvature
+    >>> curv = Curvature()
+    >>> curv.inputs.in_file = 'lh.white' # doctest: +SKIP
+    >>> curv.inputs.save = True
+    >>> curv.cmdline # doctest: +SKIP
+    'mris_curvature -w lh.white'
+    """
+
+    _cmd = 'mris_curvature'
+    input_spec = CurvatureInputSpec
+    output_spec = CurvatureOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_mean"] = os.path.abspath(self.inputs.in_file) + '.H'
+        outputs["out_gauss"] = os.path.abspath(self.inputs.in_file) + '.K'
+        return outputs
