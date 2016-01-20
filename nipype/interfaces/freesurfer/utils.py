@@ -1563,3 +1563,50 @@ class MRIFill(FSCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class MRIsInflateInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                   desc="Input file for MRIsInflate")
+    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
+                    desc="Output file for MRIsInflate")
+    # optional
+    out_sulc = File(mandatory=False, exists=False,
+                    xor=['no_save_sulc'],
+                    desc="Future filename of the sulc file. Location is \
+                    {SUBJECTS_DIR}/{SUBJID}/surf/<hemisphere>.sulc")
+    no_save_sulc = traits.Bool(argstr='-no-save-sulc', mandatory=False,
+                               xor=['out_sulc'],
+                               desc="Do not save sulc file as output")
+
+
+class MRIsInflateOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file for MRIsInflate")
+    out_sulc = File(exists=False, desc="Output sulc file")
+
+
+class MRIsInflate(FSCommand):
+    """
+    This program will inflate a cortical surface.
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import MRIsInflate
+    >>> inflate = MRIsInflate()
+    >>> inflate.inputs.in_file = 'lh.smoothwm.nofix' # doctest: +SKIP
+    >>> inflate.inputs.out_file = 'lh.inflated.nofix' # doctest: +SKIP
+    >>> inflate.inputs.no_save_sulc = True
+    >>> inflate.cmdline # doctest: +SKIP
+    'mris_inflate -no-save-sulc lh.smoothwm.nofix lh.inflated.nofix'
+    """
+
+    _cmd = 'mris_inflate'
+    input_spec = MRIsInflateInputSpec
+    output_spec = MRIsInflateOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        if not self.inputs.no_save_sulc:
+            # if the sulc file will be saved
+            outputs["out_sulc"] = os.path.abspath(self.inputs.out_sulc)
+        return outputs
