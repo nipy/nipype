@@ -30,6 +30,8 @@ def test_MRIConvert_inputs():
     ),
     cut_ends=dict(argstr='--cutends %d',
     ),
+    cw256=dict(argstr='--cw256',
+    ),
     devolve_transform=dict(argstr='--devolvexfm %s',
     ),
     drop_n=dict(argstr='--ndrop %d',
