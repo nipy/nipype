@@ -1359,3 +1359,45 @@ class AddXFormToHeader(FSCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class CheckTalairachAlignmentInputSpec(FSTraitedSpec):
+    in_file = File(argstr='-xfm %s', xor=['subject'], exists=True, mandatory=True, position=-1,
+                   desc="specify the talairach.xfm file to check")
+    subject = traits.String(argstr='-subj %s', xor=['in_file'], mandatory=True, position=-1,
+                            desc="specify subject's name")
+    # optional
+    threshold = traits.Float(default=0.010, argstr='-T %.3f', desc="Talairach transforms for subjects with p-values <= T " +
+                             "are considered as very unlikely default=0.010")
+
+
+class CheckTalairachAlignmentOutputSpec(TraitedSpec):
+    out_file = traits.File(
+        exists=True, desc="The input file for CheckTalairachAlignment")
+
+
+class CheckTalairachAlignment(FSCommand):
+    """
+    This program detects Talairach alignment failures
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces.freesurfer import CheckTalairachAlignment
+    >>> checker = CheckTalairachAlignment()
+
+    >>> checker.inputs.in_file = 'talairach.xfm'
+    >>> checker.inputs.threshold = 0.005
+    >>> checker.cmdline
+    'talairach_afd -T 0.005 -xfm talairach.xfm'
+
+    >>> checker.run() # doctest: +SKIP
+    """
+    _cmd = "talairach_afd"
+    input_spec = CheckTalairachAlignmentInputSpec
+    output_spec = CheckTalairachAlignmentOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = self.inputs.in_file
+        return outputs
