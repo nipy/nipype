@@ -1521,3 +1521,45 @@ class RemoveNeck(FSCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class MRIFillInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", mandatory=True, exists=True, position=-2,
+                   desc="Input white matter file")
+    out_file = File(argstr="%s", mandatory=True, exists=False, position=-1,
+                    desc="Output filled volume file name for MRIFill")
+    # optional
+    segmentation = File(argstr="-segmentation %s", mandatory=False, exists=True,
+                        desc="Input segmentation file for MRIFill")
+    transform = File(argstr="-xform %s", mandatory=False, exists=True,
+                     desc="Input transform file for MRIFill")
+    log_file = File(argstr="-a %s", mandatory=False, exists=False,
+                    desc="Input segmentation file for MRIFill")
+
+
+class MRIFillOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file from MRIFill")
+
+
+class MRIFill(FSCommand):
+    """
+    This program creates hemispheric cutting planes and fills white matter
+    with specific values for subsequent surface tesselation.
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import MRIFill
+    >>> fill = MRIFill()
+    >>> fill.inputs.in_file = 'wm.mgz' # doctest: +SKIP
+    >>> fill.inputs.out_file = 'filled.mgz' # doctest: +SKIP
+    >>> fill.cmdline # doctest: +SKIP
+    'mri_fill wm.mgz filled.mgz'
+    """
+
+    _cmd = "mri_fill"
+    input_spec = MRIFillInputSpec
+    output_spec = MRIFillOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
