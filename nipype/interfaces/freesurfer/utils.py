@@ -1662,3 +1662,64 @@ class Sphere(FSCommandOpenMP):
             basename = hemisphere + '.sphere'
             outputs["out_file"] = os.path.join(head, basename)
         return outputs
+
+
+class FixTopologyInputSpec(FSTraitedSpec):
+    in_orig = File(exists=True, mandatory=True,
+                   desc="Undocumented input file <hemisphere>.orig")
+    in_inflated = File(exists=True, mandatory=True,
+                       desc="Undocumented input file <hemisphere>.inflated")
+    hemisphere = traits.String(position=-1, argstr="%s", mandatory=True,
+                               desc="Hemisphere being processed")
+    subject_id = traits.String(position=-2, argstr="%s", mandatory=True,
+                               desc="Subject being processed")
+    # optional
+    seed = traits.Int(argstr="-seed %d", mandatory=False,
+                      desc="Seed for setting random number generator")
+    ga = traits.Bool(argstr="-ga", mandatory=False,
+                     desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
+    mgz = traits.Bool(argstr="-mgz", mandatory=False,
+                      desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
+    sphere = traits.File(argstr="-sphere %s", mandatory=False,
+                         desc="Sphere input file")
+
+
+class FixTopologyOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file for FixTopology")
+
+
+class FixTopology(FSCommand):
+    """
+    This program computes a mapping from the unit sphere onto the surface
+    of the cortex from a previously generated approximation of the
+    cortical surface, thus guaranteeing a topologically correct surface.
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import FixTopology
+    >>> ft = FixTopology()
+    >>> ft.inputs.in_orig = 'lh.orig' # doctest: +SKIP
+    >>> ft.inputs.in_inflated = 'lh.inflated' # doctest: +SKIP
+    >>> ft.inputs.sphere = 'lh.qsphere.nofix' # doctest: +SKIP
+    >>> ft.inputs.hemisphere = 'lh'
+    >>> ft.inputs.subject_id = '10335'
+    >>> ft.inputs.mgz = True
+    >>> ft.inputs.ga = True
+    >>> ft.cmdline # doctest: +SKIP
+    'mris_fix_topology -ga -mgz -sphere qsphere.nofix 10335 lh'
+    """
+
+    _cmd = 'mris_fix_topology'
+    input_spec = FixTopologyInputSpec
+    output_spec = FixTopologyOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'sphere':
+            # get the basename and take out the hemisphere
+            suffix = os.path.basename(value).split('.', 1)[1]
+            return spec.argstr % suffix
+        return super(FixTopology, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.in_orig)
+        return outputs
