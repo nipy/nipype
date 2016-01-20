@@ -1475,3 +1475,49 @@ class TalairachQC(FSScriptCommand):
     _cmd = "tal_QC_AZS"
     input_spec = TalairachQCInputSpec
     output_spec = FSScriptOutputSpec
+
+
+class RemoveNeckInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", exisits=True, madatory=True,
+                   position=-4, desc="Input file for RemoveNeck")
+    out_file = File(argstr="%s", exists=False, mandatory=True,
+                    genfile=True, position=-1, desc="Output file for RemoveNeck")
+    transform = File(argstr="%s", exists=True, mandatory=True,
+                     position=-3, desc="Input transform file for RemoveNeck")
+    template = File(argstr="%s", exists=True, mandatory=True,
+                    position=-2, desc="Input template file for RemoveNeck")
+    # optional
+    radius = traits.Int(argstr="-radius %d", mandatory=False, desc="Radius")
+
+
+class RemoveNeckOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file with neck removed")
+
+
+class RemoveNeck(FSCommand):
+    """
+    Crops the neck out of the mri image
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces.freesurfer import TalairachQC
+    >>> remove_neck = RemoveNeck()
+
+    >>> remove_neck.inputs.in_file = 'nu.mgz' # doctest: +SKIP
+    >>> remove_neck.inputs.out_file = 'nu_noneck.mgz' # doctest: +SKIP
+    >>> remove_neck.run() # doctest: +SKIP
+    """
+    _cmd = "mri_remove_neck"
+    input_spec = RemoveNeckInputSpec
+    output_spec = RemoveNeckOutputSpec
+
+    def _gen_fname(self, name):
+        if name == 'out_file':
+            return os.path.abspath('nu_noneck.mgz')
+        return None
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
