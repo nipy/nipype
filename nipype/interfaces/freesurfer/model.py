@@ -627,6 +627,8 @@ class SegStatsInputSpec(FSTraitedSpec):
     wm_vol_from_surf = traits.Bool(argstr='--surf-wm-vol', desc='Compute wm volume from surf')
     cortex_vol_from_surf = traits.Bool(argstr='--surf-ctx-vol', desc='Compute cortex volume from surf')
     non_empty_only = traits.Bool(argstr='--nonempty', desc='Only report nonempty segmentations')
+    empty = traits.Bool(argstr="--empty", mandatory=False,
+                        desc="Report on segmentations listed in the color table")
     mask_file = File(exists=True, argstr='--mask %s',
                      desc='Mask volume (same size as seg')
     mask_thresh = traits.Float(argstr='--maskthresh %f',
