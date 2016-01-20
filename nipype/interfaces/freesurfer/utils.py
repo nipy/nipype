@@ -1610,3 +1610,55 @@ class MRIsInflate(FSCommand):
             # if the sulc file will be saved
             outputs["out_sulc"] = os.path.abspath(self.inputs.out_sulc)
         return outputs
+
+
+class SphereInputSpec(FSTraitedSpecOpenMP):
+    in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                   desc="Input file for Sphere")
+    # optional
+    out_file = File(argstr="%s", position=-1, mandatory=False, exists=False, genfile=True,
+                    desc="Output file for Sphere")
+    seed = traits.Int(argstr="-seed %d", mandatory=False,
+                      desc="Seed for setting random number generator")
+    magic = traits.Bool(argstr="-q", mandatory=False,
+                        desc="Magic. No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
+    in_smoothwm = File(mandatory=False, exists=True,
+                       desc="Input surface required when -q flag is not selected")
+
+
+class SphereOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file for Sphere")
+
+class Sphere(FSCommandOpenMP):
+    """
+    This program will add a template into an average surface
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import Sphere
+    >>> sphere = Sphere()
+    >>> sphere.inputs.in_file = 'lh.inflated.nofix' # doctest: +SKIP
+    >>> sphere.inputs.out_file = 'lh.qsphere.nofix' # doctest: +SKIP
+    >>> sphere.inputs.magic = True
+    >>> sphere.cmdline # doctest: +SKIP
+    'mris_sphere -q lh.inflated.nofix lh.qsphere.nofix'
+    """
+    _cmd = 'mris_sphere'
+    input_spec = SphereInputSpec
+    output_spec = SphereOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if isdefined(self.inputs.out_file):
+            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        else:
+            # save file with hemisphere label and to same directoyr as input
+            head, tail = os.path.split(self.inputs.in_file)
+            hemisphere = tail.split('.')[0]
+            basename = hemisphere + '.sphere'
+            outputs["out_file"] = os.path.join(head, basename)
+        return outputs
