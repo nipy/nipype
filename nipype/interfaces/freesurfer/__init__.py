@@ -21,3 +21,4 @@ from .utils import (SampleToSurface, SurfaceSmooth, SurfaceTransform, Surface2Vo
                     RemoveIntersection, MakeSurfaces, Curvature, CurvatureStats,
                     Jacobian, MRIsCalc, VolumeMask, ParcellationStats, Contrast,
                     RelabelHypointensities, Aparc2Aseg, Apas2Aseg)
+from .longitudinal import (RobustTemplate, FuseSegmentations)
