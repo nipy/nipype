@@ -1068,21 +1068,21 @@ class SmoothTessellationInputSpec(FSTraitedSpec):
     This program smooths the tessellation of a surface using 'mris_smooth'
     """
 
-    in_file = File(exists=True, mandatory=True, argstr='%s', position=1, desc='Input volume to tesselate voxels from.')
-
-    curvature_averaging_iterations = traits.Int(10, usedefault=True, argstr='-a %d', position=-1, desc='Number of curvature averaging iterations (default=10)')
-    smoothing_iterations = traits.Int(10, usedefault=True, argstr='-n %d', position=-2, desc='Number of smoothing iterations (default=10)')
+    in_file = File(exists=True, mandatory=True, argstr='%s',
+                   position=-2, desc='Input volume to tesselate voxels from.')
+    curvature_averaging_iterations = traits.Int(argstr='-a %d', desc='Number of curvature averaging iterations (default=10)')
+    smoothing_iterations = traits.Int(argstr='-n %d', desc='Number of smoothing iterations (default=10)')
     snapshot_writing_iterations = traits.Int(argstr='-w %d', desc='Write snapshot every "n" iterations')
 
-    use_gaussian_curvature_smoothing = traits.Bool(argstr='-g', position=3, desc='Use Gaussian curvature smoothing')
-    gaussian_curvature_norm_steps = traits.Int(argstr='%d ', position=4, desc='Use Gaussian curvature smoothing')
-    gaussian_curvature_smoothing_steps = traits.Int(argstr='%d', position=5, desc='Use Gaussian curvature smoothing')
+    use_gaussian_curvature_smoothing = traits.Bool(argstr='-g', desc='Use Gaussian curvature smoothing')
+    gaussian_curvature_norm_steps = traits.Int(argstr='%d ', desc='Use Gaussian curvature smoothing')
+    gaussian_curvature_smoothing_steps = traits.Int(argstr='%d', desc='Use Gaussian curvature smoothing')
 
     disable_estimates = traits.Bool(argstr='-nw', desc='Disables the writing of curvature and area estimates')
     normalize_area = traits.Bool(argstr='-area', desc='Normalizes the area after smoothing')
     use_momentum = traits.Bool(argstr='-m', desc='Uses momentum')
 
-    out_file = File(argstr='%s', position=2, genfile=True, desc='output filename or True to generate one')
+    out_file = File(argstr='%s', position=-1, genfile=True, desc='output filename or True to generate one')
     out_curvature_file = File(argstr='-c %s', desc='Write curvature to ?h.curvname (default "curv")')
     out_area_file = File(argstr='-b %s', desc='Write area to ?h.areaname (default "area")')
 
