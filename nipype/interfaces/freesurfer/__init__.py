@@ -15,4 +15,9 @@ from .model import (MRISPreproc, MRISPreprocReconAll, GLMFit, OneSampleTTest, Bi
 from .utils import (SampleToSurface, SurfaceSmooth, SurfaceTransform, Surface2VolTransform,
                     SurfaceSnapshots, ApplyMask, MRIsConvert, MRITessellate, MRIPretess,
                     MRIMarchingCubes, SmoothTessellation, MakeAverageSubject,
-                    ExtractMainComponent, Tkregister2)
+                    ExtractMainComponent, Tkregister2, AddXFormToHeader,
+                    CheckTalairachAlignment, TalairachAVI, TalairachQC, RemoveNeck,
+                    MRIFill, MRIsInflate, Sphere, FixTopology, EulerNumber,
+                    RemoveIntersection, MakeSurfaces, Curvature, CurvatureStats,
+                    Jacobian, MRIsCalc, VolumeMask, ParcellationStats, Contrast,
+                    RelabelHypointensities, Aparc2Aseg, Apas2Aseg)
