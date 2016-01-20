@@ -22,3 +22,5 @@ from .utils import (SampleToSurface, SurfaceSmooth, SurfaceTransform, Surface2Vo
                     Jacobian, MRIsCalc, VolumeMask, ParcellationStats, Contrast,
                     RelabelHypointensities, Aparc2Aseg, Apas2Aseg)
 from .longitudinal import (RobustTemplate, FuseSegmentations)
+from .registration import (MPRtoMNI305, RegisterAVItoTalairach, EMRegister, Register,
+                           Paint)
