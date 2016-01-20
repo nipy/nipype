@@ -1188,3 +1188,97 @@ class Label2Annot(FSCommand):
                                            'label',
                                            self.inputs.hemisphere + '.' + self.inputs.out_annot + '.annot')
         return outputs
+
+
+class SphericalAverageInputSpec(FSTraitedSpec):
+    out_file = File(argstr="%s", genfile=True, exists=False,
+                    position=-1, desc="Output filename")
+    in_average = traits.Directory(argstr="%s", exists=True, genfile=True,
+                                  position=-2, desc="Average subject")
+    in_surf = File(argstr="%s", mandatory=True, exists=True,
+                   position=-3, desc="Input surface file")
+    hemisphere = traits.Enum('lh', 'rh', argstr="%s", mandatory=True,
+                             position=-4, desc="Input hemisphere")
+    fname = traits.String(argstr="%s", mandatory=True, position=-5,
+                          desc="""Filename from the average subject directory.
+                          Example: to use rh.entorhinal.label as the input label
+                          filename, set fname to 'rh.entorhinal' and which to
+                          'label'. The program will then search for
+                          '{in_average}/label/rh.entorhinal.label'
+                          """)
+    which = traits.Enum('coords', 'label', 'vals', 'curv', 'area',
+                        argstr="%s", mandatory=True, position=-6, desc="No documentation")
+    subject_id = traits.String(
+        argstr="-o %s", mandatory=True, desc="Output subject id")
+    # optional
+    erode = traits.Int(argstr="-erode %d", desc="Undocumented")
+    in_orig = File(argstr="-orig %s", exists=True,
+                   desc="Original surface filename")
+    threshold = traits.Float(argstr="-t %.1f", desc="Undocumented")
+
+
+class SphericalAverageOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc='Output label')
+
+
+class SphericalAverage(FSCommand):
+    """
+    This program will add a template into an average surface.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import SphericalAverage
+    >>> sphericalavg = SphericalAverage()
+    >>> sphericalavg.inputs.out_file = 'test.out'
+    >>> sphericalavg.inputs.in_average = '.'
+    >>> sphericalavg.inputs.in_surf = 'lh.pial'
+    >>> sphericalavg.inputs.hemisphere = 'lh'
+    >>> sphericalavg.inputs.fname = 'lh.entorhinal'
+    >>> sphericalavg.inputs.which = 'label'
+    >>> sphericalavg.inputs.subject_id = '10335'
+    >>> sphericalavg.inputs.erode = 2
+    >>> sphericalavg.inputs.threshold = 5
+    >>> sphericalavg.cmdline
+    'mris_spherical_average -erode 2 -o 10335 -t 5.0 label lh.entorhinal lh white . test.out'
+    """
+
+    _cmd = 'mris_spherical_average'
+    input_spec = SphericalAverageInputSpec
+    output_spec = SphericalAverageOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'in_orig' or name == 'in_surf':
+            surf = os.path.basename(value)
+            for item in ['lh.', 'rh.']:
+                surf = surf.replace(item, '')
+            return spec.argstr % surf
+        return super(SphericalAverage, self)._format_arg(name, spec, value)
+
+    def _gen_filename(self, name):
+        if name == 'in_average':
+            avg_subject = self.inputs.hemisphere + '.EC_average'
+            avg_directory = os.path.join(self.inputs.subjects_dir, avg_subject)
+            if not os.path.isdir(avg_directory):
+                fs_home = os.path.abspath(os.environ.get('FREESURFER_HOME'))
+                avg_home = os.path.join(fs_home, 'subjects', 'fsaverage')
+            return avg_subject
+        elif name == 'out_file':
+            return self._list_outputs()[name]
+        else:
+            return None
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        print outputs
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        else:
+            out_dir = os.path.join(
+                self.inputs.subjects_dir, self.inputs.subject_id, 'label')
+            if isdefined(self.inputs.in_average):
+                basename = os.path.basename(self.inputs.in_average)
+                basename = basename.replace('_', '_exvivo_') + '.label'
+            else:
+                basename = self.inputs.hemisphere + '.EC_exvivo_average.label'
+            outputs['out_file'] = os.path.join(out_dir, basename)
+        return outputs
