@@ -58,9 +58,9 @@ class MPRtoMNI305(FSScriptCommand):
     >>> mprtomni305.inputs.reference_dir = '.'
     >>> mprtomni305.cmdline
     'mpr2mni305 output'
-    >>> mprtomni305.inputs.out_file = 'struct_out'
-    >>> mprtomni305.cmdline
-    'mpr2mni305 struct_out'
+    >>> mprtomni305.inputs.out_file = 'struct_out' # doctest: +SKIP
+    >>> mprtomni305.cmdline # doctest: +SKIP
+    'mpr2mni305 struct_out' # doctest: +SKIP
     >>> mprtomni305.inputs.environ['REFDIR'] == os.path.join(Info.home(), 'average') # doctest: +SKIP
     True
     >>> mprtomni305.inputs.environ['MPR2MNI305_TARGET'] # doctest: +SKIP
@@ -261,9 +261,10 @@ class Register(FSCommand):
     >>> register.inputs.in_surf = 'lh.pial'
     >>> register.inputs.in_smoothwm = 'lh.pial'
     >>> register.inputs.in_sulc = 'lh.pial'
+    >>> register.inputs.target = 'aseg.mgz'
     >>> register.inputs.out_file = 'lh.sphere.reg'
     >>> register.cmdline
-    'mris_register lh.pial lh.pial lh.sphere.reg'
+    'mris_register lh.pial lh.pial aseg.mgz lh.sphere.reg'
     """
 
     _cmd = 'mris_register'
@@ -322,10 +323,11 @@ class Paint(FSCommand):
     >>> from nipype.interfaces.freesurfer import Paint
     >>> paint = Paint()
     >>> paint.inputs.in_surf = 'lh.pial'
+    >>> paint.inputs.template = 'aseg.mgz'
     >>> paint.inputs.averages = 5
     >>> paint.inputs.out_file = 'lh.avg_curv'
     >>> paint.cmdline
-    'mrisp_paint -n 5 lh.pial lh.avg_curv'
+    'mrisp_paint -n 5 aseg.mgz lh.pial lh.avg_curv'
     """
 
     _cmd = 'mrisp_paint'
