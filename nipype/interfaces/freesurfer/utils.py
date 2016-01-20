@@ -1440,7 +1440,7 @@ class TalairachAVI(FSCommand):
     >>> example.inputs.in_file = 'norm.mgz'
     >>> example.inputs.out_file = 'trans.mat'
     >>> example.cmdline
-    'talairach_avi -i norm.mgz -xfm trans.mat'
+    'talairach_avi --i norm.mgz --xfm trans.mat'
 
     >>> example.run() # doctest: +SKIP
     """
