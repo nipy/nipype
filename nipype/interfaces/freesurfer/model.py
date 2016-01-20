@@ -779,15 +779,15 @@ class SegStatsReconAll(SegStats):
     >>> segstatsreconall.inputs.avgwf_txt_file = './avgwf.txt'
     >>> segstatsreconall.inputs.summary_file = './summary.stats'
     >>> segstatsreconall.inputs.subject_id = '10335'
-    >>> segstatsreconall.inputs.ribbon = '../mri/ribbon.mgz' # doctest: +SKIP
-    >>> segstatsreconall.inputs.transform = '../mri/transforms/talairach.xfm' # doctest: +SKIP
-    >>> segstatsreconall.inputs.presurf_seg = '../mri/ribbon.mgz' # doctest: +SKIP
-    >>> segstatsreconall.inputs.lh_orig_nofix = 'lh.orig.nofix' # doctest: +SKIP
-    >>> segstatsreconall.inputs.rh_orig_nofix = 'rh.orig.nofix' # doctest: +SKIP
-    >>> segstatsreconall.inputs.lh_pial = 'lh.pial' # doctest: +SKIP
-    >>> segstatsreconall.inputs.rh_pial = 'rh.pial' # doctest: +SKIP
-    >>> segstatsreconall.inputs.lh_white = 'lh.white' # doctest: +SKIP
-    >>> segstatsreconall.inputs.rh_white = 'rh.white' # doctest: +SKIP
+    >>> segstatsreconall.inputs.ribbon = 'wm.mgz'
+    >>> segstatsreconall.inputs.transform = 'trans.mat'
+    >>> segstatsreconall.inputs.presurf_seg = 'wm.mgz'
+    >>> segstatsreconall.inputs.lh_orig_nofix = 'lh.pial'
+    >>> segstatsreconall.inputs.rh_orig_nofix = 'lh.pial'
+    >>> segstatsreconall.inputs.lh_pial = 'lh.pial'
+    >>> segstatsreconall.inputs.rh_pial = 'lh.pial'
+    >>> segstatsreconall.inputs.lh_white = 'lh.pial'
+    >>> segstatsreconall.inputs.rh_white = 'lh.pial'
     >>> segstatsreconall.inputs.empty = True
     >>> segstatsreconall.inputs.brain_vol = 'brain-vol-from-seg'
     >>> segstatsreconall.inputs.exclude_ctx_gm_wm = True
@@ -799,7 +799,7 @@ class SegStatsReconAll(SegStats):
     >>> segstatsreconall.inputs.total_gray = True
     >>> segstatsreconall.inputs.euler = True
     >>> segstatsreconall.inputs.exclude_id = 0
-    >>> segstatsreconall.cmdline # doctest: +SKIP
+    >>> segstatsreconall.cmdline
     'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --brain-vol-from-seg --surf-ctx-vol --empty --etiv --euler --excl-ctxgmwm --excludeid 0 --subcortgray --subject 10335 --sum ./summary.stats --supratent --totalgray --surf-wm-vol'
     """
     input_spec = SegStatsReconAllInputSpec
