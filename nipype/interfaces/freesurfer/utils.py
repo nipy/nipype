@@ -2542,3 +2542,124 @@ class RelabelHypointensities(FSCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = self.inputs.aseg.rstrip('mgz') + 'hypos.mgz'
         return outputs
+
+
+class Aparc2AsegInputSpec(FSTraitedSpec):
+    # required
+    subject_id = traits.String(
+        argstr="--s %s", mandatory=True, desc="Subject being processed")
+    lh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/lh.white")
+    rh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/rh.white")
+    lh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/lh.pial")
+    rh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/rh.pial")
+    lh_ribbon = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/mri/lh.ribbon.mgz")
+    rh_ribbon = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/mri/rh.ribbon.mgz")
+    ribbon = File(mandatory=True, exists=True,
+                  desc="Input file must be <subject_id>/surf/ribbon.mgz")
+    lh_annotation = File(argstr="%s", mandatory=True, exists=True,
+                         desc="Input file must be <subject_id>/label/lh.aparc.annot")
+    rh_annotation = File(mandatory=True, exists=True,
+                         desc="Input file must be <subject_id>/label/rh.aparc.annot")
+    # optional
+    out_file = File(argstr="--o %s", mandatory=False, exists=False, genfile=True,
+                    desc="Full path of file to save the output segmentation in")
+    aseg = File(argstr="--aseg %s", mandatory=False, exists=True,
+                desc="Input aseg file")
+    volmask = traits.Bool(argstr="--volmask", mandatory=False,
+                          desc="Volume mask flag")
+    ctxseg = File(argstr="--ctxseg %s", mandatory=False, exists=True,
+                  desc="")
+    label_wm = traits.Bool(argstr="--labelwm", mandatory=False,
+                           desc="""
+                           For each voxel labeled as white matter in the aseg, re-assign
+                           its label to be that of the closest cortical point if its
+                           distance is less than dmaxctx
+                           """)
+    hypo_wm = traits.Bool(argstr="--hypo-as-wm", mandatory=False,
+                          desc="Label hypointensities as WM")
+    rip_unknown = traits.Bool(argstr="--rip-unknown", mandatory=False,
+                              desc="Do not label WM based on 'unknown' corical label")
+
+
+class Aparc2AsegOutputSpec(TraitedSpec):
+    out_file = File(argstr="%s", exists=False, mandatory=False,
+                    desc="Output aseg file")
+
+
+class Aparc2Aseg(FSCommand):
+    """
+    Maps the cortical labels from the automatic cortical parcellation
+    (aparc) to the automatic segmentation volume (aseg). The result can be
+    used as the aseg would. The algorithm is to find each aseg voxel
+    labeled as cortex (3 and 42) and assign it the label of the closest
+    cortical vertex. If the voxel is not in the ribbon (as defined by mri/
+    lh.ribbon and rh.ribbon), then the voxel is marked as unknown (0).
+    This can be turned off with --noribbon. The cortical parcellation is
+    obtained from subject/label/hemi.aparc.annot which should be based on
+    the curvature.buckner40.filled.desikan_killiany.gcs atlas. The aseg is
+    obtained from subject/mri/aseg.mgz and should be based on the RB40_
+    talairach_2005-07-20.gca atlas. If these atlases are used, then the
+    segmentations can be viewed with tkmedit and the
+    FreeSurferColorLUT.txt color table found in $FREESURFER_HOME. These
+    are the default atlases used by recon-all.
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import Aparc2Aseg
+    >>> aparc2aseg = Aparc2Aseg()
+    >>> aparc2aseg.inputs.subject_id = '10335'
+    >>> aparc2aseg.inputs.lh_white = 'lh.white' # doctest: +SKIP
+    >>> aparc2aseg.inputs.rh_white = 'rh.white' # doctest: +SKIP
+    >>> aparc2aseg.inputs.lh_pial = 'lh.pial' # doctest: +SKIP
+    >>> aparc2aseg.inputs.rh_pial = 'rh.pial' # doctest: +SKIP
+    >>> aparc2aseg.inputs.lh_ribbon = '../mri/lh.ribbon.mgz' # doctest: +SKIP
+    >>> aparc2aseg.inputs.rh_ribbon = '../mri/rh.ribbon.mgz' # doctest: +SKIP
+    >>> aparc2aseg.inputs.ribbon = '../mri/ribbon.mgz' # doctest: +SKIP
+    >>> aparc2aseg.inputs.lh_annotation = '../label/lh.aparc.annot' # doctest: +SKIP
+    >>> aparc2aseg.inputs.rh_annotation = '../label/rh.aparc.annot' # doctest: +SKIP
+    >>> aparc2aseg.inputs.out_file = '../mri/aparc+aseg.mgz'
+    >>> aparc2aseg.inputs.label_wm = True
+    >>> aparc2aseg.inputs.rip_unknown = True
+    >>> aparc2aseg.cmdline # doctest: +SKIP
+    'mri_aparc2aseg --labelwm  --o ../mri/aparc+aseg.mgz --rip-unknown --s 10335'
+    """
+
+    _cmd = 'mri_aparc2aseg'
+    input_spec = Aparc2AsegInputSpec
+    output_spec = Aparc2AsegOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+
+    def _format_arg(self, name, spec, value):
+        if name == 'lh_annotation':
+            if 'a2009s' in value:
+                return spec.argstr % "--a2009s"
+            else:
+                return
+        elif name == 'aseg':
+            return spec.argstr % os.path.basename(value).replace('.mgz', '')
+        else:
+            return super(Aparc2Aseg, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if isdefined(self.inputs.out_file):
+            outputs["out_file"] = self.inputs.out_file
+        else:
+            if self.inputs.label_wm:
+                basename = 'wmparc.mgz'
+            elif 'a2009s' in self.inputs.lh_annotation:
+                basename = 'aparc.a2009s+aseg.mgz'
+            else:
+                basename = 'aparc+aseg.mgz'
+            out_dir = os.path.dirname(self.inputs.ribbon)
+            outputs["out_file"] = os.path.join(out_dir, basename)
+        return outputs
