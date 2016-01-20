@@ -640,7 +640,7 @@ class SegStatsInputSpec(FSTraitedSpec):
                             desc='Mask with this (0 based) frame of the mask volume')
     mask_invert = traits.Bool(argstr='--maskinvert', desc='Invert binarized mask volume')
     mask_erode = traits.Int(argstr='--maskerode %d', desc='Erode mask by some amount')
-    brain_vol = traits.Enum('brain-vol-from-seg', 'brainmask', '--%s',
+    brain_vol = traits.Enum('brain-vol-from-seg', 'brainmask', argstr='--%s',
                             desc='Compute brain volume either with ``brainmask`` or ``brain-vol-from-seg``')
     brainmask_file = File(argstr="--brainmask %s", exists=True,
                           desc="Load brain mask and compute the volume of the brain as the non-zero voxels in this volume")
