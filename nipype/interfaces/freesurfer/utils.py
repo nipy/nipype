@@ -2272,3 +2272,144 @@ class VolumeMask(FSCommand):
             outputs["rh_ribbon"] = os.path.join(out_dir, 'rh.ribbon.mgz')
             outputs["lh_ribbon"] = os.path.join(out_dir, 'lh.ribbon.mgz')
         return outputs
+
+
+class ParcellationStatsInputSpec(FSTraitedSpec):
+    # required
+    subject_id = traits.String(position=-3, argstr="%s", mandatory=True,
+                               desc="Subject being processed")
+    hemisphere = traits.String(position=-2, argstr="%s", mandatory=True,
+                               desc="Hemisphere being processed")
+    wm = File(mandatory=True, exists=True,
+              desc="Input file must be <subject_id>/mri/wm.mgz")
+    lh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/lh.white")
+    rh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/rh.white")
+    lh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/lh.pial")
+    rh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/rh.pial")
+    transform = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/mri/transforms/talairach.xfm")
+    thickness = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/surf/?h.thickness")
+    brainmask = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/mri/brainmask.mgz")
+    aseg = File(mandatory=True, exists=True,
+                desc="Input file must be <subject_id>/mri/aseg.presurf.mgz")
+    ribbon = File(mandatory=True, exists=True,
+                  desc="Input file must be <subject_id>/mri/ribbon.mgz")
+    # optional
+    surface = traits.String(position=-1, argstr="%s", mandatory=False,
+                            desc="Input surface (e.g. 'white')")
+    mgz = traits.Bool(argstr="-mgz", mandatory=False,
+                      desc="Look for mgz files")
+    in_cortex = traits.File(argstr="-cortex %s", mandatory=False, exists=True,
+                            desc="Input cortex label")
+    in_annotation = traits.File(argstr="-a %s", mandatory=False, exists=True, xor=['in_label'],
+                                desc="compute properties for each label in the annotation file separately")
+    in_label = traits.File(argstr="-l %s", mandatory=False, exists=True, xor=['in_annotatoin', 'out_color'],
+                           desc="limit calculations to specified label")
+    tabular_output = traits.Bool(argstr="-b", mandatory=False,
+                                 desc="Tabular output")
+    out_table = traits.File(argstr="-f %s", mandatory=False, exists=False, genfile=True,
+                            requires=['tabular_output'], desc="Table output to tablefile")
+    out_color = traits.File(argstr="-c %s", mandatory=False, exists=False, genfile=True, xor=['in_label'],
+                            desc="Output annotation files's colortable to text file")
+
+
+class ParcellationStatsOutputSpec(TraitedSpec):
+    out_table = File(exists=False, desc="Table output to tablefile")
+    out_color = File(
+        exists=False, desc="Output annotation files's colortable to text file")
+
+
+class ParcellationStats(FSCommand):
+    """
+    This program computes a number of anatomical properties.
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import ParcellationStats
+    >>> import os
+    >>> parcstats = ParcellationStats()
+    >>> parcstats.inputs.subject_id = '10335'
+    >>> parcstats.inputs.hemisphere = 'lh'
+    >>> parcstats.inputs.wm = './../mri/wm.mgz' # doctest: +SKIP
+    >>> parcstats.inputs.transform = './../mri/transforms/talairach.xfm' # doctest: +SKIP
+    >>> parcstats.inputs.brainmask = './../mri/brainmask.mgz' # doctest: +SKIP
+    >>> parcstats.inputs.aseg = './../mri/aseg.presurf.mgz' # doctest: +SKIP
+    >>> parcstats.inputs.ribbon = './../mri/ribbon.mgz' # doctest: +SKIP
+    >>> parcstats.inputs.lh_pial = 'lh.pial' # doctest: +SKIP
+    >>> parcstats.inputs.rh_pial = 'rh.pial' # doctest: +SKIP
+    >>> parcstats.inputs.lh_white = 'lh.white' # doctest: +SKIP
+    >>> parcstats.inputs.rh_white = 'rh.white' # doctest: +SKIP
+    >>> parcstats.inputs.thickness = 'lh.thickness' # doctest: +SKIP
+    >>> parcstats.inputs.surface = 'white'
+    >>> parcstats.inputs.out_table = 'lh.test.stats'
+    >>> parcstats.inputs.out_color = 'test.ctab'
+    >>> parcstats.cmdline # doctest: +SKIP
+    'mris_anatomical_stats -c test.ctab -f lh.test.stats 10335 lh white'
+    """
+
+    _cmd = 'mris_anatomical_stats'
+    input_spec = ParcellationStatsInputSpec
+    output_spec = ParcellationStatsOutputSpec
+
+    def _gen_filename(self, name):
+        if name in ['out_table', 'out_color']:
+            return self._list_outputs()[name]
+        return None
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if isdefined(self.inputs.out_table):
+            outputs["out_table"] = os.path.abspath(self.inputs.out_table)
+        else:
+            # subject stats directory
+            stats_dir = os.path.join(
+                self.inputs.subjects_dir, self.inputs.subject_id, 'stats')
+            if isdefined(self.inputs.in_annotation):
+                # if out_table is not defined just tag .stats on the end
+                # instead of .annot
+                if self.inputs.surface == 'pial':
+                    basename = os.path.basename(
+                        self.inputs.in_annotation).replace('.annot', '.pial.stats')
+                else:
+                    basename = os.path.basename(
+                        self.inputs.in_annotation).replace('.annot', '.stats')
+            elif isdefined(self.inputs.in_label):
+                # if out_table is not defined just tag .stats on the end
+                # instead of .label
+                if self.inputs.surface == 'pial':
+                    basename = os.path.basename(
+                        self.inputs.in_label).replace('.label', '.pial.stats')
+                else:
+                    basename = os.path.basename(
+                        self.inputs.in_label).replace('.label', '.stats')
+            else:
+                basename = self.inputs.hemisphere + '.aparc.annot.stats'
+            outputs["out_table"] = os.path.join(stats_dir, basename)
+        if isdefined(self.inputs.out_color):
+            outputs["out_color"] = os.path.abspath(self.inputs.out_color)
+        else:
+            # subject label directory
+            out_dir = os.path.join(self.inputs.subjects_dir,
+                                   self.inputs.subject_id, 'label')
+            if isdefined(self.inputs.in_annotation):
+                # find the annotation name (if it exists)
+                basename = os.path.basename(self.inputs.in_annotation)
+                for item in ['lh.', 'rh.', 'aparc.', 'annot']:
+                    basename = basename.replace(item, '')
+                annot = basename
+                # if the out_color table is not defined, one with the annotation
+                # name will be created
+                if 'BA' in annot:
+                    outputs["out_color"] = os.path.join(out_dir, annot + 'ctab')
+                else:
+                    outputs["out_color"] = os.path.join(
+                        out_dir, 'aparc.annot.' + annot + 'ctab')
+            else:
+                outputs["out_color"] = os.path.join(
+                        out_dir, 'aparc.annot.ctab')
+        return outputs
