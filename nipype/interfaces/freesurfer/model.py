@@ -1128,3 +1128,63 @@ class Label2Label(FSCommand):
             return 'surface'
         else:
             return None
+
+
+class Label2AnnotInputSpec(FSTraitedSpec):
+    # required
+    hemisphere = traits.String(argstr="--hemi %s", mandatory=True,
+                               desc="Input hemisphere")
+    subject_id = traits.String(argstr="--s %s", mandatory=True,
+                               desc="Subject name/ID")
+    in_labels = traits.List(argstr="--l %s...", mandatory=True,
+                            desc="List of input label files")
+    out_annot = traits.String(argstr="--a %s", mandatory=True,
+                              desc="Name of the annotation to create")
+    # optional
+    keep_max = traits.Bool(argstr="--maxstatwinner", mandatory=False,
+                           desc="Keep label with highest 'stat' value")
+    verbose_off = traits.Bool(argstr="--noverbose", mandatory=False,
+                              desc="Turn off overlap and stat override messages")
+    color_table = File(argstr="--ctab %s", mandatory=False, exists=True,
+                       desc="File that defines the structure names, their indices, and their color")
+
+
+class Label2AnnotOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Output annotation file')
+
+
+class Label2Annot(FSCommand):
+    """
+    Converts a set of surface labels to an annotation file
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import Label2Annot
+    >>> l2a = Label2Annot()
+    >>> l2a.inputs.hemisphere = 'lh'
+    >>> l2a.inputs.subject_id = '10335'
+    >>> l2a.inputs.in_labels = ['lh.aparc.label']
+    >>> l2a.inputs.out_annot = 'test'
+    >>> l2a.cmdline
+    'mris_label2annot --hemi lh --l lh.aparc.label --a test --s 10335'
+    """
+
+    _cmd = 'mris_label2annot'
+    input_spec = Label2AnnotInputSpec
+    output_spec = Label2AnnotOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'out_annot':
+            # this program will crash if the output annotation file already exists
+            # To prevent this, the file is deleted prior to running.
+            if os.path.isfile(self._list_outputs()['out_file']):
+                os.remove(self._list_outputs()['out_file'])
+        return super(Label2Annot, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.join(self.inputs.subjects_dir,
+                                           self.inputs.subject_id,
+                                           'label',
+                                           self.inputs.hemisphere + '.' + self.inputs.out_annot + '.annot')
+        return outputs
