@@ -9,8 +9,9 @@ from .preprocess import (ParseDICOMDir, UnpackSDICOMDir, MRIConvert, Resample,
                          SynthesizeFLASH, MNIBiasCorrection, WatershedSkullStrip,
                          Normalize, CANormalize, CARegister, CALabel, MRIsCALabel,
                          SegmentCC, SegmentWM, EditWMwithAseg, ConcatenateLTA)
-from .model import (MRISPreproc, GLMFit, OneSampleTTest, Binarize, Concatenate,
-                    SegStats, Label2Vol, MS_LDA)
+from .model import (MRISPreproc, MRISPreprocReconAll, GLMFit, OneSampleTTest, Binarize,
+                    Concatenate, SegStats, SegStatsReconAll, Label2Vol, MS_LDA,
+                    Label2Label, Label2Annot, SphericalAverage)
 from .utils import (SampleToSurface, SurfaceSmooth, SurfaceTransform, Surface2VolTransform,
                     SurfaceSnapshots, ApplyMask, MRIsConvert, MRITessellate, MRIPretess,
                     MRIMarchingCubes, SmoothTessellation, MakeAverageSubject,
