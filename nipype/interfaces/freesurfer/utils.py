@@ -2192,3 +2192,83 @@ class MRIsCalc(FSCommand):
             outputs['out_file'] = self.inputs.in_file1 + \
                 '.' + self.inputs.action
         return outputs
+
+
+class VolumeMaskInputSpec(FSTraitedSpec):
+    left_whitelabel = traits.Int(argstr="--label_left_white %d", mandatory=True,
+                                 desc="Left white matter label")
+    left_ribbonlabel = traits.Int(argstr="--label_left_ribbon %d", mandatory=True,
+                                  desc="Left cortical ribbon label")
+    right_whitelabel = traits.Int(argstr="--label_right_white %d", mandatory=True,
+                                  desc="Right white matter label")
+    right_ribbonlabel = traits.Int(argstr="--label_right_ribbon %d", mandatory=True,
+                                   desc="Right cortical ribbon label")
+    lh_pial = File(mandatory=True, exists=True,
+                   desc="Implicit input left pial surface")
+    rh_pial = File(mandatory=True, exists=True,
+                   desc="Implicit input right pial surface")
+    lh_white = File(mandatory=True, exists=True,
+                    desc="Implicit input left white matter surface")
+    rh_white = File(mandatory=True, exists=True,
+                    desc="Implicit input right white matter surface")
+    subject_id = traits.String(position=-1, argstr="%s", mandatory=True,
+                               desc="Subject being processed")
+    # optional
+    in_aseg = File(argstr="--aseg_name %s", mandatory=False, exists=True,
+                   desc="Input aseg file for VolumeMask")
+    save_ribbon = traits.Bool(argstr="--save_ribbon", mandatory=False,
+                              desc="option to save just the ribbon for the hemispheres in the format ?h.ribbon.mgz")
+
+
+class VolumeMaskOutputSpec(TraitedSpec):
+    out_ribbon = File(exists=False, desc="Output cortical ribbon mask")
+    lh_ribbon = File(exists=False, desc="Output left cortical ribbon mask")
+    rh_ribbon = File(exists=False, desc="Output right cortical ribbon mask")
+
+
+class VolumeMask(FSCommand):
+    """
+    Computes a volume mask, at the same resolution as the
+    <subject>/mri/brain.mgz.  The volume mask contains 4 values: LH_WM
+    (default 10), LH_GM (default 100), RH_WM (default 20), RH_GM (default
+    200).
+    The algorithm uses the 4 surfaces situated in <subject>/surf/
+    [lh|rh].[white|pial] and labels voxels based on the
+    signed-distance function from the surface.
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import VolumeMask
+    >>> volmask = VolumeMask()
+    >>> volmask.inputs.left_whitelabel = 2
+    >>> volmask.inputs.left_ribbonlabel = 3
+    >>> volmask.inputs.right_whitelabel = 41
+    >>> volmask.inputs.right_ribbonlabel = 42
+    >>> volmask.inputs.lh_pial = 'lh.pial' # doctest: +SKIP
+    >>> volmask.inputs.rh_pial = 'rh.pial' # doctest: +SKIP
+    >>> volmask.inputs.lh_white = 'lh.white' # doctest: +SKIP
+    >>> volmask.inputs.rh_white = 'rh.white' # doctest: +SKIP
+    >>> volmask.inputs.subject_id = '10335'
+    >>> volmask.inputs.save_ribbon = True
+    >>> volmask.cmdline # doctest: +SKIP
+    'mris_volmask --label_left_ribbon 3 --label_left_white 2 --label_right_ribbon 42 --label_right_white 41 --save_ribbon 10335'
+    """
+
+    _cmd = 'mris_volmask'
+    input_spec = VolumeMaskInputSpec
+    output_spec = VolumeMaskOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'in_aseg':
+            return spec.argstr % os.path.basename(value).rstrip('.mgz')
+        else:
+            return super(VolumeMask, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        out_dir = os.path.join(self.inputs.subjects_dir,
+                               self.inputs.subject_id, 'mri')
+        outputs["out_ribbon"] = os.path.join(out_dir, 'ribbon.mgz')
+        if self.inputs.save_ribbon:
+            outputs["rh_ribbon"] = os.path.join(out_dir, 'rh.ribbon.mgz')
+            outputs["lh_ribbon"] = os.path.join(out_dir, 'lh.ribbon.mgz')
+        return outputs
