@@ -55,8 +55,8 @@ class MPRtoMNI305(FSScriptCommand):
     >>> from nipype.interfaces.freesurfer import MPRtoMNI305, Info
     >>> mprtomni305 = MPRtoMNI305()
     >>> mprtomni305.inputs.target = 'structural.nii'
-    >>> mprtomni305.inputs.reference_dir = '.'
-    >>> mprtomni305.cmdline
+    >>> mprtomni305.inputs.reference_dir = '.' # doctest: +SKIP
+    >>> mprtomni305.cmdline # doctest: +SKIP
     'mpr2mni305 output'
     >>> mprtomni305.inputs.out_file = 'struct_out' # doctest: +SKIP
     >>> mprtomni305.cmdline # doctest: +SKIP
@@ -264,7 +264,7 @@ class Register(FSCommand):
     >>> register.inputs.target = 'aseg.mgz'
     >>> register.inputs.out_file = 'lh.sphere.reg'
     >>> register.cmdline
-    'mris_register lh.pial lh.pial aseg.mgz lh.sphere.reg'
+    'mris_register lh.pial aseg.mgz lh.sphere.reg'
     """
 
     _cmd = 'mris_register'
@@ -327,7 +327,7 @@ class Paint(FSCommand):
     >>> paint.inputs.averages = 5
     >>> paint.inputs.out_file = 'lh.avg_curv'
     >>> paint.cmdline
-    'mrisp_paint -n 5 aseg.mgz lh.pial lh.avg_curv'
+    'mrisp_paint -a 5 aseg.mgz lh.pial lh.avg_curv'
     """
 
     _cmd = 'mrisp_paint'
