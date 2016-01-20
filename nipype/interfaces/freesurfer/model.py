@@ -730,6 +730,10 @@ class SegStats(FSCommand):
             else:
                 fname = value
             return spec.argstr % fname
+        elif name == 'in_intensity':
+            intensity_name = os.path.basename(
+                self.inputs.in_intensity).replace('.mgz', '')
+            return spec.argstr % (value, intensity_name)
         return super(SegStats, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
