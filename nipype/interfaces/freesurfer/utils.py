@@ -2663,3 +2663,49 @@ class Aparc2Aseg(FSCommand):
             out_dir = os.path.dirname(self.inputs.ribbon)
             outputs["out_file"] = os.path.join(out_dir, basename)
         return outputs
+
+
+class Apas2AsegInputSpec(FSTraitedSpec):
+    # required
+    in_file = File(argstr="--i %s", mandatory=True, exists=True,
+                   desc="Input aparc+aseg.mgz")
+    # optional
+    out_file = File(argstr="--o %s", mandatory=False, exists=True, genfile=True,
+                    desc="Input aparc+aseg.mgz")
+
+
+class Apas2AsegOutputSpec(TraitedSpec):
+    out_file = File(argstr="%s", exists=False, mandatory=False,
+                    desc="Output aseg file")
+
+
+class Apas2Aseg(FSCommand):
+    """
+    Converts aparc+aseg.mgz into something like aseg.mgz by replacing the
+    cortical segmentations 1000-1035 with 3 and 2000-2035 with 42. The
+    advantage of this output is that the cortical label conforms to the
+    actual surface (this is not the case with aseg.mgz).
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import Apas2Aseg
+    >>> apas2aseg = Apas2Aseg()
+    >>> apas2aseg.inputs.in_file = 'aparc+aseg.mgz' # doctest: +SKIP
+    >>> apas2aseg.cmdline # doctest: +SKIP
+    'apas2aseg --i aparc+aseg.mgz --o aseg.mgz'
+    """
+
+    _cmd = 'apas2aseg'
+    input_spec = Apas2AsegInputSpec
+    output_spec = Apas2AsegOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        else:
+            return None
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.join(
+            os.path.dirname(self.inputs.in_file), 'aseg.mgz')
+        return outputs
