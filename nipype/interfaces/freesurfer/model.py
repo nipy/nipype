@@ -113,6 +113,55 @@ class MRISPreproc(FSCommand):
         return None
 
 
+class MRISPreprocReconAllInputSpec(MRISPreprocInputSpec):
+    surf_measure_file = File(exists=True, argstr='--meas %s',
+                             xor=('surf_measure',
+                                  'surf_measure_file', 'surf_area'),
+                             desc='file necessary for surfmeas')
+    surfreg_file = File(
+        argstr="--surfreg %s", desc="Input surface registration file")
+    subject_id = traits.String(argstr='--s %s',
+                               xor=(
+                                   'subjects', 'fsgd_file', 'subject_file', 'subject_id'),
+                               desc='subject from who measures are calculated')
+
+
+class MRISPreprocReconAll(MRISPreproc):
+
+    """Extends MRISPreproc to allow it to be used in a recon-all workflow
+
+    Examples
+    --------
+
+    >>> preproc = MRISPreprocReconAll()
+    >>> preproc.inputs.target = 'fsaverage'
+    >>> preproc.inputs.hemi = 'lh'
+    >>> preproc.inputs.vol_measure_file = [('cont1.nii', 'register.dat'), \
+                                           ('cont1a.nii', 'register.dat')]
+    >>> preproc.inputs.out_file = 'concatenated_file.mgz'
+    >>> preproc.cmdline
+    'mris_preproc --hemi lh --out concatenated_file.mgz --target fsaverage --iv cont1.nii register.dat --iv cont1a.nii register.dat'
+
+    """
+
+    input_spec = MRISPreprocReconAllInputSpec
+
+    def _verify_file_location(self, filepath, name):
+        head, tail = os.path.split(filepath)
+        surf_dir = os.path.join(
+            self.inputs.subjects_dir, self.inputs.subject_id, 'surf')
+        if head != surf_dir:
+            raise traits.TraitError(
+                "MRIS_PreprocReconAll: {0} must be located in subjects_dir/subject_id/surf\
+                instead a file location of {1} was given".format(name, filepath))
+
+    def _format_arg(self, name, spec, value):
+        if name in ("surfreg_file", "surf_measure_file"):
+            self._verify_file_location(value, name)
+            return spec.argstr % os.path.basename(value).lstrip('rh.').lstrip('lh.')
+        return super(MRISPreprocReconAll, self)._format_arg(name, spec, value)
+
+
 class GLMFitInputSpec(FSTraitedSpec):
     glm_dir = traits.Str(argstr='--glmdir %s', desc='save outputs to dir',
                          genfile=True)
