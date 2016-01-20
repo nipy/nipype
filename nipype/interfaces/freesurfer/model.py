@@ -1019,3 +1019,112 @@ class MS_LDA(FSCommand):
 
     def _gen_filename(self, name):
         pass
+
+
+class Label2LabelInputSpec(FSTraitedSpec):
+    hemisphere = traits.String(argstr="--hemi %s", mandatory=True,
+                               desc="Input hemisphere")
+    subject_id = traits.String(argstr="--trgsubject %s", mandatory=True,
+                               desc="Target subject")
+    label = traits.String(mandatory=True, desc="Input label name")
+    sphere_reg = File(mandatory=True, exists=True,
+                      desc="Implicit input <hemisphere>.sphere.reg")
+    white = File(mandatory=True, exists=True,
+                 desc="Implicit input <hemisphere>.white")
+    # optional
+    source_subject = traits.String(argstr="--srcsubject %s", mandatory=False, genfile=True,
+                                   desc="Source subject")
+    source_label = File(argstr="--srclabel %s", mandatory=False, genfile=True, exists=True,
+                        desc="Source label")
+    target_label = File(argstr="--trglabel %s", mandatory=False, genfile=True,
+                        desc="Source label")
+    registration_method = traits.String(argstr="--regmethod %s", mandatory=False, genfile=True,
+                                        desc="Target subject")
+    threshold = traits.Bool(
+        mandatory=False, desc="Specifies whether source label should be the threshold label")
+
+
+class Label2LabelOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='Output label')
+
+
+class Label2Label(FSCommand):
+    """
+    Converts a label in one subject's space to a label
+    in another subject's space using either talairach or spherical
+    as an intermediate registration space.
+
+    If a source mask is used, then the input label must have been
+    created from a surface (ie, the vertex numbers are valid). The
+    format can be anything supported by mri_convert or curv or paint.
+    Vertices in the source label that do not meet threshold in the
+    mask will be removed from the label.
+
+    Examples
+    --------
+    >>> from nipype.interfaces.freesurfer import Label2Label
+    >>> l2l = Label2Label()
+    >>> l2l.inputs.hemisphere = 'lh'
+    >>> l2l.inputs.subject_id = '10335'
+    >>> l2l.inputs.label = 'fsaverage'
+    >>> l2l.inputs.sphere_reg = 'lh.pial'
+    >>> l2l.inputs.white = 'lh.pial'
+    >>> l2l.inputs.source_label = 'aseg.mgz'
+    >>> l2l.inputs.target_label = 'lh.aparc.label'
+    >>> l2l.cmdline
+    'mri_label2label --hemi lh --regmethod surface --srclabel aseg.mgz --srcsubject fsaverage --trgsubject 10335 --trglabel lh.aparc.label'
+    """
+
+    _cmd = 'mri_label2label'
+    input_spec = Label2LabelInputSpec
+    output_spec = Label2LabelOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if isdefined(self.inputs.target_label):
+            outputs['out_file'] = self.inputs.target_label
+        else:
+            out_dir = os.path.join(
+                self.inputs.subjects_dir, self.inputs.subject_id, 'label')
+            if self.inputs.threshold:
+                basename = self.inputs.hemisphere + '.' + \
+                    self.inputs.label + '_exvivo.thresh.label'
+            else:
+                basename = self.inputs.hemisphere + '.' + self.inputs.label + '_exvivo.label'
+            outputs['out_file'] = os.path.join(out_dir, basename)
+        return outputs
+
+    def _gen_filename(self, name):
+        # deterimine source subject
+        if not isdefined(self.inputs.source_subject):
+            # by default, the source subject is 'fsaverage'
+            src_subject = 'fsaverage'
+        else:
+            src_subject = self.inputs.source_subject
+        # if generating the source subject string
+        if name == 'source_subject':
+            return src_subject
+        # if generating the source label
+        elif name == 'source_label':
+            # source label will be locaed in the source subject directory
+            fsaverage = os.path.join(self.inputs.subjects_dir, src_subject)
+            # if this directory doesn't exist, we need to create it
+            if not os.path.isdir(fsaverage):
+                fs_home = os.path.abspath(os.environ.get('FREESURFER_HOME'))
+                fsaverage_home = os.path.join(fs_home, 'subjects', 'fsaverage')
+                # Create a symlink
+                os.symlink(fsaverage_home, fsaverage)
+            # input label will be different depending on the whether it is a
+            # threshold or not
+            if self.inputs.threshold:
+                basename = self.inputs.hemisphere + '.' + \
+                    self.inputs.label + '_exvivo.thresh.label'
+            else:
+                basename = self.inputs.hemisphere + '.' + self.inputs.label + '_exvivo.label'
+            return os.path.join(fsaverage, 'label', basename)
+        elif name == 'target_label':
+            return self._list_outputs()['out_file']
+        elif name == 'registration_method':
+            return 'surface'
+        else:
+            return None
