@@ -1297,3 +1297,65 @@ class Tkregister2(FSCommand):
         else:
             _, name, ext = split_filename(self.inputs.in_file)
             return os.path.abspath(name + '_smoothed' + ext)
+
+
+class AddXFormToHeaderInputSpec(FSTraitedSpec):
+
+    # required
+    in_file = File(exists=True, mandatory=True, position=-
+                   2, argstr="%s", desc="input volume")
+    # transform file does NOT need to exist at the time if using copy_name
+    transform = File(exists=False, mandatory=True,
+                     position=-3, argstr="%s", desc="xfm file")
+    out_file = File('output.mgz', position=-1, argstr="%s",
+                    usedefault=True, desc="output volume")
+    # optional
+    copy_name = traits.Bool(
+        argstr="-c", desc="do not try to load the xfmfile, just copy name")
+    verbose = traits.Bool(argstr="-v", desc="be verbose")
+
+
+class AddXFormToHeaderOutputSpec(TraitedSpec):
+
+    out_file = File(exists=True, desc="output volume")
+
+
+class AddXFormToHeader(FSCommand):
+    """ Just adds specified xform to the volume header
+
+    (!) WARNING: transform input **MUST** be an absolute path to a DataSink'ed transform or
+    the output will reference a transform in the workflow cache directory!
+
+    >>> from nipype.interfaces.freesurfer import AddXFormToHeader
+    >>> adder = AddXFormToHeader()
+    >>> adder.inputs.in_file = 'norm.mgz'
+    >>> adder.inputs.transform = 'talairach.xfm'
+    >>> adder.cmdline
+    'mri_add_xform_to_header talairach.xfm norm.mgz output.mgz'
+
+    >>> adder.inputs.copy_name = True
+    >>> adder.cmdline
+    'mri_add_xform_to_header -c talairach.xfm norm.mgz output.mgz'
+
+    >>> adder.run()   # doctest: +SKIP
+
+    References:
+    ----------
+    [https://surfer.nmr.mgh.harvard.edu/fswiki/mri_add_xform_to_header]
+
+    """
+    _cmd = "mri_add_xform_to_header"
+    input_spec = AddXFormToHeaderInputSpec
+    output_spec = AddXFormToHeaderOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'transform':
+            return value  # os.path.abspath(value)
+        # if name == 'copy_name' and value:
+        #     self.input_spec.transform
+        return super(AddXFormToHeader, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
