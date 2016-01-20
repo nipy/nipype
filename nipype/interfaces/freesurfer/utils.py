@@ -1972,3 +1972,96 @@ class Curvature(FSCommand):
         outputs["out_mean"] = os.path.abspath(self.inputs.in_file) + '.H'
         outputs["out_gauss"] = os.path.abspath(self.inputs.in_file) + '.K'
         return outputs
+
+
+class CurvatureStatsInputSpec(FSTraitedSpec):
+    surface = File(argstr="-F %s", mandatory=False, exists=True,
+                   desc="Specify surface file for CurvatureStats")
+    in_curv = File(argstr="curv", position=-2, mandatory=True, exists=True,
+                   desc="Input file for CurvatureStats")
+    in_sulc = File(argstr="sulc", position=-1, mandatory=True, exists=True,
+                   desc="Input file for CurvatureStats")
+    hemisphere = traits.String(position=-3, argstr="%s", mandatory=True,
+                               desc="Hemisphere being processed")
+    subject_id = traits.String(position=-4, argstr="%s", mandatory=True,
+                               desc="Subject being processed")
+    out_file = File(argstr="-o %s", mandatory=False, exists=False, genfile=True,
+                    desc="Output curvature stats file")
+    # optional
+    min_max = traits.Bool(argstr="-m", mandatory=False,
+                          desc="Output min / max information for the processed curvature.")
+    values = traits.Bool(argstr="-G", mandatory=False,
+                         desc="Triggers a series of derived curvature values")
+    write = traits.Bool(argstr="--writeCurvatureFiles", mandatory=False,
+                        desc="Write curvature files")
+
+
+class CurvatureStatsOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output curvature stats file")
+
+
+class CurvatureStats(FSCommand):
+    """
+    In its simplest usage, 'mris_curvature_stats' will compute a set
+    of statistics on its input <curvFile>. These statistics are the
+    mean and standard deviation of the particular curvature on the
+    surface, as well as the results from several surface-based
+    integrals.
+
+    Additionally, 'mris_curvature_stats' can report the max/min
+    curvature values, and compute a simple histogram based on
+    all curvature values.
+
+    Curvatures can also be normalised and constrained to a given
+    range before computation.
+
+    Principal curvature (K, H, k1 and k2) calculations on a surface
+    structure can also be performed, as well as several functions
+    derived from k1 and k2.
+
+    Finally, all output to the console, as well as any new
+    curvatures that result from the above calculations can be
+    saved to a series of text and binary-curvature files.
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import CurvatureStats
+    >>> curvstats = CurvatureStats()
+    >>> curvstats.inputs.hemisphere = 'lh'
+    >>> curvstats.inputs.subject_id = '10335'
+    >>> curvstats.inputs.in_curv = 'lh.curv' # doctest: +SKIP
+    >>> curvstats.inputs.in_sulc = 'lh.sulc' # doctest: +SKIP
+    >>> curvstats.inputs.surface = 'lh.smoothwm' # doctest: +SKIP
+    >>> curvstats.inputs.out_file = 'lh.curv.stats'
+    >>> curvstats.inputs.values = True
+    >>> curvstats.inputs.min_max = True
+    >>> curvstats.inputs.write = True
+    >>> curvstats.cmdline # doctest: +SKIP
+    'mris_curvature_stats -m -o lh.curv.stats -F smoothwm -G --writeCurvatureFiles 10335 lh curv sulc'
+    """
+
+    _cmd = 'mris_curvature_stats'
+    input_spec = CurvatureStatsInputSpec
+    output_spec = CurvatureStatsOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+
+    def _format_arg(self, name, spec, value):
+        if name == 'surface':
+            prefix = os.path.basename(value).split('.')[1]
+            return spec.argstr % prefix
+        elif name in ['in_curv', 'in_sulc']:
+            return spec.argstr
+        else:
+            return super(CurvatureStats, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if not isdefined(self.inputs.out_file):
+            outputs["out_file"] = os.path.join(
+                self.inputs.subjects_dir, self.inputs.subject_id, 'stats', self.inputs.hemisphere + '.curv.stats')
+        else:
+            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
