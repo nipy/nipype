@@ -209,7 +209,7 @@ class EMRegister(FSCommandOpenMP):
     >>> register.inputs.skull = True
     >>> register.inputs.nbrspacing = 9
     >>> register.cmdline
-    'mri_em_register -skull -uns 9 norm.mgz aseg.mgz  talairach_with_skull.lta'
+    'mri_em_register -uns 9 -skull norm.mgz aseg.mgz talairach_with_skull.lta'
     """
     _cmd = 'mri_em_register'
     input_spec = EMRegisterInputSpec
