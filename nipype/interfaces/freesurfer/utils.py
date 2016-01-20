@@ -1723,3 +1723,33 @@ class FixTopology(FSCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.in_orig)
         return outputs
+
+
+class EulerNumberInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-1, mandatory=True, exists=True,
+                   desc="Input file for EulerNumber")
+
+
+class EulerNumberOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file for EulerNumber")
+
+
+class EulerNumber(FSCommand):
+    """
+    This program computes EulerNumber for a cortical surface
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import EulerNumber
+    >>> ft = EulerNumber()
+    >>> ft.inputs.in_file = 'lh.orig' # doctest: +SKIP
+    >>> ft.cmdline # doctest: +SKIP
+    'mris_euler_number lh.orig'
+    """
+    _cmd = 'mris_euler_number'
+    input_spec = EulerNumberInputSpec
+    output_spec = EulerNumberOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.in_file)
+        return outputs
