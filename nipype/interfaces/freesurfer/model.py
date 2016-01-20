@@ -1239,7 +1239,7 @@ class SphericalAverage(FSCommand):
     >>> sphericalavg.inputs.erode = 2
     >>> sphericalavg.inputs.threshold = 5
     >>> sphericalavg.cmdline
-    'mris_spherical_average -erode 2 -o 10335 -t 5.0 label lh.entorhinal lh white . test.out'
+    'mris_spherical_average -erode 2 -o 10335 -t 5.0 label lh.entorhinal lh pial . test.out'
     """
 
     _cmd = 'mris_spherical_average'
