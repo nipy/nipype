@@ -1787,3 +1787,141 @@ class RemoveIntersection(FSCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class MakeSurfacesInputSpec(FSTraitedSpec):
+    # required
+    hemisphere = traits.String(position=-1, argstr="%s", mandatory=True,
+                               desc="Hemisphere being processed")
+    subject_id = traits.String(position=-2, argstr="%s", mandatory=True,
+                               desc="Subject being processed")
+    # implicit
+    in_orig = File(exists=True, mandatory=True, argstr='-orig %s',
+                   desc="Implicit input file <hemisphere>.orig")
+    in_wm = File(exists=True, mandatory=True,
+                 desc="Implicit input file wm.mgz")
+    in_filled = File(exists=True, mandatory=True,
+                     desc="Implicit input file filled.mgz")
+    in_label = File(exists=True, mandatory=False, xor=['noaparc'],
+                    desc="Implicit input label/<hemisphere>.aparc.annot")
+    # optional
+    orig_white = File(argstr="-orig_white %s", exists=True, mandatory=False,
+                      desc="Specify a white surface to start with")
+    orig_pial = File(argstr="-orig_pial %s", exists=True, mandatory=False, requires=['in_label'],
+                     desc="Specify a pial surface to start with")
+    fix_mtl = traits.Bool(argstr="-fix_mtl", mandatory=False,
+                          desc="Undocumented flag")
+    no_white = traits.Bool(argstr="-nowhite", mandatory=False,
+                           desc="Undocumented flag")
+    white_only = traits.Bool(argstr="-whiteonly", mandatory=False,
+                             desc="Undocumented flage")
+    in_aseg = File(argstr="-aseg %s", exists=True,
+                   mandatory=False, desc="Input segmentation file")
+    in_T1 = File(argstr="-T1 %s", exists=True, mandatory=False,
+                 desc="Input brain or T1 file")
+    mgz = traits.Bool(
+        argstr="-mgz", mandatory=False,
+        desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
+    noaparc = traits.Bool(
+        argstr="-noaparc", mandatory=False, xor=['in_label'],
+        desc="No documentation. Direct questions to analysis-bugs@nmr.mgh.harvard.edu")
+    maximum = traits.Float(
+        argstr="-max %.1f", desc="No documentation (used for longitudinal processing)")
+    longitudinal = traits.Bool(
+        argstr="-long", desc="No documentation (used for longitudinal processing)")
+
+
+class MakeSurfacesOutputSpec(TraitedSpec):
+    out_white = File(
+        exists=False, desc="Output white matter hemisphere surface")
+    out_curv = File(exists=False, desc="Output curv file for MakeSurfaces")
+    out_area = File(exists=False, desc="Output area file for MakeSurfaces")
+    out_cortex = File(exists=False, desc="Output cortex file for MakeSurfaces")
+    out_pial = File(exists=False, desc="Output pial surface for MakeSurfaces")
+    out_thickness = File(
+        exists=False, desc="Output thickness file for MakeSurfaces")
+
+
+class MakeSurfaces(FSCommand):
+    """
+    This program positions the tessellation of the cortical surface at the
+    white matter surface, then the gray matter surface and generate
+    surface files for these surfaces as well as a 'curvature' file for the
+    cortical thickness, and a surface file which approximates layer IV of
+    the cortical sheet.
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import MakeSurfaces
+    >>> makesurfaces = MakeSurfaces()
+    >>> makesurfaces.inputs.hemisphere = 'lh'
+    >>> makesurfaces.inputs.subject_id = '10335'
+    >>> makesurfaces.inputs.in_orig = './surf/lh.orig' # doctest: +SKIP
+    >>> makesurfaces.inputs.in_wm = './mri/wm.mgz' # doctest: +SKIP
+    >>> makesurfaces.inputs.in_filled = './mri/filled.mgz' # doctest: +SKIP
+    >>> makesurfaces.inputs.in_label = './label/lh.aparc.annot' # doctest: +SKIP
+    >>> makesurfaces.inputs.in_T1 = './mri/T1.mgz' # doctest: +SKIP
+    >>> makesurfaces.inputs.orig_pial = './surf/lh.pial' # doctest: +SKIP
+    >>> makesurfaces.cmdline # doctest: +SKIP
+    'mris_make_surfaces -T1 T1.mgz -orig_pial pial 10335 lh'
+    """
+
+    _cmd = 'mris_make_surfaces'
+    input_spec = MakeSurfacesInputSpec
+    output_spec = MakeSurfacesOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name in ['in_T1', 'in_aseg']:
+            # These inputs do not take full paths as inputs or even basenames
+            basename = os.path.basename(value)
+            # whent he -mgz flag is specified, it assumes the mgz extension
+            if self.inputs.mgz:
+                prefix = basename.rstrip('.mgz')
+            else:
+                prefix = basename
+            return spec.argstr % prefix
+        elif name in ['orig_white', 'orig_pial']:
+            # these inputs do take full file paths or even basenames
+            basename = os.path.basename(value)
+            suffix = basename.split('.')[1]
+            return spec.argstr % suffix
+        elif name == 'in_orig':
+            if value.endswith('lh.orig') or value.endswith('rh.orig'):
+                return
+            else:
+                # these inputs do take full file paths or even basenames
+                basename = os.path.basename(value)
+                suffix = basename.split('.')[1]
+                return spec.argstr % suffix
+        return super(MakeSurfaces, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        # Outputs are saved in the toward the surf directory
+        dest_dir = os.path.join(self.inputs.subjects_dir,
+                                self.inputs.subject_id, 'surf')
+        # labels are saved in the label directory
+        label_dir = os.path.join(
+            self.inputs.subjects_dir, self.inputs.subject_id, 'label')
+        if not self.inputs.no_white:
+            outputs["out_white"] = os.path.join(
+                dest_dir, self.inputs.hemisphere + '.white')
+        # The curv and area files must have the hemisphere names as a prefix
+        outputs["out_curv"] = os.path.join(
+            dest_dir, self.inputs.hemisphere + '.curv')
+        outputs["out_area"] = os.path.join(
+            dest_dir, self.inputs.hemisphere + '.area')
+        # Something determines when a pial surface and thickness file is generated, but documentation doesn't say what
+        # The orig_pial flag is just a guess
+        if isdefined(self.inputs.orig_pial):
+            outputs["out_curv"] = outputs["out_curv"] + ".pial"
+            outputs["out_area"] = outputs["out_area"] + ".pial"
+            outputs["out_pial"] = os.path.join(
+                dest_dir, self.inputs.hemisphere + '.pial')
+            outputs["out_thickness"] = os.path.join(
+                dest_dir, self.inputs.hemisphere + '.thickness')
+        else:
+            # when a pial surface is generated, the cortex label file is not
+            # generated
+            outputs["out_cortex"] = os.path.join(
+                label_dir, self.inputs.hemisphere + '.cortex.label')
+        return outputs
