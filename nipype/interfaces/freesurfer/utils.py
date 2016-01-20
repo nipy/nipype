@@ -467,6 +467,11 @@ class ApplyMaskInputSpec(FSTraitedSpec):
     xfm_target = File(exists=True, argstr="-lta_dst %s", desc="image defining transform target space")
     use_abs = traits.Bool(argstr="-abs", desc="take absolute value of mask before applying")
     mask_thresh = traits.Float(argstr="-T %.4f", desc="threshold mask before applying")
+    keep_mask_deletion_edits = traits.Bool(
+        argstr="-keep_mask_deletion_edits",
+        desc="transfer voxel-deletion edits (voxels=1) from mask to out vol")
+    transfer = traits.Int(argstr="-transfer %d",
+                          desc="transfer only voxel value # from mask to out")
 
 
 class ApplyMaskOutputSpec(TraitedSpec):
