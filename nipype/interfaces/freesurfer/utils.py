@@ -1753,3 +1753,37 @@ class EulerNumber(FSCommand):
         outputs = self._outputs().get()
         outputs["out_file"] = os.path.abspath(self.inputs.in_file)
         return outputs
+
+
+class RemoveIntersectionInputSpec(FSTraitedSpec):
+    in_file = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                   desc="Input file for RemoveIntersection")
+    out_file = File(argstr="%s", position=-1, mandatory=True, exists=False,
+                    desc="Output file for RemoveIntersection")
+
+
+class RemoveIntersectionOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file for RemoveIntersection")
+
+
+class RemoveIntersection(FSCommand):
+    """
+    This program removes the intersection of the given MRI
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import RemoveIntersection
+    >>> ri = RemoveIntersection()
+    >>> ri.inputs.in_file = 'lh.orig' # doctest: +SKIP
+    >>> ri.inputs.out_file = 'lh.orig' # doctest: +SKIP
+    >>> ri.cmdline # doctest: +SKIP
+    'mris_remove_intersection lh.orig lh.orig'
+    """
+
+    _cmd = 'mris_remove_intersection'
+    input_spec = RemoveIntersectionInputSpec
+    output_spec = RemoveIntersectionOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+        return outputs
