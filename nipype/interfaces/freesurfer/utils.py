@@ -2065,3 +2065,54 @@ class CurvatureStats(FSCommand):
         else:
             outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
+
+
+class JacobianInputSpec(FSTraitedSpec):
+    # required
+    in_origsurf = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                       desc="Original surface")
+    in_mappedsurf = File(argstr="%s", position=-2, mandatory=True, exists=True,
+                         desc="Mapped surface")
+    # optional
+    out_file = File(argstr="%s", exists=False, position=-1, genfile=True,
+                    desc="Output Jacobian of the surface mapping")
+
+
+class JacobianOutputSpec(TraitedSpec):
+    out_file = File(
+        exists=False, desc="Output Jacobian of the surface mapping")
+
+
+class Jacobian(FSCommand):
+    """
+    This program computes the Jacobian of a surface mapping.
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import Jacobian
+    >>> jacobian = Jacobian()
+    >>> jacobian.inputs.in_origsurf = 'lh.white' # doctest: +SKIP
+    >>> jacobian.inputs.in_mappedsurf = 'lh.sphere.reg' # doctest: +SKIP
+    >>> jacobian.inputs.out_file = 'lh.jacobian_white'
+    >>> jacobian.cmdline # doctest: +SKIP
+    'mris_jacobian lh.white lh.sphere.reg lh.jacobian_white'
+    """
+
+    _cmd = 'mris_jacobian'
+    input_spec = JacobianInputSpec
+    output_spec = JacobianOutputSpec
+
+    def _gen_filename(self, name):
+        if name == 'out_file':
+            return self._list_outputs()[name]
+        return None
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if isdefined(self.inputs.out_file):
+            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        else:
+            head, tail = os.path.split(self.inputs.in_origsurf)
+            hemisphere = tail.split('.')[0]
+            filename = hemisphere + '.jacobian_white'
+            outputs['out_file'] = os.path.join(head, filename)
+        return outputs
