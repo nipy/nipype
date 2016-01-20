@@ -603,7 +603,7 @@ class SegStatsInputSpec(FSTraitedSpec):
                               desc='subject hemi label : use surface label')
     summary_file = File(argstr='--sum %s', genfile=True,
                         desc='Segmentation stats summary table file')
-    partial_volume_file = File(exists=True, argstr='--pv %f',
+    partial_volume_file = File(exists=True, argstr='--pv %s',
                                desc='Compensate for partial voluming')
     in_file = File(exists=True, argstr='--i %s',
                    desc='Use the segmentation to report stats on this volume')
