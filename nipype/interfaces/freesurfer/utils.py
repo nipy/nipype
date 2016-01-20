@@ -1331,13 +1331,13 @@ class AddXFormToHeader(FSCommand):
     >>> from nipype.interfaces.freesurfer import AddXFormToHeader
     >>> adder = AddXFormToHeader()
     >>> adder.inputs.in_file = 'norm.mgz'
-    >>> adder.inputs.transform = 'talairach.xfm'
+    >>> adder.inputs.transform = 'trans.mat'
     >>> adder.cmdline
-    'mri_add_xform_to_header talairach.xfm norm.mgz output.mgz'
+    'mri_add_xform_to_header trans.mat norm.mgz output.mgz'
 
     >>> adder.inputs.copy_name = True
     >>> adder.cmdline
-    'mri_add_xform_to_header -c talairach.xfm norm.mgz output.mgz'
+    'mri_add_xform_to_header -c trans.mat norm.mgz output.mgz'
 
     >>> adder.run()   # doctest: +SKIP
 
@@ -1388,10 +1388,10 @@ class CheckTalairachAlignment(FSCommand):
     >>> from nipype.interfaces.freesurfer import CheckTalairachAlignment
     >>> checker = CheckTalairachAlignment()
 
-    >>> checker.inputs.in_file = 'talairach.xfm'
+    >>> checker.inputs.in_file = 'trans.mat'
     >>> checker.inputs.threshold = 0.005
     >>> checker.cmdline
-    'talairach_afd -T 0.005 -xfm talairach.xfm'
+    'talairach_afd -T 0.005 -xfm trans.mat'
 
     >>> checker.run() # doctest: +SKIP
     """
