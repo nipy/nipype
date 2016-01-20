@@ -1454,3 +1454,24 @@ class TalairachAVI(FSCommand):
         outputs['out_txt'] = os.path.join(os.path.dirname(
             self.inputs.out_file), 'talsrcimg_to_' + self.inputs.atlas + 't4_vox2vox.txt')
         return outputs
+
+
+class TalairachQCInputSpec(FSTraitedSpec):
+    log_file = File(argstr='%s', mandatory=True, exists=True,
+                    position=0, desc="The log file for TalairachQC")
+
+
+class TalairachQC(FSScriptCommand):
+    """
+    Examples
+    ========
+
+    >>> from nipype.interfaces.freesurfer import TalairachQC
+    >>> qc = TalairachQC()
+    >>> qc.inputs.log_file = 'dirs.txt'
+    >>> qc.cmdline
+    'tal_QC_AZS dirs.txt'
+    """
+    _cmd = "tal_QC_AZS"
+    input_spec = TalairachQCInputSpec
+    output_spec = FSScriptOutputSpec
