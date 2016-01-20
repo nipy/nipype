@@ -889,7 +889,7 @@ class MRITessellateInputSpec(FSTraitedSpec):
     in_file = File(exists=True, mandatory=True, position=-3, argstr='%s', desc='Input volume to tesselate voxels from.')
     label_value = traits.Int(position=-2, argstr='%d', mandatory=True,
                              desc='Label value which to tesselate from the input volume. (integer, if input is "filled.mgz" volume, 127 is rh, 255 is lh)')
-    out_file = File(argstr='./%s', position=-1, genfile=True, desc='output filename or True to generate one')
+    out_file = File(argstr='%s', position=-1, genfile=True, desc='output filename or True to generate one')
     tesselate_all_voxels = traits.Bool(argstr='-a', desc='Tessellate the surface of all voxels with different labels')
     use_real_RAS_coordinates = traits.Bool(argstr='-n', desc='Saves surface with real RAS coordinates where c_(r,a,s) != 0')
 
