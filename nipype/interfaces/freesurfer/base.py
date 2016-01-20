@@ -21,7 +21,7 @@ import os
 
 from ..base import (CommandLine, Directory,
                     CommandLineInputSpec, isdefined,
-                    traits)
+                    traits, TraitedSpec, File)
 from ...utils.filemanip import fname_presuffix
 
 
@@ -162,6 +162,26 @@ class FSCommand(CommandLine):
                 return ver.rstrip().split('-')[-1] + '.dev'
             else:
                 return ver.rstrip().split('-v')[-1]
+
+
+class FSScriptCommand(FSCommand):
+    """ Support for Freesurfer script commands with log inputs.terminal_output """
+    _terminal_output = 'file'
+    _always_run = False
+
+    def __init__(self, **inputs):
+        super(FSScriptCommand, self).__init__(**inputs)
+        self.set_default_terminal_output(self._terminal_output)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['log_file'] = os.path.abspath('stdout.nipype')
+        return outputs
+
+
+class FSScriptOutputSpec(TraitedSpec):
+    log_file = File('stdout.nipype', usedefault=True,
+                    exists=True, desc="The output log")
 
 
 class FSTraitedSpecOpenMP(FSTraitedSpec):
