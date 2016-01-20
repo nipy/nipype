@@ -1085,6 +1085,8 @@ class SmoothTessellationInputSpec(FSTraitedSpec):
     out_file = File(argstr='%s', position=-1, genfile=True, desc='output filename or True to generate one')
     out_curvature_file = File(argstr='-c %s', desc='Write curvature to ?h.curvname (default "curv")')
     out_area_file = File(argstr='-b %s', desc='Write area to ?h.areaname (default "area")')
+    seed = traits.Int(argstr="-seed %d", mandatory=False,
+                      desc="Seed for setting random number generator")
 
 
 class SmoothTessellationOutputSpec(TraitedSpec):
