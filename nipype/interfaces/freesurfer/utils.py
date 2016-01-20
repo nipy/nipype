@@ -1401,3 +1401,56 @@ class CheckTalairachAlignment(FSCommand):
         outputs = self._outputs().get()
         outputs['out_file'] = self.inputs.in_file
         return outputs
+
+
+class TalairachAVIInputSpec(FSTraitedSpec):
+    in_file = File(argstr='--i %s', exists=True, mandatory=True,
+                   desc="input volume")
+    out_file = File(argstr='--xfm %s', mandatory=True, exists=False,
+                    desc="output xfm file")
+    # optional
+    atlas = traits.String(
+        argstr='--atlas %s', desc="alternate target atlas (in freesurfer/average dir)")
+
+
+class TalairachAVIOutputSpec(TraitedSpec):
+    out_file = traits.File(
+        exists=False, desc="The output transform for TalairachAVI")
+    out_log = traits.File(
+        exists=False, desc="The output log file for TalairachAVI")
+    out_txt = traits.File(
+        exists=False, desc="The output text file for TaliarachAVI")
+
+
+class TalairachAVI(FSCommand):
+    """
+    Front-end for Avi Snyders image registration tool. Computes the
+    talairach transform that maps the input volume to the MNI average_305.
+    This does not add the xfm to the header of the input file. When called
+    by recon-all, the xfm is added to the header after the transform is
+    computed.
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces.freesurfer import TalairachAVI
+    >>> example = TalairachAVI()
+    >>> example.inputs.in_file = 'norm.mgz'
+    >>> example.inputs.out_file = 'trans.mat'
+    >>> example.cmdline
+    'talairach_avi -i norm.mgz -xfm trans.mat'
+
+    >>> example.run() # doctest: +SKIP
+    """
+    _cmd = "talairach_avi"
+    input_spec = TalairachAVIInputSpec
+    output_spec = TalairachAVIOutputSpec
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        outputs['out_file'] = self.inputs.out_file
+        outputs['out_log'] = os.path.join(os.path.dirname(
+            self.inputs.out_file), 'talairach_avi.log')
+        outputs['out_txt'] = os.path.join(os.path.dirname(
+            self.inputs.out_file), 'talsrcimg_to_' + self.inputs.atlas + 't4_vox2vox.txt')
+        return outputs
