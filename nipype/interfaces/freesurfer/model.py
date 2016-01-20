@@ -742,6 +742,101 @@ class SegStats(FSCommand):
         return None
 
 
+class SegStatsReconAllInputSpec(SegStatsInputSpec):
+    # recon-all input requirements
+    subject_id = traits.String(argstr="--subject %s", mandatory=True,
+                               desc="Subject id being processed")
+    ribbon = traits.File(mandatory=True, exists=True,
+                         desc="Input file mri/ribbon.mgz")
+    presurf_seg = File(mandatory=True, exists=True,
+                       desc="Input segmentation volume")
+    transform = File(mandatory=True, exists=True,
+                     desc="Input transform file")
+    lh_orig_nofix = File(mandatory=True, exists=True,
+                         desc="Input lh.orig.nofix")
+    rh_orig_nofix = File(mandatory=True, exists=True,
+                         desc="Input rh.orig.nofix")
+    lh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/lh.white")
+    rh_white = File(mandatory=True, exists=True,
+                    desc="Input file must be <subject_id>/surf/rh.white")
+    lh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/lh.pial")
+    rh_pial = File(mandatory=True, exists=True,
+                   desc="Input file must be <subject_id>/surf/rh.pial")
+
+class SegStatsReconAll(SegStats):
+
+    """
+    This class inherits SegStats to and modifies it for use in a recon-all workflow.
+    This implementation mandates implicit inputs that SegStats does make mandatory
+    and to ensure backwards compatability of SegStats, this class was created.
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import SegStatsReconAll
+    >>> segstatsreconall = SegStatsReconAll()
+    >>> segstatsreconall.inputs.annot = ('PWS04', 'lh', 'aparc')
+    >>> segstatsreconall.inputs.avgwf_txt_file = './avgwf.txt'
+    >>> segstatsreconall.inputs.summary_file = './summary.stats'
+    >>> segstatsreconall.inputs.subject_id = '10335'
+    >>> segstatsreconall.inputs.ribbon = '../mri/ribbon.mgz' # doctest: +SKIP
+    >>> segstatsreconall.inputs.transform = '../mri/transforms/talairach.xfm' # doctest: +SKIP
+    >>> segstatsreconall.inputs.presurf_seg = '../mri/ribbon.mgz' # doctest: +SKIP
+    >>> segstatsreconall.inputs.lh_orig_nofix = 'lh.orig.nofix' # doctest: +SKIP
+    >>> segstatsreconall.inputs.rh_orig_nofix = 'rh.orig.nofix' # doctest: +SKIP
+    >>> segstatsreconall.inputs.lh_pial = 'lh.pial' # doctest: +SKIP
+    >>> segstatsreconall.inputs.rh_pial = 'rh.pial' # doctest: +SKIP
+    >>> segstatsreconall.inputs.lh_white = 'lh.white' # doctest: +SKIP
+    >>> segstatsreconall.inputs.rh_white = 'rh.white' # doctest: +SKIP
+    >>> segstatsreconall.inputs.empty = True
+    >>> segstatsreconall.inputs.brain_vol = 'brain-vol-from-seg'
+    >>> segstatsreconall.inputs.exclude_ctx_gm_wm = True
+    >>> segstatsreconall.inputs.supratent = True
+    >>> segstatsreconall.inputs.subcort_gm = True
+    >>> segstatsreconall.inputs.etiv = True
+    >>> segstatsreconall.inputs.wm_vol_from_surf = True
+    >>> segstatsreconall.inputs.cortex_vol_from_surf = True
+    >>> segstatsreconall.inputs.total_gray = True
+    >>> segstatsreconall.inputs.euler = True
+    >>> segstatsreconall.inputs.exclude_id = 0
+    >>> segstatsreconall.cmdline # doctest: +SKIP
+    'mri_segstats --annot PWS04 lh aparc --avgwf ./avgwf.txt --brain-vol-from-seg --surf-ctx-vol --empty --etiv --euler --excl-ctxgmwm --excludeid 0 --subcortgray --subject 10335 --sum ./summary.stats --supratent --totalgray --surf-wm-vol'
+    """
+    input_spec = SegStatsReconAllInputSpec
+    output_spec = SegStatsOutputSpec
+
+    def _list_outputs(self):
+        outputs = self.output_spec().get()
+        if isdefined(self.inputs.summary_file):
+            outputs['summary_file'] = os.path.abspath(self.inputs.summary_file)
+        elif isdefined(self.inputs.segmentation_file) and isdefined(self.inputs.subjects_dir):
+            basename = os.path.basename(
+                self.inputs.segmentation_file).replace('.mgz', '.stats')
+            outputs['summary_file'] = os.path.join(
+                self.inputs.subjects_dir, self.inputs.subject_id, 'stats', basename)
+        else:
+            outputs['summary_file'] = os.path.join(
+                os.getcwd(), 'summary.stats')
+        suffices = dict(avgwf_txt_file='_avgwf.txt', avgwf_file='_avgwf.nii.gz',
+                        sf_avg_file='sfavg.txt')
+        if isdefined(self.inputs.segmentation_file):
+            _, src = os.path.split(self.inputs.segmentation_file)
+        if isdefined(self.inputs.annot):
+            src = '_'.join(self.inputs.annot)
+        if isdefined(self.inputs.surf_label):
+            src = '_'.join(self.inputs.surf_label)
+        for name, suffix in suffices.items():
+            value = getattr(self.inputs, name)
+            if isdefined(value):
+                if isinstance(value, bool):
+                    outputs[name] = fname_presuffix(src, suffix=suffix,
+                                                    newpath=os.getcwd(),
+                                                    use_ext=False)
+                else:
+                    outputs[name] = os.path.abspath(value)
+        return outputs
+
+
 class Label2VolInputSpec(FSTraitedSpec):
     label_file = InputMultiPath(File(exists=True), argstr='--label %s...',
                                 xor=('label_file', 'annot_file', 'seg_file', 'aparc_aseg'),
