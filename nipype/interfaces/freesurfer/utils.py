@@ -2413,3 +2413,79 @@ class ParcellationStats(FSCommand):
                 outputs["out_color"] = os.path.join(
                         out_dir, 'aparc.annot.ctab')
         return outputs
+
+
+class ContrastInputSpec(FSTraitedSpec):
+    # required
+    subject_id = traits.String(
+        argstr="--s %s", mandatory=True, desc="Subject being processed")
+    thickness = File(mandatory=True, exists=True,
+                     desc="Input file must be <subject_id>/surf/?h.thickness")
+    white = File(mandatory=True, exists=True,
+                 desc="Input file must be <subject_id>/surf/<hemisphere>.white")
+    annotation = traits.File(mandatory=True, exists=True,
+                             desc="Input annotation file must be <subject_id>/label/<hemisphere>.aparc.annot")
+    cortex = traits.File(mandatory=True, exists=True,
+                         desc="Input cortex label must be <subject_id>/label/<hemisphere>.cortex.label")
+    orig = File(exists=True, mandatory=True,
+                desc="Implicit input file mri/orig.mgz")
+    rawavg = File(exists=True, mandatory=True,
+                  desc="Implicit input file mri/rawavg.mgz")
+    hemisphere = traits.Enum('lh', 'rh',
+        argstr="%s", mandatory=True, desc="Hemisphere being processed")
+
+
+class ContrastOutputSpec(TraitedSpec):
+    out_contrast = File(
+        exists=False, desc="Output contrast file from Contrast")
+    out_stats = File(exists=False, desc="Output stats file from Contrast")
+    out_log = File(exists=True, desc="Output log from Contrast")
+
+
+class Contrast(FSCommand):
+    """
+    Compute surface-wise gray/white contrast
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import Contrast
+    >>> contrast = Contrast()
+    >>> contrast.inputs.subject_id = '10335'
+    >>> contrast.inputs.hemisphere = 'lh'
+    >>> contrast.inputs.white = 'lh.white' # doctest: +SKIP
+    >>> contrast.inputs.thickness = 'lh.thickness' # doctest: +SKIP
+    >>> contrast.inputs.annotation = '../label/lh.aparc.annot' # doctest: +SKIP
+    >>> contrast.inputs.cortex = '../label/lh.cortex.label' # doctest: +SKIP
+    >>> contrast.inputs.rawavg = '../mri/rawavg.mgz' # doctest: +SKIP
+    >>> contrast.inputs.orig = '../mri/orig.mgz' # doctest: +SKIP
+    >>> contrast.cmdline # doctest: +SKIP
+    'pctsurfcon --lh-only --s 10335'
+    """
+
+    _cmd = 'pctsurfcon'
+    input_spec = ContrastInputSpec
+    output_spec = ContrastOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'hemisphere':
+            flag = '--' + self.inputs.hemisphere + '-only'
+            return spec.argstr % flag
+        else:
+            return super(Contrast, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        subject_dir = os.path.join(
+            self.inputs.subjects_dir, self.inputs.subject_id)
+        if isdefined(self.inputs.hemisphere):
+            outputs["out_contrast"] = os.path.join(
+                subject_dir, 'surf', self.inputs.hemisphere + '.w-g.pct.mgh')
+            outputs["out_stats"] = os.path.join(
+                subject_dir, 'stats', self.inputs.hemisphere + '.w-g.pct.stats')
+        else:
+            outputs["out_contrast"] = os.path.join(
+                subject_dir, 'surf', 'w-g.pct.mgh')
+            outputs["out_stats"] = os.path.join(
+                subject_dir, 'stats', 'w-g.pct.stats')
+        outputs["out_log"] = os.path.join(
+            subject_dir, 'scripts', 'pctsurfcon.log')
+        return outputs
