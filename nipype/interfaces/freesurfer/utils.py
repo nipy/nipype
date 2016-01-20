@@ -2116,3 +2116,79 @@ class Jacobian(FSCommand):
             filename = hemisphere + '.jacobian_white'
             outputs['out_file'] = os.path.join(head, filename)
         return outputs
+
+
+class MRIsCalcInputSpec(FSTraitedSpec):
+    # required
+    in_file1 = File(argstr="%s", position=-3, mandatory=True, exists=True,
+                    desc="Input file 1")
+    action = traits.String(argstr="%s", position=-2, mandatory=True,
+                           desc="Action to perform on input file(s)")
+    # optional
+    in_file2 = File(argstr="%s", exists=True, position=-1, mandatory=False,
+                    xor=['in_float', 'in_int'], desc="Input file 2")
+    in_float = traits.Float(argstr="%f", position=-1, mandatory=False,
+                            xor=['in_file2', 'in_int'], desc="Input float")
+    in_int = traits.Int(argstr="%d", position=-1, mandatory=False,
+                        xor=['in_file2', 'in_float'], desc="Input integer")
+    out_file = File(argstr="-o %s", mandatory=False, genfile=True,
+                    desc="Output file after calculation")
+
+
+class MRIsCalcOutputSpec(TraitedSpec):
+    out_file = File(exists=False, desc="Output file after calculation")
+
+
+class MRIsCalc(FSCommand):
+    """
+    'mris_calc' is a simple calculator that operates on FreeSurfer
+    curvatures and volumes. In most cases, the calculator functions with
+    three arguments: two inputs and an <ACTION> linking them. Some
+    actions, however, operate with only one input <file1>. In all cases,
+    the first input <file1> is the name of a FreeSurfer curvature overlay
+    (e.g. rh.curv) or volume file (e.g. orig.mgz). For two inputs, the
+    calculator first assumes that the second input is a file. If, however,
+    this second input file doesn't exist, the calculator assumes it refers
+    to a float number, which is then processed according to <ACTION>.Note:
+    <file1> and <file2> should typically be generated on the same subject.
+
+    Examples                                                                                                                                                                                                          ========
+    >>> from nipype.interfaces.freesurfer import MRIsCalc
+    >>> example = MRIsCalc()
+    >>> example.inputs.in_file1 = 'lh.area' # doctest: +SKIP
+    >>> example.inputs.in_file2 = 'lh.area.pial' # doctest: +SKIP
+    >>> example.inputs.action = 'add'
+    >>> example.inputs.out_file = 'area.mid'
+    >>> example.cmdline # doctest: +SKIP
+    'mris_calc -o lh.area.mid lh.area add lh.area.pial'
+    """
+
+    _cmd = 'mris_calc'
+    input_spec = MRIsCalcInputSpec
+    output_spec = MRIsCalcOutputSpec
+
+    def _format_arg(self, name, spec, value):
+        if name == 'out_file':
+            return spec.argstr % self._list_outputs()[name]
+        else:
+            return super(MRIsCalc, self)._format_arg(name, spec, value)
+
+    def _list_outputs(self):
+        outputs = self._outputs().get()
+        if isdefined(self.inputs.out_file):
+            if os.path.isabs(self.inputs.out_file):
+                outputs['out_file'] = self.inputs.out_file
+            else:
+                basename = os.path.basename(self.inputs.out_file)
+                prefix = os.path.basename(self.inputs.in_file1).split('.')[0]
+                if prefix in ['lh', 'rh']:
+                    # add hemisphere label to output
+                    basename = prefix + '.' + basename
+                # Write output to same directory as input
+                dirname = os.path.dirname(self.inputs.in_file1)
+                outputs['out_file'] = os.path.join(dirname, basename)
+        else:
+            # if the output file is not predefined
+            outputs['out_file'] = self.inputs.in_file1 + \
+                '.' + self.inputs.action
+        return outputs
