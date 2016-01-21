@@ -1269,7 +1269,6 @@ class SphericalAverage(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        print outputs
         if isdefined(self.inputs.out_file):
             outputs['out_file'] = os.path.abspath(self.inputs.out_file)
         else:
