@@ -1857,7 +1857,7 @@ class MRIsCALabel(FSCommandOpenMP):
         else:
             head = os.path.join(self.inputs.subjects_dir,
                                 self.inputs.subject_id, 'label')
-            hemisphere = self.inputs.hemisphere
+            hemisphere = str(self.inputs.hemisphere)
             filename = hemisphere + '.aparc.annot'
             outputs['out_file'] = os.path.join(head, filename)
         return outputs

@@ -1454,7 +1454,7 @@ class TalairachAVI(FSCommand):
         outputs['out_log'] = os.path.join(os.path.dirname(
             self.inputs.out_file), 'talairach_avi.log')
         outputs['out_txt'] = os.path.join(os.path.dirname(
-            self.inputs.out_file), 'talsrcimg_to_' + self.inputs.atlas + 't4_vox2vox.txt')
+            self.inputs.out_file), 'talsrcimg_to_' + str(self.inputs.atlas) + 't4_vox2vox.txt')
         return outputs
 
 
@@ -1906,26 +1906,26 @@ class MakeSurfaces(FSCommand):
             self.inputs.subjects_dir, self.inputs.subject_id, 'label')
         if not self.inputs.no_white:
             outputs["out_white"] = os.path.join(
-                dest_dir, self.inputs.hemisphere + '.white')
+                dest_dir, str(self.inputs.hemisphere) + '.white')
         # The curv and area files must have the hemisphere names as a prefix
         outputs["out_curv"] = os.path.join(
-            dest_dir, self.inputs.hemisphere + '.curv')
+            dest_dir, str(self.inputs.hemisphere) + '.curv')
         outputs["out_area"] = os.path.join(
-            dest_dir, self.inputs.hemisphere + '.area')
+            dest_dir, str(self.inputs.hemisphere) + '.area')
         # Something determines when a pial surface and thickness file is generated, but documentation doesn't say what
         # The orig_pial flag is just a guess
         if isdefined(self.inputs.orig_pial):
             outputs["out_curv"] = outputs["out_curv"] + ".pial"
             outputs["out_area"] = outputs["out_area"] + ".pial"
             outputs["out_pial"] = os.path.join(
-                dest_dir, self.inputs.hemisphere + '.pial')
+                dest_dir, str(self.inputs.hemisphere) + '.pial')
             outputs["out_thickness"] = os.path.join(
-                dest_dir, self.inputs.hemisphere + '.thickness')
+                dest_dir, str(self.inputs.hemisphere) + '.thickness')
         else:
             # when a pial surface is generated, the cortex label file is not
             # generated
             outputs["out_cortex"] = os.path.join(
-                label_dir, self.inputs.hemisphere + '.cortex.label')
+                label_dir, str(self.inputs.hemisphere) + '.cortex.label')
         return outputs
 
 
@@ -2063,7 +2063,7 @@ class CurvatureStats(FSCommand):
         outputs = self._outputs().get()
         if not isdefined(self.inputs.out_file):
             outputs["out_file"] = os.path.join(
-                self.inputs.subjects_dir, self.inputs.subject_id, 'stats', self.inputs.hemisphere + '.curv.stats')
+                self.inputs.subjects_dir, self.inputs.subject_id, 'stats', str(self.inputs.hemisphere) + '.curv.stats')
         else:
             outputs["out_file"] = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -2191,8 +2191,7 @@ class MRIsCalc(FSCommand):
                 outputs['out_file'] = os.path.join(dirname, basename)
         else:
             # if the output file is not predefined
-            outputs['out_file'] = self.inputs.in_file1 + \
-                '.' + self.inputs.action
+            outputs['out_file'] = str(self.inputs.in_file1) + '.' + str(self.inputs.action)
         return outputs
 
 
@@ -2390,7 +2389,7 @@ class ParcellationStats(FSCommand):
                     basename = os.path.basename(
                         self.inputs.in_label).replace('.label', '.stats')
             else:
-                basename = self.inputs.hemisphere + '.aparc.annot.stats'
+                basename = str(self.inputs.hemisphere) + '.aparc.annot.stats'
             outputs["out_table"] = os.path.join(stats_dir, basename)
         if isdefined(self.inputs.out_color):
             outputs["out_color"] = os.path.abspath(self.inputs.out_color)
@@ -2469,7 +2468,7 @@ class Contrast(FSCommand):
 
     def _format_arg(self, name, spec, value):
         if name == 'hemisphere':
-            flag = '--' + self.inputs.hemisphere + '-only'
+            flag = '--' + str(self.inputs.hemisphere) + '-only'
             return spec.argstr % flag
         else:
             return super(Contrast, self)._format_arg(name, spec, value)
@@ -2480,9 +2479,9 @@ class Contrast(FSCommand):
             self.inputs.subjects_dir, self.inputs.subject_id)
         if isdefined(self.inputs.hemisphere):
             outputs["out_contrast"] = os.path.join(
-                subject_dir, 'surf', self.inputs.hemisphere + '.w-g.pct.mgh')
+                subject_dir, 'surf', str(self.inputs.hemisphere) + '.w-g.pct.mgh')
             outputs["out_stats"] = os.path.join(
-                subject_dir, 'stats', self.inputs.hemisphere + '.w-g.pct.stats')
+                subject_dir, 'stats', str(self.inputs.hemisphere) + '.w-g.pct.stats')
         else:
             outputs["out_contrast"] = os.path.join(
                 subject_dir, 'surf', 'w-g.pct.mgh')
@@ -2542,7 +2541,7 @@ class RelabelHypointensities(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = self.inputs.aseg.rstrip('mgz') + 'hypos.mgz'
+        outputs["out_file"] = str(self.inputs.aseg).rstrip('mgz') + 'hypos.mgz'
         return outputs
 
 

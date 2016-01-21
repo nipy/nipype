@@ -1087,10 +1087,10 @@ class Label2Label(FSCommand):
             out_dir = os.path.join(
                 self.inputs.subjects_dir, self.inputs.subject_id, 'label')
             if self.inputs.threshold:
-                basename = self.inputs.hemisphere + '.' + \
+                basename = str(self.inputs.hemisphere) + '.' + \
                     self.inputs.label + '_exvivo.thresh.label'
             else:
-                basename = self.inputs.hemisphere + '.' + self.inputs.label + '_exvivo.label'
+                basename = str(self.inputs.hemisphere) + '.' + str(self.inputs.label) + '_exvivo.label'
             outputs['out_file'] = os.path.join(out_dir, basename)
         return outputs
 
@@ -1117,10 +1117,9 @@ class Label2Label(FSCommand):
             # input label will be different depending on the whether it is a
             # threshold or not
             if self.inputs.threshold:
-                basename = self.inputs.hemisphere + '.' + \
-                    self.inputs.label + '_exvivo.thresh.label'
+                basename = str(self.inputs.hemisphere) + '.' + str(self.inputs.label) + '_exvivo.thresh.label'
             else:
-                basename = self.inputs.hemisphere + '.' + self.inputs.label + '_exvivo.label'
+                basename = str(self.inputs.hemisphere) + '.' + str(self.inputs.label) + '_exvivo.label'
             return os.path.join(fsaverage, 'label', basename)
         elif name == 'target_label':
             return self._list_outputs()['out_file']
@@ -1186,7 +1185,7 @@ class Label2Annot(FSCommand):
         outputs["out_file"] = os.path.join(self.inputs.subjects_dir,
                                            self.inputs.subject_id,
                                            'label',
-                                           self.inputs.hemisphere + '.' + self.inputs.out_annot + '.annot')
+                                           str(self.inputs.hemisphere) + '.' + str(self.inputs.out_annot) + '.annot')
         return outputs
 
 
@@ -1256,7 +1255,7 @@ class SphericalAverage(FSCommand):
 
     def _gen_filename(self, name):
         if name == 'in_average':
-            avg_subject = self.inputs.hemisphere + '.EC_average'
+            avg_subject = str(self.inputs.hemisphere) + '.EC_average'
             avg_directory = os.path.join(self.inputs.subjects_dir, avg_subject)
             if not os.path.isdir(avg_directory):
                 fs_home = os.path.abspath(os.environ.get('FREESURFER_HOME'))
@@ -1278,6 +1277,6 @@ class SphericalAverage(FSCommand):
                 basename = os.path.basename(self.inputs.in_average)
                 basename = basename.replace('_', '_exvivo_') + '.label'
             else:
-                basename = self.inputs.hemisphere + '.EC_exvivo_average.label'
+                basename = str(self.inputs.hemisphere) + '.EC_exvivo_average.label'
             outputs['out_file'] = os.path.join(out_dir, basename)
         return outputs
