@@ -1182,8 +1182,8 @@ class Label2Annot(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = os.path.join(self.inputs.subjects_dir,
-                                           self.inputs.subject_id,
+        outputs["out_file"] = os.path.join(str(self.inputs.subjects_dir),
+                                           str(self.inputs.subject_id),
                                            'label',
                                            str(self.inputs.hemisphere) + '.' + str(self.inputs.out_annot) + '.annot')
         return outputs
