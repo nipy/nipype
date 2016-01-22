@@ -49,8 +49,7 @@ class bseInputSpec(CommandLineInputSpec):
     verbosityLevel = traits.Float(1, usedefault=True,
                                   desc=' verbosity level (0=silent)',
                                   argstr='-v %f')
-    noRotate = traits.Bool(True, usedefault=True,
-                           desc='retain original orientation'
+    noRotate = traits.Bool(desc='retain original orientation'
                            '(default behavior will auto-rotate input NII files'
                            'to LPI orientation)', argstr='--norotate')
     timer = traits.Bool(desc='show timing', argstr='--timer')
@@ -70,39 +69,23 @@ class bse(CommandLine):
     output_spec = bseOutputSpec
     _cmd = 'bse'
 
-    def _list_outputs(self):
-
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.outputMRIVolume):
-            outputs['outputMRIVolume'] = (os.getcwd() + '/' +
-                                          self.inputs.outputMRIVolume)
-        else:
-            outputs['outputMRIVolume'] = self._gen_filename('outputMRIVolume')
-
-        if isdefined(self.inputs.outputMaskFile):
-            outputs['outputMaskFile'] = (os.getcwd() + '/' +
-                                         self.inputs.outputMaskFile)
-        if isdefined(self.inputs.outputDiffusionFilter):
-            outputs['outputDiffusionFilter'] = (os.getcwd() + '/' +
-                                                self.inputs.outputDiffusionFilter)
-        if isdefined(self.inputs.outputEdgeMap):
-            outputs['outputEdgeMap'] = (os.getcwd() + '/' +
-                                        self.inputs.outputEdgeMap)
-        if isdefined(self.inputs.outputDetailedBrainMask):
-            outputs['outputDetailedBrainMask'] = (os.getcwd() + '/' +
-                                                  self.inputs.outputDetailedBrainMask)
-        if isdefined(self.inputs.outputCortexFile):
-            outputs['outputCortexFile'] = (os.getcwd() + '/' +
-                                           self.inputs.outputCortexFile)
-
-        return outputs
-
     def _gen_filename(self, name):
+        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+
+        if is_user_defined:
+            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
+
+            return toReturn
+
         if name == 'outputMRIVolume':
             myExtension = '.nii.gz'
             return ''.join((os.getcwd(), '/',
                             getFileName(self.inputs.inputMRIFile),
                             "___", self._cmd, 'Output_', name, myExtension))
+        return None
+
+    def _list_outputs(self):
+        return l_outputs(self)
 
 
 class bfcInputSpec(CommandLineInputSpec):
@@ -168,11 +151,9 @@ class bfcInputSpec(CommandLineInputSpec):
     convergenceThreshold = traits.Float(desc='convergence threshold',
                                         argstr='--eps %f')
     biasEstimateConvergenceThreshold = traits.Float(
-        desc='bias estimate convergence threshold (values > 0.1 disable)',
-        argstr='--beps %f')
+        desc='bias estimate convergence threshold (values > 0.1 disable)', argstr='--beps %f')
     verbosityLevel = traits.Int(
-        desc='verbosity level (0=silent)',
-        argstr='-v %d')
+        desc='verbosity level (0=silent)', argstr='-v %d')
     timer = traits.Bool(desc='display timing information', argstr='--timer')
 
 
@@ -190,67 +171,43 @@ class bfc(CommandLine):
     _cmd = 'bfc'
 
     def _gen_filename(self, name):
+        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+
+        if is_user_defined:
+            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
+            return toReturn
+
         if name == 'outputMRIVolume':
             myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/',  getFileName(self.inputs.inputMRIFile), "___", self._cmd, 'Output_', name, myExtension))
+
+        return None
 
     def _format_arg(self, name, spec, value):
         if name == 'histogramType':
-            return spec.argstr % {
-                "ellipse": "--ellipse", "block": "--block"}[value]
+            return spec.argstr % {"ellipse": "--ellipse", "block": "--block"}[value]
         if name == 'biasRange':
-            return spec.argstr % {"low": "--low",
-                                  "medium": "--medium", "high": "--high"}[value]
+            return spec.argstr % {"low": "--low", "medium": "--medium", "high": "--high"}[value]
         if name == 'intermediate_file_type':
-            return spec.argstr % {"analyze": "--analyze", "nifti": "--nifti",
-                                  "gzippedAnalyze": "--analyzegz", "gzippedNifti": "--niftigz"}[value]
+            return spec.argstr % {"analyze": "--analyze", "nifti": "--nifti", "gzippedAnalyze": "--analyzegz", "gzippedNifti": "--niftigz"}[value]
 
         return super(bfc, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
-
-        if isdefined(self.inputs.outputMRIVolume):
-            outputs['outputMRIVolume'] = (
-                os.getcwd() + '/' + self.inputs.outputMRIVolume)
-        else:
-            outputs['outputMRIVolume'] = self._gen_filename('outputMRIVolume')
-
-        if isdefined(self.inputs.outputMaskFile):
-            outputs['outputMaskFile'] = (
-                os.getcwd() + '/' + self.inputs.outputMaskFile)
-        if isdefined(self.inputs.outputBiasField):
-            outputs['outputBiasField'] = (
-                os.getcwd() + '/' + self.inputs.outputBiasField)
-        if isdefined(self.inputs.outputMaskedBiasField):
-            outputs['outputMaskedBiasField'] = (
-                os.getcwd() + '/' + self.inputs.outputMaskedBiasField)
-        if isdefined(self.inputs.correctionScheduleFile):
-            outputs['correctionScheduleFile'] = (
-                os.getcwd() + '/' + self.inputs.correctionScheduleFile)
-
-        return outputs
+        return l_outputs(self)
 
 
 class pvcInputSpec(CommandLineInputSpec):
     inputMRIFile = File(mandatory=True, desc='MRI file', argstr='-i %s')
     inputMaskFile = File(desc='brain mask file', argstr='-m %s')
     outputLabelFile = File(
-        mandatory=False,
-        desc='output label file. If unspecified, output file name will be auto generated.',
-        argstr='-o %s',
-        genfile=True)
+        mandatory=False, desc='output label file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     outputTissueFractionFile = File(
-        mandatory=False,
-        desc='output tissue fraction file',
-        argstr='-f %s',
-        genfile=True)
+        mandatory=False, desc='output tissue fraction file', argstr='-f %s', genfile=True)
     spatialPrior = traits.Float(desc='spatial prior strength', argstr='-l %f')
     verbosity = traits.Int(desc='verbosity level (0 = silent)', argstr='-v %d')
     threeClassFlag = traits.Bool(
-        desc='use a three-class (CSF=0,GM=1,WM=2) labeling',
-        argstr='-3')
+        desc='use a three-class (CSF=0,GM=1,WM=2) labeling', argstr='-3')
     timer = traits.Bool(desc='time processing', argstr='--timer')
 
 
@@ -265,87 +222,56 @@ class pvc(CommandLine):
     _cmd = 'pvc'
 
     def _gen_filename(self, name):
+        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+        if is_user_defined:
+            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
+            return toReturn
+
         if name == 'outputLabelFile':
             myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', self._cmd,
-                            'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', self._cmd, 'Output_', name, myExtension))
         if name == 'outputTissueFractionFile':
             myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile), "___", self._cmd, 'Output_', name, myExtension))
+
+        return None
 
     def _list_outputs(self):
-
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.outputLabelFile):
-            outputs['outputLabelFile'] = (
-                os.getcwd() + '/' + self.inputs.outputLabelFile)
-        else:
-            outputs['outputLabelFile'] = self._gen_filename('outputLabelFile')
-
-        if isdefined(self.inputs.outputTissueFractionFile):
-            outputs['outputTissueFractionFile'] = (
-                os.getcwd() + '/' + self.inputs.outputTissueFractionFile)
-        else:
-            outputs['outputTissueFractionFile'] = self._gen_filename(
-                'outputTissueFractionFile')
-
-        return outputs
+        return l_outputs(self)
 
 
 class cerebroInputSpec(CommandLineInputSpec):
     inputMRIFile = File(
-        mandatory=True,
-        desc='input 3D MRI volume',
-        argstr='-i %s')
+        mandatory=True, desc='input 3D MRI volume', argstr='-i %s')
     inputAtlasMRIFile = File(
-        mandatory=True,
-        desc='atlas MRI volume',
-        argstr='--atlas %s')
+        mandatory=True, desc='atlas MRI volume', argstr='--atlas %s')
     inputAtlasLabelFile = File(
-        mandatory=True,
-        desc='atlas labeling',
-        argstr='--atlaslabels %s')
+        mandatory=True, desc='atlas labeling', argstr='--atlaslabels %s')
     inputBrainMaskFile = File(desc='brain mask file', argstr='-m %s')
     outputCerebrumMaskFile = File(
-        mandatory=False,
-        desc='output cerebrum mask volume. If unspecified, output file name will be auto generated.',
-        argstr='-o %s',
-        genfile=True)
+        mandatory=False, desc='output cerebrum mask volume. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     outputLabelMaskFile = File(
-        mandatory=False,
-        desc='output labeled hemisphere/cerebrum volume. If unspecified, output file name will be auto generated.',
-        argstr='-l %s',
-        genfile=True)
+        mandatory=False, desc='output labeled hemisphere/cerebrum volume. If unspecified, output file name will be auto generated.', argstr='-l %s', genfile=True)
     costFunction = traits.Int(2, usedefault=True, desc='0,1,2', argstr='-c %d')
     useCentroids = traits.Bool(
-        desc='use centroids of data to initialize position',
-        argstr='--centroids')
+        desc='use centroids of data to initialize position', argstr='--centroids')
     outputAffineTransformFile = File(
-        desc='save affine transform to file.',
-        argstr='--air %s')
+        desc='save affine transform to file.', argstr='--air %s')
     outputWarpTransformFile = File(
-        desc='save warp transform to file.',
-        argstr='--warp %s')
+        desc='save warp transform to file.', argstr='--warp %s')
     verbosity = traits.Int(desc='verbosity level (0=silent)', argstr='-v %d')
     linearConvergence = traits.Float(
-        desc='linear convergence',
-        argstr='--linconv %f')
+        desc='linear convergence', argstr='--linconv %f')
     warpLabel = traits.Int(
-        desc='warp order (2,3,4,5,6,7,8)',
-        argstr='--warplevel %d')
+        desc='warp order (2,3,4,5,6,7,8)', argstr='--warplevel %d')
     warpConvergence = traits.Float(
-        desc='warp convergence',
-        argstr='--warpconv %f')
+        desc='warp convergence', argstr='--warpconv %f')
     keepTempFiles = traits.Bool(
-        desc="don't remove temporary files",
-        argstr='--keep')
+        desc="don't remove temporary files", argstr='--keep')
     tempDirectory = traits.Str(
-        desc='specify directory to use for temporary files',
-        argstr='--tempdir %s')
+        desc='specify directory to use for temporary files', argstr='--tempdir %s')
     tempDirectoryBase = traits.Str(
-        desc='create a temporary directory within this directory',
-        argstr='--tempdirbase %s')
+        desc='create a temporary directory within this directory', argstr='--tempdirbase %s')
 
 
 class cerebroOutputSpec(TraitedSpec):
@@ -361,73 +287,40 @@ class cerebro(CommandLine):
     _cmd = 'cerebro'
 
     def _gen_filename(self, name):
+        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+
+        if is_user_defined:
+            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
+            return toReturn
+
         if name == 'outputCerebrumMaskFile':
             myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile), "___", self._cmd, 'Output_', name, myExtension))
         if name == 'outputLabelMaskFile':
             myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile), "___", self._cmd, 'Output_', name, myExtension))
+
+        return None
 
     def _list_outputs(self):
-
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.outputCerebrumMaskFile):
-            outputs['outputCerebrumMaskFile'] = (
-                os.getcwd() + '/' + self.inputs.outputCerebrumMaskFile)
-        else:
-            outputs['outputCerebrumMaskFile'] = self._gen_filename(
-                'outputCerebrumMaskFile')
-
-        if isdefined(self.inputs.outputLabelMaskFile):
-            outputs['outputLabelMaskFile'] = (
-                os.getcwd() + '/' + self.inputs.outputLabelMaskFile)
-        else:
-            outputs['outputLabelMaskFile'] = self._gen_filename(
-                'outputLabelMaskFile')
-
-        if isdefined(self.inputs.outputAffineTransformFile):
-            outputs['outputAffineTransformFile'] = (
-                os.getcwd() + '/' + self.inputs.outputAffineTransformFile)
-        if isdefined(self.inputs.outputWarpTransformFile):
-            outputs['outputWarpTransformFile'] = (
-                os.getcwd() + '/' + self.inputs.outputWarpTransformFile)
-
-        return outputs
+        return l_outputs(self)
 
 
 class cortexInputSpec(CommandLineInputSpec):
     inputHemisphereLabelFile = File(
-        mandatory=True,
-        desc='hemisphere / lobe label volume',
-        argstr='-h %s')
+        mandatory=True, desc='hemisphere / lobe label volume', argstr='-h %s')
     outputCerebrumMask = File(
-        mandatory=False,
-        desc='output structure mask. If unspecified, output file name will be auto generated.',
-        argstr='-o %s',
-        genfile=True)
+        mandatory=False, desc='output structure mask. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     inputTissueFractionFile = File(
-        mandatory=True,
-        desc='tissue fraction file (32-bit float)',
-        argstr='-f %s')
+        mandatory=True, desc='tissue fraction file (32-bit float)', argstr='-f %s')
     tissueFractionThreshold = traits.Float(
-        50.0,
-        usedefault=True,
-        desc='tissue fraction threshold (percentage)',
-        argstr='-p %f')
+        50.0, usedefault=True, desc='tissue fraction threshold (percentage)', argstr='-p %f')
     computeWGBoundary = traits.Bool(
-        True,
-        usedefault=True,
-        desc='compute WM/GM boundary',
-        argstr='-w')
+        True, usedefault=True, desc='compute WM/GM boundary', argstr='-w')
     computeGCBoundary = traits.Bool(
         desc='compute GM/CSF boundary', argstr='-g')
     includeAllSubcorticalAreas = traits.Bool(
-        True,
-        usedefault=True,
-        esc='include all subcortical areas in WM mask',
-        argstr='-a')
+        True, usedefault=True, esc='include all subcortical areas in WM mask', argstr='-a')
     verbosity = traits.Int(desc='verbosity level', argstr='-v %d')
     timer = traits.Bool(desc='timing function', argstr='--timer')
 
@@ -442,44 +335,30 @@ class cortex(CommandLine):
     _cmd = 'cortex'
 
     def _gen_filename(self, name):
+        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+        if is_user_defined:
+            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
+            return toReturn
+
         if name == 'outputCerebrumMask':
             myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputHemisphereLabelFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputHemisphereLabelFile), "___", self._cmd, 'Output_', name, myExtension))
+
+        return None
 
     def _list_outputs(self):
-
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.outputCerebrumMask):
-            outputs['outputCerebrumMask'] = (
-                os.getcwd() + '/' + self.inputs.outputCerebrumMask)
-        else:
-            outputs['outputCerebrumMask'] = self._gen_filename(
-                'outputCerebrumMask')
-
-        return outputs
+        return l_outputs(self)
 
 
 class scrubmaskInputSpec(CommandLineInputSpec):
     inputMaskFile = File(
-        mandatory=True,
-        desc='input structure mask file',
-        argstr='-i %s')
+        mandatory=True, desc='input structure mask file', argstr='-i %s')
     outputMaskFile = File(
-        mandatory=False,
-        desc='output structure mask file. If unspecified, output file name will be auto generated.',
-        argstr='-o %s',
-        genfile=True)
+        mandatory=False, desc='output structure mask file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     backgroundFillThreshold = traits.Int(
-        2,
-        usedefault=True,
-        desc='background fill threshold',
-        argstr='-b %d')
+        2, usedefault=True, desc='background fill threshold', argstr='-b %d')
     foregroundTrimThreshold = traits.Int(
-        0,
-        usedefault=True,
-        desc='foreground trim threshold',
-        argstr='-f %d')
+        0, usedefault=True, desc='foreground trim threshold', argstr='-f %d')
     numberIterations = traits.Int(desc='number of iterations', argstr='-n %d')
     verbosity = traits.Int(desc='verbosity (0=silent)', argstr='-v %d')
     timer = traits.Bool(desc='timing function', argstr='--timer')
@@ -495,46 +374,31 @@ class scrubmask(CommandLine):
     _cmd = 'scrubmask'
 
     def _gen_filename(self, name):
+        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+        if is_user_defined:
+            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
+            return toReturn
+
         if name == 'outputMaskFile':
             myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMaskFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMaskFile), "___", self._cmd, 'Output_', name, myExtension))
+        return None
 
     def _list_outputs(self):
-
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.outputMaskFile):
-            outputs['outputMaskFile'] = (
-                os.getcwd() + '/' + self.inputs.outputMaskFile)
-        else:
-            outputs['outputMaskFile'] = self._gen_filename('outputMaskFile')
-
-        return outputs
+        return l_outputs(self)
 
 
 class tcaInputSpec(CommandLineInputSpec):
     inputMaskFile = File(
-        mandatory=True,
-        desc='input mask volume',
-        argstr='-i %s')
+        mandatory=True, desc='input mask volume', argstr='-i %s')
     outputMaskFile = File(
-        mandatory=False,
-        desc='output mask volume. If unspecified, output file name will be auto generated.',
-        argstr='-o %s',
-        genfile=True)
+        mandatory=False, desc='output mask volume. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     minCorrectionSize = traits.Int(
-        2500,
-        usedefault=True,
-        desc='maximum correction size',
-        argstr='-m %d')
+        2500, usedefault=True, desc='maximum correction size', argstr='-m %d')
     maxCorrectionSize = traits.Int(
-        desc='minimum correction size',
-        argstr='-n %d')
+        desc='minimum correction size', argstr='-n %d')
     foregroundDelta = traits.Int(
-        20,
-        usedefault=True,
-        desc='foreground delta',
-        argstr='--delta %d')
+        20, usedefault=True, desc='foreground delta', argstr='--delta %d')
     verbosity = traits.Int(desc='verbosity (0 = quiet)', argstr='-v %d')
     timer = traits.Bool(desc='timing function', argstr='--timer')
 
@@ -549,35 +413,29 @@ class tca(CommandLine):
     _cmd = 'tca'
 
     def _gen_filename(self, name):
+        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+        if is_user_defined:
+            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
+            return toReturn
+
         if name == 'outputMaskFile':
             myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMaskFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMaskFile), "___", self._cmd, 'Output_', name, myExtension))
+
+        return None
 
     def _list_outputs(self):
-
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.outputMaskFile):
-            outputs['outputMaskFile'] = (
-                os.getcwd() + '/' + self.inputs.outputMaskFile)
-        else:
-            outputs['outputMaskFile'] = self._gen_filename('outputMaskFile')
-
-        return outputs
+        return l_outputs(self)
 
 
 class dewispInputSpec(CommandLineInputSpec):
     inputMaskFile = File(mandatory=True, desc='input file', argstr='-i %s')
     outputMaskFile = File(
-        mandatory=False,
-        desc='output file. If unspecified, output file name will be auto generated.',
-        argstr='-o %s',
-        genfile=True)
+        mandatory=False, desc='output file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     verbosity = traits.Int(desc='verbosity', argstr='-v %d')
     sizeThreshold = traits.Int(desc='size threshold', argstr='-t %d')
     maximumIterations = traits.Int(
-        desc='maximum number of iterations',
-        argstr='-n %d')
+        desc='maximum number of iterations', argstr='-n %d')
     timer = traits.Bool(desc='time processing', argstr='--timer')
 
 
@@ -591,82 +449,47 @@ class dewisp(CommandLine):
     _cmd = 'dewisp'
 
     def _gen_filename(self, name):
+        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+        if is_user_defined:
+            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
+            return toReturn
+
         if name == 'outputMaskFile':
             myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMaskFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMaskFile), "___", self._cmd, 'Output_', name, myExtension))
+
+        return None
 
     def _list_outputs(self):
-
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.outputMaskFile):
-            outputs['outputMaskFile'] = (
-                os.getcwd() + '/' + self.inputs.outputMaskFile)
-        else:
-            outputs['outputMaskFile'] = self._gen_filename('outputMaskFile')
-
-        return outputs
+        return l_outputs(self)
 
 
 class dfsInputSpec(CommandLineInputSpec):
     inputVolumeFile = File(
-        mandatory=True,
-        desc='input 3D volume',
-        argstr='-i %s')
+        mandatory=True, desc='input 3D volume', argstr='-i %s')
     outputSurfaceFile = File(
-        mandatory=False,
-        desc='output surface mesh file. If unspecified, output file name will be auto generated.',
-        argstr='-o %s',
-        genfile=True)
+        mandatory=False, desc='output surface mesh file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     inputShadingVolume = File(
-        desc='shade surface model with data from image volume',
-        argstr='-c %s')
+        desc='shade surface model with data from image volume', argstr='-c %s')
     smoothingIterations = traits.Int(
-        10,
-        usedefault=True,
-        desc='number of smoothing iterations',
-        argstr='-n %d')
+        10, usedefault=True, desc='number of smoothing iterations', argstr='-n %d')
     smoothingConstant = traits.Float(
-        0.5,
-        usedefault=True,
-        desc='smoothing constant',
-        argstr='-a %f')
+        0.5, usedefault=True, desc='smoothing constant', argstr='-a %f')
     curvatureWeighting = traits.Float(
-        5.0,
-        usedefault=True,
-        desc='curvature weighting',
-        argstr='-w %f')
+        5.0, usedefault=True, desc='curvature weighting', argstr='-w %f')
     scalingPercentile = traits.Float(desc='scaling percentile', argstr='-f %f')
     nonZeroTessellation = traits.Bool(
-        desc='tessellate non-zero voxels',
-        argstr='-nz',
-        xor=(
-            'nonZeroTessellation',
-            'specialTessellation'))
+        desc='tessellate non-zero voxels', argstr='-nz', xor=('nonZeroTessellation', 'specialTessellation'))
     tessellationThreshold = traits.Float(
-        desc='To be used with specialTessellation. Set this value first, then set specialTessellation value.\nUsage: tessellate voxels greater_than, less_than, or equal_to <tessellationThreshold>',
-        argstr='%f')
-    specialTessellation = traits.Enum(
-        'greater_than',
-        'less_than',
-        'equal_to',
-        desc='To avoid throwing a UserWarning, set tessellationThreshold first. Then set this attribute.\nUsage: tessellate voxels greater_than, less_than, or equal_to <tessellationThreshold>',
-        argstr='%s',
-        xor=(
-            'nonZeroTessellation',
-            'specialTessellation'),
-        requires=['tessellationThreshold'],
-        position=-
-        1)
+        desc='To be used with specialTessellation. Set this value first, then set specialTessellation value.\nUsage: tessellate voxels greater_than, less_than, or equal_to <tessellationThreshold>', argstr='%f')
+    specialTessellation = traits.Enum('greater_than', 'less_than', 'equal_to', desc='To avoid throwing a UserWarning, set tessellationThreshold first. Then set this attribute.\nUsage: tessellate voxels greater_than, less_than, or equal_to <tessellationThreshold>', argstr='%s', xor=(
+        'nonZeroTessellation', 'specialTessellation'), requires=['tessellationThreshold'], position=-1)
     zeroPadFlag = traits.Bool(
-        desc='zero-pad volume (avoids clipping at edges)',
-        argstr='-z')
+        desc='zero-pad volume (avoids clipping at edges)', argstr='-z')
     noNormalsFlag = traits.Bool(
-        desc='do not compute vertex normals',
-        argstr='--nonormals')
+        desc='do not compute vertex normals', argstr='--nonormals')
     postSmoothFlag = traits.Bool(
-        desc='smooth vertices after coloring',
-        argstr='--postsmooth')
+        desc='smooth vertices after coloring', argstr='--postsmooth')
     verbosity = traits.Int(desc='verbosity (0 = quiet)', argstr='-v %d')
     timer = traits.Bool(desc='timing function', argstr='--timer')
 
@@ -685,97 +508,59 @@ class dfs(CommandLine):
             return ''  # blank argstr
         if name == 'specialTessellation':
             threshold = self.inputs.tessellationThreshold
-            return spec.argstr % {"greater_than": ''.join(("-gt %f" % threshold)), "less_than": ''.join(
-                ("-lt %f" % threshold)), "equal_to": ''.join(("-eq %f" % threshold))}[value]
+            return spec.argstr % {"greater_than": ''.join(("-gt %f" % threshold)), "less_than": ''.join(("-lt %f" % threshold)), "equal_to": ''.join(("-eq %f" % threshold))}[value]
         return super(dfs, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
+        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+        if is_user_defined:
+            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
+            return toReturn
+
         if name == 'outputSurfaceFile':
             myExtension = '.dfs'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputVolumeFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputVolumeFile), "___", self._cmd, 'Output_', name, myExtension))
+
+        return None
 
     def _list_outputs(self):
-
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.outputSurfaceFile):
-            outputs['outputSurfaceFile'] = (
-                os.getcwd() + '/' + self.inputs.outputSurfaceFile)
-        else:
-            outputs['outputSurfaceFile'] = self._gen_filename(
-                'outputSurfaceFile')
-
-        return outputs
+        return l_outputs(self)
 
 
 class pialmeshInputSpec(CommandLineInputSpec):
     inputSurfaceFile = File(mandatory=True, desc='input file', argstr='-i %s')
     outputSurfaceFile = File(
-        mandatory=False,
-        desc='output file. If unspecified, output file name will be auto generated.',
-        argstr='-o %s',
-        genfile=True)
+        mandatory=False, desc='output file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     verbosity = traits.Int(desc='verbosity', argstr='-v %d')
     inputTissueFractionFile = File(
-        mandatory=True,
-        desc='floating point (32) tissue fraction image',
-        argstr='-f %s')
+        mandatory=True, desc='floating point (32) tissue fraction image', argstr='-f %s')
     numIterations = traits.Int(
-        100,
-        usedefault=True,
-        desc='number of iterations',
-        argstr='-n %d')
+        100, usedefault=True, desc='number of iterations', argstr='-n %d')
     searchRadius = traits.Float(
-        1,
-        usedefault=True,
-        desc='search radius',
-        argstr='-r %f')
-    stepSize = traits.Float(
-        0.4,
-        usedefault=True,
-        desc='step size',
-        argstr='-s %f')
+        1, usedefault=True, desc='search radius', argstr='-r %f')
+    stepSize = traits.Float(0.4, usedefault=True,
+                            desc='step size', argstr='-s %f')
     inputMaskFile = File(
-        mandatory=True,
-        desc='restrict growth to mask file region',
-        argstr='-m %s')
+        mandatory=True, desc='restrict growth to mask file region', argstr='-m %s')
     maxThickness = traits.Float(
-        20,
-        usedefault=True,
-        desc='maximum allowed tissue thickness',
-        argstr='--max %f')
+        20, usedefault=True, desc='maximum allowed tissue thickness', argstr='--max %f')
     tissueThreshold = traits.Float(
-        1.05,
-        usedefault=True,
-        desc='tissue threshold',
-        argstr='-t %f')
+        1.05, usedefault=True, desc='tissue threshold', argstr='-t %f')
 # output interval is not an output -- it specifies how frequently the
 # output surfaces are generated
     outputInterval = traits.Int(
-        10,
-        usedefault=True,
-        desc='output interval',
-        argstr='--interval %d')
+        10, usedefault=True, desc='output interval', argstr='--interval %d')
     exportPrefix = traits.Str(
-        desc='prefix for exporting surfaces if interval is set',
-        argstr='--prefix %s')
+        desc='prefix for exporting surfaces if interval is set', argstr='--prefix %s')
     laplacianSmoothing = traits.Float(
-        0.025,
-        usedefault=True,
-        desc='apply Laplacian smoothing',
-        argstr='--smooth %f')
+        0.025, usedefault=True, desc='apply Laplacian smoothing', argstr='--smooth %f')
     timer = traits.Bool(desc='show timing', argstr='--timer')
     recomputNormals = traits.Bool(
-        desc='recompute normals at each iteration',
-        argstr='--norm')
+        desc='recompute normals at each iteration', argstr='--norm')
     normalSmoother = traits.Float(
-        0.2,
-        usedefault=True,
-        desc='strength of normal smoother.',
-        argstr='--nc %f')
+        0.2, usedefault=True, desc='strength of normal smoother.', argstr='--nc %f')
     tangentSmoother = traits.Float(
-        desc='strength of tangential smoother.',
-        argstr='--tc %f')
+        desc='strength of tangential smoother.', argstr='--tc %f')
 
 
 class pialmeshOutputSpec(TraitedSpec):
@@ -788,63 +573,46 @@ class pialmesh(CommandLine):
     _cmd = 'pialmesh'
 
     def _gen_filename(self, name):
+        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+        if is_user_defined:
+            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
+            return toReturn
+
         if name == 'outputSurfaceFile':
             myExtension = '.dfs'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile), "___", self._cmd, 'Output_', name, myExtension))
+
+        return None
 
     def _list_outputs(self):
-
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.outputSurfaceFile):
-            outputs['outputSurfaceFile'] = (
-                os.getcwd() + '/' + self.inputs.outputSurfaceFile)
-        else:
-            outputs['outputSurfaceFile'] = self._gen_filename(
-                'outputSurfaceFile')
-
-        return outputs
+        return l_outputs(self)
 
 
 class skullfinderInputSpec(CommandLineInputSpec):
     inputMRIFile = File(mandatory=True, desc='input file', argstr='-i %s')
     inputMaskFile = File(
-        mandatory=True,
-        desc='A brain mask file, 8-bit image (0=non-brain, 255=brain)',
-        argstr='-m %s')
+        mandatory=True, desc='A brain mask file, 8-bit image (0=non-brain, 255=brain)', argstr='-m %s')
     outputLabelFile = File(
-        mandatory=False,
-        desc='output file. If unspecified, output file name will be auto generated.',
-        argstr='-o %s',
-        genfile=True)
+        mandatory=False, desc='output file. If unspecified, output file name will be auto generated.', argstr='-o %s', genfile=True)
     verbosity = traits.Int(desc='verbosity', argstr='-v %d')
     lowerThreshold = traits.Int(
-        desc='Lower threshold for segmentation',
-        argstr='-l %d')
+        desc='Lower threshold for segmentation', argstr='-l %d')
     upperThreshold = traits.Int(
-        desc='Upper threshold for segmentation',
-        argstr='-u %d')
+        desc='Upper threshold for segmentation', argstr='-u %d')
     surfaceFilePrefix = traits.Str(
-        desc='if specified, generate surface files for brain, skull, and scalp',
-        argstr='-s %s')
+        desc='if specified, generate surface files for brain, skull, and scalp', argstr='-s %s')
     bgLabelValue = traits.Int(
-        desc='background label value (0-255)',
-        argstr='--bglabel %d')
+        desc='background label value (0-255)', argstr='--bglabel %d')
     scalpLabelValue = traits.Int(
-        desc='scalp label value (0-255)',
-        argstr='--scalplabel %d')
+        desc='scalp label value (0-255)', argstr='--scalplabel %d')
     skullLabelValue = traits.Int(
-        desc='skull label value (0-255)',
-        argstr='--skulllabel %d')
+        desc='skull label value (0-255)', argstr='--skulllabel %d')
     spaceLabelValue = traits.Int(
-        desc='space label value (0-255)',
-        argstr='--spacelabel %d')
+        desc='space label value (0-255)', argstr='--spacelabel %d')
     brainLabelValue = traits.Int(
-        desc='brain label value (0-255)',
-        argstr='--brainlabel %d')
+        desc='brain label value (0-255)', argstr='--brainlabel %d')
     performFinalOpening = traits.Bool(
-        desc='perform a final opening operation on the scalp mask',
-        argstr='--finalOpening')
+        desc='perform a final opening operation on the scalp mask', argstr='--finalOpening')
 
 
 class skullfinderOutputSpec(TraitedSpec):
@@ -857,55 +625,36 @@ class skullfinder(CommandLine):
     _cmd = 'skullfinder'
 
     def _gen_filename(self, name):
+        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+        if is_user_defined:
+            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
+            return toReturn
+
         if name == 'outputLabelFile':
             myExtension = '.nii.gz'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputMRIFile), "___", self._cmd, 'Output_', name, myExtension))
+
+        return None
 
     def _list_outputs(self):
-
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.outputLabelFile):
-            outputs['outputLabelFile'] = (
-                os.getcwd() + '/' + self.inputs.outputLabelFile)
-        else:
-            outputs['outputLabelFile'] = self._gen_filename('outputLabelFile')
-
-        return outputs
+        return l_outputs(self)
 
 
 class hemisplitInputSpec(CommandLineInputSpec):
     inputSurfaceFile = File(
-        mandatory=True,
-        desc='input surface',
-        argstr='-i %s')
+        mandatory=True, desc='input surface', argstr='-i %s')
     inputHemisphereLabelFile = File(
-        mandatory=True,
-        desc='input hemisphere label volume',
-        argstr='-l %s')
+        mandatory=True, desc='input hemisphere label volume', argstr='-l %s')
     outputLeftHemisphere = File(
-        mandatory=False,
-        desc='output surface file, left hemisphere. If unspecified, output file name will be auto generated.',
-        argstr='--left %s',
-        genfile=True)
+        mandatory=False, desc='output surface file, left hemisphere. If unspecified, output file name will be auto generated.', argstr='--left %s', genfile=True)
     outputRightHemisphere = File(
-        mandatory=False,
-        desc='output surface file, right hemisphere. If unspecified, output file name will be auto generated.',
-        argstr='--right %s',
-        genfile=True)
+        mandatory=False, desc='output surface file, right hemisphere. If unspecified, output file name will be auto generated.', argstr='--right %s', genfile=True)
     pialSurfaceFile = File(
-        desc='pial surface file -- must have same geometry as input surface',
-        argstr='-p %s')
+        desc='pial surface file -- must have same geometry as input surface', argstr='-p %s')
     outputLeftPialHemisphere = File(
-        mandatory=False,
-        desc='output pial surface file, left hemisphere. If unspecified, output file name will be auto generated.',
-        argstr='-pl %s',
-        genfile=True)
+        mandatory=False, desc='output pial surface file, left hemisphere. If unspecified, output file name will be auto generated.', argstr='-pl %s', genfile=True)
     outputRightPialHemisphere = File(
-        mandatory=False,
-        desc='output pial surface file, right hemisphere. If unspecified, output file name will be auto generated.',
-        argstr='-pr %s',
-        genfile=True)
+        mandatory=False, desc='output pial surface file, right hemisphere. If unspecified, output file name will be auto generated.', argstr='-pr %s', genfile=True)
     verbosity = traits.Int(desc='verbosity (0 = silent)', argstr='-v %d')
     timer = traits.Bool(desc='timing function', argstr='--timer')
 
@@ -923,48 +672,28 @@ class hemisplit(CommandLine):
     _cmd = 'hemisplit'
 
     def _gen_filename(self, name):
+        exec('is_user_defined = isdefined(self.inputs.' + name + ')')
+        if is_user_defined:
+            exec("toReturn = os.path.abspath(self.inputs." + name + ")")
+            return toReturn
+
         if name == 'outputLeftHemisphere':
             myExtension = '.dfs'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile), "___", self._cmd, 'Output_', name, myExtension))
         if name == 'outputRightHemisphere':
             myExtension = '.dfs'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile), "___", self._cmd, 'Output_', name, myExtension))
         if name == 'outputLeftPialHemisphere':
             myExtension = '.dfs'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile), "___", self._cmd, 'Output_', name, myExtension))
         if name == 'outputRightPialHemisphere':
             myExtension = '.dfs'
-            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile),
-                            "___", self._cmd, 'Output_', name, myExtension))
+            return ''.join((os.getcwd(), '/', getFileName(self.inputs.inputSurfaceFile), "___", self._cmd, 'Output_', name, myExtension))
+
+        return None
 
     def _list_outputs(self):
-
-        outputs = self.output_spec().get()
-        if isdefined(self.inputs.outputLeftHemisphere):
-            outputs['outputLeftHemisphere'] = (os.getcwd() + '/' +
-                                               self.inputs.outputLeftHemisphere)
-        else:
-            outputs['outputLeftHemisphere'] = self._gen_filename(
-                'outputLeftHemisphere')
-
-        if isdefined(self.inputs.outputRightHemisphere):
-            outputs['outputRightHemisphere'] = (os.getcwd() + '/' +
-                                                self.inputs.outputRightHemisphere)
-        else:
-            outputs['outputRightHemisphere'] = self._gen_filename(
-                'outputRightHemisphere')
-
-        if isdefined(self.inputs.outputLeftPialHemisphere):
-            outputs['outputLeftPialHemisphere'] = (
-                os.getcwd() + '/' + self.inputs.outputLeftPialHemisphere)
-        if isdefined(self.inputs.outputRightPialHemisphere):
-            outputs['outputRightPialHemisphere'] = (
-                os.getcwd() + '/' + self.inputs.outputRightPialHemisphere)
-
-        return outputs
+        return l_outputs(self)
 
 
 # removes directory of a pathway to a file, removes extension, returns file name
@@ -978,3 +707,13 @@ def getFileName(string):
     arr2 = dotRegex.findall(arr[0])
     arr3 = slashRegex.findall(arr2[0])
     return arr3[len(arr3) - 1]
+
+
+def l_outputs(self):
+    outputs = self.output_spec().get()
+    for key in outputs:
+        name = self._gen_filename(key)
+        if not name is None:
+            outputs[key] = name
+
+    return outputs
