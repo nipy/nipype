@@ -43,6 +43,7 @@ class Info(object):
                                 terminal_output='allatonce').run()
         except IOError:
             # If afni_vcheck is not present, return None
+            warn('afni_vcheck executable not found.')
             return None
 
         out = clout.runtime.stdout.split('\n')[1]

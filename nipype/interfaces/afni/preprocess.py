@@ -1245,8 +1245,6 @@ class SkullStrip(AFNICommand):
             # As of AFNI 16.0.00, redirect_x is not needed
             if isinstance(v[0], int) and v[0] > 15:
                 self._redirect_x = False
-        else:
-            raise RuntimeWarning('afni_vcheck executable not found.')
 
 
 class TCatInputSpec(AFNICommandInputSpec):
