@@ -1236,13 +1236,17 @@ class SkullStrip(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
     def __init__(self, **inputs):
-        from .base import Info
+        from .base import Info, no_afni
         super(SkullStrip, self).__init__(**inputs)
-        v = Info.version()
 
-        # As of AFNI 16.0.00, redirect_x is not needed
-        if isinstance(v[0], int) and v[0] > 15:
-            self._redirect_x = False
+        if not no_afni():
+            v = Info.version()
+
+            # As of AFNI 16.0.00, redirect_x is not needed
+            if isinstance(v[0], int) and v[0] > 15:
+                self._redirect_x = False
+        else:
+            raise RuntimeWarning('afni_vcheck executable not found.')
 
 
 class TCatInputSpec(AFNICommandInputSpec):

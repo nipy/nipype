@@ -38,8 +38,13 @@ class Info(object):
 
         """
         import re
-        clout = CommandLine(command='afni_vcheck',
-                            terminal_output='allatonce').run()
+        try:
+            clout = CommandLine(command='afni_vcheck',
+                                terminal_output='allatonce').run()
+        except IOError:
+            # If afni_vcheck is not present, return None
+            return None
+
         out = clout.runtime.stdout.split('\n')[1]
 
         # Try to parse the version number
@@ -173,3 +178,10 @@ class AFNICommand(CommandLine):
                     if ext == "":
                         outputs[name] = outputs[name] + "+orig.BRIK"
         return outputs
+
+
+def no_afni():
+    """ Checks if AFNI is available """
+    if Info.version() is None:
+        return True
+    return False
