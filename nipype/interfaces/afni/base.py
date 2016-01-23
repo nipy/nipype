@@ -41,12 +41,15 @@ class Info(object):
         try:
             clout = CommandLine(command='afni_vcheck',
                                 terminal_output='allatonce').run()
+            out = clout.runtime.stdout.split('\n')[1]
         except IOError:
             # If afni_vcheck is not present, return None
             warn('afni_vcheck executable not found.')
             return None
-
-        out = clout.runtime.stdout.split('\n')[1]
+        except RuntimeError:
+            # If AFNI is outdated, afni_vcheck throws error
+            warn('AFNI is outdated')
+            out = clout.runtime.stderr.split('\n')[1]
 
         # Try to parse the version number
         m = re.search(r'[\.\d]*$', out)
