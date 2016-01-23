@@ -37,10 +37,23 @@ class Info(object):
            Version number as string or None if AFNI not found
 
         """
+        import re
         clout = CommandLine(command='afni_vcheck',
                             terminal_output='allatonce').run()
-        out = clout.runtime.stdout
-        return out.split('\n')[1]
+        out = clout.runtime.stdout.split('\n')[1]
+
+        # Try to parse the version number
+        m = re.search(r'[\.\d]*$', out)
+        # is the format kept through versions before 16.x?
+        if m is None or not m.group(0):
+            return out
+
+        v = m.group(0).split('.')
+        try:
+            v = [int(n) for n in v]
+        except ValueError:
+            return out
+        return tuple(v)
 
     @classmethod
     def outputtype_to_ext(cls, outputtype):
