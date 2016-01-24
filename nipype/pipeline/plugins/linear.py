@@ -6,7 +6,8 @@ import os
 
 from .base import (PluginBase, logger, report_crash, report_nodes_not_run,
                    str2bool)
-from ..utils import (nx, dfs_preorder, topological_sort)
+from ..engine.utils import (nx, dfs_preorder, topological_sort)
+
 
 class LinearPlugin(PluginBase):
     """Execute workflow in series
@@ -28,7 +29,7 @@ class LinearPlugin(PluginBase):
         old_wd = os.getcwd()
         notrun = []
         donotrun = []
-        nodes, _  = topological_sort(graph)
+        nodes, _ = topological_sort(graph)
         for node in nodes:
             try:
                 if node in donotrun:
@@ -47,11 +48,10 @@ class LinearPlugin(PluginBase):
                 crashfile = report_crash(node)
                 # remove dependencies from queue
                 subnodes = [s for s in dfs_preorder(graph, node)]
-                notrun.append(dict(node = node,
-                                   dependents = subnodes,
-                                   crashfile = crashfile))
+                notrun.append(dict(node=node,
+                                   dependents=subnodes,
+                                   crashfile=crashfile))
                 donotrun.extend(subnodes)
                 if self._status_callback:
                     self._status_callback(node, 'exception')
         report_nodes_not_run(notrun)
-

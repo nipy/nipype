@@ -7,14 +7,11 @@ Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
 
-from multiprocessing import (Process, Pool, cpu_count, pool,
-                             Manager, TimeoutError)
+from multiprocessing import (Process, Pool, cpu_count, pool)
 from copy import deepcopy
 from traceback import format_exception
 import sys
 import signal
-from time import sleep
-import os.path as op
 from .base import (DistributedPluginBase, report_crash, report_nodes_not_run)
 from ..engine import (MapNode, str2bool)
 import numpy as np
@@ -23,12 +20,9 @@ logger = logging.getLogger('workflow')
 
 
 def run_node(args):
-    jobid = args[0]
-    node = args[1]
-    updatehash = args[2]
-
-    jres = dict(result=None, traceback=None)
+    jobid, node, updatehash = args
     logger.info('[Starting] Job %d %s' % (jobid, str(node._id)))
+    jres = {'result': None, 'traceback': None}
     try:
         jres['result'] = node.run(updatehash=updatehash)
         logger.info('[Terminated] Job %d %s' % (jobid, str(node._id)))
@@ -36,8 +30,7 @@ def run_node(args):
         etype, eval, etr = sys.exc_info()
         jres['traceback'] = format_exception(etype, eval, etr)
         jres['result'] = node.result
-        logger.info('[Error] Job %d: %s' % (jobid, jres['traceback']))
-    return (jobid, jres)
+    return jres
 
 
 class NonDaemonProcess(Process):
@@ -160,9 +153,6 @@ calling-helper-functions-when-using-apply-asyncs-callback
 
         return (processed, notrun)
 
-    # def _sem_release(self):
-    #     self._sem.release()
-
     def _report_crash(self, node, result=None):
         if result and result['traceback']:
             node._result = result['result']
@@ -241,7 +231,7 @@ calling-helper-functions-when-using-apply-asyncs-callback
                     if sworker and not nosubmit:
                         forkjids.append(jobid)
                     else:
-                        self._run_mthread(jobid, updatehash)
+                        self._run_mthread(jobid, updatehash, graph)
 
         if len(forkjids) > 0:
             p, n = self._submit_jobs(forkjids)
@@ -298,12 +288,10 @@ calling-helper-functions-when-using-apply-asyncs-callback
         self._results[jobid] = result[jobid]['result']
 
     def _get_result(self, jobid):
-        return self._results.get(jobid,
-                                 {'result': None,
-                                  'traceback': 'Result not found',
-                                  'jobid': jobid})
+        return self._results.get(
+            jobid, {'result': None, 'traceback': 'Result not found', 'jobid': jobid})
 
-    def _run_mthread(self, jobid, updatehash=False):
+    def _run_mthread(self, jobid, graph=None, updatehash=False):
         """
         Run task in master thread
         """

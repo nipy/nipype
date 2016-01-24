@@ -126,7 +126,7 @@ def test_skew():
 -0.5057854071  -2.415896554  -9.663571931  -5.714041661  -6.037933426  8.673756933  10.03557773  8.629816199
 3.622185659  0.4716627142  -10.92515308  -3.705286841  -2.776089545  2.271920902  9.251504922  5.744980887
 """
-    with tempfile.NamedTemporaryFile(delete=True) as f:
+    with tempfile.NamedTemporaryFile(mode='w', delete=True) as f:
         f.write(data)
         f.flush()
         skewness = calc_moments(f.name, 3)

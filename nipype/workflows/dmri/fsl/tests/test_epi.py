@@ -19,8 +19,8 @@ def test_create_eddy_correct_pipeline():
     fsl_course_dir = os.path.abspath(os.environ['FSL_COURSE_DATA'])
 
     dwi_file = os.path.join(fsl_course_dir, "fdt1/subj1/data.nii.gz")
-    
-    trim_dwi = pe.Node(fsl.ExtractROI(t_min=0, 
+
+    trim_dwi = pe.Node(fsl.ExtractROI(t_min=0,
                                       t_size=2), name="trim_dwi")
     trim_dwi.inputs.in_file = dwi_file
 
@@ -45,4 +45,3 @@ def test_create_eddy_correct_pipeline():
 
     pipeline.run(plugin='Linear')
     shutil.rmtree(pipeline.base_dir)
-

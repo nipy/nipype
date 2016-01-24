@@ -33,6 +33,7 @@ from .utils import skip_if_no_package, package_check
 
 skipif = dec.skipif
 
+
 def example_data(infile='functional.nii'):
     """returns path to empty example data files for doc tests
     it will raise an exception if filename is not in the directory"""

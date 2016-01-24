@@ -19,7 +19,7 @@ be specified in the following ways:
 Options can be assigned when you first create an interface object:
 
 .. testcode::
-   
+
    import nipype.interfaces.fsl as fsl
    mybet = fsl.BET(in_file='foo.nii', out_file='bar.nii')
    result = mybet.run()
@@ -40,7 +40,7 @@ Options can be assigned when calling the ``run`` method:
 
    import nipype.interfaces.fsl as fsl
    mybet = fsl.BET()
-   result = mybet.run(in_file='foo.nii', out_file='bar.nii', frac=0.5)   
+   result = mybet.run(in_file='foo.nii', out_file='bar.nii', frac=0.5)
 
 Getting Help
 ------------
@@ -58,17 +58,17 @@ documentation and examples.
     File:		/Users/satra/sp/nipype/interfaces/fsl/preprocess.py
     Docstring:
         Use FSL FAST for segmenting and bias correction.
-    
+
         For complete details, see the `FAST Documentation.
         <http://www.fmrib.ox.ac.uk/fsl/fast4/index.html>`_
-    
+
         Examples
         --------
         >>> from nipype.interfaces import fsl
         >>> from nipype.testing import anatfile
-    
+
         Assign options through the ``inputs`` attribute:
-    
+
         >>> fastr = fsl.FAST()
         >>> fastr.inputs.in_files = anatfile
         >>> out = fastr.run() #doctest: +SKIP
@@ -191,7 +191,7 @@ Using FSL_ to realign a time_series:
    realigner = fsl.McFlirt()
    realigner.inputs.in_file='timeseries4D.nii'
    result = realigner.run()
-   
+
 
 SPM interface example
 ---------------------
@@ -199,7 +199,7 @@ SPM interface example
 Using SPM_ to realign a time-series:
 
 .. testcode::
-   
+
    import nipype.interfaces.spm as spm
    from glob import glob
    allepi = glob('epi*.nii') # this will return an unsorted list

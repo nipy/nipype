@@ -3,16 +3,17 @@ cache:
 language: python
 python:
 - 2.7
+- 3.4
 env:
 - INSTALL_DEB_DEPENDECIES=true
 - INSTALL_DEB_DEPENDECIES=false
 before_install:
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh
-  -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.6.0-Linux-x86_64.sh
+- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+  -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
   -O miniconda.sh; fi
 - chmod +x miniconda.sh
 - "./miniconda.sh -b"
-- export PATH=/home/travis/miniconda/bin:$PATH
+- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then export PATH=/home/travis/miniconda2/bin:$PATH; else export PATH=/home/travis/miniconda3/bin:$PATH; fi
 - if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi
 - if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi
 - if $INSTALL_DEB_DEPENDECIES; then bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh);
@@ -27,22 +28,23 @@ install:
 - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
 - source activate testenv
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then pip install ordereddict; fi
-- conda install --yes numpy scipy nose traits networkx dateutil
-- pip install nibabel
+- conda install --yes numpy scipy nose networkx dateutil
+- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes traits; else pip install traits; fi
 - pip install python-coveralls
 - pip install nose-cov
-- pip install https://github.com/RDFLib/rdflib/archive/master.zip
-- pip install https://github.com/trungdong/prov/archive/rdf.zip
+- pip install -r requirements.txt  # finish remaining requirements
 - python setup.py install
 script:
-- nosetests --with-doctest --with-cov --cov nipype --cov-config .coveragerc --logging-level=INFO
+- python -W once:FSL:UserWarning:nipype `which nosetests` --with-doctest --with-cov --cover-package nipype --cov-config .coveragerc --logging-level=INFO
 after_success:
 - coveralls --config_file .coveragerc
 deploy:
   provider: pypi
   user: satra
   password:
-    secure: ZaN6Y4hfybPMi1rW3Qe03irCe/3GU4J4BJsjG+tClVN5Fjc3FCJaYU0k4wNd9q2kMjuRDv1efA9BN/5QasJS32oqs6wHvxzIWA18ucel4BBnAAkuviC1vqi/8Hk/DGB6e1gnmZ1Nv58zVLfn0MwlOKmsGDtvGQWc+HbaV2fS5NA=
+    secure: OCO0FXb4f+pH4Uw7zWCIRp3qOJ1t7rhky4K8MjNU8tyVCJgd6O/Bv8GJgceS0LktPodlAAjB8SxAhTORPAQZ1D/44PJYy3NQIisvej1zjLpaA9TEGfl6W7MqhDpRyMHW+cnSi/n84SAmdr+Z4vOxScDHdwr13EPmGyOIlHMAGnE=
   on:
     tags: true
+    repo: nipy/nipype
     branch: master
+  distributions: "sdist bdist_wheel"

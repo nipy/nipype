@@ -24,16 +24,16 @@ def test_create_bedpostx_pipeline():
     dwi_file = os.path.join(fsl_course_dir, "fdt2/subj1/data.nii.gz")
     z_min = 62
     z_size = 2
-    
-    slice_mask = pe.Node(fsl.ExtractROI(x_min=0, 
+
+    slice_mask = pe.Node(fsl.ExtractROI(x_min=0,
                                         x_size=-1,
                                         y_min=0,
                                         y_size=-1,
                                         z_min=z_min,
                                         z_size=z_size), name="slice_mask")
     slice_mask.inputs.in_file = mask_file
-    
-    slice_dwi = pe.Node(fsl.ExtractROI(x_min=0, 
+
+    slice_dwi = pe.Node(fsl.ExtractROI(x_min=0,
                                        x_size=-1,
                                        y_min=0,
                                        y_size=-1,
@@ -51,6 +51,7 @@ def test_create_bedpostx_pipeline():
     nipype_bedpostx.inputs.xfibres.sample_every = 1
     nipype_bedpostx.inputs.xfibres.cnlinear = True
     nipype_bedpostx.inputs.xfibres.seed = 0
+    nipype_bedpostx.inputs.xfibres.model = 2
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -64,6 +65,7 @@ def test_create_bedpostx_pipeline():
     original_bedpostx.inputs.n_jumps = 1
     original_bedpostx.inputs.sample_every = 1
     original_bedpostx.inputs.seed = 0
+    original_bedpostx.inputs.model = 2
 
     test_f1 = pe.Node(util.AssertEqual(), name="mean_f1_test")
 
@@ -72,14 +74,13 @@ def test_create_bedpostx_pipeline():
 
     pipeline.connect([(slice_mask, original_bedpostx, [("roi_file", "mask")]),
                       (slice_mask, nipype_bedpostx, [("roi_file", "inputnode.mask")]),
-                      
+
                       (slice_dwi, original_bedpostx, [("roi_file", "dwi")]),
                       (slice_dwi, nipype_bedpostx, [("roi_file", "inputnode.dwi")]),
-                      
-                      (nipype_bedpostx, test_f1, [(("outputnode.mean_fsamples",list_to_filename), "volume1")]),
+
+                      (nipype_bedpostx, test_f1, [(("outputnode.mean_fsamples", list_to_filename), "volume1")]),
                       (original_bedpostx, test_f1, [("mean_fsamples", "volume2")]),
                       ])
 
     pipeline.run(plugin='Linear')
     shutil.rmtree(pipeline.base_dir)
-

@@ -3,7 +3,10 @@
 """Parallel workflow execution via IPython controller
 """
 
-from cPickle import dumps
+from future import standard_library
+standard_library.install_aliases()
+
+from pickle import dumps
 
 import sys
 
@@ -16,18 +19,19 @@ except:
 
 from .base import (DistributedPluginBase, logger, report_crash)
 
+
 def execute_task(pckld_task, node_config, updatehash):
     from socket import gethostname
     from traceback import format_exc
     from nipype import config, logging
-    traceback=None
-    result=None
+    traceback = None
+    result = None
     import os
     cwd = os.getcwd()
     try:
         config.update_config(node_config)
         logging.update_logging(config)
-        from cPickle import loads
+        from pickle import loads
         task = loads(pckld_task)
         result = task.run(updatehash=updatehash)
     except:
@@ -35,6 +39,7 @@ def execute_task(pckld_task, node_config, updatehash):
         result = task.result
     os.chdir(cwd)
     return result, traceback, gethostname()
+
 
 class IPythonPlugin(DistributedPluginBase):
     """Execute workflow with ipython
@@ -59,11 +64,11 @@ class IPythonPlugin(DistributedPluginBase):
             __import__(name)
             self.iparallel = sys.modules[name]
         except ImportError:
-            raise ImportError("Ipython kernel not found. Parallel execution " \
+            raise ImportError("Ipython kernel not found. Parallel execution "
                               "will be unavailable")
         try:
             self.taskclient = self.iparallel.Client()
-        except Exception, e:
+        except Exception as e:
             if isinstance(e, TimeoutError):
                 raise Exception("No IPython clients found.")
             if isinstance(e, IOError):
@@ -107,6 +112,6 @@ class IPythonPlugin(DistributedPluginBase):
 
     def _clear_task(self, taskid):
         if IPyversion >= '0.11':
-            logger.debug("Clearing id: %d"%taskid)
+            logger.debug("Clearing id: %d" % taskid)
             self.taskclient.purge_results(self.taskmap[taskid])
             del self.taskmap[taskid]
