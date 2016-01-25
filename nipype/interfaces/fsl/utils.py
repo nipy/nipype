@@ -1935,7 +1935,6 @@ class WarpPoints(CommandLine):
         writer.write()
 
     def _trk_to_coords(self, in_file, out_file=None):
-        raise NotImplementedError('trk files are not yet supported')
         try:
             from nibabel.trackvis import TrackvisFile
         except ImportError:
