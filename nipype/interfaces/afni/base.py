@@ -37,10 +37,30 @@ class Info(object):
            Version number as string or None if AFNI not found
 
         """
-        clout = CommandLine(command='afni_vcheck',
-                            terminal_output='allatonce').run()
-        out = clout.runtime.stdout
-        return out.split('\n')[1]
+        try:
+            clout = CommandLine(command='afni_vcheck',
+                                terminal_output='allatonce').run()
+        except IOError:
+            # If afni_vcheck is not present, return None
+            warn('afni_vcheck executable not found.')
+            return None
+        except RuntimeError as e:
+            # If AFNI is outdated, afni_vcheck throws error
+            warn('AFNI is outdated')
+            return str(e).split('\n')[4].split('=', 1)[1].strip()
+
+        # Try to parse the version number
+        out = clout.runtime.stdout.split('\n')[1].split('=', 1)[1].strip()
+
+        if out.startswith('AFNI_'):
+            out = out[5:]
+
+        v = out.split('.')
+        try:
+            v = [int(n) for n in v]
+        except ValueError:
+            return out
+        return tuple(v)
 
     @classmethod
     def outputtype_to_ext(cls, outputtype):
@@ -160,3 +180,10 @@ class AFNICommand(CommandLine):
                     if ext == "":
                         outputs[name] = outputs[name] + "+orig.BRIK"
         return outputs
+
+
+def no_afni():
+    """ Checks if AFNI is available """
+    if Info.version() is None:
+        return True
+    return False
