@@ -37,7 +37,6 @@ class Info(object):
            Version number as string or None if AFNI not found
 
         """
-        import re
         try:
             clout = CommandLine(command='afni_vcheck',
                                 terminal_output='allatonce').run()
