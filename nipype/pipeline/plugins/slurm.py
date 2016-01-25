@@ -67,7 +67,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         This is more or less the _submit_batchtask from sge.py with flipped variable
         names, different command line switches, and different output formatting/processing
         """
-        cmd = CommandLine('sbatch', environ=os.environ.data,
+        cmd = CommandLine('sbatch', environ=dict(os.environ),
                           terminal_output='allatonce')
         path = os.path.dirname(scriptfile)
 
@@ -85,11 +85,11 @@ class SLURMPlugin(SGELikeBatchManagerBase):
         if '-e' not in sbatch_args:
             sbatch_args = '%s -e %s' % (sbatch_args, os.path.join(path, 'slurm-%j.out'))
         if node._hierarchy:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._hierarchy,
                                 node._id))
         else:
-            jobname = '.'.join((os.environ.data['LOGNAME'],
+            jobname = '.'.join((dict(os.environ)['LOGNAME'],
                                 node._id))
         jobnameitems = jobname.split('.')
         jobnameitems.reverse()

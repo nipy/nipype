@@ -7,11 +7,11 @@ import os
 from shutil import rmtree
 from tempfile import mkdtemp
 
-from nipype.testing import (assert_equal, assert_true)
-import nipype.interfaces.base as nib
-import nipype.pipeline.engine as pe
-from nipype.interfaces.utility import IdentityInterface
-from nipype.interfaces.base import traits, File
+from ....testing import (assert_equal, assert_true)
+from ... import engine as pe
+from ....interfaces import base as nib
+from ....interfaces.utility import IdentityInterface
+from ....interfaces.base import traits, File
 
 
 class PickFirstSpec(nib.TraitedSpec):

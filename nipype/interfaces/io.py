@@ -475,7 +475,8 @@ class S3DataSink(DataSink):
 
 class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     anon = traits.Bool(False, usedefault=True,
-                       desc='Use anonymous connection to s3')
+                       desc='Use anonymous connection to s3.  If this is set to True, boto may print' +
+                            ' a urlopen error, but this does not prevent data from being downloaded.')
     region = traits.Str('us-east-1', usedefault=True,
                         desc='Region of s3 bucket')
     bucket = traits.Str(mandatory=True,
@@ -656,14 +657,17 @@ class S3DataGrabber(IOBase):
         # Outputs are currently stored as locations on S3.
         # We must convert to the local location specified
         # and download the files.
-        for key in outputs:
-            if type(outputs[key]) == list:
-                paths = outputs[key]
-                for i in range(len(paths)):
-                    path = paths[i]
+        for key,val in outputs.iteritems():
+            #This will basically be either list-like or string-like:
+            #if it has the __iter__ attribute, it's list-like (list,
+            #tuple, numpy array) and we iterate through each of its
+            #values. If it doesn't, it's string-like (string,
+            #unicode), and we convert that value directly.
+            if hasattr(val,'__iter__'):
+                for i,path in enumerate(val):
                     outputs[key][i] = self.s3tolocal(path, bkt)
-            elif type(outputs[key]) == str:
-                outputs[key] = self.s3tolocal(outputs[key], bkt)
+            else:
+                outputs[key] = self.s3tolocal(val, bkt)
 
         return outputs
 
