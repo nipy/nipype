@@ -19,8 +19,8 @@ dependencies:
     - echo 'source /etc/fsl/fsl.sh' >> $HOME/.profile
     - echo 'source /etc/afni/afni.sh' >> $HOME/.profile
     # Enable system-wide vtk
-    - echo 'export PYTHONPATH=$PYTHONPATH:/usr/lib/pymodules/python2.7/' >> $HOME/.profile
-    - export PYTHONPATH=$PYTHONPATH:/usr/lib/pymodules/python2.7/
+    - echo 'ln -s /usr/lib/pymodules/python2.7/vtk ~/virtualenvs/venv-system/lib/python2.7/site-packages/' >> $HOME/.profile
+    - ln -s /usr/lib/pymodules/python2.7/vtk ~/virtualenvs/venv-system/lib/python2.7/site-packages/
     # Set up python environment
     - pip install --upgrade pip
     - pip install -e .
