@@ -38,17 +38,19 @@ install:
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then pip install ordereddict; fi
 - conda install --yes numpy scipy nose networkx dateutil
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes traits; else pip install traits; fi
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes vtk; else pip install vtk; fi
+- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes vtk; fi
 - pip install python-coveralls
 - pip install nose-cov
 # Add tvtk (PIL is required by blockcanvas)
-- pip install http://effbot.org/downloads/Imaging-1.1.7.tar.gz
-- pip install -e git+https://github.com/enthought/etsdevtools.git#egg=etsdevtools
-- pip install -e git+https://github.com/enthought/blockcanvas.git#egg=blockcanvas
-- pip install -e git+https://github.com/enthought/etsproxy.git#egg=etsproxy
 # Install mayavi (see https://github.com/enthought/mayavi/issues/271)
-- pip install https://github.com/dmsurti/mayavi/archive/4d4aaf315a29d6a86707dd95149e27d9ed2225bf.zip
-- pip install -e git+https://github.com/enthought/ets.git#egg=ets
+- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then
+  pip install http://effbot.org/downloads/Imaging-1.1.7.tar.gz
+  pip install -e git+https://github.com/enthought/etsdevtools.git#egg=etsdevtools
+  pip install -e git+https://github.com/enthought/blockcanvas.git#egg=blockcanvas
+  pip install -e git+https://github.com/enthought/etsproxy.git#egg=etsproxy
+  pip install https://github.com/dmsurti/mayavi/archive/4d4aaf315a29d6a86707dd95149e27d9ed2225bf.zip
+  pip install -e git+https://github.com/enthought/ets.git#egg=ets
+  fi
 - pip install -r requirements.txt  # finish remaining requirements
 - python setup.py install
 script:
