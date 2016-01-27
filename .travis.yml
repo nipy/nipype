@@ -43,6 +43,8 @@ install:
 - pip install -e git+https://github.com/enthought/etsdevtools.git#egg=etsdevtools
 - pip install -e git+https://github.com/enthought/blockcanvas.git#egg=blockcanvas
 - pip install -e git+https://github.com/enthought/etsproxy.git#egg=etsproxy
+# Install mayavi (see https://github.com/enthought/mayavi/issues/271)
+- pip install https://github.com/dmsurti/mayavi/archive/4d4aaf315a29d6a86707dd95149e27d9ed2225bf.zip
 - pip install -e git+https://github.com/enthought/ets.git#egg=ets
 - pip install -r requirements.txt  # finish remaining requirements
 - python setup.py install
