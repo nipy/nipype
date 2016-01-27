@@ -39,7 +39,7 @@ install:
 - pip install python-coveralls
 - pip install nose-cov
 # Add tvtk (PIL is required by blockcanvas)
-- pip install PIL http://effbot.org/downloads/Imaging-1.1.7.tar.gz
+- pip install http://effbot.org/downloads/Imaging-1.1.7.tar.gz
 - pip install -e git+https://github.com/enthought/etsdevtools.git#egg=etsdevtools
 - pip install -e git+https://github.com/enthought/blockcanvas.git#egg=blockcanvas
 - pip install -e git+https://github.com/enthought/ets.git#egg=ets
