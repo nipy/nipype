@@ -1,15 +1,16 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-'''
+"""
 Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname(os.path.realpath( __file__ ))
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-    >>> os.chdir(datadir)
+  .. testsetup::
+    # Change directory to provide relative paths for doctests
+    import os
+    filepath = os.path.dirname(os.path.realpath( __file__ ))
+    datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+    os.chdir(datadir)
 
-'''
+"""
 from __future__ import division
 from builtins import zip
 
@@ -44,6 +45,7 @@ finally:
 
 
 class TVTKBaseInterface(BaseInterface):
+
     """ A base class for interfaces using VTK """
 
     _redirect_x = True
@@ -66,9 +68,9 @@ class TVTKBaseInterface(BaseInterface):
 
 class WarpPointsInputSpec(BaseInterfaceInputSpec):
     points = File(exists=True, mandatory=True,
-                  desc=('file containing the point set'))
+                  desc='file containing the point set')
     warp = File(exists=True, mandatory=True,
-                desc=('dense deformation field to be applied'))
+                desc='dense deformation field to be applied')
     interp = traits.Enum('cubic', 'nearest', 'linear', usedefault=True,
                          mandatory=True, desc='interpolation')
     out_points = File(name_source='points', name_template='%s_warped',
@@ -92,11 +94,19 @@ class WarpPoints(TVTKBaseInterface):
     Example
     -------
 
+    >>> from nipype.algorithms.mesh import have_tvtk
     >>> from nipype.algorithms.mesh import WarpPoints
-    >>> wp = WarpPoints()
-    >>> wp.inputs.points = 'surf1.vtk'
-    >>> wp.inputs.warp = 'warpfield.nii'
-    >>> res = wp.run() # doctest: +SKIP
+    >>> if not have_tvtk:
+    ...     wp = WarpPoints()
+    Traceback (most recent call last):
+     ...
+    ImportError: This interface requires tvtk to run.
+    >>> else:
+    ...     wp = WarpPoints()
+    ...     wp.inputs.points = 'surf1.vtk'
+    ...     wp.inputs.warp = 'warpfield.nii'
+    ...     res = wp.run() # doctest: +SKIP
+
     """
     input_spec = WarpPointsInputSpec
     output_spec = WarpPointsOutputSpec
@@ -179,7 +189,7 @@ class ComputeMeshWarpInputSpec(BaseInterfaceInputSpec):
                     desc=('Test surface (vtk format) from which compute '
                           'distance.'))
     metric = traits.Enum('euclidean', 'sqeuclidean', usedefault=True,
-                         desc=('norm used to report distance'))
+                         desc='norm used to report distance')
     weighting = traits.Enum(
         'none', 'area', usedefault=True,
         desc=('"none": no weighting is performed, surface": edge distance is '
@@ -256,9 +266,9 @@ class ComputeMeshWarp(TVTKBaseInterface):
             errvector = np.apply_along_axis(nla.norm, 1, diff)
 
         if self.inputs.metric == 'sqeuclidean':
-            errvector = errvector ** 2
+            errvector **= 2
 
-        if (self.inputs.weighting == 'area'):
+        if self.inputs.weighting == 'area':
             faces = vtk1.polys.to_array().reshape(-1, 4).astype(int)[:, 1:]
 
             for i, p1 in enumerate(points2):
@@ -285,9 +295,9 @@ class ComputeMeshWarp(TVTKBaseInterface):
             file_name=op.abspath(self.inputs.out_warp))
 
         if self._vtk_major <= 5:
-            writer.input = mesh
+            writer.input = out_mesh
         else:
-            writer.set_input_data_object(mesh)
+            writer.set_input_data_object(out_mesh)
 
         writer.write()
 
@@ -311,10 +321,10 @@ class MeshWarpMathsInputSpec(BaseInterfaceInputSpec):
 
     operator = traits.Either(
         float_trait, File(exists=True), default=1.0, mandatory=True,
-        desc=('image, float or tuple of floats to act as operator'))
+        desc='image, float or tuple of floats to act as operator')
 
     operation = traits.Enum('sum', 'sub', 'mul', 'div', usedefault=True,
-                            desc=('operation to be performed'))
+                            desc='operation to be performed')
 
     out_warp = File('warp_maths.vtk', usedefault=True,
                     desc='vtk file based on in_surf and warpings mapping it '
@@ -364,7 +374,7 @@ class MeshWarpMaths(TVTKBaseInterface):
         points1 = np.array(vtk1.points)
 
         if vtk1.point_data.vectors is None:
-            raise RuntimeError(('No warping field was found in in_surf'))
+            raise RuntimeError('No warping field was found in in_surf')
 
         operator = self.inputs.operator
         opfield = np.ones_like(points1)
