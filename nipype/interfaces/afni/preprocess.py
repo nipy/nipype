@@ -1235,6 +1235,17 @@ class SkullStrip(AFNICommand):
     input_spec = SkullStripInputSpec
     output_spec = AFNICommandOutputSpec
 
+    def __init__(self, **inputs):
+        from .base import Info, no_afni
+        super(SkullStrip, self).__init__(**inputs)
+
+        if not no_afni():
+            v = Info.version()
+
+            # As of AFNI 16.0.00, redirect_x is not needed
+            if isinstance(v[0], int) and v[0] > 15:
+                self._redirect_x = False
+
 
 class TCatInputSpec(AFNICommandInputSpec):
     in_files = InputMultiPath(

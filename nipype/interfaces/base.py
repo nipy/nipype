@@ -1271,9 +1271,16 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     if output == 'allatonce':
         stdout, stderr = proc.communicate()
         if stdout and isinstance(stdout, bytes):
-            stdout = stdout.decode()
+            try:
+                stdout = stdout.decode()
+            except UnicodeDecodeError:
+                stdout = stdout.decode("ISO-8859-1")
         if stderr and isinstance(stderr, bytes):
-            stderr = stderr.decode()
+            try:
+                stderr = stderr.decode()
+            except UnicodeDecodeError:
+                stderr = stderr.decode("ISO-8859-1")
+
         result['stdout'] = str(stdout).split('\n')
         result['stderr'] = str(stderr).split('\n')
         result['merged'] = ''
