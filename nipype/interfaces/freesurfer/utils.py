@@ -2604,8 +2604,8 @@ class Aparc2Aseg(FSCommand):
     This can be turned off with --noribbon. The cortical parcellation is
     obtained from subject/label/hemi.aparc.annot which should be based on
     the curvature.buckner40.filled.desikan_killiany.gcs atlas. The aseg is
-    obtained from subject/mri/aseg.mgz and should be based on the RB40_
-    talairach_2005-07-20.gca atlas. If these atlases are used, then the
+    obtained from subject/mri/aseg.mgz and should be based on the
+    RB40_talairach_2005-07-20.gca atlas. If these atlases are used, then the
     segmentations can be viewed with tkmedit and the
     FreeSurferColorLUT.txt color table found in $FREESURFER_HOME. These
     are the default atlases used by recon-all.
