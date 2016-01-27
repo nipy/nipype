@@ -2,6 +2,7 @@ Next release
 ============
 
 * FIX: Prevent crash when tvtk is loaded - ETS_TOOLKIT=null (https://github.com/nipy/nipype/pull/973)
+* TST: Cache APT in CircleCI (https://github.com/nipy/nipype/pull/1333)
 * ENH: Add new flags to the BRAINSABC for new features (https://github.com/nipy/nipype/pull/1322)
 * ENH: Provides a Nipype wrapper for ANTs DenoiseImage (https://github.com/nipy/nipype/pull/1291)
 * FIX: Minor bugfix logging hash differences (https://github.com/nipy/nipype/pull/1298)
