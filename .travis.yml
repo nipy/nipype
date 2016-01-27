@@ -24,9 +24,10 @@ before_install:
   fi
 - if $INSTALL_DEB_DEPENDECIES; then source /etc/fsl/fsl.sh; fi
 - if $INSTALL_DEB_DEPENDECIES; then source /etc/afni/afni.sh; fi
+# Install vtk and fix numpy installation problem
+# Fix numpy problem: https://github.com/enthought/enable/issues/34#issuecomment-2029381
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then travis_retry sudo apt-get install -qq libx11-dev swig;
-  # Fix numpy problem: https://github.com/enthought/enable/issues/34#issuecomment-2029381
-  echo '[x11]' >> $HOME/.numpy-site.cfg;
+  echo '[x11]' >> $HOME/.numpy-site.cfg; 
   echo 'library_dirs = /usr/lib64:/usr/lib:/usr/lib/x86_64-linux-gnu' >> $HOME/.numpy-site.cfg;
   echo 'include_dirs = /usr/include:/usr/include/X11' >> $HOME/.numpy-site.cfg;
   fi
