@@ -22,7 +22,7 @@ before_install:
   fsl afni elastix; fi
 - if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -qq fsl-atlases;
   fi
-- travis_retry sudo apt-get install -qq libx11-dev libvtk5-dev swig python-vtk
+- travis_retry sudo apt-get install -qq libx11-dev swig
 - if $INSTALL_DEB_DEPENDECIES; then source /etc/fsl/fsl.sh; fi
 - if $INSTALL_DEB_DEPENDECIES; then source /etc/afni/afni.sh; fi
 # Fix numpy problem: https://github.com/enthought/enable/issues/34#issuecomment-2029381
@@ -34,7 +34,7 @@ install:
 - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
 - source activate testenv
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then pip install ordereddict; fi
-- conda install --yes numpy scipy nose networkx dateutil
+- conda install --yes numpy scipy nose networkx dateutil vtk
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes traits; else pip install traits; fi
 - pip install python-coveralls
 - pip install nose-cov
