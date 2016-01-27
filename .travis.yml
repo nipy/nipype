@@ -25,6 +25,10 @@ before_install:
 - travis_retry sudo apt-get install -qq libx11-dev libvtk5-dev swig
 - if $INSTALL_DEB_DEPENDECIES; then source /etc/fsl/fsl.sh; fi
 - if $INSTALL_DEB_DEPENDECIES; then source /etc/afni/afni.sh; fi
+# Fix numpy problem: https://github.com/enthought/enable/issues/34#issuecomment-2029381
+- echo '[x11]' >> $HOME/.numpy-site.cfg
+- echo 'library_dirs = /usr/lib64:/usr/lib:/usr/lib/x86_64-linux-gnu' >> $HOME/.numpy-site.cfg
+- echo 'include_dirs = /usr/include:/usr/include/X11' >> $HOME/.numpy-site.cfg
 install:
 - conda update --yes conda
 - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
