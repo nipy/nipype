@@ -17,19 +17,20 @@ import platform
 
 notvtk = True
 if 'darwin' not in platform.system().lower():
-    oldets = os.getenv('ETS_TOOLKIT')
+    old_ets = os.getenv('ETS_TOOLKIT')
+    os.environ['ETS_TOOLKIT'] = 'null'
     have_tvtk = False
     try:
-        os.environ['ETS_TOOLKIT'] = 'null'
         from tvtk.api import tvtk
         notvtk = False
     except ImportError:
         pass
+    finally:
+        if old_ets is not None:
+            os.environ['ETS_TOOLKIT'] = old_ets
+        else:
+            del os.environ['ETS_TOOLKIT']
 
-    if oldets is not None:
-        os.environ['ETS_TOOLKIT'] = oldets
-    else:
-        del os.environ['ETS_TOOLKIT']
 
 @skipif(notvtk)
 def test_ident_distances():

@@ -1867,25 +1867,21 @@ class WarpPoints(CommandLine):
         import os
         import os.path as op
 
-        oldets = os.getenv('ETS_TOOLKIT')
+        # Ensure that tvtk is loaded with the appropriate ETS_TOOLKIT env var
+        old_ets = os.getenv('ETS_TOOLKIT')
+        os.environ['ETS_TOOLKIT'] = 'null'
         try:
-            os.environ['ETS_TOOLKIT'] = 'null'
             from tvtk.api import tvtk
+            from tvtk.tvtk_classes.vtk_version import vtk_build_version
         except ImportError:
             raise ImportError('This interface requires tvtk to run.')
         finally:
-            if oldets is not None:
-                os.environ['ETS_TOOLKIT'] = oldets
+            if old_ets is not None:
+                os.environ['ETS_TOOLKIT'] = old_ets
             else:
                 del os.environ['ETS_TOOLKIT']
 
-        vtk_major = 5
-        try:
-            from tvtk.tvtk_classes.vtk_version import vtk_build_version
-            vtk_major = int(vtk_build_version[0])
-        except ImportError:
-            iflogger.warning('VTK version-major inspection using tvtk failed.')
-
+        vtk_major = int(vtk_build_version[0])
         reader = tvtk.PolyDataReader(file_name=in_file + '.vtk')
         reader.update()
 
@@ -1902,25 +1898,21 @@ class WarpPoints(CommandLine):
         import os
         import os.path as op
 
-        oldets = os.getenv('ETS_TOOLKIT')
+        # Ensure that tvtk is loaded with the appropriate ETS_TOOLKIT env var
+        old_ets = os.getenv('ETS_TOOLKIT')
+        os.environ['ETS_TOOLKIT'] = 'null'
         try:
-            os.environ['ETS_TOOLKIT'] = 'null'
             from tvtk.api import tvtk
+            from tvtk.tvtk_classes.vtk_version import vtk_build_version
         except ImportError:
             raise ImportError('This interface requires tvtk to run.')
         finally:
-            if oldets is not None:
-                os.environ['ETS_TOOLKIT'] = oldets
+            if old_ets is not None:
+                os.environ['ETS_TOOLKIT'] = old_ets
             else:
                 del os.environ['ETS_TOOLKIT']
 
-        vtk_major = 5
-        try:
-            from tvtk.tvtk_classes.vtk_version import vtk_build_version
-            vtk_major = int(vtk_build_version[0])
-        except ImportError:
-            iflogger.warning('VTK version-major inspection using tvtk failed.')
-
+        vtk_major = int(vtk_build_version[0])
         reader = tvtk.PolyDataReader(file_name=self.inputs.in_file)
         reader.update()
 

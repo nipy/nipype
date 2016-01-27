@@ -25,36 +25,41 @@ from ..external.six import string_types
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
 
-oldets = os.getenv('ETS_TOOLKIT')
+iflogger = logging.getLogger('interface')
+
+# Ensure that tvtk is loaded with the appropriate ETS_TOOLKIT env var
+old_ets = os.getenv('ETS_TOOLKIT')
+os.environ['ETS_TOOLKIT'] = 'null'
 have_tvtk = False
 try:
-    os.environ['ETS_TOOLKIT'] = 'null'
     from tvtk.api import tvtk
     have_tvtk = True
 except ImportError:
-    pass
-
-if oldets is not None:
-    os.environ['ETS_TOOLKIT'] = oldets
-else:
-    del os.environ['ETS_TOOLKIT']
-
-iflogger = logging.getLogger('interface')
+    iflogger.warning('tvtk wasn\'t found')
+finally:
+    if old_ets is not None:
+        os.environ['ETS_TOOLKIT'] = old_ets
+    else:
+        del os.environ['ETS_TOOLKIT']
 
 
 class TVTKBaseInterface(BaseInterface):
+    """ A base class for interfaces using VTK """
+
     _redirect_x = True
-    _vtk_major = 6
+    _vtk_major = 5
 
     def __init__(self, **inputs):
         if not have_tvtk:
-            iflogger.warning('Interface requires tvtk, but it wasn\'t found')
-        else:
-            try:
-                from tvtk.tvtk_classes.vtk_version import vtk_build_version
-                self._vtk_major = int(vtk_build_version[0])
-            except ImportError:
-                iflogger.warning('VTK version-major inspection using tvtk failed.')
+            raise ImportError('This interface requires tvtk to run.')
+
+        # Identify VTK version major, use 5.0 if failed
+        try:
+            from tvtk.tvtk_classes.vtk_version import vtk_build_version
+            self._vtk_major = int(vtk_build_version[0])
+        except ImportError:
+            iflogger.warning(
+                'VTK version-major inspection using tvtk failed, assuming VTK <= 5.0.')
 
         super(TVTKBaseInterface, self).__init__(**inputs)
 
