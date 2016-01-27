@@ -224,11 +224,18 @@ class ComputeMeshWarp(TVTKBaseInterface):
     Example
     -------
 
+    >>> from nipype.algorithms.mesh import have_tvtk
     >>> import nipype.algorithms.mesh as m
-    >>> dist = m.ComputeMeshWarp()
-    >>> dist.inputs.surface1 = 'surf1.vtk'
-    >>> dist.inputs.surface2 = 'surf2.vtk'
-    >>> res = dist.run()  # doctest: +SKIP
+    >>> if not have_tvtk:
+    ...     dist = m.ComputeMeshWarp()
+    Traceback (most recent call last):
+     ...
+    ImportError: This interface requires tvtk to run.
+    >>> else:
+    ...     dist = m.ComputeMeshWarp()
+    ...     dist.inputs.surface1 = 'surf1.vtk'
+    ...     dist.inputs.surface2 = 'surf2.vtk'
+    ...     res = dist.run()  # doctest: +SKIP
 
     """
 
@@ -355,12 +362,19 @@ class MeshWarpMaths(TVTKBaseInterface):
     Example
     -------
 
+    >>> from nipype.algorithms.mesh import have_tvtk
     >>> import nipype.algorithms.mesh as m
-    >>> mmath = m.MeshWarpMaths()
-    >>> mmath.inputs.in_surf = 'surf1.vtk'
-    >>> mmath.inputs.operator = 'surf2.vtk'
-    >>> mmath.inputs.operation = 'mul'
-    >>> res = mmath.run()  # doctest: +SKIP
+    >>> if not have_tvtk:
+    ...     mmath = m.MeshWarpMaths()
+    Traceback (most recent call last):
+     ...
+    ImportError: This interface requires tvtk to run.
+    >>> else:
+    ...     mmath = m.MeshWarpMaths()
+    ...     mmath.inputs.in_surf = 'surf1.vtk'
+    ...     mmath.inputs.operator = 'surf2.vtk'
+    ...     mmath.inputs.operation = 'mul'
+    ...     res = mmath.run()  # doctest: +SKIP
 
     """
 
