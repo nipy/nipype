@@ -38,8 +38,8 @@ install:
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then conda install --yes traits; else pip install traits; fi
 - pip install python-coveralls
 - pip install nose-cov
-# Add tvtk
-- pip install PIL --allow-external PIL --allow-unverified PIL
+# Add tvtk (PIL is required by blockcanvas)
+- pip install PIL http://effbot.org/downloads/Imaging-1.1.7.tar.gz
 - pip install -e git+https://github.com/enthought/etsdevtools.git#egg=etsdevtools
 - pip install -e git+https://github.com/enthought/blockcanvas.git#egg=blockcanvas
 - pip install -e git+https://github.com/enthought/ets.git#egg=ets
