@@ -26,6 +26,7 @@ dependencies:
     - pip install http://effbot.org/downloads/Imaging-1.1.7.tar.gz
     - pip install -e git+https://github.com/enthought/etsdevtools.git#egg=etsdevtools
     - pip install -e git+https://github.com/enthought/blockcanvas.git#egg=blockcanvas
+    - pip install -e git+https://github.com/enthought/etsproxy.git#egg=etsproxy
     - pip install -e git+https://github.com/enthought/ets.git#egg=ets
     - gem install fakes3
     - if [[ ! -d ~/examples/data ]]; then wget "http://tcpdiag.dl.sourceforge.net/project/nipy/nipype/nipype-0.2/nipype-tutorial.tar.bz2"; tar jxvf nipype-tutorial.tar.bz2; mkdir ~/examples; mv nipype-tutorial/* ~/examples/; fi
