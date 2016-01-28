@@ -147,8 +147,8 @@ class PETPVC(CommandLine):
     >>> from ..testing import example_data
     >>> #TODO get data for PETPVC
     >>> pvc = PETPVC()
-    >>> pvc.inputs.in_file   = example_data('pet.nii.gz')
-    >>> pvc.inputs.mask_file = example_data('tissues.nii.gz')
+    >>> pvc.inputs.in_file   = 'pet.nii.gz'
+    >>> pvc.inputs.mask_file = 'tissues.nii.gz'
     >>> pvc.inputs.out_file  = 'pet_pvc_rbv.nii.gz'
     >>> pvc.inputs.pvc = 'RBV'
     >>> pvc.inputs.fwhm_x = 2.0
