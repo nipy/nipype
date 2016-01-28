@@ -23,7 +23,7 @@ logger = logging.getLogger('workflow')
 def run_node(args):
     jobid, node, updatehash = args
     logger.info('[Starting] Job %d %s' % (jobid, str(node._id)))
-    jres = {'result': None, 'traceback': None}
+    jres = {'result': None}
     abort = False
     try:
         jres['result'] = node.run(updatehash=updatehash)
@@ -38,6 +38,7 @@ def run_node(args):
         etype, eval, etr = sys.exc_info()
         jres['traceback'] = format_exception(etype, eval, etr)
         jres['result'] = node.result
+        logger.warn('[Errored] Job %d %s' % (jobid, str(node._id)))
 
     return (jobid, jres, abort)
 
@@ -123,7 +124,7 @@ calling-helper-functions-when-using-apply-asyncs-callback
             maxtasksperchild=plugin_args.get('maxtasksperchild', 50))
         self._non_daemon = plugin_args.get('non_daemon', True)
 
-    def _submit_jobs(self, jobids, updatehash=False):
+    def _submit_jobs(self, jobids, graph=None, updatehash=False):
         jobids = np.atleast_1d(jobids).tolist()
         logger.info('Submitting %s' % str(jobids))
         jobargs = []
@@ -154,9 +155,12 @@ calling-helper-functions-when-using-apply-asyncs-callback
                 raise KeyboardInterrupt('Aborting execution at user\'s request...')
 
             jobid = el[0]
-            if el[1]['traceback'] is not None:
-                logger.info('Job %s failed. Reason: %s.' % (el[0], el[1]['traceback']))
-                notrun.append(jobid)
+            tb = el[1].get('traceback', None)
+            if tb is not None:
+                logger.info('Job %s failed.' % el[0])
+                logger.error(''.join(el[1]['traceback']))
+                notrun.append(self._clean_queue(jobid, graph,
+                              result=el[1]))
             else:
                 processed.append(jobid)
 
@@ -172,8 +176,7 @@ calling-helper-functions-when-using-apply-asyncs-callback
         if result and result['traceback']:
             node._result = result['result']
             node._traceback = result['traceback']
-            return report_crash(node,
-                                traceback=result['traceback'])
+            return report_crash(node, traceback=result['traceback'])
         else:
             return report_crash(node)
 
@@ -249,10 +252,8 @@ calling-helper-functions-when-using-apply-asyncs-callback
                         self._run_mthread(jobid, updatehash, graph)
 
         if len(forkjids) > 0:
-            p, n = self._submit_jobs(forkjids)
-
-            for jid in n:
-                self._notrun.append(self._clean_queue(jid, graph))
+            p, n = self._submit_jobs(forkjids, graph=graph, updatehash=updatehash)
+            self._notrun += n
 
     def run(self, graph, config, updatehash=False):
         """

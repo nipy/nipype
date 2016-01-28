@@ -284,8 +284,7 @@ class DistributedPluginBase(PluginBase):
     def _clean_queue(self, jobid, graph, result=None):
         if str2bool(self._config['execution']['stop_on_first_crash']):
             raise RuntimeError("".join(result['traceback']))
-        crashfile = self._report_crash(self.procs[jobid],
-                                       result=result)
+        crashfile = self._report_crash(self.procs[jobid], result=result)
         if self._status_callback:
             self._status_callback(self.procs[jobid], 'exception')
         if jobid in self.mapnodesubids:
