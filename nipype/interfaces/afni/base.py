@@ -6,13 +6,14 @@ from builtins import object
 
 
 import os
-import warnings
 
+from ... import logging
 from ...utils.filemanip import split_filename
 from ..base import (
     CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
 
-warn = warnings.warn
+# Use nipype's logging system
+iflogger = logging.getLogger('interface')
 
 
 class Info(object):
@@ -40,26 +41,29 @@ class Info(object):
         try:
             clout = CommandLine(command='afni_vcheck',
                                 terminal_output='allatonce').run()
+
+            # Try to parse the version number
+            currv = clout.runtime.stdout.split('\n')[1].split('=', 1)[1].strip()
         except IOError:
             # If afni_vcheck is not present, return None
-            warn('afni_vcheck executable not found.')
+            iflogger.warn('afni_vcheck executable not found.')
             return None
         except RuntimeError as e:
-            # If AFNI is outdated, afni_vcheck throws error
-            warn('AFNI is outdated')
-            return str(e).split('\n')[4].split('=', 1)[1].strip()
+            # If AFNI is outdated, afni_vcheck throws error.
+            # Show new version, but parse current anyways.
+            currv = str(e).split('\n')[4].split('=', 1)[1].strip()
+            nextv = str(e).split('\n')[6].split('=', 1)[1].strip()
+            iflogger.warn(
+                'AFNI is outdated, detected version %s and %s is available.' % (currv, nextv))
 
-        # Try to parse the version number
-        out = clout.runtime.stdout.split('\n')[1].split('=', 1)[1].strip()
+        if currv.startswith('AFNI_'):
+            currv = currv[5:]
 
-        if out.startswith('AFNI_'):
-            out = out[5:]
-
-        v = out.split('.')
+        v = currv.split('.')
         try:
             v = [int(n) for n in v]
         except ValueError:
-            return out
+            return currv
         return tuple(v)
 
     @classmethod
