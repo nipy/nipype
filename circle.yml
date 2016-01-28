@@ -19,7 +19,7 @@ dependencies:
     - echo 'source /etc/afni/afni.sh' >> $HOME/.profile
     # Enable system-wide vtk
     - echo 'ln -sf /usr/lib/pymodules/python2.7/vtk ~/virtualenvs/venv-system/lib/python2.7/site-packages/' >> $HOME/.profile
-    - ln -s /usr/lib/pymodules/python2.7/vtk ~/virtualenvs/venv-system/lib/python2.7/site-packages/
+    - ln -sf /usr/lib/pymodules/python2.7/vtk ~/virtualenvs/venv-system/lib/python2.7/site-packages/
     # Set up python environment
     - pip install --upgrade pip
     - pip install -e .
