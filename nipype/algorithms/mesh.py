@@ -5,10 +5,10 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 
   .. testsetup::
     # Change directory to provide relative paths for doctests
-    import os
-    filepath = os.path.dirname(os.path.realpath( __file__ ))
-    datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-    os.chdir(datadir)
+    >>> import os
+    >>> filepath = os.path.dirname(os.path.realpath( __file__ ))
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+    >>> os.chdir(datadir)
 
 """
 from __future__ import division
@@ -91,25 +91,13 @@ class WarpPoints(TVTKBaseInterface):
     ``warp`` file. FSL interfaces are compatible, for instance any
     field computed with :class:`nipype.interfaces.fsl.utils.ConvertWarp`.
 
-    Example
-    -------
+    Example::
 
-    >>> from nipype.algorithms.mesh import have_tvtk
-    >>> from nipype.algorithms.mesh import WarpPoints
-    >>> if not have_tvtk:
-    ...     wp = WarpPoints()
-    >>> else:
-    ...     wp = WarpPoints()
-    ...     wp.inputs.points = 'surf1.vtk'
-    ...     wp.inputs.warp = 'warpfield.nii'
-    ...     res = wp.run() # doctest: +SKIP
-    # Exceptions cannot be tested conditionally, so raise error
-    # https://docs.python.org/2/library/doctest.html#id2
-    ...     raise ImportError('This interface requires tvtk to run.')
-    Traceback (most recent call last):
-     ...
-    ImportError: This interface requires tvtk to run.
-
+        from nipype.algorithms.mesh import WarpPoints
+        wp = WarpPoints()
+        wp.inputs.points = 'surf1.vtk'
+        wp.inputs.warp = 'warpfield.nii'
+        res = wp.run()
 
     """
     input_spec = WarpPointsInputSpec
@@ -225,24 +213,13 @@ class ComputeMeshWarp(TVTKBaseInterface):
       A point-to-point correspondence between surfaces is required
 
 
-    Example
-    -------
+    Example::
 
-    >>> from nipype.algorithms.mesh import have_tvtk
-    >>> import nipype.algorithms.mesh as m
-    >>> if not have_tvtk:
-    ...     dist = m.ComputeMeshWarp()
-    >>> else:
-    ...     dist = m.ComputeMeshWarp()
-    ...     dist.inputs.surface1 = 'surf1.vtk'
-    ...     dist.inputs.surface2 = 'surf2.vtk'
-    ...     res = dist.run()  # doctest: +SKIP
-    # Exceptions cannot be tested conditionally, so raise error
-    # https://docs.python.org/2/library/doctest.html#id2
-    ...     raise ImportError('This interface requires tvtk to run.')
-    Traceback (most recent call last):
-     ...
-    ImportError: This interface requires tvtk to run.
+        import nipype.algorithms.mesh as m
+        dist = m.ComputeMeshWarp()
+        dist.inputs.surface1 = 'surf1.vtk'
+        dist.inputs.surface2 = 'surf2.vtk'
+        res = dist.run()
 
     """
 
@@ -366,25 +343,14 @@ class MeshWarpMaths(TVTKBaseInterface):
       A point-to-point correspondence between surfaces is required
 
 
-    Example
-    -------
+    Example::
 
-    >>> from nipype.algorithms.mesh import have_tvtk
-    >>> import nipype.algorithms.mesh as m
-    >>> if not have_tvtk:
-    ...     mmath = m.MeshWarpMaths()
-    >>> else:
-    ...     mmath = m.MeshWarpMaths()
-    ...     mmath.inputs.in_surf = 'surf1.vtk'
-    ...     mmath.inputs.operator = 'surf2.vtk'
-    ...     mmath.inputs.operation = 'mul'
-    ...     res = mmath.run()  # doctest: +SKIP
-    # Exceptions cannot be tested conditionally, so raise error
-    # https://docs.python.org/2/library/doctest.html#id2
-    ...     raise ImportError('This interface requires tvtk to run.')
-    Traceback (most recent call last):
-     ...
-    ImportError: This interface requires tvtk to run.
+        import nipype.algorithms.mesh as m
+        mmath = m.MeshWarpMaths()
+        mmath.inputs.in_surf = 'surf1.vtk'
+        mmath.inputs.operator = 'surf2.vtk'
+        mmath.inputs.operation = 'mul'
+        res = mmath.run()
 
     """
 
