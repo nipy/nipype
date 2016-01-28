@@ -1,7 +1,10 @@
-# -*- coding: utf-8 -*-
-# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
-# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
+   Change directory to provide relative paths for doctests
+   >>> import os
+   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+   >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+   >>> os.chdir(datadir)
+
 Nipype interface for PETPVC.
 
 PETPVC is a software from the Nuclear Medicine Department
@@ -217,19 +220,3 @@ class PETPVC(CommandLine):
         if name == 'out_file':
             return self._list_outputs()['out_file']
         return None
-
-
-if __name__ == '__main__':
-
-    #from .testing import example_data
-    #TODO get data for PETPVC
-
-    pvc = PETPVC()
-    pvc.inputs.in_file   = example_data('pet.nii.gz')
-    pvc.inputs.mask_file = example_data('tissues.nii.gz')
-    pvc.inputs.out_file  = 'pet_pvc_rbv.nii.gz'
-    pvc.inputs.pvc = 'RBV'
-    pvc.inputs.fwhm_x = 2.0
-    pvc.inputs.fwhm_y = 2.0
-    pvc.inputs.fwhm_z = 2.0
-    pvc.run()
