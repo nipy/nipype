@@ -13,7 +13,8 @@ from traceback import format_exception
 import sys
 import signal
 from .base import (DistributedPluginBase, report_crash, report_nodes_not_run)
-from ..engine import (MapNode, str2bool)
+from ..engine import MapNode
+from ...utils.misc import str2bool
 import numpy as np
 from ... import logging
 logger = logging.getLogger('workflow')
@@ -26,11 +27,15 @@ def run_node(args):
     try:
         jres['result'] = node.run(updatehash=updatehash)
         logger.info('[Terminated] Job %d %s' % (jobid, str(node._id)))
+    except KeyboardInterrupt:
+            logger.warn('Processing interrupted by user.')
+            abort = True
     except:
         etype, eval, etr = sys.exc_info()
         jres['traceback'] = format_exception(etype, eval, etr)
         jres['result'] = node.result
-    return jres
+
+    return (jobid, jres)
 
 
 class NonDaemonProcess(Process):
@@ -73,7 +78,8 @@ class MultiProcPlugin(DistributedPluginBase):
         Ignore interrupt signal, handle in main thread
         https://noswap.com/blog/python-multiprocessing-keyboardinterrupt
         """
-        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        pass
+        # signal.signal(signal.SIGINT, signal.SIG_IGN)
 
     def _start_pool(self):
         """
@@ -136,8 +142,13 @@ calling-helper-functions-when-using-apply-asyncs-callback
         self.pool.terminate()
         del self.pool
 
+        if abort:
+            logger.warn('Aborting execution...')
+            return ([], active)
+
         processed = []
         notrun = []
+
         for el in cur_batch:
             jobid = el[0]
             if el[1]['traceback'] is not None:
@@ -243,43 +254,35 @@ calling-helper-functions-when-using-apply-asyncs-callback
         """
         Executes a pre-defined pipeline using distributed approaches
         """
-        try:
-            logger.info('Running in parallel.')
-            self._config = config
-            # Generate appropriate structures for worker-manager model
-            self._generate_dependency_list(graph)
-            self.pending_tasks = []
-            self.readytorun = []
-            self.mapnodes = []
-            self.mapnodesubids = {}
+        logger.info('Running in parallel.')
+        self._config = config
+        # Generate appropriate structures for worker-manager model
+        self._generate_dependency_list(graph)
+        self.pending_tasks = []
+        self.readytorun = []
+        self.mapnodes = []
+        self.mapnodesubids = {}
 
-            it = 0
-            while not np.all(self.proc_done):
-                # Check to see if there are jobs available
-                undone = np.logical_not(self.proc_done).astype(np.uint8)
-                jobdeps = (self.depidx.sum(axis=0) == 0).__array__()
-                jobids = np.flatnonzero(undone * jobdeps)
-                logger.info(('Polling [%02d]: Jobs ready/remaining/total='
-                             '%d/%d/%d') % (it, len(jobids), undone.sum(),
-                                            len(self.proc_done)))
+        it = 0
+        while not np.all(self.proc_done):
+            # Check to see if there are jobs available
+            undone = np.logical_not(self.proc_done).astype(np.uint8)
+            jobdeps = (self.depidx.sum(axis=0) == 0).__array__()
+            jobids = np.flatnonzero(undone * jobdeps)
+            logger.info(('Polling [%02d]: Jobs ready/remaining/total='
+                         '%d/%d/%d') % (it, len(jobids), undone.sum(),
+                                        len(self.proc_done)))
 
-                if len(jobids) >= self.max_jobs:
-                    jobids = jobids[:self.max_jobs]
+            if len(jobids) >= self.max_jobs:
+                jobids = jobids[:self.max_jobs]
 
-                if len(jobids) == 0:
-                    logger.info('No more ready jobs, exit')
-                    break
+            if len(jobids) == 0:
+                logger.info('No more ready jobs, exit')
+                break
 
-                self._send_procs_to_workers(jobids, updatehash=updatehash,
-                                            graph=graph)
-                it += 1
-
-        except KeyboardInterrupt:
-            logger.info('User interrupt')
-            self._notrun.extend([self._clean_queue(jid, graph) for jid, v in
-                                 enumerate(self.proc_done) if not v])
-            self.pool.terminate()
-
+            self._send_procs_to_workers(jobids, updatehash=updatehash,
+                                        graph=graph)
+            it += 1
         self._remove_node_dirs()
         report_nodes_not_run(self._notrun)
 
