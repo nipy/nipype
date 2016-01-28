@@ -12,7 +12,6 @@ from nipype.testing import (assert_equal, assert_raises, skipif,
 import numpy as np
 
 from nipype.algorithms import mesh as m
-from nipype.algorithms.mesh import have_vtk
 
 import platform
 
@@ -22,7 +21,7 @@ def test_ident_distances():
     curdir = os.getcwd()
     os.chdir(tempdir)
 
-    if not have_vtk:
+    if m.no_tvtk():
         yield assert_raises, ImportError, m.ComputeMeshWarp
     else:
         in_surf = example_data('surf01.vtk')
@@ -46,7 +45,7 @@ def test_trans_distances():
     curdir = os.getcwd()
     os.chdir(tempdir)
 
-    if not have_vtk:
+    if m.no_tvtk():
         yield assert_raises, ImportError, m.ComputeMeshWarp
     else:
         from nipype.algorithms.mesh import tvtk

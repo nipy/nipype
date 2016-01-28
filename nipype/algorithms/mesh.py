@@ -44,6 +44,11 @@ finally:
         del os.environ['ETS_TOOLKIT']
 
 
+def no_tvtk():
+    global have_tvtk
+    return not have_tvtk
+
+
 class TVTKBaseInterface(BaseInterface):
 
     """ A base class for interfaces using VTK """
