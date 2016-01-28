@@ -17,8 +17,8 @@ dependencies:
     - sudo apt-get install -y fsl-core fsl-atlases fsl-mni152-templates fsl-feeds afni swig python-vtk
     - echo 'source /etc/fsl/fsl.sh' >> $HOME/.profile
     - echo 'source /etc/afni/afni.sh' >> $HOME/.profile
+    - ln -sf /usr/share/fsl-feeds/ ~/examples/feeds
     # Enable system-wide vtk
-    - echo 'ln -sf /usr/lib/pymodules/python2.7/vtk ~/virtualenvs/venv-system/lib/python2.7/site-packages/' >> $HOME/.profile
     - ln -sf /usr/lib/pymodules/python2.7/vtk ~/virtualenvs/venv-system/lib/python2.7/site-packages/
     # Set up python environment
     - pip install --upgrade pip
