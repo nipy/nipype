@@ -62,7 +62,8 @@ class TVTKBaseInterface(BaseInterface):
 
         try:
             from tvtk.tvtk_classes.vtk_version import vtk_build_version
-            self._vtk_version = tuple([int(v) for v in vtk_build_version.split('.')])
+            vsplits = vtk_build_version.split('.')
+            self._vtk_version = tuple([int(vsplits[0]), int(vsplits[1])] + vsplits[2:])
         except ImportError:
             iflogger.warning(
                 'VTK version-major inspection using tvtk failed, assuming VTK == 4.0.')
