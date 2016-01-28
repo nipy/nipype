@@ -24,18 +24,22 @@ def run_node(args):
     jobid, node, updatehash = args
     logger.info('[Starting] Job %d %s' % (jobid, str(node._id)))
     jres = {'result': None, 'traceback': None}
+    abort = False
     try:
         jres['result'] = node.run(updatehash=updatehash)
         logger.info('[Terminated] Job %d %s' % (jobid, str(node._id)))
     except KeyboardInterrupt:
-            logger.warn('Processing interrupted by user.')
-            abort = True
+        logger.warn('Processing interrupted by user.')
+        abort = True
+        etype, eval, etr = sys.exc_info()
+        jres['traceback'] = format_exception(etype, eval, etr)
+        jres['result'] = node.result
     except:
         etype, eval, etr = sys.exc_info()
         jres['traceback'] = format_exception(etype, eval, etr)
         jres['result'] = node.result
 
-    return (jobid, jres)
+    return (jobid, jres, abort)
 
 
 class NonDaemonProcess(Process):
@@ -142,16 +146,16 @@ calling-helper-functions-when-using-apply-asyncs-callback
         self.pool.terminate()
         del self.pool
 
-        if abort:
-            logger.warn('Aborting execution...')
-            return ([], active)
-
         processed = []
         notrun = []
 
         for el in cur_batch:
+            if el[2]:
+                raise KeyboardInterrupt('Aborting execution at user\'s request...')
+
             jobid = el[0]
             if el[1]['traceback'] is not None:
+                logger.info('Job %s failed. Reason: %s.' % (el[0], el[1]['traceback']))
                 notrun.append(jobid)
             else:
                 processed.append(jobid)
