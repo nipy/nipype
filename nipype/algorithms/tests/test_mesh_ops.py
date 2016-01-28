@@ -75,3 +75,31 @@ def test_trans_distances():
 
     os.chdir(curdir)
     rmtree(tempdir)
+
+
+def test_warppoints():
+    tempdir = mkdtemp()
+    curdir = os.getcwd()
+    os.chdir(tempdir)
+
+    if m.no_tvtk():
+        yield assert_raises, ImportError, m.WarpPoints
+
+    # TODO: include regression tests for when tvtk is installed
+
+    os.chdir(curdir)
+    rmtree(tempdir)
+
+
+def test_meshwarpmaths():
+    tempdir = mkdtemp()
+    curdir = os.getcwd()
+    os.chdir(tempdir)
+
+    if m.no_tvtk():
+        yield assert_raises, ImportError, m.MeshWarpMaths
+
+    # TODO: include regression tests for when tvtk is installed
+
+    os.chdir(curdir)
+    rmtree(tempdir)
