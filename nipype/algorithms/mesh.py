@@ -54,21 +54,22 @@ class TVTKBaseInterface(BaseInterface):
     """ A base class for interfaces using VTK """
 
     _redirect_x = True
-    _vtk_major = 5
+    _vtk_version = (4, 0, 0)
 
     def __init__(self, **inputs):
-        if not have_tvtk:
+        if no_tvtk():
             raise ImportError('This interface requires tvtk to run.')
 
-        # Identify VTK version major, use 5.0 if failed
         try:
             from tvtk.tvtk_classes.vtk_version import vtk_build_version
-            self._vtk_major = int(vtk_build_version[0])
+            self._vtk_version = tuple([int(v) for v in vtk_build_version.split('.')])
         except ImportError:
             iflogger.warning(
-                'VTK version-major inspection using tvtk failed, assuming VTK <= 5.0.')
-
+                'VTK version-major inspection using tvtk failed, assuming VTK == 4.0.')
         super(TVTKBaseInterface, self).__init__(**inputs)
+
+    def version(self):
+        return self._vtk_version
 
 
 class WarpPointsInputSpec(BaseInterfaceInputSpec):
@@ -158,7 +159,7 @@ class WarpPoints(TVTKBaseInterface):
         newpoints = [p + d for p, d in zip(points, disps)]
         mesh.points = newpoints
         w = tvtk.PolyDataWriter()
-        if self._vtk_major <= 5:
+        if self.version()[0] < 6:
             w.input = mesh
         else:
             w.set_input_data_object(mesh)
@@ -290,7 +291,7 @@ class ComputeMeshWarp(TVTKBaseInterface):
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_warp))
 
-        if self._vtk_major <= 5:
+        if self.version()[0] < 6:
             writer.input = out_mesh
         else:
             writer.set_input_data_object(out_mesh)
@@ -411,7 +412,7 @@ class MeshWarpMaths(TVTKBaseInterface):
         vtk1.point_data.vectors = warping
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_warp))
-        if self._vtk_major <= 5:
+        if self.version()[0] < 6:
             writer.input = vtk1
         else:
             writer.set_input_data_object(vtk1)
@@ -422,7 +423,7 @@ class MeshWarpMaths(TVTKBaseInterface):
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_file))
 
-        if self._vtk_major <= 5:
+        if self.version()[0] < 6:
             writer.input = vtk1
         else:
             writer.set_input_data_object(vtk1)
