@@ -14,7 +14,6 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 from __future__ import division
 from builtins import zip
 
-import os
 import os.path as op
 from warnings import warn
 
@@ -25,51 +24,9 @@ from .. import logging
 from ..external.six import string_types
 from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
-
+from ..interfaces.vtkbase import tvtk
+from ..interfaces import vtkbase as VTKInfo
 iflogger = logging.getLogger('interface')
-
-# Ensure that tvtk is loaded with the appropriate ETS_TOOLKIT env var
-old_ets = os.getenv('ETS_TOOLKIT')
-os.environ['ETS_TOOLKIT'] = 'null'
-have_tvtk = False
-try:
-    from tvtk.api import tvtk
-    have_tvtk = True
-except ImportError:
-    iflogger.warning('tvtk wasn\'t found')
-finally:
-    if old_ets is not None:
-        os.environ['ETS_TOOLKIT'] = old_ets
-    else:
-        del os.environ['ETS_TOOLKIT']
-
-
-class Info(object):
-    """ Handle VTK version information """
-    _vtk_version = None
-
-    @staticmethod
-    def vtk_version():
-        """ Get VTK version """
-        if not Info.no_tvtk():
-            return None
-
-        if Info._vtk_version is None:
-            try:
-                from tvtk.tvtk_classes.vtk_version import vtk_build_version
-                vsplits = vtk_build_version.split('.')
-                Info._vtk_version = tuple([int(vsplits[0]), int(vsplits[1])] + vsplits[2:])
-            except ImportError:
-                iflogger.warning(
-                    'VTK version-major inspection using tvtk failed, assuming VTK == 4.0.')
-                Info._vtk_version = (4, 0)
-
-        return Info._vtk_version
-
-    @staticmethod
-    def no_tvtk():
-        global have_tvtk
-        return not have_tvtk
 
 
 class TVTKBaseInterface(BaseInterface):
@@ -79,12 +36,9 @@ class TVTKBaseInterface(BaseInterface):
     _redirect_x = True
 
     def __init__(self, **inputs):
-        if Info.no_tvtk():
+        if VTKInfo.no_tvtk():
             raise ImportError('This interface requires tvtk to run.')
         super(TVTKBaseInterface, self).__init__(**inputs)
-
-    def vtk_version(self):
-        return Info.vtk_version()
 
 
 class WarpPointsInputSpec(BaseInterfaceInputSpec):
@@ -144,17 +98,15 @@ class WarpPoints(TVTKBaseInterface):
         import nibabel as nb
         import numpy as np
         from scipy import ndimage
-        from tvtk.common import configure_input_data
-        from tvtk.common import is_old_pipeline as vtk_old
 
         r = tvtk.PolyDataReader(file_name=self.inputs.points)
         r.update()
-        mesh = r.output if vtk_old() else r.get_output()
+        mesh = VTKInfo.vtk_output(r)
         points = np.array(mesh.points)
         warp_dims = nb.funcs.four_to_three(nb.load(self.inputs.warp))
 
         affine = warp_dims[0].affine
-        voxsize = warp_dims[0].header.get_zooms()
+        # voxsize = warp_dims[0].header.get_zooms()
         vox2ras = affine[0:3, 0:3]
         ras2vox = np.linalg.inv(vox2ras)
         origin = affine[0:3, 3]
@@ -176,7 +128,7 @@ class WarpPoints(TVTKBaseInterface):
         newpoints = [p + d for p, d in zip(points, disps)]
         mesh.points = newpoints
         w = tvtk.PolyDataWriter()
-        configure_input_data(w, mesh)
+        VTKInfo.configure_input_data(w, mesh)
         w.file_name = self._gen_fname(self.inputs.points, suffix='warped', ext='.vtk')
         w.write()
         return runtime
@@ -253,13 +205,10 @@ class ComputeMeshWarp(TVTKBaseInterface):
         return area
 
     def _run_interface(self, runtime):
-        from tvtk.common import configure_input_data
-        from tvtk.common import is_old_pipeline as vtk_old
-
         r1 = tvtk.PolyDataReader(file_name=self.inputs.surface1)
         r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
-        vtk1 = r1.output if vtk_old() else r1.get_output()
-        vtk2 = r2.output if vtk_old() else r2.get_output()
+        vtk1 = VTKInfo.vtk_output(r1)
+        vtk2 = VTKInfo.vtk_output(r2)
         r1.update()
         r2.update()
         assert(len(vtk1.points) == len(vtk2.points))
@@ -303,7 +252,7 @@ class ComputeMeshWarp(TVTKBaseInterface):
         out_mesh.point_data.vectors.name = 'warpings'
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_warp))
-        configure_input_data(writer, out_mesh)
+        VTKInfo.configure_input_data(writer, out_mesh)
         writer.write()
 
         self._distance = np.average(errvector, weights=weights)
@@ -372,11 +321,8 @@ class MeshWarpMaths(TVTKBaseInterface):
     output_spec = MeshWarpMathsOutputSpec
 
     def _run_interface(self, runtime):
-        from tvtk.common import configure_input_data
-        from tvtk.common import is_old_pipeline as vtk_old
-
         r1 = tvtk.PolyDataReader(file_name=self.inputs.in_surf)
-        vtk1 = r1.output if vtk_old() else r1.get_output()
+        vtk1 = VTKInfo.vtk_output(r1)
         r1.update()
         points1 = np.array(vtk1.points)
 
@@ -388,7 +334,7 @@ class MeshWarpMaths(TVTKBaseInterface):
 
         if isinstance(operator, string_types):
             r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
-            vtk2 = r2.output if vtk_old() else r2.get_output()
+            vtk2 = VTKInfo.vtk_output(r2)
             r2.update()
             assert(len(points1) == len(vtk2.points))
 
@@ -399,7 +345,7 @@ class MeshWarpMaths(TVTKBaseInterface):
 
             if opfield is None:
                 raise RuntimeError(
-                    ('No operator values found in operator file'))
+                    'No operator values found in operator file')
 
             opfield = np.array(opfield)
 
@@ -422,13 +368,13 @@ class MeshWarpMaths(TVTKBaseInterface):
 
         vtk1.point_data.vectors = warping
         writer = tvtk.PolyDataWriter(file_name=op.abspath(self.inputs.out_warp))
-        configure_input_data(writer, vtk1)
+        VTKInfo.configure_input_data(writer, vtk1)
         writer.write()
 
         vtk1.point_data.vectors = None
         vtk1.points = points1 + warping
         writer = tvtk.PolyDataWriter(file_name=op.abspath(self.inputs.out_file))
-        configure_input_data(writer, vtk1)
+        VTKInfo.configure_input_data(writer, vtk1)
         writer.write()
         return runtime
 

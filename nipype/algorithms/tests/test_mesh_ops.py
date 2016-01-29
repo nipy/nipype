@@ -8,12 +8,9 @@ from tempfile import mkdtemp
 
 from nipype.testing import (assert_equal, assert_raises, skipif,
                             assert_almost_equal, example_data)
-
 import numpy as np
-
 from nipype.algorithms import mesh as m
-
-import platform
+from ...interfaces import vtkbase as VTKInfo
 
 
 def test_ident_distances():
@@ -21,7 +18,7 @@ def test_ident_distances():
     curdir = os.getcwd()
     os.chdir(tempdir)
 
-    if m.Info.no_tvtk():
+    if VTKInfo.no_tvtk():
         yield assert_raises, ImportError, m.ComputeMeshWarp
     else:
         in_surf = example_data('surf01.vtk')
@@ -45,24 +42,23 @@ def test_trans_distances():
     curdir = os.getcwd()
     os.chdir(tempdir)
 
-    if m.Info.no_tvtk():
+    if VTKInfo.no_tvtk():
         yield assert_raises, ImportError, m.ComputeMeshWarp
     else:
-        from nipype.algorithms.mesh import tvtk
-        from tvtk.common import is_old_pipeline as vtk_old
-        from tvtk.common import configure_input_data
+        from ...interfaces.vtkbase import tvtk
+
         in_surf = example_data('surf01.vtk')
         warped_surf = os.path.join(tempdir, 'warped.vtk')
 
         inc = np.array([0.7, 0.3, -0.2])
 
         r1 = tvtk.PolyDataReader(file_name=in_surf)
-        vtk1 = r1.output if vtk_old() else r1.get_output()
+        vtk1 = VTKInfo.vtk_output(r1)
         r1.update()
         vtk1.points = np.array(vtk1.points) + inc
 
         writer = tvtk.PolyDataWriter(file_name=warped_surf)
-        configure_input_data(writer, vtk1)
+        VTKInfo.configure_input_data(writer, vtk1)
         writer.write()
 
         dist = m.ComputeMeshWarp()
@@ -84,7 +80,7 @@ def test_warppoints():
     curdir = os.getcwd()
     os.chdir(tempdir)
 
-    if m.Info.no_tvtk():
+    if VTKInfo.no_tvtk():
         yield assert_raises, ImportError, m.WarpPoints
 
     # TODO: include regression tests for when tvtk is installed
@@ -98,7 +94,7 @@ def test_meshwarpmaths():
     curdir = os.getcwd()
     os.chdir(tempdir)
 
-    if m.Info.no_tvtk():
+    if VTKInfo.no_tvtk():
         yield assert_raises, ImportError, m.MeshWarpMaths
 
     # TODO: include regression tests for when tvtk is installed

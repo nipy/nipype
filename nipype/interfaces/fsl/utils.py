@@ -34,8 +34,6 @@ from ..base import (traits, TraitedSpec, OutputMultiPath, File,
 from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix, copyfile)
 
-from ...algorithms.mesh import Info as VTKInfo
-
 warn = warnings.warn
 
 
@@ -1895,17 +1893,15 @@ class WarpPoints(CommandLine):
         return first_args + [second_args]
 
     def _vtk_to_coords(self, in_file, out_file=None):
-        # Ensure that tvtk is loaded with the appropriate ETS_TOOLKIT env var
+        from ..vtkbase import tvtk
+        from ...interfaces import vtkbase as VTKInfo
+
         if VTKInfo.no_tvtk():
             raise ImportError('TVTK is required and tvtk package was not found')
 
-        from ...algorithms.mesh import tvtk
-        from tvtk.common import is_old_pipeline as vtk_old
-
         reader = tvtk.PolyDataReader(file_name=in_file + '.vtk')
         reader.update()
-
-        mesh = reader.output if vtk_old() else reader.get_output()
+        mesh = VTKInfo.vtk_output(reader)
         points = mesh.points
 
         if out_file is None:
@@ -1915,23 +1911,20 @@ class WarpPoints(CommandLine):
         return out_file
 
     def _coords_to_vtk(self, points, out_file):
-        import os
-        # Ensure that tvtk is loaded with the appropriate ETS_TOOLKIT env var
+        from ..vtkbase import tvtk
+        from ...interfaces import vtkbase as VTKInfo
+
         if VTKInfo.no_tvtk():
             raise ImportError('TVTK is required and tvtk package was not found')
-
-        from ...algorithms.mesh import tvtk
-        from tvtk.common import is_old_pipeline as vtk_old
-        from tvtk.common import configure_input_data
 
         reader = tvtk.PolyDataReader(file_name=self.inputs.in_file)
         reader.update()
 
-        mesh = reader.output if vtk_old() else reader.get_output()
+        mesh = VTKInfo.vtk_output(reader)
         mesh.points = points
 
         writer = tvtk.PolyDataWriter(file_name=out_file)
-        configure_input_data(writer, mesh)
+        VTKInfo.configure_input_data(writer, mesh)
         writer.write()
 
     def _trk_to_coords(self, in_file, out_file=None):
