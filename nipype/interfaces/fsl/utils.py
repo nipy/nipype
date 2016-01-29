@@ -34,6 +34,8 @@ from ..base import (traits, TraitedSpec, OutputMultiPath, File,
 from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix, copyfile)
 
+from ...algorithms.mesh import Info as VTKInfo
+
 warn = warnings.warn
 
 
@@ -1872,8 +1874,8 @@ class WarpPoints(CommandLine):
     def _format_arg(self, name, trait_spec, value):
         if name == 'out_file':
             return ''
-        else:
-            return super(WarpPoints, self)._format_arg(name, trait_spec, value)
+
+        return super(WarpPoints, self)._format_arg(name, trait_spec, value)
 
     def _parse_inputs(self, skip=None):
         fname, ext = op.splitext(self.inputs.in_coords)
@@ -1894,21 +1896,12 @@ class WarpPoints(CommandLine):
 
     def _vtk_to_coords(self, in_file, out_file=None):
         # Ensure that tvtk is loaded with the appropriate ETS_TOOLKIT env var
-        old_ets = os.getenv('ETS_TOOLKIT')
-        os.environ['ETS_TOOLKIT'] = 'null'
-        try:
-            from tvtk.api import tvtk
-            from tvtk.tvtk_classes.vtk_version import vtk_build_version
-        except ImportError:
-            vtk_build_version = None
-            raise ImportError('This interface requires tvtk to run.')
-        finally:
-            if old_ets is not None:
-                os.environ['ETS_TOOLKIT'] = old_ets
-            else:
-                del os.environ['ETS_TOOLKIT']
+        if VTKInfo.no_tvtk():
+            raise ImportError('TVTK is required and tvtk package was not found')
 
-        vtk_major = int(vtk_build_version[0])
+        from ...algorithms.mesh import tvtk
+
+        vtk_major = VTKInfo.vtk_version()[0]
         reader = tvtk.PolyDataReader(file_name=in_file + '.vtk')
         reader.update()
 
@@ -1923,23 +1916,13 @@ class WarpPoints(CommandLine):
 
     def _coords_to_vtk(self, points, out_file):
         import os
-
         # Ensure that tvtk is loaded with the appropriate ETS_TOOLKIT env var
-        old_ets = os.getenv('ETS_TOOLKIT')
-        os.environ['ETS_TOOLKIT'] = 'null'
-        try:
-            from tvtk.api import tvtk
-            from tvtk.tvtk_classes.vtk_version import vtk_build_version
-        except ImportError:
-            vtk_build_version = None
-            raise ImportError('This interface requires tvtk to run.')
-        finally:
-            if old_ets is not None:
-                os.environ['ETS_TOOLKIT'] = old_ets
-            else:
-                del os.environ['ETS_TOOLKIT']
+        if VTKInfo.no_tvtk():
+            raise ImportError('TVTK is required and tvtk package was not found')
 
-        vtk_major = int(vtk_build_version[0])
+        from ...algorithms.mesh import tvtk
+
+        vtk_major = VTKInfo.vtk_version()[0]
         reader = tvtk.PolyDataReader(file_name=self.inputs.in_file)
         reader.update()
 

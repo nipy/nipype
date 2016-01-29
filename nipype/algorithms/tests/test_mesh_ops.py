@@ -45,7 +45,7 @@ def test_trans_distances():
     curdir = os.getcwd()
     os.chdir(tempdir)
 
-    if m.no_tvtk():
+    if m.Info.no_tvtk():
         yield assert_raises, ImportError, m.ComputeMeshWarp
     else:
         from nipype.algorithms.mesh import tvtk
@@ -60,7 +60,12 @@ def test_trans_distances():
         vtk1.points = np.array(vtk1.points) + inc
 
         writer = tvtk.PolyDataWriter(file_name=warped_surf)
-        writer.set_input_data(vtk1)
+
+        if m.Info.vtk_version() < 6:
+            writer.set_input(vtk1)
+        else:
+            writer.set_input_data_object(vtk1)
+
         writer.write()
 
         dist = m.ComputeMeshWarp()
@@ -82,7 +87,7 @@ def test_warppoints():
     curdir = os.getcwd()
     os.chdir(tempdir)
 
-    if m.no_tvtk():
+    if m.Info.no_tvtk():
         yield assert_raises, ImportError, m.WarpPoints
 
     # TODO: include regression tests for when tvtk is installed
@@ -96,7 +101,7 @@ def test_meshwarpmaths():
     curdir = os.getcwd()
     os.chdir(tempdir)
 
-    if m.no_tvtk():
+    if m.Info.no_tvtk():
         yield assert_raises, ImportError, m.MeshWarpMaths
 
     # TODO: include regression tests for when tvtk is installed

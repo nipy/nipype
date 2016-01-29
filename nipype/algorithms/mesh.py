@@ -44,9 +44,32 @@ finally:
         del os.environ['ETS_TOOLKIT']
 
 
-def no_tvtk():
-    global have_tvtk
-    return not have_tvtk
+class Info(object):
+    """ Handle VTK version information """
+    _vtk_version = None
+
+    @staticmethod
+    def vtk_version():
+        """ Get VTK version """
+        if not Info.no_tvtk():
+            return None
+
+        if Info._vtk_version is None:
+            try:
+                from tvtk.tvtk_classes.vtk_version import vtk_build_version
+                vsplits = vtk_build_version.split('.')
+                Info._vtk_version = tuple([int(vsplits[0]), int(vsplits[1])] + vsplits[2:])
+            except ImportError:
+                iflogger.warning(
+                    'VTK version-major inspection using tvtk failed, assuming VTK == 4.0.')
+                Info._vtk_version = (4, 0)
+
+        return Info._vtk_version
+
+    @staticmethod
+    def no_tvtk():
+        global have_tvtk
+        return not have_tvtk
 
 
 class TVTKBaseInterface(BaseInterface):
@@ -54,23 +77,14 @@ class TVTKBaseInterface(BaseInterface):
     """ A base class for interfaces using VTK """
 
     _redirect_x = True
-    _vtk_version = (4, 0, 0)
 
     def __init__(self, **inputs):
-        if no_tvtk():
+        if Info.no_tvtk():
             raise ImportError('This interface requires tvtk to run.')
-
-        try:
-            from tvtk.tvtk_classes.vtk_version import vtk_build_version
-            vsplits = vtk_build_version.split('.')
-            self._vtk_version = tuple([int(vsplits[0]), int(vsplits[1])] + vsplits[2:])
-        except ImportError:
-            iflogger.warning(
-                'VTK version-major inspection using tvtk failed, assuming VTK == 4.0.')
         super(TVTKBaseInterface, self).__init__(**inputs)
 
-    def version(self):
-        return self._vtk_version
+    def vtk_version(self):
+        return Info.vtk_version()
 
 
 class WarpPointsInputSpec(BaseInterfaceInputSpec):
@@ -160,7 +174,7 @@ class WarpPoints(TVTKBaseInterface):
         newpoints = [p + d for p, d in zip(points, disps)]
         mesh.points = newpoints
         w = tvtk.PolyDataWriter()
-        if self.version()[0] < 6:
+        if self.vtk_version()[0] < 6:
             w.input = mesh
         else:
             w.set_input_data_object(mesh)
@@ -292,7 +306,7 @@ class ComputeMeshWarp(TVTKBaseInterface):
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_warp))
 
-        if self.version()[0] < 6:
+        if self.vtk_version()[0] < 6:
             writer.input = out_mesh
         else:
             writer.set_input_data_object(out_mesh)
@@ -413,7 +427,7 @@ class MeshWarpMaths(TVTKBaseInterface):
         vtk1.point_data.vectors = warping
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_warp))
-        if self.version()[0] < 6:
+        if self.vtk_version()[0] < 6:
             writer.input = vtk1
         else:
             writer.set_input_data_object(vtk1)
@@ -424,7 +438,7 @@ class MeshWarpMaths(TVTKBaseInterface):
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_file))
 
-        if self.version()[0] < 6:
+        if self.vtk_version()[0] < 6:
             writer.input = vtk1
         else:
             writer.set_input_data_object(vtk1)
