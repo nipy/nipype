@@ -144,10 +144,12 @@ class WarpPoints(TVTKBaseInterface):
         import nibabel as nb
         import numpy as np
         from scipy import ndimage
+        from tvtk.common import configure_input_data
+        from tvtk.common import is_old_pipeline as vtk_old
 
         r = tvtk.PolyDataReader(file_name=self.inputs.points)
         r.update()
-        mesh = r.output
+        mesh = r.output if vtk_old() else r.get_output()
         points = np.array(mesh.points)
         warp_dims = nb.funcs.four_to_three(nb.load(self.inputs.warp))
 
@@ -174,21 +176,14 @@ class WarpPoints(TVTKBaseInterface):
         newpoints = [p + d for p, d in zip(points, disps)]
         mesh.points = newpoints
         w = tvtk.PolyDataWriter()
-        if self.vtk_version()[0] < 6:
-            w.input = mesh
-        else:
-            w.set_input_data_object(mesh)
-
-        w.file_name = self._gen_fname(self.inputs.points,
-                                      suffix='warped',
-                                      ext='.vtk')
+        configure_input_data(w, mesh)
+        w.file_name = self._gen_fname(self.inputs.points, suffix='warped', ext='.vtk')
         w.write()
         return runtime
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_points'] = self._gen_fname(self.inputs.points,
-                                                suffix='warped',
+        outputs['out_points'] = self._gen_fname(self.inputs.points, suffix='warped',
                                                 ext='.vtk')
         return outputs
 
@@ -258,10 +253,13 @@ class ComputeMeshWarp(TVTKBaseInterface):
         return area
 
     def _run_interface(self, runtime):
+        from tvtk.common import configure_input_data
+        from tvtk.common import is_old_pipeline as vtk_old
+
         r1 = tvtk.PolyDataReader(file_name=self.inputs.surface1)
         r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
-        vtk1 = r1.output
-        vtk2 = r2.output
+        vtk1 = r1.output if vtk_old() else r1.get_output()
+        vtk2 = r2.output if vtk_old() else r2.get_output()
         r1.update()
         r2.update()
         assert(len(vtk1.points) == len(vtk2.points))
@@ -305,12 +303,7 @@ class ComputeMeshWarp(TVTKBaseInterface):
         out_mesh.point_data.vectors.name = 'warpings'
         writer = tvtk.PolyDataWriter(
             file_name=op.abspath(self.inputs.out_warp))
-
-        if self.vtk_version()[0] < 6:
-            writer.input = out_mesh
-        else:
-            writer.set_input_data_object(out_mesh)
-
+        configure_input_data(writer, out_mesh)
         writer.write()
 
         self._distance = np.average(errvector, weights=weights)
@@ -379,8 +372,11 @@ class MeshWarpMaths(TVTKBaseInterface):
     output_spec = MeshWarpMathsOutputSpec
 
     def _run_interface(self, runtime):
+        from tvtk.common import configure_input_data
+        from tvtk.common import is_old_pipeline as vtk_old
+
         r1 = tvtk.PolyDataReader(file_name=self.inputs.in_surf)
-        vtk1 = r1.output
+        vtk1 = r1.output if vtk_old() else r1.get_output()
         r1.update()
         points1 = np.array(vtk1.points)
 
@@ -392,7 +388,7 @@ class MeshWarpMaths(TVTKBaseInterface):
 
         if isinstance(operator, string_types):
             r2 = tvtk.PolyDataReader(file_name=self.inputs.surface2)
-            vtk2 = r2.output
+            vtk2 = r2.output if vtk_old() else r2.get_output()
             r2.update()
             assert(len(points1) == len(vtk2.points))
 
@@ -425,25 +421,15 @@ class MeshWarpMaths(TVTKBaseInterface):
             warping /= opfield
 
         vtk1.point_data.vectors = warping
-        writer = tvtk.PolyDataWriter(
-            file_name=op.abspath(self.inputs.out_warp))
-        if self.vtk_version()[0] < 6:
-            writer.input = vtk1
-        else:
-            writer.set_input_data_object(vtk1)
+        writer = tvtk.PolyDataWriter(file_name=op.abspath(self.inputs.out_warp))
+        configure_input_data(writer, vtk1)
         writer.write()
 
         vtk1.point_data.vectors = None
         vtk1.points = points1 + warping
-        writer = tvtk.PolyDataWriter(
-            file_name=op.abspath(self.inputs.out_file))
-
-        if self.vtk_version()[0] < 6:
-            writer.input = vtk1
-        else:
-            writer.set_input_data_object(vtk1)
+        writer = tvtk.PolyDataWriter(file_name=op.abspath(self.inputs.out_file))
+        configure_input_data(writer, vtk1)
         writer.write()
-
         return runtime
 
     def _list_outputs(self):

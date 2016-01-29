@@ -21,7 +21,7 @@ def test_ident_distances():
     curdir = os.getcwd()
     os.chdir(tempdir)
 
-    if m.no_tvtk():
+    if m.Info.no_tvtk():
         yield assert_raises, ImportError, m.ComputeMeshWarp
     else:
         in_surf = example_data('surf01.vtk')
@@ -49,23 +49,20 @@ def test_trans_distances():
         yield assert_raises, ImportError, m.ComputeMeshWarp
     else:
         from nipype.algorithms.mesh import tvtk
+        from tvtk.common import is_old_pipeline as vtk_old
+        from tvtk.common import configure_input_data
         in_surf = example_data('surf01.vtk')
         warped_surf = os.path.join(tempdir, 'warped.vtk')
 
         inc = np.array([0.7, 0.3, -0.2])
 
         r1 = tvtk.PolyDataReader(file_name=in_surf)
-        vtk1 = r1.output
+        vtk1 = r1.output if vtk_old() else r1.get_output()
         r1.update()
         vtk1.points = np.array(vtk1.points) + inc
 
         writer = tvtk.PolyDataWriter(file_name=warped_surf)
-
-        if m.Info.vtk_version() < 6:
-            writer.set_input(vtk1)
-        else:
-            writer.set_input_data_object(vtk1)
-
+        configure_input_data(writer, vtk1)
         writer.write()
 
         dist = m.ComputeMeshWarp()

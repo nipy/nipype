@@ -1900,12 +1900,12 @@ class WarpPoints(CommandLine):
             raise ImportError('TVTK is required and tvtk package was not found')
 
         from ...algorithms.mesh import tvtk
+        from tvtk.common import is_old_pipeline as vtk_old
 
-        vtk_major = VTKInfo.vtk_version()[0]
         reader = tvtk.PolyDataReader(file_name=in_file + '.vtk')
         reader.update()
 
-        mesh = reader.output if vtk_major < 6 else reader.get_output()
+        mesh = reader.output if vtk_old() else reader.get_output()
         points = mesh.points
 
         if out_file is None:
@@ -1921,19 +1921,17 @@ class WarpPoints(CommandLine):
             raise ImportError('TVTK is required and tvtk package was not found')
 
         from ...algorithms.mesh import tvtk
+        from tvtk.common import is_old_pipeline as vtk_old
+        from tvtk.common import configure_input_data
 
-        vtk_major = VTKInfo.vtk_version()[0]
         reader = tvtk.PolyDataReader(file_name=self.inputs.in_file)
         reader.update()
 
-        mesh = reader.output if vtk_major < 6 else reader.get_output()
+        mesh = reader.output if vtk_old() else reader.get_output()
         mesh.points = points
 
         writer = tvtk.PolyDataWriter(file_name=out_file)
-        if vtk_major < 6:
-            writer.input = mesh
-        else:
-            writer.set_input_data_object(mesh)
+        configure_input_data(writer, mesh)
         writer.write()
 
     def _trk_to_coords(self, in_file, out_file=None):
