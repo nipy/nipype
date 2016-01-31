@@ -72,7 +72,6 @@ from .utils import (generate_expanded_graph, modify_paths,
 from .base import EngineBase
 
 
-<<<<<<< HEAD:nipype/pipeline/engine.py
 def _write_inputs(node):
     lines = []
     nodename = node.fullname.replace('.', '_')
