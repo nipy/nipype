@@ -1,26 +1,34 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Defines functionality for pipelined execution of interfaces
 
-The `Workflow` class provides core functionality for batch processing.
+The `Node` class provides core functionality for batch processing.
 
-   Change directory to provide relative paths for doctests
-   >>> import os
-   >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-   >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
-   >>> os.chdir(datadir)
+  .. testsetup::
+     # Change directory to provide relative paths for doctests
+     import os
+     filepath = os.path.dirname(os.path.realpath( __file__ ))
+     datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
+     os.chdir(datadir)
 
 """
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
+
 from datetime import datetime
 from nipype.utils.misc import flatten, unflatten
-from nipype.interfaces.traits_extension import File
 try:
     from collections import OrderedDict
 except ImportError:
     from ordereddict import OrderedDict
+
 from copy import deepcopy
-import cPickle
+import pickle
 from glob import glob
 import gzip
 import inspect
@@ -29,41 +37,42 @@ import os.path as op
 import re
 import shutil
 import errno
+import socket
 from shutil import rmtree
-from socket import gethostname
-from string import Template
 import sys
 from tempfile import mkdtemp
 from warnings import warn
 from hashlib import sha1
-from nipype.external import six
 
 import numpy as np
-
-from ..utils.misc import package_check, str2bool
-package_check('networkx', '1.3')
 import networkx as nx
 
-from .. import config, logging
-logger = logging.getLogger('workflow')
-from ..interfaces.base import (traits, InputMultiPath, CommandLine,
-                               Undefined, TraitedSpec, DynamicTraitedSpec,
-                               Bunch, InterfaceResult, md5, Interface,
-                               TraitDictObject, TraitListObject, isdefined)
-from ..utils.misc import getsource, create_function_from_source
-from ..utils.filemanip import (save_json, FileNotFoundError,
-                               filename_to_list, list_to_filename,
-                               copyfiles, fnames_presuffix, loadpkl,
-                               split_filename, load_json, savepkl,
-                               write_rst_header, write_rst_dict,
-                               write_rst_list)
+from ...utils.misc import package_check, str2bool
+package_check('networkx', '1.3')
 
+from ... import config, logging
+logger = logging.getLogger('workflow')
+from ...interfaces.base import (traits, InputMultiPath, CommandLine,
+                                Undefined, TraitedSpec, DynamicTraitedSpec,
+                                Bunch, InterfaceResult, md5, Interface,
+                                TraitDictObject, TraitListObject, isdefined)
+from ...utils.misc import (getsource, create_function_from_source,
+                           flatten, unflatten)
+from ...utils.filemanip import (save_json, FileNotFoundError,
+                                filename_to_list, list_to_filename,
+                                copyfiles, fnames_presuffix, loadpkl,
+                                split_filename, load_json, savepkl,
+                                write_rst_header, write_rst_dict,
+                                write_rst_list)
+from ...external.six import string_types
 from .utils import (generate_expanded_graph, modify_paths,
                     export_graph, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,
                     get_print_name, merge_dict, evaluate_connect_function)
+from .base import EngineBase
 
 
+<<<<<<< HEAD:nipype/pipeline/engine.py
 def _write_inputs(node):
     lines = []
     nodename = node.fullname.replace('.', '_')
@@ -1113,7 +1122,7 @@ connected.
         return ('\n' + prefix).join(dotlist)
 
 
-class Node(WorkflowBase):
+class Node(EngineBase):
     """Wraps interface objects for use in pipeline
 
     A Node creates a sandbox-like directory for executing the underlying
@@ -1268,7 +1277,7 @@ class Node(WorkflowBase):
             else:
                 outputdir = op.join(outputdir, *self.parameterization)
         return op.abspath(op.join(outputdir,
-                                            self.name))
+                                  self.name))
 
     def set_input(self, parameter, val):
         """ Set interface input value"""
@@ -1342,19 +1351,19 @@ class Node(WorkflowBase):
         logger.debug(('updatehash, overwrite, always_run, hash_exists',
                       updatehash, self.overwrite, self._interface.always_run,
                       hash_exists))
-        if (not updatehash and (((self.overwrite is None
-                                  and self._interface.always_run)
-                                 or self.overwrite) or
-                                not hash_exists)):
+        if (not updatehash and (((self.overwrite is None and
+                                  self._interface.always_run) or
+                                 self.overwrite) or not
+                                hash_exists)):
             logger.debug("Node hash: %s" % hashvalue)
 
             # by rerunning we mean only nodes that did finish to run previously
             json_pat = op.join(outdir, '_0x*.json')
             json_unfinished_pat = op.join(outdir, '_0x*_unfinished.json')
-            need_rerun = (op.exists(outdir)
-                          and not isinstance(self, MapNode)
-                          and len(glob(json_pat)) != 0
-                          and len(glob(json_unfinished_pat)) == 0)
+            need_rerun = (op.exists(outdir) and not
+                          isinstance(self, MapNode) and
+                          len(glob(json_pat)) != 0 and
+                          len(glob(json_unfinished_pat)) == 0)
             if need_rerun:
                 logger.debug("Rerunning node")
                 logger.debug(("updatehash = %s, "
@@ -1384,21 +1393,20 @@ class Node(WorkflowBase):
                             logging.logdebug_dict_differences(prev_inputs,
                                                               hashed_inputs)
                 cannot_rerun = (str2bool(
-                    self.config['execution']['stop_on_first_rerun'])
-                    and not (self.overwrite is None
-                         and self._interface.always_run))
+                    self.config['execution']['stop_on_first_rerun']) and not
+                    (self.overwrite is None and self._interface.always_run))
                 if cannot_rerun:
                     raise Exception(("Cannot rerun when 'stop_on_first_rerun' "
                                      "is set to True"))
             hashfile_unfinished = op.join(outdir,
-                                               '_0x%s_unfinished.json' %
-                                               hashvalue)
+                                          '_0x%s_unfinished.json' %
+                                          hashvalue)
             if op.exists(hashfile):
                 os.remove(hashfile)
-            rm_outdir = (op.exists(outdir)
-                         and not (op.exists(hashfile_unfinished)
-                                  and self._interface.can_resume)
-                         and not isinstance(self, MapNode))
+            rm_outdir = (op.exists(outdir) and not
+                         (op.exists(hashfile_unfinished) and
+                             self._interface.can_resume) and not
+                         isinstance(self, MapNode))
             if rm_outdir:
                 logger.debug("Removing old %s and its contents" % outdir)
                 try:
@@ -1407,12 +1415,11 @@ class Node(WorkflowBase):
                     outdircont = os.listdir(outdir)
                     if ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) == 0)):
                         logger.warn(('An exception was raised trying to remove old %s, '
-                                    'but the path seems empty. Is it an NFS mount?. '
-                                    'Passing the exception.') % outdir)
-                        pass
+                                     'but the path seems empty. Is it an NFS mount?. '
+                                     'Passing the exception.') % outdir)
                     elif ((ex.errno == errno.ENOTEMPTY) and (len(outdircont) != 0)):
                         logger.debug(('Folder contents (%d items): '
-                                     '%s') % (len(outdircont), outdircont))
+                                      '%s') % (len(outdircont), outdircont))
                         raise ex
                     else:
                         raise ex
@@ -1474,9 +1481,9 @@ class Node(WorkflowBase):
         rm_extra = self.config['execution']['remove_unnecessary_outputs']
         if str2bool(rm_extra) and self.needed_outputs:
             hashobject = md5()
-            hashobject.update(hashvalue)
+            hashobject.update(hashvalue.encode())
             sorted_outputs = sorted(self.needed_outputs)
-            hashobject.update(str(sorted_outputs))
+            hashobject.update(str(sorted_outputs).encode())
             hashvalue = hashobject.hexdigest()
             hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
@@ -1490,9 +1497,9 @@ class Node(WorkflowBase):
                 # XXX - SG current workaround is to just
                 # create the hashed file and not put anything
                 # in it
-                fd = open(hashfile, 'wt')
-                fd.writelines(str(hashed_inputs))
-                fd.close()
+                with open(hashfile, 'wt') as fd:
+                    fd.writelines(str(hashed_inputs))
+
                 logger.debug(('Unable to write a particular type to the json '
                               'file'))
             else:
@@ -1506,7 +1513,7 @@ class Node(WorkflowBase):
         other data sources (e.g., XNAT, HTTP, etc.,.)
         """
         logger.debug('Setting node inputs')
-        for key, info in self.input_source.items():
+        for key, info in list(self.input_source.items()):
             logger.debug('input: %s' % key)
             results_file = info[0]
             logger.debug('results file: %s' % results_file)
@@ -1528,7 +1535,7 @@ class Node(WorkflowBase):
             logger.debug('output: %s' % output_name)
             try:
                 self.set_input(key, deepcopy(output_value))
-            except traits.TraitError, e:
+            except traits.TraitError as e:
                 msg = ['Error setting node input:',
                        'Node: %s' % self.name,
                        'input: %s' % key,
@@ -1585,8 +1592,8 @@ class Node(WorkflowBase):
         if op.exists(resultsoutputfile):
             pkl_file = gzip.open(resultsoutputfile, 'rb')
             try:
-                result = cPickle.load(pkl_file)
-            except (traits.TraitError, AttributeError, ImportError), err:
+                result = pickle.load(pkl_file)
+            except (traits.TraitError, AttributeError, ImportError) as err:
                 if isinstance(err, (AttributeError, ImportError)):
                     attribute_error = True
                     logger.debug(('attribute error: %s probably using '
@@ -1626,8 +1633,8 @@ class Node(WorkflowBase):
                     needed_outputs=self.needed_outputs)
                 runtime = Bunch(cwd=cwd,
                                 returncode=0,
-                                environ=deepcopy(os.environ.data),
-                                hostname=gethostname())
+                                environ=dict(os.environ),
+                                hostname=socket.gethostname())
                 result = InterfaceResult(
                     interface=self._interface.__class__,
                     runtime=runtime,
@@ -1646,8 +1653,8 @@ class Node(WorkflowBase):
             self._originputs = deepcopy(self._interface.inputs)
         if execute:
             runtime = Bunch(returncode=1,
-                            environ=deepcopy(os.environ.data),
-                            hostname=gethostname())
+                            environ=dict(os.environ),
+                            hostname=socket.gethostname())
             result = InterfaceResult(
                 interface=self._interface.__class__,
                 runtime=runtime,
@@ -1659,7 +1666,7 @@ class Node(WorkflowBase):
             if issubclass(self._interface.__class__, CommandLine):
                 try:
                     cmd = self._interface.cmdline
-                except Exception, msg:
+                except Exception as msg:
                     self._result.runtime.stderr = msg
                     raise
                 cmdfile = op.join(cwd, 'command.txt')
@@ -1669,7 +1676,7 @@ class Node(WorkflowBase):
                 logger.info('Running: %s' % cmd)
             try:
                 result = self._interface.run()
-            except Exception, msg:
+            except Exception as msg:
                 self._result.runtime.stderr = msg
                 raise
 
@@ -1767,8 +1774,8 @@ class Node(WorkflowBase):
             fp = open(report_file, 'at')
             fp.writelines(write_rst_header('Execution Inputs', level=1))
             fp.writelines(write_rst_dict(self.inputs.get()))
-            exit_now = (not hasattr(self.result, 'outputs')
-                        or self.result.outputs is None)
+            exit_now = (not hasattr(self.result, 'outputs') or
+                        self.result.outputs is None)
             if exit_now:
                 return
             fp.writelines(write_rst_header('Execution Outputs', level=1))
@@ -1828,7 +1835,7 @@ class JoinNode(Node):
     """
 
     def __init__(self, interface, name, joinsource, joinfield=None,
-        unique=False, **kwargs):
+                 unique=False, **kwargs):
         """
 
         Parameters
@@ -1854,7 +1861,7 @@ class JoinNode(Node):
         if not joinfield:
             # default is the interface fields
             joinfield = self._interface.inputs.copyable_trait_names()
-        elif isinstance(joinfield, six.string_types):
+        elif isinstance(joinfield, string_types):
             joinfield = [joinfield]
         self.joinfield = joinfield
         """the fields to join"""
@@ -1951,7 +1958,7 @@ class JoinNode(Node):
                 if not basetraits.trait(field):
                     raise ValueError("The JoinNode %s does not have a field"
                                      " named %s" % (self.name, field))
-        for name, trait in basetraits.items():
+        for name, trait in list(basetraits.items()):
             # if a join field has a single inner trait, then the item
             # trait is that inner trait. Otherwise, the item trait is
             # a new Any trait.
@@ -2021,8 +2028,9 @@ class JoinNode(Node):
             return getattr(self._inputs, slot_field)
         except AttributeError as e:
             raise AttributeError("The join node %s does not have a slot field %s"
-                         " to hold the %s value at index %d: %s"
-                         % (self, slot_field, field, index, e))
+                                 " to hold the %s value at index %d: %s"
+                                 % (self, slot_field, field, index, e))
+
 
 class MapNode(Node):
     """Wraps interface objects that need to be iterated on a list of inputs.
@@ -2062,9 +2070,8 @@ class MapNode(Node):
         See Node docstring for additional keyword arguments.
         """
 
-
         super(MapNode, self).__init__(interface, name, **kwargs)
-        if isinstance(iterfield, six.string_types):
+        if isinstance(iterfield, string_types):
             iterfield = [iterfield]
         self.iterfield = iterfield
         self.nested = nested
@@ -2080,7 +2087,7 @@ class MapNode(Node):
         output = DynamicTraitedSpec()
         if fields is None:
             fields = basetraits.copyable_trait_names()
-        for name, spec in basetraits.items():
+        for name, spec in list(basetraits.items()):
             if name in fields and ((nitems is None) or (nitems > 1)):
                 logger.debug('adding multipath trait: %s' % name)
                 if self.nested:
@@ -2139,9 +2146,9 @@ class MapNode(Node):
         rm_extra = self.config['execution']['remove_unnecessary_outputs']
         if str2bool(rm_extra) and self.needed_outputs:
             hashobject = md5()
-            hashobject.update(hashvalue)
+            hashobject.update(hashvalue.encode())
             sorted_outputs = sorted(self.needed_outputs)
-            hashobject.update(str(sorted_outputs))
+            hashobject.update(str(sorted_outputs).encode())
             hashvalue = hashobject.hexdigest()
             hashed_inputs.append(('needed_outputs', sorted_outputs))
         return hashed_inputs, hashvalue
@@ -2190,7 +2197,7 @@ class MapNode(Node):
             err = None
             try:
                 node.run(updatehash=updatehash)
-            except Exception, err:
+            except Exception as err:
                 if str2bool(self.config['execution']['stop_on_first_crash']):
                     self._result = node.result
                     raise
@@ -2212,7 +2219,7 @@ class MapNode(Node):
                     self._result.provenance.insert(i, node.result.provenance)
             returncode.insert(i, err)
             if self.outputs:
-                for key, _ in self.outputs.items():
+                for key, _ in list(self.outputs.items()):
                     rm_extra = (self.config['execution']
                                 ['remove_unnecessary_outputs'])
                     if str2bool(rm_extra) and self.needed_outputs:
@@ -2230,7 +2237,7 @@ class MapNode(Node):
                         setattr(self._result.outputs, key, values)
 
         if self.nested:
-            for key, _ in self.outputs.items():
+            for key, _ in list(self.outputs.items()):
                 values = getattr(self._result.outputs, key)
                 if isdefined(values):
                     values = unflatten(values, filename_to_list(getattr(self.inputs, self.iterfield[0])))
@@ -2263,10 +2270,10 @@ class MapNode(Node):
                 nodename = '_' + self.name + str(i)
                 subnode_report_files.insert(i, 'subnode %d' % i + ' : ' +
                                                op.join(cwd,
-                                                            'mapflow',
-                                                            nodename,
-                                                            '_report',
-                                                            'report.rst'))
+                                                       'mapflow',
+                                                       nodename,
+                                                       '_report',
+                                                       'report.rst'))
             fp.writelines(write_rst_list(subnode_report_files))
             fp.close()
 
@@ -2283,7 +2290,7 @@ class MapNode(Node):
             self._get_inputs()
             self._got_inputs = True
         self._check_iterfield()
-        if self._serial :
+        if self._serial:
             return 1
         else:
             if self.nested:
@@ -2331,7 +2338,7 @@ class MapNode(Node):
         if execute:
             if self.nested:
                 nitems = len(filename_to_list(flatten(getattr(self.inputs,
-                                                      self.iterfield[0]))))
+                                                              self.iterfield[0]))))
             else:
                 nitems = len(filename_to_list(getattr(self.inputs,
                                                       self.iterfield[0])))

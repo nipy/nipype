@@ -2,15 +2,20 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Useful Functions for working with matlab"""
 
+from builtins import range
+
 # Stdlib imports
 import os
 import re
 import tempfile
 
 # Functions, classes and other top-level code
+
+
 def fltcols(vals):
     ''' Trivial little function to make 1xN float vector '''
     return np.atleast_2d(np.array(vals, dtype=float))
+
 
 def mlab_tempfile(dir=None):
     """Returns a temporary file-like object with valid matlab name.
@@ -51,10 +56,10 @@ def mlab_tempfile(dir=None):
     # directly, we just keep trying until we get a valid name.  To avoid an
     # infinite loop for some strange reason, we only try 100 times.
     for n in range(100):
-        f = tempfile.NamedTemporaryFile(suffix='.m',prefix='tmp_matlab_',
+        f = tempfile.NamedTemporaryFile(suffix='.m', prefix='tmp_matlab_',
                                         dir=dir)
         # Check the file name for matlab compilance
-        fname =  os.path.splitext(os.path.basename(f.name))[0]
+        fname = os.path.splitext(os.path.basename(f.name))[0]
         if valid_name.match(fname):
             break
         # Close the temp file we just made if its name is not valid; the
