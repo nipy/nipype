@@ -45,7 +45,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = GrayscaleGrindPeakImageFilterInputSpec
     output_spec = GrayscaleGrindPeakImageFilterOutputSpec
     _cmd = "GrayscaleGrindPeakImageFilter "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
 
 class GrayscaleFillHoleImageFilterInputSpec(CommandLineInputSpec):
@@ -85,4 +85,4 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = GrayscaleFillHoleImageFilterInputSpec
     output_spec = GrayscaleFillHoleImageFilterOutputSpec
     _cmd = "GrayscaleFillHoleImageFilter "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}

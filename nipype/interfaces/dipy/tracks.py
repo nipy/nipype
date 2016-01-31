@@ -1,27 +1,26 @@
 # -*- coding: utf-8 -*-
-"""Change directory to provide relative paths for doctests
+"""
+Change directory to provide relative paths for doctests
    >>> import os
    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-from nipype.interfaces.base import (
-    TraitedSpec, BaseInterface, BaseInterfaceInputSpec, File, isdefined,
-    traits)
-from nipype.utils.filemanip import split_filename
 import os.path as op
+import numpy as np
 import nibabel as nb
-import nibabel.trackvis as trk
-from nipype.utils.misc import package_check
-import warnings
+import nibabel.trackvis as nbt
 
+from ..base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
+                    File, isdefined, traits)
+from ...utils.misc import package_check
 from ... import logging
-iflogger = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('interface')
 
 have_dipy = True
 try:
     package_check('dipy', version='0.6.0')
-except Exception, e:
+except Exception as e:
     have_dipy = False
 else:
     from dipy.tracking.utils import density_map
@@ -30,13 +29,17 @@ else:
 class TrackDensityMapInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='The input TrackVis track file')
+    reference = File(exists=True,
+                     desc='A reference file to define RAS coordinates space')
+    points_space = traits.Enum('rasmm', 'voxel', None, usedefault=True,
+                               desc='coordinates of trk file')
     voxel_dims = traits.List(traits.Float, minlen=3, maxlen=3,
                              desc='The size of each voxel in mm.')
     data_dims = traits.List(traits.Int, minlen=3, maxlen=3,
                             desc='The size of the image in voxels.')
     out_filename = File('tdi.nii', usedefault=True,
-                        desc=('The output filename for the tracks in TrackVis'
-                              ' (.trk) format'))
+                        desc='The output filename for the tracks in TrackVis '
+                             '(.trk) format')
 
 
 class TrackDensityMapOutputSpec(TraitedSpec):
@@ -46,7 +49,8 @@ class TrackDensityMapOutputSpec(TraitedSpec):
 class TrackDensityMap(BaseInterface):
 
     """
-    Creates a tract density image from a TrackVis track file using dipy
+    Creates a tract density image from a TrackVis track file using functions
+    from dipy
 
     Example
     -------
@@ -55,35 +59,48 @@ class TrackDensityMap(BaseInterface):
     >>> trk2tdi = dipy.TrackDensityMap()
     >>> trk2tdi.inputs.in_file = 'converted.trk'
     >>> trk2tdi.run()                                   # doctest: +SKIP
+
     """
     input_spec = TrackDensityMapInputSpec
     output_spec = TrackDensityMapOutputSpec
 
     def _run_interface(self, runtime):
-        tracks, header = trk.read(self.inputs.in_file)
-        if not isdefined(self.inputs.data_dims):
-            data_dims = header['dim']
-        else:
-            data_dims = self.inputs.data_dims
-
-        if not isdefined(self.inputs.voxel_dims):
-            voxel_size = header['voxel_size']
-        else:
-            voxel_size = self.inputs.voxel_dims
-
-        affine = header['vox_to_ras']
-
+        from numpy import min_scalar_type
+        tracks, header = nbt.read(self.inputs.in_file)
         streams = ((ii[0]) for ii in tracks)
-        data = density_map(streams, data_dims, voxel_size)
-        if data.max() < 2 ** 15:
-            data = data.astype('int16')
 
+        if isdefined(self.inputs.reference):
+            refnii = nb.load(self.inputs.reference)
+            affine = refnii.affine
+            data_dims = refnii.shape[:3]
+            kwargs = dict(affine=affine)
+        else:
+            IFLOGGER.warn(
+                'voxel_dims and data_dims are deprecated as of dipy 0.7.1. Please use reference '
+                'input instead')
+
+            if not isdefined(self.inputs.data_dims):
+                data_dims = header['dim']
+            else:
+                data_dims = self.inputs.data_dims
+            if not isdefined(self.inputs.voxel_dims):
+                voxel_size = header['voxel_size']
+            else:
+                voxel_size = self.inputs.voxel_dims
+
+            affine = header['vox_to_ras']
+            kwargs = dict(voxel_size=voxel_size)
+
+        data = density_map(streams, data_dims, **kwargs)
+        data = data.astype(min_scalar_type(data.max()))
         img = nb.Nifti1Image(data, affine)
         out_file = op.abspath(self.inputs.out_filename)
         nb.save(img, out_file)
-        iflogger.info('Track density map saved as {i}'.format(i=out_file))
-        iflogger.info('Data Dimensions {d}'.format(d=data_dims))
-        iflogger.info('Voxel Dimensions {v}'.format(v=voxel_size))
+
+        IFLOGGER.info(
+            'Track density map saved as %s, size=%s, dimensions=%s',
+            out_file, img.shape, img.header.get_zooms())
+
         return runtime
 
     def _list_outputs(self):
@@ -175,13 +192,13 @@ class StreamlineTractography(BaseInterface):
 
         self._save_peaks = False
         if isdefined(self.inputs.in_peaks):
-            iflogger.info('Peaks file found, skipping ODF peaks search...')
+            IFLOGGER.info('Peaks file found, skipping ODF peaks search...')
             f = gzip.open(self.inputs.in_peaks, 'rb')
             peaks = pickle.load(f)
             f.close()
         else:
             self._save_peaks = True
-            iflogger.info('Loading model and computing ODF peaks')
+            IFLOGGER.info('Loading model and computing ODF peaks')
             f = gzip.open(self.inputs.in_model, 'rb')
             odf_model = pickle.load(f)
             f.close()
@@ -202,7 +219,7 @@ class StreamlineTractography(BaseInterface):
         nb.Nifti1Image(peaks.gfa.astype(np.float32), affine,
                        hdr).to_filename(self._gen_filename('gfa'))
 
-        iflogger.info('Performing tractography')
+        IFLOGGER.info('Performing tractography')
 
         if isdefined(self.inputs.tracking_mask):
             msk = nb.load(self.inputs.tracking_mask).get_data()
@@ -225,11 +242,11 @@ class StreamlineTractography(BaseInterface):
             seedps = np.array(np.where(seedmsk == 1), dtype=np.float32).T
             vseeds = seedps.shape[0]
             nsperv = (seeds // vseeds) + 1
-            iflogger.info(('Seed mask is provided (%d voxels inside '
+            IFLOGGER.info(('Seed mask is provided (%d voxels inside '
                            'mask), computing seeds (%d seeds/voxel).') %
                           (vseeds, nsperv))
             if nsperv > 1:
-                iflogger.info(('Needed %d seeds per selected voxel '
+                IFLOGGER.info(('Needed %d seeds per selected voxel '
                                '(total %d).') % (nsperv, vseeds))
                 seedps = np.vstack(np.array([seedps] * nsperv))
                 voxcoord = seedps + np.random.uniform(-1, 1, size=seedps.shape)
@@ -256,9 +273,8 @@ class StreamlineTractography(BaseInterface):
 
         ss_mm = [np.array(s) for s in eu]
 
-        trkfilev = nb.trackvis.TrackvisFile([(s, None, None) for s in ss_mm],
-                                            points_space='rasmm',
-                                            affine=np.eye(4))
+        trkfilev = nb.trackvis.TrackvisFile(
+            [(s, None, None) for s in ss_mm], points_space='rasmm', affine=np.eye(4))
         trkfilev.to_file(self._gen_filename('tracked', ext='.trk'))
         return runtime
 

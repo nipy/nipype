@@ -39,4 +39,4 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = OtsuThresholdSegmentationInputSpec
     output_spec = OtsuThresholdSegmentationOutputSpec
     _cmd = "OtsuThresholdSegmentation "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}

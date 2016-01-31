@@ -1,21 +1,23 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
-                                    File, TraitedSpec, InputMultiPath,
-                                    OutputMultiPath, isdefined)
+
 import os.path as op
-import numpy as np
-import networkx as nx
-from nipype.utils.misc import package_check
 import warnings
 
+import numpy as np
+import networkx as nx
+
+from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+                    File, TraitedSpec, InputMultiPath,
+                    OutputMultiPath, isdefined)
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_cv = True
 try:
     package_check('cviewer')
-except Exception, e:
+except Exception as e:
     have_cv = False
 else:
     import cviewer.libs.pyconto.groupstatistics.nbs as nbs
@@ -41,8 +43,8 @@ class NetworkBasedStatisticInputSpec(BaseInterfaceInputSpec):
     number_of_permutations = traits.Int(1000, usedefault=True, desc='Number of permutations to perform')
     threshold = traits.Float(3, usedefault=True, desc='T-statistic threshold')
     t_tail = traits.Enum('left', 'right', 'both', usedefault=True, desc='Can be one of "left", "right", or "both"')
-    edge_key = traits.Str('number_of_fibers', usedefault=True, desc='Usually "number_of_fibers, "fiber_length_mean", "fiber_length_std" for matrices made with CMTK' \
-     'Sometimes "weight" or "value" for functional networks.')
+    edge_key = traits.Str('number_of_fibers', usedefault=True, desc='Usually "number_of_fibers, "fiber_length_mean", "fiber_length_std" for matrices made with CMTK'
+                          'Sometimes "weight" or "value" for functional networks.')
     out_nbs_network = File(desc='Output network with edges identified by the NBS')
     out_nbs_pval_network = File(desc='Output network with p-values to weight the edges identified by the NBS')
 

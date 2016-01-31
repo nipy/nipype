@@ -3,6 +3,8 @@
 
 """Tests for workflow callbacks
 """
+
+from builtins import object
 from tempfile import mkdtemp
 from shutil import rmtree
 
@@ -19,7 +21,7 @@ def bad_func():
     raise Exception
 
 
-class Status:
+class Status(object):
 
     def __init__(self):
         self.statuses = []

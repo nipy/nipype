@@ -12,10 +12,11 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys
+import os
 
 nipypepath = os.path.abspath('..')
-sys.path.insert(1,nipypepath)
+sys.path.insert(1, nipypepath)
 
 import nipype
 
@@ -57,7 +58,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'nipype'
-copyright = u'2009-14, Neuroimaging in Python team'
+copyright = u'2009-15, Neuroimaging in Python team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -168,9 +169,9 @@ html_index = 'index.html'
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-html_sidebars = {'**': ['gse.html','localtoc.html', 'sidebar_versions.html', 'indexsidebar.html'],
-                 'searchresults' : ['sidebar_versions.html', 'indexsidebar.html'],
-                 'version' : []}
+html_sidebars = {'**': ['gse.html', 'localtoc.html', 'sidebar_versions.html', 'indexsidebar.html'],
+                 'searchresults': ['sidebar_versions.html', 'indexsidebar.html'],
+                 'version': []}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -211,8 +212,8 @@ htmlhelp_basename = 'nipypedoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('documentation', 'nipype.tex', u'nipype Documentation',
-   u'Neuroimaging in Python team', 'manual'),
+    ('documentation', 'nipype.tex', u'nipype Documentation',
+     u'Neuroimaging in Python team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
