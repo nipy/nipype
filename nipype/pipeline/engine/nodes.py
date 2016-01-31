@@ -28,7 +28,11 @@ except ImportError:
     from ordereddict import OrderedDict
 
 from copy import deepcopy
-import pickle
+try:
+    import cPickle as pickle
+except:
+    import pickle
+
 from glob import glob
 import gzip
 import inspect
@@ -81,12 +85,12 @@ def _write_inputs(node):
             if type(val) == str:
                 try:
                     func = create_function_from_source(val)
-                except RuntimeError, e:
+                except RuntimeError:
                     lines.append("%s.inputs.%s = '%s'" % (nodename, key, val))
                 else:
                     funcname = [name for name in func.func_globals
                                 if name != '__builtins__'][0]
-                    lines.append(cPickle.loads(val))
+                    lines.append(pickle.loads(val))
                     if funcname == nodename:
                         lines[-1] = lines[-1].replace(' %s(' % funcname,
                                                       ' %s_1(' % funcname)
@@ -207,7 +211,7 @@ class WorkflowBase(object):
         return hasattr(self.inputs, parameter)
 
     def _verify_name(self, name):
-        valid_name = bool(re.match('^[\w-]+$', name))
+        valid_name = bool(re.match(r'^[\w-]+$', name))
         if not valid_name:
             raise Exception('the name must not contain any special characters')
 
@@ -650,7 +654,7 @@ connected.
                             lines.append(connect_template2 % line_args)
             functionlines = ['# Functions']
             for function in functions:
-                functionlines.append(cPickle.loads(function).rstrip())
+                functionlines.append(pickle.loads(function).rstrip())
             all_lines = importlines + functionlines + lines
 
             if not filename:
