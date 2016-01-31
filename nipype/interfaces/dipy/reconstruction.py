@@ -1,23 +1,18 @@
 # -*- coding: utf-8 -*-
-import os
+"""
+Interfaces to the reconstruction algorithms in dipy
+
+"""
 import os.path as op
 
 import numpy as np
-from dipy.core.gradients import GradientTable
 import nibabel as nb
 
-from nipype.interfaces.base import (TraitedSpec, File, InputMultiPath,
-                                    OutputMultiPath, Undefined, traits,
-                                    isdefined, OutputMultiPath,
-                                    CommandLineInputSpec, CommandLine,
-                                    BaseInterface, BaseInterfaceInputSpec,
-                                    traits)
-from nipype.utils.filemanip import split_filename, fname_presuffix
-
-from .base import DipyBaseInterface, DipyBaseInterfaceInputSpec
+from nipype.interfaces.base import TraitedSpec, File, traits, isdefined
+from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
 
 from nipype import logging
-iflogger = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('interface')
 
 
 class RESTOREInputSpec(DipyBaseInterfaceInputSpec):
@@ -27,12 +22,12 @@ class RESTOREInputSpec(DipyBaseInterfaceInputSpec):
 
 
 class RESTOREOutputSpec(TraitedSpec):
-    fa = File(desc=('output fractional anisotropy (FA) map computed from '
-                    'the fitted DTI'))
-    md = File(desc=('output mean diffusivity (MD) map computed from the '
-                    'fitted DTI'))
-    rd = File(desc=('output radial diffusivity (RD) map computed from '
-                    'the fitted DTI'))
+    fa = File(desc='output fractional anisotropy (FA) map computed from '
+                   'the fitted DTI')
+    md = File(desc='output mean diffusivity (MD) map computed from the '
+                   'fitted DTI')
+    rd = File(desc='output radial diffusivity (RD) map computed from '
+                   'the fitted DTI')
     mode = File(desc=('output mode (MO) map computed from the fitted DTI'))
     trace = File(desc=('output the tensor trace map computed from the '
                        'fitted DTI'))
@@ -40,7 +35,7 @@ class RESTOREOutputSpec(TraitedSpec):
     evecs = File(desc=('output the eigenvectors of the fitted DTI'))
 
 
-class RESTORE(DipyBaseInterface):
+class RESTORE(DipyDiffusionInterface):
 
     """
     Uses RESTORE [Chang2005]_ to perform DTI fitting with outlier detection.
@@ -92,7 +87,7 @@ class RESTORE(DipyBaseInterface):
             noise_msk = noise_msk.astype(np.uint8)
             try_b0 = False
         elif np.all(data[msk == 0, 0] == 0):
-            iflogger.info('Input data are masked.')
+            IFLOGGER.info('Input data are masked.')
             noise_msk = msk.reshape(-1).astype(np.uint8)
         else:
             noise_msk = (1 - msk).reshape(-1).astype(np.uint8)
@@ -123,18 +118,18 @@ class RESTORE(DipyBaseInterface):
         sigma = mean_std * (1 + bias)
 
         if sigma == 0:
-            iflogger.warn(
+            IFLOGGER.warn(
                 ('Noise std is 0.0, looks like data was masked and noise'
                  ' cannot be estimated correctly. Using default tensor '
                  'model instead of RESTORE.'))
             dti = TensorModel(gtab)
         else:
-            iflogger.info(('Performing RESTORE with noise std=%.4f.') % sigma)
+            IFLOGGER.info(('Performing RESTORE with noise std=%.4f.') % sigma)
             dti = TensorModel(gtab, fit_method='RESTORE', sigma=sigma)
 
         try:
             fit_restore = dti.fit(data, msk)
-        except TypeError as e:
+        except TypeError:
             dti = TensorModel(gtab)
             fit_restore = dti.fit(data, msk)
 
@@ -181,7 +176,7 @@ class EstimateResponseSHOutputSpec(TraitedSpec):
     out_mask = File(exists=True, desc=('output wm mask'))
 
 
-class EstimateResponseSH(DipyBaseInterface):
+class EstimateResponseSH(DipyDiffusionInterface):
 
     """
     Uses dipy to compute the single fiber response to be used in spherical
@@ -253,14 +248,14 @@ class EstimateResponseSH(DipyBaseInterface):
             ratio = abs(response[1] / response[0])
 
         if ratio > 0.25:
-            iflogger.warn(('Estimated response is not prolate enough. '
+            IFLOGGER.warn(('Estimated response is not prolate enough. '
                            'Ratio=%0.3f.') % ratio)
         elif ratio < 1.e-5 or np.any(np.isnan(response)):
             response = np.array([1.8e-3, 3.6e-4, 3.6e-4, S0])
-            iflogger.warn(
+            IFLOGGER.warn(
                 ('Estimated response is not valid, using a default one'))
         else:
-            iflogger.info(('Estimated response: %s') % str(response[:3]))
+            IFLOGGER.info(('Estimated response: %s') % str(response[:3]))
 
         np.savetxt(op.abspath(self.inputs.response), response)
 
@@ -293,7 +288,7 @@ class CSDOutputSpec(TraitedSpec):
     out_fods = File(desc=('fODFs output file name'))
 
 
-class CSD(DipyBaseInterface):
+class CSD(DipyDiffusionInterface):
 
     """
     Uses CSD [Tournier2007]_ to generate the fODF of DWIs. The interface uses
@@ -344,13 +339,13 @@ class CSD(DipyBaseInterface):
         ratio = response[0][1] / response[0][0]
 
         if abs(ratio - 0.2) > 0.1:
-            iflogger.warn(('Estimated response is not prolate enough. '
+            IFLOGGER.warn(('Estimated response is not prolate enough. '
                            'Ratio=%0.3f.') % ratio)
 
         csd_model = ConstrainedSphericalDeconvModel(
             gtab, response, sh_order=self.inputs.sh_order)
 
-        iflogger.info('Fitting CSD model')
+        IFLOGGER.info('Fitting CSD model')
         csd_fit = csd_model.fit(data, msk)
 
         f = gzip.open(self._gen_filename('csdmodel', ext='.pklz'), 'wb')

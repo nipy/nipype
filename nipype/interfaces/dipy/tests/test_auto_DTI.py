@@ -4,15 +4,19 @@ from ..tensors import DTI
 
 
 def test_DTI_inputs():
-    input_map = dict(bvals=dict(mandatory=True,
+    input_map = dict(b0_thres=dict(usedefault=True,
     ),
-    bvecs=dict(mandatory=True,
+    ignore_exception=dict(nohash=True,
+    usedefault=True,
+    ),
+    in_bval=dict(mandatory=True,
+    ),
+    in_bvec=dict(mandatory=True,
     ),
     in_file=dict(mandatory=True,
     ),
     mask_file=dict(),
-    out_filename=dict(genfile=True,
-    ),
+    out_prefix=dict(),
     )
     inputs = DTI.input_spec()
 

@@ -8,25 +8,13 @@ Change directory to provide relative paths for doctests
    >>> os.chdir(datadir)
 """
 import os.path as op
-import warnings
-
 import nibabel as nb
 import numpy as np
 
-from ..base import (traits, TraitedSpec, BaseInterface, File, isdefined)
-from ...utils.filemanip import split_filename
-from ...utils.misc import package_check
+from ..base import (traits, TraitedSpec, File, isdefined)
+from .base import DipyBaseInterface
 from ... import logging
-iflogger = logging.getLogger('interface')
-
-have_dipy = True
-try:
-    package_check('dipy', version='0.6.0')
-except Exception as e:
-    have_dipy = False
-else:
-    from dipy.align.aniso2iso import resample
-    from dipy.core.gradients import GradientTable
+IFLOGGER = logging.getLogger('interface')
 
 
 class ResampleInputSpec(TraitedSpec):
@@ -46,7 +34,7 @@ class ResampleOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class Resample(BaseInterface):
+class Resample(DipyBaseInterface):
 
     """
     An interface to reslicing diffusion datasets.
@@ -75,7 +63,7 @@ class Resample(BaseInterface):
         resample_proxy(self.inputs.in_file, order=order,
                        new_zooms=vox_size, out_file=out_file)
 
-        iflogger.info('Resliced image saved as {i}'.format(i=out_file))
+        IFLOGGER.info('Resliced image saved as {i}'.format(i=out_file))
         return runtime
 
     def _list_outputs(self):
@@ -111,7 +99,7 @@ class DenoiseOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class Denoise(BaseInterface):
+class Denoise(DipyBaseInterface):
 
     """
     An interface to denoising diffusion datasets [Coupe2008]_.
@@ -166,7 +154,7 @@ class Denoise(BaseInterface):
                              smask=signal_mask,
                              nmask=noise_mask,
                              out_file=out_file)
-        iflogger.info(('Denoised image saved as {i}, estimated '
+        IFLOGGER.info(('Denoised image saved as {i}, estimated '
                        'SNR={s}').format(i=out_file, s=str(s)))
         return runtime
 
@@ -187,6 +175,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
     """
     Performs regridding of an image to set isotropic voxel sizes using dipy.
     """
+    from dipy.align.aniso2iso import resample
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -227,7 +216,6 @@ def nlmeans_proxy(in_file, settings,
     """
     Uses non-local means to denoise 4D datasets
     """
-    package_check('dipy', version='0.8.0.dev')
     from dipy.denoise.nlmeans import nlmeans
     from scipy.ndimage.morphology import binary_erosion
     from scipy import ndimage

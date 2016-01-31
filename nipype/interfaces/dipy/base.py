@@ -1,8 +1,44 @@
 # -*- coding: utf-8 -*-
-import numpy as np
+""" Base interfaces for dipy """
 import os.path as op
+import numpy as np
 from nipype.interfaces.base import (traits, File, isdefined,
                                     BaseInterface, BaseInterfaceInputSpec)
+from ... import logging
+
+IFLOGGER = logging.getLogger('interface')
+
+HAVE_DIPY = True
+try:
+    import dipy
+except ImportError:
+    HAVE_DIPY = False
+
+
+def no_dipy():
+    """ Check if dipy is available """
+    global HAVE_DIPY
+    return not HAVE_DIPY
+
+
+def dipy_version():
+    """ Check dipy version """
+    if no_dipy():
+        return None
+
+    return dipy.__version__
+
+
+class DipyBaseInterface(BaseInterface):
+
+    """
+    A base interface for py:mod:`dipy` computations
+    """
+    def __init__(self, **inputs):
+        if no_dipy():
+            IFLOGGER.error('dipy was not found')
+            # raise ImportError('dipy was not found')
+        super(DipyBaseInterface, self).__init__(**inputs)
 
 
 class DipyBaseInterfaceInputSpec(BaseInterfaceInputSpec):
@@ -13,7 +49,7 @@ class DipyBaseInterfaceInputSpec(BaseInterfaceInputSpec):
     out_prefix = traits.Str(desc=('output prefix for file names'))
 
 
-class DipyBaseInterface(BaseInterface):
+class DipyDiffusionInterface(DipyBaseInterface):
 
     """
     A base interface for py:mod:`dipy` computations

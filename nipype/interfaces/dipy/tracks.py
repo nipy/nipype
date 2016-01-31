@@ -11,22 +11,14 @@ import numpy as np
 import nibabel as nb
 import nibabel.trackvis as nbt
 
-from ..base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
+from ..base import (TraitedSpec, BaseInterfaceInputSpec,
                     File, isdefined, traits)
-from ...utils.misc import package_check
+from .base import DipyBaseInterface
 from ... import logging
 IFLOGGER = logging.getLogger('interface')
 
-have_dipy = True
-try:
-    package_check('dipy', version='0.6.0')
-except Exception as e:
-    have_dipy = False
-else:
-    from dipy.tracking.utils import density_map
 
-
-class TrackDensityMapInputSpec(TraitedSpec):
+class TrackDensityMapInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='The input TrackVis track file')
     reference = File(exists=True,
@@ -46,7 +38,7 @@ class TrackDensityMapOutputSpec(TraitedSpec):
     out_file = File(exists=True)
 
 
-class TrackDensityMap(BaseInterface):
+class TrackDensityMap(DipyBaseInterface):
 
     """
     Creates a tract density image from a TrackVis track file using functions
@@ -66,6 +58,8 @@ class TrackDensityMap(BaseInterface):
 
     def _run_interface(self, runtime):
         from numpy import min_scalar_type
+        from dipy.tracking.utils import density_map
+
         tracks, header = nbt.read(self.inputs.in_file)
         streams = ((ii[0]) for ii in tracks)
 
@@ -145,7 +139,7 @@ class StreamlineTractographyOutputSpec(TraitedSpec):
                            ' in seeding.'))
 
 
-class StreamlineTractography(BaseInterface):
+class StreamlineTractography(DipyBaseInterface):
 
     """
     Streamline tractography using EuDX [Garyfallidis12]_.
