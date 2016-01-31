@@ -165,7 +165,7 @@ calling-helper-functions-when-using-apply-asyncs-callback
         self._start_pool()
         cur_batch = self.pool.map(run_node, jobargs)
 
-        if INTERRUPT.value:
+        if INTERRUPT is not None and INTERRUPT.value:
             raise KeyboardInterrupt()
 
         self.pool.close()
