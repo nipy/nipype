@@ -62,8 +62,8 @@ def test_callback_exception():
     assert_equal(len(so.statuses), 2)
     for (n, s) in so.statuses:
         yield assert_equal, n.name, 'f_node'
-    yield assert_equal, so.statuses[0][1], 'start'
-    yield assert_equal, so.statuses[1][1], 'exception'
+    yield assert_equal, 'start', so.statuses[0][1]
+    yield assert_equal, 'error', so.statuses[1][1]
     rmtree(wf.base_dir)
 
 
@@ -99,10 +99,11 @@ def test_callback_multiproc_exception():
                plugin_args={'status_callback': so.callback})
     except:
         pass
-    assert_equal(len(so.statuses), 3)
+
+    assert_equal(len(so.statuses), 2)
     for (n, s) in so.statuses:
         yield assert_equal, n.name, 'f_node'
     yield assert_equal, so.statuses[0][1], 'start'
-    yield assert_equal, so.statuses[1][1], 'end'
-    yield assert_equal, so.statuses[2][1], 'exception'
+    yield assert_equal, so.statuses[1][1], 'error'
+
     rmtree(wf.base_dir)

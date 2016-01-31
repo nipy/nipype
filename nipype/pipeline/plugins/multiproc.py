@@ -24,23 +24,21 @@ def run_node(args):
     jobid, node, updatehash = args
     logger.info('[Starting] Job %d %s' % (jobid, str(node._id)))
     jres = {'result': None}
-    abort = False
     try:
         jres['result'] = node.run(updatehash=updatehash)
         logger.info('[Terminated] Job %d %s' % (jobid, str(node._id)))
+    except Exception:
+        logger.error('[Failed] Job %d %s' % (jobid, str(node._id)))
+        etype, ev, etr = sys.exc_info()
+        jres['traceback'] = format_exception(etype, ev, etr)
+        jres['result'] = node.result
     except KeyboardInterrupt:
-        logger.warn('Processing interrupted by user.')
-        abort = True
-        etype, eval, etr = sys.exc_info()
-        jres['traceback'] = format_exception(etype, eval, etr)
+        logger.error('Processing interrupted by user.')
+        etype, ev, etr = sys.exc_info()
+        jres['traceback'] = format_exception(etype, ev, etr)
         jres['result'] = node.result
-    except:
-        etype, eval, etr = sys.exc_info()
-        jres['traceback'] = format_exception(etype, eval, etr)
-        jres['result'] = node.result
-        logger.warn('[Errored] Job %d %s' % (jobid, str(node._id)))
 
-    return (jobid, jres, abort)
+    return (jobid, jres)
 
 
 class NonDaemonProcess(Process):
@@ -146,31 +144,24 @@ calling-helper-functions-when-using-apply-asyncs-callback
         self.pool.close()
         self.pool.terminate()
         del self.pool
+        self._post_job(cur_batch, graph)
 
+    def _post_job(self, job_results, graph=None):
         processed = []
         notrun = []
-
-        for el in cur_batch:
-            if el[2]:
-                raise KeyboardInterrupt('Aborting execution at user\'s request...')
-
+        for el in job_results:
             jobid = el[0]
             tb = el[1].get('traceback', None)
-            if tb is not None:
-                logger.info('Job %s failed.' % el[0])
-                logger.error(''.join(el[1]['traceback']))
-                notrun.append(self._clean_queue(jobid, graph,
-                              result=el[1]))
-            else:
+            if tb is None:
                 processed.append(jobid)
+                self._task_finished_cb(jobid)
+            else:
+                self._notrun.append(self._clean_queue(jobid, graph, result=el[1]))
 
             self.proc_done[jobid] = True
             self.pending_tasks.remove(jobid)
             self._results[jobid] = el[1]
-            self._task_finished_cb(jobid)
             self._remove_node_dirs()
-
-        return (processed, notrun)
 
     def _report_crash(self, node, result=None):
         if result and result['traceback']:
@@ -215,29 +206,20 @@ calling-helper-functions-when-using-apply-asyncs-callback
                 continue_with_submission = True
                 if str2bool(self.procs[jobid].config['execution']
                             ['local_hash_check']):
-                    try:
-                        logger.info('checking hash locally')
-                        hash_exists, _, _, _ = self.procs[
-                            jobid].hash_exists()
-                        overwrite = getattr(
-                            self.procs[jobid], 'overwrite', False)
-                        always_run = getattr(
-                            self.procs[jobid]._interface, 'always_run', False)
+                    logger.info('checking hash locally')
+                    hash_exists, _, _, _ = self.procs[jobid].hash_exists()
+                    overwrite = getattr(
+                        self.procs[jobid], 'overwrite', False)
+                    always_run = getattr(
+                        self.procs[jobid]._interface, 'always_run', False)
 
-                        # Is cached and run enforced
-                        if (hash_exists and not overwrite and not always_run):
-                            continue_with_submission = False
-                            self.proc_done[jobid] = True
-                            self._task_finished_cb(jobid)
-                            self._remove_node_dirs()
-                            logger.info(('Node %s (%d) is cached or does'
-                                         ' not require being run') %
-                                        (self.procs[jobid], jobid))
-                    except Exception:
-                        self._clean_queue(jobid, graph)
-                        self.proc_pending[jobid] = False
+                    # Is cached and run enforced
+                    if (hash_exists and not overwrite and not always_run):
                         continue_with_submission = False
-                        logger.warn(('Node %s (%d) raised exception') %
+                        self.proc_done[jobid] = True
+                        self._task_finished_cb(jobid)
+                        self._remove_node_dirs()
+                        logger.info(('Node %s (%d) is cached or does not require being run') %
                                     (self.procs[jobid], jobid))
 
                 if continue_with_submission:
@@ -249,11 +231,11 @@ calling-helper-functions-when-using-apply-asyncs-callback
                     if sworker and not nosubmit:
                         forkjids.append(jobid)
                     else:
-                        self._run_mthread(jobid, updatehash, graph)
+                        jres = run_node(jobid, self.procs[jobid], updatehash)
+                        self._post_job([jres], graph)
 
         if len(forkjids) > 0:
-            p, n = self._submit_jobs(forkjids, graph=graph, updatehash=updatehash)
-            self._notrun += n
+            self._submit_jobs(forkjids, graph=graph, updatehash=updatehash)
 
     def run(self, graph, config, updatehash=False):
         """
@@ -298,18 +280,3 @@ calling-helper-functions-when-using-apply-asyncs-callback
     def _get_result(self, jobid):
         return self._results.get(
             jobid, {'result': None, 'traceback': 'Result not found', 'jobid': jobid})
-
-    def _run_mthread(self, jobid, graph=None, updatehash=False):
-        """
-        Run task in master thread
-        """
-        logger.info('Running node %s (%d) on master thread' %
-                    (self.procs[jobid], jobid))
-
-        try:
-            self.procs[jobid].run()
-        except Exception:
-            self._notrun.append(self._clean_queue(jobid, graph))
-        self.pending_tasks.remove(jobid)
-        self._task_finished_cb(jobid)
-        self._remove_node_dirs()

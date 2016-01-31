@@ -47,9 +47,8 @@ def report_crash(node, traceback=None, hostname=None):
             host = hostname
         else:
             host = gethostname()
-    message = ['Node %s failed to run on host %s.' % (name,
-                                                      host)]
-    logger.error(message)
+
+    logger.error('Node %s failed to run on host %s.' % (name, host))
     if not traceback:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback = format_exception(exc_type,
@@ -286,7 +285,7 @@ class DistributedPluginBase(PluginBase):
             raise RuntimeError("".join(result['traceback']))
         crashfile = self._report_crash(self.procs[jobid], result=result)
         if self._status_callback:
-            self._status_callback(self.procs[jobid], 'exception')
+            self._status_callback(self.procs[jobid], 'error')
         if jobid in self.mapnodesubids:
             # remove current jobid
             self.proc_pending[jobid] = False
@@ -409,15 +408,15 @@ class DistributedPluginBase(PluginBase):
             else:
                 break
 
-    def _task_finished_cb(self, jobid):
+    def _task_finished_cb(self, jobid, status='end'):
         """ Extract outputs and assign to inputs of dependent tasks
 
         This is called when a job is completed.
         """
-        logger.info('[Job finished] jobname: %s jobid: %d' %
-                    (self.procs[jobid]._id, jobid))
+        logger.info('[Job finished] jobname: %s jobid: %d status: %s' %
+                    (self.procs[jobid]._id, jobid, status))
         if self._status_callback:
-            self._status_callback(self.procs[jobid], 'end')
+            self._status_callback(self.procs[jobid], status)
         # Update job and worker queues
         self.proc_pending[jobid] = False
         # update the job dependency structure
