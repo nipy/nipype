@@ -64,17 +64,6 @@ class NipypeInterfaceError(Exception):
     def __str__(self):
         return repr(self.value)
 
-
-def _unlock_display(ndisplay):
-    lockf = os.path.join('/tmp', '.X%d-lock' % ndisplay)
-    try:
-        os.remove(lockf)
-    except:
-        return False
-
-    return True
-
-
 def _exists_in_path(cmd, environ):
     '''
     Based on a code snippet from
@@ -987,7 +976,10 @@ class BaseInterface(Interface):
 
             vdisp = Xvfb(nolisten='tcp')
             vdisp.start()
-            vdisp_num = vdisp.vdisplay_num
+            try:
+                vdisp_num = vdisp.new_display
+            except AttributeError:  # outdated version of xvfbwrapper
+                vdisp_num = vdisp.vdisplay_num
 
             iflogger.info('Redirecting X to :%d' % vdisp_num)
             runtime.environ['DISPLAY'] = ':%d' % vdisp_num
@@ -995,14 +987,7 @@ class BaseInterface(Interface):
         runtime = self._run_interface(runtime)
 
         if self._redirect_x:
-            if sysdisplay is None:
-                os.unsetenv('DISPLAY')
-            else:
-                os.environ['DISPLAY'] = sysdisplay
-
-            iflogger.info('Freeing X :%d' % vdisp_num)
             vdisp.stop()
-            _unlock_display(vdisp_num)
 
         return runtime
 
