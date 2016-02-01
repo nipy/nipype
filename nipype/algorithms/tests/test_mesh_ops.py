@@ -22,6 +22,7 @@ if 'darwin' not in platform.system().lower():
     except ImportError:
         pass
 
+
 @skipif(notvtk)
 def test_ident_distances():
     tempdir = mkdtemp()

@@ -12,9 +12,12 @@ Examples
 See the docstrings for the individual classes for 'working' examples.
 
 """
+
+from builtins import object
 __docformat__ = 'restructuredtext'
 import re
 from nipype.interfaces.base import CommandLine
+
 
 class Info(object):
     """ Handle dtk output type and version information.

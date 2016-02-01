@@ -6,6 +6,7 @@ import os
 
 from nipype.interfaces import matlab
 
+
 def grab_doc(task_name):
     """Grab the SPM documentation for the given SPM task named `task_name`
 
@@ -41,9 +42,9 @@ def _strip_header(doc):
 
     """
     hdr = 'NIPYPE'
-    cruft = '\x1b' # There's some weird cruft at the end of the
-                   # docstring, almost looks like the hex for the
-                   # escape character 0x1b.
+    # There's some weird cruft at the end of the docstring, almost looks like
+    # the hex for the escape character 0x1b.
+    cruft = '\x1b'
     try:
         index = doc.index(hdr)
         index += len(hdr)

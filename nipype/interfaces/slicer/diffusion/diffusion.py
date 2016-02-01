@@ -59,7 +59,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = ResampleDTIVolumeInputSpec
     output_spec = ResampleDTIVolumeOutputSpec
     _cmd = "ResampleDTIVolume "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
 
 class DWIRicianLMMSEFilterInputSpec(CommandLineInputSpec):
@@ -104,7 +104,7 @@ acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the C
     input_spec = DWIRicianLMMSEFilterInputSpec
     output_spec = DWIRicianLMMSEFilterOutputSpec
     _cmd = "DWIRicianLMMSEFilter "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
 
 class TractographyLabelMapSeedingInputSpec(CommandLineInputSpec):
@@ -154,7 +154,7 @@ acknowledgements: Laboratory of Mathematics in Imaging. This work is part of the
     input_spec = TractographyLabelMapSeedingInputSpec
     output_spec = TractographyLabelMapSeedingOutputSpec
     _cmd = "TractographyLabelMapSeeding "
-    _outputs_filenames = {'OutputFibers':'OutputFibers.vtk','outputdirectory':'outputdirectory'}
+    _outputs_filenames = {'OutputFibers': 'OutputFibers.vtk', 'outputdirectory': 'outputdirectory'}
 
 
 class DWIJointRicianLMMSEFilterInputSpec(CommandLineInputSpec):
@@ -193,7 +193,7 @@ acknowledgements: Partially founded by grant number TEC2007-67073/TCM from the C
     input_spec = DWIJointRicianLMMSEFilterInputSpec
     output_spec = DWIJointRicianLMMSEFilterOutputSpec
     _cmd = "DWIJointRicianLMMSEFilter "
-    _outputs_filenames = {'outputVolume':'outputVolume.nii'}
+    _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
 
 class DiffusionWeightedVolumeMaskingInputSpec(CommandLineInputSpec):
@@ -229,7 +229,7 @@ contributor: Demian Wassermann (SPL, BWH)
     input_spec = DiffusionWeightedVolumeMaskingInputSpec
     output_spec = DiffusionWeightedVolumeMaskingOutputSpec
     _cmd = "DiffusionWeightedVolumeMasking "
-    _outputs_filenames = {'outputBaseline':'outputBaseline.nii','thresholdMask':'thresholdMask.nii'}
+    _outputs_filenames = {'outputBaseline': 'outputBaseline.nii', 'thresholdMask': 'thresholdMask.nii'}
 
 
 class DTIimportInputSpec(CommandLineInputSpec):
@@ -262,7 +262,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = DTIimportInputSpec
     output_spec = DTIimportOutputSpec
     _cmd = "DTIimport "
-    _outputs_filenames = {'outputTensor':'outputTensor.nii'}
+    _outputs_filenames = {'outputTensor': 'outputTensor.nii'}
 
 
 class DWIToDTIEstimationInputSpec(CommandLineInputSpec):
@@ -303,7 +303,7 @@ acknowledgements: This command module is based on the estimation functionality p
     input_spec = DWIToDTIEstimationInputSpec
     output_spec = DWIToDTIEstimationOutputSpec
     _cmd = "DWIToDTIEstimation "
-    _outputs_filenames = {'outputTensor':'outputTensor.nii','outputBaseline':'outputBaseline.nii'}
+    _outputs_filenames = {'outputTensor': 'outputTensor.nii', 'outputBaseline': 'outputBaseline.nii'}
 
 
 class DiffusionTensorScalarMeasurementsInputSpec(CommandLineInputSpec):
@@ -336,7 +336,7 @@ acknowledgements: LMI
     input_spec = DiffusionTensorScalarMeasurementsInputSpec
     output_spec = DiffusionTensorScalarMeasurementsOutputSpec
     _cmd = "DiffusionTensorScalarMeasurements "
-    _outputs_filenames = {'outputScalar':'outputScalar.nii'}
+    _outputs_filenames = {'outputScalar': 'outputScalar.nii'}
 
 
 class DTIexportInputSpec(CommandLineInputSpec):
@@ -368,4 +368,4 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
     input_spec = DTIexportInputSpec
     output_spec = DTIexportOutputSpec
     _cmd = "DTIexport "
-    _outputs_filenames = {'outputFile':'outputFile'}
+    _outputs_filenames = {'outputFile': 'outputFile'}
