@@ -139,12 +139,12 @@ class ImageMeants(FSLCommand):
 
 class SmoothInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", position=0, mandatory=True)
-    fwhm = traits.Float(
-        argstr="-kernel gauss %.03f -fmean", position=1, xor=['sigma'],
-        desc='gaussian kernel fwhm, will be converted to sigma in mm (not voxels)')
     sigma = traits.Float(
-        argstr="-kernel gauss %.03f -fmean", position=1, xor=['fwhm'],
+        argstr="-kernel gauss %.03f -fmean", position=1, xor=['fwhm'], mandatory=True,
         desc='gaussian kernel sigma in mm (not voxels)')
+    fwhm = traits.Float(
+        argstr="-kernel gauss %.03f -fmean", position=1, xor=['sigma'], mandatory=True,
+        desc='gaussian kernel fwhm, will be converted to sigma in mm (not voxels)')
     smoothed_file = File(
         argstr="%s", position=2, name_source=['in_file'], name_template='%s_smooth', hash_files=False)
 
@@ -181,10 +181,10 @@ class Smooth(FSLCommand):
     >>> from nipype.interfaces.fsl import Smooth
     >>> sm = Smooth()
     >>> sm.inputs.in_file = 'functional2.nii'
-    >>> sm.cmdline
+    >>> sm.cmdline #doctest: +ELLIPSIS
     Traceback (most recent call last):
      ...
-    RuntimeError: either sigma (in mm) or fwhm need be specified.
+    ValueError: Smooth requires a value for one of the inputs 'sigma'. ...
 
     """
 
@@ -197,11 +197,6 @@ class Smooth(FSLCommand):
             sigma = float(value) / np.sqrt(8 * np.log(2))
             return super(Smooth, self)._format_arg(name, trait_spec, sigma)
         return super(Smooth, self)._format_arg(name, trait_spec, value)
-
-    def _parse_inputs(self, skip=None):
-        if not isdefined(self.inputs.sigma) and not isdefined(self.inputs.fwhm):
-            raise RuntimeError('either sigma (in mm) or fwhm need be specified.')
-        return super(Smooth, self)._parse_inputs(skip=skip)
 
 
 class MergeInputSpec(FSLCommandInputSpec):
