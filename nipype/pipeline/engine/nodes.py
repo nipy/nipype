@@ -81,7 +81,7 @@ def _write_inputs(node):
             if type(val) == str:
                 try:
                     func = create_function_from_source(val)
-                except RuntimeError, e:
+                except RuntimeError:
                     lines.append("%s.inputs.%s = '%s'" % (nodename, key, val))
                 else:
                     funcname = [name for name in func.func_globals
