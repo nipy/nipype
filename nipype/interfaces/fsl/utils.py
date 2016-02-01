@@ -157,8 +157,26 @@ class Smooth(FSLCommand):
     """
     Use fslmaths to smooth the image
 
-    Example
-    -------
+    Examples
+    --------
+
+    Setting the kernel width using sigma:
+
+    >>> sm = Smooth()
+    >>> sm.inputs.in_file = 'functional2.nii'
+    >>> sm.inputs.sigma = 8.0
+    >>> sm.cmdline #doctest: +ELLIPSIS
+    'fslmaths functional2.nii -kernel gauss 8.000 -fmean functional2_smooth.nii.gz'
+
+    Setting the kernel width using fwhm:
+
+    >>> sm = Smooth()
+    >>> sm.inputs.in_file = 'functional2.nii'
+    >>> sm.inputs.fwhm = 8.0
+    >>> sm.cmdline #doctest: +ELLIPSIS
+    'fslmaths functional2.nii -kernel gauss 3.397 -fmean functional2_smooth.nii.gz'
+
+    One of sigma or fwhm must be set:
 
     >>> from nipype.interfaces.fsl import Smooth
     >>> sm = Smooth()
@@ -167,20 +185,6 @@ class Smooth(FSLCommand):
     Traceback (most recent call last):
      ...
     RuntimeError: either sigma (in mm) or fwhm need be specified.
-
-    Setting the kernel width using sigma:
-    >>> sm = Smooth()
-    >>> sm.inputs.in_file = 'functional2.nii'
-    >>> sm.inputs.sigma = 8.0
-    >>> sm.cmdline #doctest: +ELLIPSIS
-    'fslmaths functional2.nii -kernel gauss 8.000 -fmean functional2_smooth.nii.gz'
-
-    Setting the kernel width using fwhm:
-    >>> sm = Smooth()
-    >>> sm.inputs.in_file = 'functional2.nii'
-    >>> sm.inputs.fwhm = 8.0
-    >>> sm.cmdline #doctest: +ELLIPSIS
-    'fslmaths functional2.nii -kernel gauss 3.397 -fmean functional2_smooth.nii.gz'
 
     """
 
