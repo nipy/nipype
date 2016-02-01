@@ -139,10 +139,14 @@ class ImageMeants(FSLCommand):
 
 class SmoothInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", position=0, mandatory=True)
-    fwhm = traits.Float(argstr="-kernel gauss %f -fmean", position=1,
-                        mandatory=True)
+    fwhm = traits.Float(
+        argstr="-kernel gauss %.03f -fmean", position=1, xor=['sigma'],
+        desc='gaussian kernel fwhm, will be converted to sigma in mm (not voxels)')
+    sigma = traits.Float(
+        argstr="-kernel gauss %.03f -fmean", position=1, xor=['fwhm'],
+        desc='gaussian kernel sigma in mm (not voxels)')
     smoothed_file = File(
-        argstr="%s", position=2, genfile=True, hash_files=False)
+        argstr="%s", position=2, name_source=['in_file'], name_template='%s_smooth', hash_files=False)
 
 
 class SmoothOutputSpec(TraitedSpec):
@@ -150,32 +154,50 @@ class SmoothOutputSpec(TraitedSpec):
 
 
 class Smooth(FSLCommand):
-    '''Use fslmaths to smooth the image
-    '''
+    """
+    Use fslmaths to smooth the image
+
+    Example
+    -------
+
+    >>> from nipype.interfaces.fsl import Smooth
+    >>> sm = Smooth()
+    >>> sm.inputs.in_file = 'functional2.nii'
+    >>> sm.cmdline
+    Traceback (most recent call last):
+     ...
+    RuntimeError: either sigma (in mm) or fwhm need be specified.
+
+    Setting the kernel width using sigma:
+    >>> sm = Smooth()
+    >>> sm.inputs.in_file = 'functional2.nii'
+    >>> sm.inputs.sigma = 8.0
+    >>> sm.cmdline #doctest: +ELLIPSIS
+    'fslmaths functional2.nii -kernel gauss 8.000 -fmean functional2_smooth.nii.gz'
+
+    Setting the kernel width using fwhm:
+    >>> sm = Smooth()
+    >>> sm.inputs.in_file = 'functional2.nii'
+    >>> sm.inputs.fwhm = 8.0
+    >>> sm.cmdline #doctest: +ELLIPSIS
+    'fslmaths functional2.nii -kernel gauss 3.397 -fmean functional2_smooth.nii.gz'
+
+    """
 
     input_spec = SmoothInputSpec
     output_spec = SmoothOutputSpec
     _cmd = 'fslmaths'
-
-    def _gen_filename(self, name):
-        if name == 'smoothed_file':
-            return self._list_outputs()['smoothed_file']
-        return None
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['smoothed_file'] = self.inputs.smoothed_file
-        if not isdefined(outputs['smoothed_file']):
-            outputs['smoothed_file'] = self._gen_fname(self.inputs.in_file,
-                                                       suffix='_smooth')
-        outputs['smoothed_file'] = os.path.abspath(outputs['smoothed_file'])
-        return outputs
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'fwhm':
             sigma = float(value) / np.sqrt(8 * np.log(2))
             return super(Smooth, self)._format_arg(name, trait_spec, sigma)
         return super(Smooth, self)._format_arg(name, trait_spec, value)
+
+    def _parse_inputs(self, skip=None):
+        if not isdefined(self.inputs.sigma) and not isdefined(self.inputs.fwhm):
+            raise RuntimeError('either sigma (in mm) or fwhm need be specified.')
+        return super(Smooth, self)._parse_inputs(skip=skip)
 
 
 class MergeInputSpec(FSLCommandInputSpec):
