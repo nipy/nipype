@@ -231,9 +231,9 @@ class Node(EngineBase):
 
     def set_input(self, parameter, val):
         """ Set interface input value"""
-        logger.debug('setting nodelevel(%s) input %s = %s' % (str(self),
-                                                              parameter,
-                                                              str(val)))
+        logger.debug('Node: setting nodelevel(%s) input %s = %s' % (str(self),
+                                                                    parameter,
+                                                                    str(val)))
         setattr(self.inputs, parameter, deepcopy(val))
 
     def get_output(self, parameter):
@@ -290,7 +290,7 @@ class Node(EngineBase):
         else:
             self.config = merge_dict(deepcopy(config._sections), self.config)
         if not self._got_inputs:
-            self._get_inputs()
+            self._get_all_inputs()
             self._got_inputs = True
         outdir = self.output_dir()
         logger.info("Executing node %s in dir: %s" % (self._id, outdir))
@@ -424,7 +424,7 @@ class Node(EngineBase):
     def _get_hashval(self):
         """Return a hash of the input state"""
         if not self._got_inputs:
-            self._get_inputs()
+            self._get_all_inputs()
             self._got_inputs = True
         hashed_inputs, hashvalue = self.inputs.get_hashval(
             hash_method=self.config['execution']['hash_method'])
@@ -457,14 +457,17 @@ class Node(EngineBase):
                                 hashfile)
 
     def _get_inputs(self):
+        return self._get_all_inputs()
+
+    def _get_all_inputs(self):
         """Retrieve inputs from pointers to results file
 
         This mechanism can be easily extended/replaced to retrieve data from
         other data sources (e.g., XNAT, HTTP, etc.,.)
         """
-        logger.debug('Setting node inputs')
-        for key, info in list(self.input_source.items()):
-            logger.debug('input: %s' % key)
+        logger.debug('Setting node %s inputs' % self.name)
+        for key, info in self.input_source.items():
+            logger.debug('input: %s, info: %s' % (key, str(info)))
             results_file = info[0]
             logger.debug('results file: %s' % results_file)
             results = loadpkl(results_file)
@@ -982,6 +985,7 @@ class JoinNode(Node):
                                  % (self, slot_field, field, index, e))
 
 
+
 class MapNode(Node):
     """Wraps interface objects that need to be iterated on a list of inputs.
 
@@ -1014,9 +1018,9 @@ class MapNode(Node):
             node specific name
         serial : boolean
             flag to enforce executing the jobs of the mapnode in a serial manner rather than parallel
-        nested : boolea
+        nested : boolean
             support for nested lists, if set the input list will be flattened before running, and the
-            nested list structure of the outputs will be resored
+            nested list structure of the outputs will be resorted
         See Node docstring for additional keyword arguments.
         """
 
@@ -1058,9 +1062,9 @@ class MapNode(Node):
 
         Priority goes to interface.
         """
-        logger.debug('setting nodelevel(%s) input %s = %s' % (str(self),
-                                                              parameter,
-                                                              str(val)))
+        logger.debug('MapNode: setting nodelevel(%s) input %s = %s' % (str(self),
+                                                                       parameter,
+                                                                       str(val)))
         self._set_mapnode_input(self.inputs, parameter, deepcopy(val))
 
     def _set_mapnode_input(self, object, name, newvalue):
@@ -1075,7 +1079,7 @@ class MapNode(Node):
     def _get_hashval(self):
         """ Compute hash including iterfield lists."""
         if not self._got_inputs:
-            self._get_inputs()
+            self._get_all_inputs()
             self._got_inputs = True
         self._check_iterfield()
         hashinputs = deepcopy(self._interface.inputs)
@@ -1229,7 +1233,7 @@ class MapNode(Node):
 
     def get_subnodes(self):
         if not self._got_inputs:
-            self._get_inputs()
+            self._get_all_inputs()
             self._got_inputs = True
         self._check_iterfield()
         self.write_report(report_type='preexec', cwd=self.output_dir())
@@ -1237,7 +1241,7 @@ class MapNode(Node):
 
     def num_subnodes(self):
         if not self._got_inputs:
-            self._get_inputs()
+            self._get_all_inputs()
             self._got_inputs = True
         self._check_iterfield()
         if self._serial:
@@ -1249,11 +1253,14 @@ class MapNode(Node):
                 return len(filename_to_list(getattr(self.inputs, self.iterfield[0])))
 
     def _get_inputs(self):
+        return self._get_all_inputs()
+
+    def _get_all_inputs(self):
         old_inputs = self._inputs.get()
         self._inputs = self._create_dynamic_traits(self._interface.inputs,
                                                    fields=self.iterfield)
         self._inputs.set(**old_inputs)
-        super(MapNode, self)._get_inputs()
+        super(MapNode, self)._get_all_inputs()
 
     def _check_iterfield(self):
         """Checks iterfield

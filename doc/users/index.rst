@@ -35,6 +35,7 @@
    joinnode_and_itersource
    model_specification
    saving_workflows
+   graft_workflow
    spmmcr
    mipav
    nipypecmd

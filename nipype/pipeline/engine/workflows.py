@@ -209,10 +209,11 @@ class Workflow(EngineBase):
                 # determine their inputs/outputs depending on
                 # connection settings.  Skip these modules in the check
                 if dest in connected_ports[destnode]:
-                    raise Exception("""
-Trying to connect %s:%s to %s:%s but input '%s' of node '%s' is already
-connected.
-""" % (srcnode, source, destnode, dest, dest, destnode))
+                    raise Exception(
+                        'Trying to connect %s:%s to %s:%s but input \'%s\' of '
+                        'node \'%s\' is already connected.' %
+                        (srcnode, source, destnode, dest, dest, destnode))
+
                 if not (hasattr(destnode, '_interface') and
                         '.io' in str(destnode._interface.__class__)):
                     if not destnode._check_inputs(dest):
@@ -714,9 +715,9 @@ connected.
         """Checks if a parameter is available as an input or output
         """
         if subtype == 'in':
-            subobject = self.inputs
+            subobject = self._get_all_inputs()
         else:
-            subobject = self.outputs
+            subobject = self._get_all_outputs()
         attrlist = parameter.split('.')
         cur_out = subobject
         for attr in attrlist:
@@ -730,9 +731,9 @@ connected.
         output parameter
         """
         if subtype == 'in':
-            subobject = self.inputs
+            subobject = self._get_all_inputs()
         else:
-            subobject = self.outputs
+            subobject = self._get_all_outputs()
         attrlist = parameter.split('.')
         cur_out = subobject
         for attr in attrlist[:-1]:
@@ -746,8 +747,10 @@ connected.
         return self._has_attr(parameter, subtype='in')
 
     def _get_inputs(self):
-        """Returns the inputs of a workflow
+        return self._get_all_inputs()
 
+    def _get_all_inputs(self):
+        """Returns the inputs of a workflow
         This function does not return any input ports that are already
         connected
         """
@@ -755,7 +758,7 @@ connected.
         for node in self._graph.nodes():
             inputdict.add_trait(node.name, traits.Instance(TraitedSpec))
             if isinstance(node, Workflow):
-                setattr(inputdict, node.name, node.inputs)
+                setattr(inputdict, node.name, node._get_all_inputs())
             else:
                 taken_inputs = []
                 for _, _, d in self._graph.in_edges_iter(nbunch=node,
@@ -763,7 +766,7 @@ connected.
                     for cd in d['connect']:
                         taken_inputs.append(cd[1])
                 unconnectedinputs = TraitedSpec()
-                for key, trait in list(node.inputs.items()):
+                for key, trait in node.inputs.items():
                     if key not in taken_inputs:
                         unconnectedinputs.add_trait(key,
                                                     traits.Trait(trait,
@@ -775,16 +778,19 @@ connected.
         return inputdict
 
     def _get_outputs(self):
+        return self._get_all_outputs()
+
+    def _get_all_outputs(self):
         """Returns all possible output ports that are not already connected
         """
         outputdict = TraitedSpec()
         for node in self._graph.nodes():
             outputdict.add_trait(node.name, traits.Instance(TraitedSpec))
             if isinstance(node, Workflow):
-                setattr(outputdict, node.name, node.outputs)
+                setattr(outputdict, node.name, node._get_all_outputs())
             elif node.outputs:
                 outputs = TraitedSpec()
-                for key, _ in list(node.outputs.items()):
+                for key, _ in node.outputs.items():
                     outputs.add_trait(key, traits.Any(node=node))
                     setattr(outputs, key, None)
                 setattr(outputdict, node.name, outputs)
@@ -1003,3 +1009,264 @@ connected.
                                                   vname1.replace('.', '_')))
                     logger.debug('cross connection: ' + dotlist[-1])
         return ('\n' + prefix).join(dotlist)
+
+
+class InterfacedWorkflow(Workflow):
+    """
+    A workflow that automatically generates the input and output nodes to avoid
+    repetitive inputnode.* and outputnode.* connections and allow for agile
+    pipeline chaining.
+    """
+
+    @property
+    def input_names(self):
+        return self._input_names
+
+    @property
+    def output_names(self):
+        return self._output_names
+
+    def __init__(self, name, base_dir=None, input_names=[], output_names=[]):
+        """Create a workflow object.
+
+        Parameters
+        ----------
+        name : alphanumeric string
+            unique identifier for the workflow
+        base_dir : string, optional
+            path to workflow storage
+
+        """
+        from nipype.interfaces.utility import IdentityInterface
+        super(InterfacedWorkflow, self).__init__(name, base_dir)
+
+        if isinstance(input_names, str):
+            input_names = [input_names]
+
+        if input_names is None or not input_names:
+            raise ValueError(('InterfacedWorkflow input_names must be a '
+                             'non-empty list'))
+
+        if isinstance(output_names, str):
+            output_names = [output_names]
+
+        if output_names is None or not output_names:
+            raise ValueError(('InterfacedWorkflow output_names must be a '
+                             'non-empty list'))
+
+        self._input_names = input_names
+        self._output_names = output_names
+
+        self._inputnode = Node(IdentityInterface(fields=input_names),
+                               name='inputnode')
+        self._outputnode = Node(IdentityInterface(fields=output_names),
+                                name='outputnode')
+        self.add_nodes([self._inputnode, self._outputnode])
+
+    def connect(self, *args, **kwargs):
+        """
+        Extends the connect method to accept void nodes for inputs and outputs.
+
+        Parameters
+        ----------
+
+        args : same as superclass
+
+        """
+        if len(args) == 1:
+            conns = args[0]
+        elif len(args) == 4:
+            conns = [(args[0], args[2], [(args[1], args[3])])]
+        else:
+            raise TypeError('connect() takes either 4 arguments, or 1 list of'
+                            ' connection tuples (%d args given)' % len(args))
+
+        disconnect = False
+        if kwargs:
+            disconnect = kwargs.get('disconnect', False)
+
+        if disconnect:
+            self.disconnect(conns)
+            return
+
+        connection_list = []
+        for conn in conns:
+            srcpref = ''
+            dstpref = ''
+
+            if (isinstance(conn[0], str) and conn[0][0:2] == 'in'):
+                srcnode = self._inputnode
+            else:
+                srcnode = conn[0]
+
+            if (isinstance(conn[1], str) and conn[1][0:3] == 'out'):
+                dstnode = self._outputnode
+            else:
+                dstnode = conn[1]
+
+            if isinstance(srcnode, InterfacedWorkflow):
+                srcpref = 'outputnode.'
+
+            if isinstance(dstnode, InterfacedWorkflow):
+                dstpref = 'inputnode.'
+
+            if len(conn) == 2:
+                srcnames = srcnode.outputs.copyable_trait_names()
+                dstnames = dstnode.inputs.copyable_trait_names()
+                for n in srcnames:
+                    if n not in dstnames:
+                        raise RuntimeError(('Interface missmatch between '
+                                           'workflows, %s port is not '
+                                           'present in destination node') % n)
+                ports = [(srcpref+k, dstpref+k) for k in srcnames]
+            else:
+                ports = []
+                for c in conn[2]:
+                    srcport = c[0]
+                    dstport = c[1]
+                    if len(srcpref) > 0 and not '.' in srcport:
+                        srcport = srcpref + srcport
+
+                    if len(dstpref) > 0 and not '.' in dstport:
+                        dstport = dstpref + dstport
+
+                    ports.append((srcport, dstport))
+
+            connection_list.append((srcnode, dstnode, ports))
+
+        super(InterfacedWorkflow, self).connect(connection_list, **kwargs)
+
+    def _get_inputs(self):
+        """
+        Returns the inputs of a workflow
+
+        This function does not return any input ports that are already
+        connected, nor internal input ports
+        """
+        inputdict = TraitedSpec()
+        node = self._inputnode
+
+        taken_inputs = []
+        for _, _, d in self._graph.in_edges_iter(nbunch=[node],
+                                                 data=True):
+            for cd in d['connect']:
+                taken_inputs.append(cd[1])
+
+        for key, trait in node.inputs.items():
+            if key not in taken_inputs:
+                inputdict.add_trait(key, traits.Trait(trait, node=node))
+                value = getattr(node.inputs, key)
+                setattr(inputdict, key, value)
+
+        inputdict.on_trait_change(self._set_input)
+        return inputdict
+
+    def _get_outputs(self):
+        """
+        Returns all possible output ports of the output node that are not
+        already connected
+        """
+        outputdict = TraitedSpec()
+        node = self._outputnode
+
+        if node.outputs:
+            for key, _ in node.outputs.items():
+                outputdict.add_trait(key, traits.Any(node=node))
+                setattr(outputdict, key, None)
+        return outputdict
+
+
+class GraftWorkflow(InterfacedWorkflow):
+    """
+    A workflow ready to insert several internal workflows that share
+    i/o interfaces, and are run on the same input data.
+    This workflow produces as many outputs as inserted subworkflows, and
+    an outputnode with all the outputs merged.
+
+    Example
+    -------
+    >>> import nipype.pipeline.engine as npe
+    >>> import nipype.interfaces.utility as niu
+    >>> from nipype.interfaces.fsl import Threshold
+    >>> from nipype.interfaces.utility import IdentityInterface
+    >>> wf1 = npe.InterfacedWorkflow(name='testname1', input_names=['in_file', \
+                                     'thresh'], output_names=['out_file'])
+    >>> node = npe.Node(Threshold(), name='internalnode')
+    >>> wf1.connect([ ('in', node), (node, 'out') ])
+    >>> wf2 = wf1.clone(name='testname2')
+    >>> wf = npe.GraftWorkflow(name='graft', fields_from=wf1)
+    >>> wf.insert(wf1)
+    0
+    >>> wf.insert(wf2)
+    1
+    >>> wf.inputs.in_file = 'structural.nii'
+    >>> wf.inputs.thresh = 1.0
+    >>> wf.run() # doctest: +SKIP
+    """
+
+    def __init__(self, name, base_dir=None, fields_from=None,
+                 input_names=[], output_names=[]):
+        """
+        Initializes the workflow from an existing InterfacedWorkflow
+        """
+        self._children = dict()
+        self._cids = dict()
+        self._outnodes = dict()
+        from nipype.interfaces.utility import IdentityInterface, CollateInterface
+        fields_undefined = ((input_names is None) or (output_names is None))
+        wf_undefined = (fields_from is None)
+        if wf_undefined and fields_undefined:
+            raise ValueError(('An existing InterfacedWorkflow or the in/output'
+                             ' names are required to initialize the '
+                             'GraftWorkflow'))
+        if not wf_undefined:
+            if not isinstance(fields_from, InterfacedWorkflow):
+                raise TypeError('Workflow is not an InterfacedWorkflow.')
+            input_names = fields_from.input_names
+            output_names = fields_from.output_names
+        if (((input_names is None) or (not input_names)) and
+           ((output_names is None) or (not output_names))):
+            raise ValueError(('A GraftWorkflow cannot be initialized without '
+                             'specifying either a fields_from workflow or i/o'
+                             ' names lists'))
+
+        super(GraftWorkflow, self).__init__(name=name, base_dir=base_dir,
+                                            input_names=input_names,
+                                            output_names=output_names)
+        self._outputnode = Node(CollateInterface(fields=output_names), name='outputnode')
+
+    def get_cid(self, name):
+        return self._cids[name]
+
+    def insert(self, workflow):
+        """
+        Inserts an InterfacedWorkflow into the workflow
+        """
+        from nipype.interfaces.utility import IdentityInterface
+
+        if not isinstance(workflow, InterfacedWorkflow):
+            raise TypeError(('Only InterfacedWorkflows can be inserted in '
+                            'a GraftWorkflow.'))
+
+        ckey = workflow.name
+        cid = len(self._children)
+
+        if ckey in self._children.keys():
+            raise RuntimeError(('Trying to add an existing workflow to '
+                               'GraftWorkflow'))
+
+        childname = 'out%02d' % cid
+        self._children[ckey] = workflow
+        self._cids[ckey] = cid
+        self._outnodes[ckey] = Node(IdentityInterface(fields=self.output_names),
+                                    name=childname)
+
+        # Check that interfaces are satisfied
+        if ((workflow.input_names != self.input_names) or
+           (workflow.output_names != self.output_names)):
+            raise RuntimeError('Workflow does not meet the general interface')
+
+        self.connect([('in', workflow), (workflow, self._outnodes[ckey]),
+                     (self._outnodes[ckey], 'out',
+                      [(key, '%s_%s' % (childname, key)) for key in self.output_names])])
+        return cid
