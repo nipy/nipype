@@ -8,10 +8,10 @@
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-import warnings
 
 import os
 import re
+from warnings import warn
 
 from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec
 from ..base import CommandLineInputSpec, CommandLine, OutputMultiPath
@@ -19,8 +19,6 @@ from ..base import (Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from ...utils.filemanip import fname_presuffix
-
-warn = warnings.warn
 
 
 class To3DInputSpec(AFNICommandInputSpec):
