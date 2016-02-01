@@ -7,8 +7,5 @@ cover-xml=1
 cover-xml-file=./coverage.xml
 cover-min-percentage=66
 
-with-profile=1
-profile-restrict=.05
-profile-stats-file=./profile-stats.prof
 
 with-xunit=1
