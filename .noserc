@@ -5,7 +5,7 @@ with-coverage=1
 cover-branches=1
 cover-xml=1
 cover-xml-file=./coverage.xml
-cover-min-percentage=66
+cover-min-percentage=50
 
 
 with-xunit=1
