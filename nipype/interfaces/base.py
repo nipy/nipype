@@ -758,6 +758,7 @@ class BaseInterface(Interface):
     _version = None
     _additional_metadata = []
     _redirect_x = False
+    _singleworker = True
 
     def __init__(self, **inputs):
         if not self.input_spec:
@@ -1465,8 +1466,8 @@ class CommandLine(BaseInterface):
 
     def version_from_command(self, flag='-v'):
         cmdname = self.cmd.split()[0]
-        if _exists_in_path(cmdname):
-            env = dict(os.environ)
+        env = dict(os.environ)
+        if _exists_in_path(cmdname, env):
             out_environ = self._get_environ()
             env.update(out_environ)
             proc = subprocess.Popen(' '.join((cmdname, flag)),

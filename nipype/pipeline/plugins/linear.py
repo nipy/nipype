@@ -53,5 +53,5 @@ class LinearPlugin(PluginBase):
                                    crashfile=crashfile))
                 donotrun.extend(subnodes)
                 if self._status_callback:
-                    self._status_callback(node, 'exception')
+                    self._status_callback(node, 'error')
         report_nodes_not_run(notrun)

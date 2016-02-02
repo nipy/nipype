@@ -83,6 +83,14 @@ the number of used resources (to say 2 CPUs), you can call::
 
   workflow.run(plugin='MultiProc', plugin_args={'n_procs' : 2}
 
+When used along with multithreaded interfaces that also take over all the available
+CPUs, the MultiProc plugin may slow down processing. In this context, interfaces
+provide the attribute `_singleworker`. Set it to `False` when the interface is
+multithreaded, and the MultiProc plugin will not allow other interfaces running
+in parallel until the multiple-worker task ends. This trick can also be useful
+when the interface takes a large amount of memory and parallelizing provokes
+swapping.
+
 IPython
 -------
 

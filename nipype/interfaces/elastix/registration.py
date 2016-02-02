@@ -13,9 +13,8 @@ from __future__ import absolute_import
 import os.path as op
 import re
 
-from ..base import (CommandLine, CommandLineInputSpec, isdefined,
-                    TraitedSpec, File, traits, InputMultiPath)
-from .base import ElastixBaseInputSpec
+from ..base import (CommandLine, TraitedSpec, File, traits, InputMultiPath)
+from .base import ElastixBaseInputSpec, ElastixBaseInterface
 
 from ... import logging
 logger = logging.getLogger('interface')
@@ -43,7 +42,7 @@ class RegistrationOutputSpec(TraitedSpec):
                                      desc='flag indicating if warped image was generated')
 
 
-class Registration(CommandLine):
+class Registration(ElastixBaseInterface):
     """
     Elastix nonlinear registration interface
 

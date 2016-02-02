@@ -565,10 +565,10 @@ connected.
             name = 'nipype.pipeline.plugins'
             try:
                 __import__(name)
-            except ImportError:
+            except ImportError as e:
                 msg = 'Could not import plugin module: %s' % name
                 logger.error(msg)
-                raise ImportError(msg)
+                raise e
             else:
                 plugin_mod = getattr(sys.modules[name], '%sPlugin' % plugin)
                 runner = plugin_mod(plugin_args=plugin_args)
