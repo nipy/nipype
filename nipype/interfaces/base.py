@@ -858,7 +858,7 @@ class BaseInterface(Interface):
         """ Prints description for output parameters
         """
         helpstr = ['Outputs::', '']
-        if cls.output_spec:
+        if cls.output_spec is not None:
             outputs = cls.output_spec()
             for name, spec in sorted(outputs.traits(transient=None).items()):
                 helpstr += cls._get_trait_desc(outputs, name, spec)
@@ -870,7 +870,7 @@ class BaseInterface(Interface):
         """ Returns a bunch containing output fields for the class
         """
         outputs = None
-        if self.output_spec:
+        if self.output_spec is not None:
             outputs = self.output_spec()
         return outputs
 
@@ -1091,7 +1091,7 @@ class BaseInterface(Interface):
     def _list_outputs(self):
         """ List the expected outputs
         """
-        if self.output_spec:
+        if self.output_spec is not None:
             raise NotImplementedError
         else:
             return None
@@ -1450,8 +1450,8 @@ class CommandLine(BaseInterface):
 
     def version_from_command(self, flag='-v'):
         cmdname = self.cmd.split()[0]
-        if _exists_in_path(cmdname):
-            env = dict(os.environ)
+        env = dict(os.environ)
+        if _exists_in_path(cmdname, env):
             out_environ = self._get_environ()
             env.update(out_environ)
             proc = subprocess.Popen(' '.join((cmdname, flag)),
@@ -1612,7 +1612,7 @@ class CommandLine(BaseInterface):
     def _list_outputs(self):
         metadata = dict(name_source=lambda t: t is not None)
         traits = self.inputs.traits(**metadata)
-        if traits:
+        if traits and self.output_spec is not None:
             outputs = self.output_spec().get()
             for name, trait_spec in traits.items():
                 out_name = name
