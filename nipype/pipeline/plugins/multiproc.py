@@ -246,8 +246,8 @@ calling-helper-functions-when-using-apply-asyncs-callback
                         self.proc_done[jobid] = True
                         self._task_finished_cb(jobid)
                         self._remove_node_dirs()
-                        LOGGER.info(('Node %s (%d) is cached or does not require being run') %
-                                    (self.procs[jobid], jobid))
+                        LOGGER.info('Node %s (%d) is cached or does not require being run',
+                                    self.procs[jobid], jobid)
 
                 if continue_with_submission:
                     self.pending_tasks.insert(0, jobid)
@@ -258,7 +258,7 @@ calling-helper-functions-when-using-apply-asyncs-callback
                     if sworker and not nosubmit:
                         forkjids.append(jobid)
                     else:
-                        jres = run_node(jobid, self.procs[jobid], updatehash)
+                        jres = run_node((jobid, self.procs[jobid], updatehash))
                         self._post_job([jres], graph)
 
         if len(forkjids) > 0:
