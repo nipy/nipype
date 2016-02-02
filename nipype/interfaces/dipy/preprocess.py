@@ -175,7 +175,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
     """
     Performs regridding of an image to set isotropic voxel sizes using dipy.
     """
-    from dipy.align.aniso2iso import resample
+    from dipy.align.reslice import reslice
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -197,7 +197,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
     if np.all(im_zooms == new_zooms):
         return in_file
 
-    data2, affine2 = resample(data, affine, im_zooms, new_zooms, order=order)
+    data2, affine2 = reslice(data, affine, im_zooms, new_zooms, order=order)
     tmp_zooms = np.array(hdr.get_zooms())
     tmp_zooms[:3] = new_zooms[0]
     hdr.set_zooms(tuple(tmp_zooms))
