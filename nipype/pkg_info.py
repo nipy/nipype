@@ -1,9 +1,17 @@
+from future import standard_library
+standard_library.install_aliases()
+
 import os
 import sys
 import subprocess
-from ConfigParser import ConfigParser
+
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser  # python 3
 
 COMMIT_INFO_FNAME = 'COMMIT_INFO.txt'
+
 
 def pkg_commit_hash(pkg_path):
     ''' Get short form of commit hash given directory `pkg_path`
@@ -42,13 +50,13 @@ def pkg_commit_hash(pkg_path):
     cfg_parser = ConfigParser()
     cfg_parser.read(pth)
     archive_subst = cfg_parser.get('commit hash', 'archive_subst_hash')
-    if not archive_subst.startswith('$Format'): # it has been substituted
+    if not archive_subst.startswith('$Format'):  # it has been substituted
         return 'archive substitution', archive_subst
     install_subst = cfg_parser.get('commit hash', 'install_hash')
     if install_subst != '':
         return 'installation', install_subst
     # maybe we are in a repository
-    proc = subprocess.Popen('git rev-parse HEAD',
+    proc = subprocess.Popen('git rev-parse --short HEAD',
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             cwd=pkg_path, shell=True)

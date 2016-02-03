@@ -5,6 +5,7 @@ from .debug import DebugPlugin
 from .linear import LinearPlugin
 from .ipythonx import IPythonXPlugin
 from .pbs import PBSPlugin
+from .oar import OARPlugin
 from .sge import SGEPlugin
 from .condor import CondorPlugin
 from .dagman import CondorDAGManPlugin
@@ -15,3 +16,4 @@ from .pbsgraph import PBSGraphPlugin
 from .sgegraph import SGEGraphPlugin
 from .lsf import LSFPlugin
 from .slurm import SLURMPlugin
+from .slurmgraph import SLURMGraphPlugin

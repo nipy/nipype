@@ -7,5 +7,3 @@ Exaples: artifactdetect
 
 """
 __docformat__ = 'restructuredtext'
-
-

@@ -1,8 +1,10 @@
+from __future__ import print_function
+from builtins import range
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 import os
 import shutil
-from tempfile import mkdtemp
+from tempfile import mkdtemp, mkstemp
 
 import numpy as np
 from nipype.testing import assert_equal, assert_true, assert_raises
@@ -106,10 +108,62 @@ def test_function_with_imports():
                                     function=make_random_array,
                                     imports=["import numpy as np"]),
                    name="should_not_fail")
-    print node.inputs.function_str
+    print(node.inputs.function_str)
     try:
         node.inputs.size = 10
         node.run()
     finally:
         os.chdir(origdir)
         shutil.rmtree(tempdir)
+
+
+def test_split():
+    tempdir = os.path.realpath(mkdtemp())
+    origdir = os.getcwd()
+    os.chdir(tempdir)
+
+    try:
+        node = pe.Node(utility.Split(inlist=list(range(4)),
+                                     splits=[1, 3]),
+                       name='split_squeeze')
+        res = node.run()
+        yield assert_equal, res.outputs.out1, [0]
+        yield assert_equal, res.outputs.out2, [1, 2, 3]
+
+        node = pe.Node(utility.Split(inlist=list(range(4)),
+                                     splits=[1, 3],
+                                     squeeze=True),
+                       name='split_squeeze')
+        res = node.run()
+        yield assert_equal, res.outputs.out1, 0
+        yield assert_equal, res.outputs.out2, [1, 2, 3]
+    finally:
+        os.chdir(origdir)
+        shutil.rmtree(tempdir)
+
+
+def test_csvReader():
+    header = "files,labels,erosion\n"
+    lines = ["foo,hello,300.1\n",
+             "bar,world,5\n",
+             "baz,goodbye,0.3\n"]
+    for x in range(2):
+        fd, name = mkstemp(suffix=".csv")
+        with open(name, 'w') as fid:
+            reader = utility.CSVReader()
+            if x % 2 == 0:
+                fid.write(header)
+                reader.inputs.header = True
+            fid.writelines(lines)
+            fid.flush()
+            reader.inputs.in_file = name
+            out = reader.run()
+            if x % 2 == 0:
+                yield assert_equal, out.outputs.files, ['foo', 'bar', 'baz']
+                yield assert_equal, out.outputs.labels, ['hello', 'world', 'goodbye']
+                yield assert_equal, out.outputs.erosion, ['300.1', '5', '0.3']
+            else:
+                yield assert_equal, out.outputs.column_0, ['foo', 'bar', 'baz']
+                yield assert_equal, out.outputs.column_1, ['hello', 'world', 'goodbye']
+                yield assert_equal, out.outputs.column_2, ['300.1', '5', '0.3']
+        os.unlink(name)

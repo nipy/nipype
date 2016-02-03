@@ -3,6 +3,8 @@
 
 """Tests for workflow callbacks
 """
+
+from builtins import object
 from tempfile import mkdtemp
 from shutil import rmtree
 
@@ -19,7 +21,7 @@ def bad_func():
     raise Exception
 
 
-class Status:
+class Status(object):
 
     def __init__(self):
         self.statuses = []
@@ -72,7 +74,8 @@ def test_callback_multiproc_normal():
                                   output_names=[]),
                      name='f_node')
     wf.add_nodes([f_node])
-    wf.config['execution'] = {'crashdump_dir': wf.base_dir}
+    wf.config['execution']['crashdump_dir'] = wf.base_dir
+    wf.config['execution']['poll_sleep_duration'] = 2
     wf.run(plugin='MultiProc', plugin_args={'status_callback': so.callback})
     assert_equal(len(so.statuses), 2)
     for (n, s) in so.statuses:
@@ -89,7 +92,8 @@ def test_callback_multiproc_exception():
                                   output_names=[]),
                      name='f_node')
     wf.add_nodes([f_node])
-    wf.config['execution'] = {'crashdump_dir': wf.base_dir}
+    wf.config['execution']['crashdump_dir'] = wf.base_dir
+    wf.config['execution']['poll_sleep_duration'] = 2
     try:
         wf.run(plugin='MultiProc',
                plugin_args={'status_callback': so.callback})

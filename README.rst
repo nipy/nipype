@@ -5,9 +5,34 @@ NIPYPE: Neuroimaging in Python: Pipelines and Interfaces
 .. image:: https://travis-ci.org/nipy/nipype.png?branch=master
   :target: https://travis-ci.org/nipy/nipype
 
+.. image:: https://circleci.com/gh/nipy/nipype/tree/master.svg?style=svg
+  :target: https://circleci.com/gh/nipy/nipype/tree/master
+
 .. image:: https://coveralls.io/repos/nipy/nipype/badge.png
   :target: https://coveralls.io/r/nipy/nipype
 
+.. image:: https://www.codacy.com/project/badge/182f27944c51474490b369d0a23e2f32
+  :target: https://www.codacy.com/app/krzysztof-gorgolewski/nipy_nipype
+
+.. image:: https://img.shields.io/pypi/v/nipype.svg
+    :target: https://pypi.python.org/pypi/nipype/
+    :alt: Latest Version
+
+.. image:: https://img.shields.io/pypi/dm/nipype.svg
+    :target: https://pypi.python.org/pypi/nipype/
+    :alt: Downloads
+
+.. image:: https://img.shields.io/pypi/pyversions/nipype.svg
+    :target: https://pypi.python.org/pypi/nipype/
+    :alt: Supported Python versions
+
+.. image:: https://img.shields.io/pypi/status/nipype.svg
+    :target: https://pypi.python.org/pypi/nipype/
+    :alt: Development Status
+
+.. image:: https://img.shields.io/pypi/l/nipype.svg
+    :target: https://pypi.python.org/pypi/nipype/
+    :alt: License
 
 Current neuroimaging software offer users an incredible opportunity to
 analyze data using a variety of different algorithms. However, this has
@@ -19,7 +44,7 @@ umbrella of NiPy, is a Python project that provides a uniform interface
 to existing neuroimaging software and facilitates interaction between
 these packages within a single workflow. Nipype provides an environment
 that encourages interactive exploration of algorithms from different
-packages (e.g., SPM, FSL, FreeSurfer, AFNI, Slicer), eases the
+packages (e.g., SPM, FSL, FreeSurfer, AFNI, Slicer, ANTS), eases the
 design of workflows within and between packages, and reduces the
 learning curve necessary to use different packages. Nipype is creating a
 collaborative platform for neuroimaging software development in a
@@ -44,32 +69,34 @@ documentation.
 Website
 -------
 
-Information specific to NIPYPE is located here::
-	    
+Information specific to Nipype is located here::
+
     http://nipy.org/nipype
 
 
-Mailing Lists
--------------
+Support and Communication
+-------------------------
 
-For core NIPYPE related issues, please see the developer's list here::
-       
-       http://projects.scipy.org/mailman/listinfo/nipy-devel
+If you have a problem or would like to ask a question about how to do something in Nipype please submit a question
+to `NeuroStars.org <http://neurostars.org>`_ with a *nipype* tag. `NeuroStars.org <http://neurostars.org>`_  is a platform similar to StackOverflow but dedicated to neuroinformatics. All previous Nipype questions are available here::
 
-For user NIPYPE related issues, please see the user's list here::
-
-       http://groups.google.com/group/nipy-user
-
-For NIPYPE related issues, please add *NIPYPE* to the subject line
+       http://neurostars.org/t/nipype/
 
 
-NIPYPE structure
+To participate in the Nipype development related discussions please use the following mailing list::
+
+       http://mail.python.org/mailman/listinfo/neuroimaging
+
+Please add *[nipype]* to the subject line when posting on the mailing list.
+
+
+Nipype structure
 ----------------
 
-Currently NIPYPE consists of the following files and directories:
+Currently Nipype consists of the following files and directories:
 
   INSTALL
-    NIPYPE prerequisites, installation, development, testing, and 
+    NIPYPE prerequisites, installation, development, testing, and
     troubleshooting.
 
   README
@@ -103,5 +130,5 @@ There are interfaces to some GNU code but these are entirely optional.
 All trademarks referenced herein are property of their respective
 holders.
 
-Copyright (c) 2009-2014, NIPY Developers
+Copyright (c) 2009-2015, NIPY Developers
 All rights reserved.
