@@ -449,7 +449,15 @@ class Function(IOBase):
             if isdefined(value):
                 args[name] = value
 
-        out = function_handle(**args)
+        # Record memory of function_handle
+        try:
+            import memory_profiler
+            proc = (function_handle, (), args)
+            mem_mb, out = memory_profiler.memory_usage(proc=proc, retval=True, include_children=True, max_usage=True)
+            setattr(runtime, 'cmd_memory', mem_mb[0]/1024.0)
+        # If no memory_profiler package, run without recording memory
+        except:
+            out = function_handle(**args)
 
         if len(self._output_names) == 1:
             self._out[self._output_names[0]] = out
