@@ -134,7 +134,54 @@ class IOBase(BaseInterface):
         return base
 
 
+# Class to track percentage of S3 file upload
+class ProgressPercentage(object):
+    '''
+    Callable class instsance (via __call__ method) that displays
+    upload percentage of a file to S3
+    '''
+
+    def __init__(self, filename):
+        '''
+        '''
+
+        # Import packages
+        import threading
+
+        # Initialize data attributes
+        self._filename = filename
+        self._size = float(os.path.getsize(filename))
+        self._seen_so_far = 0
+        self._lock = threading.Lock()
+
+    def __call__(self, bytes_amount):
+        '''
+        '''
+
+        # Import packages
+        import sys
+
+        # With the lock on, print upload status
+        with self._lock:
+            self._seen_so_far += bytes_amount
+            if self._size != 0:
+                percentage = (self._seen_so_far / self._size) * 100
+            else:
+                percentage = 0
+            progress_str = '%d / %d (%.2f%%)\r'\
+                           % (self._seen_so_far, self._size, percentage)
+
+            # Write to stdout
+            sys.stdout.write(progress_str)
+            sys.stdout.flush()
+
+
+# DataSink inputs
 class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    '''
+    '''
+
+    # Init inputspec data attributes
     base_directory = Directory(
         desc='Path to the base directory for storing data.')
     container = traits.Str(
@@ -146,17 +193,32 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                    desc=('List of 2-tuples reflecting string '
                                          'to substitute and string to replace '
                                          'it with'))
-    regexp_substitutions = InputMultiPath(traits.Tuple(traits.Str, traits.Str),
-                                          desc=('List of 2-tuples reflecting a pair '
-                                                'of a Python regexp pattern and a '
-                                                'replacement string. Invoked after '
-                                                'string `substitutions`'))
+    regexp_substitutions = \
+        InputMultiPath(traits.Tuple(traits.Str, traits.Str),
+                       desc=('List of 2-tuples reflecting a pair of a '\
+                             'Python regexp pattern and a replacement '\
+                             'string. Invoked after string `substitutions`'))
 
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
     remove_dest_dir = traits.Bool(False, usedefault=True,
                                   desc='remove dest directory when copying dirs')
 
+    # AWS S3 data attributes
+    creds_path = traits.Str(desc='Filepath to AWS credentials file for S3 bucket '\
+                                 'access; if not specified, the credentials will '\
+                                 'be taken from the AWS_ACCESS_KEY_ID and '\
+                                 'AWS_SECRET_ACCESS_KEY environment variables')
+    encrypt_bucket_keys = traits.Bool(desc='Flag indicating whether to use S3 '\
+                                        'server-side AES-256 encryption')
+    # Set this if user wishes to override the bucket with their own
+    bucket = traits.Generic(mandatory=False,
+                            desc='Boto3 S3 bucket for manual override of bucket')
+    # Set this if user wishes to have local copy of files as well
+    local_copy = traits.Str(desc='Copy files locally as well as to S3 bucket')
+
+    # Set call-able inputs attributes
     def __setattr__(self, key, value):
+
         if key not in self.copyable_trait_names():
             if not isdefined(value):
                 super(DataSinkInputSpec, self).__setattr__(key, value)
@@ -167,11 +229,14 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
             super(DataSinkInputSpec, self).__setattr__(key, value)
 
 
+# DataSink outputs
 class DataSinkOutputSpec(TraitedSpec):
 
+    # Init out file
     out_file = traits.Any(desc='datasink output')
 
 
+# Custom DataSink class
 class DataSink(IOBase):
     """ Generic datasink module to store structured outputs
 
@@ -233,9 +298,12 @@ class DataSink(IOBase):
         >>> ds.run()  # doctest: +SKIP
 
     """
+
+    # Give obj .inputs and .outputs
     input_spec = DataSinkInputSpec
     output_spec = DataSinkOutputSpec
 
+    # Initialization method to set up datasink
     def __init__(self, infields=None, force_run=True, **kwargs):
         """
         Parameters
@@ -257,6 +325,7 @@ class DataSink(IOBase):
         if force_run:
             self._always_run = True
 
+    # Get destination paths
     def _get_dst(self, src):
         # If path is directory with trailing os.path.sep,
         # then remove that for a more robust behavior
@@ -280,6 +349,7 @@ class DataSink(IOBase):
             dst = dst[1:]
         return dst
 
+    # Substitute paths in substitutions dictionary parameter
     def _substitute(self, pathstr):
         pathstr_ = pathstr
         if isdefined(self.inputs.substitutions):
@@ -300,50 +370,377 @@ class DataSink(IOBase):
             iflogger.info('sub: %s -> %s' % (pathstr_, pathstr))
         return pathstr
 
+    # Check for s3 in base directory
+    def _check_s3_base_dir(self):
+        '''
+        Method to see if the datasink's base directory specifies an
+        S3 bucket path; if it does, it parses the path for the bucket
+        name in the form 's3://bucket_name/...' and returns it
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+        s3_flag : boolean
+            flag indicating whether the base_directory contained an
+            S3 bucket path
+        bucket_name : string
+            name of the S3 bucket to connect to; if the base directory
+            is not a valid S3 path, defaults to '<N/A>'
+        '''
+
+        # Init variables
+        s3_str = 's3://'
+        bucket_name = '<N/A>'
+        base_directory = self.inputs.base_directory
+
+        if not isdefined(base_directory):
+            s3_flag = False
+            return s3_flag, bucket_name
+
+        # Explicitly lower-case the "s3"
+        if base_directory.lower().startswith(s3_str):
+            base_dir_sp = base_directory.split('/')
+            base_dir_sp[0] = base_dir_sp[0].lower()
+            base_directory = '/'.join(base_dir_sp)
+
+        # Check if 's3://' in base dir
+        if base_directory.startswith(s3_str):
+            # Expects bucket name to be 's3://bucket_name/base_dir/..'
+            bucket_name = base_directory.split(s3_str)[1].split('/')[0]
+            s3_flag = True
+        # Otherwise it's just a normal datasink
+        else:
+            s3_flag = False
+
+        # Return s3_flag
+        return s3_flag, bucket_name
+
+    # Function to return AWS secure environment variables
+    def _return_aws_keys(self):
+        '''
+        Method to return AWS access key id and secret access key using
+        credentials found in a local file.
+
+        Parameters
+        ----------
+        self : nipype.interfaces.io.DataSink
+            self for instance method
+
+        Returns
+        -------
+        aws_access_key_id : string
+            string of the AWS access key ID
+        aws_secret_access_key : string
+            string of the AWS secret access key
+        '''
+
+        # Import packages
+        import os
+
+        # Init variables
+        creds_path = self.inputs.creds_path
+
+        # Check if creds exist
+        if creds_path and os.path.exists(creds_path):
+            with open(creds_path, 'r') as creds_in:
+                # Grab csv rows
+                row1 = creds_in.readline()
+                row2 = creds_in.readline()
+
+            # Are they root or user keys
+            if 'User Name' in row1:
+                # And split out for keys
+                aws_access_key_id = row2.split(',')[1]
+                aws_secret_access_key = row2.split(',')[2]
+            elif 'AWSAccessKeyId' in row1:
+                # And split out for keys
+                aws_access_key_id = row1.split('=')[1]
+                aws_secret_access_key = row2.split('=')[1]
+            else:
+                err_msg = 'Credentials file not recognized, check file is correct'
+                raise Exception(err_msg)
+
+            # Strip any carriage return/line feeds
+            aws_access_key_id = aws_access_key_id.replace('\r', '').replace('\n', '')
+            aws_secret_access_key = aws_secret_access_key.replace('\r', '').replace('\n', '')
+        else:
+            aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+            aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+        # Return keys
+        return aws_access_key_id, aws_secret_access_key
+
+    # Fetch bucket object
+    def _fetch_bucket(self, bucket_name):
+        '''
+        Method to return a bucket object which can be used to interact
+        with an AWS S3 bucket using credentials found in a local file.
+
+        Parameters
+        ----------
+        self : nipype.interfaces.io.DataSink
+            self for instance method
+        bucket_name : string
+            string corresponding to the name of the bucket on S3
+
+        Returns
+        -------
+        bucket : boto3.resources.factory.s3.Bucket
+            boto3 s3 Bucket object which is used to interact with files
+            in an S3 bucket on AWS
+        '''
+
+        # Import packages
+        import logging
+
+        try:
+            import boto3
+            import botocore
+        except ImportError as exc:
+            err_msg = 'Boto3 package is not installed - install boto3 and '\
+                      'try again.'
+            raise Exception(err_msg)
+
+        # Init variables
+        creds_path = self.inputs.creds_path
+        iflogger = logging.getLogger('interface')
+
+        # Get AWS credentials
+        try:
+            aws_access_key_id, aws_secret_access_key = \
+                self._return_aws_keys()
+        except Exception as exc:
+            err_msg = 'There was a problem extracting the AWS credentials '\
+                      'from the credentials file provided: %s. Error:\n%s'\
+                      % (creds_path, exc)
+            raise Exception(err_msg)
+
+        # Try and get AWS credentials if a creds_path is specified
+        if aws_access_key_id and aws_secret_access_key:
+            # Init connection
+            iflogger.info('Connecting to S3 bucket: %s with credentials...'\
+                          % bucket_name)
+            # Use individual session for each instance of DataSink
+            # Better when datasinks are being used in multi-threading, see:
+            # http://boto3.readthedocs.org/en/latest/guide/resources.html#multithreading
+            session = boto3.session.Session(aws_access_key_id=aws_access_key_id,
+                                            aws_secret_access_key=aws_secret_access_key)
+            s3_resource = session.resource('s3', use_ssl=True)
+
+        # Otherwise, connect anonymously
+        else:
+            iflogger.info('Connecting to AWS: %s anonymously...'\
+                          % bucket_name)
+            session = boto3.session.Session()
+            s3_resource = session.resource('s3', use_ssl=True)
+            s3_resource.meta.client.meta.events.register('choose-signer.s3.*',
+                                                         botocore.handlers.disable_signing)
+
+        # Explicitly declare a secure SSL connection for bucket object
+        bucket = s3_resource.Bucket(bucket_name)
+
+        # And try fetch the bucket with the name argument
+        try:
+            s3_resource.meta.client.head_bucket(Bucket=bucket_name)
+        except botocore.exceptions.ClientError as exc:
+            error_code = int(exc.response['Error']['Code'])
+            if error_code == 403:
+                err_msg = 'Access to bucket: %s is denied; check credentials'\
+                          % bucket_name
+                raise Exception(err_msg)
+            elif error_code == 404:
+                err_msg = 'Bucket: %s does not exist; check spelling and try '\
+                          'again' % bucket_name
+                raise Exception(err_msg)
+            else:
+                err_msg = 'Unable to connect to bucket: %s. Error message:\n%s'\
+                          % (bucket_name, exc)
+        except Exception as exc:
+            err_msg = 'Unable to connect to bucket: %s. Error message:\n%s'\
+                      % (bucket_name, exc)
+            raise Exception(err_msg)
+
+        # Return the bucket
+        return bucket
+
+    # Send up to S3 method
+    def _upload_to_s3(self, bucket, src, dst):
+        '''
+        Method to upload outputs to S3 bucket instead of on local disk
+        '''
+
+        # Import packages
+        import hashlib
+        import logging
+        import os
+
+        from botocore.exceptions import ClientError
+
+        # Init variables
+        iflogger = logging.getLogger('interface')
+        s3_str = 's3://'
+        s3_prefix = s3_str + bucket.name
+
+        # Explicitly lower-case the "s3"
+        if dst.lower().startswith(s3_str):
+            dst_sp = dst.split('/')
+            dst_sp[0] = dst_sp[0].lower()
+            dst = '/'.join(dst_sp)
+
+        # If src is a directory, collect files (this assumes dst is a dir too)
+        if os.path.isdir(src):
+            src_files = []
+            for root, dirs, files in os.walk(src):
+                src_files.extend([os.path.join(root, fil) for fil in files])
+            # Make the dst files have the dst folder as base dir
+            dst_files = [os.path.join(dst, src_f.split(src)[1]) \
+                         for src_f in src_files]
+        else:
+            src_files = [src]
+            dst_files = [dst]
+
+        # Iterate over src and copy to dst
+        for src_idx, src_f in enumerate(src_files):
+            # Get destination filename/keyname
+            dst_f = dst_files[src_idx]
+            dst_k = dst_f.replace(s3_prefix, '').lstrip('/')
+
+            # See if same file is already up there
+            try:
+                dst_obj = bucket.Object(key=dst_k)
+                dst_md5 = dst_obj.e_tag.strip('"')
+
+                # See if same file is already there
+                src_read = open(src_f, 'rb').read()
+                src_md5 = hashlib.md5(src_read).hexdigest()
+                # Move to next loop iteration
+                if dst_md5 == src_md5:
+                    iflogger.info('File %s already exists on S3, skipping...' % dst_f)
+                    continue
+                else:
+                    iflogger.info('Overwriting previous S3 file...')
+
+            except ClientError:
+                iflogger.info('New file to S3')
+
+            # Copy file up to S3 (either encrypted or not)
+            iflogger.info('Uploading %s to S3 bucket, %s, as %s...'\
+                          % (src_f, bucket.name, dst_f))
+            if self.inputs.encrypt_bucket_keys:
+                extra_args = {'ServerSideEncryption' : 'AES256'}
+            else:
+                extra_args = {}
+            bucket.upload_file(src_f, dst_k, ExtraArgs=extra_args,
+                               Callback=ProgressPercentage(src_f))
+
+    # List outputs, main run routine
     def _list_outputs(self):
         """Execute this module.
         """
+
+        # Init variables
+        iflogger = logging.getLogger('interface')
         outputs = self.output_spec().get()
         out_files = []
-        outdir = self.inputs.base_directory
-        if not isdefined(outdir):
-            outdir = '.'
-        outdir = os.path.abspath(outdir)
+        # Use hardlink
+        use_hardlink = str2bool(config.get('execution', 'try_hard_link_datasink'))
+
+        # Set local output directory if specified
+        if isdefined(self.inputs.local_copy):
+            outdir = self.inputs.local_copy
+        else:
+            outdir = self.inputs.base_directory
+            # If base directory isn't given, assume current directory
+            if not isdefined(outdir):
+                outdir = '.'
+
+        # Check if base directory reflects S3 bucket upload
+        s3_flag, bucket_name = self._check_s3_base_dir()
+        if s3_flag:
+            s3dir = self.inputs.base_directory
+            # If user overrides bucket object, use that
+            if self.inputs.bucket:
+                bucket = self.inputs.bucket
+            # Otherwise fetch bucket object using name
+            else:
+                try:
+                    bucket = self._fetch_bucket(bucket_name)
+                # If encountering an exception during bucket access, set output
+                # base directory to a local folder
+                except Exception as exc:
+                    s3dir = '<N/A>'
+                    if not isdefined(self.inputs.local_copy):
+                        local_out_exception = os.path.join(os.path.expanduser('~'),
+                                                           's3_datasink_' + bucket_name)
+                        outdir = local_out_exception
+                    # Log local copying directory
+                    iflogger.info('Access to S3 failed! Storing outputs locally at: '\
+                                  '%s\nError: %s' %(outdir, exc))
+        else:
+            s3dir = '<N/A>'
+
+        # If container input is given, append that to outdir
         if isdefined(self.inputs.container):
             outdir = os.path.join(outdir, self.inputs.container)
-        if not os.path.exists(outdir):
-            try:
-                os.makedirs(outdir)
-            except OSError as inst:
-                if 'File exists' in inst:
-                    pass
-                else:
-                    raise(inst)
-        use_hardlink = str2bool(config.get('execution',
-                                           'try_hard_link_datasink'))
-        for key, files in list(self.inputs._outputs.items()):
+            s3dir = os.path.join(s3dir, self.inputs.container)
+
+        # If sinking to local folder
+        if outdir != s3dir:
+            outdir = os.path.abspath(outdir)
+            # Create the directory if it doesn't exist
+            if not os.path.exists(outdir):
+                try:
+                    os.makedirs(outdir)
+                except OSError as inst:
+                    if 'File exists' in inst:
+                        pass
+                    else:
+                        raise(inst)
+
+        # Iterate through outputs attributes {key : path(s)}
+        for key, files in self.inputs._outputs.items():
             if not isdefined(files):
                 continue
             iflogger.debug("key: %s files: %s" % (key, str(files)))
             files = filename_to_list(files)
             tempoutdir = outdir
+            if s3_flag:
+                s3tempoutdir = s3dir
             for d in key.split('.'):
                 if d[0] == '@':
                     continue
                 tempoutdir = os.path.join(tempoutdir, d)
+                if s3_flag:
+                    s3tempoutdir = os.path.join(s3tempoutdir, d)
 
             # flattening list
             if isinstance(files, list):
                 if isinstance(files[0], list):
                     files = [item for sublist in files for item in sublist]
 
+            # Iterate through passed-in source files
             for src in filename_to_list(files):
+                # Format src and dst files
                 src = os.path.abspath(src)
-                if os.path.isfile(src):
-                    dst = self._get_dst(src)
-                    dst = os.path.join(tempoutdir, dst)
-                    dst = self._substitute(dst)
-                    path, _ = os.path.split(dst)
+                if not os.path.isfile(src):
+                    src = os.path.join(src, '')
+                dst = self._get_dst(src)
+                if s3_flag:
+                    s3dst = os.path.join(s3tempoutdir, dst)
+                    s3dst = self._substitute(s3dst)
+                dst = os.path.join(tempoutdir, dst)
+                dst = self._substitute(dst)
+                path, _ = os.path.split(dst)
+
+                # If we're uploading to S3
+                if s3_flag:
+                    self._upload_to_s3(bucket, src, s3dst)
+                    out_files.append(s3dst)
+                # Otherwise, copy locally src -> dst
+                if not s3_flag or isdefined(self.inputs.local_copy):
+                    # Create output directory if it doesnt exist
                     if not os.path.exists(path):
                         try:
                             os.makedirs(path)
@@ -352,125 +749,25 @@ class DataSink(IOBase):
                                 pass
                             else:
                                 raise(inst)
-                    iflogger.debug("copyfile: %s %s" % (src, dst))
-                    copyfile(src, dst, copy=True, hashmethod='content',
-                             use_hardlink=use_hardlink)
-                    out_files.append(dst)
-                elif os.path.isdir(src):
-                    dst = self._get_dst(os.path.join(src, ''))
-                    dst = os.path.join(tempoutdir, dst)
-                    dst = self._substitute(dst)
-                    path, _ = os.path.split(dst)
-                    if not os.path.exists(path):
-                        try:
-                            os.makedirs(path)
-                        except OSError as inst:
-                            if 'File exists' in inst:
-                                pass
-                            else:
-                                raise(inst)
-                    if os.path.exists(dst) and self.inputs.remove_dest_dir:
-                        iflogger.debug("removing: %s" % dst)
-                        shutil.rmtree(dst)
-                    iflogger.debug("copydir: %s %s" % (src, dst))
-                    copytree(src, dst)
-                    out_files.append(dst)
+                    # If src is a file, copy it to dst
+                    if os.path.isfile(src):
+                        iflogger.debug('copyfile: %s %s' % (src, dst))
+                        copyfile(src, dst, copy=True, hashmethod='content',
+                                 use_hardlink=use_hardlink)
+                        out_files.append(dst)
+                    # If src is a directory, copy entire contents to dst dir
+                    elif os.path.isdir(src):
+                        if os.path.exists(dst) and self.inputs.remove_dest_dir:
+                            iflogger.debug('removing: %s' % dst)
+                            shutil.rmtree(dst)
+                        iflogger.debug('copydir: %s %s' % (src, dst))
+                        copytree(src, dst)
+                        out_files.append(dst)
+
+        # Return outputs dictionary
         outputs['out_file'] = out_files
 
         return outputs
-
-
-class S3DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    testing = traits.Bool(False, usedefault=True,
-                          desc='Flag for using local fakes3 server.'
-                          ' (for testing purposes only)')
-    anon = traits.Bool(False, usedefault=True,
-                       desc='Use anonymous connection to s3')
-    bucket = traits.Str(mandatory=True,
-                        desc='Amazon S3 bucket where your data is stored')
-    bucket_path = traits.Str('', usedefault=True,
-                             desc='Location within your bucket to store '
-                             'data.')
-    base_directory = Directory(
-        desc='Path to the base directory for storing data.')
-    container = traits.Str(
-        desc='Folder within base directory in which to store output')
-    parameterization = traits.Bool(True, usedefault=True,
-                                   desc='store output in parametrized structure')
-    strip_dir = Directory(desc='path to strip out of filename')
-    substitutions = InputMultiPath(traits.Tuple(traits.Str, traits.Str),
-                                   desc=('List of 2-tuples reflecting string '
-                                         'to substitute and string to replace '
-                                         'it with'))
-    regexp_substitutions = InputMultiPath(traits.Tuple(traits.Str, traits.Str),
-                                          desc=('List of 2-tuples reflecting a pair '
-                                                'of a Python regexp pattern and a '
-                                                'replacement string. Invoked after '
-                                                'string `substitutions`'))
-
-    _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
-    remove_dest_dir = traits.Bool(False, usedefault=True,
-                                  desc='remove dest directory when copying dirs')
-
-    def __setattr__(self, key, value):
-        if key not in self.copyable_trait_names():
-            if not isdefined(value):
-                super(S3DataSinkInputSpec, self).__setattr__(key, value)
-            self._outputs[key] = value
-        else:
-            if key in self._outputs:
-                self._outputs[key] = value
-            super(S3DataSinkInputSpec, self).__setattr__(key, value)
-
-
-class S3DataSink(DataSink):
-    """ Works exactly like DataSink, except the specified files will
-        also be uploaded to Amazon S3 storage in the specified bucket
-        and location.  'bucket_path' is the s3 analog for
-        'base_directory'.
-
-    """
-    input_spec = S3DataSinkInputSpec
-
-    def _list_outputs(self):
-        """Execute this module.
-        """
-        outputs = super(S3DataSink, self)._list_outputs()
-
-        self.localtos3(outputs['out_file'])
-
-        return outputs
-
-    def localtos3(self, paths):
-        if self.inputs.testing:
-            conn = S3Connection(anon=True, is_secure=False, port=4567,
-                                host='localhost',
-                                calling_format=OrdinaryCallingFormat())
-
-        else:
-            conn = S3Connection(anon=self.inputs.anon)
-        bkt = conn.get_bucket(self.inputs.bucket)
-        s3paths = []
-
-        for path in paths:
-            # convert local path to s3 path
-            bd_index = path.find(self.inputs.base_directory)
-            if bd_index != -1:  # base_directory is in path, maintain directory structure
-                s3path = path[bd_index + len(self.inputs.base_directory):]  # cut out base directory
-                if s3path[0] == os.path.sep:
-                    s3path = s3path[1:]
-            else:  # base_directory isn't in path, simply place all files in bucket_path folder
-                s3path = os.path.split(path)[1]  # take filename from path
-            s3path = os.path.join(self.inputs.bucket_path, s3path)
-            if s3path[-1] == os.path.sep:
-                s3path = s3path[:-1]
-            s3paths.append(s3path)
-
-            k = boto.s3.key.Key(bkt)
-            k.key = s3path
-            k.set_contents_from_filename(path)
-
-        return s3paths
 
 
 class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):

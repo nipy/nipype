@@ -18,13 +18,32 @@ from nipype.testing import assert_equal, assert_true, assert_false, skipif
 import nipype.interfaces.io as nio
 from nipype.interfaces.base import Undefined
 
+# Check for boto
 noboto = False
 try:
     import boto
     from boto.s3.connection import S3Connection, OrdinaryCallingFormat
-except:
+except ImportError:
     noboto = True
 
+# Check for boto3
+noboto3 = False
+try:
+    import boto3
+    from botocore.utils import fix_s3_host
+except ImportError:
+    noboto3 = True
+
+# Check for fakes3
+import subprocess
+try:
+    ret_code = subprocess.check_call(['which', 'fakes3'], stdout=open(os.devnull, 'wb'))
+    if ret_code == 0:
+        fakes3 = True
+    else:
+        fakes3 = False
+except subprocess.CalledProcessError:
+    fakes3 = False
 
 def test_datagrabber():
     dg = nio.DataGrabber()
@@ -166,17 +185,161 @@ def test_datasink():
     yield assert_true, 'test' in ds.inputs.copyable_trait_names()
 
 
-@skipif(noboto)
-def test_s3datasink():
-    ds = nio.S3DataSink()
-    yield assert_true, ds.inputs.parameterization
-    yield assert_equal, ds.inputs.base_directory, Undefined
-    yield assert_equal, ds.inputs.strip_dir, Undefined
-    yield assert_equal, ds.inputs._outputs, {}
-    ds = nio.S3DataSink(base_directory='foo')
-    yield assert_equal, ds.inputs.base_directory, 'foo'
-    ds = nio.S3DataSink(infields=['test'])
-    yield assert_true, 'test' in ds.inputs.copyable_trait_names()
+# Make dummy input file
+def _make_dummy_input():
+    '''
+    Function to create a dummy file
+    '''
+
+    # Import packages
+    import tempfile
+
+
+    # Init variables
+    input_dir = tempfile.mkdtemp()
+    input_path = os.path.join(input_dir, 'datasink_test_s3.txt')
+
+    # Create input file
+    with open(input_path, 'wb') as f:
+        f.write(b'ABCD1234')
+
+    # Return path
+    return input_path
+
+
+# Test datasink writes to s3 properly
+@skipif(noboto3 or not fakes3)
+def test_datasink_to_s3():
+    '''
+    This function tests to see if the S3 functionality of a DataSink
+    works properly
+    '''
+
+    # Import packages
+    import hashlib
+    import tempfile
+
+    # Init variables
+    ds = nio.DataSink()
+    bucket_name = 'test'
+    container = 'outputs'
+    attr_folder = 'text_file'
+    output_dir = 's3://' + bucket_name
+    # Local temporary filepaths for testing
+    fakes3_dir = tempfile.mkdtemp()
+    input_path = _make_dummy_input()
+
+    # Start up fake-S3 server
+    proc = Popen(['fakes3', '-r', fakes3_dir, '-p', '4567'], stdout=open(os.devnull, 'wb'))
+
+    # Init boto3 s3 resource to talk with fakes3
+    resource = boto3.resource(aws_access_key_id='mykey',
+                              aws_secret_access_key='mysecret',
+                              service_name='s3',
+                              endpoint_url='http://localhost:4567',
+                              use_ssl=False)
+    resource.meta.client.meta.events.unregister('before-sign.s3', fix_s3_host)
+
+    # Create bucket
+    bucket = resource.create_bucket(Bucket=bucket_name)
+
+    # Prep datasink
+    ds.inputs.base_directory = output_dir
+    ds.inputs.container = container
+    ds.inputs.bucket = bucket
+    setattr(ds.inputs, attr_folder, input_path)
+
+    # Run datasink
+    ds.run()
+
+    # Get MD5sums and compare
+    key = '/'.join([container, attr_folder, os.path.basename(input_path)])
+    obj = bucket.Object(key=key)
+    dst_md5 = obj.e_tag.replace('"', '')
+    src_md5 = hashlib.md5(open(input_path, 'rb').read()).hexdigest()
+
+    # Kill fakes3
+    proc.kill()
+
+    # Delete fakes3 folder and input file
+    shutil.rmtree(fakes3_dir)
+    shutil.rmtree(os.path.dirname(input_path))
+
+    # Make sure md5sums match
+    yield assert_equal, src_md5, dst_md5
+
+
+# Test AWS creds read from env vars
+@skipif(noboto3 or not fakes3)
+def test_aws_keys_from_env():
+    '''
+    Function to ensure the DataSink can successfully read in AWS
+    credentials from the environment variables
+    '''
+
+    # Import packages
+    import os
+    import nipype.interfaces.io as nio
+
+    # Init variables
+    ds = nio.DataSink()
+    aws_access_key_id = 'ABCDACCESS'
+    aws_secret_access_key = 'DEFGSECRET'
+
+    # Set env vars
+    os.environ['AWS_ACCESS_KEY_ID'] = aws_access_key_id
+    os.environ['AWS_SECRET_ACCESS_KEY'] = aws_secret_access_key
+
+    # Call function to return creds
+    access_key_test, secret_key_test = ds._return_aws_keys()
+
+    # Assert match
+    yield assert_equal, aws_access_key_id, access_key_test
+    yield assert_equal, aws_secret_access_key, secret_key_test
+
+
+# Test the local copy attribute
+def test_datasink_localcopy():
+    '''
+    Function to validate DataSink will make local copy via local_copy
+    attribute
+    '''
+
+    # Import packages
+    import hashlib
+    import tempfile
+
+    # Init variables
+    local_dir = tempfile.mkdtemp()
+    container = 'outputs'
+    attr_folder = 'text_file'
+
+    # Make dummy input file and datasink
+    input_path = _make_dummy_input()
+    ds = nio.DataSink()
+
+    # Set up datasink
+    ds.inputs.container = container
+    ds.inputs.local_copy = local_dir
+    setattr(ds.inputs, attr_folder, input_path)
+
+    # Expected local copy path
+    local_copy = os.path.join(local_dir, container, attr_folder,
+                              os.path.basename(input_path))
+
+    # Run the datasink
+    ds.run()
+
+    # Check md5sums of both
+    src_md5 = hashlib.md5(open(input_path, 'rb').read()).hexdigest()
+    dst_md5 = hashlib.md5(open(local_copy, 'rb').read()).hexdigest()
+
+    # Delete temp diretories
+    shutil.rmtree(os.path.dirname(input_path))
+    shutil.rmtree(local_dir)
+
+    # Perform test
+    yield assert_equal, src_md5, dst_md5
 
 
 def test_datasink_substitutions():
@@ -204,84 +367,6 @@ def test_datasink_substitutions():
         sorted([os.path.basename(x) for
                 x in glob.glob(os.path.join(outdir, '*'))]), \
         ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
-    shutil.rmtree(indir)
-    shutil.rmtree(outdir)
-
-
-@skipif(noboto)
-def test_s3datasink_substitutions():
-    indir = mkdtemp(prefix='-Tmp-nipype_ds_subs_in')
-    outdir = mkdtemp(prefix='-Tmp-nipype_ds_subs_out')
-    files = []
-    for n in ['ababab.n', 'xabababyz.n']:
-        f = os.path.join(indir, n)
-        files.append(f)
-        open(f, 'w')
-
-    # run fakes3 server and set up bucket
-    fakes3dir = op.expanduser('~/fakes3')
-    try:
-        proc = Popen(
-            ['fakes3', '-r', fakes3dir, '-p', '4567'], stdout=open(os.devnull, 'wb'))
-    except OSError as ose:
-        if 'No such file or directory' in str(ose):
-            return  # fakes3 not installed. OK!
-        raise ose
-
-    conn = S3Connection(anon=True, is_secure=False, port=4567,
-                        host='localhost',
-                        calling_format=OrdinaryCallingFormat())
-    conn.create_bucket('test')
-
-    ds = nio.S3DataSink(
-        testing=True,
-        anon=True,
-        bucket='test',
-        bucket_path='output/',
-        parametrization=False,
-        base_directory=outdir,
-        substitutions=[('ababab', 'ABABAB')],
-        # end archoring ($) is used to assure operation on the filename
-        # instead of possible temporary directories names matches
-        # Patterns should be more comprehendable in the real-world usage
-        # cases since paths would be quite more sensible
-        regexp_substitutions=[(r'xABABAB(\w*)\.n$', r'a-\1-b.n'),
-                              ('(.*%s)[-a]([^%s]*)$' % ((os.path.sep,) * 2),
-                               r'\1!\2')])
-    setattr(ds.inputs, '@outdir', files)
-    ds.run()
-    yield assert_equal, \
-        sorted([os.path.basename(x) for
-                x in glob.glob(os.path.join(outdir, '*'))]), \
-        ['!-yz-b.n', 'ABABAB.n']  # so we got re used 2nd and both patterns
-
-    bkt = conn.get_bucket(ds.inputs.bucket)
-    bkt_files = list(k for k in bkt.list())
-
-    found = [False, False]
-    failed_deletes = 0
-    for k in bkt_files:
-        if '!-yz-b.n' in k.key:
-            found[0] = True
-            try:
-                bkt.delete_key(k)
-            except:
-                failed_deletes += 1
-        elif 'ABABAB.n' in k.key:
-            found[1] = True
-            try:
-                bkt.delete_key(k)
-            except:
-                failed_deletes += 1
-
-    # ensure delete requests were successful
-    yield assert_equal, failed_deletes, 0
-
-    # ensure both keys are found in bucket
-    yield assert_equal, found.count(True), 2
-
-    proc.kill()
-    shutil.rmtree(fakes3dir)
     shutil.rmtree(indir)
     shutil.rmtree(outdir)
 
