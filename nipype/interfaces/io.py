@@ -375,8 +375,7 @@ class DataSink(IOBase):
         '''
         Method to see if the datasink's base directory specifies an
         S3 bucket path; if it does, it parses the path for the bucket
-        name in the form 's3://bucket_name/...' and adds a bucket
-        attribute to the data sink instance, i.e. self.bucket
+        name in the form 's3://bucket_name/...' and returns it
 
         Parameters
         ----------
@@ -386,15 +385,19 @@ class DataSink(IOBase):
         s3_flag : boolean
             flag indicating whether the base_directory contained an
             S3 bucket path
+        bucket_name : string
+            name of the S3 bucket to connect to; if the base directory
+            is not a valid S3 path, defaults to '<N/A>'
         '''
 
         # Init variables
         s3_str = 's3://'
+        bucket_name = '<N/A>'
         base_directory = self.inputs.base_directory
 
         if not isdefined(base_directory):
             s3_flag = False
-            return s3_flag
+            return s3_flag, bucket_name
 
         # Explicitly lower-case the "s3"
         if base_directory.lower().startswith(s3_str):
@@ -404,28 +407,15 @@ class DataSink(IOBase):
 
         # Check if 's3://' in base dir
         if base_directory.startswith(s3_str):
-            # Attempt to access bucket
-            try:
-                # Expects bucket name to be 's3://bucket_name/base_dir/..'
-                bucket_name = base_directory.split(s3_str)[1].split('/')[0]
-                # Get the actual bucket object
-                if self.inputs.bucket:
-                    self.bucket = self.inputs.bucket
-                else:
-                    self.bucket = self._fetch_bucket(bucket_name)
-            # Report error in case of exception
-            except Exception as exc:
-                err_msg = 'Unable to access S3 bucket. Error:\n%s. Exiting...'\
-                          % exc
-                raise Exception(err_msg)
-            # Bucket access was a success, set flag
+            # Expects bucket name to be 's3://bucket_name/base_dir/..'
+            bucket_name = base_directory.split(s3_str)[1].split('/')[0]
             s3_flag = True
         # Otherwise it's just a normal datasink
         else:
             s3_flag = False
 
         # Return s3_flag
-        return s3_flag
+        return s3_flag, bucket_name
 
     # Function to return AWS secure environment variables
     def _return_aws_keys(self):
@@ -576,7 +566,7 @@ class DataSink(IOBase):
         return bucket
 
     # Send up to S3 method
-    def _upload_to_s3(self, src, dst):
+    def _upload_to_s3(self, bucket, src, dst):
         '''
         Method to upload outputs to S3 bucket instead of on local disk
         '''
@@ -589,7 +579,6 @@ class DataSink(IOBase):
         from botocore.exceptions import ClientError
 
         # Init variables
-        bucket = self.bucket
         iflogger = logging.getLogger('interface')
         s3_str = 's3://'
         s3_prefix = s3_str + bucket.name
@@ -668,30 +657,34 @@ class DataSink(IOBase):
                 outdir = '.'
 
         # Check if base directory reflects S3 bucket upload
-        try:
-            s3_flag = self._check_s3_base_dir()
-            if s3_flag:
-                s3dir = self.inputs.base_directory
-                if isdefined(self.inputs.container):
-                    s3dir = os.path.join(s3dir, self.inputs.container)
+        s3_flag, bucket_name = self._check_s3_base_dir()
+        if s3_flag:
+            s3dir = self.inputs.base_directory
+            # If user overrides bucket object, use that
+            if self.inputs.bucket:
+                bucket = self.inputs.bucket
+            # Otherwise fetch bucket object using name
             else:
-                s3dir = '<N/A>'
-        # If encountering an exception during bucket access, set output
-        # base directory to a local folder
-        except Exception as exc:
+                try:
+                    bucket = self._fetch_bucket(bucket_name)
+                # If encountering an exception during bucket access, set output
+                # base directory to a local folder
+                except Exception as exc:
+                    s3dir = '<N/A>'
+                    if not isdefined(self.inputs.local_copy):
+                        local_out_exception = os.path.join(os.path.expanduser('~'),
+                                                           's3_datasink_' + bucket_name)
+                        outdir = local_out_exception
+                    # Log local copying directory
+                    iflogger.info('Access to S3 failed! Storing outputs locally at: '\
+                                  '%s\nError: %s' %(outdir, exc))
+        else:
             s3dir = '<N/A>'
-            s3_flag = False
-            if not isdefined(self.inputs.local_copy):
-                local_out_exception = os.path.join(os.path.expanduser('~'),
-                                                   's3_datasink_' + self.bucket.name)
-                outdir = local_out_exception
-            # Log local copying directory
-            iflogger.info('Access to S3 failed! Storing outputs locally at: '\
-                          '%s\nError: %s' %(outdir, exc))
 
         # If container input is given, append that to outdir
         if isdefined(self.inputs.container):
             outdir = os.path.join(outdir, self.inputs.container)
+            s3dir = os.path.join(s3dir, self.inputs.container)
 
         # If sinking to local folder
         if outdir != s3dir:
@@ -743,7 +736,7 @@ class DataSink(IOBase):
 
                 # If we're uploading to S3
                 if s3_flag:
-                    self._upload_to_s3(src, s3dst)
+                    self._upload_to_s3(bucket, src, s3dst)
                     out_files.append(s3dst)
                 # Otherwise, copy locally src -> dst
                 if not s3_flag or isdefined(self.inputs.local_copy):
