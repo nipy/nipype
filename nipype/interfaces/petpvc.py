@@ -1,3 +1,5 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
 """
    Change directory to provide relative paths for doctests
    >>> import os
@@ -14,8 +16,8 @@ Its source code is here: https://github.com/UCL/PETPVC
 
 The methods that it implement are explained here:
 K. Erlandsson, I. Buvat, P. H. Pretorius, B. A. Thomas, and B. F. Hutton,
-“A review of partial volume correction techniques for emission tomography
-and their applications in neurology, cardiology and oncology,” Phys. Med.
+"A review of partial volume correction techniques for emission tomography
+and their applications in neurology, cardiology and oncology," Phys. Med.
 Biol., vol. 57, no. 21, p. R119, 2012.
 
 There is a publication waiting to be accepted for this software tool.
