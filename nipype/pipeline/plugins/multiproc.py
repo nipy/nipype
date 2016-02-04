@@ -41,13 +41,15 @@ def run_node(node, updatehash, runtime_profile=False):
             # Init function tuple
             proc = (node.run, (), {'updatehash' : updatehash})
             start = datetime.datetime.now()
-            mem_mb, retval = memory_profiler.memory_usage(proc=proc, retval=True, include_children=True, max_usage=True)
+            mem_mb, retval = memory_profiler.memory_usage(proc=proc, retval=True,
+                                                          include_children=True,
+                                                          max_usage=True)
             runtime = (datetime.datetime.now() - start).total_seconds()
             result['result'] = retval
             result['node_memory'] = mem_mb[0]/1024.0
+            result['run_seconds'] = runtime
             result['cmd_memory'] = retval.runtime.get('cmd_memory')
             result['cmd_threads'] = retval.runtime.get('cmd_threads')
-            result['run_seconds'] = runtime
         except:
             etype, eval, etr = sys.exc_info()
             result['traceback'] = format_exception(etype,eval,etr)

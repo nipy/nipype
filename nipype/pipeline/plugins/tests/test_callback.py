@@ -104,7 +104,3 @@ def test_callback_multiproc_exception():
     yield assert_equal, so.statuses[0][1], 'start'
     yield assert_equal, so.statuses[1][1], 'exception'
     rmtree(wf.base_dir)
-
-if __name__ == '__main__':
-    import nose
-    nose.run()

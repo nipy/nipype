@@ -3,13 +3,13 @@ import logging
 
 def log_nodes_cb(node, status, result=None):
     logger = logging.getLogger('callback')
-    try:
+    if result is None:
+        node_mem = cmd_mem = run_seconds = cmd_threads = 'N/A'
+    else:
         node_mem = result['node_memory']
         cmd_mem = result['cmd_memory']
         run_seconds = result['run_seconds']
         cmd_threads = result['cmd_threads']
-    except Exception as exc:
-        node_mem = cmd_mem = run_seconds = cmd_threads = 'N/A'
     if status == 'start':
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' +\
         node._id + '"' + ',"start":' + '"' +str(datetime.datetime.now()) +\
