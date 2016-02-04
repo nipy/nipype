@@ -1204,6 +1204,7 @@ class Stream(object):
         self._lastidx = len(self._rows)
 
 
+# Get number of threads for process
 def _get_num_threads(proc):
     '''
     '''
@@ -1223,6 +1224,29 @@ def _get_num_threads(proc):
     return num_threads
 
 
+# Get max resources used for process
+def _get_max_resources_used(proc, mem_mb, num_threads, poll=False):
+    '''
+    docstring
+    '''
+
+    # Import packages
+    from memory_profiler import _get_memory
+    import psutil
+
+    try:
+        mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
+        num_threads = max(num_threads, _get_num_threads(psutil.Process(proc.pid)))
+        if poll:
+            proc.poll()
+    except Exception as exc:
+        iflogger.info('Could not get resources used by process. Error: %s'\
+                      % exc)
+
+    # Return resources
+    return mem_mb, num_threads
+
+
 def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     """Run a command, read stdout and stderr, prefix with timestamp.
 
@@ -1231,7 +1255,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
 
     # Import packages
     try:
-        from memory_profiler import _get_memory
+        import memory_profiler
         import psutil
         mem_prof = True
     except:
@@ -1292,8 +1316,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                     stream.read(drain)
         while proc.returncode is None:
             if mem_prof:
-                mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
-                num_threads = max(num_threads, _get_num_threads(psutil.Process(proc.pid)))
+                mem_mb, num_threads = \
+                    _get_max_resources_used(proc, mem_mb, num_threads)
             proc.poll()
             _process()
         _process(drain=1)
@@ -1311,9 +1335,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     if output == 'allatonce':
         if mem_prof:
             while proc.returncode is None:
-                mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
-                num_threads = max(num_threads, _get_num_threads(psutil.Process(proc.pid)))
-                proc.poll()
+                mem_mb, num_threads = \
+                    _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
         stdout, stderr = proc.communicate()
         if stdout and isinstance(stdout, bytes):
             try:
@@ -1332,9 +1355,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     if output == 'file':
         if mem_prof:
             while proc.returncode is None:
-                mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
-                num_threads = max(num_threads, _get_num_threads(psutil.Process(proc.pid)))
-                proc.poll()
+                mem_mb, num_threads = \
+                    _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
         ret_code = proc.wait()
         stderr.flush()
         stdout.flush()
@@ -1344,9 +1366,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     if output == 'none':
         if mem_prof:
             while proc.returncode is None:
-                mem_mb = max(mem_mb, _get_memory(proc.pid, include_children=True))
-                num_threads = max(num_threads, _get_num_threads(psutil.Process(proc.pid)))
-                proc.poll()
+                mem_mb, num_threads = \
+                    _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
         proc.communicate()
         result['stdout'] = []
         result['stderr'] = []

@@ -43,6 +43,7 @@ def test_run_multiproc():
     pipe.connect([(mod1, mod2, [('output1', 'input1')])])
     pipe.base_dir = os.getcwd()
     mod1.inputs.input1 = 1
+    pipe.config['execution']['poll_sleep_duration'] = 2
     execgraph = pipe.run(plugin="ResourceMultiProc")
     names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
     node = execgraph.nodes()[names.index('pipe.mod1')]
@@ -50,6 +51,7 @@ def test_run_multiproc():
     yield assert_equal, result, [1, 1]
     os.chdir(cur_dir)
     rmtree(temp_dir)
+
 
 ################################
 

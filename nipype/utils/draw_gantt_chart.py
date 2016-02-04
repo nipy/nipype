@@ -254,8 +254,8 @@ def generate_gantt_chart(logfile, cores, minute_scale=10, space_between_minutes=
     #draw nodes
     html_string += draw_nodes(start, result, cores, scale, colors)
 
-    html_string += draw_thread_bar(start, duration, result, space_between_minutes, minute_scale)
-    html_string += draw_memory_bar(start, duration, result, space_between_minutes, minute_scale)
+    #html_string += draw_thread_bar(start, duration, result, space_between_minutes, minute_scale)
+    #html_string += draw_memory_bar(start, duration, result, space_between_minutes, minute_scale)
 
     #finish html
     html_string+= '''
