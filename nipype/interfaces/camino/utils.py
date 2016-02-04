@@ -6,11 +6,13 @@
     >>> os.chdir(datadir)
 
 """
-from nipype.interfaces.base import (traits, TraitedSpec, File,
-                                    CommandLine, CommandLineInputSpec, isdefined,
-                                    InputMultiPath)
-from nipype.utils.filemanip import split_filename
 import os
+
+from ..base import (traits, TraitedSpec, File,
+                    CommandLine, CommandLineInputSpec, isdefined,
+                    InputMultiPath)
+from ...utils.filemanip import split_filename
+
 
 class ImageStatsInputSpec(CommandLineInputSpec):
     in_files = InputMultiPath(File(exists=True), argstr='-images %s', mandatory=True,
@@ -29,8 +31,10 @@ class ImageStatsInputSpec(CommandLineInputSpec):
                        desc=('Filename root prepended onto the names of the output '
                              ' files. The extension will be determined from the input.'))
 
+
 class ImageStatsOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Path of the file computed with the statistic chosen')
+
 
 class ImageStats(CommandLine):
     """
@@ -59,5 +63,5 @@ class ImageStats(CommandLine):
     def _gen_outfilename(self):
         output_root = self.inputs.output_root
         first_file = self.inputs.in_files[0]
-        _, _ , ext = split_filename(first_file)
+        _, _, ext = split_filename(first_file)
         return output_root + ext

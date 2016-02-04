@@ -1,17 +1,15 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 
-import nipype.pipeline.engine as pe
-
-import nipype.interfaces.fsl as fsl
-import nipype.interfaces.freesurfer as fs
-import nipype.interfaces.meshfix as mf
-import nipype.interfaces.io as nio
-import nipype.interfaces.utility as niu
-import nipype.algorithms.misc as misc
-from nipype.interfaces.utility import Function
-from nipype.workflows.misc.utils import region_list_from_volume, id_list_from_lookup_table
-import os, os.path as op
+from ....pipeline import engine as pe
+from ....interfaces import fsl as fsl
+from ....interfaces import freesurfer as fs
+from ....interfaces import meshfix as mf
+from ....interfaces import io as nio
+from ....interfaces import utility as niu
+from ....algorithms import misc as misc
+from ....interfaces.utility import Function
+from ....workflows.misc.utils import region_list_from_volume, id_list_from_lookup_table
 
 
 def get_aparc_aseg(files):
@@ -87,34 +85,33 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
     """
 
     fssource = pe.Node(nio.FreeSurferSource(),
-        name = 'fssource')
+                       name='fssource')
     threshold = pe.Node(fs.Binarize(min=0.5, out_type='nii'),
-        name='threshold')
+                        name='threshold')
     register = pe.MapNode(fs.BBRegister(init='fsl'),
-        iterfield=['source_file'],
-        name='register')
+                          iterfield=['source_file'],
+                          name='register')
     voltransform = pe.MapNode(fs.ApplyVolTransform(inverse=True),
-        iterfield=['source_file', 'reg_file'],
-        name='transform')
+                              iterfield=['source_file', 'reg_file'],
+                              name='transform')
 
     """
     Connect the nodes
     """
 
     getmask.connect([
-        (inputnode, fssource, [('subject_id','subject_id'),
-            ('subjects_dir','subjects_dir')]),
+        (inputnode, fssource, [('subject_id', 'subject_id'),
+                               ('subjects_dir', 'subjects_dir')]),
         (inputnode, register, [('source_file', 'source_file'),
-            ('subject_id', 'subject_id'),
-            ('subjects_dir', 'subjects_dir'),
-            ('contrast_type', 'contrast_type')]),
+                               ('subject_id', 'subject_id'),
+                               ('subjects_dir', 'subjects_dir'),
+                               ('contrast_type', 'contrast_type')]),
         (inputnode, voltransform, [('subjects_dir', 'subjects_dir'),
-            ('source_file', 'source_file')]),
+                                   ('source_file', 'source_file')]),
         (fssource, threshold, [(('aparc_aseg', get_aparc_aseg), 'in_file')]),
-        (register, voltransform, [('out_reg_file','reg_file')]),
-        (threshold, voltransform, [('binary_file','target_file')])
+        (register, voltransform, [('out_reg_file', 'reg_file')]),
+        (threshold, voltransform, [('binary_file', 'target_file')])
     ])
-
 
     """
     Add remaining nodes and connections
@@ -124,8 +121,8 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
     """
 
     threshold2 = pe.MapNode(fs.Binarize(min=0.5, out_type='nii'),
-        iterfield=['in_file'],
-        name='threshold2')
+                            iterfield=['in_file'],
+                            name='threshold2')
     if dilate_mask:
         threshold2.inputs.dilate = 1
     getmask.connect([
@@ -139,14 +136,15 @@ def create_getmask_flow(name='getmask', dilate_mask=True):
     outputnode = pe.Node(niu.IdentityInterface(fields=["mask_file",
                                                        "reg_file",
                                                        "reg_cost"
-    ]),
-        name="outputspec")
+                                                       ]),
+                         name="outputspec")
     getmask.connect([
         (register, outputnode, [("out_reg_file", "reg_file")]),
         (register, outputnode, [("min_cost_file", "reg_cost")]),
         (threshold2, outputnode, [("binary_file", "mask_file")]),
     ])
     return getmask
+
 
 def create_get_stats_flow(name='getstats', withreg=False):
     """Retrieves stats from labels
@@ -199,9 +197,8 @@ def create_get_stats_flow(name='getstats', withreg=False):
                                                           'label_file']),
                             name='inputspec')
 
-
     statnode = pe.MapNode(fs.SegStats(),
-                          iterfield=['segmentation_file','in_file'],
+                          iterfield=['segmentation_file', 'in_file'],
                           name='segstats')
 
     """
@@ -223,18 +220,18 @@ def create_get_stats_flow(name='getstats', withreg=False):
             else:
                 return label_file, transform_output
 
-        chooser = pe.MapNode(niu.Function(input_names = ['inverse',
-                                                         'transform_output',
-                                                         'source_file',
-                                                         'label_file'],
-                                          output_names = ['label_file',
-                                                          'source_file'],
+        chooser = pe.MapNode(niu.Function(input_names=['inverse',
+                                                       'transform_output',
+                                                       'source_file',
+                                                       'label_file'],
+                                          output_names=['label_file',
+                                                        'source_file'],
                                           function=switch_labels),
-                             iterfield=['transform_output','source_file'],
+                             iterfield=['transform_output', 'source_file'],
                              name='chooser')
-        getstats.connect(inputnode,'source_file', chooser, 'source_file')
-        getstats.connect(inputnode,'label_file', chooser, 'label_file')
-        getstats.connect(inputnode,'inverse', chooser, 'inverse')
+        getstats.connect(inputnode, 'source_file', chooser, 'source_file')
+        getstats.connect(inputnode, 'label_file', chooser, 'label_file')
+        getstats.connect(inputnode, 'inverse', chooser, 'inverse')
         getstats.connect(voltransform, 'transformed_file', chooser, 'transform_output')
         getstats.connect(chooser, 'label_file', statnode, 'segmentation_file')
         getstats.connect(chooser, 'source_file', statnode, 'in_file')
@@ -247,11 +244,11 @@ def create_get_stats_flow(name='getstats', withreg=False):
     """
 
     outputnode = pe.Node(niu.IdentityInterface(fields=["stats_file"
-                                                        ]),
+                                                       ]),
                          name="outputspec")
     getstats.connect([
-            (statnode, outputnode, [("summary_file", "stats_file")]),
-            ])
+        (statnode, outputnode, [("summary_file", "stats_file")]),
+    ])
     return getstats
 
 
@@ -307,32 +304,32 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     """
 
     fssource = pe.Node(nio.FreeSurferSource(),
-                       name = 'fssource')
+                       name='fssource')
     volconvert = pe.Node(fs.MRIConvert(out_type='nii'),
-                       name = 'volconvert')
+                         name='volconvert')
     tessellate = pe.MapNode(fs.MRIMarchingCubes(),
-                        iterfield=['label_value','out_file'],
-                        name='tessellate')
+                            iterfield=['label_value', 'out_file'],
+                            name='tessellate')
     surfconvert = pe.MapNode(fs.MRIsConvert(out_datatype='stl'),
-                          iterfield=['in_file'],
-                          name='surfconvert')
+                             iterfield=['in_file'],
+                             name='surfconvert')
     smoother = pe.MapNode(mf.MeshFix(),
-			  iterfield=['in_file1'],
+                          iterfield=['in_file1'],
                           name='smoother')
     if out_format == 'gii':
-	stl_to_gifti = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
-			      iterfield=['in_file'],
-			      name='stl_to_gifti')
+        stl_to_gifti = pe.MapNode(fs.MRIsConvert(out_datatype=out_format),
+                                  iterfield=['in_file'],
+                                  name='stl_to_gifti')
     smoother.inputs.save_as_stl = True
     smoother.inputs.laplacian_smoothing_steps = 1
 
     region_list_from_volume_interface = Function(input_names=["in_file"],
-                             output_names=["region_list"],
-                             function=region_list_from_volume)
+                                                 output_names=["region_list"],
+                                                 function=region_list_from_volume)
 
     id_list_from_lookup_table_interface = Function(input_names=["lookup_file", "region_list"],
-                             output_names=["id_list"],
-                             function=id_list_from_lookup_table)
+                                                   output_names=["id_list"],
+                                                   function=id_list_from_lookup_table)
 
     region_list_from_volume_node = pe.Node(interface=region_list_from_volume_interface, name='region_list_from_volume_node')
     id_list_from_lookup_table_node = pe.Node(interface=id_list_from_lookup_table_interface, name='id_list_from_lookup_table_node')
@@ -342,35 +339,35 @@ def create_tessellation_flow(name='tessellate', out_format='stl'):
     """
 
     tessflow.connect([
-            (inputnode, fssource, [('subject_id','subject_id'),
-                                   ('subjects_dir','subjects_dir')]),
-            (fssource, volconvert, [('aseg', 'in_file')]),
-            (volconvert, region_list_from_volume_node, [('out_file', 'in_file')]),
-            (region_list_from_volume_node, tessellate, [('region_list', 'label_value')]),
-            (region_list_from_volume_node, id_list_from_lookup_table_node, [('region_list', 'region_list')]),
-            (inputnode, id_list_from_lookup_table_node, [('lookup_file', 'lookup_file')]),
-            (id_list_from_lookup_table_node, tessellate, [('id_list', 'out_file')]),
-            (fssource, tessellate, [('aseg', 'in_file')]),
-            (tessellate, surfconvert, [('surface','in_file')]),
-	    (surfconvert, smoother, [('converted','in_file1')]),
-            ])
+        (inputnode, fssource, [('subject_id', 'subject_id'),
+                               ('subjects_dir', 'subjects_dir')]),
+        (fssource, volconvert, [('aseg', 'in_file')]),
+        (volconvert, region_list_from_volume_node, [('out_file', 'in_file')]),
+        (region_list_from_volume_node, tessellate, [('region_list', 'label_value')]),
+        (region_list_from_volume_node, id_list_from_lookup_table_node, [('region_list', 'region_list')]),
+        (inputnode, id_list_from_lookup_table_node, [('lookup_file', 'lookup_file')]),
+        (id_list_from_lookup_table_node, tessellate, [('id_list', 'out_file')]),
+        (fssource, tessellate, [('aseg', 'in_file')]),
+        (tessellate, surfconvert, [('surface', 'in_file')]),
+        (surfconvert, smoother, [('converted', 'in_file1')]),
+    ])
 
     """
     Setup an outputnode that defines relevant inputs of the workflow.
     """
 
     outputnode = pe.Node(niu.IdentityInterface(fields=["meshes"]),
-			 name="outputspec")
+                         name="outputspec")
 
     if out_format == 'gii':
-	tessflow.connect([
-	    (smoother, stl_to_gifti, [("mesh_file", "in_file")]),
-	    ])
-	tessflow.connect([
-	    (stl_to_gifti, outputnode, [("converted", "meshes")]),
-	    ])
+        tessflow.connect([
+            (smoother, stl_to_gifti, [("mesh_file", "in_file")]),
+        ])
+        tessflow.connect([
+            (stl_to_gifti, outputnode, [("converted", "meshes")]),
+        ])
     else:
-	tessflow.connect([
-	    (smoother, outputnode, [("mesh_file", "meshes")]),
-            ])
+        tessflow.connect([
+            (smoother, outputnode, [("mesh_file", "meshes")]),
+        ])
     return tessflow

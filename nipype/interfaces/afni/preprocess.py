@@ -8,22 +8,17 @@
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-import warnings
 
 import os
 import re
+from warnings import warn
 
+from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec
+from ..base import CommandLineInputSpec, CommandLine, OutputMultiPath
 from ..base import (Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
 from ...utils.filemanip import (load_json, save_json, split_filename)
-from nipype.utils.filemanip import fname_presuffix
-from .base import AFNICommand, AFNICommandInputSpec,\
-    AFNICommandOutputSpec
-from nipype.interfaces.base import CommandLineInputSpec, CommandLine,\
-    OutputMultiPath
-
-warn = warnings.warn
-warnings.filterwarnings('always', category=UserWarning)
+from ...utils.filemanip import fname_presuffix
 
 
 class To3DInputSpec(AFNICommandInputSpec):
@@ -309,7 +304,7 @@ class ResampleInputSpec(AFNICommandInputSpec):
                                 argstr='-rmode %s',
                                 desc="resampling method from set {'NN', 'Li', 'Cu', 'Bk'}.  These are for 'Nearest Neighbor', 'Linear', 'Cubic' and 'Blocky' interpolation, respectively. Default is NN.")
 
-    voxel_size = traits.Tuple(*[traits.Float()]*3,
+    voxel_size = traits.Tuple(*[traits.Float()] * 3,
                               argstr='-dxyz %f %f %f',
                               desc="resample to new dx, dy and dz")
 
@@ -1116,7 +1111,7 @@ if not given the reference will be the first volume of in_file.""")
     # Non-linear experimental
     _nwarp_types = ['bilinear',
                     'cubic', 'quintic', 'heptic', 'nonic',
-                    'poly3', 'poly5', 'poly7',  'poly9']  # same non-hellenistic
+                    'poly3', 'poly5', 'poly7', 'poly9']  # same non-hellenistic
     nwarp = traits.Enum(
         *_nwarp_types, argstr='-nwarp %s',
         desc='Experimental nonlinear warping: bilinear or legendre poly.')
@@ -1255,8 +1250,20 @@ class SkullStrip(AFNICommand):
 
     """
     _cmd = '3dSkullStrip'
+    _redirect_x = True
     input_spec = SkullStripInputSpec
     output_spec = AFNICommandOutputSpec
+
+    def __init__(self, **inputs):
+        from .base import Info, no_afni
+        super(SkullStrip, self).__init__(**inputs)
+
+        if not no_afni():
+            v = Info.version()
+
+            # As of AFNI 16.0.00, redirect_x is not needed
+            if isinstance(v[0], int) and v[0] > 15:
+                self._redirect_x = False
 
 
 class TCatInputSpec(AFNICommandInputSpec):
@@ -1884,7 +1891,7 @@ class Autobox(AFNICommand):
             m = re.search(pattern, line)
             if m:
                 d = m.groupdict()
-                for k in d.keys():
+                for k in list(d.keys()):
                     d[k] = int(d[k])
                 outputs.set(**d)
         outputs.set(out_file=self._gen_filename('out_file'))

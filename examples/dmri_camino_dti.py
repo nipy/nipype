@@ -33,28 +33,31 @@ pipeline to be flexible enough to accept and process images of varying size. The
 (fmri_spm_face.py) also implements this inferral of voxel size from the data.
 """
 
+
 def get_vox_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume)
-    hdr = nii.get_header()
+    hdr = nii.header
     voxdims = hdr.get_zooms()
     return [float(voxdims[0]), float(voxdims[1]), float(voxdims[2])]
+
 
 def get_data_dims(volume):
     import nibabel as nb
     if isinstance(volume, list):
         volume = volume[0]
     nii = nb.load(volume)
-    hdr = nii.get_header()
+    hdr = nii.header
     datadims = hdr.get_data_shape()
     return [int(datadims[0]), int(datadims[1]), int(datadims[2])]
+
 
 def get_affine(volume):
     import nibabel as nb
     nii = nb.load(volume)
-    return nii.get_affine()
+    return nii.affine
 
 subject_list = ['subj1']
 fsl.FSLCommand.set_default_output_type('NIFTI')
@@ -65,8 +68,8 @@ Map field names to individual subject runs
 """
 
 info = dict(dwi=[['subject_id', 'data']],
-            bvecs=[['subject_id','bvecs']],
-            bvals=[['subject_id','bvals']])
+            bvecs=[['subject_id', 'bvecs']],
+            bvals=[['subject_id', 'bvals']])
 
 infosource = pe.Node(interface=util.IdentityInterface(fields=['subject_id']),
                      name="infosource")
@@ -91,8 +94,8 @@ functionality.
 """
 
 datasource = pe.Node(interface=nio.DataGrabber(infields=['subject_id'],
-                                               outfields=info.keys()),
-                     name = 'datasource')
+                                               outfields=list(info.keys())),
+                     name='datasource')
 
 datasource.inputs.template = "%s/%s"
 
@@ -125,7 +128,7 @@ fsl2scheme.inputs.usegradmod = True
 Second, diffusion tensors are fit to the voxel-order data.
 """
 
-dtifit = pe.Node(interface=camino.DTIFit(),name='dtifit')
+dtifit = pe.Node(interface=camino.DTIFit(), name='dtifit')
 
 """
 Next, a lookup table is generated from the schemefile and the
@@ -196,15 +199,15 @@ We can also produce a variety of scalar values from our fitted tensors. The foll
 fractional anisotropy and diffusivity trace maps and their associated headers.
 """
 
-fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(),name='fa')
-trace = pe.Node(interface=camino.ComputeTensorTrace(),name='trace')
+fa = pe.Node(interface=camino.ComputeFractionalAnisotropy(), name='fa')
+trace = pe.Node(interface=camino.ComputeTensorTrace(), name='trace')
 dteig = pe.Node(interface=camino.ComputeEigensystem(), name='dteig')
 
-analyzeheader_fa = pe.Node(interface= camino.AnalyzeHeader(), name = "analyzeheader_fa")
+analyzeheader_fa = pe.Node(interface=camino.AnalyzeHeader(), name="analyzeheader_fa")
 analyzeheader_fa.inputs.datatype = "double"
 analyzeheader_trace = analyzeheader_fa.clone('analyzeheader_trace')
 
-fa2nii = pe.Node(interface=misc.CreateNifti(),name='fa2nii')
+fa2nii = pe.Node(interface=misc.CreateNifti(), name='fa2nii')
 trace2nii = fa2nii.clone("trace2nii")
 
 """
@@ -213,7 +216,7 @@ Since we have now created all our nodes, we can now define our workflow and star
 
 tractography = pe.Workflow(name='tractography')
 
-tractography.connect([(inputnode, bet,[("dwi","in_file")])])
+tractography.connect([(inputnode, bet, [("dwi", "in_file")])])
 
 """
 File format conversion
@@ -228,29 +231,29 @@ tractography.connect([(inputnode, image2voxel, [("dwi", "in_file")]),
 Tensor fitting
 """
 
-tractography.connect([(image2voxel, dtifit,[['voxel_order','in_file']]),
-                      (fsl2scheme, dtifit,[['scheme','scheme_file']])
-                     ])
+tractography.connect([(image2voxel, dtifit, [['voxel_order', 'in_file']]),
+                      (fsl2scheme, dtifit, [['scheme', 'scheme_file']])
+                      ])
 
 """
 Workflow for applying DT streamline tractogpahy
 """
 
-tractography.connect([(bet, trackdt,[("mask_file","seed_file")])])
-tractography.connect([(dtifit, trackdt,[("tensor_fitted","in_file")])])
+tractography.connect([(bet, trackdt, [("mask_file", "seed_file")])])
+tractography.connect([(dtifit, trackdt, [("tensor_fitted", "in_file")])])
 
 """
 Workflow for applying PICo
 """
 
-tractography.connect([(bet, trackpico,[("mask_file","seed_file")])])
-tractography.connect([(fsl2scheme, dtlutgen,[("scheme","scheme_file")])])
-tractography.connect([(dtlutgen, picopdfs,[("dtLUT","luts")])])
-tractography.connect([(dtifit, picopdfs,[("tensor_fitted","in_file")])])
-tractography.connect([(picopdfs, trackpico,[("pdfs","in_file")])])
+tractography.connect([(bet, trackpico, [("mask_file", "seed_file")])])
+tractography.connect([(fsl2scheme, dtlutgen, [("scheme", "scheme_file")])])
+tractography.connect([(dtlutgen, picopdfs, [("dtLUT", "luts")])])
+tractography.connect([(dtifit, picopdfs, [("tensor_fitted", "in_file")])])
+tractography.connect([(picopdfs, trackpico, [("pdfs", "in_file")])])
 
 # ProcStreamlines might throw memory errors - comment this line out in such case
-tractography.connect([(trackdt, procstreamlines,[("tracked","in_file")])])
+tractography.connect([(trackdt, procstreamlines, [("tracked", "in_file")])])
 
 
 """
@@ -262,32 +265,32 @@ the original DWI image from the input node, to the header-generating nodes. This
 will be correct and readable.
 """
 
-tractography.connect([(dtifit, fa,[("tensor_fitted","in_file")])])
-tractography.connect([(fa, analyzeheader_fa,[("fa","in_file")])])
-tractography.connect([(inputnode, analyzeheader_fa,[(('dwi', get_vox_dims), 'voxel_dims'),
-(('dwi', get_data_dims), 'data_dims')])])
-tractography.connect([(fa, fa2nii,[('fa','data_file')])])
-tractography.connect([(inputnode, fa2nii,[(('dwi', get_affine), 'affine')])])
-tractography.connect([(analyzeheader_fa, fa2nii,[('header', 'header_file')])])
+tractography.connect([(dtifit, fa, [("tensor_fitted", "in_file")])])
+tractography.connect([(fa, analyzeheader_fa, [("fa", "in_file")])])
+tractography.connect([(inputnode, analyzeheader_fa, [(('dwi', get_vox_dims), 'voxel_dims'),
+                                                     (('dwi', get_data_dims), 'data_dims')])])
+tractography.connect([(fa, fa2nii, [('fa', 'data_file')])])
+tractography.connect([(inputnode, fa2nii, [(('dwi', get_affine), 'affine')])])
+tractography.connect([(analyzeheader_fa, fa2nii, [('header', 'header_file')])])
 
 
-tractography.connect([(dtifit, trace,[("tensor_fitted","in_file")])])
-tractography.connect([(trace, analyzeheader_trace,[("trace","in_file")])])
-tractography.connect([(inputnode, analyzeheader_trace,[(('dwi', get_vox_dims), 'voxel_dims'),
-(('dwi', get_data_dims), 'data_dims')])])
-tractography.connect([(trace, trace2nii,[('trace','data_file')])])
-tractography.connect([(inputnode, trace2nii,[(('dwi', get_affine), 'affine')])])
-tractography.connect([(analyzeheader_trace, trace2nii,[('header', 'header_file')])])
+tractography.connect([(dtifit, trace, [("tensor_fitted", "in_file")])])
+tractography.connect([(trace, analyzeheader_trace, [("trace", "in_file")])])
+tractography.connect([(inputnode, analyzeheader_trace, [(('dwi', get_vox_dims), 'voxel_dims'),
+                                                        (('dwi', get_data_dims), 'data_dims')])])
+tractography.connect([(trace, trace2nii, [('trace', 'data_file')])])
+tractography.connect([(inputnode, trace2nii, [(('dwi', get_affine), 'affine')])])
+tractography.connect([(analyzeheader_trace, trace2nii, [('header', 'header_file')])])
 
-tractography.connect([(dtifit, dteig,[("tensor_fitted","in_file")])])
+tractography.connect([(dtifit, dteig, [("tensor_fitted", "in_file")])])
 
-tractography.connect([(trackpico, cam2trk_pico, [('tracked','in_file')])])
-tractography.connect([(trackdt, cam2trk_dt, [('tracked','in_file')])])
-tractography.connect([(inputnode, cam2trk_pico,[(('dwi', get_vox_dims), 'voxel_dims'),
-                                                (('dwi', get_data_dims), 'data_dims')])])
+tractography.connect([(trackpico, cam2trk_pico, [('tracked', 'in_file')])])
+tractography.connect([(trackdt, cam2trk_dt, [('tracked', 'in_file')])])
+tractography.connect([(inputnode, cam2trk_pico, [(('dwi', get_vox_dims), 'voxel_dims'),
+                                                 (('dwi', get_data_dims), 'data_dims')])])
 
-tractography.connect([(inputnode, cam2trk_dt,[(('dwi', get_vox_dims), 'voxel_dims'),
-                                              (('dwi', get_data_dims), 'data_dims')])])
+tractography.connect([(inputnode, cam2trk_dt, [(('dwi', get_vox_dims), 'voxel_dims'),
+                                               (('dwi', get_data_dims), 'data_dims')])])
 
 
 """
@@ -298,12 +301,12 @@ their names to the subject list and their data to the proper folders.
 
 workflow = pe.Workflow(name="workflow")
 workflow.base_dir = os.path.abspath('camino_dti_tutorial')
-workflow.connect([(infosource,datasource,[('subject_id', 'subject_id')]),
-                  (datasource,tractography,[('dwi','inputnode.dwi'),
-                                            ('bvals','inputnode.bvals'),
-                                            ('bvecs','inputnode.bvecs')
-                                           ])
-                 ])
+workflow.connect([(infosource, datasource, [('subject_id', 'subject_id')]),
+                  (datasource, tractography, [('dwi', 'inputnode.dwi'),
+                                              ('bvals', 'inputnode.bvals'),
+                                              ('bvecs', 'inputnode.bvecs')
+                                              ])
+                  ])
 """
 The following functions run the whole workflow and produce a .dot and .png graph of the processing pipeline.
 """

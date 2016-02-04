@@ -1,13 +1,14 @@
 # coding: utf-8
 
-import nipype.pipeline.engine as pe
-from nipype.interfaces import utility as niu
-from nipype.interfaces import fsl
-from nipype.algorithms import misc
-import os
+from __future__ import absolute_import
 
-#backwards compatibility
-from epi import create_eddy_correct_pipeline
+from ....pipeline import engine as pe
+from ....interfaces import utility as niu
+from ....interfaces import fsl
+from ....algorithms import misc
+
+# backwards compatibility
+from .epi import create_eddy_correct_pipeline
 
 
 def transpose(samples_over_fibres):
@@ -16,9 +17,9 @@ def transpose(samples_over_fibres):
     return np.squeeze(a.T).tolist()
 
 
-def create_bedpostx_pipeline(name='bedpostx', params={'n_fibres':2, 'fudge':1, 'burn_in':1000,
-                                                      'n_jumps':1250, 'sample_every':25, 'model':1,
-                                                      'cnlinear':True}):
+def create_bedpostx_pipeline(name='bedpostx', params={'n_fibres': 2, 'fudge': 1, 'burn_in': 1000,
+                                                      'n_jumps': 1250, 'sample_every': 25, 'model': 2,
+                                                      'cnlinear': True}):
     """
     Creates a pipeline that does the same as bedpostx script from FSL -
     calculates diffusion model parameters (distributions not MLE) voxelwise for
@@ -73,14 +74,14 @@ def create_bedpostx_pipeline(name='bedpostx', params={'n_fibres':2, 'fudge':1, '
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode, slice_dwi,  [('dwi', 'in_file')]),
-        (inputnode, slice_msk,  [('mask', 'in_file')]),
-        (slice_dwi, mask_dwi,   [('out_files', 'in_file')]),
-        (slice_msk, mask_dwi,   [('out_files', 'in_file2')]),
-        (slice_dwi, xfibres,    [('out_files', 'dwi')]),
-        (mask_dwi, xfibres,     [('out_file', 'mask')]),
-        (inputnode, xfibres,    [('bvecs', 'bvecs'),
-                                 ('bvals', 'bvals')]),
+        (inputnode, slice_dwi, [('dwi', 'in_file')]),
+        (inputnode, slice_msk, [('mask', 'in_file')]),
+        (slice_dwi, mask_dwi, [('out_files', 'in_file')]),
+        (slice_msk, mask_dwi, [('out_files', 'in_file2')]),
+        (slice_dwi, xfibres, [('out_files', 'dwi')]),
+        (mask_dwi, xfibres, [('out_file', 'mask')]),
+        (inputnode, xfibres, [('bvecs', 'bvecs'),
+                              ('bvals', 'bvals')]),
         (inputnode, make_dyads, [('mask', 'mask')])
     ])
 
@@ -99,7 +100,7 @@ def create_bedpostx_pipeline(name='bedpostx', params={'n_fibres':2, 'fudge':1, '
     wf.connect([
         (mms['thsamples'], make_dyads, [('outputnode.merged', 'theta_vol')]),
         (mms['phsamples'], make_dyads, [('outputnode.merged', 'phi_vol')]),
-        #(xfibres, m_mdsamples,  [('mean_dsamples', 'in_files')]),
+        # (xfibres, m_mdsamples,  [('mean_dsamples', 'in_files')]),
         (make_dyads, outputnode, [('dyads', 'dyads'),
                                   ('dispersion', 'dyads_disp')])
     ])
@@ -118,19 +119,19 @@ def merge_and_mean(name='mm'):
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode, merge,  [(('in_files', transpose), 'in_files')]),
-        (merge, mean,       [('merged_file', 'in_file')]),
+        (inputnode, merge, [(('in_files', transpose), 'in_files')]),
+        (merge, mean, [('merged_file', 'in_file')]),
         (merge, outputnode, [('merged_file', 'merged')]),
-        (mean, outputnode,  [('out_file', 'mean')])
+        (mean, outputnode, [('out_file', 'mean')])
     ])
     return wf
 
 
 def bedpostx_parallel(name='bedpostx_parallel',
                       compute_all_outputs=True,
-                      params={'n_fibres':2, 'fudge':1, 'burn_in':1000,
-                              'n_jumps':1250, 'sample_every':25, 'model':1,
-                              'cnlinear':True}):
+                      params={'n_fibres': 2, 'fudge': 1, 'burn_in': 1000,
+                              'n_jumps': 1250, 'sample_every': 25, 'model': 1,
+                              'cnlinear': True}):
     """
     Does the same as :func:`.create_bedpostx_pipeline` by splitting
     the input dMRI in small ROIs that are better suited for parallel
@@ -189,18 +190,18 @@ def bedpostx_parallel(name='bedpostx_parallel',
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode, slice_dwi,  [('dwi', 'in_file'),
-                                 ('mask', 'in_mask')]),
-        (slice_dwi, xfibres,    [('out_files', 'dwi'),
-                                 ('out_masks', 'mask')]),
-        (inputnode, xfibres,    [('bvecs', 'bvecs'),
-                                 ('bvals', 'bvals')]),
-        (inputnode, mrg_dyads,  [('mask', 'in_reference')]),
-        (xfibres,   mrg_dyads,  [(('dyads', transpose), 'in_files')]),
-        (slice_dwi, mrg_dyads,  [('out_index', 'in_index')]),
-        (inputnode, mrg_fsamp,  [('mask', 'in_reference')]),
-        (xfibres,   mrg_fsamp,  [(('mean_fsamples', transpose), 'in_files')]),
-        (slice_dwi, mrg_fsamp,  [('out_index', 'in_index')]),
+        (inputnode, slice_dwi, [('dwi', 'in_file'),
+                                ('mask', 'in_mask')]),
+        (slice_dwi, xfibres, [('out_files', 'dwi'),
+                              ('out_masks', 'mask')]),
+        (inputnode, xfibres, [('bvecs', 'bvecs'),
+                              ('bvals', 'bvals')]),
+        (inputnode, mrg_dyads, [('mask', 'in_reference')]),
+        (xfibres, mrg_dyads, [(('dyads', transpose), 'in_files')]),
+        (slice_dwi, mrg_dyads, [('out_index', 'in_index')]),
+        (inputnode, mrg_fsamp, [('mask', 'in_reference')]),
+        (xfibres, mrg_fsamp, [(('mean_fsamples', transpose), 'in_files')]),
+        (slice_dwi, mrg_fsamp, [('out_index', 'in_index')]),
         (mrg_dyads, outputnode, [('merged_file', 'dyads')]),
         (mrg_fsamp, outputnode, [('merged_file', 'fsamples')])
     ])
@@ -227,7 +228,7 @@ def bedpostx_parallel(name='bedpostx_parallel',
         wf.connect([
             (mms['thsamples'], make_dyads, [('outputnode.merged', 'theta_vol')]),
             (mms['phsamples'], make_dyads, [('outputnode.merged', 'phi_vol')]),
-            #(xfibres, m_mdsamples,  [('mean_dsamples', 'in_files')]),
+            # (xfibres, m_mdsamples,  [('mean_dsamples', 'in_files')]),
             (make_dyads, outputnode, [('dispersion', 'dyads_disp')])
         ])
 
@@ -246,11 +247,11 @@ def merge_and_mean_parallel(name='mm'):
 
     wf = pe.Workflow(name=name)
     wf.connect([
-        (inputnode, merge,  [(('in_files', transpose), 'in_files'),
-                             ('in_reference', 'in_reference'),
-                             ('in_index', 'in_index')]),
-        (merge, mean,       [('merged_file', 'in_file')]),
+        (inputnode, merge, [(('in_files', transpose), 'in_files'),
+                            ('in_reference', 'in_reference'),
+                            ('in_index', 'in_index')]),
+        (merge, mean, [('merged_file', 'in_file')]),
         (merge, outputnode, [('merged_file', 'merged')]),
-        (mean, outputnode,  [('out_file', 'mean')])
+        (mean, outputnode, [('out_file', 'mean')])
     ])
     return wf
