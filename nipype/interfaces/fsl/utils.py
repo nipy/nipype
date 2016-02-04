@@ -139,10 +139,14 @@ class ImageMeants(FSLCommand):
 
 class SmoothInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", position=0, mandatory=True)
-    fwhm = traits.Float(argstr="-kernel gauss %f -fmean", position=1,
-                        mandatory=True)
+    sigma = traits.Float(
+        argstr="-kernel gauss %.03f -fmean", position=1, xor=['fwhm'], mandatory=True,
+        desc='gaussian kernel sigma in mm (not voxels)')
+    fwhm = traits.Float(
+        argstr="-kernel gauss %.03f -fmean", position=1, xor=['sigma'], mandatory=True,
+        desc='gaussian kernel fwhm, will be converted to sigma in mm (not voxels)')
     smoothed_file = File(
-        argstr="%s", position=2, genfile=True, hash_files=False)
+        argstr="%s", position=2, name_source=['in_file'], name_template='%s_smooth', hash_files=False)
 
 
 class SmoothOutputSpec(TraitedSpec):
@@ -150,26 +154,43 @@ class SmoothOutputSpec(TraitedSpec):
 
 
 class Smooth(FSLCommand):
-    '''Use fslmaths to smooth the image
-    '''
+    """
+    Use fslmaths to smooth the image
+
+    Examples
+    --------
+
+    Setting the kernel width using sigma:
+
+    >>> sm = Smooth()
+    >>> sm.inputs.in_file = 'functional2.nii'
+    >>> sm.inputs.sigma = 8.0
+    >>> sm.cmdline #doctest: +ELLIPSIS
+    'fslmaths functional2.nii -kernel gauss 8.000 -fmean functional2_smooth.nii.gz'
+
+    Setting the kernel width using fwhm:
+
+    >>> sm = Smooth()
+    >>> sm.inputs.in_file = 'functional2.nii'
+    >>> sm.inputs.fwhm = 8.0
+    >>> sm.cmdline #doctest: +ELLIPSIS
+    'fslmaths functional2.nii -kernel gauss 3.397 -fmean functional2_smooth.nii.gz'
+
+    One of sigma or fwhm must be set:
+
+    >>> from nipype.interfaces.fsl import Smooth
+    >>> sm = Smooth()
+    >>> sm.inputs.in_file = 'functional2.nii'
+    >>> sm.cmdline #doctest: +ELLIPSIS
+    Traceback (most recent call last):
+     ...
+    ValueError: Smooth requires a value for one of the inputs ...
+
+    """
 
     input_spec = SmoothInputSpec
     output_spec = SmoothOutputSpec
     _cmd = 'fslmaths'
-
-    def _gen_filename(self, name):
-        if name == 'smoothed_file':
-            return self._list_outputs()['smoothed_file']
-        return None
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['smoothed_file'] = self.inputs.smoothed_file
-        if not isdefined(outputs['smoothed_file']):
-            outputs['smoothed_file'] = self._gen_fname(self.inputs.in_file,
-                                                       suffix='_smooth')
-        outputs['smoothed_file'] = os.path.abspath(outputs['smoothed_file'])
-        return outputs
 
     def _format_arg(self, name, trait_spec, value):
         if name == 'fwhm':
