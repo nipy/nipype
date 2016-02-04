@@ -113,7 +113,7 @@ def test_selectfiles_valueerror():
     yield assert_raises, ValueError, sf.run
 
 
-@skip
+@skipif(noboto)
 def test_s3datagrabber_communication():
     dg = nio.S3DataGrabber(
         infields=['subj_id', 'run_num'], outfields=['func', 'struct'])
