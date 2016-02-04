@@ -21,23 +21,20 @@ from .base import (DistributedPluginBase, report_crash)
 
 
 # Run node
-def run_node(node, updatehash, plugin_args=None):
+def run_node(node, updatehash, runtime_profile=False):
     """docstring
     """
-
+ 
     # Import packages
     try:
-        runtime_profile = plugin_args['runtime_profile']
         import memory_profiler
         import datetime
-    except KeyError:
-        runtime_profile = False
     except ImportError:
         runtime_profile = False
-
+ 
     # Init variables
     result = dict(result=None, traceback=None)
-
+    runtime_profile = False
     # If we're profiling the run
     if runtime_profile:
         try:
@@ -167,9 +164,14 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
                 node.inputs.terminal_output = 'allatonce'
         except:
             pass
-        self._taskresult[self._taskid] = self.pool.apply_async(run_node,
-                                                               (node, updatehash, self.plugin_args),
-                                                               callback=release_lock)
+        try:
+            runtime_profile = self.plugin_args['runtime_profile']
+        except:
+            runtime_profile = False
+        self._taskresult[self._taskid] = \
+            self.pool.apply_async(run_node,
+                                  (node, updatehash, runtime_profile),
+                                  callback=release_lock)
         return self._taskid
 
     def _send_procs_to_workers(self, updatehash=False, graph=None):

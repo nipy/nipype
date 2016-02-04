@@ -26,7 +26,7 @@ class Status(object):
     def __init__(self):
         self.statuses = []
 
-    def callback(self, node, status):
+    def callback(self, node, status, result=None):
         self.statuses.append((node, status))
 
 
@@ -105,3 +105,7 @@ def test_callback_multiproc_exception():
     yield assert_equal, so.statuses[0][1], 'start'
     yield assert_equal, so.statuses[1][1], 'exception'
     rmtree(wf.base_dir)
+
+if __name__ == '__main__':
+    import nose
+    nose.run()
