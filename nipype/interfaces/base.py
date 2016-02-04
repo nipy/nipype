@@ -858,7 +858,7 @@ class BaseInterface(Interface):
         """ Prints description for output parameters
         """
         helpstr = ['Outputs::', '']
-        if getattr(cls, 'output_spec', None) is not None:
+        if cls.output_spec:
             outputs = cls.output_spec()
             for name, spec in sorted(outputs.traits(transient=None).items()):
                 helpstr += cls._get_trait_desc(outputs, name, spec)
@@ -870,7 +870,7 @@ class BaseInterface(Interface):
         """ Returns a bunch containing output fields for the class
         """
         outputs = None
-        if getattr(self, 'output_spec', None) is not None:
+        if self.output_spec:
             outputs = self.output_spec()
         return outputs
 
@@ -1091,7 +1091,7 @@ class BaseInterface(Interface):
     def _list_outputs(self):
         """ List the expected outputs
         """
-        if getattr(self, 'output_spec', None) is not None:
+        if self.output_spec:
             raise NotImplementedError
         else:
             return None
@@ -1612,7 +1612,7 @@ class CommandLine(BaseInterface):
     def _list_outputs(self):
         metadata = dict(name_source=lambda t: t is not None)
         traits = self.inputs.traits(**metadata)
-        if traits and getattr(self, 'output_spec', None) is not None:
+        if traits:
             outputs = self.output_spec().get()
             for name, trait_spec in traits.items():
                 out_name = name
