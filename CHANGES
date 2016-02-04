@@ -1,6 +1,7 @@
 Next release
 ============
 
+* ENH: Merge S3DataSink into DataSink, added AWS documentation (https://github.com/nipy/nipype/pull/1316)
 * TST: Cache APT in CircleCI (https://github.com/nipy/nipype/pull/1333)
 * ENH: Add new flags to the BRAINSABC for new features (https://github.com/nipy/nipype/pull/1322)
 * ENH: Provides a Nipype wrapper for ANTs DenoiseImage (https://github.com/nipy/nipype/pull/1291)

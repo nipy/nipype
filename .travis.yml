@@ -24,6 +24,7 @@ before_install:
   fi
 - if $INSTALL_DEB_DEPENDECIES; then source /etc/fsl/fsl.sh; fi
 - if $INSTALL_DEB_DEPENDECIES; then source /etc/afni/afni.sh; fi
+- export FSLOUTPUTTYPE=NIFTI_GZ
 install:
 - conda update --yes conda
 - conda create -n testenv --yes pip python=$TRAVIS_PYTHON_VERSION
