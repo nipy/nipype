@@ -6,13 +6,14 @@ from builtins import object
 
 
 import os
-import warnings
 
+from ... import logging
 from ...utils.filemanip import split_filename
 from ..base import (
     CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
 
-warn = warnings.warn
+# Use nipype's logging system
+iflogger = logging.getLogger('interface')
 
 
 class Info(object):
@@ -37,10 +38,33 @@ class Info(object):
            Version number as string or None if AFNI not found
 
         """
-        clout = CommandLine(command='afni_vcheck',
-                            terminal_output='allatonce').run()
-        out = clout.runtime.stdout
-        return out.split('\n')[1]
+        try:
+            clout = CommandLine(command='afni_vcheck',
+                                terminal_output='allatonce').run()
+
+            # Try to parse the version number
+            currv = clout.runtime.stdout.split('\n')[1].split('=', 1)[1].strip()
+        except IOError:
+            # If afni_vcheck is not present, return None
+            iflogger.warn('afni_vcheck executable not found.')
+            return None
+        except RuntimeError as e:
+            # If AFNI is outdated, afni_vcheck throws error.
+            # Show new version, but parse current anyways.
+            currv = str(e).split('\n')[4].split('=', 1)[1].strip()
+            nextv = str(e).split('\n')[6].split('=', 1)[1].strip()
+            iflogger.warn(
+                'AFNI is outdated, detected version %s and %s is available.' % (currv, nextv))
+
+        if currv.startswith('AFNI_'):
+            currv = currv[5:]
+
+        v = currv.split('.')
+        try:
+            v = [int(n) for n in v]
+        except ValueError:
+            return currv
+        return tuple(v)
 
     @classmethod
     def outputtype_to_ext(cls, outputtype):
@@ -160,3 +184,10 @@ class AFNICommand(CommandLine):
                     if ext == "":
                         outputs[name] = outputs[name] + "+orig.BRIK"
         return outputs
+
+
+def no_afni():
+    """ Checks if AFNI is available """
+    if Info.version() is None:
+        return True
+    return False

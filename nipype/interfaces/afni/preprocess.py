@@ -8,10 +8,10 @@
     >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
     >>> os.chdir(datadir)
 """
-import warnings
 
 import os
 import re
+from warnings import warn
 
 from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec
 from ..base import CommandLineInputSpec, CommandLine, OutputMultiPath
@@ -19,8 +19,6 @@ from ..base import (Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from ...utils.filemanip import fname_presuffix
-
-warn = warnings.warn
 
 
 class To3DInputSpec(AFNICommandInputSpec):
@@ -1234,6 +1232,17 @@ class SkullStrip(AFNICommand):
     _redirect_x = True
     input_spec = SkullStripInputSpec
     output_spec = AFNICommandOutputSpec
+
+    def __init__(self, **inputs):
+        from .base import Info, no_afni
+        super(SkullStrip, self).__init__(**inputs)
+
+        if not no_afni():
+            v = Info.version()
+
+            # As of AFNI 16.0.00, redirect_x is not needed
+            if isinstance(v[0], int) and v[0] > 15:
+                self._redirect_x = False
 
 
 class TCatInputSpec(AFNICommandInputSpec):
