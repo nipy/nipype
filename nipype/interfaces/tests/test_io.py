@@ -18,7 +18,6 @@ from nipype.testing import assert_equal, assert_true, assert_false, skipif
 import nipype.interfaces.io as nio
 from nipype.interfaces.base import Undefined
 
-# Check for boto
 noboto = False
 try:
     import boto
@@ -113,7 +112,7 @@ def test_selectfiles_valueerror():
     yield assert_raises, ValueError, sf.run
 
 
-@skipif(noboto)
+@skip
 def test_s3datagrabber_communication():
     dg = nio.S3DataGrabber(
         infields=['subj_id', 'run_num'], outfields=['func', 'struct'])

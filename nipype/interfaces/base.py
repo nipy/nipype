@@ -1297,6 +1297,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     # Init variables for memory profiling
     mem_mb = -1
     num_threads = -1
+    interval = 1
 
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
@@ -1346,7 +1347,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
             try:
                 stderr = stderr.decode()
             except UnicodeDecodeError:
-                stdout = stdout.decode("ISO-8859-1")
+                stderr = stderr.decode("ISO-8859-1")
 
         result['stdout'] = str(stdout).split('\n')
         result['stderr'] = str(stderr).split('\n')

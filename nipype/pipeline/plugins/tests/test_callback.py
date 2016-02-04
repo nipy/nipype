@@ -93,7 +93,6 @@ def test_callback_multiproc_exception():
                      name='f_node')
     wf.add_nodes([f_node])
     wf.config['execution']['crashdump_dir'] = wf.base_dir
-    wf.config['execution']['poll_sleep_duration'] = 2
     try:
         wf.run(plugin='ResourceMultiProc',
                plugin_args={'status_callback': so.callback})

@@ -6,7 +6,7 @@ from shutil import rmtree
 from nipype.testing import assert_equal, assert_less_equal
 import nipype.pipeline.engine as pe
 
-
+ 
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
     input2 = nib.traits.Int(desc='a random int')
