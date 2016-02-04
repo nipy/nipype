@@ -212,7 +212,8 @@ def test_do_not_use_more_threads_then_specified():
     pipe.connect(n3, 'output1', n4, 'input2')
     n1.inputs.input1 = 10
     pipe.config['execution']['poll_sleep_duration'] = 1
-    pipe.run(plugin='ResourceMultiProc', plugin_args={'n_procs': max_threads, 'status_callback': log_nodes_cb})
+    pipe.run(plugin='ResourceMultiProc', plugin_args={'n_procs': max_threads,
+                                                      'status_callback': log_nodes_cb})
 
     nodes, last_node = draw_gantt_chart.log_to_json(LOG_FILENAME)
     #usage in every second
