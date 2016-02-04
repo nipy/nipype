@@ -34,7 +34,6 @@ def run_node(node, updatehash, runtime_profile=False):
  
     # Init variables
     result = dict(result=None, traceback=None)
-    runtime_profile = False
 
     # If we're profiling the run
     if runtime_profile:
