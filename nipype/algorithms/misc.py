@@ -341,7 +341,7 @@ class TSNR(BaseInterface):
             outputs[k] = op.abspath(getattr(self.inputs, k))
 
         if isdefined(self.inputs.regress_poly):
-            outputs['detrended_file'] = op.abspath(self.inputs.detrended_file) 
+            outputs['detrended_file'] = op.abspath(self.inputs.detrended_file)
         return outputs
 
 
