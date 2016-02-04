@@ -52,7 +52,6 @@ def test_run_multiproc():
     os.chdir(cur_dir)
     rmtree(temp_dir)
 
-
 ################################
 
 
@@ -236,3 +235,4 @@ def test_do_not_use_more_threads_then_specified():
     yield assert_equal, result, True, "using more memory than system has (memory is not specified by user)"
 
     os.remove(LOG_FILENAME)
+

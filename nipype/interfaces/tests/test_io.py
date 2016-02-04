@@ -18,6 +18,7 @@ from nipype.testing import assert_equal, assert_true, assert_false, skipif
 import nipype.interfaces.io as nio
 from nipype.interfaces.base import Undefined
 
+# Check for boto
 noboto = False
 try:
     import boto

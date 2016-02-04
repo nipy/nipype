@@ -134,7 +134,54 @@ class IOBase(BaseInterface):
         return base
 
 
+# Class to track percentage of S3 file upload
+class ProgressPercentage(object):
+    '''
+    Callable class instsance (via __call__ method) that displays
+    upload percentage of a file to S3
+    '''
+
+    def __init__(self, filename):
+        '''
+        '''
+
+        # Import packages
+        import threading
+
+        # Initialize data attributes
+        self._filename = filename
+        self._size = float(os.path.getsize(filename))
+        self._seen_so_far = 0
+        self._lock = threading.Lock()
+
+    def __call__(self, bytes_amount):
+        '''
+        '''
+
+        # Import packages
+        import sys
+
+        # With the lock on, print upload status
+        with self._lock:
+            self._seen_so_far += bytes_amount
+            if self._size != 0:
+                percentage = (self._seen_so_far / self._size) * 100
+            else:
+                percentage = 0
+            progress_str = '%d / %d (%.2f%%)\r'\
+                           % (self._seen_so_far, self._size, percentage)
+
+            # Write to stdout
+            sys.stdout.write(progress_str)
+            sys.stdout.flush()
+
+
+# DataSink inputs
 class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+    '''
+    '''
+
+    # Init inputspec data attributes
     base_directory = Directory(
         desc='Path to the base directory for storing data.')
     container = traits.Str(
@@ -146,11 +193,11 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
                                    desc=('List of 2-tuples reflecting string '
                                          'to substitute and string to replace '
                                          'it with'))
-    regexp_substitutions = InputMultiPath(traits.Tuple(traits.Str, traits.Str),
-                                          desc=('List of 2-tuples reflecting a pair '
-                                                'of a Python regexp pattern and a '
-                                                'replacement string. Invoked after '
-                                                'string `substitutions`'))
+    regexp_substitutions = \
+        InputMultiPath(traits.Tuple(traits.Str, traits.Str),
+                       desc=('List of 2-tuples reflecting a pair of a '\
+                             'Python regexp pattern and a replacement '\
+                             'string. Invoked after string `substitutions`'))
 
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
     remove_dest_dir = traits.Bool(False, usedefault=True,
@@ -171,6 +218,7 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     # Set call-able inputs attributes
     def __setattr__(self, key, value):
+
         if key not in self.copyable_trait_names():
             if not isdefined(value):
                 super(DataSinkInputSpec, self).__setattr__(key, value)
@@ -181,12 +229,14 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
             super(DataSinkInputSpec, self).__setattr__(key, value)
 
 
+# DataSink outputs
 class DataSinkOutputSpec(TraitedSpec):
 
     # Init out file
     out_file = traits.Any(desc='datasink output')
 
 
+# Custom DataSink class
 class DataSink(IOBase):
     """ Generic datasink module to store structured outputs
 
@@ -248,9 +298,12 @@ class DataSink(IOBase):
         >>> ds.run()  # doctest: +SKIP
 
     """
+
+    # Give obj .inputs and .outputs
     input_spec = DataSinkInputSpec
     output_spec = DataSinkOutputSpec
 
+    # Initialization method to set up datasink
     def __init__(self, infields=None, force_run=True, **kwargs):
         """
         Parameters
@@ -272,6 +325,7 @@ class DataSink(IOBase):
         if force_run:
             self._always_run = True
 
+    # Get destination paths
     def _get_dst(self, src):
         # If path is directory with trailing os.path.sep,
         # then remove that for a more robust behavior
@@ -295,6 +349,7 @@ class DataSink(IOBase):
             dst = dst[1:]
         return dst
 
+    # Substitute paths in substitutions dictionary parameter
     def _substitute(self, pathstr):
         pathstr_ = pathstr
         if isdefined(self.inputs.substitutions):
@@ -584,6 +639,9 @@ class DataSink(IOBase):
     def _list_outputs(self):
         """Execute this module.
         """
+
+        # Init variables
+        iflogger = logging.getLogger('interface')
         outputs = self.output_spec().get()
         out_files = []
         # Use hardlink
@@ -648,17 +706,23 @@ class DataSink(IOBase):
             iflogger.debug("key: %s files: %s" % (key, str(files)))
             files = filename_to_list(files)
             tempoutdir = outdir
+            if s3_flag:
+                s3tempoutdir = s3dir
             for d in key.split('.'):
                 if d[0] == '@':
                     continue
                 tempoutdir = os.path.join(tempoutdir, d)
+                if s3_flag:
+                    s3tempoutdir = os.path.join(s3tempoutdir, d)
 
             # flattening list
             if isinstance(files, list):
                 if isinstance(files[0], list):
                     files = [item for sublist in files for item in sublist]
 
+            # Iterate through passed-in source files
             for src in filename_to_list(files):
+                # Format src and dst files
                 src = os.path.abspath(src)
                 if not os.path.isfile(src):
                     src = os.path.join(src, '')
@@ -685,12 +749,22 @@ class DataSink(IOBase):
                                 pass
                             else:
                                 raise(inst)
-                    if os.path.exists(dst) and self.inputs.remove_dest_dir:
-                        iflogger.debug("removing: %s" % dst)
-                        shutil.rmtree(dst)
-                    iflogger.debug("copydir: %s %s" % (src, dst))
-                    copytree(src, dst)
-                    out_files.append(dst)
+                    # If src is a file, copy it to dst
+                    if os.path.isfile(src):
+                        iflogger.debug('copyfile: %s %s' % (src, dst))
+                        copyfile(src, dst, copy=True, hashmethod='content',
+                                 use_hardlink=use_hardlink)
+                        out_files.append(dst)
+                    # If src is a directory, copy entire contents to dst dir
+                    elif os.path.isdir(src):
+                        if os.path.exists(dst) and self.inputs.remove_dest_dir:
+                            iflogger.debug('removing: %s' % dst)
+                            shutil.rmtree(dst)
+                        iflogger.debug('copydir: %s %s' % (src, dst))
+                        copytree(src, dst)
+                        out_files.append(dst)
+
+        # Return outputs dictionary
         outputs['out_file'] = out_files
 
         return outputs

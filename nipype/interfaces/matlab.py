@@ -168,9 +168,9 @@ class MatlabCommand(CommandLine):
         prescript = self.inputs.prescript
         postscript = self.inputs.postscript
 
-        # postcript takes different default value depending on the mfile argument
+        # prescript takes different default value depending on the mfile argument
         if mfile:
-            prescript.insert(0, "fprintf(1,'Executing %s at %s:\\n',mfilename,datestr(now));")
+            prescript.insert(0, "fprintf(1,'Executing %s at %s:\\n',mfilename(),datestr(now));")
         else:
             prescript.insert(0, "fprintf(1,'Executing code at %s:\\n',datestr(now));")
         for path in paths:
