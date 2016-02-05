@@ -302,7 +302,7 @@ class TSNR(BaseInterface):
         vollist = [nb.load(filename) for filename in self.inputs.in_file]
         data = np.concatenate([vol.get_data().reshape(
             vol.get_shape()[:3] + (-1,)) for vol in vollist], axis=3)
-        data = data.nan_to_num()
+        data = np.nan_to_num(data)
 
         if data.dtype.kind == 'i':
             header.set_data_dtype(np.float32)
