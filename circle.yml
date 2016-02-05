@@ -23,7 +23,7 @@ dependencies:
     # Set up python environment
     - pip install --upgrade pip
     - pip install -e .
-    - pip install matplotlib sphinx ipython boto
+    - pip install matplotlib sphinx ipython boto coverage
     # Add tvtk
     - pip install http://effbot.org/downloads/Imaging-1.1.7.tar.gz
     - pip install -e git+https://github.com/enthought/etsdevtools.git#egg=etsdevtools
@@ -40,7 +40,8 @@ machine:
     FSLOUTPUTTYPE: NIFTI_GZ
 test:
   override:
-    - source $HOME/.profile; nosetests --with-doctest --logging-level=DEBUG --verbosity=3:
+    - mkdir -p ${CIRCLE_TEST_REPORTS}/nose
+    - source $HOME/.profile; nosetests --with-doctest --xunit-file="${CIRCLE_TEST_REPORTS}/nose/${CIRCLE_PROJECT_REPONAME}.xml" -c ./.noserc --logging-level=DEBUG --verbosity=3:
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
@@ -74,3 +75,5 @@ general:
   artifacts:
     - "doc/_build/html"
     - "~/log.txt"
+    - "nosetests.xml"
+    - "coverage.xml"
