@@ -44,10 +44,10 @@ def run_node(node, updatehash, runtime_profile=False):
             mem_mb, retval = memory_profiler.memory_usage(proc=proc, retval=True,
                                                           include_children=True,
                                                           max_usage=True)
-            runtime = (datetime.datetime.now() - start).total_seconds()
+            run_secs = (datetime.datetime.now() - start).total_seconds()
             result['result'] = retval
             result['node_memory'] = mem_mb[0]/1024.0
-            result['run_seconds'] = runtime
+            result['run_seconds'] = run_secs
             result['cmd_memory'] = retval.runtime.get('cmd_memory')
             result['cmd_threads'] = retval.runtime.get('cmd_threads')
         except:
@@ -118,7 +118,7 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
         self.plugin_args = plugin_args
         self.processors = cpu_count()
         memory = psutil.virtual_memory()
-        self.memory = memory.total / (1024*1024*1024)
+        self.memory = float(memory.total) / (1024.0**3)
         if self.plugin_args:
             if 'non_daemon' in self.plugin_args:
                 non_daemon = plugin_args['non_daemon']

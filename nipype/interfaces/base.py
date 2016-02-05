@@ -1211,15 +1211,17 @@ def _get_num_threads(proc):
 
     # Import packages
     import psutil
+    import logging as lg
 
     # Init variables
     num_threads = proc.num_threads()
     try:
+        num_children = len(proc.children())
         for child in proc.children():
-            num_threads = max(num_threads, child.num_threads(),
-                              len(child.children()), _get_num_threads(child))
+            num_threads = max(num_threads, num_children,
+                              child.num_threads(), len(child.children()))
     except psutil.NoSuchProcess:
-        dummy = 1
+        pass
 
     return num_threads
 
