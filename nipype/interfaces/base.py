@@ -1196,9 +1196,14 @@ class BaseInterface(Interface):
         """ List the expected outputs
         """
         if self.output_spec:
-            raise NotImplementedError
+            outputs = self.output_spec().get()
+
+            for out_name in outputs.keys():
+                if isdefined(getattr(self.inputs, out_name)):
+                    outputs[out_name] = getattr(self.inputs, out_name)
+            return outputs
         else:
-            return None
+            raise NotImplementedError
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         """ Collate expected outputs and check for existence
@@ -1704,6 +1709,7 @@ class CommandLine(BaseInterface):
         first_args = [arg for pos, arg in sorted(initial_args.items())]
         last_args = [arg for pos, arg in sorted(final_args.items())]
         return first_args + all_args + last_args
+
 
 
 class StdOutCommandLineInputSpec(CommandLineInputSpec):
