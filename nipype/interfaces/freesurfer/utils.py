@@ -814,10 +814,10 @@ class MRIsConvertInputSpec(FSTraitedSpec):
     origname = traits.String(argstr="-o %s", desc="read orig positions")
 
     in_file = File(exists=True, mandatory=True, position=-2, argstr='%s', desc='File to read/convert')
-    out_file = File(argstr='./%s', position=-1, genfile=True, desc='output filename or True to generate one')
-    # Not really sure why the ./ is necessary but the module fails without it
+    out_file = File(argstr='%s', position=-1, genfile=True, xor=['out_datatype'],
+                    desc='output filename or True to generate one')
 
-    out_datatype = traits.Enum("ico", "tri", "stl", "vtk", "gii", "mgh", "mgz", mandatory=True,
+    out_datatype = traits.Enum("ico", "tri", "stl", "vtk", "gii", "mgh", "mgz", xor=['out_file'],
                                desc="These file formats are supported:  ASCII:       .asc"
                                "ICO: .ico, .tri GEO: .geo STL: .stl VTK: .vtk GIFTI: .gii MGH surface-encoded 'volume': .mgh, .mgz")
 
@@ -853,12 +853,14 @@ class MRIsConvert(FSCommand):
 
     def _gen_filename(self, name):
         if name is 'out_file':
-            return self._gen_outfilename()
+            return os.path.abspath(self._gen_outfilename())
         else:
             return None
 
     def _gen_outfilename(self):
-        if isdefined(self.inputs.annot_file):
+        if isdefined(self.inputs.out_file):
+            return self.inputs.out_file
+        elif isdefined(self.inputs.annot_file):
             _, name, ext = split_filename(self.inputs.annot_file)
         elif isdefined(self.inputs.parcstats_file):
             _, name, ext = split_filename(self.inputs.parcstats_file)
