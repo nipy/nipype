@@ -6,8 +6,9 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
    >>> os.chdir(datadir)
 """
-from nipype.interfaces.base import (CommandLineInputSpec, traits, TraitedSpec,
-				    File, SEMLikeCommandLine)
+
+from .base import (CommandLineInputSpec, traits, TraitedSpec,
+                   File, SEMLikeCommandLine)
 
 
 class C3dAffineToolInputSpec(CommandLineInputSpec):
@@ -15,8 +16,8 @@ class C3dAffineToolInputSpec(CommandLineInputSpec):
     source_file = File(exists=True, argstr='-src %s', position=2)
     transform_file = File(exists=True, argstr='%s', position=3)
     itk_transform = traits.Either(traits.Bool, File(), hash_files=False,
-				  desc="Export ITK transform.",
-				  argstr="-oitk %s", position=5)
+                                  desc="Export ITK transform.",
+                                  argstr="-oitk %s", position=5)
     fsl2ras = traits.Bool(argstr='-fsl2ras', position=4)
 
 

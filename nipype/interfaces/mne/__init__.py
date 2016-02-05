@@ -1,1 +1,1 @@
-from nipype.interfaces.mne.base import WatershedBEM
+from .base import WatershedBEM

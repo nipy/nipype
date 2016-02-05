@@ -6,10 +6,10 @@ from shutil import rmtree
 
 from nose.tools import assert_equal
 
-from nipype.caching import Memory
-from nipype.pipeline.tests.test_engine import TestInterface
-from nipype.utils.config import NipypeConfig
-config = NipypeConfig()
+from .. import Memory
+from ...pipeline.engine.tests.test_engine import TestInterface
+
+from ... import config
 config.set_default_config()
 
 nb_runs = 0
@@ -50,4 +50,3 @@ def test_caching():
 
 if __name__ == '__main__':
     test_caching()
-

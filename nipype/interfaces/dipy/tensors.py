@@ -5,23 +5,22 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-
-from nipype.interfaces.base import (
-    TraitedSpec, BaseInterface, File)
-from nipype.utils.filemanip import split_filename
 import os.path as op
-import nibabel as nb
-import numpy as np
-from nipype.utils.misc import package_check
 import warnings
 
+import nibabel as nb
+import numpy as np
+
+from ..base import (TraitedSpec, BaseInterface, File)
+from ...utils.filemanip import split_filename
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_dipy = True
 try:
     package_check('dipy', version='0.6.0')
-except Exception, e:
+except Exception as e:
     have_dipy = False
 else:
     import dipy.reconst.dti as dti
@@ -48,13 +47,13 @@ def tensor_fitting(data, bvals, bvecs, mask_file=None):
     -------
     TensorFit object, affine
     """
-    img = nb.load(in_file).get_data()
+    img = nb.load(in_file)
     data = img.get_data()
-    affine = img.get_affine()
+    affine = img.affine
     if mask_file is not None:
         mask = nb.load(self.inputs.mask_file).get_data()
     else:
-        mask=None
+        mask = None
 
     # Load information about the gradients:
     gtab = grad.gradient_table(self.inputs.bvals, self.inputs.bvecs)
@@ -71,8 +70,8 @@ class DTIInputSpec(TraitedSpec):
                  desc='The input b-vector text file')
     bvals = File(exists=True, mandatory=True,
                  desc='The input b-value text file')
-    mask_file = File(exists=True, mandatory=False,
-                 desc='An optional white matter mask')
+    mask_file = File(exists=True,
+                     desc='An optional white matter mask')
     out_filename = File(
         genfile=True, desc='The output filename for the DTI parameters image')
 
@@ -133,7 +132,7 @@ class TensorModeInputSpec(TraitedSpec):
                  desc='The input b-vector text file')
     bvals = File(exists=True, mandatory=True,
                  desc='The input b-value text file')
-    mask_file = File(exists=True, mandatory=False,
+    mask_file = File(exists=True,
                      desc='An optional white matter mask')
     out_filename = File(
         genfile=True, desc='The output filename for the Tensor mode image')
@@ -172,7 +171,7 @@ class TensorMode(BaseInterface):
         ten_fit = tensor_fitting(self.inputs.in_file, self.inputs.bvals, self.inputs.bvecs,
                                  self.inputs.mask_file)
 
-        ## Write as a 3D Nifti image with the original affine
+        # Write as a 3D Nifti image with the original affine
         img = nb.Nifti1Image(tenfit.mode, affine)
         out_file = op.abspath(self._gen_outfilename())
         nb.save(img, out_file)

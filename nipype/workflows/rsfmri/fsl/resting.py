@@ -1,10 +1,12 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import division
 
-import nipype.interfaces.fsl as fsl          # fsl
-from nipype.algorithms.misc import TSNR
-import nipype.interfaces.utility as util     # utility
-import nipype.pipeline.engine as pe          # pypeline engine
+from ....interfaces import fsl as fsl          # fsl
+from ....interfaces import utility as util     # utility
+from ....pipeline import engine as pe          # pypeline engine
+from ....algorithms.misc import TSNR
+
 
 def extract_noise_components(realigned_file, noise_mask_file, num_components):
     """Derive components most reflective of physiological noise
@@ -25,7 +27,7 @@ def extract_noise_components(realigned_file, noise_mask_file, num_components):
     stdX[stdX == 0] = 1.
     stdX[np.isnan(stdX)] = 1.
     stdX[np.isinf(stdX)] = 1.
-    X = (X - np.mean(X, axis=0))/stdX
+    X = (X - np.mean(X, axis=0)) / stdX
     u, _, _ = sp.linalg.svd(X, full_matrices=False)
     if components is None:
         components = u[:, :num_components]
@@ -35,6 +37,7 @@ def extract_noise_components(realigned_file, noise_mask_file, num_components):
     np.savetxt(components_file, components, fmt="%.10f")
     return components_file
 
+
 def select_volume(filename, which):
     """Return the middle index of a file
     """
@@ -43,10 +46,11 @@ def select_volume(filename, which):
     if which.lower() == 'first':
         idx = 0
     elif which.lower() == 'middle':
-        idx = int(np.ceil(load(filename).get_shape()[3]/2))
+        idx = int(np.ceil(load(filename).shape[3] / 2))
     else:
-        raise Exception('unknown value for volume selection : %s'%which)
+        raise Exception('unknown value for volume selection : %s' % which)
     return idx
+
 
 def create_realign_flow(name='realign'):
     """Realign a time series to the middle volume using spline interpolation
@@ -67,9 +71,9 @@ def create_realign_flow(name='realign'):
                                                                  ]),
                         name='inputspec')
     outputnode = pe.Node(interface=util.IdentityInterface(fields=[
-                                                               'realigned_file',
-                                                                 ]),
-                        name='outputspec')
+        'realigned_file',
+    ]),
+        name='outputspec')
     realigner = pe.Node(fsl.MCFLIRT(save_mats=True, stats_imgs=True),
                         name='realigner')
     splitter = pe.Node(fsl.Split(dimension='t'), name='splitter')
@@ -88,6 +92,7 @@ def create_realign_flow(name='realign'):
     realignflow.connect(warper, 'out_file', joiner, 'in_files')
     realignflow.connect(joiner, 'merged_file', outputnode, 'realigned_file')
     return realignflow
+
 
 def create_resting_preproc(name='restpreproc'):
     """Create a "resting" time series preprocessing workflow
@@ -131,22 +136,22 @@ def create_resting_preproc(name='restpreproc'):
                                                                  ]),
                         name='inputspec')
     outputnode = pe.Node(interface=util.IdentityInterface(fields=[
-                                                              'noise_mask_file',
-                                                              'filtered_file',
-                                                              ]),
-                     name='outputspec')
+        'noise_mask_file',
+        'filtered_file',
+    ]),
+        name='outputspec')
     slicetimer = pe.Node(fsl.SliceTimer(), name='slicetimer')
     realigner = create_realign_flow()
     tsnr = pe.Node(TSNR(regress_poly=2), name='tsnr')
     getthresh = pe.Node(interface=fsl.ImageStats(op_string='-p 98'),
-                           name='getthreshold')
+                        name='getthreshold')
     threshold_stddev = pe.Node(fsl.Threshold(), name='threshold')
     compcor = pe.Node(util.Function(input_names=['realigned_file',
                                                  'noise_mask_file',
                                                  'num_components'],
-                                     output_names=['noise_components'],
-                                     function=extract_noise_components),
-                       name='compcorr')
+                                    output_names=['noise_components'],
+                                    function=extract_noise_components),
+                      name='compcorr')
     remove_noise = pe.Node(fsl.FilterRegressor(filter_all=True),
                            name='remove_noise')
     bandpass_filter = pe.Node(fsl.TemporalFilter(),

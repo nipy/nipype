@@ -14,28 +14,31 @@ from nipype.interfaces.base import TraitError
 
 import nipype.interfaces.freesurfer as fs
 
+
 def no_freesurfer():
     if fs.Info().version is None:
         return True
     else:
         return False
 
+
 def create_files_in_directory():
     outdir = os.path.realpath(mkdtemp())
     cwd = os.getcwd()
     os.chdir(outdir)
-    filelist = ['a.nii','b.nii']
+    filelist = ['a.nii', 'b.nii']
     for f in filelist:
         hdr = nif.Nifti1Header()
-        shape = (3,3,3,4)
+        shape = (3, 3, 3, 4)
         hdr.set_data_shape(shape)
         img = np.random.random(shape)
-        nif.save(nif.Nifti1Image(img,np.eye(4),hdr),
-                 os.path.join(outdir,f))
+        nif.save(nif.Nifti1Image(img, np.eye(4), hdr),
+                 os.path.join(outdir, f))
     with open(os.path.join(outdir, 'reg.dat'), 'wt') as fp:
         fp.write('dummy file')
     filelist.append('reg.dat')
     return filelist, outdir, cwd
+
 
 def create_surf_file():
     outdir = os.path.realpath(mkdtemp())
@@ -43,17 +46,19 @@ def create_surf_file():
     os.chdir(outdir)
     surf = 'lh.a.nii'
     hdr = nif.Nifti1Header()
-    shape = (1,100,1)
+    shape = (1, 100, 1)
     hdr.set_data_shape(shape)
     img = np.random.random(shape)
-    nif.save(nif.Nifti1Image(img,np.eye(4),hdr),
-             os.path.join(outdir,surf))
+    nif.save(nif.Nifti1Image(img, np.eye(4), hdr),
+             os.path.join(outdir, surf))
     return surf, outdir, cwd
+
 
 def clean_directory(outdir, old_wd):
     if os.path.exists(outdir):
         rmtree(outdir)
     os.chdir(old_wd)
+
 
 @skipif(no_freesurfer)
 def test_sample2surf():
@@ -79,11 +84,11 @@ def test_sample2surf():
 
     # Test a basic command line
     yield assert_equal, s2s.cmdline, ("mri_vol2surf "
-    "--hemi lh --o %s --ref %s --reg reg.dat --projfrac 0.500 --mov %s"
-    %(os.path.join(cwd, "lh.a.mgz"),files[1],files[0]))
+                                      "--hemi lh --o %s --ref %s --reg reg.dat --projfrac 0.500 --mov %s"
+                                      % (os.path.join(cwd, "lh.a.mgz"), files[1], files[0]))
 
     # Test identity
-    s2sish = fs.SampleToSurface(source_file = files[1], reference_file = files[0],hemi="rh")
+    s2sish = fs.SampleToSurface(source_file=files[1], reference_file=files[0], hemi="rh")
     yield assert_not_equal, s2s, s2sish
 
     # Test hits file name creation
@@ -97,6 +102,7 @@ def test_sample2surf():
 
     # Clean up our mess
     clean_directory(cwd, oldwd)
+
 
 @skipif(no_freesurfer)
 def test_surfsmooth():
@@ -121,8 +127,8 @@ def test_surfsmooth():
 
     # Test the command line
     yield assert_equal, smooth.cmdline, \
-    ("mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval %s --tval %s/lh.a_smooth%d.nii --s fsaverage"%
-    (surf, cwd, fwhm))
+        ("mri_surf2surf --cortex --fwhm 5.0000 --hemi lh --sval %s --tval %s/lh.a_smooth%d.nii --s fsaverage" %
+         (surf, cwd, fwhm))
 
     # Test identity
     shmooth = fs.SurfaceSmooth(
@@ -131,6 +137,7 @@ def test_surfsmooth():
 
     # Clean up
     clean_directory(cwd, oldwd)
+
 
 @skipif(no_freesurfer)
 def test_surfxfm():
@@ -154,8 +161,8 @@ def test_surfxfm():
 
     # Test the command line
     yield assert_equal, xfm.cmdline, \
-    ("mri_surf2surf --hemi lh --tval %s/lh.a.fsaverage.nii --sval %s --srcsubject my_subject --trgsubject fsaverage"%
-    (cwd, surf))
+        ("mri_surf2surf --hemi lh --tval %s/lh.a.fsaverage.nii --sval %s --srcsubject my_subject --trgsubject fsaverage" %
+         (cwd, surf))
 
     # Test identity
     xfmish = fs.SurfaceTransform(
@@ -164,6 +171,7 @@ def test_surfxfm():
 
     # Clean up
     clean_directory(cwd, oldwd)
+
 
 @skipif(no_freesurfer)
 def test_applymask():
@@ -177,7 +185,7 @@ def test_applymask():
     # Test exception with mandatory args absent
     yield assert_raises, ValueError, masker.run
     for input in ["in_file", "mask_file"]:
-        indict = {input:filelist[0]}
+        indict = {input: filelist[0]}
         willbreak = fs.ApplyMask(**indict)
         yield assert_raises, ValueError, willbreak.run
 
@@ -185,15 +193,16 @@ def test_applymask():
     masker.inputs.in_file = filelist[0]
     masker.inputs.mask_file = filelist[1]
     outfile = os.path.join(testdir, "a_masked.nii")
-    yield assert_equal, masker.cmdline, "mri_mask a.nii b.nii %s"%outfile
+    yield assert_equal, masker.cmdline, "mri_mask a.nii b.nii %s" % outfile
     # Now test that optional inputs get formatted properly
     masker.inputs.mask_thresh = 2
-    yield assert_equal, masker.cmdline, "mri_mask -T 2.0000 a.nii b.nii %s"%outfile
+    yield assert_equal, masker.cmdline, "mri_mask -T 2.0000 a.nii b.nii %s" % outfile
     masker.inputs.use_abs = True
-    yield assert_equal, masker.cmdline, "mri_mask -T 2.0000 -abs a.nii b.nii %s"%outfile
+    yield assert_equal, masker.cmdline, "mri_mask -T 2.0000 -abs a.nii b.nii %s" % outfile
 
     # Now clean up
     clean_directory(testdir, origdir)
+
 
 @skipif(no_freesurfer)
 def test_surfshots():
@@ -218,7 +227,7 @@ def test_surfshots():
     yield assert_equal, fotos.cmdline, "tksurfer fsaverage lh pial -tcl snapshots.tcl"
 
     # Test identity
-    schmotos = fs.SurfaceSnapshots(subject_id="mysubject",hemi="rh",surface="white")
+    schmotos = fs.SurfaceSnapshots(subject_id="mysubject", hemi="rh", surface="white")
     yield assert_not_equal, fotos, schmotos
 
     # Test that the tcl script gets written

@@ -6,26 +6,23 @@
    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
    >>> os.chdir(datadir)
 """
-
-from nipype.interfaces.base import (traits, TraitedSpec, BaseInterface,
-                                    File, isdefined)
-from nipype.utils.filemanip import split_filename
 import os.path as op
+import warnings
+
 import nibabel as nb
 import numpy as np
-from nipype.utils.misc import package_check
-import warnings
+
+from ..base import (traits, TraitedSpec, BaseInterface, File, isdefined)
+from ...utils.filemanip import split_filename
+from ...utils.misc import package_check
 from ... import logging
 iflogger = logging.getLogger('interface')
 
 have_dipy = True
 try:
     package_check('dipy', version='0.6.0')
-except Exception, e:
+except Exception as e:
     have_dipy = False
-else:
-    from dipy.align.aniso2iso import resample
-    from dipy.core.gradients import GradientTable
 
 
 class ResampleInputSpec(TraitedSpec):
@@ -172,6 +169,7 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
     """
     Performs regridding of an image to set isotropic voxel sizes using dipy.
     """
+    from dipy.align.aniso2iso import resample
 
     if out_file is None:
         fname, fext = op.splitext(op.basename(in_file))
@@ -181,9 +179,9 @@ def resample_proxy(in_file, order=3, new_zooms=None, out_file=None):
         out_file = op.abspath('./%s_reslice%s' % (fname, fext))
 
     img = nb.load(in_file)
-    hdr = img.get_header().copy()
+    hdr = img.header.copy()
     data = img.get_data().astype(np.float32)
-    affine = img.get_affine()
+    affine = img.affine
     im_zooms = hdr.get_zooms()[:3]
 
     if new_zooms is None:
@@ -220,9 +218,9 @@ def nlmeans_proxy(in_file, settings,
         out_file = op.abspath('./%s_denoise%s' % (fname, fext))
 
     img = nb.load(in_file)
-    hdr = img.get_header()
+    hdr = img.header
     data = img.get_data()
-    aff = img.get_affine()
+    aff = img.affine
 
     nmask = data[..., 0] > 80
     if noise_mask is not None:
