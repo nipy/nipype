@@ -940,7 +940,7 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
 
 
 class AntsJointFusionOutputSpec(TraitedSpec):
-    out_label_fusion = File()
+    out_label_fusion = File(exists=True)
     out_intensity_fusion_name_format = traits.Str()
     out_label_post_prob_name_format = traits.Str()
     out_atlas_voting_weight_name_format = traits.Str()
