@@ -1387,7 +1387,10 @@ class MNIBiasCorrectionInputSpec(FSTraitedSpec):
                 desc="brainmask volume. Input can be any format accepted by mri_convert.")
     transform = File(exists=True, mandatory=False, argstr="--uchar %s",
                      desc="tal.xfm. Use mri_make_uchar instead of conforming")
-
+    stop = traits.Float(argstr="--stop %f", mandatory=False,
+                        desc="Convergence threshold below which iteration stops (suggest 0.01 to 0.0001)")
+    shrink = traits.Int(argstr="--shrink %d", mandatory=False,
+                        desc="Shrink parameter for finer sampling (default is 4)")
 
 class MNIBiasCorrectionOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="output volume")
