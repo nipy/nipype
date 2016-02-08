@@ -27,6 +27,7 @@ import re
 import numpy as np
 from nipype.utils.misc import package_check
 from functools import reduce
+from distutils.version import LooseVersion
 
 package_check('networkx', '1.3')
 
@@ -1021,7 +1022,7 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                                suffix='.dot',
                                use_ext=False,
                                newpath=base_dir)
-    if float(nx.__version__)<1.11:                           
+    if LooseVersion(nx.__version__) < LooseVersion('1.11'):                           
         nx.write_dot(pklgraph, outfname)
     else:
         nx.drawing.nx_pydot.write_dot(pklgraph, outfname)
