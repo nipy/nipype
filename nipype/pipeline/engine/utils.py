@@ -1021,7 +1021,10 @@ def export_graph(graph_in, base_dir=None, show=False, use_execgraph=False,
                                suffix='.dot',
                                use_ext=False,
                                newpath=base_dir)
-    nx.write_dot(pklgraph, outfname)
+    if float(nx.__version__)<1.11:                           
+        nx.write_dot(pklgraph, outfname)
+    else:
+        nx.drawing.nx_pydot.write_dot(pklgraph, outfname)
     logger.info('Creating dot file: %s' % outfname)
     cmd = 'dot -T%s -O %s' % (format, outfname)
     res = CommandLine(cmd, terminal_output='allatonce').run()
