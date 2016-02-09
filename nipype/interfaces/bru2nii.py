@@ -31,9 +31,9 @@ class Bru2(CommandLine):
 
 	>>> from nipype.interfaces.bru2nii import Bru2
 	>>> converter = Bru2()
-	>>> converter.inputs.input_dir = '.'
+	>>> converter.inputs.input_dir = os.getcwd()
 	>>> converter.cmdline
-	'Bru2 -o .'
+	'Bru2 -o '+os.getcwd()
 	"""
 	input_spec = Bru2InputSpec
 	output_spec = Bru2OutputSpec
