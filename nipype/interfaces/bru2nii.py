@@ -31,10 +31,9 @@ class Bru2(CommandLine):
 
 	>>> from nipype.interfaces.bru2nii import Bru2
 	>>> converter = Bru2()
-	>>> converter.inputs.input_dir = '/data/20151103_213035_4001_1_1/10/'
-	>>> converter.inputs.nii_file = '/data/20151103_213035_4001_1_1/10'
+	>>> converter.inputs.input_dir = '.'
 	>>> converter.cmdline
-	'Bru2 -o /data/20151103_213035_4001_1_1/10 /data/20151103_213035_4001_1_1/10/'
+	'Bru2 -o .'
 	"""
 	input_spec = Bru2InputSpec
 	output_spec = Bru2OutputSpec
