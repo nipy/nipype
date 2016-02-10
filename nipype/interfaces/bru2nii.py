@@ -33,7 +33,7 @@ class Bru2(CommandLine):
 	>>> converter = Bru2()
 	>>> converter.inputs.input_dir = os.getcwd()
 	>>> converter.cmdline
-	'Bru2 -o '+os.getcwd()
+	'Bru2 -o '+os.getcwd()+"/"+os.path.basename(os.getcwd())+' '+os.getcwd()
 	"""
 	input_spec = Bru2InputSpec
 	output_spec = Bru2OutputSpec
