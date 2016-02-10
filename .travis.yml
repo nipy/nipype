@@ -19,23 +19,16 @@ before_install:
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then export PATH=/home/travis/miniconda2/bin:$PATH; else export PATH=/home/travis/miniconda3/bin:$PATH; fi
 - if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi
 - if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi
-# Enable universe and multiverse
-# - sudo bash -c 'echo "deb http://archive.ubuntu.com/ubuntu/ trusty main universe multiverse" >> /etc/apt/sources.list.d/trusty.list'
-# - sudo bash -c 'echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty main universe multiverse" >> /etc/apt/sources.list.d/trusty.list'
 - bash <(wget -q -O- https://gist.github.com/oesteban/a0d8972f978339910bf4/raw)
 - sudo apt-get update
 # Fix numpy problem: https://github.com/enthought/enable/issues/34#issuecomment-2029381
-- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then
-  echo '[x11]' >> $HOME/.numpy-site.cfg; 
-  echo 'library_dirs = /usr/lib64:/usr/lib:/usr/lib/x86_64-linux-gnu' >> $HOME/.numpy-site.cfg;
-  echo 'include_dirs = /usr/include:/usr/include/X11' >> $HOME/.numpy-site.cfg;
-  fi
+#- if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then
+#  echo '[x11]' >> $HOME/.numpy-site.cfg; 
+#  echo 'library_dirs = /usr/lib64:/usr/lib:/usr/lib/x86_64-linux-gnu' >> $HOME/.numpy-site.cfg;
+#  echo 'include_dirs = /usr/include:/usr/include/X11' >> $HOME/.numpy-site.cfg;
+#  fi
 install:
-- sudo apt-get build-dep -y -qq dh-python
-- sudo apt-get -b source -t trusty -y -qq python
-- sudo apt-get build-dep -y -qq libvtk6-dev
-- sudo apt-get -b source -t trusty -y -qq libvtk6-dev
-- sudo apt-get install -y -qq xvfb libx11-dev swig
+- travis_retry sudo apt-get install -y -qq xvfb libx11-dev swig libvtk6-dev python-vtk
 - if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -qq --no-install-recommends
   fsl afni elastix; fi
 - if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -qq fsl-atlases;
