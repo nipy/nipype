@@ -52,7 +52,6 @@ class CopyGeomOutputSpec(TraitedSpec):
 
 
 class CopyGeom(FSLCommand):
-
     """Use fslcpgeom to copy the header geometry information to another image.
     Copy certain parts of the header information (image dimensions, voxel dimensions,
     voxel dimensions units string, image orientation/origin or qform/sform info)
@@ -114,7 +113,6 @@ class ImageMeantsOutputSpec(TraitedSpec):
 
 
 class ImageMeants(FSLCommand):
-
     """ Use fslmeants for printing the average timeseries (intensities) to
         the screen (or saves to a file). The average is taken over all voxels in
         the mask (or all voxels in the image if no mask is specified)
@@ -158,7 +156,6 @@ class SmoothOutputSpec(TraitedSpec):
 
 
 class Smooth(FSLCommand):
-
     """
     Use fslmaths to smooth the image
 
@@ -223,7 +220,6 @@ class MergeOutputSpec(TraitedSpec):
 
 
 class Merge(FSLCommand):
-
     """Use fslmerge to concatenate images
 
     Images can be concatenated across time, x, y, or z dimensions. Across the
@@ -291,7 +287,6 @@ class ExtractROIOutputSpec(TraitedSpec):
 
 
 class ExtractROI(FSLCommand):
-
     """Uses FSL Fslroi command to extract region of interest (ROI)
     from an image.
 
@@ -372,7 +367,6 @@ class SplitOutputSpec(TraitedSpec):
 
 
 class Split(FSLCommand):
-
     """Uses FSL Fslsplit command to separate a volume into images in
     time, x, y or z dimension.
     """
@@ -424,7 +418,6 @@ class ImageMathsOutputSpec(TraitedSpec):
 
 
 class ImageMaths(FSLCommand):
-
     """Use FSL fslmaths command to allow mathematical manipulation of images
     `FSL info <http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils>`_
 
@@ -499,7 +492,6 @@ class FilterRegressorOutputSpec(TraitedSpec):
 
 
 class FilterRegressor(FSLCommand):
-
     """Data de-noising by regressing out part of a design matrix
 
     Uses simple OLS regression on 4D images
@@ -555,7 +547,6 @@ class ImageStatsOutputSpec(TraitedSpec):
 
 
 class ImageStats(FSLCommand):
-
     """Use FSL fslstats command to calculate stats from images
     `FSL info
     <http://www.fmrib.ox.ac.uk/fslcourse/lectures/practicals/intro/index.htm#fslutils>`_
@@ -633,7 +624,6 @@ class AvScaleOutputSpec(TraitedSpec):
 
 
 class AvScale(FSLCommand):
-
     """Use FSL avscale command to extract info from mat file output of FLIRT
 
     Examples
@@ -728,7 +718,6 @@ class OverlayOutputSpec(TraitedSpec):
 
 
 class Overlay(FSLCommand):
-
     """ Use FSL's overlay command to combine background and statistical images
         into one volume
 
@@ -845,7 +834,6 @@ class SlicerOutputSpec(TraitedSpec):
 
 
 class Slicer(FSLCommand):
-
     """Use FSL's slicer command to output a png image from a volume.
 
 
@@ -937,7 +925,6 @@ class PlotTimeSeriesOutputSpec(TraitedSpec):
 
 
 class PlotTimeSeries(FSLCommand):
-
     """Use fsl_tsplot to create images of time course plots.
 
     Examples
@@ -1021,7 +1008,6 @@ class PlotMotionParamsOutputSpec(TraitedSpec):
 
 
 class PlotMotionParams(FSLCommand):
-
     """Use fsl_tsplot to plot the estimated motion parameters from a realignment
     program.
 
@@ -1135,7 +1121,6 @@ class ConvertXFMOutputSpec(TraitedSpec):
 
 
 class ConvertXFM(FSLCommand):
-
     """Use the FSL utility convert_xfm to modify FLIRT transformation matrices.
 
     Examples
@@ -1207,7 +1192,6 @@ class SwapDimensionsOutputSpec(TraitedSpec):
 
 
 class SwapDimensions(FSLCommand):
-
     """Use fslswapdim to alter the orientation of an image.
 
     This interface accepts a three-tuple corresponding to the new
@@ -1250,7 +1234,6 @@ class PowerSpectrumOutputSpec(TraitedSpec):
 
 
 class PowerSpectrum(FSLCommand):
-
     """Use FSL PowerSpectrum command for power spectrum estimation.
 
     Examples
@@ -1311,7 +1294,6 @@ class SigLossOuputSpec(TraitedSpec):
 
 
 class SigLoss(FSLCommand):
-
     """Estimates signal loss from a field map (in rad/s)
 
     Examples
@@ -1353,7 +1335,6 @@ class Reorient2StdOutputSpec(TraitedSpec):
 
 
 class Reorient2Std(FSLCommand):
-
     """fslreorient2std is a tool for reorienting the image to match the
     approximate orientation of the standard template images (MNI152).
 
@@ -1442,7 +1423,6 @@ class InvWarpOutputSpec(TraitedSpec):
 
 
 class InvWarp(FSLCommand):
-
     """
     Use FSL Invwarp to invert a FNIRT warp
 
@@ -1529,7 +1509,6 @@ class ComplexOuputSpec(TraitedSpec):
 
 
 class Complex(FSLCommand):
-
     """fslcomplex is a tool for converting complex data
 
     Examples
@@ -1665,7 +1644,6 @@ class WarpUtilsOutputSpec(TraitedSpec):
 
 
 class WarpUtils(FSLCommand):
-
     """Use FSL `fnirtfileutils <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fnirt/warp_utils.html>`_
     to convert field->coefficients, coefficients->field, coefficients->other_coefficients etc
 
@@ -1798,7 +1776,6 @@ class ConvertWarpOutputSpec(TraitedSpec):
 
 
 class ConvertWarp(FSLCommand):
-
     """Use FSL `convertwarp <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fnirt/warp_utils.html>`_
     for combining multiple transforms into one.
 
@@ -1854,7 +1831,6 @@ class WarpPointsOutputSpec(TraitedSpec):
 
 
 class WarpPoints(CommandLine):
-
     """Use FSL `img2imgcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
     to transform point sets. Accepts plain text files and vtk files.
 
@@ -2011,7 +1987,6 @@ class WarpPointsToStdInputSpec(WarpPointsBaseInputSpec):
 
 
 class WarpPointsToStd(WarpPoints):
-
     """
     Use FSL `img2stdcoord <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/flirt/overview.html>`_
     to transform point sets to standard space coordinates. Accepts plain text files and
@@ -2073,7 +2048,6 @@ class MotionOutliersOutputSpec(TraitedSpec):
 
 
 class MotionOutliers(FSLCommand):
-
     """
     Use FSL fsl_motion_outliers`http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FSLMotionOutliers`_ to find outliers in timeseries (4d) data.
     Examples

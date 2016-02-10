@@ -12,13 +12,12 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 
 """
 from __future__ import division
-from builtins import zip
 
 import os.path as op
-from warnings import warn
-
 import numpy as np
 from numpy import linalg as nla
+
+from builtins import zip
 
 from .. import logging
 from ..external.six import string_types
@@ -26,11 +25,10 @@ from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
                                BaseInterfaceInputSpec)
 from ..interfaces.vtkbase import tvtk
 from ..interfaces import vtkbase as VTKInfo
-iflogger = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('interface')
 
 
 class TVTKBaseInterface(BaseInterface):
-
     """ A base class for interfaces using VTK """
 
     _redirect_x = True
@@ -58,7 +56,6 @@ class WarpPointsOutputSpec(TraitedSpec):
 
 
 class WarpPoints(TVTKBaseInterface):
-
     """
     Applies a displacement field to a point set given in vtk format.
     Any discrete deformation field, given in physical coordinates and
@@ -79,8 +76,6 @@ class WarpPoints(TVTKBaseInterface):
     output_spec = WarpPointsOutputSpec
 
     def _gen_fname(self, in_file, suffix='generated', ext=None):
-        import os.path as op
-
         fname, fext = op.splitext(op.basename(in_file))
 
         if fext == '.gz':
@@ -96,7 +91,6 @@ class WarpPoints(TVTKBaseInterface):
 
     def _run_interface(self, runtime):
         import nibabel as nb
-        import numpy as np
         from scipy import ndimage
 
         r = tvtk.PolyDataReader(file_name=self.inputs.points)
@@ -170,7 +164,6 @@ class ComputeMeshWarpOutputSpec(TraitedSpec):
 
 
 class ComputeMeshWarp(TVTKBaseInterface):
-
     """
     Calculates a the vertex-wise warping to get surface2 from surface1.
     It also reports the average distance of vertices, using the norm specified
@@ -295,7 +288,6 @@ class MeshWarpMathsOutputSpec(TraitedSpec):
 
 
 class MeshWarpMaths(TVTKBaseInterface):
-
     """
     Performs the most basic mathematical operations on the warping field
     defined at each vertex of the input surface. A surface with scalar
@@ -386,7 +378,6 @@ class MeshWarpMaths(TVTKBaseInterface):
 
 
 class P2PDistance(ComputeMeshWarp):
-
     """
     Calculates a point-to-point (p2p) distance between two corresponding
     VTK-readable meshes or contours.
@@ -399,6 +390,5 @@ class P2PDistance(ComputeMeshWarp):
 
     def __init__(self, **inputs):
         super(P2PDistance, self).__init__(**inputs)
-        warn(('This interface has been deprecated since 1.0, please use '
-              'ComputeMeshWarp'),
-             DeprecationWarning)
+        IFLOGGER.warn('This interface has been deprecated since 1.0, please use '
+                      'ComputeMeshWarp')
