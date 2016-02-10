@@ -22,7 +22,7 @@ before_install:
 # Enable universe and multiverse
 # - sudo bash -c 'echo "deb http://archive.ubuntu.com/ubuntu/ trusty main universe multiverse" >> /etc/apt/sources.list.d/trusty.list'
 # - sudo bash -c 'echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty main universe multiverse" >> /etc/apt/sources.list.d/trusty.list'
-- bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
+- bash <(wget -q -O- https://gist.github.com/oesteban/a0d8972f978339910bf4/raw)
 - sudo apt-get update
 # Fix numpy problem: https://github.com/enthought/enable/issues/34#issuecomment-2029381
 - if [ ${TRAVIS_PYTHON_VERSION:0:1} == "2" ]; then
