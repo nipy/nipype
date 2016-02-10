@@ -10,10 +10,11 @@
 """
 
 import os
+import os.path as op
 import re
 from warnings import warn
 
-from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec
+from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec, Info
 from ..base import CommandLineInputSpec, CommandLine, OutputMultiPath
 from ..base import (Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
@@ -2090,3 +2091,64 @@ class Means(AFNICommand):
     _cmd = '3dMean'
     input_spec = MeansInputSpec
     output_spec = AFNICommandOutputSpec
+
+
+class HistogramInputSpec(CommandLineInputSpec):
+    in_file = File(
+        desc='input file to 3dHist', argstr='-input %s', position=1, mandatory=True,
+        exists=True, copyfile=False)
+    out_file = File(
+        desc='Write histogram to niml file with this prefix', name_template='%s_hist',
+        keep_extension=False, argstr='-prefix %s', name_source=['in_file'])
+    showhist = traits.Bool(False, usedefault=True, desc='write a text visual histogram',
+                           argstr='-showhist')
+    out_show = File(
+        name_template="%s_hist.out", desc='output image file name', keep_extension=False,
+        argstr="> %s", name_source="in_file", position=-1)
+    mask = File(desc='matrix to align input file', argstr='-mask %s', exists=True)
+    nbin = traits.Int(desc='number of bins', argstr='-nbin %d')
+    max_value = traits.Float(argstr='-max %f', desc='maximum intensity value')
+    min_value = traits.Float(argstr='-min %f', desc='minimum intensity value')
+    bin_width = traits.Float(argstr='-binwidth %f', desc='bin width')
+
+class HistogramOutputSpec(TraitedSpec):
+    out_file = File(desc='output file', exists=True)
+    out_show = File(desc='output visual histogram')
+
+
+class Histogram(CommandLine):
+    """Computes average of all voxels in the input dataset
+    which satisfy the criterion in the options list
+
+    For complete details, see the `3dHist Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dHist.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> maskave = afni.Histogram()
+    >>> maskave.inputs.in_file = 'functional.nii'
+    '3dHist -input functional.nii -prefix functional_hist'
+    >>> res = maskave.run() # doctest: +SKIP
+
+    """
+
+    _cmd = '3dHist'
+    input_spec = HistogramInputSpec
+    output_spec = HistogramOutputSpec
+
+    def _parse_inputs(self, skip=None):
+        if not self.inputs.showhist:
+            if skip is None:
+                skip = []
+            skip += ['out_show']
+        return super(Histogram, self)._parse_inputs(skip=skip)
+
+
+    def _list_outputs(self):
+        outputs = super(Histogram, self)._list_outputs()
+        outputs['out_file'] += '.niml.hist'
+        if not self.inputs.showhist:
+            outputs['out_show'] = Undefined
+        return outputs
