@@ -2127,10 +2127,11 @@ class Histogram(CommandLine):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> maskave = afni.Histogram()
-    >>> maskave.inputs.in_file = 'functional.nii'
+    >>> hist = afni.Histogram()
+    >>> hist.inputs.in_file = 'functional.nii'
+    >>> hist.cmdline
     '3dHist -input functional.nii -prefix functional_hist'
-    >>> res = maskave.run() # doctest: +SKIP
+    >>> res = hist.run() # doctest: +SKIP
 
     """
 
