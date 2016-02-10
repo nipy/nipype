@@ -14,13 +14,12 @@ import os.path as op
 import re
 from warnings import warn
 
-from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec, Info
+from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec, Info, no_afni
 from ..base import CommandLineInputSpec, CommandLine, OutputMultiPath
 from ..base import (Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from ...utils.filemanip import fname_presuffix
-
 
 class To3DInputSpec(AFNICommandInputSpec):
     out_file = File(name_template="%s", desc='output image file name',
@@ -1235,9 +1234,7 @@ class SkullStrip(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
     def __init__(self, **inputs):
-        from .base import Info, no_afni
         super(SkullStrip, self).__init__(**inputs)
-
         if not no_afni():
             v = Info.version()
 
@@ -2138,6 +2135,16 @@ class Hist(CommandLine):
     _cmd = '3dHist'
     input_spec = HistInputSpec
     output_spec = HistOutputSpec
+    _redirect_x = True
+
+    def __init__(self, **inputs):
+        super(Hist, self).__init__(**inputs)
+        if not no_afni():
+            version = Info.version()
+
+            # As of AFNI 16.0.00, redirect_x is not needed
+            if isinstance(version[0], int) and version[0] > 15:
+                self._redirect_x = False
 
     def _parse_inputs(self, skip=None):
         if not self.inputs.showhist:
