@@ -18,7 +18,8 @@ before_install:
 - if $INSTALL_DEB_DEPENDECIES; then sudo rm -rf /dev/shm; fi
 - if $INSTALL_DEB_DEPENDECIES; then sudo ln -s /run/shm /dev/shm; fi
 # Enable universe and multiverse
-- sudo add-apt-repository -s "deb http://archive.ubuntu.com/ubuntu/ trusty main universe multiverse"
+- echo "deb http://archive.ubuntu.com/ubuntu/ trusty main universe multiverse" | sudo tee /etc/apt/sources.list.d/trusty.list
+- echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty main universe multiverse" | sudo tee /etc/apt/sources.list.d/trusty.list
 - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
 - sudo apt-get update
 # Fix numpy problem: https://github.com/enthought/enable/issues/34#issuecomment-2029381
