@@ -20,6 +20,8 @@ before_install:
 # Enable universe and multiverse
 - echo "deb http://archive.ubuntu.com/ubuntu/ trusty main universe multiverse" | sudo tee /etc/apt/sources.list.d/trusty.list
 - echo "deb-src http://archive.ubuntu.com/ubuntu/ trusty main universe multiverse" | sudo tee /etc/apt/sources.list.d/trusty.list
+- echo "deb http://us.archive.ubuntu.com/ubuntu/ trusty-updates universe multiverse" | sudo tee /etc/apt/sources.list.d/trusty.list
+- echo "deb-src deb-src http://us.archive.ubuntu.com/ubuntu/ trusty-updates universe multiverse" | sudo tee /etc/apt/sources.list.d/trusty.list
 - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
 - sudo apt-get update
 # Fix numpy problem: https://github.com/enthought/enable/issues/34#issuecomment-2029381
@@ -29,6 +31,8 @@ before_install:
   echo 'include_dirs = /usr/include:/usr/include/X11' >> $HOME/.numpy-site.cfg;
   fi
 install:
+- sudo apt-get build-dep -y -qq dh-python
+- sudo apt-get -b source -t trusty -y -qq python
 - sudo apt-get build-dep -y -qq libvtk6-dev
 - sudo apt-get -b source -t trusty -y -qq libvtk6-dev
 - sudo apt-get install -y -qq xvfb libx11-dev swig
