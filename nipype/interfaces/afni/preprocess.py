@@ -2093,7 +2093,7 @@ class Means(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
 
-class HistogramInputSpec(CommandLineInputSpec):
+class HistInputSpec(CommandLineInputSpec):
     in_file = File(
         desc='input file to 3dHist', argstr='-input %s', position=1, mandatory=True,
         exists=True, copyfile=False)
@@ -2111,12 +2111,12 @@ class HistogramInputSpec(CommandLineInputSpec):
     min_value = traits.Float(argstr='-min %f', desc='minimum intensity value')
     bin_width = traits.Float(argstr='-binwidth %f', desc='bin width')
 
-class HistogramOutputSpec(TraitedSpec):
+class HistOutputSpec(TraitedSpec):
     out_file = File(desc='output file', exists=True)
     out_show = File(desc='output visual histogram')
 
 
-class Histogram(CommandLine):
+class Hist(CommandLine):
     """Computes average of all voxels in the input dataset
     which satisfy the criterion in the options list
 
@@ -2127,7 +2127,7 @@ class Histogram(CommandLine):
     ========
 
     >>> from nipype.interfaces import afni as afni
-    >>> hist = afni.Histogram()
+    >>> hist = afni.Hist()
     >>> hist.inputs.in_file = 'functional.nii'
     >>> hist.cmdline
     '3dHist -input functional.nii -prefix functional_hist'
@@ -2136,19 +2136,19 @@ class Histogram(CommandLine):
     """
 
     _cmd = '3dHist'
-    input_spec = HistogramInputSpec
-    output_spec = HistogramOutputSpec
+    input_spec = HistInputSpec
+    output_spec = HistOutputSpec
 
     def _parse_inputs(self, skip=None):
         if not self.inputs.showhist:
             if skip is None:
                 skip = []
             skip += ['out_show']
-        return super(Histogram, self)._parse_inputs(skip=skip)
+        return super(Hist, self)._parse_inputs(skip=skip)
 
 
     def _list_outputs(self):
-        outputs = super(Histogram, self)._list_outputs()
+        outputs = super(Hist, self)._list_outputs()
         outputs['out_file'] += '.niml.hist'
         if not self.inputs.showhist:
             outputs['out_show'] = Undefined
