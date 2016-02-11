@@ -28,7 +28,7 @@ before_install:
 #  echo 'include_dirs = /usr/include:/usr/include/X11' >> $HOME/.numpy-site.cfg;
 #  fi
 install:
-- travis_retry sudo apt-get install -y -qq xvfb libx11-dev swig libvtk6-dev python-vtk
+- travis_retry sudo apt-get install -y -qq xvfb libx11-dev swig libvtk6-dev
 - if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -qq --no-install-recommends
   fsl afni elastix; fi
 - if $INSTALL_DEB_DEPENDECIES; then travis_retry sudo apt-get install -qq fsl-atlases;
