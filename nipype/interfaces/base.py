@@ -859,7 +859,7 @@ class BaseInterface(Interface):
         """
         helpstr = ['Outputs::', '']
         if cls.output_spec:
-            outputs = cls.output_spec()
+            outputs = cls.output_spec()  #pylint: disable=E1102
             for name, spec in sorted(outputs.traits(transient=None).items()):
                 helpstr += cls._get_trait_desc(outputs, name, spec)
         if len(helpstr) == 2:
@@ -871,7 +871,8 @@ class BaseInterface(Interface):
         """
         outputs = None
         if self.output_spec:
-            outputs = self.output_spec()
+            outputs = self.output_spec()  #pylint: disable=E1102
+
         return outputs
 
     @classmethod
@@ -1613,7 +1614,7 @@ class CommandLine(BaseInterface):
         metadata = dict(name_source=lambda t: t is not None)
         traits = self.inputs.traits(**metadata)
         if traits:
-            outputs = self.output_spec().get()
+            outputs = self.output_spec().get()  #pylint: disable=E1102
             for name, trait_spec in traits.items():
                 out_name = name
                 if trait_spec.output_name is not None:
