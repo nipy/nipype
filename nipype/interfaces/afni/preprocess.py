@@ -10,16 +10,16 @@
 """
 
 import os
+import os.path as op
 import re
 from warnings import warn
 
-from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec
+from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec, Info, no_afni
 from ..base import CommandLineInputSpec, CommandLine, OutputMultiPath
 from ..base import (Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
 from ...utils.filemanip import (load_json, save_json, split_filename)
 from ...utils.filemanip import fname_presuffix
-
 
 class To3DInputSpec(AFNICommandInputSpec):
     out_file = File(name_template="%s", desc='output image file name',
@@ -1234,9 +1234,7 @@ class SkullStrip(AFNICommand):
     output_spec = AFNICommandOutputSpec
 
     def __init__(self, **inputs):
-        from .base import Info, no_afni
         super(SkullStrip, self).__init__(**inputs)
-
         if not no_afni():
             v = Info.version()
 
@@ -2090,3 +2088,75 @@ class Means(AFNICommand):
     _cmd = '3dMean'
     input_spec = MeansInputSpec
     output_spec = AFNICommandOutputSpec
+
+
+class HistInputSpec(CommandLineInputSpec):
+    in_file = File(
+        desc='input file to 3dHist', argstr='-input %s', position=1, mandatory=True,
+        exists=True, copyfile=False)
+    out_file = File(
+        desc='Write histogram to niml file with this prefix', name_template='%s_hist',
+        keep_extension=False, argstr='-prefix %s', name_source=['in_file'])
+    showhist = traits.Bool(False, usedefault=True, desc='write a text visual histogram',
+                           argstr='-showhist')
+    out_show = File(
+        name_template="%s_hist.out", desc='output image file name', keep_extension=False,
+        argstr="> %s", name_source="in_file", position=-1)
+    mask = File(desc='matrix to align input file', argstr='-mask %s', exists=True)
+    nbin = traits.Int(desc='number of bins', argstr='-nbin %d')
+    max_value = traits.Float(argstr='-max %f', desc='maximum intensity value')
+    min_value = traits.Float(argstr='-min %f', desc='minimum intensity value')
+    bin_width = traits.Float(argstr='-binwidth %f', desc='bin width')
+
+class HistOutputSpec(TraitedSpec):
+    out_file = File(desc='output file', exists=True)
+    out_show = File(desc='output visual histogram')
+
+
+class Hist(CommandLine):
+    """Computes average of all voxels in the input dataset
+    which satisfy the criterion in the options list
+
+    For complete details, see the `3dHist Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dHist.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> hist = afni.Hist()
+    >>> hist.inputs.in_file = 'functional.nii'
+    >>> hist.cmdline
+    '3dHist -input functional.nii -prefix functional_hist'
+    >>> res = hist.run() # doctest: +SKIP
+
+    """
+
+    _cmd = '3dHist'
+    input_spec = HistInputSpec
+    output_spec = HistOutputSpec
+    _redirect_x = True
+
+    def __init__(self, **inputs):
+        super(Hist, self).__init__(**inputs)
+        if not no_afni():
+            version = Info.version()
+
+            # As of AFNI 16.0.00, redirect_x is not needed
+            if isinstance(version[0], int) and version[0] > 15:
+                self._redirect_x = False
+
+    def _parse_inputs(self, skip=None):
+        if not self.inputs.showhist:
+            if skip is None:
+                skip = []
+            skip += ['out_show']
+        return super(Hist, self)._parse_inputs(skip=skip)
+
+
+    def _list_outputs(self):
+        outputs = super(Hist, self)._list_outputs()
+        outputs['out_file'] += '.niml.hist'
+        if not self.inputs.showhist:
+            outputs['out_show'] = Undefined
+        return outputs

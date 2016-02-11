@@ -2,6 +2,7 @@ Next release
 ============
 
 * FIX: Prevent crash when tvtk is loaded - ETS_TOOLKIT=null (https://github.com/nipy/nipype/pull/973)
+* ENH: Added interfaces of AFNI (https://github.com/nipy/nipype/pull/1360)
 * ENH: Added support for PETPVC (https://github.com/nipy/nipype/pull/1335)
 * ENH: Merge S3DataSink into DataSink, added AWS documentation (https://github.com/nipy/nipype/pull/1316)
 * TST: Cache APT in CircleCI (https://github.com/nipy/nipype/pull/1333)
