@@ -10,13 +10,13 @@
 """
 
 import os
-from sys import platform
 import os.path as op
 import re
 import numpy as np
 
-from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec, Info, no_afni
-from ..base import CommandLineInputSpec, CommandLine
+from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
+                   Info, no_afni)
+from ..base import CommandLineInputSpec
 from ..base import (Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
 from ...external.six import string_types
@@ -182,7 +182,7 @@ class RefitInputSpec(CommandLineInputSpec):
                         ' template type, e.g. TLRC, MNI, ORIG')
 
 
-class Refit(CommandLine):
+class Refit(AFNICommandBase):
     """Changes some of the information inside a 3D dataset's header
 
     For complete details, see the `3drefit Documentation.
@@ -1546,7 +1546,7 @@ class ROIStatsOutputSpec(TraitedSpec):
     stats = File(desc='output tab separated values file', exists=True)
 
 
-class ROIStats(CommandLine):
+class ROIStats(AFNICommandBase):
     """Display statistics over masked regions
 
     For complete details, see the `3dROIstats Documentation.
@@ -2115,7 +2115,7 @@ class HistOutputSpec(TraitedSpec):
     out_show = File(desc='output visual histogram')
 
 
-class Hist(CommandLine):
+class Hist(AFNICommandBase):
     """Computes average of all voxels in the input dataset
     which satisfy the criterion in the options list
 
@@ -2197,8 +2197,8 @@ class FWHMxInputSpec(CommandLineInputSpec):
     combine = traits.Bool(argstr='-combine', desc='combine the final measurements along each axis')
     compat = traits.Bool(argstr='-compat', desc='be compatible with the older 3dFWHM')
     acf = traits.Either(
-        traits.Bool(), File(exists=True), traits.Tuple(File(exists=True), traits.Float()),
-        argstr='-acf', desc='computes the spatial autocorrelation')
+        traits.Bool(), File(), traits.Tuple(File(exists=True), traits.Float()),
+        default=False, usedefault=True, argstr='-acf', desc='computes the spatial autocorrelation')
 
 
 class FWHMxOutputSpec(TraitedSpec):
@@ -2209,9 +2209,14 @@ class FWHMxOutputSpec(TraitedSpec):
         traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
         traits.Tuple(traits.Float(), traits.Float(), traits.Float(), traits.Float()),
         desc='FWHM along each axis')
+    acf_param = traits.Either(
+        traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
+        traits.Tuple(traits.Float(), traits.Float(), traits.Float(), traits.Float()),
+        desc='fitted ACF model parameters')
+    out_acf = File(exists=True, desc='output acf file')
 
 
-class FWHMx(CommandLine):
+class FWHMx(AFNICommandBase):
     """
     Unlike the older 3dFWHM, this program computes FWHMs for all sub-bricks
     in the input dataset, each one separately.  The output for each one is
@@ -2312,6 +2317,7 @@ class FWHMx(CommandLine):
     _cmd = '3dFWHMx'
     input_spec = FWHMxInputSpec
     output_spec = FWHMxOutputSpec
+    _acf = True
 
     def _parse_inputs(self, skip=None):
         if not self.inputs.detrend:
@@ -2331,19 +2337,17 @@ class FWHMx(CommandLine):
                 return trait_spec.argstr + ' %d' % value
 
         if name == 'acf':
-            if isinstance(value, tuple):
+            if isinstance(value, bool):
+                if value:
+                    return trait_spec.argstr
+                else:
+                    self._acf = False
+                    return None
+            elif isinstance(value, tuple):
                 return trait_spec.argstr + ' %s %f' % value
             elif isinstance(value, string_types):
                 return trait_spec.argstr + ' ' + value
         return super(FWHMx, self)._format_arg(name, trait_spec, value)
-
-    def _run_interface(self, runtime):
-        if platform == 'darwin':
-            # http://afni.nimh.nih.gov/afni/community/board/read.php?1,145346,145347#msg-145347
-            runtime.environ['DYLD_FALLBACK_LIBRARY_PATH'] = '/usr/local/afni/'
-
-        return super(FWHMx, self)._run_interface(runtime)
-
 
     def _list_outputs(self):
         outputs = super(FWHMx, self)._list_outputs()
@@ -2357,5 +2361,14 @@ class FWHMx(CommandLine):
         else:
             outputs['out_detrend'] = Undefined
 
-        outputs['fwhm'] = tuple(np.loadtxt(outputs['out_file']))  #pylint: disable=E1101
+        sout = np.loadtxt(outputs['out_file'])  #pylint: disable=E1101
+        if self._acf:
+            outputs['acf_param'] = tuple(sout[1])
+            sout = tuple(sout[0])
+
+            outputs['out_acf'] = op.abspath('3dFWHMx.1D')
+            if isinstance(self.inputs.acf, string_types):
+                outputs['out_acf'] = op.abspath(self.inputs.acf)
+
+        outputs['fwhm'] = tuple(sout)
         return outputs
