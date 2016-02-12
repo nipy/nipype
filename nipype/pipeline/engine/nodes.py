@@ -671,7 +671,6 @@ class Node(EngineBase):
                 os.makedirs(outdir)
             for info in self._interface._get_filecopy_info():
                 files = self.inputs.get().get(info['key'])
-                print '######## files: %s' % (str(files))
                 if not isdefined(files):
                     continue
                 if files:

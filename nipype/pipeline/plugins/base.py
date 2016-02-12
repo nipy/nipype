@@ -250,7 +250,7 @@ class DistributedPluginBase(PluginBase):
                         self._clear_task(taskid)
                     else:
                         toappend.insert(0, (taskid, jobid))
-                except Exception as exc:
+                except Exception:
                     result = {'result': None,
                               'traceback': format_exc()}
                     notrun.append(self._clean_queue(jobid, graph,
