@@ -247,7 +247,7 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
                                                           traits.Float())
                                              )
     transforms = InputMultiPath(
-        File(exists=True), argstr='%s', mandatory=True, desc='transform files')
+        File(exists=True), argstr='%s', mandatory=True, desc='transform files: will be applied in reverse order. For example, the last specified transform will be applied first')
     invert_transform_flags = InputMultiPath(traits.Bool())
     default_value = traits.Float(0.0, argstr='--default-value %g', usedefault=True)
     print_out_composite_warp_file = traits.Bool(False, requires=["output_image"],
@@ -274,12 +274,12 @@ class ApplyTransforms(ANTSCommand):
     >>> at.inputs.output_image = 'deformed_moving1.nii'
     >>> at.inputs.interpolation = 'Linear'
     >>> at.inputs.default_value = 0
-    >>> at.inputs.transforms = ['trans.mat', 'ants_Warp.nii.gz']
+    >>> at.inputs.transforms = ['ants_Warp.nii.gz', 'trans.mat']
     >>> at.inputs.invert_transform_flags = [False, False]
     >>> at.cmdline
     'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation Linear \
---output deformed_moving1.nii --reference-image fixed1.nii --transform [ trans.mat, 0 ] \
---transform [ ants_Warp.nii.gz, 0 ]'
+--output deformed_moving1.nii --reference-image fixed1.nii --transform [ ants_Warp.nii.gz, 0 ] \
+--transform [ trans.mat, 0 ]'
 
     >>> at1 = ApplyTransforms()
     >>> at1.inputs.dimension = 3
@@ -289,12 +289,12 @@ class ApplyTransforms(ANTSCommand):
     >>> at1.inputs.interpolation = 'BSpline'
     >>> at1.inputs.interpolation_parameters = (5,)
     >>> at1.inputs.default_value = 0
-    >>> at1.inputs.transforms = ['trans.mat', 'ants_Warp.nii.gz']
+    >>> at1.inputs.transforms = ['ants_Warp.nii.gz', 'trans.mat']
     >>> at1.inputs.invert_transform_flags = [False, False]
     >>> at1.cmdline
     'antsApplyTransforms --default-value 0 --dimensionality 3 --input moving1.nii --interpolation BSpline[ 5 ] \
---output deformed_moving1.nii --reference-image fixed1.nii --transform [ trans.mat, 0 ] \
---transform [ ants_Warp.nii.gz, 0 ]'
+--output deformed_moving1.nii --reference-image fixed1.nii --transform [ ants_Warp.nii.gz, 0 ] \
+--transform [ trans.mat, 0 ]'
 
 
     """
