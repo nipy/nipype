@@ -981,7 +981,7 @@ class BaseInterface(Interface):
 
             retval = name_template % base
             _, _, ext = split_filename(retval)
-            if trait_spec.keep_extension and ext:
+            if ext and (not isdefined(trait_spec.keep_extension) or trait_spec.keep_extension):
                 return retval
             return self._overload_extension(retval, name)
 
@@ -1773,7 +1773,7 @@ class SEMLikeCommandLine(CommandLine):
     """
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        outputs = self.output_spec().get()  #pylint: disable=E1102
         return self._outputs_from_inputs(outputs)
 
     def _outputs_from_inputs(self, outputs):
