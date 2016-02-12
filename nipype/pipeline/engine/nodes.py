@@ -52,6 +52,7 @@ package_check('networkx', '1.3')
 
 from ... import config, logging
 logger = logging.getLogger('workflow')
+
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
                                 Bunch, InterfaceResult, md5, Interface,
@@ -670,6 +671,7 @@ class Node(EngineBase):
                 os.makedirs(outdir)
             for info in self._interface._get_filecopy_info():
                 files = self.inputs.get().get(info['key'])
+                print '######## files: %s' % (str(files))
                 if not isdefined(files):
                     continue
                 if files:

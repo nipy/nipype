@@ -265,7 +265,7 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
                     self._remove_node_dirs()
 
                 else:
-                    logger.debug('submitting', jobid)
+                    logger.debug('submitting %s' % str(jobid))
                     tid = self._submit_job(deepcopy(self.procs[jobid]), updatehash=updatehash)
                     if tid is None:
                         self.proc_done[jobid] = False
