@@ -184,12 +184,7 @@ class RefitInputSpec(CommandLineInputSpec):
                         ' template type, e.g. TLRC, MNI, ORIG')
 
 
-<<<<<<< HEAD
-class Refit(CommandLine):
-
-=======
 class Refit(AFNICommandBase):
->>>>>>> master
     """Changes some of the information inside a 3D dataset's header
 
     For complete details, see the `3drefit Documentation.
@@ -1576,12 +1571,7 @@ class ROIStatsOutputSpec(TraitedSpec):
     stats = File(desc='output tab separated values file', exists=True)
 
 
-<<<<<<< HEAD
-class ROIStats(CommandLine):
-
-=======
 class ROIStats(AFNICommandBase):
->>>>>>> master
     """Display statistics over masked regions
 
     For complete details, see the `3dROIstats Documentation.

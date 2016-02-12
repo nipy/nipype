@@ -879,7 +879,7 @@ class BaseInterface(Interface):
         """
         helpstr = ['Outputs::', '']
         if cls.output_spec:
-            outputs = cls.output_spec()
+            outputs = cls.output_spec()  #pylint: disable=E1102
             for name, spec in sorted(outputs.traits(transient=None).items()):
                 helpstr += cls._get_trait_desc(outputs, name, spec)
         if len(helpstr) == 2:
@@ -891,7 +891,7 @@ class BaseInterface(Interface):
         """
         outputs = None
         if self.output_spec:
-            outputs = self.output_spec()
+            outputs = self.output_spec()  #pylint: disable=E1102
         return outputs
 
     @classmethod
@@ -1004,10 +1004,8 @@ class BaseInterface(Interface):
             if ns is not None:
                 value = self._resolve_namesource(name)
 
-                if not isdefined(value):
-                    raise NipypeInterfaceError('Input %s with name_source=%s could '
-                                               'not be resolved' % (name, ns))
-                setattr(self.inputs, name, value)
+                if isdefined(value):
+                    setattr(self.inputs, name, value)
 
     def _overload_extension(self, value, name=None):
         return value
@@ -1207,8 +1205,9 @@ class BaseInterface(Interface):
                 out_name = name
                 if trait_spec.output_name is not None:
                     out_name = trait_spec.output_name
-                outputs[out_name] = \
-                    os.path.abspath(self._resolve_namesource(name))
+                value = self._resolve_namesource(name)
+                if isdefined(value):
+                    outputs[out_name] = os.path.abspath(value)
             return outputs
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
@@ -1224,7 +1223,9 @@ class BaseInterface(Interface):
             out_name = name
             if spec.output_name is not None:
                 out_name = spec.output_name
-            setattr(outputs, out_name, os.path.abspath(getattr(self.inputs, name)))
+            value = getattr(self.inputs, name)
+            if value is not None and isdefined(value):
+                setattr(outputs, out_name, os.path.abspath(value))
 
         if predicted_outputs:
             _unavailable_outputs = []
@@ -1576,18 +1577,14 @@ class CommandLine(BaseInterface):
 
     def version_from_command(self, flag='-v'):
         cmdname = self.cmd.split()[0]
-        if _exists_in_path(cmdname):
-            env = dict(os.environ)
+        env = dict(os.environ)
+        if _exists_in_path(cmdname, env):
             out_environ = self._get_environ()
             env.update(out_environ)
-            proc = subprocess.Popen(' '.join((cmdname, flag)),
-                                    shell=True,
-                                    env=env,
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
-                                    )
-            o, e = proc.communicate()
-            return o
+            proc = subprocess.Popen(' '.join((cmdname, flag)), shell=True, env=env,
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
+            out, _ = proc.communicate()
+            return out
 
     def _run_wrapper(self, runtime):
         runtime = self._run_interface(runtime)
