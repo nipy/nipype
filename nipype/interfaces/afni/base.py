@@ -2,10 +2,9 @@
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """Provide interface to AFNI commands."""
 
-from builtins import object
-
-
 import os
+from sys import platform
+from builtins import object
 
 from ... import logging
 from ...utils.filemanip import split_filename
@@ -13,7 +12,7 @@ from ..base import (
     CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
 
 # Use nipype's logging system
-iflogger = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('interface')
 
 
 class Info(object):
@@ -46,14 +45,14 @@ class Info(object):
             currv = clout.runtime.stdout.split('\n')[1].split('=', 1)[1].strip()
         except IOError:
             # If afni_vcheck is not present, return None
-            iflogger.warn('afni_vcheck executable not found.')
+            IFLOGGER.warn('afni_vcheck executable not found.')
             return None
         except RuntimeError as e:
             # If AFNI is outdated, afni_vcheck throws error.
             # Show new version, but parse current anyways.
             currv = str(e).split('\n')[4].split('=', 1)[1].strip()
             nextv = str(e).split('\n')[6].split('=', 1)[1].strip()
-            iflogger.warn(
+            IFLOGGER.warn(
                 'AFNI is outdated, detected version %s and %s is available.' % (currv, nextv))
 
         if currv.startswith('AFNI_'):
@@ -117,6 +116,17 @@ class Info(object):
         return os.path.join(basedir, img_name)
 
 
+class AFNICommandBase(CommandLine):
+    """
+    A base class to fix a linking problem in OSX and afni.
+    See http://afni.nimh.nih.gov/afni/community/board/read.php?1,145346,145347#msg-145347
+    """
+    def _run_interface(self, runtime):
+        if platform == 'darwin':
+            runtime.environ['DYLD_FALLBACK_LIBRARY_PATH'] = '/usr/local/afni/'
+        return super(AFNICommandBase, self)._run_interface(runtime)
+
+
 class AFNICommandInputSpec(CommandLineInputSpec):
     outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
                              desc='AFNI output filetype')
@@ -130,8 +140,8 @@ class AFNICommandOutputSpec(TraitedSpec):
                     exists=True)
 
 
-class AFNICommand(CommandLine):
-
+class AFNICommand(AFNICommandBase):
+    """Shared options for several AFNI commands """
     input_spec = AFNICommandInputSpec
     _outputtype = None
 

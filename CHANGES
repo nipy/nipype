@@ -3,7 +3,8 @@ Next release
 
 * ENH: The name_source feature now available for all Interfaces derived from BaseInterface
        (https://github.com/nipy/nipype/pull/1240)
-* ENH: Added interfaces of AFNI (https://github.com/nipy/nipype/pull/1360)
+* ENH: Added interfaces of AFNI (https://github.com/nipy/nipype/pull/1360,
+       https://github.com/nipy/nipype/pull/1361)
 * ENH: Added support for PETPVC (https://github.com/nipy/nipype/pull/1335)
 * ENH: Merge S3DataSink into DataSink, added AWS documentation (https://github.com/nipy/nipype/pull/1316)
 * TST: Cache APT in CircleCI (https://github.com/nipy/nipype/pull/1333)
