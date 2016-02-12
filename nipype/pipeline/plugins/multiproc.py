@@ -6,6 +6,7 @@ Support for child processes running as non-daemons based on
 http://stackoverflow.com/a/8963618/1183453
 """
 
+# Import packages
 from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
 import sys
@@ -13,12 +14,13 @@ import numpy as np
 from copy import deepcopy
 from ..engine import MapNode
 from ...utils.misc import str2bool
-import datetime
 import psutil
 from ... import logging
 import semaphore_singleton
 from .base import (DistributedPluginBase, report_crash)
 
+# Init logger
+logger = logging.getLogger('workflow')
 
 # Run node
 def run_node(node, updatehash, runtime_profile=False):
@@ -26,11 +28,7 @@ def run_node(node, updatehash, runtime_profile=False):
     """
  
     # Import packages
-    try:
-        import memory_profiler
-        import datetime
-    except ImportError:
-        runtime_profile = False
+    import datetime
  
     # Init variables
     result = dict(result=None, traceback=None)
@@ -38,15 +36,10 @@ def run_node(node, updatehash, runtime_profile=False):
     # If we're profiling the run
     if runtime_profile:
         try:
-            # Init function tuple
-            proc = (node.run, (), {'updatehash' : updatehash})
             start = datetime.datetime.now()
-            mem_mb, retval = memory_profiler.memory_usage(proc=proc, retval=True,
-                                                          include_children=True,
-                                                          max_usage=True, interval=.9e-6)
+            retval = node.run(updatehash=updatehash)
             run_secs = (datetime.datetime.now() - start).total_seconds()
             result['result'] = retval
-            result['node_memory'] = mem_mb[0]/1024.0
             result['run_seconds'] = run_secs
             if hasattr(retval.runtime, 'get'):
                 result['cmd_memory'] = retval.runtime.get('cmd_memory')
@@ -83,10 +76,10 @@ class NonDaemonPool(pool.Pool):
     """
     Process = NonDaemonProcess
 
-logger = logging.getLogger('workflow')
 
 def release_lock(args):
     semaphore_singleton.semaphore.release()
+
 
 class ResourceMultiProcPlugin(DistributedPluginBase):
     """Execute workflow with multiprocessing, not sending more jobs at once
