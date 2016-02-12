@@ -5,6 +5,7 @@ from ..preprocess import FWHMx
 
 def test_FWHMx_inputs():
     input_map = dict(acf=dict(argstr='-acf',
+    usedefault=True,
     ),
     args=dict(argstr='%s',
     ),
@@ -68,7 +69,9 @@ def test_FWHMx_inputs():
 
 
 def test_FWHMx_outputs():
-    output_map = dict(fwhm=dict(),
+    output_map = dict(acf_param=dict(),
+    fwhm=dict(),
+    out_acf=dict(),
     out_detrend=dict(),
     out_file=dict(),
     out_subbricks=dict(),
