@@ -12,7 +12,7 @@ from .resampling import (ApplyTransforms, ApplyTransformsToPoints, WarpImageMult
 
 # Segmentation Programs
 from .segmentation import (Atropos, LaplacianThickness, N4BiasFieldCorrection, JointFusion, CorticalThickness,
-                           BrainExtraction, DenoiseImage)
+                           BrainExtraction, DenoiseImage, AntsJointFusion)
 
 # Visualization Programs
 from .visualization import ConvertScalarImageToRGB, CreateTiledMosaic
