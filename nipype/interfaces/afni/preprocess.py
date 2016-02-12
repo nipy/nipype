@@ -12,14 +12,16 @@
 import os
 import os.path as op
 import re
-from warnings import warn
+import numpy as np
 
-from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec, Info, no_afni
-from ..base import CommandLineInputSpec, CommandLine, OutputMultiPath
+from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
+                   Info, no_afni)
+from ..base import CommandLineInputSpec
 from ..base import (Directory, TraitedSpec,
                     traits, isdefined, File, InputMultiPath, Undefined)
+from ...external.six import string_types
 from ...utils.filemanip import (load_json, save_json, split_filename)
-from ...utils.filemanip import fname_presuffix
+
 
 class To3DInputSpec(AFNICommandInputSpec):
     out_file = File(name_template="%s", desc='output image file name',
@@ -180,7 +182,7 @@ class RefitInputSpec(CommandLineInputSpec):
                         ' template type, e.g. TLRC, MNI, ORIG')
 
 
-class Refit(CommandLine):
+class Refit(AFNICommandBase):
     """Changes some of the information inside a 3D dataset's header
 
     For complete details, see the `3drefit Documentation.
@@ -1544,7 +1546,7 @@ class ROIStatsOutputSpec(TraitedSpec):
     stats = File(desc='output tab separated values file', exists=True)
 
 
-class ROIStats(CommandLine):
+class ROIStats(AFNICommandBase):
     """Display statistics over masked regions
 
     For complete details, see the `3dROIstats Documentation.
@@ -2113,7 +2115,7 @@ class HistOutputSpec(TraitedSpec):
     out_show = File(desc='output visual histogram')
 
 
-class Hist(CommandLine):
+class Hist(AFNICommandBase):
     """Computes average of all voxels in the input dataset
     which satisfy the criterion in the options list
 
@@ -2159,4 +2161,214 @@ class Hist(CommandLine):
         outputs['out_file'] += '.niml.hist'
         if not self.inputs.showhist:
             outputs['out_show'] = Undefined
+        return outputs
+
+
+class FWHMxInputSpec(CommandLineInputSpec):
+    in_file = File(desc='input dataset', argstr='-input %s', mandatory=True, exists=True)
+    out_file = File(argstr='> %s', name_source='in_file', name_template='%s_fwhmx.out',
+                    position=-1, keep_extension=False, desc='output file')
+    out_subbricks = File(argstr='-out %s', name_source='in_file', name_template='%s_subbricks.out',
+                         keep_extension=False, desc='output file listing the subbricks FWHM')
+    mask = File(desc='use only voxels that are nonzero in mask', argstr='-mask %s', exists=True)
+    automask = traits.Bool(False, usedefault=True, argstr='-automask',
+                           desc='compute a mask from THIS dataset, a la 3dAutomask')
+    detrend = traits.Either(
+        traits.Bool(), traits.Int(), default=False, argstr='-detrend', xor=['demed'], usedefault=True,
+        desc='instead of demed (0th order detrending), detrend to the specified order.  If order '
+             'is not given, the program picks q=NT/30. -detrend disables -demed, and includes '
+             '-unif.')
+    demed = traits.Bool(
+        False, argstr='-demed', xorg=['detrend'],
+        desc='If the input dataset has more than one sub-brick (e.g., has a time axis), then '
+             'subtract the median of each voxel\'s time series before processing FWHM. This will '
+             'tend to remove intrinsic spatial structure and leave behind the noise.')
+    unif = traits.Bool(False, argstr='-unif',
+                       desc='If the input dataset has more than one sub-brick, then normalize each'
+                            ' voxel\'s time series to have the same MAD before processing FWHM.')
+    out_detrend = File(argstr='-detprefix %s', name_source='in_file', name_template='%s_detrend',
+                       keep_extension=False, desc='Save the detrended file into a dataset')
+    geom = traits.Bool(argstr='-geom', xor=['arith'],
+                       desc='if in_file has more than one sub-brick, compute the final estimate as'
+                            'the geometric mean of the individual sub-brick FWHM estimates')
+    arith = traits.Bool(argstr='-arith', xor=['geom'],
+                        desc='if in_file has more than one sub-brick, compute the final estimate as'
+                             'the arithmetic mean of the individual sub-brick FWHM estimates')
+    combine = traits.Bool(argstr='-combine', desc='combine the final measurements along each axis')
+    compat = traits.Bool(argstr='-compat', desc='be compatible with the older 3dFWHM')
+    acf = traits.Either(
+        traits.Bool(), File(), traits.Tuple(File(exists=True), traits.Float()),
+        default=False, usedefault=True, argstr='-acf', desc='computes the spatial autocorrelation')
+
+
+class FWHMxOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='output file')
+    out_subbricks = File(exists=True, desc='output file (subbricks)')
+    out_detrend = File(desc='output file, detrended')
+    fwhm = traits.Either(
+        traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
+        traits.Tuple(traits.Float(), traits.Float(), traits.Float(), traits.Float()),
+        desc='FWHM along each axis')
+    acf_param = traits.Either(
+        traits.Tuple(traits.Float(), traits.Float(), traits.Float()),
+        traits.Tuple(traits.Float(), traits.Float(), traits.Float(), traits.Float()),
+        desc='fitted ACF model parameters')
+    out_acf = File(exists=True, desc='output acf file')
+
+
+class FWHMx(AFNICommandBase):
+    """
+    Unlike the older 3dFWHM, this program computes FWHMs for all sub-bricks
+    in the input dataset, each one separately.  The output for each one is
+    written to the file specified by '-out'.  The mean (arithmetic or geometric)
+    of all the FWHMs along each axis is written to stdout.  (A non-positive
+    output value indicates something bad happened; e.g., FWHM in z is meaningless
+    for a 2D dataset; the estimation method computed incoherent intermediate results.)
+
+    Examples
+    --------
+
+    >>> from nipype.interfaces import afni as afp
+    >>> fwhm = afp.FWHMx()
+    >>> fwhm.inputs.in_file = 'functional.nii'
+    >>> fwhm.cmdline
+    '3dFWHMx -input functional.nii -out functional_subbricks.out > functional_fwhmx.out'
+
+
+    (Classic) METHOD:
+
+      * Calculate ratio of variance of first differences to data variance.
+      * Should be the same as 3dFWHM for a 1-brick dataset.
+        (But the output format is simpler to use in a script.)
+
+
+    .. note:: IMPORTANT NOTE [AFNI > 16]
+
+      A completely new method for estimating and using noise smoothness values is
+      now available in 3dFWHMx and 3dClustSim. This method is implemented in the
+      '-acf' options to both programs.  'ACF' stands for (spatial) AutoCorrelation
+      Function, and it is estimated by calculating moments of differences out to
+      a larger radius than before.
+
+      Notably, real FMRI data does not actually have a Gaussian-shaped ACF, so the
+      estimated ACF is then fit (in 3dFWHMx) to a mixed model (Gaussian plus
+      mono-exponential) of the form
+
+        .. math::
+
+          ACF(r) = a * exp(-r*r/(2*b*b)) + (1-a)*exp(-r/c)
+
+
+      where :math:`r` is the radius, and :math:`a, b, c` are the fitted parameters.
+      The apparent FWHM from this model is usually somewhat larger in real data
+      than the FWHM estimated from just the nearest-neighbor differences used
+      in the 'classic' analysis.
+
+      The longer tails provided by the mono-exponential are also significant.
+      3dClustSim has also been modified to use the ACF model given above to generate
+      noise random fields.
+
+
+    .. note:: TL;DR or summary
+
+      The take-awaymessage is that the 'classic' 3dFWHMx and
+      3dClustSim analysis, using a pure Gaussian ACF, is not very correct for
+      FMRI data -- I cannot speak for PET or MEG data.
+
+
+    .. warning::
+
+      Do NOT use 3dFWHMx on the statistical results (e.g., '-bucket') from
+      3dDeconvolve or 3dREMLfit!!!  The function of 3dFWHMx is to estimate
+      the smoothness of the time series NOISE, not of the statistics. This
+      proscription is especially true if you plan to use 3dClustSim next!!
+
+
+    .. note:: Recommendations
+
+      * For FMRI statistical purposes, you DO NOT want the FWHM to reflect
+        the spatial structure of the underlying anatomy.  Rather, you want
+        the FWHM to reflect the spatial structure of the noise.  This means
+        that the input dataset should not have anatomical (spatial) structure.
+      * One good form of input is the output of '3dDeconvolve -errts', which is
+        the dataset of residuals left over after the GLM fitted signal model is
+        subtracted out from each voxel's time series.
+      * If you don't want to go to that much trouble, use '-detrend' to approximately
+        subtract out the anatomical spatial structure, OR use the output of 3dDetrend
+        for the same purpose.
+      * If you do not use '-detrend', the program attempts to find non-zero spatial
+        structure in the input, and will print a warning message if it is detected.
+
+
+    .. note:: Notes on -demend
+
+      * I recommend this option, and it is not the default only for historical
+        compatibility reasons.  It may become the default someday.
+      * It is already the default in program 3dBlurToFWHM. This is the same detrending
+        as done in 3dDespike; using 2*q+3 basis functions for q > 0.
+      * If you don't use '-detrend', the program now [Aug 2010] checks if a large number
+        of voxels are have significant nonzero means. If so, the program will print a
+        warning message suggesting the use of '-detrend', since inherent spatial
+        structure in the image will bias the estimation of the FWHM of the image time
+        series NOISE (which is usually the point of using 3dFWHMx).
+
+
+    """
+    _cmd = '3dFWHMx'
+    input_spec = FWHMxInputSpec
+    output_spec = FWHMxOutputSpec
+    _acf = True
+
+    def _parse_inputs(self, skip=None):
+        if not self.inputs.detrend:
+            if skip is None:
+                skip = []
+            skip += ['out_detrend']
+        return super(FWHMx, self)._parse_inputs(skip=skip)
+
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'detrend':
+            if isinstance(value, bool):
+                if value:
+                    return trait_spec.argstr
+                else:
+                    return None
+            elif isinstance(value, int):
+                return trait_spec.argstr + ' %d' % value
+
+        if name == 'acf':
+            if isinstance(value, bool):
+                if value:
+                    return trait_spec.argstr
+                else:
+                    self._acf = False
+                    return None
+            elif isinstance(value, tuple):
+                return trait_spec.argstr + ' %s %f' % value
+            elif isinstance(value, string_types):
+                return trait_spec.argstr + ' ' + value
+        return super(FWHMx, self)._format_arg(name, trait_spec, value)
+
+    def _list_outputs(self):
+        outputs = super(FWHMx, self)._list_outputs()
+
+        if self.inputs.detrend:
+            fname, ext = op.splitext(self.inputs.in_file)
+            if '.gz' in ext:
+                _, ext2 = op.splitext(fname)
+                ext = ext2 + ext
+            outputs['out_detrend'] += ext
+        else:
+            outputs['out_detrend'] = Undefined
+
+        sout = np.loadtxt(outputs['out_file'])  #pylint: disable=E1101
+        if self._acf:
+            outputs['acf_param'] = tuple(sout[1])
+            sout = tuple(sout[0])
+
+            outputs['out_acf'] = op.abspath('3dFWHMx.1D')
+            if isinstance(self.inputs.acf, string_types):
+                outputs['out_acf'] = op.abspath(self.inputs.acf)
+
+        outputs['fwhm'] = tuple(sout)
         return outputs
