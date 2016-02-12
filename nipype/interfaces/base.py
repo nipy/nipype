@@ -1195,10 +1195,21 @@ class BaseInterface(Interface):
     def _list_outputs(self):
         """ List the expected outputs
         """
-        if self.output_spec:
-            raise NotImplementedError
-        else:
+        if self.output_spec is None:
+            iflogger.warn('Interface does not have output specification')
             return None
+
+        metadata = dict(name_source=lambda t: t is not None)
+        out_traits = self.inputs.traits(**metadata)
+        if out_traits:
+            outputs = self.output_spec().get()  #pylint: disable=E1102
+            for name, trait_spec in out_traits.items():
+                out_name = name
+                if trait_spec.output_name is not None:
+                    out_name = trait_spec.output_name
+                outputs[out_name] = \
+                    os.path.abspath(self._resolve_namesource(name))
+            return outputs
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         """ Collate expected outputs and check for existence
