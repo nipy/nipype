@@ -43,7 +43,7 @@ def run_node(node, updatehash, runtime_profile=False):
             start = datetime.datetime.now()
             mem_mb, retval = memory_profiler.memory_usage(proc=proc, retval=True,
                                                           include_children=True,
-                                                          max_usage=True)
+                                                          max_usage=True, interval=.9e-6)
             run_secs = (datetime.datetime.now() - start).total_seconds()
             result['result'] = retval
             result['node_memory'] = mem_mb[0]/1024.0
