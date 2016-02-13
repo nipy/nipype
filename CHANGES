@@ -1,6 +1,8 @@
 Next release
 ============
 
+* ENH: New interfaces in dipy: RESTORE, EstimateResponseSH, CSD and StreamlineTractography
+       (https://github.com/nipy/nipype/pull/1090)
 * ENH: Added interfaces of AFNI (https://github.com/nipy/nipype/pull/1360,
        https://github.com/nipy/nipype/pull/1361)
 * ENH: Provides a Nipype wrapper for antsJointFusion (https://github.com/nipy/nipype/pull/1351)
