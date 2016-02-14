@@ -3,23 +3,22 @@
 """Miscellaneous file manipulation functions
 
 """
-
-from future import standard_library
-standard_library.install_aliases()
-
+import sys
+import os
+import re
+import shutil
 import pickle
 import gzip
 import hashlib
 from hashlib import md5
+
+from future import standard_library
+standard_library.install_aliases()
 import simplejson
-import os
-import re
-import shutil
 
 import numpy as np
 
 from .misc import is_container
-from .config import mkdir_p
 from ..external.six import string_types
 from ..interfaces.traits_extension import isdefined
 
@@ -169,10 +168,19 @@ def check_forhash(filename):
     else:
         return False, None
 
+def auto_hash(afile, hashmethod=None, chunk_len=8192, crypto=hashlib.md5):
+    """Checks the hash method and calls the appropriate function"""
+    if hashmethod is None:
+        hashmethod = config.get('execution', 'hash_method').lower()
+    
+    if hashmethod not in ['content', 'timestamp']:
+        raise ValueError("Unknown hash method: %s" % hashmethod)
+    func = getattr(sys.modules[__name__], 'hash_' + hashmethod)
+    return func(afile, chunk_len, crypto)
 
-def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5):
+def hash_content(afile, chunk_len=8192, crypto=hashlib.md5):
     """ Computes hash of a file using 'crypto' module"""
-    hex = None
+    hashhex = None
     if os.path.isfile(afile):
         crypto_obj = crypto()
         with open(afile, 'rb') as fp:
@@ -181,11 +189,10 @@ def hash_infile(afile, chunk_len=8192, crypto=hashlib.md5):
                 if not data:
                     break
                 crypto_obj.update(data)
-        hex = crypto_obj.hexdigest()
-    return hex
+        hashhex = crypto_obj.hexdigest()
+    return hashhex
 
-
-def hash_timestamp(afile):
+def hash_timestamp(afile, **kwargs):  # pylint: disable=W0613
     """ Computes md5 hash of the timestamp of a file """
     md5hex = None
     if os.path.isfile(afile):
@@ -239,7 +246,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
         if hashmethod == 'timestamp':
             newhash = hash_timestamp(newfile)
         elif hashmethod == 'content':
-            newhash = hash_infile(newfile)
+            newhash = hash_content(newfile)
         fmlogger.debug("File: %s already exists,%s, copy:%d"
                        % (newfile, newhash, copy))
     # the following seems unnecessary
@@ -252,7 +259,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             if hashmethod == 'timestamp':
                 orighash = hash_timestamp(originalfile)
             elif hashmethod == 'content':
-                orighash = hash_infile(originalfile)
+                orighash = hash_content(originalfile)
             fmlogger.debug('Original hash: %s, %s' % (originalfile, orighash))
             if newhash != orighash:
                 os.unlink(newfile)
@@ -263,7 +270,7 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             if hashmethod == 'timestamp':
                 orighash = hash_timestamp(originalfile)
             elif hashmethod == 'content':
-                orighash = hash_infile(originalfile)
+                orighash = hash_content(originalfile)
         if (newhash is None) or (newhash != orighash):
             try:
                 fmlogger.debug("Copying File: %s->%s" %

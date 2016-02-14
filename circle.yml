@@ -21,7 +21,7 @@ dependencies:
     # Set up python environment
     - pip install --upgrade pip
     - pip install -e .
-    - pip install matplotlib sphinx ipython boto
+    - pip install matplotlib sphinx ipython boto coverage
     - gem install fakes3
     - if [[ ! -d ~/examples/data ]]; then wget "http://tcpdiag.dl.sourceforge.net/project/nipy/nipype/nipype-0.2/nipype-tutorial.tar.bz2" && tar jxvf nipype-tutorial.tar.bz2 && mv nipype-tutorial/* ~/examples/; fi
     - if [[ ! -d ~/examples/fsl_course_data ]]; then wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" && wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz" && wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz" && mkdir ~/examples/fsl_course_data && tar zxvf fdt1.tar.gz -C ~/examples/fsl_course_data && tar zxvf fdt2.tar.gz -C ~/examples/fsl_course_data && tar zxvf tbss.tar.gz -C ~/examples/fsl_course_data; fi
@@ -32,7 +32,8 @@ machine:
     FSLOUTPUTTYPE: NIFTI_GZ
 test:
   override:
-    - source $HOME/.profile; nosetests --with-doctest --logging-level=DEBUG --verbosity=3:
+    - mkdir -p ${CIRCLE_TEST_REPORTS}/nose
+    - source $HOME/.profile; nosetests --with-doctest --xunit-file="${CIRCLE_TEST_REPORTS}/nose/${CIRCLE_PROJECT_REPONAME}.xml" -c ./.noserc --logging-level=DEBUG --verbosity=3:
         environment:
           SPMMCRCMD: "$HOME/spm12/run_spm12.sh $HOME/mcr/v85/ script"
           FORCE_SPMMCR: 1
@@ -66,3 +67,5 @@ general:
   artifacts:
     - "doc/_build/html"
     - "~/log.txt"
+    - "nosetests.xml"
+    - "coverage.xml"

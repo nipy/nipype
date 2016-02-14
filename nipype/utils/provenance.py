@@ -20,7 +20,7 @@ import prov.model as pm
 from ..external.six import string_types, text_type
 
 from .. import get_info
-from .filemanip import (md5, hashlib, hash_infile)
+from .filemanip import (md5, hashlib, hash_content)
 from .. import logging
 iflogger = logging.getLogger('interface')
 
@@ -102,7 +102,7 @@ def _get_sorteddict(object, dictwithhash=False):
             out = tuple(out)
     else:
         if isinstance(object, string_types) and os.path.isfile(object):
-            hash = hash_infile(object)
+            hash = hash_content(object)
             if dictwithhash:
                 out = (object, hash)
             else:
@@ -226,7 +226,7 @@ def prov_encode(graph, value, create_container=True):
         if isinstance(value, string_types) and os.path.exists(value):
             attr.update({pm.PROV['location']: encoded_literal})
             if not os.path.isdir(value):
-                sha512 = hash_infile(value, crypto=hashlib.sha512)
+                sha512 = hash_content(value, crypto=hashlib.sha512)
                 attr.update({crypto['sha512']: pm.Literal(sha512,
                                                           pm.XSD['string'])})
                 id = get_attr_id(attr, skip=[pm.PROV['location'],
