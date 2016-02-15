@@ -115,7 +115,7 @@ class BaseTraitedSpec(traits.HasTraits):
                     self.trait_set(trait_change_notify=False,
                                    **{'%s' % name: Undefined,
                                       '%s' % spec.new_name: new})
-            
+
     def _hash_infile(self, adict, key):
         """ Inject file hashes into adict[key]"""
         stuff = adict[key]
@@ -330,7 +330,7 @@ class BaseInputSpec(BaseTraitedSpec):
     def __init__(self, **kwargs):
         """ Initialize handlers and inputs"""
         super(BaseInputSpec, self).__init__(**kwargs)
-        
+
         # Attach xor handler
         has_xor = dict(xor=lambda t: t is not None)
         xors = self.trait_names(**has_xor)
@@ -346,8 +346,8 @@ class BaseInputSpec(BaseTraitedSpec):
         allitems = self.traits(transient=None).items()
         for k, _ in self.mandatory_items():
             try:
-                allitems.pop(k, None)
-            except KeyError:
+                allitems.remove(k)
+            except ValueError:
                 pass
         return allitems
 
@@ -356,8 +356,9 @@ class BaseInputSpec(BaseTraitedSpec):
         metadata = dict(name_source=lambda t: t is not None)
         return list(self.traits(**metadata).items())
 
-    def _check_xor(self, name):
+    def _check_xor(self, obj, name, old, new):
         """ Checks inputs with xor list """
+        IFLOGGER.error('Called check_xorg with name %s' % name)
         if isdefined(getattr(self, name)):
             xor_list = self.traits()[name].xor
 
@@ -441,9 +442,10 @@ class BaseInputSpec(BaseTraitedSpec):
 
                 # special treatment for files
                 try:
-                    _, base, _ = split_filename(source)
+                    _, base, ext = split_filename(source)
                 except AttributeError:
                     base = source
+                    ext = ''
             else:
                 if name in chain:
                     raise InterfaceInputsError('Mutually pointing name_sources')
@@ -452,9 +454,9 @@ class BaseInputSpec(BaseTraitedSpec):
                 return self._resolve_namesource(ns, chain)
 
             retval = name_template % base
-            _, _, ext = split_filename(retval)
-            if ext and (not isdefined(spec.keep_extension) or spec.keep_extension):
-                return retval
+
+            if not isdefined(spec.keep_extension) or spec.keep_extension:
+                return retval + ext
             return self._overload_extension(retval, name)
 
         return retval
@@ -478,7 +480,7 @@ class BaseInputSpec(BaseTraitedSpec):
                 if isdefined(value):
                     setattr(self, name, value)
 
-    
+
     def get_filecopy_info(self):
         """ Provides information about file inputs to copy or link to cwd.
             Necessary for pipeline operation
@@ -505,13 +507,13 @@ class BaseInputSpec(BaseTraitedSpec):
                 if not isdefined(getattr(self, name)):
                     continue
 
-                msg = ('Trait %s (%s) (version %s < required %s)' % 
+                msg = ('Trait %s (%s) (version %s < required %s)' %
                        (name, self.__class__.__name__, version, min_ver))
                 if raise_exception:
                     raise Exception(msg)
                 else:
                     IFLOGGER.warn(msg)
-                        
+
         # Check maximum version
         check = dict(max_ver=lambda t: t is not None)
         for name in self.trait_names(**check):

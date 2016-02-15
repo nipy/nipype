@@ -30,127 +30,16 @@ from scipy import signal
 import scipy.io as sio
 
 from ..external.six import string_types
-from ..interfaces.base import (BaseInterface, traits, InputMultiPath,
-                               OutputMultiPath, TraitedSpec, File,
-                               BaseInterfaceInputSpec, isdefined)
+
 from ..utils.filemanip import filename_to_list, save_json, split_filename
 from ..utils.misc import find_indices
+
+from ..interfaces.traits_extension import traits, File, isdefined
+from ..interfaces.specs import BaseInterfaceInputSpec, TraitedSpec, InputMultiPath, OutputMultiPath
+from ..interfaces.base import BaseInterface
+
 from .. import logging, config
 iflogger = logging.getLogger('interface')
-
-
-def _get_affine_matrix(params, source):
-    """Return affine matrix given a set of translation and rotation parameters
-
-    params : np.array (upto 12 long) in native package format
-    source : the package that generated the parameters
-             supports SPM, AFNI, FSFAST, FSL, NIPY
-    """
-    if source == 'FSL':
-        params = params[[3, 4, 5, 0, 1, 2]]
-    elif source in ('AFNI', 'FSFAST'):
-        params = params[np.asarray([4, 5, 3, 1, 2, 0]) + (len(params) > 6)]
-        params[3:] = params[3:] * np.pi / 180.
-    if source == 'NIPY':
-        # nipy does not store typical euler angles, use nipy to convert
-        from nipy.algorithms.registration import to_matrix44
-        return to_matrix44(params)
-    # process for FSL, SPM, AFNI and FSFAST
-    rotfunc = lambda x: np.array([[np.cos(x), np.sin(x)],
-                                  [-np.sin(x), np.cos(x)]])
-    q = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0])
-    if len(params) < 12:
-        params = np.hstack((params, q[len(params):]))
-    params.shape = (len(params),)
-    # Translation
-    T = np.eye(4)
-    T[0:3, -1] = params[0:3]
-    # Rotation
-    Rx = np.eye(4)
-    Rx[1:3, 1:3] = rotfunc(params[3])
-    Ry = np.eye(4)
-    Ry[(0, 0, 2, 2), (0, 2, 0, 2)] = rotfunc(params[4]).ravel()
-    Rz = np.eye(4)
-    Rz[0:2, 0:2] = rotfunc(params[5])
-    # Scaling
-    S = np.eye(4)
-    S[0:3, 0:3] = np.diag(params[6:9])
-    # Shear
-    Sh = np.eye(4)
-    Sh[(0, 0, 1), (1, 2, 2)] = params[9:12]
-    if source in ('AFNI', 'FSFAST'):
-        return np.dot(T, np.dot(Ry, np.dot(Rx, np.dot(Rz, np.dot(S, Sh)))))
-    return np.dot(T, np.dot(Rx, np.dot(Ry, np.dot(Rz, np.dot(S, Sh)))))
-
-
-def _calc_norm(mc, use_differences, source, brain_pts=None):
-    """Calculates the maximum overall displacement of the midpoints
-    of the faces of a cube due to translation and rotation.
-
-    Parameters
-    ----------
-    mc : motion parameter estimates
-        [3 translation, 3 rotation (radians)]
-    use_differences : boolean
-    brain_pts : [4 x n_points] of coordinates
-
-    Returns
-    -------
-
-    norm : at each time point
-    displacement : euclidean distance (mm) of displacement at each coordinate
-
-    """
-
-    if brain_pts is None:
-        respos = np.diag([70, 70, 75])
-        resneg = np.diag([-70, -110, -45])
-        all_pts = np.vstack((np.hstack((respos, resneg)), np.ones((1, 6))))
-        displacement = None
-    else:
-        all_pts = brain_pts
-    n_pts = all_pts.size - all_pts.shape[1]
-    newpos = np.zeros((mc.shape[0], n_pts))
-    if brain_pts is not None:
-        displacement = np.zeros((mc.shape[0], int(n_pts / 3)))
-    for i in range(mc.shape[0]):
-        affine = _get_affine_matrix(mc[i, :], source)
-        newpos[i, :] = np.dot(affine,
-                              all_pts)[0:3, :].ravel()
-        if brain_pts is not None:
-            displacement[i, :] = \
-                np.sqrt(np.sum(np.power(np.reshape(newpos[i, :],
-                                                   (3, all_pts.shape[1])) -
-                                        all_pts[0:3, :],
-                                        2),
-                               axis=0))
-    # np.savez('displacement.npz', newpos=newpos, pts=all_pts)
-    normdata = np.zeros(mc.shape[0])
-    if use_differences:
-        newpos = np.concatenate((np.zeros((1, n_pts)),
-                                 np.diff(newpos, n=1, axis=0)), axis=0)
-        for i in range(newpos.shape[0]):
-            normdata[i] = \
-                np.max(np.sqrt(np.sum(np.reshape(np.power(np.abs(newpos[i, :]), 2),
-                                                 (3, all_pts.shape[1])), axis=0)))
-    else:
-        newpos = np.abs(signal.detrend(newpos, axis=0, type='constant'))
-        normdata = np.sqrt(np.mean(np.power(newpos, 2), axis=1))
-    return normdata, displacement
-
-
-def _nanmean(a, axis=None):
-    """Return the mean excluding items that are nan
-
-    >>> a = [1, 2, np.nan]
-    >>> _nanmean(a)
-    1.5
-
-    """
-    if axis:
-        return np.nansum(a, axis) / np.sum(1 - np.isnan(a), axis)
-    else:
-        return np.nansum(a) / np.sum(1 - np.isnan(a))
 
 
 class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
@@ -303,34 +192,6 @@ class ArtifactDetect(BaseInterface):
         maskfile = os.path.join(output_dir, ''.join(('mask.', filename, ext)))
         return (artifactfile, intensityfile, statsfile, normfile, plotfile,
                 displacementfile, maskfile)
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['outlier_files'] = []
-        outputs['intensity_files'] = []
-        outputs['statistic_files'] = []
-        outputs['mask_files'] = []
-        if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
-            outputs['norm_files'] = []
-            if self.inputs.bound_by_brainmask:
-                outputs['displacement_files'] = []
-        if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
-            outputs['plot_files'] = []
-        for i, f in enumerate(filename_to_list(self.inputs.realigned_files)):
-            (outlierfile, intensityfile, statsfile, normfile, plotfile,
-             displacementfile, maskfile) = \
-                self._get_output_filenames(f, os.getcwd())
-            outputs['outlier_files'].insert(i, outlierfile)
-            outputs['intensity_files'].insert(i, intensityfile)
-            outputs['statistic_files'].insert(i, statsfile)
-            outputs['mask_files'].insert(i, maskfile)
-            if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
-                outputs['norm_files'].insert(i, normfile)
-                if self.inputs.bound_by_brainmask:
-                    outputs['displacement_files'].insert(i, displacementfile)
-            if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
-                outputs['plot_files'].insert(i, plotfile)
-        return outputs
 
     def _plot_outliers_with_wave(self, wave, outliers, name):
         import matplotlib.pyplot as plt
@@ -539,24 +400,51 @@ class ArtifactDetect(BaseInterface):
         for i, imgf in enumerate(funcfilelist):
             self._detect_outliers_core(imgf, motparamlist[i], i,
                                        cwd=os.getcwd())
+
+        self.outputs.outlier_files = []
+        self.outputs.intensity_files = []
+        self.outputs.statistic_files = []
+        self.outputs.mask_files = []
+        if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
+            self.outputs.norm_files = []
+            if self.inputs.bound_by_brainmask:
+                self.outputs.displacement_files = []
+        if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
+            self.outputs.plot_files = []
+        for i, f in enumerate(filename_to_list(self.inputs.realigned_files)):
+            (outlierfile, intensityfile, statsfile, normfile, plotfile,
+             displacementfile, maskfile) = \
+                self._get_output_filenames(f, os.getcwd())
+            self.outputs.outlier_files.insert(i, outlierfile)
+            self.outputs.intensity_files.insert(i, intensityfile)
+            self.outputs.statistic_files.insert(i, statsfile)
+            self.outputs.mask_files.insert(i, maskfile)
+            if isdefined(self.inputs.use_norm) and self.inputs.use_norm:
+                self.outputs.norm_files.insert(i, normfile)
+                if self.inputs.bound_by_brainmask:
+                    self.outputs.displacement_files.insert(i, displacementfile)
+            if isdefined(self.inputs.save_plot) and self.inputs.save_plot:
+                self.outputs.plot_files.insert(i, plotfile)
         return runtime
 
 
 class StimCorrInputSpec(BaseInterfaceInputSpec):
-    realignment_parameters = InputMultiPath(File(exists=True), mandatory=True,
-                                            desc=('Names of realignment parameters corresponding to the functional '
-                                                  'data files'))
+    realignment_parameters = InputMultiPath(
+        File(exists=True), mandatory=True,
+        desc='Names of realignment parameters corresponding to the functional data files')
     intensity_values = InputMultiPath(File(exists=True), mandatory=True,
                                       desc='Name of file containing intensity values')
     spm_mat_file = File(exists=True, mandatory=True,
                         desc='SPM mat file (use pre-estimate SPM.mat file)')
-    concatenated_design = traits.Bool(mandatory=True,
-                                      desc='state if the design matrix contains concatenated sessions')
-
+    concatenated_design = traits.Bool(
+        mandatory=True, desc='state if the design matrix contains concatenated sessions')
+    stimcorr_files = OutputMultiPath(File(exists=True), name_source='realignment_parameters',
+        name_template='qa.%s_stimcorr.txt', keep_extension=False,
+        desc='List of files containing correlation values')
 
 class StimCorrOutputSpec(TraitedSpec):
-    stimcorr_files = OutputMultiPath(File(exists=True),
-                                     desc='List of files containing correlation values')
+    stimcorr_files = OutputMultiPath(
+        File(exists=True), desc='List of files containing correlation values')
 
 
 class StimulusCorrelation(BaseInterface):
@@ -584,29 +472,11 @@ class StimulusCorrelation(BaseInterface):
     input_spec = StimCorrInputSpec
     output_spec = StimCorrOutputSpec
 
-    def _get_output_filenames(self, motionfile, output_dir):
-        """Generate output files based on motion filenames
-
-        Parameters
-        ----------
-        motionfile: file/string
-            Filename for motion parameter file
-        output_dir: string
-            output directory in which the files will be generated
-        """
-        (_, filename) = os.path.split(motionfile)
-        (filename, _) = os.path.splitext(filename)
-        corrfile = os.path.join(output_dir, ''.join(('qa.', filename,
-                                                     '_stimcorr.txt')))
-        return corrfile
-
-    def _stimcorr_core(self, motionfile, intensityfile, designmatrix, cwd=None):
+    def _stimcorr_core(self, motionfile, intensityfile, corrfile, designmatrix):
         """
         Core routine for determining stimulus correlation
 
         """
-        if not cwd:
-            cwd = os.getcwd()
         # read in motion parameters
         mc_in = np.loadtxt(motionfile)
         g_in = np.loadtxt(intensityfile)
@@ -615,7 +485,6 @@ class StimulusCorrelation(BaseInterface):
         mccol = mc_in.shape[1]
         concat_matrix = np.hstack((np.hstack((designmatrix, mc_in)), g_in))
         cm = np.corrcoef(concat_matrix, rowvar=0)
-        corrfile = self._get_output_filenames(motionfile, cwd)
         # write output to outputfile
         file = open(corrfile, 'w')
         file.write("Stats for:\n")
@@ -665,14 +534,122 @@ class StimulusCorrelation(BaseInterface):
                 nrows.append(mc_in.shape[0])
             matrix = self._get_spm_submatrix(spmmat, sessidx, rows)
             self._stimcorr_core(motparamlist[i], intensityfiles[i],
+                                self.inputs.stimcorr_files[i],
                                 matrix, os.getcwd())
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        files = []
-        for i, f in enumerate(self.inputs.realignment_parameters):
-            files.insert(i, self._get_output_filenames(f, os.getcwd()))
-        if files:
-            outputs['stimcorr_files'] = files
-        return outputs
+
+# Helper functions -----------------------------------------------------------------
+
+def _get_affine_matrix(params, source):
+    """Return affine matrix given a set of translation and rotation parameters
+
+    params : np.array (upto 12 long) in native package format
+    source : the package that generated the parameters
+             supports SPM, AFNI, FSFAST, FSL, NIPY
+    """
+    if source == 'FSL':
+        params = params[[3, 4, 5, 0, 1, 2]]
+    elif source in ('AFNI', 'FSFAST'):
+        params = params[np.asarray([4, 5, 3, 1, 2, 0]) + (len(params) > 6)]
+        params[3:] = params[3:] * np.pi / 180.
+    if source == 'NIPY':
+        # nipy does not store typical euler angles, use nipy to convert
+        from nipy.algorithms.registration import to_matrix44
+        return to_matrix44(params)
+    # process for FSL, SPM, AFNI and FSFAST
+    rotfunc = lambda x: np.array([[np.cos(x), np.sin(x)],
+                                  [-np.sin(x), np.cos(x)]])
+    q = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0])
+    if len(params) < 12:
+        params = np.hstack((params, q[len(params):]))
+    params.shape = (len(params),)
+    # Translation
+    T = np.eye(4)
+    T[0:3, -1] = params[0:3]
+    # Rotation
+    Rx = np.eye(4)
+    Rx[1:3, 1:3] = rotfunc(params[3])
+    Ry = np.eye(4)
+    Ry[(0, 0, 2, 2), (0, 2, 0, 2)] = rotfunc(params[4]).ravel()
+    Rz = np.eye(4)
+    Rz[0:2, 0:2] = rotfunc(params[5])
+    # Scaling
+    S = np.eye(4)
+    S[0:3, 0:3] = np.diag(params[6:9])
+    # Shear
+    Sh = np.eye(4)
+    Sh[(0, 0, 1), (1, 2, 2)] = params[9:12]
+    if source in ('AFNI', 'FSFAST'):
+        return np.dot(T, np.dot(Ry, np.dot(Rx, np.dot(Rz, np.dot(S, Sh)))))
+    return np.dot(T, np.dot(Rx, np.dot(Ry, np.dot(Rz, np.dot(S, Sh)))))
+
+
+def _calc_norm(mc, use_differences, source, brain_pts=None):
+    """Calculates the maximum overall displacement of the midpoints
+    of the faces of a cube due to translation and rotation.
+
+    Parameters
+    ----------
+    mc : motion parameter estimates
+        [3 translation, 3 rotation (radians)]
+    use_differences : boolean
+    brain_pts : [4 x n_points] of coordinates
+
+    Returns
+    -------
+
+    norm : at each time point
+    displacement : euclidean distance (mm) of displacement at each coordinate
+
+    """
+
+    if brain_pts is None:
+        respos = np.diag([70, 70, 75])
+        resneg = np.diag([-70, -110, -45])
+        all_pts = np.vstack((np.hstack((respos, resneg)), np.ones((1, 6))))
+        displacement = None
+    else:
+        all_pts = brain_pts
+    n_pts = all_pts.size - all_pts.shape[1]
+    newpos = np.zeros((mc.shape[0], n_pts))
+    if brain_pts is not None:
+        displacement = np.zeros((mc.shape[0], int(n_pts / 3)))
+    for i in range(mc.shape[0]):
+        affine = _get_affine_matrix(mc[i, :], source)
+        newpos[i, :] = np.dot(affine,
+                              all_pts)[0:3, :].ravel()
+        if brain_pts is not None:
+            displacement[i, :] = \
+                np.sqrt(np.sum(np.power(np.reshape(newpos[i, :],
+                                                   (3, all_pts.shape[1])) -
+                                        all_pts[0:3, :],
+                                        2),
+                               axis=0))
+    # np.savez('displacement.npz', newpos=newpos, pts=all_pts)
+    normdata = np.zeros(mc.shape[0])
+    if use_differences:
+        newpos = np.concatenate((np.zeros((1, n_pts)),
+                                 np.diff(newpos, n=1, axis=0)), axis=0)
+        for i in range(newpos.shape[0]):
+            normdata[i] = \
+                np.max(np.sqrt(np.sum(np.reshape(np.power(np.abs(newpos[i, :]), 2),
+                                                 (3, all_pts.shape[1])), axis=0)))
+    else:
+        newpos = np.abs(signal.detrend(newpos, axis=0, type='constant'))
+        normdata = np.sqrt(np.mean(np.power(newpos, 2), axis=1))
+    return normdata, displacement
+
+
+def _nanmean(a, axis=None):
+    """Return the mean excluding items that are nan
+
+    >>> a = [1, 2, np.nan]
+    >>> _nanmean(a)
+    1.5
+
+    """
+    if axis:
+        return np.nansum(a, axis) / np.sum(1 - np.isnan(a), axis)
+    else:
+        return np.nansum(a) / np.sum(1 - np.isnan(a))
