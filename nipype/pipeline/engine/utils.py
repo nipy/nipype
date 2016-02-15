@@ -36,8 +36,8 @@ from ...external.six import string_types
 from ...utils.filemanip import (fname_presuffix, FileNotFoundError,
                                 filename_to_list, get_related_files)
 from ...utils.misc import create_function_from_source, str2bool
-from ...interfaces.base import (CommandLine, isdefined, Undefined,
-                                InterfaceResult)
+from ...interfaces.traits_extension import isdefined, Undefined
+from ...interfaces.base import CommandLine, InterfaceResult
 from ...interfaces.utility import IdentityInterface
 from ...utils.provenance import ProvStore, pm, nipype_ns, get_id
 

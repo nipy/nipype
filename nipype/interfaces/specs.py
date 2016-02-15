@@ -19,8 +19,9 @@ from builtins import object
 
 from .traits_extension import (traits, Undefined, TraitDictObject, TraitListObject, TraitError,
                                isdefined, File, has_metadata)
-from ..utils.filemanip import md5, auto_hash
+from ..utils.filemanip import md5, auto_hash, split_filename
 from ..utils.misc import is_container
+from ..utils.errors import InterfaceInputsError
 from .. import logging, LooseVersion
 from .. import __version__
 from ..external.six import string_types
@@ -304,14 +305,14 @@ class BaseTraitedSpec(traits.HasTraits):
                                initial_indent='\t\t', subsequent_indent='\t\t ')
         return manhelpstr
 
-    @classmethod
-    def help(cls):
+    def help(self):
         """Print help of these traits"""
-        helpstr = ['']
-        for name, spec in sorted(cls.traits(transient=None).items()):
-            helpstr += cls._get_trait_desc(name, spec)
-        if len(helpstr) == 2:
+        helpstr = []
+        for name, spec in sorted(self.traits(transient=None).items()):
+            helpstr += self._get_trait_desc(name, spec)
+        if len(helpstr) == 0:
             helpstr += ['\tNone']
+        return helpstr
 
 
 class TraitedSpec(BaseTraitedSpec):
@@ -338,17 +339,22 @@ class BaseInputSpec(BaseTraitedSpec):
 
     def mandatory_items(self):
         """Get those items that are mandatory"""
-        return self.traits(mandatory=True).items()
+        return list(self.traits(mandatory=True).items())
 
     def optional_items(self):
         """Get those items that are optional"""
         allitems = self.traits(transient=None).items()
-        for k in self.mandatory_items().keys():
+        for k, _ in self.mandatory_items():
             try:
                 allitems.pop(k, None)
             except KeyError:
                 pass
         return allitems
+
+    def namesource_items(self):
+        """Get inputs that will generate outputs"""
+        metadata = dict(name_source=lambda t: t is not None)
+        return list(self.traits(**metadata).items())
 
     def _check_xor(self, name):
         """ Checks inputs with xor list """
@@ -368,16 +374,19 @@ class BaseInputSpec(BaseTraitedSpec):
 
     def _check_requires(self, name, spec=None):
         if not isdefined(getattr(self, name)):
-            return
-
+            return True
         if spec is None:
-            spec = self.traits()[name]    
+            spec = self.traits()[name]
+        if spec.requires is None:
+            return True
+
         req_defined = [isdefined(rname) for rname in getattr(spec, 'requires', [])]
         if not all(req_defined):
             raise ValueError(
                 '%s requires a value for input \'%s\' because one of %s is set. For a list of'
                 ' required inputs, see %s.help()' % (self.__class__.__name__, name,
                 ', '.join(spec.requires), self.__class__.__name__))
+        return True
 
 
     def check_inputs(self):
@@ -437,7 +446,7 @@ class BaseInputSpec(BaseTraitedSpec):
                     base = source
             else:
                 if name in chain:
-                    raise NipypeInterfaceError('Mutually pointing name_sources')
+                    raise InterfaceInputsError('Mutually pointing name_sources')
 
                 chain.append(name)
                 return self._resolve_namesource(ns, chain)
@@ -450,7 +459,7 @@ class BaseInputSpec(BaseTraitedSpec):
 
         return retval
 
-    def _update_autonames(self):
+    def update_autonames(self):
         """
         Checks for inputs undefined but providing name_source
         """
@@ -520,22 +529,23 @@ class BaseInputSpec(BaseTraitedSpec):
 
         return unavailable_traits
 
-
-    @classmethod
-    def help(cls):
+    def help(self):
         """Print inputs formatted"""
+        manhelpstr = []
+        for name, spec in sorted(self.mandatory_items()):
+            manhelpstr += self._get_trait_desc(name, spec)
+        opthelpstr = []
+        for name, spec in sorted(self.optional_items()):
+            opthelpstr += self._get_trait_desc(name, spec)
+
         helpstr = []
-        manhelpstr = ['', '\t[Mandatory]']
-        for name, spec in sorted(cls.mandatory_items()):
-            manhelpstr += cls._get_trait_desc(name, spec)
-
-        opthelpstr = ['', '\t[Optional]']
-        for name, spec in sorted(cls.optional_items()):
-            opthelpstr += cls._get_trait_desc(name, spec)
-
         if manhelpstr:
+            manhelpstr.insert(0, '')
+            manhelpstr.insert(1, '\t[Mandatory]')
             helpstr += manhelpstr
         if opthelpstr:
+            opthelpstr.insert(0, '')
+            opthelpstr.insert(1, '\t[Optional]')
             helpstr += opthelpstr
 
         if not helpstr:
@@ -596,7 +606,7 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
              'writes output to file, `none` - output is ignored')
 
     def _format_arg(self, name, spec=None, value=None):
-        """A helper function for _parse_inputs
+        """A helper function for parse_args
 
         Formats a trait containing argstr metadata
         """
@@ -645,7 +655,7 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
             # Append options using format string.
             return argstr % value
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         """Parse all inputs using the ``argstr`` format string in the Trait.
 
         Any inputs that are assigned (not the default_value) are formatted
@@ -687,6 +697,9 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
 class StdOutCommandLineInputSpec(CommandLineInputSpec):
     """Appends a command line argument to pipe standard output to a file"""
     out_file = File('standard.out', argstr="> %s", position=-1, usedefault=True)
+
+class StdOutCommandLineOutputSpec(TraitedSpec):
+    out_file = File(exists=True, desc='file containing the standard output')
 
 
 class MpiCommandLineInputSpec(CommandLineInputSpec):

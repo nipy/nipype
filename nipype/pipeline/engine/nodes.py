@@ -48,28 +48,25 @@ import numpy as np
 import networkx as nx
 
 from ...utils.misc import package_check, str2bool
-package_check('networkx', '1.3')
-
 from ... import config, logging
-logger = logging.getLogger('workflow')
-from ...interfaces.base import (traits, InputMultiPath, CommandLine,
-                                Undefined, TraitedSpec, DynamicTraitedSpec,
-                                Bunch, InterfaceResult, md5, Interface,
-                                TraitDictObject, TraitListObject, isdefined)
-from ...utils.misc import (getsource, create_function_from_source,
-                           flatten, unflatten)
-from ...utils.filemanip import (save_json, FileNotFoundError,
-                                filename_to_list, list_to_filename,
-                                copyfiles, fnames_presuffix, loadpkl,
-                                split_filename, load_json, savepkl,
-                                write_rst_header, write_rst_dict,
-                                write_rst_list)
+
+from ...utils.misc import flatten, unflatten
+from ...utils.filemanip import md5, save_json, FileNotFoundError, filename_to_list, \
+    list_to_filename, copyfiles, fnames_presuffix, loadpkl, split_filename, load_json, \
+    savepkl, write_rst_header, write_rst_dict, write_rst_list
+
+from ...interfaces.traits_extension import traits, Undefined, isdefined
+from ...interfaces.specs import InputMultiPath, DynamicTraitedSpec
+from ...interfaces.base import CommandLine, Bunch, InterfaceResult, Interface
+
 from ...external.six import string_types
-from .utils import (generate_expanded_graph, modify_paths,
-                    export_graph, make_output_dir, write_workflow_prov,
+from .utils import (modify_paths, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,
                     get_print_name, merge_dict, evaluate_connect_function)
 from .base import EngineBase
+
+package_check('networkx', '1.3')
+logger = logging.getLogger('workflow')
 
 
 class Node(EngineBase):

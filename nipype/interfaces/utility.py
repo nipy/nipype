@@ -21,9 +21,11 @@ from textwrap import dedent
 import numpy as np
 import nibabel as nb
 
-from .base import (traits, TraitedSpec, DynamicTraitedSpec, File,
-                   Undefined, isdefined, OutputMultiPath,
-                   InputMultiPath, BaseInterface, BaseInterfaceInputSpec)
+from .traits_extension import traits, Undefined, File, isdefined
+from .base import BaseInterface
+from .specs import (TraitedSpec, DynamicTraitedSpec, 
+                    BaseInterfaceInputSpec, InputMultiPath,
+                    OutputMultiPath)
 from .io import IOBase, add_traits
 from ..external.six import string_types
 from ..testing import assert_equal

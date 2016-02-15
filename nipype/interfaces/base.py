@@ -14,6 +14,7 @@ from __future__ import division
 from copy import deepcopy
 import errno
 import os
+import os.path as op
 import platform
 from socket import getfqdn
 from string import Template
@@ -30,12 +31,13 @@ from builtins import object
 
 from configparser import NoOptionError
 
-from .traits_extension import TraitError, isdefined
+from .traits_extension import TraitError, isdefined, Undefined
 from ..utils.filemanip import md5, FileNotFoundError
 from ..utils.misc import trim, str2bool, is_container
 from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
-                    StdOutCommandLineInputSpec, MpiCommandLineInputSpec,
-                    SEMLikeCommandLineInputSpec)
+                    StdOutCommandLineInputSpec, StdOutCommandLineOutputSpec,
+                    MpiCommandLineInputSpec,
+                    SEMLikeCommandLineInputSpec, TraitedSpec)
 from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
@@ -45,18 +47,8 @@ IFLOGGER = logging.getLogger('interface')
 __docformat__ = 'restructuredtext'
 
 
-class NipypeInterfaceError(Exception):
-    """Error raised in nipype interfaces"""
-    def __init__(self, value):
-        self.value = value
-        super(NipypeInterfaceError, self).__init__(value)
-
-    def __str__(self):
-        return repr(self.value)
-
-
 def _unlock_display(ndisplay):
-    lockf = os.path.join('/tmp', '.X%d-lock' % ndisplay)
+    lockf = op.join('/tmp', '.X%d-lock' % ndisplay)
     try:
         os.remove(lockf)
     except:
@@ -74,10 +66,10 @@ def _exists_in_path(cmd, environ):
     input_environ = environ.get("PATH", os.environ.get("PATH", ""))
     extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
     for directory in input_environ.split(os.pathsep):
-        base = os.path.join(directory, cmd)
+        base = op.join(directory, cmd)
         options = [base] + [(base + ext) for ext in extensions]
         for filename in options:
-            if os.path.exists(filename):
+            if op.exists(filename):
                 return True, filename
     return False, None
 
@@ -96,7 +88,7 @@ def load_template(name):
 
     """
 
-    full_fname = os.path.join(os.path.dirname(__file__),
+    full_fname = op.join(op.dirname(__file__),
                               'script_templates', name)
     template_file = open(full_fname)
     template = Template(template_file.read())
@@ -224,7 +216,7 @@ class Bunch(object):
             else:
                 item = val
             try:
-                if os.path.isfile(item):
+                if op.isfile(item):
                     infile_list.append(key)
             except TypeError:
                 # `item` is not a file or string.
@@ -248,7 +240,7 @@ class Bunch(object):
             stuff = [stuff]
         file_list = []
         for fname in stuff:
-            if os.path.isfile(fname):
+            if op.isfile(fname):
                 md5obj = md5()
                 with open(fname, 'rb') as filep:
                     while True:
@@ -366,25 +358,19 @@ class Interface(object):
         """ Prints outputs help"""
         raise NotImplementedError
 
-    @classmethod
-    def _outputs(cls):
-        """ Initializes outputs"""
-        raise NotImplementedError
-
     @property
     def version(self):
         raise NotImplementedError
 
+    def _pre_run(self, **inputs):
+        raise NotImplementedError
+
+    def _post_run(self, **inputs):
+        raise NotImplementedError
+
+
     def run(self):
         """Execute the command."""
-        raise NotImplementedError
-
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        """Called to populate outputs"""
-        raise NotImplementedError
-
-    def _list_outputs(self):
-        """ List expected outputs"""
         raise NotImplementedError
 
     def _get_filecopy_info(self):
@@ -413,6 +399,7 @@ class BaseInterface(Interface):
 
     """
     input_spec = BaseInterfaceInputSpec
+    output_spec = TraitedSpec
     _version = None
     _additional_metadata = []
     _redirect_x = False
@@ -422,6 +409,7 @@ class BaseInterface(Interface):
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
+        self.outputs = self.output_spec()
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -434,21 +422,12 @@ class BaseInterface(Interface):
         else:
             docstring = ['']
 
-        allhelp = '\n'.join(docstring + ['Inputs::'] + cls.input_spec.help() + [''] +
-                            ['Outputs::', ''] + cls.output_spec.help() + [''])
+        allhelp = '\n'.join(docstring + ['Inputs::'] + cls.input_spec().help() + [''] +
+                            ['Outputs::', ''] + cls.output_spec().help() + [''])
         if returnhelp:
             return allhelp
         else:
             print(allhelp)
-
-    def _outputs(self):
-        """ Returns a bunch containing output fields for the class
-        """
-        outputs = None
-        if self.output_spec:
-            outputs = self.output_spec()  #pylint: disable=E1102
-        return outputs
-
 
     def _run_wrapper(self, runtime):
         sysdisplay = os.getenv('DISPLAY')
@@ -480,7 +459,7 @@ class BaseInterface(Interface):
 
         return runtime
 
-    def _run_interface(self, runtime):
+    def _run_interface(self, runtime, *kwargs):
         """ Core function that executes interface
         """
         raise NotImplementedError
@@ -491,6 +470,33 @@ class BaseInterface(Interface):
         self.inputs.update_autonames()
         if self.version:
             self.inputs.check_version(LooseVersion(str(self.version)))
+
+    def _post_run(self):
+        if self.output_spec is None:
+            IFLOGGER.warn('Interface does not have an output specification')
+            return None
+
+        ns_outputs = {}
+        for ns, sp in list(self.inputs.namesource_items()):
+            ns_pointer = getattr(sp, 'out_name', None)
+            if ns_pointer is not None:
+                ns_outputs[ns_pointer] = ns
+
+        # Search for inputs with the same name
+        for out_name, spec in list(self.outputs.items()):
+            if out_name in ns_outputs.keys():
+                value = getattr(self.inputs, ns_outputs[out_name], Undefined)
+            else:
+                value = getattr(self.inputs, out_name, Undefined)
+
+            if isdefined(value):
+                setattr(self.outputs, out_name, op.abspath(value))
+
+                if spec.exists:
+                    if not op.isfile(getattr(self.outputs, out_name)):
+                        raise FileNotFoundError(
+                            'Output %s not found for interface %s.' %
+                            (out_name, self.__class__))
 
     def run(self, **inputs):
         """Execute this interface.
@@ -550,7 +556,8 @@ class BaseInterface(Interface):
                                   inputs=self.inputs.get_traitsfree())
 
         if runtime.traceback is None:
-            results.outputs=self.aggregate_outputs(runtime)
+            self._post_run()
+            results.outputs = self.outputs
         
         prov_record = None
         if str2bool(config.get('execution', 'write_provenance')):
@@ -561,69 +568,6 @@ class BaseInterface(Interface):
             not getattr(self.inputs, 'ignore_exception', False)):
             raise
         return results
-
-    def _list_outputs(self):
-        """ List the expected outputs
-        """
-        if self.output_spec is None:
-            IFLOGGER.warn('Interface does not have output specification')
-            return None
-
-        metadata = dict(name_source=lambda t: t is not None)
-        out_traits = self.inputs.traits(**metadata)
-        if out_traits:
-            outputs = self.output_spec().get()  #pylint: disable=E1102
-            for name, trait_spec in out_traits.items():
-                out_name = name
-                if trait_spec.output_name is not None:
-                    out_name = trait_spec.output_name
-                value = self._resolve_namesource(name)
-                if isdefined(value):
-                    outputs[out_name] = os.path.abspath(value)
-            return outputs
-
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        """ Collate expected outputs and check for existence
-        """
-        predicted_outputs = self._list_outputs()
-        outputs = self._outputs()
-
-        # fill automatically resolved outputs
-        metadata = dict(name_source=lambda t: t is not None)
-
-        for name, spec in self.inputs.traits(**metadata).iteritems():
-            out_name = name
-            if spec.output_name is not None:
-                out_name = spec.output_name
-            value = getattr(self.inputs, name)
-            if value is not None and isdefined(value):
-                setattr(outputs, out_name, os.path.abspath(value))
-
-        if predicted_outputs:
-            _unavailable_outputs = []
-            if outputs:
-                _unavailable_outputs = \
-                    self._check_version_requirements(self._outputs())
-            for key, val in list(predicted_outputs.items()):
-                if needed_outputs and key not in needed_outputs:
-                    continue
-                if key in _unavailable_outputs:
-                    raise KeyError(('Output trait %s not available in version '
-                                    '%s of interface %s. Please inform '
-                                    'developers.') % (key, self.version,
-                                                      self.__class__.__name__))
-                try:
-                    setattr(outputs, key, val)
-                    _ = getattr(outputs, key)
-                except TraitError as error:
-                    if hasattr(error, 'info') and \
-                            error.info.startswith("an existing"):
-                        msg = ("File/Directory '%s' not found for %s output "
-                               "'%s'." % (val, self.__class__.__name__, key))
-                        raise FileNotFoundError(msg)
-                    else:
-                        raise error
-        return outputs
 
     @property
     def version(self):
@@ -700,8 +644,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         cmdline = 'xvfb-run -a ' + cmdline
 
     if output == 'file':
-        errfile = os.path.join(runtime.cwd, 'stderr.nipype')
-        outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+        errfile = op.join(runtime.cwd, 'stderr.nipype')
+        outfile = op.join(runtime.cwd, 'stdout.nipype')
         stderr = open(errfile, 'wt')  # t=='text'===default
         stdout = open(outfile, 'wt')
 
@@ -719,8 +663,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                                 cwd=runtime.cwd,
                                 env=runtime.environ)
     result = {}
-    errfile = os.path.join(runtime.cwd, 'stderr.nipype')
-    outfile = os.path.join(runtime.cwd, 'stdout.nipype')
+    errfile = op.join(runtime.cwd, 'stderr.nipype')
+    outfile = op.join(runtime.cwd, 'stdout.nipype')
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]
 
@@ -794,20 +738,14 @@ def get_dependencies(name, environ):
     """
     PIPE = subprocess.PIPE
     if sys.platform == 'darwin':
-        proc = subprocess.Popen('otool -L `which %s`' % name,
-                                stdout=PIPE,
-                                stderr=PIPE,
-                                shell=True,
-                                env=environ)
+        proc = subprocess.Popen(
+            'otool -L `which %s`' % name, stdout=PIPE, stderr=PIPE, shell=True, env=environ)
     elif 'linux' in sys.platform:
-        proc = subprocess.Popen('ldd `which %s`' % name,
-                                stdout=PIPE,
-                                stderr=PIPE,
-                                shell=True,
-                                env=environ)
+        proc = subprocess.Popen(
+            'ldd `which %s`' % name, stdout=PIPE, stderr=PIPE, shell=True, env=environ)
     else:
         return 'Platform %s not supported' % sys.platform
-    o, e = proc.communicate()
+    o, _ = proc.communicate()
     return o.rstrip()
 
 
@@ -894,9 +832,9 @@ class CommandLine(BaseInterface):
     def cmdline(self):
         """ `command` plus any arguments (args)
         validates arguments and generates command line"""
-        self._check_mandatory_inputs()
-        self._update_autonames()
-        allargs = self._parse_inputs()
+        self.inputs.check_inputs()
+        self.inputs.update_autonames()
+        allargs = self.inputs.parse_args()
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)
 
@@ -910,13 +848,11 @@ class CommandLine(BaseInterface):
     @classmethod
     def help(cls, returnhelp=False):
         allhelp = super(CommandLine, cls).help(returnhelp=True)
-
-        allhelp = "Wraps command **%s**\n\n" % cls._cmd + allhelp
+        allhelp = "Wraps command ``%s``\n\n" % cls._cmd + allhelp
 
         if returnhelp:
             return allhelp
-        else:
-            print(allhelp)
+        print(allhelp)
 
     def _get_environ(self):
         out_environ = {}
@@ -946,7 +882,7 @@ class CommandLine(BaseInterface):
         runtime = self._run_interface(runtime)
         return runtime
 
-    def _run_interface(self, runtime, correct_return_codes=[0]):
+    def _run_interface(self, runtime, **kwargs):
         """Execute command via subprocess
 
         Parameters
@@ -959,6 +895,10 @@ class CommandLine(BaseInterface):
             adds stdout, stderr, merged, cmdline, dependencies, command_path
 
         """
+        correct_return_codes = [0]
+        if 'correct_return_codes' in kwargs.keys():
+            correct_return_codes = kwargs[correct_return_codes]
+
         setattr(runtime, 'stdout', None)
         setattr(runtime, 'stderr', None)
         setattr(runtime, 'cmdline', self.cmdline)
@@ -981,21 +921,11 @@ class CommandLine(BaseInterface):
 
         return runtime
 
-    def _gen_filename(self, name):
-        raise NotImplementedError
-
 
 class StdOutCommandLine(CommandLine):
+    """A command line that writes into the output stream"""
     input_spec = StdOutCommandLineInputSpec
-
-    def _gen_filename(self, name):
-        if name is 'out_file':
-            return self._gen_outfilename()
-        else:
-            return None
-
-    def _gen_outfilename(self):
-        raise NotImplementedError
+    output_spec = StdOutCommandLineOutputSpec
 
 
 class MpiCommandLine(CommandLine):
@@ -1023,7 +953,7 @@ class MpiCommandLine(CommandLine):
         result = []
         if self.inputs.use_mpi:
             result.append('mpiexec')
-            if self.inputs.n_procs:
+            if isdefined(self.inputs.n_procs):
                 result.append('-n %d' % self.inputs.n_procs)
         result.append(super(MpiCommandLine, self).cmdline)
         return ' '.join(result)
@@ -1039,22 +969,17 @@ class SEMLikeCommandLine(CommandLine):
     """
     input_spec = SEMLikeCommandLineInputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()  #pylint: disable=E1102
-        return self._outputs_from_inputs(outputs)
-
-    def _outputs_from_inputs(self, outputs):
-        for name in list(outputs.keys()):
+    def _post_run(self):
+        for name in list(self.outputs.keys()):
             corresponding_input = getattr(self.inputs, name)
             if isdefined(corresponding_input):
                 if (isinstance(corresponding_input, bool) and
                         corresponding_input):
-                    outputs[name] = \
-                        os.path.abspath(self._outputs_filenames[name])
+                    setattr(self.outputs, name, op.abspath(
+                        self._outputs_filenames[name]))
                 else:
                     if isinstance(corresponding_input, list):
-                        outputs[name] = [os.path.abspath(inp)
-                                         for inp in corresponding_input]
+                        setattr(self.outputs, name,
+                                [op.abspath(inp) for inp in corresponding_input])
                     else:
-                        outputs[name] = os.path.abspath(corresponding_input)
-        return outputs
+                        setattr(self.outputs, name, op.abspath(corresponding_input))
