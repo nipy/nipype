@@ -90,7 +90,7 @@ def copytree(src, dst, use_hardlink=False):
             if os.path.isdir(srcname):
                 copytree(srcname, dstname, use_hardlink)
             else:
-                copyfile(srcname, dstname, True, hashmethod='content',
+                copyfile(srcname, dstname, True, hash_method='content',
                          use_hardlink=use_hardlink)
         except (IOError, os.error) as why:
             errors.append((srcname, dstname, str(why)))
@@ -753,7 +753,7 @@ class DataSink(IOBase):
                     # If src is a file, copy it to dst
                     if os.path.isfile(src):
                         iflogger.debug('copyfile: %s %s' % (src, dst))
-                        copyfile(src, dst, copy=True, hashmethod='content',
+                        copyfile(src, dst, copy=True, hash_method='content',
                                  use_hardlink=use_hardlink)
                         out_files.append(dst)
                     # If src is a directory, copy entire contents to dst dir

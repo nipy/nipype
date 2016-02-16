@@ -30,14 +30,19 @@ from builtins import range
 from builtins import object
 
 from configparser import NoOptionError
-
-from .traits_extension import TraitError, isdefined, Undefined
 from ..utils.filemanip import md5, FileNotFoundError
 from ..utils.misc import trim, str2bool, is_container
-from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
-                    StdOutCommandLineInputSpec, StdOutCommandLineOutputSpec,
-                    MpiCommandLineInputSpec,
-                    SEMLikeCommandLineInputSpec, TraitedSpec)
+
+# Make all the traits and spec interfaces available through base
+# for backwards compatibility, even though import * is discouraged
+# in production environments.
+from .traits_extension import *  # pylint: disable=W0611
+from .specs import *  # pylint: disable=W0611
+#from .traits_extension import isdefined, Undefined
+# from .specs import (BaseInterfaceInputSpec, CommandLineInputSpec,
+#                     StdOutCommandLineInputSpec, StdOutCommandLineOutputSpec,
+#                     MpiCommandLineInputSpec,
+#                     SEMLikeCommandLineInputSpec, TraitedSpec)
 from ..utils.provenance import write_provenance
 from .. import config, logging, LooseVersion
 from .. import __version__
@@ -521,7 +526,7 @@ class BaseInterface(Interface):
             cwd=os.getcwd(), returncode=None, duration=None, environ=env,
             startTime=dt.isoformat(dt.utcnow()), endTime=None, traceback=None,
             platform=platform.platform(), hostname=getfqdn(), version=self.version)
-        
+
         try:
             runtime = self._run_wrapper(runtime)
         except Exception as e:  # pylint: disable=W0703
@@ -551,20 +556,20 @@ class BaseInterface(Interface):
         runtime.endTime = dt.isoformat(dt.utcnow())
         timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
         runtime.duration = (timediff.days * 86400 + timediff.seconds +
-                            timediff.microseconds / 1e5)        
+                            timediff.microseconds / 1e5)
         results = InterfaceResult(interface, runtime,
                                   inputs=self.inputs.get_traitsfree())
 
         if runtime.traceback is None:
             self._post_run()
             results.outputs = self.outputs
-        
+
         prov_record = None
         if str2bool(config.get('execution', 'write_provenance')):
             prov_record = write_provenance(results)
         results.provenance = prov_record
 
-        if (runtime.traceback is not None and 
+        if (runtime.traceback is not None and
             not getattr(self.inputs, 'ignore_exception', False)):
             raise
         return results

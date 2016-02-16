@@ -186,7 +186,7 @@ class BaseTraitedSpec(traits.HasTraits):
                     out = undefinedval
         return out
 
-    def get_hashval(self, hashmethod=None):
+    def get_hashval(self, hash_method=None):
         """Return a dictionary of our items with hashes for each file.
 
         Searches through dictionary items and if an item is a file, it
@@ -218,30 +218,30 @@ class BaseTraitedSpec(traits.HasTraits):
                                                False) and not
                               has_metadata(trait.trait_type, "name_source"))
                 dict_nofilename.append((name,
-                                        self._get_sorteddict(val, hashmethod=hashmethod,
+                                        self._get_sorteddict(val, hash_method=hash_method,
                                                              hash_files=hash_files)))
                 dict_withhash.append((name,
-                                      self._get_sorteddict(val, True, hashmethod=hashmethod,
+                                      self._get_sorteddict(val, True, hash_method=hash_method,
                                                            hash_files=hash_files)))
         return dict_withhash, md5(str(dict_nofilename).encode()).hexdigest()
 
-    def _get_sorteddict(self, obj, dictwithhash=False, hashmethod=None,
+    def _get_sorteddict(self, obj, dictwithhash=False, hash_method=None,
                         hash_files=True):
         out = None
         if isinstance(obj, dict):
             obj_items = [(key, val) for key, val in sorted(obj.items()) if isdefined(val)]
-            out = [(key, self._get_sorteddict(val, dictwithhash, hashmethod=hashmethod,
+            out = [(key, self._get_sorteddict(val, dictwithhash, hash_method=hash_method,
                                                hash_files=hash_files)) for key, val in obj_items]
         elif isinstance(obj, (list, tuple)):
             out = [self._get_sorteddict(
-                val, dictwithhash, hashmethod=hashmethod, hash_files=hash_files)
+                val, dictwithhash, hash_method=hash_method, hash_files=hash_files)
                 for val in obj if isdefined(val)]
             if isinstance(obj, tuple):
                 return tuple(out)
         elif isinstance(obj, float):
             out = '%.10f' % obj
         elif isinstance(obj, string_types) and hash_files and os.path.isfile(obj):
-            out = auto_hash(obj, hashmethod)
+            out = auto_hash(obj, hash_method)
             if dictwithhash:
                 return (obj, out)
         elif isdefined(obj):
@@ -256,7 +256,7 @@ class BaseTraitedSpec(traits.HasTraits):
         xor = spec.xor
         requires = spec.requires
         argstr = spec.argstr
-        ns = spec.name_source
+        name_source = spec.name_source
 
         manhelpstr = ['\t%s' % name]
 
@@ -297,11 +297,11 @@ class BaseTraitedSpec(traits.HasTraits):
             manhelpstr += wrap(line, 70, initial_indent='\t\trequires: ',
                                subsequent_indent='\t\t ')
 
-        if ns:
+        if name_source:
             tpl = ', name_template not defined'
             if spec.name_template:
                 tpl = ', name_template is \'%s\'' % spec.name_template
-            manhelpstr += wrap(('name source: %s' % ns) + tpl, 70,
+            manhelpstr += wrap(('name source: %s' % name_source) + tpl, 70,
                                initial_indent='\t\t', subsequent_indent='\t\t ')
         return manhelpstr
 
@@ -361,6 +361,8 @@ class BaseInputSpec(BaseTraitedSpec):
         IFLOGGER.error('Called check_xorg with name %s' % name)
         if isdefined(getattr(self, name)):
             xor_list = self.traits()[name].xor
+            if not isinstance(xor_list, list):
+                xor_list = list(xor_list)
 
             if name in xor_list:
                 xor_list.remove(name)
@@ -396,8 +398,10 @@ class BaseInputSpec(BaseTraitedSpec):
         for name, spec in list(self.mandatory_items()):
             value = getattr(self, name)
             if not isdefined(value):
-                xor_defined = [isdefined(getattr(self, xname))
-                               for xname in getattr(spec, 'xor', [])]
+                xor_spec = getattr(spec, 'xor', [])
+                xor_defined = ([isdefined(getattr(self, xname)) for xname in xor_spec]
+                               if xor_spec is not None else [])
+
                 if not any(xor_defined):
                     raise ValueError(
                         '%s requires a value for input \'%s\'. For a list of required inputs, '
@@ -411,53 +415,67 @@ class BaseInputSpec(BaseTraitedSpec):
         if chain is None:
             chain = []
 
+
         spec = self.traits()[name]
         retval = getattr(self, name)
 
-        if not isdefined(retval) or "%s" in retval:
-            if not spec.name_source:
-                return retval
-            if isdefined(retval) and "%s" in retval:
+        name_template = spec.name_template
+        # Default name template
+        if name_template is None:
+            if '%' in retval:
                 name_template = retval
+                retval = Undefined
             else:
-                name_template = spec.name_template
-            if not name_template:
                 name_template = "%s_generated"
 
-            ns = spec.name_source
-            while isinstance(ns, list):
-                if len(ns) > 1:
-                    IFLOGGER.warn('Only one name_source per trait is allowed')
-                ns = ns[0]
+        # If input is already set, do nothing
+        if isdefined(retval):
+            return retval
 
-            if not isinstance(ns, string_types):
-                raise ValueError(('name_source of \'%s\' trait sould be an '
-                                 'input trait name') % name)
+        # Prevent entering here twice
+        if name in chain:
+            raise InterfaceInputsError('Mutually pointing name_sources')
+        chain.append(name)
 
-            if isdefined(getattr(self, ns)):
-                name_source = ns
-                source = getattr(self, name_source)
-                while isinstance(source, list):
-                    source = source[0]
+        keep_ext = not isdefined(spec.keep_extension) or spec.keep_extension
+        name_source = spec.name_source
+        if isinstance(name_source, string_types):
+            name_source = [name_source]
+        if isinstance(name_source, tuple):
+            name_source = list(name_source)
 
-                # special treatment for files
-                try:
-                    _, base, ext = split_filename(source)
-                except AttributeError:
-                    base = source
-                    ext = ''
+        if not isinstance(name_source, list):
+            raise ValueError(
+                'name_source of input \'%s\' sould be a string, or list/tuple of '
+                'strings denoting input trait names, but got %s' % (name, name_source))
+
+        sourced_values = [None] * len(name_source)
+
+        for i, nsrc in enumerate(name_source):
+            if not isinstance(nsrc, string_types):
+                raise ValueError(('name_source \'%s\' of \'%s\' trait sould be an '
+                                  'input trait name') % (nsrc, name))
+
+            src_value = getattr(self, nsrc)
+            if not isdefined(src_value):
+                sourced_values[i] = self._resolve_namesource(nsrc, chain)
             else:
-                if name in chain:
-                    raise InterfaceInputsError('Mutually pointing name_sources')
+                if isinstance(src_value, list):
+                    raise NotImplementedError('Multiple sourced values not allowed yet')
 
-                chain.append(name)
-                return self._resolve_namesource(ns, chain)
+                try:
+                    # special treatment for files
+                    _, base, ext = split_filename(src_value)
+                except AttributeError:
+                    base = src_value
+                    ext = ''
+                sourced_values[i] = base
 
-            retval = name_template % base
-
-            if not isdefined(spec.keep_extension) or spec.keep_extension:
-                return retval + ext
-            return self._overload_extension(retval, name)
+        retval = name_template % tuple(sourced_values)
+        if keep_ext:
+            retval += ext
+        else:
+            retval = self._overload_extension(retval, name)
 
         return retval
 
@@ -473,8 +491,8 @@ class BaseInputSpec(BaseTraitedSpec):
             if isdefined(value):
                 continue
 
-            ns = spec.name_source
-            if ns is not None:
+            name_source = spec.name_source
+            if name_source is not None:
                 value = self._resolve_namesource(name)
 
                 if isdefined(value):

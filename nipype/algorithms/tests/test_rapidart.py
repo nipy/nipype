@@ -16,7 +16,7 @@ def test_ad_init():
     yield assert_false, ad.inputs.use_differences[1]
 
 
-def test_ad_output_filenames():
+# def test_ad_output_filenames():
     # TODO: rewrite this test
     # ad = ra.ArtifactDetect()
     # outputdir = '/tmp'
@@ -80,11 +80,3 @@ def test_sc_populate_inputs():
                    spm_mat_file=None,
                    concatenated_design=None)
     yield assert_equal, set(sc.inputs.__dict__.keys()), set(inputs.__dict__.keys())
-
-
-def test_sc_output_filenames():
-    sc = ra.StimulusCorrelation()
-    outputdir = '/tmp'
-    f = 'motion.nii'
-    corrfile = sc._get_output_filenames(f, outputdir)
-    yield assert_equal, corrfile, '/tmp/qa.motion_stimcorr.txt'

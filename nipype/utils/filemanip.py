@@ -168,14 +168,14 @@ def check_forhash(filename):
     else:
         return False, None
 
-def auto_hash(afile, hashmethod=None, chunk_len=8192, crypto=hashlib.md5):
+def auto_hash(afile, hash_method=None, chunk_len=8192, crypto=hashlib.md5):
     """Checks the hash method and calls the appropriate function"""
-    if hashmethod is None:
-        hashmethod = config.get('execution', 'hash_method').lower()
+    if hash_method is None:
+        hash_method = config.get('execution', 'hash_method').lower()
     
-    if hashmethod not in ['content', 'timestamp']:
-        raise ValueError("Unknown hash method: %s" % hashmethod)
-    func = getattr(sys.modules[__name__], 'hash_' + hashmethod)
+    if hash_method not in ['content', 'timestamp']:
+        raise ValueError("Unknown hash method: %s" % hash_method)
+    func = getattr(sys.modules[__name__], 'hash_' + hash_method)
     return func(afile, chunk_len, crypto)
 
 def hash_content(afile, chunk_len=8192, crypto=hashlib.md5):
@@ -205,7 +205,7 @@ def hash_timestamp(afile, **kwargs):  # pylint: disable=W0613
 
 
 def copyfile(originalfile, newfile, copy=False, create_new=False,
-             hashmethod=None, use_hardlink=False):
+             hash_method=None, use_hardlink=False):
     """Copy or symlink ``originalfile`` to ``newfile``.
 
     Parameters
@@ -239,13 +239,13 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
                 fname += "_c%04d" % i
             newfile = base + os.sep + fname + ext
 
-    if hashmethod is None:
-        hashmethod = config.get('execution', 'hash_method').lower()
+    if hash_method is None:
+        hash_method = config.get('execution', 'hash_method').lower()
 
     elif os.path.exists(newfile):
-        if hashmethod == 'timestamp':
+        if hash_method == 'timestamp':
             newhash = hash_timestamp(newfile)
-        elif hashmethod == 'content':
+        elif hash_method == 'content':
             newhash = hash_content(newfile)
         fmlogger.debug("File: %s already exists,%s, copy:%d"
                        % (newfile, newhash, copy))
@@ -256,9 +256,9 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
     #        newhash = None
     if os.name is 'posix' and not copy:
         if os.path.lexists(newfile):
-            if hashmethod == 'timestamp':
+            if hash_method == 'timestamp':
                 orighash = hash_timestamp(originalfile)
-            elif hashmethod == 'content':
+            elif hash_method == 'content':
                 orighash = hash_content(originalfile)
             fmlogger.debug('Original hash: %s, %s' % (originalfile, orighash))
             if newhash != orighash:
@@ -267,9 +267,9 @@ def copyfile(originalfile, newfile, copy=False, create_new=False,
             os.symlink(originalfile, newfile)
     else:
         if newhash:
-            if hashmethod == 'timestamp':
+            if hash_method == 'timestamp':
                 orighash = hash_timestamp(originalfile)
-            elif hashmethod == 'content':
+            elif hash_method == 'content':
                 orighash = hash_content(originalfile)
         if (newhash is None) or (newhash != orighash):
             try:
