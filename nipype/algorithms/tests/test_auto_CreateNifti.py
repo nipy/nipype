@@ -12,6 +12,10 @@ def test_CreateNifti_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
+    nifti_file=dict(keep_extension=False,
+    name_source='data_file',
+    name_template='%s_nifti.nii',
+    ),
     )
     inputs = CreateNifti.input_spec()
 

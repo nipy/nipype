@@ -13,7 +13,10 @@ def test_AddNoise_inputs():
     in_file=dict(mandatory=True,
     ),
     in_mask=dict(),
-    out_file=dict(),
+    out_file=dict(keep_extension=True,
+    name_source=['in_file', 'snr'],
+    name_template='%s_SNR%.02f',
+    ),
     snr=dict(usedefault=True,
     ),
     )

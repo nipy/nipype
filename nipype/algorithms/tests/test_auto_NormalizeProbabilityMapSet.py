@@ -6,6 +6,10 @@ from ..misc import NormalizeProbabilityMapSet
 def test_NormalizeProbabilityMapSet_inputs():
     input_map = dict(in_files=dict(),
     in_mask=dict(),
+    out_files=dict(keep_extension=True,
+    name_source='in_files',
+    name_template='%s_norm',
+    ),
     )
     inputs = NormalizeProbabilityMapSet.input_spec()
 

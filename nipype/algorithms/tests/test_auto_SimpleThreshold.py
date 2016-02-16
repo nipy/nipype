@@ -9,6 +9,10 @@ def test_SimpleThreshold_inputs():
     ),
     threshold=dict(mandatory=True,
     ),
+    thresholded_volumes=dict(keep_extension=True,
+    name_source='volumes',
+    name_template='%s_thresholded',
+    ),
     volumes=dict(mandatory=True,
     ),
     )

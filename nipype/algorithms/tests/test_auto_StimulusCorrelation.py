@@ -15,6 +15,10 @@ def test_StimulusCorrelation_inputs():
     ),
     spm_mat_file=dict(mandatory=True,
     ),
+    stimcorr_files=dict(keep_extension=False,
+    name_source='realignment_parameters',
+    name_template='qa.%s_stimcorr.txt',
+    ),
     )
     inputs = StimulusCorrelation.input_spec()
 

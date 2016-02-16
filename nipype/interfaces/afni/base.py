@@ -8,8 +8,9 @@ from builtins import object
 
 from ... import logging
 from ...utils.filemanip import split_filename
-from ..base import (
-    CommandLine, traits, CommandLineInputSpec, isdefined, File, TraitedSpec)
+from ..traits_extension import traits, isdefined, File
+from ..specs import CommandLineInputSpec, TraitedSpec
+from ..base import CommandLine
 
 # Use nipype's logging system
 IFLOGGER = logging.getLogger('interface')
@@ -131,13 +132,11 @@ class AFNICommandInputSpec(CommandLineInputSpec):
     outputtype = traits.Enum('AFNI', list(Info.ftypes.keys()),
                              desc='AFNI output filetype')
     out_file = File(name_template="%s_afni", desc='output image file name',
-                    argstr='-prefix %s',
-                    name_source=["in_file"])
+                    name_source=["in_file"], argstr='-prefix %s')
 
 
 class AFNICommandOutputSpec(TraitedSpec):
-    out_file = File(desc='output file',
-                    exists=True)
+    out_file = File(desc='output file', exists=True)
 
 
 class AFNICommand(AFNICommandBase):
@@ -183,8 +182,7 @@ class AFNICommand(AFNICommandBase):
         path, base, _ = split_filename(value)
         return os.path.join(path, base + Info.outputtype_to_ext(self.inputs.outputtype))
 
-    def _list_outputs(self):
-        outputs = super(AFNICommand, self)._list_outputs()
+    def _post_run(self):
         metadata = dict(name_source=lambda t: t is not None)
         out_names = list(self.inputs.traits(**metadata).keys())
         if out_names:
@@ -193,7 +191,6 @@ class AFNICommand(AFNICommandBase):
                     _, _, ext = split_filename(outputs[name])
                     if ext == "":
                         outputs[name] = outputs[name] + "+orig.BRIK"
-        return outputs
 
 
 def no_afni():

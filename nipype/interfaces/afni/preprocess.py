@@ -14,11 +14,11 @@ import os.path as op
 import re
 import numpy as np
 
-from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec,
-                   Info, no_afni)
-from ..base import CommandLineInputSpec
-from ..base import (Directory, TraitedSpec,
-                    traits, isdefined, File, InputMultiPath, Undefined)
+from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
+                   AFNICommandOutputSpec, Info, no_afni)
+from ..specs import CommandLineInputSpec, TraitedSpec, InputMultiPath
+from ..traits_extension import (Directory, traits, isdefined,
+                                File, Undefined)
 from ...external.six import string_types
 from ...utils.filemanip import (load_json, save_json, split_filename)
 

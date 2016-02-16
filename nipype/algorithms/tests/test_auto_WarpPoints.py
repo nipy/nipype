@@ -13,7 +13,6 @@ def test_WarpPoints_inputs():
     out_points=dict(keep_extension=True,
     name_source='points',
     name_template='%s_warped',
-    output_name='out_points',
     ),
     points=dict(mandatory=True,
     ),

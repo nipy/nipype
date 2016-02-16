@@ -14,9 +14,15 @@ def test_MeshWarpMaths_inputs():
     ),
     operator=dict(mandatory=True,
     ),
-    out_file=dict(usedefault=True,
+    out_file=dict(keep_extension=True,
+    name_source='in_surf',
+    name_template='%s_warped',
+    usedefault=True,
     ),
-    out_warp=dict(usedefault=True,
+    out_warp=dict(keep_extension=True,
+    name_source='in_surf',
+    name_template='%s_warp',
+    usedefault=True,
     ),
     )
     inputs = MeshWarpMaths.input_spec()

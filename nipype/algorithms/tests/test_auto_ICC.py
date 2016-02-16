@@ -4,11 +4,15 @@ from ..icc import ICC
 
 
 def test_ICC_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(icc_map=dict(),
+    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
     mask=dict(mandatory=True,
     ),
+    session_F_map=dict(),
+    session_var_map=dict(),
+    subject_var_map=dict(),
     subjects_sessions=dict(mandatory=True,
     ),
     )
@@ -21,6 +25,7 @@ def test_ICC_inputs():
 
 def test_ICC_outputs():
     output_map = dict(icc_map=dict(),
+    session_F_map=dict(),
     session_var_map=dict(),
     subject_var_map=dict(),
     )

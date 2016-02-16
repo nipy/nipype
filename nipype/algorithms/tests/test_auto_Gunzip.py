@@ -9,6 +9,11 @@ def test_Gunzip_inputs():
     ),
     in_file=dict(mandatory=True,
     ),
+    out_file=dict(keep_extension=False,
+    name_remove='.gz',
+    name_source='in_file',
+    name_template='%s',
+    ),
     )
     inputs = Gunzip.input_spec()
 
