@@ -85,6 +85,24 @@ class ANTSInputSpec(ANTSCommandInputSpec):
         traits.Int(), argstr='--number-of-affine-iterations %s', sep='x')
 
 
+    def _format_arg(self, opt, spec, val):
+        if opt == 'moving_image':
+            return self._image_metric_constructor()
+        elif opt == 'transformation_model':
+            return self._transformation_constructor()
+        elif opt == 'regularization':
+            return self._regularization_constructor()
+        elif opt == 'affine_gradient_descent_option':
+            return self._affine_gradient_descent_option_constructor()
+        elif opt == 'use_histogram_matching':
+            if self.inputs.use_histogram_matching:
+                return '--use-Histogram-Matching 1'
+            else:
+                return '--use-Histogram-Matching 0'
+        return super(ANTSInputSpec, self)._format_arg(opt, spec, val)
+
+
+
 class ANTSOutputSpec(TraitedSpec):
     affine_transform = File(exists=True, desc='Affine transform file')
     warp_transform = File(exists=True, desc='Warping deformation field')
@@ -186,22 +204,6 @@ class ANTS(ANTSCommand):
         retval = ['--affine-gradient-descent-option', parameters]
         return ' '.join(retval)
 
-    def _format_arg(self, opt, spec, val):
-        if opt == 'moving_image':
-            return self._image_metric_constructor()
-        elif opt == 'transformation_model':
-            return self._transformation_constructor()
-        elif opt == 'regularization':
-            return self._regularization_constructor()
-        elif opt == 'affine_gradient_descent_option':
-            return self._affine_gradient_descent_option_constructor()
-        elif opt == 'use_histogram_matching':
-            if self.inputs.use_histogram_matching:
-                return '--use-Histogram-Matching 1'
-            else:
-                return '--use-Histogram-Matching 0'
-        return super(ANTS, self)._format_arg(opt, spec, val)
-
     def _post_run(self):
         self.outputs.affine_transform = os.path.abspath(
             self.inputs.output_transform_prefix + 'Affine.txt')
@@ -211,7 +213,6 @@ class ANTS(ANTSCommand):
             self.inputs.output_transform_prefix + 'InverseWarp.nii.gz')
         # self.outputs.metaheader = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.mhd')
         # self.outputs.metaheader_raw = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.raw')
-        return outputs
 
 
 class RegistrationInputSpec(ANTSCommandInputSpec):
@@ -377,6 +378,62 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         low=0.0, high=1.0, value=1.0, argstr='%s', usedefault=True, desc="The Upper quantile to clip image ranges")
     winsorize_lower_quantile = traits.Range(
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
+
+
+    def _format_arg(self, opt, spec, val):
+        if opt == 'fixed_image_mask':
+            if isdefined(self.inputs.moving_image_mask):
+                return '--masks [ %s, %s ]' % (self.inputs.fixed_image_mask,
+                                               self.inputs.moving_image_mask)
+            else:
+                return '--masks %s' % self.inputs.fixed_image_mask
+        elif opt == 'transforms':
+            return self._format_registration()
+        elif opt == 'initial_moving_transform':
+            try:
+                do_invert_transform = int(self.inputs.invert_initial_moving_transform)
+            except ValueError:
+                do_invert_transform = 0  # Just do the default behavior
+            return '--initial-moving-transform [ %s, %d ]' % (self.inputs.initial_moving_transform,
+                                                              do_invert_transform)
+        elif opt == 'initial_moving_transform_com':
+            try:
+                do_center_of_mass_init = int(self.inputs.initial_moving_transform_com)
+            except ValueError:
+                do_center_of_mass_init = 0  # Just do the default behavior
+            return '--initial-moving-transform [ %s, %s, %d ]' % (self.inputs.fixed_image[0],
+                                                                  self.inputs.moving_image[0],
+                                                                  do_center_of_mass_init)
+        elif opt == 'interpolation':
+            if self.inputs.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
+                    isdefined(self.inputs.interpolation_parameters):
+                return '--interpolation %s[ %s ]' % (self.inputs.interpolation,
+                                                     ', '.join([str(param)
+                                                                for param in self.inputs.interpolation_parameters]))
+            else:
+                return '--interpolation %s' % self.inputs.interpolation
+        elif opt == 'output_transform_prefix':
+            out_filename = self._get_outputfilenames(inverse=False)
+            inv_out_filename = self._get_outputfilenames(inverse=True)
+            if out_filename and inv_out_filename:
+                return '--output [ %s, %s, %s ]' % (self.inputs.output_transform_prefix,
+                                                    out_filename,
+                                                    inv_out_filename)
+            elif out_filename:
+                return '--output [ %s, %s ]' % (self.inputs.output_transform_prefix,
+                                                out_filename)
+            else:
+                return '--output %s' % self.inputs.output_transform_prefix
+        elif opt == 'winsorize_upper_quantile' or opt == 'winsorize_lower_quantile':
+            if not self._quantilesDone:
+                return self._format_winsorize_image_intensities()
+            else:
+                self._quantilesDone = False
+                return ''  # Must return something for argstr!
+        # This feature was removed from recent versions of antsRegistration due to corrupt outputs.
+        # elif opt == 'collapse_linear_transforms_to_fixed_image_header':
+        #    return self._formatCollapseLinearTransformsToFixedImageHeader()
+        return super(RegistrationInputSpec, self)._format_arg(opt, spec, val)
 
 
 class RegistrationOutputSpec(TraitedSpec):
@@ -801,60 +858,6 @@ class Registration(ANTSCommand):
         return '--winsorize-image-intensities [ %s, %s ]' % (self.inputs.winsorize_lower_quantile,
                                                              self.inputs.winsorize_upper_quantile)
 
-    def _format_arg(self, opt, spec, val):
-        if opt == 'fixed_image_mask':
-            if isdefined(self.inputs.moving_image_mask):
-                return '--masks [ %s, %s ]' % (self.inputs.fixed_image_mask,
-                                               self.inputs.moving_image_mask)
-            else:
-                return '--masks %s' % self.inputs.fixed_image_mask
-        elif opt == 'transforms':
-            return self._format_registration()
-        elif opt == 'initial_moving_transform':
-            try:
-                do_invert_transform = int(self.inputs.invert_initial_moving_transform)
-            except ValueError:
-                do_invert_transform = 0  # Just do the default behavior
-            return '--initial-moving-transform [ %s, %d ]' % (self.inputs.initial_moving_transform,
-                                                              do_invert_transform)
-        elif opt == 'initial_moving_transform_com':
-            try:
-                do_center_of_mass_init = int(self.inputs.initial_moving_transform_com)
-            except ValueError:
-                do_center_of_mass_init = 0  # Just do the default behavior
-            return '--initial-moving-transform [ %s, %s, %d ]' % (self.inputs.fixed_image[0],
-                                                                  self.inputs.moving_image[0],
-                                                                  do_center_of_mass_init)
-        elif opt == 'interpolation':
-            if self.inputs.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
-                    isdefined(self.inputs.interpolation_parameters):
-                return '--interpolation %s[ %s ]' % (self.inputs.interpolation,
-                                                     ', '.join([str(param)
-                                                                for param in self.inputs.interpolation_parameters]))
-            else:
-                return '--interpolation %s' % self.inputs.interpolation
-        elif opt == 'output_transform_prefix':
-            out_filename = self._get_outputfilenames(inverse=False)
-            inv_out_filename = self._get_outputfilenames(inverse=True)
-            if out_filename and inv_out_filename:
-                return '--output [ %s, %s, %s ]' % (self.inputs.output_transform_prefix,
-                                                    out_filename,
-                                                    inv_out_filename)
-            elif out_filename:
-                return '--output [ %s, %s ]' % (self.inputs.output_transform_prefix,
-                                                out_filename)
-            else:
-                return '--output %s' % self.inputs.output_transform_prefix
-        elif opt == 'winsorize_upper_quantile' or opt == 'winsorize_lower_quantile':
-            if not self._quantilesDone:
-                return self._format_winsorize_image_intensities()
-            else:
-                self._quantilesDone = False
-                return ''  # Must return something for argstr!
-        # This feature was removed from recent versions of antsRegistration due to corrupt outputs.
-        # elif opt == 'collapse_linear_transforms_to_fixed_image_header':
-        #    return self._formatCollapseLinearTransformsToFixedImageHeader()
-        return super(Registration, self)._format_arg(opt, spec, val)
 
     def _output_filenames(self, prefix, count, transform, inverse=False):
         self.low_dimensional_transform_map = {'Rigid': 'Rigid.mat',
@@ -972,4 +975,4 @@ class Registration(ANTSCommand):
             self.outputs.inverse_warped_image = os.path.abspath(inv_out_filename)
         if len(self.inputs.save_state):
             self.outputs.save_state = os.path.abspath(self.inputs.save_state)
-        return outputs
+
