@@ -47,7 +47,7 @@ class MathsCommand(FSLCommand):
     output_spec = MathsOutput
     _suffix = "_maths"
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
@@ -264,7 +264,7 @@ class UnaryMaths(MathsCommand):
     """
     input_spec = UnaryMathsInput
 
-    def _list_outputs(self):
+    def _post_run(self):
         self._suffix = "_" + self.inputs.operation
         return super(UnaryMaths, self)._list_outputs()
 

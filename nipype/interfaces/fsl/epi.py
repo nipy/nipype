@@ -94,7 +94,7 @@ class PrepareFieldmap(FSLCommand):
 
         return super(PrepareFieldmap, self)._parse_inputs(skip=skip)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_fieldmap = self.inputs.out_fieldmap
         return outputs
@@ -254,7 +254,7 @@ class TOPUP(FSLCommand):
                     raise ValueError('out_base path must exist if provided')
         return super(TOPUP, self)._format_arg(name, trait_spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = super(TOPUP, self)._list_outputs()
         del self.outputs.out_base
         base_path = None
@@ -492,7 +492,7 @@ class Eddy(FSLCommand):
             return spec.argstr % os.path.abspath(value)
         return super(Eddy, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_corrected = os.path.abspath('%s.nii.gz' % self.inputs.out_base)
         self.outputs.out_parameter = os.path.abspath('%s.eddy_parameters' % self.inputs.out_base)
@@ -545,7 +545,7 @@ class SigLoss(FSLCommand):
     output_spec = SigLossOuputSpec
     _cmd = 'sigloss'
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = self.inputs.out_file
         if ((not isdefined(self.outputs.out_file)) and
@@ -649,7 +649,7 @@ class EpiReg(FSLCommand):
     input_spec = EpiRegInputSpec
     output_spec = EpiRegOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = os.path.join(os.getcwd(),
                                            self.inputs.out_base + '.nii.gz')
@@ -788,7 +788,7 @@ class EPIDeWarp(FSLCommand):
             return os.path.join(os.getcwd(), 'temp')
         return None
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if not isdefined(self.inputs.exfdw):
             self.outputs.exfdw = self._gen_filename('exfdw')

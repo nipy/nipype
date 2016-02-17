@@ -138,7 +138,7 @@ class SlicerCommandLine(CommandLine):
             ext = {'image': '.nii', 'transform': '.txt', 'file': ''}[param.nodeName]
         return base + ext
 
-    def _list_outputs(self):
+    def _post_run(self):
 
         for output_node in self._outputs_nodes:
             name = output_node.getElementsByTagName('name')[0].firstChild.nodeValue

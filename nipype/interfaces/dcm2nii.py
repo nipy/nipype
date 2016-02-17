@@ -159,7 +159,7 @@ class Dcm2nii(CommandLine):
             skip = False
         return files, reoriented_files, reoriented_and_cropped_files, bvecs, bvals
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.converted_files = self.output_files
         self.outputs.reoriented_files = self.reoriented_files

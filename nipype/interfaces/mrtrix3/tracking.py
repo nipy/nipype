@@ -248,7 +248,7 @@ class Tractography(MRTrix3Base):
 
         return super(Tractography, self)._format_arg(name, trait_spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs

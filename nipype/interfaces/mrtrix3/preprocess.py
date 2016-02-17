@@ -105,7 +105,7 @@ class ResponseSD(MRTrix3Base):
     input_spec = ResponseSDInputSpec
     output_spec = ResponseSDOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = op.abspath(self.inputs.out_file)
 
@@ -148,7 +148,7 @@ class ACTPrepareFSL(CommandLine):
     input_spec = ACTPrepareFSLInputSpec
     output_spec = ACTPrepareFSLOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs
@@ -195,7 +195,7 @@ mrtrix3_labelconfig.txt aparc+first.mif'
     input_spec = ReplaceFSwithFIRSTInputSpec
     output_spec = ReplaceFSwithFIRSTOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs

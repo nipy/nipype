@@ -87,7 +87,7 @@ class DTIRecon(CommandLine):
             return super(DTIRecon, self)._format_arg("bvecs", spec, new_val)
         return super(DTIRecon, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         out_prefix = self.inputs.out_prefix
         output_type = self.inputs.output_type
 
@@ -163,7 +163,7 @@ class DTITracker(CommandLine):
 
         return super(DTITracker, self)._run_interface(runtime)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.track_file = os.path.abspath(self.inputs.output_file)
         if isdefined(self.inputs.output_mask) and self.inputs.output_mask:

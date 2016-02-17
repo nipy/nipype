@@ -318,7 +318,7 @@ class SPMCommand(BaseInterface):
         runtime.merged = results.runtime.merged
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         """Determine the expected outputs based on inputs."""
 
         raise NotImplementedError

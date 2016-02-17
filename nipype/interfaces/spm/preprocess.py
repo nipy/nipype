@@ -342,7 +342,7 @@ class Coregister(SPMCommand):
         jobtype = self.inputs.jobtype
         return [{'%s' % (jobtype): einputs[0]}]
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if self.inputs.jobtype == "estimate":
             if isdefined(self.inputs.apply_to_files):
@@ -476,7 +476,7 @@ class Normalize(SPMCommand):
                     einputs[0]['subj']['resample'] = scans_for_fname(self.inputs.source)
         return [{'%s' % (jobtype): einputs[0]}]
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         jobtype = self.inputs.jobtype
         if jobtype.startswith('est'):
@@ -637,7 +637,7 @@ class Normalize12(SPMCommand):
                     einputs[0]['subj']['resample'] = scans_for_fname(self.inputs.image_to_align)
         return [{'%s' % (jobtype): einputs[0]}]
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         jobtype = self.inputs.jobtype
         if jobtype.startswith('est'):
@@ -1513,7 +1513,7 @@ class VBMSegment(SPMCommand):
     _jobtype = 'tools'
     _jobname = 'vbm8'
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         do_dartel = self.inputs.spatial_normalization
         dartel_px = ''

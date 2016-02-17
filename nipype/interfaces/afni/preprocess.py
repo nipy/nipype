@@ -207,7 +207,7 @@ class Refit(AFNICommandBase):
     input_spec = RefitInputSpec
     output_spec = AFNICommandOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = os.path.abspath(self.inputs.in_file)
         return outputs
@@ -1161,7 +1161,7 @@ class Allineate(AFNICommand):
             return arg
         return super(Allineate, self)._format_arg(name, trait_spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if not isdefined(self.inputs.out_file):
             self.outputs.out_file = self._gen_filename(self.inputs.in_file,
@@ -2193,7 +2193,7 @@ class Hist(AFNICommandBase):
         return super(Hist, self)._parse_inputs(skip=skip)
 
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = super(Hist, self)._list_outputs()
         self.outputs.out_file += '.niml.hist'
         if not self.inputs.showhist:
@@ -2386,7 +2386,7 @@ class FWHMx(AFNICommandBase):
                 return trait_spec.argstr + ' ' + value
         return super(FWHMx, self)._format_arg(name, trait_spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = super(FWHMx, self)._list_outputs()
 
         if self.inputs.detrend:

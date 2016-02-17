@@ -162,7 +162,7 @@ class PETPVC(CommandLine):
     output_spec = PETPVCOutputSpec
     _cmd = 'petpvc'
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):

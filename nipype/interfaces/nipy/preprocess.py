@@ -372,7 +372,7 @@ class Trim(BaseInterface):
         nb.save(nii2, out_file)
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):

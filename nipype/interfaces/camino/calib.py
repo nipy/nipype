@@ -120,7 +120,7 @@ class SFPICOCalibData(StdOutCommandLine):
     input_spec = SFPICOCalibDataInputSpec
     output_spec = SFPICOCalibDataOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.PICOCalib = os.path.abspath(self._gen_outfilename())
         self.outputs.calib_info = os.path.abspath(self.inputs.info_file)
@@ -227,7 +227,7 @@ class SFLUTGen(StdOutCommandLine):
     input_spec = SFLUTGenInputSpec
     output_spec = SFLUTGenOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.lut_one_fibre = self.inputs.outputstem + '_oneFibreSurfaceCoeffs.Bdouble'
         self.outputs.lut_two_fibres = self.inputs.outputstem + '_twoFibreSurfaceCoeffs.Bdouble'

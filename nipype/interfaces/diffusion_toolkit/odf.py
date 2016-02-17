@@ -85,7 +85,7 @@ class HARDIMat(CommandLine):
             return super(HARDIMat, self)._format_arg("bvecs", spec, new_val)
         return super(HARDIMat, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = os.path.abspath(self.inputs.out_file)
         return outputs
@@ -138,7 +138,7 @@ class ODFRecon(CommandLine):
 
     _cmd = 'odf_recon'
 
-    def _list_outputs(self):
+    def _post_run(self):
         out_prefix = self.inputs.out_prefix
         output_type = self.inputs.output_type
 
@@ -229,7 +229,7 @@ class ODFTracker(CommandLine):
 
         return super(ODFTracker, self)._run_interface(runtime)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.track_file = os.path.abspath(self.inputs.out_file)
         return outputs

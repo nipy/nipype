@@ -73,7 +73,7 @@ class WatershedBEM(FSCommand):
         globpattern = op.join(keydir, ''.join((globprefix, key, globsuffix)))
         return glob.glob(globpattern)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         subjects_dir = self.inputs.subjects_dir
         subject_path = op.join(subjects_dir, self.inputs.subject_id)

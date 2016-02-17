@@ -66,7 +66,7 @@ class ParseDICOMDir(FSCommand):
     input_spec = ParseDICOMDirInputSpec
     output_spec = ParseDICOMDirOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if isdefined(self.inputs.dicom_info_file):
             self.outputs.dicom_info_file = os.path.join(os.getcwd(), self.inputs.dicom_info_file)
@@ -374,7 +374,7 @@ class MRIConvert(FSCommand):
                                       use_ext=False)
         return os.path.abspath(outfile)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         outfile = self._get_outfilename()
         if isdefined(self.inputs.split) and self.inputs.split:
@@ -585,7 +585,7 @@ class Resample(FSCommand):
                                       suffix='_resample')
         return outfile
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.resampled_file = self._get_outfilename()
         return outputs
@@ -736,7 +736,7 @@ class ReconAll(CommandLine):
             return self._gen_subjects_dir()
         return None
 
-    def _list_outputs(self):
+    def _post_run(self):
         """
         See io.FreeSurferSource.outputs for the list of outputs returned
         """
@@ -867,7 +867,7 @@ class BBRegister(FSCommand):
     input_spec = BBRegisterInputSpec
     output_spec = BBRegisterOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
 
         
         _in = self.inputs
@@ -1016,7 +1016,7 @@ class ApplyVolTransform(FSCommand):
                                       suffix='_warped')
         return outfile
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.transformed_file = os.path.abspath(self._get_outfile())
         return outputs
@@ -1081,7 +1081,7 @@ class Smooth(FSCommand):
     input_spec = SmoothInputSpec
     output_spec = SmoothOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         outfile = self.inputs.smoothed_file
         if not isdefined(outfile):
@@ -1202,7 +1202,7 @@ class RobustRegister(FSCommand):
                 return spec.argstr % fname
         return super(RobustRegister, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_reg_file = self.inputs.out_reg_file
         if not isdefined(self.inputs.out_reg_file) and self.inputs.source_file:
@@ -1287,7 +1287,7 @@ class FitMSParams(FSCommand):
             return cmd
         return super(FitMSParams, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if not isdefined(self.inputs.out_dir):
             out_dir = self._gen_filename("out_dir")
@@ -1344,7 +1344,7 @@ class SynthesizeFLASH(FSCommand):
     input_spec = SynthesizeFLASHInputSpec
     output_spec = SynthesizeFLASHOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if isdefined(self.inputs.out_file):
             self.outputs.out_file = self.inputs.out_file

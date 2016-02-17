@@ -73,7 +73,7 @@ class Camino2Trackvis(CommandLine):
     input_spec = Camino2TrackvisInputSpec
     output_spec = Camino2TrackvisOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.trackvis = os.path.abspath(self._gen_outfilename())
         return outputs
@@ -124,7 +124,7 @@ class Trackvis2Camino(CommandLine):
     input_spec = Trackvis2CaminoInputSpec
     output_spec = Trackvis2CaminoOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.camino = os.path.abspath(self._gen_outfilename())
         return outputs

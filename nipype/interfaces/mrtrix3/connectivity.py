@@ -104,7 +104,7 @@ class BuildConnectome(MRTrix3Base):
     input_spec = BuildConnectomeInputSpec
     output_spec = BuildConnectomeOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs
@@ -181,7 +181,7 @@ class LabelConfig(MRTrix3Base):
 
         return super(LabelConfig, self)._parse_inputs(skip=skip)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs

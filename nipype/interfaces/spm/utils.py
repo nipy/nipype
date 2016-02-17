@@ -172,7 +172,7 @@ class ApplyTransform(SPMCommand):
         # spm_get_space(infile, transform.M * img_space);
         return script
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if not isdefined(self.inputs.out_file):
             self.outputs.out_file = os.path.abspath(self._gen_outfilename())
@@ -454,7 +454,7 @@ class DicomImport(SPMCommand):
             os.mkdir(od)
         return super(DicomImport, self)._run_interface(runtime)
 
-    def _list_outputs(self):
+    def _post_run(self):
         from glob import glob
                 od = os.path.abspath(self.inputs.output_dir)
 

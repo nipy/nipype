@@ -482,7 +482,7 @@ class NetworkXMetrics(BaseInterface):
             dicts.append(out_file)
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.k_core = op.abspath(self._gen_outfilename(self.inputs.out_k_core, 'pck'))
         self.outputs.k_shell = op.abspath(self._gen_outfilename(self.inputs.out_k_shell, 'pck'))
@@ -547,7 +547,7 @@ class AverageNetworks(BaseInterface):
         network_name, matlab_network_list = average_networks(self.inputs.in_files, ntwk_res_file, self.inputs.group_id)
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if not isdefined(self.inputs.out_gpickled_groupavg):
             self.outputs.gpickled_groupavg = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'pck'))

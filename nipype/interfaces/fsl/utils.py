@@ -120,7 +120,7 @@ class ImageMeants(FSLCommand):
     input_spec = ImageMeantsInputSpec
     output_spec = ImageMeantsOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):
@@ -320,7 +320,7 @@ class ExtractROI(FSLCommand):
             return " ".join(map(str, sum(list(map(list, value)), [])))
         return super(ExtractROI, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
@@ -371,7 +371,7 @@ class Split(FSLCommand):
     input_spec = SplitInputSpec
     output_spec = SplitOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         """Create a Bunch which contains all possible files generated
         by running the interface.  Some files are always generated, others
         depending on which ``inputs`` options are set.
@@ -443,7 +443,7 @@ class ImageMaths(FSLCommand):
     def _parse_inputs(self, skip=None):
         return super(ImageMaths, self)._parse_inputs(skip=['suffix'])
 
-    def _list_outputs(self):
+    def _post_run(self):
         suffix = '_maths'  # ohinds: build suffix
         if isdefined(self.inputs.suffix):
             suffix = self.inputs.suffix
@@ -507,7 +507,7 @@ class FilterRegressor(FSLCommand):
             return trait_spec.argstr % ",".join(map(str, list(range(1, n_cols + 1))))
         return super(FilterRegressor, self)._format_arg(name, trait_spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):
@@ -1246,7 +1246,7 @@ class PowerSpectrum(FSLCommand):
                                        suffix='_ps')
         return out_file
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = os.path.abspath(self._gen_outfilename())
         return outputs
@@ -1298,7 +1298,7 @@ class SigLoss(FSLCommand):
     output_spec = SigLossOuputSpec
     _cmd = 'sigloss'
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file) and \
@@ -1346,7 +1346,7 @@ class Reorient2Std(FSLCommand):
                                    suffix="_reoriented")
         return None
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if not isdefined(self.inputs.out_file):
             self.outputs.out_file = self._gen_filename('out_file')
@@ -1551,7 +1551,7 @@ class Complex(FSLCommand):
             output = self._gen_filename(name)
         return os.path.abspath(output)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if self.inputs.complex_cartesian or self.inputs.complex_polar or \
                 self.inputs.complex_split or self.inputs.complex_merge:

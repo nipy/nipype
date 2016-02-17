@@ -111,7 +111,7 @@ class MeshFix(CommandLine):
     input_spec = MeshFixInputSpec
     output_spec = MeshFixOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if isdefined(self.inputs.out_filename):
             path, name, ext = split_filename(self.inputs.out_filename)

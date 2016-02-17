@@ -847,7 +847,7 @@ class MRIsConvert(FSCommand):
             value = os.path.abspath(value)
         return super(MRIsConvert, self)._format_arg(name, spec, value)
     
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.converted = os.path.abspath(self._gen_outfilename())
         return outputs
@@ -915,7 +915,7 @@ class MRITessellate(FSCommand):
     input_spec = MRITessellateInputSpec
     output_spec = MRITessellateOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.surface = os.path.abspath(self._gen_outfilename())
         return outputs
@@ -985,7 +985,7 @@ class MRIPretess(FSCommand):
     input_spec = MRIPretessInputSpec
     output_spec = MRIPretessOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = os.path.abspath(self._gen_outfilename())
         return outputs
@@ -1042,7 +1042,7 @@ class MRIMarchingCubes(FSCommand):
     input_spec = MRIMarchingCubesInputSpec
     output_spec = MRIMarchingCubesOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.surface = self._gen_outfilename()
         return outputs
@@ -1113,7 +1113,7 @@ class SmoothTessellation(FSCommand):
     input_spec = SmoothTessellationInputSpec
     output_spec = SmoothTessellationOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.surface = self._gen_outfilename()
         return outputs
@@ -1170,7 +1170,7 @@ class MakeAverageSubject(FSCommand):
     input_spec = MakeAverageSubjectInputSpec
     output_spec = MakeAverageSubjectOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.average_subject_name = self.inputs.out_name
         return outputs

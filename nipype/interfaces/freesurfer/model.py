@@ -97,7 +97,7 @@ class MRISPreproc(FSCommand):
     input_spec = MRISPreprocInputSpec
     output_spec = MRISPreprocOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         outfile = self.inputs.out_file
         self.outputs.out_file = outfile
@@ -277,7 +277,7 @@ class GLMFit(FSCommand):
             return spec.argstr % (_si.subject_id, _si.hemi, _si.surf_geo)
         return super(GLMFit, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         # Get the top-level output directory
         if not isdefined(self.inputs.glm_dir):
@@ -417,7 +417,7 @@ class Binarize(FSCommand):
     input_spec = BinarizeInputSpec
     output_spec = BinarizeOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         outfile = self.inputs.binary_file
         if not isdefined(outfile):
@@ -526,7 +526,7 @@ class Concatenate(FSCommand):
     input_spec = ConcatenateInputSpec
     output_spec = ConcatenateOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if not isdefined(self.inputs.concatenated_file):
             self.outputs.concatenated_file = os.path.join(os.getcwd(),
@@ -634,7 +634,7 @@ class SegStats(FSCommand):
     input_spec = SegStatsInputSpec
     output_spec = SegStatsOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if isdefined(self.inputs.summary_file):
             self.outputs.summary_file = os.path.abspath(self.inputs.summary_file)
@@ -753,7 +753,7 @@ class Label2Vol(FSCommand):
     input_spec = Label2VolInputSpec
     output_spec = Label2VolOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         outfile = self.inputs.vol_label_file
         if not isdefined(outfile):

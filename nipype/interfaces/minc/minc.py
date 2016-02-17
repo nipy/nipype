@@ -1697,7 +1697,7 @@ class Blur(StdOutCommandLine):
             # '_bluroutput'
             return output_base
 
-    def _list_outputs(self):
+    def _post_run(self):
         
 
         output_file_base = self._gen_output_base()
@@ -2972,7 +2972,7 @@ class Gennlxfm(CommandLine):
     output_spec = GennlxfmOutputSpec
     _cmd = 'gennlxfm'
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = super(Gennlxfm, self)._list_outputs()
         self.outputs.output_grid = re.sub(
             '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_file)
@@ -3036,7 +3036,7 @@ class XfmConcat(CommandLine):
     output_spec = XfmConcatOutputSpec
     _cmd = 'xfmconcat'
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = super(XfmConcat, self)._list_outputs()
 
         if os.path.exists(self.outputs.output_file):
@@ -3232,7 +3232,7 @@ class NlpFit(CommandLine):
         else:
             raise NotImplemented
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.output_xfm = os.path.abspath(
             self._gen_filename('output_xfm'))
@@ -3337,7 +3337,7 @@ class XfmAvg(CommandLine):
     def _gen_outfilename(self):
         return self._gen_filename('output_file')
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.output_file = os.path.abspath(self._gen_outfilename())
 
@@ -3411,7 +3411,7 @@ class XfmInvert(CommandLine):
     def _gen_outfilename(self):
         return self._gen_filename('output_file')
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.output_file = os.path.abspath(self._gen_outfilename())
 
@@ -3673,7 +3673,7 @@ class VolSymm(CommandLine):
     output_spec = VolSymmOutputSpec
     _cmd = 'volsymm'
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = super(VolSymm, self)._list_outputs()
 
         # Have to manually check for the grid files.

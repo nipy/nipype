@@ -79,7 +79,7 @@ class SumInterface(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         global _sum
         global _sum_operands
                 self.outputs.operands = self.inputs.input1
@@ -109,7 +109,7 @@ class SetInterface(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         global _set_len
                 _set_len = self.outputs.output1 = len(self.inputs.input1)
         return outputs
@@ -136,7 +136,7 @@ class ProductInterface(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         global _products
                 self.outputs.output1 = self.inputs.input1 * self.inputs.input2
         _products.append(self.outputs.output1)

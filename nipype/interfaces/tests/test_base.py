@@ -568,7 +568,7 @@ def test_output_version():
         def _run_interface(self, runtime):
             return runtime
 
-        def _list_outputs(self):
+        def _post_run(self):
             return {'foo': 1}
     obj = DerivedInterface1()
     yield assert_raises, KeyError, obj.run

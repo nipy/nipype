@@ -67,7 +67,7 @@ class MRConvert(CommandLine):
     input_spec = MRConvertInputSpec
     output_spec = MRConvertOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.converted = self.inputs.out_filename
         if not isdefined(self.outputs.converted):
@@ -180,7 +180,7 @@ class Tensor2Vector(CommandLine):
     input_spec = Tensor2VectorInputSpec
     output_spec = Tensor2VectorOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.vector = self.inputs.out_filename
         if not isdefined(self.outputs.vector):
@@ -229,7 +229,7 @@ class Tensor2FractionalAnisotropy(CommandLine):
     input_spec = Tensor2FractionalAnisotropyInputSpec
     output_spec = Tensor2FractionalAnisotropyOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.FA = self.inputs.out_filename
         if not isdefined(self.outputs.FA):
@@ -278,7 +278,7 @@ class Tensor2ApparentDiffusion(CommandLine):
     input_spec = Tensor2ApparentDiffusionInputSpec
     output_spec = Tensor2ApparentDiffusionOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.ADC = self.inputs.out_filename
         if not isdefined(self.outputs.ADC):
@@ -328,7 +328,7 @@ class MRMultiply(CommandLine):
     input_spec = MRMultiplyInputSpec
     output_spec = MRMultiplyOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = self.inputs.out_filename
         if not isdefined(self.outputs.out_file):
@@ -377,7 +377,7 @@ class MRTrixViewer(CommandLine):
     input_spec = MRTrixViewerInputSpec
     output_spec = MRTrixViewerOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         return
 
 
@@ -407,7 +407,7 @@ class MRTrixInfo(CommandLine):
     input_spec = MRTrixInfoInputSpec
     output_spec = MRTrixInfoOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         return
 
 
@@ -442,7 +442,7 @@ class GenerateWhiteMatterMask(CommandLine):
     input_spec = GenerateWhiteMatterMaskInputSpec
     output_spec = GenerateWhiteMatterMaskOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.WMprobabilitymap = op.abspath(self._gen_outfilename())
         return outputs
@@ -488,7 +488,7 @@ class Erode(CommandLine):
     input_spec = ErodeInputSpec
     output_spec = ErodeOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = self.inputs.out_filename
         if not isdefined(self.outputs.out_file):
@@ -546,7 +546,7 @@ class Threshold(CommandLine):
     input_spec = ThresholdInputSpec
     output_spec = ThresholdOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = self.inputs.out_filename
         if not isdefined(self.outputs.out_file):
@@ -595,7 +595,7 @@ class MedianFilter3D(CommandLine):
     input_spec = MedianFilter3DInputSpec
     output_spec = MedianFilter3DOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = self.inputs.out_filename
         if not isdefined(self.outputs.out_file):
@@ -653,7 +653,7 @@ class MRTransform(CommandLine):
     input_spec = MRTransformInputSpec
     output_spec = MRTransformOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_file = self.inputs.out_filename
         if not isdefined(self.outputs.out_file):

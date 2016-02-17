@@ -132,7 +132,7 @@ class Conmat(CommandLine):
     input_spec = ConmatInputSpec
     output_spec = ConmatOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         output_root = self._gen_outputroot()
         self.outputs.conmat_sc = os.path.abspath(output_root + "sc.csv")

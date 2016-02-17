@@ -496,7 +496,7 @@ class CreateMatrix(BaseInterface):
              matrix_file, matrix_mat_file, endpoint_name, self.inputs.count_region_intersections)
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         if isdefined(self.inputs.out_matrix_file):
             path, name, _ = split_filename(self.inputs.out_matrix_file)

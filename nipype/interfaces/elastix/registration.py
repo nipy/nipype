@@ -65,7 +65,7 @@ class Registration(CommandLine):
     input_spec = RegistrationInputSpec
     output_spec = RegistrationOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         out_dir = op.abspath(self.inputs.output_path)
 

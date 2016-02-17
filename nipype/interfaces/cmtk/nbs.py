@@ -127,7 +127,7 @@ class NetworkBasedStatistic(BaseInterface):
         iflogger.info('Saving output p-value network as {out}'.format(out=pval_path))
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         
 
         THRESH = self.inputs.threshold

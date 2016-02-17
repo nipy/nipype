@@ -343,7 +343,7 @@ class Level1Design(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         cwd = os.getcwd()
         self.outputs.fsf_files = []
@@ -453,7 +453,7 @@ class FEATModel(FSLCommand):
         _, fname = os.path.split(infile)
         return fname.split('.')[0]
 
-    def _list_outputs(self):
+    def _post_run(self):
         # TODO: figure out file names and get rid off the globs
                 root = self._get_design_root(list_to_filename(self.inputs.fsf_file))
         design_file = glob(os.path.join(os.getcwd(), '%s*.mat' % root))
@@ -1491,7 +1491,7 @@ class MELODIC(FSLCommand):
     output_spec = MELODICOutputSpec
     _cmd = 'melodic'
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.out_dir = self.inputs.out_dir
         if not isdefined(self.outputs.out_dir):
@@ -1650,7 +1650,7 @@ class Cluster(FSLCommand):
                'out_size_file': 'size', 'out_max_file': 'max',
                'out_mean_file': 'mean', 'out_pval_file': 'pval'}
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         for key, suffix in list(self.filemap.items()):
             outkey = key[4:]
@@ -1780,7 +1780,7 @@ class Randomise(FSLCommand):
     input_spec = RandomiseInputSpec
     output_spec = RandomiseOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         
         self.outputs.tstat_files = glob(self._gen_fname(
             '%s_tstat*.nii' % self.inputs.base_name))
@@ -1916,7 +1916,7 @@ class GLM(FSLCommand):
     input_spec = GLMInputSpec
     output_spec = GLMOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = super(GLM, self)._list_outputs()
 
         if isdefined(self.inputs.out_cope):
