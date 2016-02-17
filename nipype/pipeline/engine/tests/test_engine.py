@@ -424,10 +424,10 @@ import os
 from nipype.external.six import StringIO
 from nipype.utils.config import config
 
-config.readfp(StringIO("""
+config.readfp(StringIO('''
 [execution]
 remove_unnecessary_outputs = true
-"""))
+'''))
 
 
 segment = pe.Node(interface=spm.Segment(), name="segment")

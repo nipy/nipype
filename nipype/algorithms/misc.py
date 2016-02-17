@@ -35,7 +35,7 @@ from ..interfaces.specs import BaseInterfaceInputSpec, TraitedSpec, InputMultiPa
 from ..interfaces.base import BaseInterface
 
 
-from ... import logging
+from .. import logging
 IFLOGGER = logging.getLogger('interface')
 
 
