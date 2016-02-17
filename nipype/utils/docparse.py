@@ -141,10 +141,10 @@ def insert_doc(doc, new_items):
     Examples
     --------
     >>> from nipype.utils.docparse import insert_doc
-    >>> doc = """Parameters
+    >>> doc = '''Parameters
     ... ----------
     ... outline :
-    ...     something about an outline"""
+    ...     something about an outline'''
 
     >>> new_items = ['infile : str', '    The name of the input file']
     >>> new_items.extend(['outfile : str', '    The name of the output file'])

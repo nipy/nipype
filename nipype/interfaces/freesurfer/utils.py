@@ -214,7 +214,7 @@ class SampleToSurface(FSCommand):
                                           suffix="_vox.txt",
                                           use_ext=False)
             self.outputs.vox_file = voxfile
-        
+
     def _gen_filename(self, name):
         if name == "out_file":
             return getattr(self.outputs, name)
@@ -282,7 +282,7 @@ class SurfaceSmooth(FSCommand):
             self.outputs.out_file = fname_presuffix(in_file,
                                                   suffix="_smooth%d" % kernel,
                                                   newpath=os.getcwd())
-        
+
     def _gen_filename(self, name):
         if name == "out_file":
             return getattr(self.outputs, name)
@@ -374,7 +374,7 @@ class SurfaceTransform(FSCommand):
                                                   use_ext=use_ext)
         else:
             self.outputs.out_file = os.path.abspath(self.inputs.out_file)
-        
+
     def _gen_filename(self, name):
         if name == "out_file":
             return getattr(self.outputs, name)
@@ -488,7 +488,7 @@ class ApplyMask(FSCommand):
                                                   use_ext=True)
         else:
             self.outputs.out_file = os.path.abspath(self.outputs.out_file)
-        
+
     def _gen_filename(self, name):
         if name == "out_file":
             return getattr(self.outputs, name)
@@ -697,7 +697,7 @@ class SurfaceSnapshots(FSCommand):
             snapshots.extend(["%s-pos.tif", "%s-ant.tif"])
         snapshots = [self._gen_fname(f % stem, suffix="") for f in snapshots]
         self.outputs.snapshots = snapshots
-        
+
     def _gen_filename(self, name):
         if name == "tcl_script":
             return "snapshots.tcl"
@@ -765,7 +765,7 @@ class ImageInfo(FSCommand):
         outputs.file_format = ftype
         outputs.data_type = dtype
 
-        
+
 
 class MRIsConvertInputSpec(FSTraitedSpec):
     """
@@ -840,11 +840,11 @@ class MRIsConvert(FSCommand):
         if name == "out_file" and not os.path.isabs(value):
             value = os.path.abspath(value)
         return super(MRIsConvert, self)._format_arg(name, spec, value)
-    
+
     def _post_run(self):
-        
+
         self.outputs.converted = os.path.abspath(self._gen_outfilename())
-        
+
     def _gen_filename(self, name):
         if name is 'out_file':
             return os.path.abspath(self._gen_outfilename())
@@ -909,9 +909,9 @@ class MRITessellate(FSCommand):
     output_spec = MRITessellateOutputSpec
 
     def _post_run(self):
-        
+
         self.outputs.surface = os.path.abspath(self._gen_outfilename())
-        
+
     def _gen_filename(self, name):
         if name is 'out_file':
             return self._gen_outfilename()
@@ -978,9 +978,9 @@ class MRIPretess(FSCommand):
     output_spec = MRIPretessOutputSpec
 
     def _post_run(self):
-        
+
         self.outputs.out_file = os.path.abspath(self._gen_outfilename())
-        
+
     def _gen_filename(self, name):
         if name is 'out_file':
             return self._gen_outfilename()
@@ -1034,9 +1034,9 @@ class MRIMarchingCubes(FSCommand):
     output_spec = MRIMarchingCubesOutputSpec
 
     def _post_run(self):
-        
+
         self.outputs.surface = self._gen_outfilename()
-        
+
     def _gen_filename(self, name):
         if name is 'out_file':
             return self._gen_outfilename()
@@ -1104,9 +1104,9 @@ class SmoothTessellation(FSCommand):
     output_spec = SmoothTessellationOutputSpec
 
     def _post_run(self):
-        
+
         self.outputs.surface = self._gen_outfilename()
-        
+
     def _gen_filename(self, name):
         if name is 'out_file':
             return self._gen_outfilename()
@@ -1160,9 +1160,9 @@ class MakeAverageSubject(FSCommand):
     output_spec = MakeAverageSubjectOutputSpec
 
     def _post_run(self):
-        
+
         self.outputs.average_subject_name = self.inputs.out_name
-        
+
 
 class ExtractMainComponentInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, mandatory=True, argstr='%s', position=1,
@@ -1272,7 +1272,7 @@ class Tkregister2(FSCommand):
         self.outputs.reg_file = os.path.abspath(self.inputs.reg_file)
         if isdefined(self.inputs.fsl_out):
             self.outputs.fsl_file = os.path.abspath(self.inputs.fsl_out)
-        
+
     def _gen_outfilename(self):
         if isdefined(self.inputs.out_file):
             return os.path.abspath(self.inputs.out_file)

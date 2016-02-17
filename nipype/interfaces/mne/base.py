@@ -74,7 +74,7 @@ class WatershedBEM(FSCommand):
         return glob.glob(globpattern)
 
     def _post_run(self):
-        
+
         subjects_dir = self.inputs.subjects_dir
         subject_path = op.join(subjects_dir, self.inputs.subject_id)
         output_traits = self._outputs()
@@ -94,8 +94,8 @@ class WatershedBEM(FSCommand):
                         out_files = op.abspath(value_list)
                     else:
                         raise TypeError
-                    setattr(self.outputs, k, out_files
+                    setattr(self.outputs, k, out_files)
                     if not k.rfind('surface') == -1:
                         mesh_paths.append(out_files)
         self.outputs.mesh_files = mesh_paths
-        
+

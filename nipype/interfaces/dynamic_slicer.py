@@ -20,7 +20,7 @@ class SlicerCommandLineInputSpec(DynamicTraitedSpec, CommandLineInputSpec):
             else:
                 fname = value
             return spec.argstr % fname
-        return super(SlicerCommandLine, self)._format_arg(name, spec, value)
+        return super(SlicerCommandLineInputSpec, self)._format_arg(name, spec, value)
 
 
 class SlicerCommandLine(CommandLine):
@@ -148,7 +148,7 @@ class SlicerCommandLine(CommandLine):
                     setattr(self.outputs, name, self._gen_filename(name))
                 else:
                     setattr(self.outputs, name, Undefined)
-        
+
 
 #    test = SlicerCommandLine(module="BRAINSFit")
 #    test.inputs.fixedVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"

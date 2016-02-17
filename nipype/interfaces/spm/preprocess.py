@@ -107,7 +107,7 @@ class SliceTiming(SPMCommand):
             else:
                 run = fname_presuffix(f, prefix=self.inputs.out_prefix)
             self.outputs.timecorrected_files.append(run)
-        
+
 
 class RealignInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(traits.Either(traits.List(File(exists=True)),
@@ -249,7 +249,7 @@ class Realign(SPMCommand):
                         realigned_run = fname_presuffix(imgf,
                                                         prefix=self.inputs.out_prefix)
                     self.outputs.realigned_files.append(realigned_run)
-        
+
 
 class CoregisterInputSpec(SPMCommandInputSpec):
     target = File(exists=True, field='ref', mandatory=True,
@@ -341,7 +341,7 @@ class Coregister(SPMCommand):
         return [{'%s' % (jobtype): einputs[0]}]
 
     def _post_run(self):
-        
+
         if self.inputs.jobtype == "estimate":
             if isdefined(self.inputs.apply_to_files):
                 self.outputs.coregistered_files = self.inputs.apply_to_files
@@ -356,7 +356,7 @@ class Coregister(SPMCommand):
             for imgf in filename_to_list(self.inputs.source):
                 self.outputs.coregistered_source.append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
 
-        
+
 
 class NormalizeInputSpec(SPMCommandInputSpec):
     template = File(exists=True, field='eoptions.template',
@@ -474,7 +474,7 @@ class Normalize(SPMCommand):
         return [{'%s' % (jobtype): einputs[0]}]
 
     def _post_run(self):
-        
+
         jobtype = self.inputs.jobtype
         if jobtype.startswith('est'):
             self.outputs.normalization_parameters = []
@@ -508,7 +508,7 @@ class Normalize(SPMCommand):
                     self.outputs.normalized_source.append(fname_presuffix(imgf,
                                                                         prefix=prefixNorm))
 
-        
+
 
 class Normalize12InputSpec(SPMCommandInputSpec):
     image_to_align = File(exists=True, field='subj.vol',
@@ -634,7 +634,7 @@ class Normalize12(SPMCommand):
         return [{'%s' % (jobtype): einputs[0]}]
 
     def _post_run(self):
-        
+
         jobtype = self.inputs.jobtype
         if jobtype.startswith('est'):
             self.outputs.deformation_field = []
@@ -662,7 +662,7 @@ class Normalize12(SPMCommand):
                 self.outputs.normalized_image = fname_presuffix(self.inputs.image_to_align,
                                                               prefix='w')
 
-        
+
 
 class SegmentInputSpec(SPMCommandInputSpec):
     data = InputMultiPath(File(exists=True), field='data', desc='one scan per subject',
@@ -800,7 +800,7 @@ class Segment(SPMCommand):
                         outfield = '%s_%s_image' % (image, tissue)
                         setattr(self.outputs, outfield, fname_presuffix(f,
                                                             prefix='%sc%d' % (prefix,
-                                                                              tidx + 1))
+                                                                              tidx + 1)))
         if isdefined(self.inputs.save_bias_corrected) and \
                 self.inputs.save_bias_corrected:
             self.outputs.bias_corrected_image = fname_presuffix(f, prefix='m')
@@ -808,7 +808,7 @@ class Segment(SPMCommand):
         self.outputs.transformation_mat = t_mat
         invt_mat = fname_presuffix(f, suffix='_seg_inv_sn.mat', use_ext=False)
         self.outputs.inverse_transformation_mat = invt_mat
-        
+
 
 class NewSegmentInputSpec(SPMCommandInputSpec):
     channel_files = InputMultiPath(File(exists=True),
@@ -973,7 +973,7 @@ class NewSegment(SPMCommand):
                     self.outputs.bias_corrected_images.append(os.path.join(pth, "m%s.nii" % (base)))
                 if self.inputs.channel_info[2][1]:
                     self.outputs.bias_field_images.append(os.path.join(pth, "BiasField_%s.nii" % (base)))
-        
+
 
 class SmoothInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(File(exists=True), field='data',
@@ -1033,7 +1033,7 @@ class Smooth(SPMCommand):
 
         for imgf in filename_to_list(self.inputs.in_files):
             self.outputs.smoothed_files.append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
-        
+
 
 class DARTELInputSpec(SPMCommandInputSpec):
     image_files = traits.List(traits.List(File(exists=True)),
@@ -1137,7 +1137,7 @@ class DARTEL(SPMCommand):
             self.outputs.dartel_flow_fields.append(os.path.realpath('u_%s_%s%s' % (base,
                                                                                  self.inputs.template_prefix,
                                                                                  ext)))
-        
+
 
 class DARTELNorm2MNIInputSpec(SPMCommandInputSpec):
     template_file = File(exists=True,
@@ -1228,7 +1228,7 @@ class DARTELNorm2MNI(SPMCommand):
                                                                             base,
                                                                             ext)))
 
-        
+
 
 class CreateWarpedInputSpec(SPMCommandInputSpec):
     image_files = InputMultiPath(File(exists=True),
@@ -1296,7 +1296,7 @@ class CreateWarped(SPMCommand):
             else:
                 self.outputs.warped_files.append(os.path.realpath('w%s%s' % (base,
                                                                            ext)))
-        
+
 
 class ApplyDeformationFieldInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, field='fnames')
@@ -1337,7 +1337,7 @@ class ApplyDeformations(SPMCommand):
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
             self.outputs.out_files.append(os.path.realpath('w%s' % fname))
-        
+
 
 class VBMSegmentInputSpec(SPMCommandInputSpec):
 
@@ -1502,7 +1502,7 @@ class VBMSegment(SPMCommand):
     _jobname = 'vbm8'
 
     def _post_run(self):
-        
+
         do_dartel = self.inputs.spatial_normalization
         dartel_px = ''
         if do_dartel:
@@ -1587,7 +1587,7 @@ class VBMSegment(SPMCommand):
             if self.inputs.jacobian_determinant and do_dartel:
                 self.outputs.jacobian_determinant_images.append(
                     os.path.join(pth, "jac_wrp1%s.nii" % (base)))
-        
+
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
         """

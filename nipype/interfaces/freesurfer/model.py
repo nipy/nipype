@@ -98,14 +98,14 @@ class MRISPreproc(FSCommand):
     output_spec = MRISPreprocOutputSpec
 
     def _post_run(self):
-        
+
         outfile = self.inputs.out_file
         self.outputs.out_file = outfile
         if not isdefined(outfile):
             self.outputs.out_file = os.path.join(os.getcwd(),
                                                'concat_%s_%s.mgz' % (self.inputs.hemi,
                                                                      self.inputs.target))
-        
+
     def _gen_filename(self, name):
         if name == 'out_file':
             return getattr(self.outputs, name)
@@ -277,7 +277,7 @@ class GLMFit(FSCommand):
         return super(GLMFit, self)._format_arg(name, spec, value)
 
     def _post_run(self):
-        
+
         # Get the top-level output directory
         if not isdefined(self.inputs.glm_dir):
             glmdir = os.getcwd()
@@ -323,7 +323,7 @@ class GLMFit(FSCommand):
             self.outputs.singluar_values = os.path.join(pcadir, "sdiag.mat")
             self.outputs.svd_stats_file = os.path.join(pcadir, "stats.dat")
 
-        
+
     def _gen_filename(self, name):
         if name == 'glm_dir':
             return os.getcwd()
@@ -416,7 +416,7 @@ class Binarize(FSCommand):
     output_spec = BinarizeOutputSpec
 
     def _post_run(self):
-        
+
         outfile = self.inputs.binary_file
         if not isdefined(outfile):
             if isdefined(self.inputs.out_type):
@@ -440,7 +440,7 @@ class Binarize(FSCommand):
                                                             use_ext=False)
             else:
                 self.outputs.count_file = value
-        
+
     def _format_arg(self, name, spec, value):
         if name == 'count_file':
             if isinstance(value, bool):
@@ -524,13 +524,13 @@ class Concatenate(FSCommand):
     output_spec = ConcatenateOutputSpec
 
     def _post_run(self):
-        
+
         if not isdefined(self.inputs.concatenated_file):
             self.outputs.concatenated_file = os.path.join(os.getcwd(),
                                                         'concat_output.nii.gz')
         else:
             self.outputs.concatenated_file = self.inputs.concatenated_file
-        
+
     def _gen_filename(self, name):
         if name == 'concatenated_file':
             return getattr(self.outputs, name)
@@ -631,7 +631,7 @@ class SegStats(FSCommand):
     output_spec = SegStatsOutputSpec
 
     def _post_run(self):
-        
+
         if isdefined(self.inputs.summary_file):
             self.outputs.summary_file = os.path.abspath(self.inputs.summary_file)
         else:
@@ -650,10 +650,10 @@ class SegStats(FSCommand):
                 if isinstance(value, bool):
                     setattr(self.outputs, name, fname_presuffix(src, suffix=suffix,
                                                     newpath=os.getcwd(),
-                                                    use_ext=False)
+                                                    use_ext=False))
                 else:
-                    setattr(self.outputs, name, os.path.abspath(value)
-        
+                    setattr(self.outputs, name, os.path.abspath(value))
+
     def _format_arg(self, name, spec, value):
         if name in ['avgwf_txt_file', 'avgwf_file', 'sf_avg_file']:
             if isinstance(value, bool):
@@ -749,7 +749,7 @@ class Label2Vol(FSCommand):
     output_spec = Label2VolOutputSpec
 
     def _post_run(self):
-        
+
         outfile = self.inputs.vol_label_file
         if not isdefined(outfile):
             for key in ['label_file', 'annot_file', 'seg_file']:
@@ -764,7 +764,7 @@ class Label2Vol(FSCommand):
                                       newpath=os.getcwd(),
                                       use_ext=False)
         self.outputs.vol_label_file = outfile
-        
+
     def _gen_filename(self, name):
         if name == 'vol_label_file':
             return getattr(self.outputs, name)
@@ -832,7 +832,7 @@ class MS_LDA(FSCommand):
             self.outputs.vol_synth_file = os.path.abspath(self.inputs.vol_synth_file)
         if not isdefined(self.inputs.use_weights) or self.inputs.use_weights is False:
             self.outputs.weight_file = os.path.abspath(self.inputs.weight_file)
-        
+
     def _verify_weights_file_exists(self):
         if not os.path.exists(os.path.abspath(self.inputs.weight_file)):
             raise traits.TraitError("MS_LDA: use_weights must accompany an existing weights file")

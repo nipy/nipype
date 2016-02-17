@@ -2539,7 +2539,7 @@ class JSONFileSink(IOBase):
         undefined_traits = {}
         for key in infields:
             self.inputs.add_trait(key, traits.Any)
-            self.inputs._setattr(self.outputs, key, Undefined)
+            self.inputs._outputs[key] = Undefined
             undefined_traits[key] = Undefined
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 

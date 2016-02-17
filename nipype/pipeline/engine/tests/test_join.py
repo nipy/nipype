@@ -33,7 +33,7 @@ class PickFirst(nib.BaseInterface):
 
     def _post_run(self):
         self.outputs.output1 = self.inputs.in_files[0]
-        
+
 
 class IncrementInputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(mandatory=True, desc='input')
@@ -54,7 +54,7 @@ class IncrementInterface(nib.BaseInterface):
 
     def _post_run(self):
         self.outputs.output1 = self.inputs.input1 + self.inputs.inc
-        
+
 _sums = []
 
 _sum_operands = []
@@ -80,11 +80,11 @@ class SumInterface(nib.BaseInterface):
     def _post_run(self):
         global _sum
         global _sum_operands
-                self.outputs.operands = self.inputs.input1
+        self.outputs.operands = self.inputs.input1
         _sum_operands.append(self.outputs.operands)
         self.outputs.output1 = sum(self.inputs.input1)
         _sums.append(self.outputs.output1)
-        
+
 
 _set_len = None
 """The Set interface execution result."""
@@ -109,7 +109,7 @@ class SetInterface(nib.BaseInterface):
     def _post_run(self):
         global _set_len
                 _set_len = self.outputs.output1 = len(self.inputs.input1)
-        
+
 
 _products = []
 """The Products interface execution results."""
@@ -136,7 +136,7 @@ class ProductInterface(nib.BaseInterface):
         global _products
                 self.outputs.output1 = self.inputs.input1 * self.inputs.input2
         _products.append(self.outputs.output1)
-        
+
 
 def test_join_expansion():
     cwd = os.getcwd()

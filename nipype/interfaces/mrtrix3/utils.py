@@ -57,9 +57,9 @@ class BrainMask(CommandLine):
     output_spec = BrainMaskOutputSpec
 
     def _post_run(self):
-        
+
         self.outputs.out_file = op.abspath(self.inputs.out_file)
-        
+
 
 class Mesh2PVEInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3,
@@ -103,9 +103,9 @@ class Mesh2PVE(CommandLine):
     output_spec = Mesh2PVEOutputSpec
 
     def _post_run(self):
-        
+
         self.outputs.out_file = op.abspath(self.inputs.out_file)
-        
+
 
 class Generate5ttInputSpec(CommandLineInputSpec):
     in_fast = InputMultiPath(
@@ -149,9 +149,9 @@ class Generate5tt(CommandLine):
     output_spec = Generate5ttOutputSpec
 
     def _post_run(self):
-        
+
         self.outputs.out_file = op.abspath(self.inputs.out_file)
-        
+
 
 class TensorMetricsInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-1,
@@ -205,13 +205,11 @@ class TensorMetrics(CommandLine):
     output_spec = TensorMetricsOutputSpec
 
     def _post_run(self):
-        
-
         for k in list(outputs.keys()):
             if isdefined(getattr(self.inputs, k)):
-                setattr(self.outputs, k, op.abspath(getattr(self.inputs, k))
+                setattr(self.outputs, k, op.abspath(getattr(self.inputs, k)))
 
-        
+
 
 class ComputeTDIInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
@@ -344,9 +342,9 @@ class ComputeTDI(MRTrix3Base):
     output_spec = ComputeTDIOutputSpec
 
     def _post_run(self):
-        
+
         self.outputs.out_file = op.abspath(self.inputs.out_file)
-        
+
 
 class TCK2VTKInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
@@ -394,6 +392,6 @@ class TCK2VTK(MRTrix3Base):
     output_spec = TCK2VTKOutputSpec
 
     def _post_run(self):
-        
+
         self.outputs.out_file = op.abspath(self.inputs.out_file)
-        
+
