@@ -92,28 +92,26 @@ class BETInputSpec(FSLCommandInputSpec):
 
 
 class BETOutputSpec(TraitedSpec):
-    out_file = File(
-        desc="path/name of skullstripped file (if generated)")
-    mask_file = File(
-        desc="path/name of binary brain mask (if generated)")
-    outline_file = File(
-        desc="path/name of outline file (if generated)")
-    meshfile = File(
-        desc="path/name of vtk mesh file (if generated)")
-    inskull_mask_file = File(
-        desc="path/name of inskull mask (if generated)")
-    inskull_mesh_file = File(
-        desc="path/name of inskull mesh outline (if generated)")
-    outskull_mask_file = File(
-        desc="path/name of outskull mask (if generated)")
-    outskull_mesh_file = File(
-        desc="path/name of outskull mesh outline (if generated)")
-    outskin_mask_file = File(
-        desc="path/name of outskin mask (if generated)")
-    outskin_mesh_file = File(
-        desc="path/name of outskin mesh outline (if generated)")
-    skull_mask_file = File(
-        desc="path/name of skull mask (if generated)")
+    out_file = File(desc="path/name of skullstripped file")
+    mask_file = File(name_source='in_file', name_template='%s_mask',
+                     desc="path/name of binary brain mask")
+    meshfile = File(name_source='in_file', name_template='%s_mesh.vtk',
+                    keep_extension=False, desc="path/name of vtk mesh file")
+    outline_file = File(name_source='in_file', name_template='%s_overlay',
+                        desc="path/name of outline file")
+    inskull_mask_file = File(name_source='in_file', name_template='%s_inskull_mask',
+                             desc="path/name of inskull mask")
+    inskull_mesh_file = File(name_source='in_file', name_template='%s_inskull_mesh.vtk',
+                             keep_extension=False, desc="path/name of inskull mesh outline")
+    outskull_mask_file = File(name_source='in_file', name_template='%s_outskull_mask',
+                              desc="path/name of outskull mask")
+    outskull_mesh_file = File(name_source='in_file', name_template='%s_outskull_mesh.vtk',
+                              keep_extension=False, desc="path/name of outskull mesh outline")
+    outskin_mask_file = File(name_source='in_file', name_template='%s_outskin_mask',
+                             desc="path/name of outskin mask")
+    outskin_mesh_file = File(name_source='in_file', name_template='%s_outskin_mesh.vtk',
+                             keep_extension=False, desc="path/name of outskin mesh outline")
+    skull_mask_file = File(desc="path/name of skull mask")
 
 
 class BET(FSLCommand):
@@ -145,55 +143,6 @@ class BET(FSLCommand):
         if runtime.stderr:
             self.raise_exception(runtime)
         return runtime
-
-    def _gen_outfilename(self):
-        out_file = self.inputs.out_file
-        if not isdefined(out_file) and isdefined(self.inputs.in_file):
-            out_file = self._gen_fname(self.inputs.in_file,
-                                       suffix='_brain')
-        return os.path.abspath(out_file)
-
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self._gen_outfilename()
-        if ((isdefined(self.inputs.mesh) and self.inputs.mesh) or
-                (isdefined(self.inputs.surfaces) and self.inputs.surfaces)):
-            outputs['meshfile'] = self._gen_fname(outputs['out_file'],
-                                                  suffix='_mesh.vtk',
-                                                  change_ext=False)
-        if (isdefined(self.inputs.mask) and self.inputs.mask) or \
-                (isdefined(self.inputs.reduce_bias) and
-                 self.inputs.reduce_bias):
-            outputs['mask_file'] = self._gen_fname(outputs['out_file'],
-                                                   suffix='_mask')
-        if isdefined(self.inputs.outline) and self.inputs.outline:
-            outputs['outline_file'] = self._gen_fname(outputs['out_file'],
-                                                      suffix='_overlay')
-        if isdefined(self.inputs.surfaces) and self.inputs.surfaces:
-            outputs['inskull_mask_file'] = self._gen_fname(outputs['out_file'],
-                                                           suffix='_inskull_mask')
-            outputs['inskull_mesh_file'] = self._gen_fname(outputs['out_file'],
-                                                           suffix='_inskull_mesh')
-            outputs[
-                'outskull_mask_file'] = self._gen_fname(outputs['out_file'],
-                                                        suffix='_outskull_mask')
-            outputs[
-                'outskull_mesh_file'] = self._gen_fname(outputs['out_file'],
-                                                        suffix='_outskull_mesh')
-            outputs['outskin_mask_file'] = self._gen_fname(outputs['out_file'],
-                                                           suffix='_outskin_mask')
-            outputs['outskin_mesh_file'] = self._gen_fname(outputs['out_file'],
-                                                           suffix='_outskin_mesh')
-            outputs['skull_mask_file'] = self._gen_fname(outputs['out_file'],
-                                                         suffix='_skull_mask')
-        if isdefined(self.inputs.no_output) and self.inputs.no_output:
-            outputs['out_file'] = Undefined
-        return outputs
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._gen_outfilename()
-        return None
 
 
 class FASTInputSpec(FSLCommandInputSpec):
@@ -267,6 +216,15 @@ class FASTInputSpec(FSLCommandInputSpec):
     probability_maps = traits.Bool(desc='outputs individual probability maps',
                                    argstr='-p')
 
+    def _format_arg(self, name, spec, value):
+        # first do what should be done in general
+        formatted = super(FASTInputSpec, self)._format_arg(name, spec, value)
+        if name == 'in_files':
+            # FAST needs the -S parameter value to correspond to the number
+            # of input images, otherwise it will ignore all but the first
+            formatted = "-S %d %s" % (len(value), formatted)
+        return formatted
+
 
 class FASTOutputSpec(TraitedSpec):
     """Specify possible outputs from FAST"""
@@ -311,16 +269,8 @@ class FAST(FSLCommand):
     input_spec = FASTInputSpec
     output_spec = FASTOutputSpec
 
-    def _format_arg(self, name, spec, value):
-        # first do what should be done in general
-        formated = super(FAST, self)._format_arg(name, spec, value)
-        if name == 'in_files':
-            # FAST needs the -S parameter value to correspond to the number
-            # of input images, otherwise it will ignore all but the first
-            formated = "-S %d %s" % (len(value), formated)
-        return formated
+    def _post_run(self):
 
-    def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.number_classes):
             nclasses = 3
@@ -510,6 +460,14 @@ class FLIRTInputSpec(FSLCommandInputSpec):
         argstr='-bbrslope %f', min_ver='5.0.0',
         desc='value of bbr slope')
 
+    def _parse_inputs(self, skip=None):
+        skip = []
+        if isdefined(self.inputs.save_log) and self.inputs.save_log:
+            if not isdefined(self.inputs.verbose) or self.inputs.verbose == 0:
+                self.inputs.verbose = 1
+        skip.append('save_log')
+        return super(FLIRTInputSpec, self)._parse_inputs(skip=skip)
+
 
 class FLIRTOutputSpec(TraitedSpec):
     out_file = File(exists=True,
@@ -546,21 +504,15 @@ class FLIRT(FSLCommand):
     input_spec = FLIRTInputSpec
     output_spec = FLIRTOutputSpec
 
-    def aggregate_outputs(self, runtime=None, needed_outputs=None):
-        outputs = super(FLIRT, self).aggregate_outputs(
-            runtime=runtime, needed_outputs=needed_outputs)
-        if isdefined(self.inputs.save_log) and self.inputs.save_log:
-            with open(outputs.out_log, "a") as text_file:
-                text_file.write(runtime.stdout + '\n')
-        return outputs
+    def _run_interface(self, runtime, **kwargs):
+        runtime = super(FLIRT, self)._run_interface(runtime, **kwargs)
 
-    def _parse_inputs(self, skip=None):
-        skip = []
         if isdefined(self.inputs.save_log) and self.inputs.save_log:
-            if not isdefined(self.inputs.verbose) or self.inputs.verbose == 0:
-                self.inputs.verbose = 1
-        skip.append('save_log')
-        return super(FLIRT, self)._parse_inputs(skip=skip)
+            with open(self.inputs.out_log, "a") as text_file:
+                text_file.write(runtime.stdout + '\n')
+
+        return runtime
+
 
 
 class ApplyXfmInputSpec(FLIRTInputSpec):
@@ -633,6 +585,13 @@ class MCFLIRTInputSpec(FSLCommandInputSpec):
     ref_file = File(exists=True, argstr='-reffile %s',
                     desc="target image for motion correction")
 
+    def _format_arg(self, name, spec, value):
+        if name == "interpolation":
+            if value == "trilinear":
+                return ""
+            else:
+                return spec.argstr % value
+        return super(MCFLIRTInputSpec, self)._format_arg(name, spec, value)
 
 class MCFLIRTOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc="motion-corrected timeseries")
@@ -664,18 +623,9 @@ class MCFLIRT(FSLCommand):
     input_spec = MCFLIRTInputSpec
     output_spec = MCFLIRTOutputSpec
 
-    def _format_arg(self, name, spec, value):
-        if name == "interpolation":
-            if value == "trilinear":
-                return ""
-            else:
-                return spec.argstr % value
-        return super(MCFLIRT, self)._format_arg(name, spec, value)
+    def _post_run(self):
 
-    def _list_outputs(self):
         cwd = os.getcwd()
-        outputs = self._outputs().get()
-
         outputs['out_file'] = self._gen_outfilename()
 
         if isdefined(self.inputs.stats_imgs) and self.inputs.stats_imgs:
@@ -891,7 +841,8 @@ class FNIRT(FSLCommand):
                'log_file': 'log.txt',
                'fieldcoeff_file': 'fieldwarp'}
 
-    def _list_outputs(self):
+    def _post_run(self):
+
         outputs = self.output_spec().get()
         for key, suffix in list(self.filemap.items()):
             inval = getattr(self.inputs, key)
@@ -1007,8 +958,8 @@ class ApplyWarp(FSLCommand):
             return spec.argstr % str(value)
         return super(ApplyWarp, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
+
         if not isdefined(self.inputs.out_file):
             outputs['out_file'] = self._gen_fname(self.inputs.in_file,
                                                   suffix='_warp')
@@ -1067,8 +1018,8 @@ class SliceTimer(FSLCommand):
     input_spec = SliceTimerInputSpec
     output_spec = SliceTimerOutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
+
         out_file = self.inputs.out_file
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
@@ -1146,8 +1097,8 @@ class SUSAN(FSLCommand):
             return ' '.join(arglist)
         return super(SUSAN, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
+
         out_file = self.inputs.out_file
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
@@ -1455,8 +1406,8 @@ class PRELUDE(FSLCommand):
         super(PRELUDE, self).__init__(**kwargs)
         warn('This has not been fully tested. Please report any failures.')
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
+
         out_file = self.inputs.unwrapped_phase_file
         if not isdefined(out_file):
             if isdefined(self.inputs.phase_file):
@@ -1546,7 +1497,8 @@ class FIRST(FSLCommand):
     input_spec = FIRSTInputSpec
     output_spec = FIRSTOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
+
         outputs = self.output_spec().get()
 
         if isdefined(self.inputs.list_of_specific_structures):

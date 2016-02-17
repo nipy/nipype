@@ -150,10 +150,8 @@ class FSLCommandInputSpec(CommandLineInputSpec):
         return value + Info.output_type_to_ext(self.output_type)
 
 
-class FSLCommand(CommandLine):
-    """Base support for FSL commands.
-
-    """
+class FSLCommand(CommandLine):  # pylint: disable=W0223
+    """Base support for FSL commands."""
 
     input_spec = FSLCommandInputSpec
 
@@ -166,6 +164,14 @@ class FSLCommand(CommandLine):
     def _output_update(self):
         self._output_type = self.inputs.output_type
         self.inputs.environ.update({'FSLOUTPUTTYPE': self.inputs.output_type})
+
+    def _get_ext(self):
+        return Info.output_type_to_ext(self.input_spec.output_type)
+
+    def _gen_fname(self, basename, out_path=None, suffix=''):
+        if out_path is None:
+            out_path = os.getcwd()
+        return os.path.join(out_path, basename + suffix + self._get_ext())
 
     @classmethod
     def set_default_output_type(cls, output_type):

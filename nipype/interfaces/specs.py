@@ -87,6 +87,12 @@ class BaseTraitedSpec(traits.HasTraits):
         for name in sorted(self.copyable_trait_names()):
             yield name, self.traits()[name]
 
+    def namesource_items(self):
+        """Get inputs that will generate outputs"""
+        meta = dict(name_source=lambda t: t is not None)
+        meta_ns = dict(ns=lambda t: t is not None)
+        return list(self.traits(**meta).items()) + list(self.traits(**meta_ns).items())
+
     def _check_deprecated(self, name, new):
         """ Generate a warning when a deprecated trait is set """
         if isdefined(new):
@@ -186,6 +192,40 @@ class BaseTraitedSpec(traits.HasTraits):
                     out = undefinedval
         return out
 
+    def format_ns(self, source_names, out_name, source_traits=None):
+        if source_traits is None:
+            source_traits = self
+
+        if isinstance(source_names, string_types):
+            source_names = [source_names]
+
+        values = [None] * len(source_names)
+
+        ext = ''
+        for i, srcname in enumerate(source_names):
+            src_value = getattr(self, srcname)
+
+            if isinstance(source_traits.traits()[srcname], File):
+                _, src_value, ext = split_filename(src_value)
+            values[i] = src_value
+
+        out_spec = self.traits()[out_name]
+        keep_ext = not isdefined(out_spec.keep_extension) or out_spec.keep_extension
+        name_template = out_spec.name_template
+        if name_template is None:
+            name_template = '%s_generated'
+
+        retval = name_template % tuple(values)
+        if isinstance(out_spec, File):
+            if keep_ext:
+                retval += ext
+            else:
+                retval = self._overload_extension(retval)
+        return retval
+
+    def _overload_extension(self, value, name=None):
+        return value
+
     def get_hashval(self, hash_method=None):
         """Return a dictionary of our items with hashes for each file.
 
@@ -257,6 +297,8 @@ class BaseTraitedSpec(traits.HasTraits):
         requires = spec.requires
         argstr = spec.argstr
         name_source = spec.name_source
+        if name_source is None:
+            name_source = spec.ns
 
         manhelpstr = ['\t%s' % name]
 
@@ -350,11 +392,6 @@ class BaseInputSpec(BaseTraitedSpec):
             except ValueError:
                 pass
         return allitems
-
-    def namesource_items(self):
-        """Get inputs that will generate outputs"""
-        metadata = dict(name_source=lambda t: t is not None)
-        return list(self.traits(**metadata).items())
 
     def _check_xor(self, obj, name, old, new):
         """ Checks inputs with xor list """
@@ -511,9 +548,6 @@ class BaseInputSpec(BaseTraitedSpec):
         for name, spec in sorted(self.traits(**metadata).items()):
             info.append(dict(key=name, copy=spec.copyfile))
         return info
-
-    def _overload_extension(self, value, name=None):
-        return value
 
     def check_version(self, version, raise_exception=True):
         """ Raises an exception on version mismatch"""

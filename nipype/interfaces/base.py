@@ -476,10 +476,10 @@ class BaseInterface(Interface):
             return None
 
         ns_outputs = {}
-        for ns, sp in list(self.inputs.namesource_items()):
-            ns_pointer = getattr(sp, 'out_name', None)
+        for ns_input, ns_spec in list(self.inputs.namesource_items()):
+            ns_pointer = getattr(ns_spec, 'out_name', None)
             if ns_pointer is not None:
-                ns_outputs[ns_pointer] = ns
+                ns_outputs[ns_pointer] = ns_input
 
         # Search for inputs with the same name
         for out_name, spec in list(self.outputs.items()):
@@ -491,11 +491,13 @@ class BaseInterface(Interface):
             if isdefined(value):
                 setattr(self.outputs, out_name, op.abspath(value))
 
-                if spec.exists:
-                    if not op.isfile(getattr(self.outputs, out_name)):
-                        raise FileNotFoundError(
-                            'Output %s not found for interface %s.' %
-                            (out_name, self.__class__))
+        # Search for outputs with name source
+        for out_name, spec in self.outputs.namesource_items():
+            if isdefined(getattr(self.outputs, out_name)):
+                continue
+            value = self.outputs.format_ns(spec.name_source, out_name, self.inputs)
+            setattr(self.outputs, out_name, value)
+
 
     def run(self, **inputs):
         """Execute this interface.
