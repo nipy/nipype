@@ -479,7 +479,7 @@ class BaseInterface(Interface):
         for ns_input, ns_spec in list(self.inputs.namesource_items()):
             ns_pointer = getattr(ns_spec, 'out_name', None)
             if ns_pointer is not None:
-                ns_setattr(self.outputs, ns_pointer, ns_input
+                ns_outputs[ns_pointer] = ns_input
 
         # Search for inputs with the same name
         for out_name, spec in list(self.outputs.items()):

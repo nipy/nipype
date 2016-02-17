@@ -13,22 +13,20 @@ was written to work with FSL version 4.1.4.
 
 from __future__ import print_function
 from __future__ import division
-from builtins import range
 
 import os
 import os.path as op
-import warnings
-
 import numpy as np
 from nibabel import load
 
+from builtins import range
+
+from ..base import (TraitedSpec, File, InputMultiPath, OutputMultiPath, traits, isdefined)
 from ..fsl.base import FSLCommand, FSLCommandInputSpec
-from ..base import (TraitedSpec, File, InputMultiPath,
-                    OutputMultiPath, Undefined, traits,
-                    isdefined, OutputMultiPath)
 from ...utils.filemanip import split_filename
 
-warn = warnings.warn
+from ... import logging
+IFLOGGER = logging.getLogger('interface')
 
 
 class BETInputSpec(FSLCommandInputSpec):
@@ -1403,7 +1401,7 @@ class PRELUDE(FSLCommand):
 
     def __init__(self, **kwargs):
         super(PRELUDE, self).__init__(**kwargs)
-        warn('This has not been fully tested. Please report any failures.')
+        IFLOGGER.warn('This has not been fully tested. Please report any failures.')
 
     def _post_run(self):
 
