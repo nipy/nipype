@@ -329,7 +329,7 @@ def _get_valid_pathstr(pathstr):
     Replaces: ',' -> '.'
     """
     pathstr = pathstr.replace(os.sep, '..')
-    pathstr = re.sub(r"""[][ (){}?:<>#!|"';]""", '', pathstr)
+    pathstr = re.sub(r'''[][ (){}?:<>#!|"';]''', '', pathstr)
     pathstr = pathstr.replace(',', '.')
     return pathstr
 
@@ -618,7 +618,7 @@ def _node_ports(graph, node):
             else:
                 srcport = src
             if srcport not in portoutputs:
-                portsetattr(self.outputs, srcport, []
+                portoutputs[srcport] = []
             portoutputs[srcport].append((v, dest, src))
     return (portinputs, portoutputs)
 
@@ -1238,7 +1238,7 @@ def write_workflow_prov(graph, filename=None, format='all'):
                     for key, value in list(result.outputs.items()):
                         values = getattr(result.outputs, key)
                         if isdefined(values) and idx < len(values):
-                            subresult.setattr(self.outputs, key, values[idx]
+                            subresult.outputs[key] = values[idx]
                 sub_doc = ProvStore().add_results(subresult)
                 sub_bundle = pm.ProvBundle(sub_doc.get_records(),
                                            identifier=get_id())
