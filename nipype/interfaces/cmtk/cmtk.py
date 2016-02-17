@@ -718,8 +718,8 @@ class ROIGen(BaseInterface):
             file.close()
         return runtime
 
-    def _list_outputs(self):
-                if isdefined(self.inputs.out_roi_file):
+    def _post_run(self):
+        if isdefined(self.inputs.out_roi_file):
             self.outputs.roi_file = op.abspath(self.inputs.out_roi_file)
         else:
             self.outputs.roi_file = op.abspath(self._gen_outfilename('nii'))
@@ -788,6 +788,6 @@ class CreateNodes(BaseInterface):
         iflogger.info('Saving node network to {path}'.format(path=op.abspath(self.inputs.out_filename)))
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.node_network = op.abspath(self.inputs.out_filename)
+    def _post_run(self):
+        self.outputs.node_network = op.abspath(self.inputs.out_filename)
         return outputs

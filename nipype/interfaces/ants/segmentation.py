@@ -162,8 +162,8 @@ class Atropos(ANTSCommand):
             return output
         return None
 
-    def _list_outputs(self):
-                self.outputs.classified_image = os.path.abspath(
+    def _post_run(self):
+        self.outputs.classified_image = os.path.abspath(
             self._gen_filename('out_classified_image_name'))
         if isdefined(self.inputs.save_posteriors) and self.inputs.save_posteriors:
             self.outputs.posteriors = []
@@ -223,8 +223,8 @@ class LaplacianThickness(ANTSCommand):
             return output
         return None
 
-    def _list_outputs(self):
-                _, name, ext = split_filename(os.path.abspath(self.inputs.input_wm))
+    def _post_run(self):
+        _, name, ext = split_filename(os.path.abspath(self.inputs.input_wm))
         self.outputs.output_image = os.path.join(os.getcwd(),
                                                ''.join((name,
                                                         self.inputs.output_image,
@@ -369,8 +369,8 @@ class N4BiasFieldCorrection(ANTSCommand):
         skip += ['save_bias', 'bias_image']
         return super(N4BiasFieldCorrection, self)._parse_inputs(skip=skip)
 
-    def _list_outputs(self):
-                self.outputs.output_image = os.path.abspath(
+    def _post_run(self):
+        self.outputs.output_image = os.path.abspath(
             self._gen_filename('output_image'))
 
         if self.inputs.save_bias or isdefined(self.inputs.bias_image):
@@ -542,8 +542,8 @@ class CorticalThickness(ANTSCommand):
         runtime = super(CorticalThickness, self)._run_interface(runtime)
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.BrainExtractionMask = os.path.join(os.getcwd(),
+    def _post_run(self):
+        self.outputs.BrainExtractionMask = os.path.join(os.getcwd(),
                                                       self.inputs.out_prefix +
                                                       'BrainExtractionMask.' +
                                                       self.inputs.image_suffix)
@@ -667,8 +667,8 @@ class BrainExtraction(ANTSCommand):
     output_spec = BrainExtractionOutputSpec
     _cmd = 'antsBrainExtraction.sh'
 
-    def _list_outputs(self):
-                self.outputs.BrainExtractionMask = os.path.join(os.getcwd(),
+    def _post_run(self):
+        self.outputs.BrainExtractionMask = os.path.join(os.getcwd(),
                                                       self.inputs.out_prefix +
                                                       'BrainExtractionMask.' +
                                                       self.inputs.image_suffix)
@@ -785,8 +785,8 @@ class JointFusion(ANTSCommand):
             return super(ANTSCommand, self)._format_arg(opt, spec, val)
         return retval
 
-    def _list_outputs(self):
-                self.outputs.output_label_image = os.path.abspath(
+    def _post_run(self):
+        self.outputs.output_label_image = os.path.abspath(
             self.inputs.output_label_image)
         return outputs
 
@@ -1045,8 +1045,8 @@ ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz
             return super(ANTSCommand, self)._format_arg(opt, spec, val)
         return retval
 
-    def _list_outputs(self):
-                if isdefined(self.inputs.out_label_fusion):
+    def _post_run(self):
+        if isdefined(self.inputs.out_label_fusion):
             outputs['out_label_fusion'] = os.path.abspath(
                 self.inputs.out_label_fusion)
         if isdefined(self.inputs.out_intensity_fusion_name_format):

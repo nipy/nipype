@@ -97,8 +97,8 @@ class TrackDensityMap(DipyBaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.out_file = op.abspath(self.inputs.out_filename)
+    def _post_run(self):
+        self.outputs.out_file = op.abspath(self.inputs.out_filename)
         return outputs
 
 
@@ -271,8 +271,8 @@ class StreamlineTractography(DipyBaseInterface):
         trkfilev.to_file(self._gen_filename('tracked', ext='.trk'))
         return runtime
 
-    def _list_outputs(self):
-                outputs['tracks'] = self._gen_filename('tracked', ext='.trk')
+    def _post_run(self):
+        outputs['tracks'] = self._gen_filename('tracked', ext='.trk')
         outputs['gfa'] = self._gen_filename('gfa')
         if self._save_peaks:
             outputs['odf_peaks'] = self._gen_filename('peaks', ext='.pklz')

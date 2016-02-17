@@ -45,8 +45,8 @@ class AverageAffineTransform(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         return super(AverageAffineTransform, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-                self.outputs.affine_transform = os.path.abspath(
+    def _post_run(self):
+        self.outputs.affine_transform = os.path.abspath(
             self.inputs.output_affine_transform)
         return outputs
 
@@ -86,8 +86,8 @@ class AverageImages(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         return super(AverageImages, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-                self.outputs.output_average_image = os.path.realpath(
+    def _post_run(self):
+        self.outputs.output_average_image = os.path.realpath(
             self.inputs.output_average_image)
         return outputs
 
@@ -126,8 +126,8 @@ class MultiplyImages(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         return super(MultiplyImages, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-                self.outputs.output_product_image = os.path.abspath(
+    def _post_run(self):
+        self.outputs.output_product_image = os.path.abspath(
             self.inputs.output_product_image)
         return outputs
 
@@ -184,8 +184,8 @@ class JacobianDeterminant(ANTSCommand):
             return output
         return None
 
-    def _list_outputs(self):
-                if self.inputs.use_log == 1:
+    def _post_run(self):
+        if self.inputs.use_log == 1:
             self.outputs.jacobian_image = os.path.abspath(
                 self._gen_filename('output_prefix') + 'logjacobian.nii.gz')
         else:

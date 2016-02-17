@@ -156,8 +156,8 @@ class ApplyWarp(CommandLine):
     input_spec = ApplyWarpInputSpec
     output_spec = ApplyWarpOutputSpec
 
-    def _list_outputs(self):
-                out_dir = op.abspath(self.inputs.output_path)
+    def _post_run(self):
+        out_dir = op.abspath(self.inputs.output_path)
         self.outputs.warped_file = op.join(out_dir, 'result.nii.gz')
         return outputs
 
@@ -195,8 +195,8 @@ class AnalyzeWarp(CommandLine):
     input_spec = AnalyzeWarpInputSpec
     output_spec = AnalyzeWarpOutputSpec
 
-    def _list_outputs(self):
-                out_dir = op.abspath(self.inputs.output_path)
+    def _post_run(self):
+        out_dir = op.abspath(self.inputs.output_path)
         self.outputs.disp_field = op.join(out_dir, 'deformationField.nii.gz')
         self.outputs.jacdet_map = op.join(out_dir, 'spatialJacobian.nii.gz')
         self.outputs.jacmat_map = op.join(out_dir, 'fullSpatialJacobian.nii.gz')
@@ -235,8 +235,8 @@ class PointsWarp(CommandLine):
     input_spec = PointsWarpInputSpec
     output_spec = PointsWarpOutputSpec
 
-    def _list_outputs(self):
-                out_dir = op.abspath(self.inputs.output_path)
+    def _post_run(self):
+        out_dir = op.abspath(self.inputs.output_path)
 
         fname, ext = op.splitext(op.basename(self.inputs.points_file))
 

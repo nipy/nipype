@@ -35,8 +35,8 @@ class Analyze2nii(SPMCommand):
 
         return script
 
-    def _list_outputs(self):
-                self.outputs.nifti_file = self.output_name
+    def _post_run(self):
+        self.outputs.nifti_file = self.output_name
         return outputs
 
 
@@ -114,8 +114,8 @@ class CalcCoregAffine(SPMCommand):
                self.inputs.invmat)
         return script
 
-    def _list_outputs(self):
-                self.outputs.mat = os.path.abspath(self.inputs.mat)
+    def _post_run(self):
+        self.outputs.mat = os.path.abspath(self.inputs.mat)
         self.outputs.invmat = os.path.abspath(self.inputs.invmat)
         return outputs
 
@@ -226,8 +226,8 @@ class Reslice(SPMCommand):
                self.inputs.in_file)
         return script
 
-    def _list_outputs(self):
-                self.outputs.out_file = os.path.abspath(self.inputs.out_file)
+    def _post_run(self):
+        self.outputs.out_file = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -304,8 +304,8 @@ class ApplyInverseDeformation(SPMCommand):
             return np.array([list_to_filename(val)], dtype=object)
         return val
 
-    def _list_outputs(self):
-                self.outputs.out_files = []
+    def _post_run(self):
+        self.outputs.out_files = []
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
             self.outputs.out_files.append(os.path.realpath('w%s' % fname))
@@ -373,8 +373,8 @@ class ResliceToReference(SPMCommand):
             return np.array([list_to_filename(val)], dtype=object)
         return val
 
-    def _list_outputs(self):
-                self.outputs.out_files = []
+    def _post_run(self):
+        self.outputs.out_files = []
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
             self.outputs.out_files.append(os.path.realpath('w%s' % fname))

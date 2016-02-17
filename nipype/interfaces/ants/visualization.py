@@ -64,8 +64,8 @@ class ConvertScalarImageToRGB(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         return super(ConvertScalarImageToRGB, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-                self.outputs.output_image = os.path.join(os.getcwd(),
+    def _post_run(self):
+        self.outputs.output_image = os.path.join(os.getcwd(),
                                                self.inputs.output_image)
         return outputs
 
@@ -148,7 +148,7 @@ class CreateTiledMosaic(ANTSCommand):
     input_spec = CreateTiledMosaicInputSpec
     output_spec = CreateTiledMosaicOutputSpec
 
-    def _list_outputs(self):
-                self.outputs.output_image = os.path.join(os.getcwd(),
+    def _post_run(self):
+        self.outputs.output_image = os.path.join(os.getcwd(),
                                                self.inputs.output_image)
         return outputs

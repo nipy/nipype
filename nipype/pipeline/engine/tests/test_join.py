@@ -31,8 +31,8 @@ class PickFirst(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.output1 = self.inputs.in_files[0]
+    def _post_run(self):
+        self.outputs.output1 = self.inputs.in_files[0]
         return outputs
 
 
@@ -53,8 +53,8 @@ class IncrementInterface(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.output1 = self.inputs.input1 + self.inputs.inc
+    def _post_run(self):
+        self.outputs.output1 = self.inputs.input1 + self.inputs.inc
         return outputs
 
 _sums = []

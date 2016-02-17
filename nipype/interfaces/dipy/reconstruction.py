@@ -144,8 +144,8 @@ class RESTORE(DipyDiffusionInterface):
 
         return runtime
 
-    def _list_outputs(self):
-                for k in outputs.keys():
+    def _post_run(self):
+        for k in outputs.keys():
             outputs[k] = self._gen_filename(k)
         return outputs
 
@@ -265,8 +265,8 @@ class EstimateResponseSH(DipyDiffusionInterface):
             None).to_filename(op.abspath(self.inputs.out_mask))
         return runtime
 
-    def _list_outputs(self):
-                outputs['response'] = op.abspath(self.inputs.response)
+    def _post_run(self):
+        outputs['response'] = op.abspath(self.inputs.response)
         outputs['out_mask'] = op.abspath(self.inputs.out_mask)
         return outputs
 
@@ -358,8 +358,8 @@ class CSD(DipyDiffusionInterface):
 
         return runtime
 
-    def _list_outputs(self):
-                outputs['model'] = self._gen_filename('csdmodel', ext='.pklz')
+    def _post_run(self):
+        outputs['model'] = self._gen_filename('csdmodel', ext='.pklz')
         if self.inputs.save_fods:
             outputs['out_fods'] = self._gen_filename('fods')
         return outputs

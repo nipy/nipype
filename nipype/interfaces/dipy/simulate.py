@@ -246,8 +246,8 @@ class SimulateMultiTensor(DipyBaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.out_file = op.abspath(self.inputs.out_file)
+    def _post_run(self):
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
         self.outputs.out_mask = op.abspath(self.inputs.out_mask)
         self.outputs.out_bvec = op.abspath(self.inputs.out_bvec)
         self.outputs.out_bval = op.abspath(self.inputs.out_bval)

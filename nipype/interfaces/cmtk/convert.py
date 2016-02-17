@@ -197,8 +197,8 @@ class CFFConverter(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-                _, name, ext = split_filename(self.inputs.out_file)
+    def _post_run(self):
+        _, name, ext = split_filename(self.inputs.out_file)
         if not ext == '.cff':
             ext = '.cff'
         self.outputs.connectome_file = op.abspath(name + ext)
@@ -258,8 +258,8 @@ class MergeCNetworks(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-                _, name, ext = split_filename(self.inputs.out_file)
+    def _post_run(self):
+        _, name, ext = split_filename(self.inputs.out_file)
         if not ext == '.cff':
             ext = '.cff'
         self.outputs.connectome_file = op.abspath(name + ext)

@@ -192,8 +192,8 @@ class FitGLM(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.beta = self._beta_file
+    def _post_run(self):
+        self.outputs.beta = self._beta_file
         self.outputs.nvbeta = self._nvbeta
         self.outputs.s2 = self._s2_file
         self.outputs.dof = self._dof
@@ -311,8 +311,8 @@ class EstimateContrast(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.stat_maps = self._stat_maps
+    def _post_run(self):
+        self.outputs.stat_maps = self._stat_maps
         self.outputs.p_maps = self._p_maps
         self.outputs.z_maps = self._z_maps
         return outputs

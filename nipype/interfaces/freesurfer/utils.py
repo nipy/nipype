@@ -198,8 +198,8 @@ class SampleToSurface(FSCommand):
                                       use_ext=False)
         return outfile
 
-    def _list_outputs(self):
-                self.outputs.out_file = os.path.abspath(self._get_outfilename())
+    def _post_run(self):
+        self.outputs.out_file = os.path.abspath(self._get_outfilename())
         hitsfile = self.inputs.hits_file
         if isdefined(hitsfile):
             self.outputs.hits_file = hitsfile
@@ -272,8 +272,8 @@ class SurfaceSmooth(FSCommand):
     input_spec = SurfaceSmoothInputSpec
     output_spec = SurfaceSmoothOutputSpec
 
-    def _list_outputs(self):
-                self.outputs.out_file = self.inputs.out_file
+    def _post_run(self):
+        self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):
             in_file = self.inputs.in_file
             if isdefined(self.inputs.fwhm):
@@ -349,8 +349,8 @@ class SurfaceTransform(FSCommand):
     input_spec = SurfaceTransformInputSpec
     output_spec = SurfaceTransformOutputSpec
 
-    def _list_outputs(self):
-                self.outputs.out_file = self.inputs.out_file
+    def _post_run(self):
+        self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):
             if isdefined(self.inputs.source_file):
                 source = self.inputs.source_file
@@ -482,8 +482,8 @@ class ApplyMask(FSCommand):
     input_spec = ApplyMaskInputSpec
     output_spec = ApplyMaskOutputSpec
 
-    def _list_outputs(self):
-                self.outputs.out_file = self.inputs.out_file
+    def _post_run(self):
+        self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):
             self.outputs.out_file = fname_presuffix(self.inputs.in_file,
                                                   suffix="_masked",
@@ -687,8 +687,8 @@ class SurfaceSnapshots(FSCommand):
         fid.write("\n".join(script))
         fid.close()
 
-    def _list_outputs(self):
-                if not isdefined(self.inputs.screenshot_stem):
+    def _post_run(self):
+        if not isdefined(self.inputs.screenshot_stem):
             stem = "%s_%s_%s" % (self.inputs.subject_id, self.inputs.hemi, self.inputs.surface)
         else:
             stem = self.inputs.screenshot_stem
@@ -1280,8 +1280,8 @@ class Tkregister2(FSCommand):
     input_spec = Tkregister2InputSpec
     output_spec = Tkregister2OutputSpec
 
-    def _list_outputs(self):
-                self.outputs.reg_file = os.path.abspath(self.inputs.reg_file)
+    def _post_run(self):
+        self.outputs.reg_file = os.path.abspath(self.inputs.reg_file)
         if isdefined(self.inputs.fsl_out):
             self.outputs.fsl_file = os.path.abspath(self.inputs.fsl_out)
         return outputs

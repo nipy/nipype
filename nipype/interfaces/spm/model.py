@@ -152,8 +152,8 @@ class Level1Design(SPMCommand):
             postscript = None
         return super(Level1Design, self)._make_matlab_command(content, postscript=postscript)
 
-    def _list_outputs(self):
-                spm = os.path.join(os.getcwd(), 'SPM.mat')
+    def _post_run(self):
+        spm = os.path.join(os.getcwd(), 'SPM.mat')
         self.outputs.spm_mat_file = spm
         return outputs
 
@@ -213,8 +213,8 @@ class EstimateModel(SPMCommand):
             einputs[0].update(self.inputs.flags)
         return einputs
 
-    def _list_outputs(self):
-                pth, _ = os.path.split(self.inputs.spm_mat_file)
+    def _post_run(self):
+        pth, _ = os.path.split(self.inputs.spm_mat_file)
         spm12 = '12' in self.version.split('.')[0]
         if spm12:
             mask = os.path.join(pth, 'mask.nii')
@@ -382,8 +382,8 @@ class EstimateContrast(SPMCommand):
         script += "spm_jobman('run',jobs);"
         return script
 
-    def _list_outputs(self):
-                pth, _ = os.path.split(self.inputs.spm_mat_file)
+    def _post_run(self):
+        pth, _ = os.path.split(self.inputs.spm_mat_file)
         spm = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
         con_images = []
         spmT_images = []
@@ -587,8 +587,8 @@ fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
                 setattr(outputs, 'cluster_forming_thr', float(line[len("cluster_forming_thr = "):].strip()))
         return outputs
 
-    def _list_outputs(self):
-                self.outputs.thresholded_map = self._gen_thresholded_map_filename()
+    def _post_run(self):
+        self.outputs.thresholded_map = self._gen_thresholded_map_filename()
         self.outputs.pre_topo_fdr_map = self._gen_pre_topo_map_filename()
         return outputs
 
@@ -774,8 +774,8 @@ class FactorialDesign(SPMCommand):
             einputs[0]['dir'] = np.array([str(os.getcwd())], dtype=object)
         return einputs
 
-    def _list_outputs(self):
-                spm = os.path.join(os.getcwd(), 'SPM.mat')
+    def _post_run(self):
+        spm = os.path.join(os.getcwd(), 'SPM.mat')
         self.outputs.spm_mat_file = spm
         return outputs
 

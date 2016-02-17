@@ -239,8 +239,8 @@ class MRTrix2TrackVis(BaseInterface):
             iflogger.info(trk_header)
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.out_file = op.abspath(self.inputs.out_filename)
+    def _post_run(self):
+        self.outputs.out_file = op.abspath(self.inputs.out_filename)
         return outputs
 
     def _gen_filename(self, name):

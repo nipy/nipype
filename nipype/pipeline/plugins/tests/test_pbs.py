@@ -25,8 +25,8 @@ class TestInterface(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.output1 = [1, self.inputs.input1]
+    def _post_run(self):
+        self.outputs.output1 = [1, self.inputs.input1]
         return outputs
 
 

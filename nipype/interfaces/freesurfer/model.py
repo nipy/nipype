@@ -831,8 +831,8 @@ class MS_LDA(FSCommand):
     input_spec = MS_LDAInputSpec
     output_spec = MS_LDAOutputSpec
 
-    def _list_outputs(self):
-                if isdefined(self.inputs.output_synth):
+    def _post_run(self):
+        if isdefined(self.inputs.output_synth):
             self.outputs.vol_synth_file = os.path.abspath(self.inputs.output_synth)
         else:
             self.outputs.vol_synth_file = os.path.abspath(self.inputs.vol_synth_file)

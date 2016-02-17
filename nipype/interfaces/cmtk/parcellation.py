@@ -581,8 +581,8 @@ class Parcellate(BaseInterface):
         crop_and_move_datasets(self.inputs.subject_id, self.inputs.subjects_dir, self.inputs.freesurfer_dir, self.inputs.parcellation_name, self.inputs.out_roi_file, self.inputs.dilation)
         return runtime
 
-    def _list_outputs(self):
-                if isdefined(self.inputs.out_roi_file):
+    def _post_run(self):
+        if isdefined(self.inputs.out_roi_file):
             self.outputs.roi_file = op.abspath(self.inputs.out_roi_file)
         else:
             self.outputs.roi_file = op.abspath(

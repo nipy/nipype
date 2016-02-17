@@ -70,8 +70,8 @@ class ComputeMask(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.brain_mask = self._brain_mask_path
+    def _post_run(self):
+        self.outputs.brain_mask = self._brain_mask_path
         return outputs
 
 
@@ -189,8 +189,8 @@ class FmriRealign4d(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.out_file = self._out_file_path
+    def _post_run(self):
+        self.outputs.out_file = self._out_file_path
         self.outputs.par_file = self._par_file_path
         return outputs
 
@@ -319,8 +319,8 @@ class SpaceTimeRealigner(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.out_file = self._out_file_path
+    def _post_run(self):
+        self.outputs.out_file = self._out_file_path
         self.outputs.par_file = self._par_file_path
         return outputs
 

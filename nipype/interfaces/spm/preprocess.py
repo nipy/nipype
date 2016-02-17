@@ -97,8 +97,8 @@ class SliceTiming(SPMCommand):
                                     separate_sessions=True)
         return super(SliceTiming, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-                self.outputs.timecorrected_files = []
+    def _post_run(self):
+        self.outputs.timecorrected_files = []
 
         filelist = filename_to_list(self.inputs.in_files)
         for f in filelist:
@@ -206,8 +206,8 @@ class Realign(SPMCommand):
         einputs = super(Realign, self)._parse_inputs()
         return [{'%s' % (self.inputs.jobtype): einputs[0]}]
 
-    def _list_outputs(self):
-                resliced_all = self.inputs.write_which[0] > 0
+    def _post_run(self):
+        resliced_all = self.inputs.write_which[0] > 0
         resliced_mean = self.inputs.write_which[1] > 0
 
         if self.inputs.jobtype != "write":
@@ -792,8 +792,8 @@ class Segment(SPMCommand):
             return clean_masks_dict[val]
         return super(Segment, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-                f = self.inputs.data[0]
+    def _post_run(self):
+        f = self.inputs.data[0]
 
         for tidx, tissue in enumerate(['gm', 'wm', 'csf']):
             outtype = '%s_output_type' % tissue
@@ -931,8 +931,8 @@ class NewSegment(SPMCommand):
         else:
             return super(NewSegment, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-                self.outputs.native_class_images = []
+    def _post_run(self):
+        self.outputs.native_class_images = []
         self.outputs.dartel_input_images = []
         self.outputs.normalized_class_images = []
         self.outputs.modulated_class_images = []
@@ -1035,8 +1035,8 @@ class Smooth(SPMCommand):
 
         return super(Smooth, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-                self.outputs.smoothed_files = []
+    def _post_run(self):
+        self.outputs.smoothed_files = []
 
         for imgf in filename_to_list(self.inputs.in_files):
             self.outputs.smoothed_files.append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
@@ -1134,8 +1134,8 @@ class DARTEL(SPMCommand):
         else:
             return super(DARTEL, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-                self.outputs.template_files = []
+    def _post_run(self):
+        self.outputs.template_files = []
         for i in range(6):
             self.outputs.template_files.append(os.path.realpath('%s_%d.nii' % (self.inputs.template_prefix, i + 1)))
         self.outputs.final_template_file = os.path.realpath('%s_6.nii' % self.inputs.template_prefix)
@@ -1222,8 +1222,8 @@ class DARTELNorm2MNI(SPMCommand):
         else:
             return super(DARTELNorm2MNI, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-                pth, base, ext = split_filename(self.inputs.template_file)
+    def _post_run(self):
+        pth, base, ext = split_filename(self.inputs.template_file)
         self.outputs.normalization_parameter_file = os.path.realpath(base + '_2mni.mat')
         self.outputs.normalized_files = []
         prefix = "w"
@@ -1296,8 +1296,8 @@ class CreateWarped(SPMCommand):
         else:
             return super(CreateWarped, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-                self.outputs.warped_files = []
+    def _post_run(self):
+        self.outputs.warped_files = []
         for filename in self.inputs.image_files:
             pth, base, ext = split_filename(filename)
             if isdefined(self.inputs.modulate) and self.inputs.modulate:
@@ -1343,8 +1343,8 @@ class ApplyDeformations(SPMCommand):
         else:
             return super(ApplyDeformations, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-                self.outputs.out_files = []
+    def _post_run(self):
+        self.outputs.out_files = []
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
             self.outputs.out_files.append(os.path.realpath('w%s' % fname))
