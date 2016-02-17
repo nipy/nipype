@@ -133,7 +133,7 @@ class ImageMeants(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -347,7 +347,7 @@ class ExtractROI(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'roi_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -439,7 +439,7 @@ class ImageMaths(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
     def _parse_inputs(self, skip=None):
@@ -521,7 +521,7 @@ class FilterRegressor(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -772,7 +772,7 @@ class Overlay(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()['out_file']
+            return self.outputs.out_file
         return None
 
 
@@ -874,7 +874,7 @@ class Slicer(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()['out_file']
+            return self.outputs.out_file
         return None
 
 
@@ -977,7 +977,7 @@ class PlotTimeSeries(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()['out_file']
+            return self.outputs.out_file
         return None
 
 
@@ -1088,7 +1088,7 @@ class PlotMotionParams(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()['out_file']
+            return self.outputs.out_file
         return None
 
 
@@ -1165,7 +1165,7 @@ class ConvertXFM(FSLCommand):
 
     def _gen_filename(self, name):
         if name == "out_file":
-            return self._list_outputs()["out_file"]
+            return self.outputs.out_file
         return None
 
 
@@ -1211,7 +1211,7 @@ class SwapDimensions(FSLCommand):
 
     def _gen_filename(self, name):
         if name == "out_file":
-            return self._list_outputs()["out_file"]
+            return self.outputs.out_file
         return None
 
 
@@ -1318,7 +1318,7 @@ class SigLoss(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()['out_file']
+            return self.outputs.out_file
         return None
 
 

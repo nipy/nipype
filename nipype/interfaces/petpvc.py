@@ -220,5 +220,5 @@ class PETPVC(CommandLine):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()['out_file']
+            return self.outputs.out_file
         return None

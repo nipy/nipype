@@ -868,12 +868,12 @@ class FNIRT(FSLCommand):
 
     def _format_arg(self, name, spec, value):
         if name in list(self.filemap.keys()):
-            return spec.argstr % self._list_outputs()[name]
+            return spec.argstr % getattr(self.outputs, name)
         return super(FNIRT, self)._format_arg(name, spec, value)
 
     def _gen_filename(self, name):
         if name in ['warped_file', 'log_file']:
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
     def write_config(self, configfile):
@@ -969,7 +969,7 @@ class ApplyWarp(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -1028,7 +1028,7 @@ class SliceTimer(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()['slice_time_corrected_file']
+            return self.outputs.slice_time_corrected_file
         return None
 
 
@@ -1107,7 +1107,7 @@ class SUSAN(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()['smoothed_file']
+            return self.outputs.smoothed_file
         return None
 
 
@@ -1420,7 +1420,7 @@ class PRELUDE(FSLCommand):
 
     def _gen_filename(self, name):
         if name == 'unwrapped_phase_file':
-            return self._list_outputs()['unwrapped_phase_file']
+            return self.outputs.unwrapped_phase_file
         return None
 
 

@@ -1172,7 +1172,7 @@ class Allineate(AFNICommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
 
 
 class MaskaveInputSpec(AFNICommandInputSpec):

@@ -905,7 +905,7 @@ class BBRegister(FSCommand):
 
         if name in ['registered_file', 'out_fsl_file']:
             if isinstance(value, bool):
-                fname = self._list_outputs()[name]
+                fname = getattr(self.outputs, name)
             else:
                 fname = value
             return spec.argstr % fname
@@ -914,7 +914,7 @@ class BBRegister(FSCommand):
     def _gen_filename(self, name):
 
         if name == 'out_reg_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -1093,7 +1093,7 @@ class Smooth(FSCommand):
 
     def _gen_filename(self, name):
         if name == 'smoothed_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -1197,7 +1197,7 @@ class RobustRegister(FSCommand):
                        "half_weights", "half_source_xfm", "half_targ_xfm"]:
             if name == option:
                 if isinstance(value, bool):
-                    fname = self._list_outputs()[name]
+                    fname = getattr(self.outputs, name)
                 else:
                     fname = value
                 return spec.argstr % fname
@@ -1231,7 +1231,7 @@ class RobustRegister(FSCommand):
 
     def _gen_filename(self, name):
         if name == 'out_reg_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -1356,5 +1356,5 @@ class SynthesizeFLASH(FSCommand):
 
     def _gen_filename(self, name):
         if name == "out_file":
-            return self._list_outputs()["out_file"]
+            return self.outputs.out_file
         return None

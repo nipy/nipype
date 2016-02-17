@@ -109,7 +109,7 @@ class MRISPreproc(FSCommand):
 
     def _gen_filename(self, name):
         if name == 'out_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -447,7 +447,7 @@ class Binarize(FSCommand):
     def _format_arg(self, name, spec, value):
         if name == 'count_file':
             if isinstance(value, bool):
-                fname = self._list_outputs()[name]
+                fname = getattr(self.outputs, name)
             else:
                 fname = value
             return spec.argstr % fname
@@ -457,7 +457,7 @@ class Binarize(FSCommand):
 
     def _gen_filename(self, name):
         if name == 'binary_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -537,7 +537,7 @@ class Concatenate(FSCommand):
 
     def _gen_filename(self, name):
         if name == 'concatenated_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -662,7 +662,7 @@ class SegStats(FSCommand):
     def _format_arg(self, name, spec, value):
         if name in ['avgwf_txt_file', 'avgwf_file', 'sf_avg_file']:
             if isinstance(value, bool):
-                fname = self._list_outputs()[name]
+                fname = getattr(self.outputs, name)
             else:
                 fname = value
             return spec.argstr % fname
@@ -670,7 +670,7 @@ class SegStats(FSCommand):
 
     def _gen_filename(self, name):
         if name == 'summary_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -773,7 +773,7 @@ class Label2Vol(FSCommand):
 
     def _gen_filename(self, name):
         if name == 'vol_label_file':
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 

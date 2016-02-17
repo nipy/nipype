@@ -219,7 +219,7 @@ class SampleToSurface(FSCommand):
 
     def _gen_filename(self, name):
         if name == "out_file":
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -289,7 +289,7 @@ class SurfaceSmooth(FSCommand):
 
     def _gen_filename(self, name):
         if name == "out_file":
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -383,7 +383,7 @@ class SurfaceTransform(FSCommand):
 
     def _gen_filename(self, name):
         if name == "out_file":
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -499,7 +499,7 @@ class ApplyMask(FSCommand):
 
     def _gen_filename(self, name):
         if name == "out_file":
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
