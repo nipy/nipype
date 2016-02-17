@@ -91,8 +91,7 @@ ants_Affine.txt'
         return super(WarpTimeSeriesImageMultiTransform, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
+                _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
         self.outputs.output_image = os.path.join(os.getcwd(),
                                                ''.join((name,
                                                         self.inputs.out_postfix,
@@ -200,8 +199,7 @@ ants_Affine.txt'
         return super(WarpImageMultiTransform, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        if isdefined(self.inputs.output_image):
+                if isdefined(self.inputs.output_image):
             self.outputs.output_image = os.path.abspath(self.inputs.output_image)
         else:
             self.outputs.output_image = os.path.abspath(
@@ -350,8 +348,7 @@ class ApplyTransforms(ANTSCommand):
         return super(ApplyTransforms, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.output_image = os.path.abspath(
+                self.outputs.output_image = os.path.abspath(
             self._gen_filename('output_image'))
         return outputs
 

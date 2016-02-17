@@ -162,8 +162,7 @@ class DcmStack(NiftiGeneratorBase):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_file = self.out_path
+                self.outputs.out_file = self.out_path
         return outputs
 
 
@@ -194,8 +193,7 @@ class GroupAndStack(DcmStack):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_list = self.out_list
+                self.outputs.out_list = self.out_list
         return outputs
 
 
@@ -264,8 +262,7 @@ class LookupMeta(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs.update(self.result)
+                outputs.update(self.result)
         return outputs
 
 
@@ -321,8 +318,7 @@ class CopyMeta(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.dest_file = self.out_path
+                self.outputs.dest_file = self.out_path
         return outputs
 
 
@@ -379,8 +375,7 @@ class MergeNifti(NiftiGeneratorBase):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_file = self.out_path
+                self.outputs.out_file = self.out_path
         return outputs
 
 
@@ -421,6 +416,5 @@ class SplitNifti(NiftiGeneratorBase):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_list = self.out_list
+                self.outputs.out_list = self.out_list
         return outputs

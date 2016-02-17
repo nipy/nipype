@@ -96,8 +96,7 @@ class antsIntroduction(ANTSCommand):
     output_spec = antsIntroductionOutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        transmodel = self.inputs.transformation_model
+                transmodel = self.inputs.transformation_model
 
         # When transform is set as 'RI'/'RA', wrap fields should not be expected
         # The default transformation is GR, which outputs the wrap fields
@@ -228,8 +227,7 @@ class buildtemplateparallel(ANTSCommand):
         return super(buildtemplateparallel, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.template_files = []
+                self.outputs.template_files = []
         for i in range(len(glob(os.path.realpath('*iteration*')))):
             temp = os.path.realpath('%s_iteration_%d/%stemplate.nii.gz' %
                                     (self.inputs.transformation_model,

@@ -1477,8 +1477,7 @@ class DataFinder(IOBase):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs.update(self.result)
+                outputs.update(self.result)
         return outputs
 
 

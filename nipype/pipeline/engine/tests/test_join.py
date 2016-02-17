@@ -32,8 +32,7 @@ class PickFirst(nib.BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.output1 = self.inputs.in_files[0]
+                self.outputs.output1 = self.inputs.in_files[0]
         return outputs
 
 
@@ -55,8 +54,7 @@ class IncrementInterface(nib.BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.output1 = self.inputs.input1 + self.inputs.inc
+                self.outputs.output1 = self.inputs.input1 + self.inputs.inc
         return outputs
 
 _sums = []
@@ -84,8 +82,7 @@ class SumInterface(nib.BaseInterface):
     def _list_outputs(self):
         global _sum
         global _sum_operands
-        outputs = self._outputs().get()
-        self.outputs.operands = self.inputs.input1
+                self.outputs.operands = self.inputs.input1
         _sum_operands.append(self.outputs.operands)
         self.outputs.output1 = sum(self.inputs.input1)
         _sums.append(self.outputs.output1)
@@ -114,8 +111,7 @@ class SetInterface(nib.BaseInterface):
 
     def _list_outputs(self):
         global _set_len
-        outputs = self._outputs().get()
-        _set_len = self.outputs.output1 = len(self.inputs.input1)
+                _set_len = self.outputs.output1 = len(self.inputs.input1)
         return outputs
 
 
@@ -142,8 +138,7 @@ class ProductInterface(nib.BaseInterface):
 
     def _list_outputs(self):
         global _products
-        outputs = self._outputs().get()
-        self.outputs.output1 = self.inputs.input1 * self.inputs.input2
+                self.outputs.output1 = self.inputs.input1 * self.inputs.input2
         _products.append(self.outputs.output1)
         return outputs
 

@@ -98,8 +98,7 @@ class SliceTiming(SPMCommand):
         return super(SliceTiming, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.timecorrected_files = []
+                self.outputs.timecorrected_files = []
 
         filelist = filename_to_list(self.inputs.in_files)
         for f in filelist:
@@ -208,8 +207,7 @@ class Realign(SPMCommand):
         return [{'%s' % (self.inputs.jobtype): einputs[0]}]
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        resliced_all = self.inputs.write_which[0] > 0
+                resliced_all = self.inputs.write_which[0] > 0
         resliced_mean = self.inputs.write_which[1] > 0
 
         if self.inputs.jobtype != "write":
@@ -345,8 +343,7 @@ class Coregister(SPMCommand):
         return [{'%s' % (jobtype): einputs[0]}]
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-
+        
         if self.inputs.jobtype == "estimate":
             if isdefined(self.inputs.apply_to_files):
                 self.outputs.coregistered_files = self.inputs.apply_to_files
@@ -480,8 +477,7 @@ class Normalize(SPMCommand):
         return [{'%s' % (jobtype): einputs[0]}]
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-
+        
         jobtype = self.inputs.jobtype
         if jobtype.startswith('est'):
             self.outputs.normalization_parameters = []
@@ -642,8 +638,7 @@ class Normalize12(SPMCommand):
         return [{'%s' % (jobtype): einputs[0]}]
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-
+        
         jobtype = self.inputs.jobtype
         if jobtype.startswith('est'):
             self.outputs.deformation_field = []
@@ -798,8 +793,7 @@ class Segment(SPMCommand):
         return super(Segment, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        f = self.inputs.data[0]
+                f = self.inputs.data[0]
 
         for tidx, tissue in enumerate(['gm', 'wm', 'csf']):
             outtype = '%s_output_type' % tissue
@@ -938,8 +932,7 @@ class NewSegment(SPMCommand):
             return super(NewSegment, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.native_class_images = []
+                self.outputs.native_class_images = []
         self.outputs.dartel_input_images = []
         self.outputs.normalized_class_images = []
         self.outputs.modulated_class_images = []
@@ -1043,8 +1036,7 @@ class Smooth(SPMCommand):
         return super(Smooth, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.smoothed_files = []
+                self.outputs.smoothed_files = []
 
         for imgf in filename_to_list(self.inputs.in_files):
             self.outputs.smoothed_files.append(fname_presuffix(imgf, prefix=self.inputs.out_prefix))
@@ -1143,8 +1135,7 @@ class DARTEL(SPMCommand):
             return super(DARTEL, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.template_files = []
+                self.outputs.template_files = []
         for i in range(6):
             self.outputs.template_files.append(os.path.realpath('%s_%d.nii' % (self.inputs.template_prefix, i + 1)))
         self.outputs.final_template_file = os.path.realpath('%s_6.nii' % self.inputs.template_prefix)
@@ -1232,8 +1223,7 @@ class DARTELNorm2MNI(SPMCommand):
             return super(DARTELNorm2MNI, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        pth, base, ext = split_filename(self.inputs.template_file)
+                pth, base, ext = split_filename(self.inputs.template_file)
         self.outputs.normalization_parameter_file = os.path.realpath(base + '_2mni.mat')
         self.outputs.normalized_files = []
         prefix = "w"
@@ -1307,8 +1297,7 @@ class CreateWarped(SPMCommand):
             return super(CreateWarped, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.warped_files = []
+                self.outputs.warped_files = []
         for filename in self.inputs.image_files:
             pth, base, ext = split_filename(filename)
             if isdefined(self.inputs.modulate) and self.inputs.modulate:
@@ -1355,8 +1344,7 @@ class ApplyDeformations(SPMCommand):
             return super(ApplyDeformations, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_files = []
+                self.outputs.out_files = []
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
             self.outputs.out_files.append(os.path.realpath('w%s' % fname))
@@ -1526,8 +1514,7 @@ class VBMSegment(SPMCommand):
     _jobname = 'vbm8'
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-
+        
         do_dartel = self.inputs.spatial_normalization
         dartel_px = ''
         if do_dartel:

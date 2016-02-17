@@ -199,8 +199,7 @@ class SampleToSurface(FSCommand):
         return outfile
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_file = os.path.abspath(self._get_outfilename())
+                self.outputs.out_file = os.path.abspath(self._get_outfilename())
         hitsfile = self.inputs.hits_file
         if isdefined(hitsfile):
             self.outputs.hits_file = hitsfile
@@ -274,8 +273,7 @@ class SurfaceSmooth(FSCommand):
     output_spec = SurfaceSmoothOutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_file = self.inputs.out_file
+                self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):
             in_file = self.inputs.in_file
             if isdefined(self.inputs.fwhm):
@@ -352,8 +350,7 @@ class SurfaceTransform(FSCommand):
     output_spec = SurfaceTransformOutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_file = self.inputs.out_file
+                self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):
             if isdefined(self.inputs.source_file):
                 source = self.inputs.source_file
@@ -486,8 +483,7 @@ class ApplyMask(FSCommand):
     output_spec = ApplyMaskOutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_file = self.inputs.out_file
+                self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):
             self.outputs.out_file = fname_presuffix(self.inputs.in_file,
                                                   suffix="_masked",
@@ -692,8 +688,7 @@ class SurfaceSnapshots(FSCommand):
         fid.close()
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        if not isdefined(self.inputs.screenshot_stem):
+                if not isdefined(self.inputs.screenshot_stem):
             stem = "%s_%s_%s" % (self.inputs.subject_id, self.inputs.hemi, self.inputs.surface)
         else:
             stem = self.inputs.screenshot_stem
@@ -813,10 +808,12 @@ class MRIsConvertInputSpec(FSTraitedSpec):
     origname = traits.String(argstr="-o %s", desc="read orig positions")
 
     in_file = File(exists=True, mandatory=True, position=-2, argstr='%s', desc='File to read/convert')
-    out_file = File(argstr='./%s', position=-1, genfile=True, desc='output filename or True to generate one')
-    # Not really sure why the ./ is necessary but the module fails without it
+    out_file = File(argstr='%s', position=-1, genfile=True,
+                    xor=['out_datatype'], mandatory=True,
+                    desc='output filename or True to generate one')
 
-    out_datatype = traits.Enum("ico", "tri", "stl", "vtk", "gii", "mgh", "mgz", mandatory=True,
+    out_datatype = traits.Enum("ico", "tri", "stl", "vtk", "gii", "mgh", "mgz",
+                               xor=['out_file'], mandatory=True,
                                desc="These file formats are supported:  ASCII:       .asc"
                                "ICO: .ico, .tri GEO: .geo STL: .stl VTK: .vtk GIFTI: .gii MGH surface-encoded 'volume': .mgh, .mgz")
 
@@ -845,6 +842,11 @@ class MRIsConvert(FSCommand):
     input_spec = MRIsConvertInputSpec
     output_spec = MRIsConvertOutputSpec
 
+    def _format_arg(self, name, spec, value):
+        if name == "out_file" and not os.path.isabs(value):
+            value = os.path.abspath(value)
+        return super(MRIsConvert, self)._format_arg(name, spec, value)
+    
     def _list_outputs(self):
         
         self.outputs.converted = os.path.abspath(self._gen_outfilename())
@@ -852,12 +854,14 @@ class MRIsConvert(FSCommand):
 
     def _gen_filename(self, name):
         if name is 'out_file':
-            return self._gen_outfilename()
+            return os.path.abspath(self._gen_outfilename())
         else:
             return None
 
     def _gen_outfilename(self):
-        if isdefined(self.inputs.annot_file):
+        if isdefined(self.inputs.out_file):
+            return self.inputs.out_file
+        elif isdefined(self.inputs.annot_file):
             _, name, ext = split_filename(self.inputs.annot_file)
         elif isdefined(self.inputs.parcstats_file):
             _, name, ext = split_filename(self.inputs.parcstats_file)
@@ -1277,8 +1281,7 @@ class Tkregister2(FSCommand):
     output_spec = Tkregister2OutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.reg_file = os.path.abspath(self.inputs.reg_file)
+                self.outputs.reg_file = os.path.abspath(self.inputs.reg_file)
         if isdefined(self.inputs.fsl_out):
             self.outputs.fsl_file = os.path.abspath(self.inputs.fsl_out)
         return outputs

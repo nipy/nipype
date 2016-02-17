@@ -96,8 +96,7 @@ class IdentityInterface(IOBase):
                         (self.__class__.__name__, key)
                     raise ValueError(msg)
 
-        outputs = self._outputs().get()
-        for key in self._fields:
+                for key in self._fields:
             val = getattr(self.inputs, key)
             if isdefined(val):
                 setattr(self.outputs, key, val
@@ -139,8 +138,7 @@ class Merge(IOBase):
         add_traits(self.inputs, ['in%d' % (i + 1) for i in range(numinputs)])
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        out = []
+                out = []
         if self.inputs.axis == 'vstack':
             for idx in range(self._numinputs):
                 value = getattr(self.inputs, 'in%d' % (idx + 1))
@@ -260,8 +258,7 @@ class Rename(IOBase):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_file = os.path.join(os.getcwd(), self._rename())
+                self.outputs.out_file = os.path.join(os.getcwd(), self._rename())
         return outputs
 
 
@@ -302,8 +299,7 @@ class Split(IOBase):
         return base
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        if isdefined(self.inputs.splits):
+                if isdefined(self.inputs.splits):
             if sum(self.inputs.splits) != len(self.inputs.inlist):
                 raise RuntimeError('sum of splits != num of list elements')
             splits = [0]
@@ -352,8 +348,7 @@ class Select(IOBase):
     output_spec = SelectOutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        out = np.array(self.inputs.inlist)[np.array(self.inputs.index)].tolist()
+                out = np.array(self.inputs.inlist)[np.array(self.inputs.index)].tolist()
         self.outputs.out = out
         return outputs
 
@@ -466,8 +461,7 @@ class Function(IOBase):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        for key in self._output_names:
+                for key in self._output_names:
             setattr(self.outputs, key, self._out[key]
         return outputs
 

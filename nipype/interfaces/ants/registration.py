@@ -203,8 +203,7 @@ class ANTS(ANTSCommand):
         return super(ANTS, self)._format_arg(opt, spec, val)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.affine_transform = os.path.abspath(
+                self.outputs.affine_transform = os.path.abspath(
             self.inputs.output_transform_prefix + 'Affine.txt')
         self.outputs.warp_transform = os.path.abspath(
             self.inputs.output_transform_prefix + 'Warp.nii.gz')
@@ -878,8 +877,7 @@ class Registration(ANTSCommand):
         return '%s%d%s' % (prefix, count, suffix), inverse_mode
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.forward_transforms = []
+                self.outputs.forward_transforms = []
         self.outputs.forward_invert_flags = []
         self.outputs.reverse_transforms = []
         self.outputs.reverse_invert_flags = []

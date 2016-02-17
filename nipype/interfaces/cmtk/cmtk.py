@@ -719,8 +719,7 @@ class ROIGen(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        if isdefined(self.inputs.out_roi_file):
+                if isdefined(self.inputs.out_roi_file):
             self.outputs.roi_file = op.abspath(self.inputs.out_roi_file)
         else:
             self.outputs.roi_file = op.abspath(self._gen_outfilename('nii'))
@@ -790,6 +789,5 @@ class CreateNodes(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.node_network = op.abspath(self.inputs.out_filename)
+                self.outputs.node_network = op.abspath(self.inputs.out_filename)
         return outputs

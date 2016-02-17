@@ -153,8 +153,7 @@ class Level1Design(SPMCommand):
         return super(Level1Design, self)._make_matlab_command(content, postscript=postscript)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        spm = os.path.join(os.getcwd(), 'SPM.mat')
+                spm = os.path.join(os.getcwd(), 'SPM.mat')
         self.outputs.spm_mat_file = spm
         return outputs
 
@@ -215,8 +214,7 @@ class EstimateModel(SPMCommand):
         return einputs
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        pth, _ = os.path.split(self.inputs.spm_mat_file)
+                pth, _ = os.path.split(self.inputs.spm_mat_file)
         spm12 = '12' in self.version.split('.')[0]
         if spm12:
             mask = os.path.join(pth, 'mask.nii')
@@ -385,8 +383,7 @@ class EstimateContrast(SPMCommand):
         return script
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        pth, _ = os.path.split(self.inputs.spm_mat_file)
+                pth, _ = os.path.split(self.inputs.spm_mat_file)
         spm = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
         con_images = []
         spmT_images = []
@@ -591,8 +588,7 @@ fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
         return outputs
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.thresholded_map = self._gen_thresholded_map_filename()
+                self.outputs.thresholded_map = self._gen_thresholded_map_filename()
         self.outputs.pre_topo_fdr_map = self._gen_pre_topo_map_filename()
         return outputs
 
@@ -779,8 +775,7 @@ class FactorialDesign(SPMCommand):
         return einputs
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        spm = os.path.join(os.getcwd(), 'SPM.mat')
+                spm = os.path.join(os.getcwd(), 'SPM.mat')
         self.outputs.spm_mat_file = spm
         return outputs
 

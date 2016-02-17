@@ -9,9 +9,7 @@ dependencies:
   pre:
     # Let CircleCI cache the apt archive
     - sudo rm -rf /var/cache/apt/archives && sudo ln -s ~/.apt-cache /var/cache/apt/archives && mkdir -p ~/.apt-cache/partial
-    - wget -O- http://neuro.debian.net/lists/precise.us-ca.full | sudo tee /etc/apt/sources.list.d/neurodebian.sources.list
-    - sudo apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9
-    - sudo apt-get update
+    - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
   override:
     # Install apt packages
     - sudo apt-get install -y fsl-core fsl-atlases fsl-mni152-templates fsl-feeds afni
@@ -21,7 +19,7 @@ dependencies:
     # Set up python environment
     - pip install --upgrade pip
     - pip install -e .
-    - pip install matplotlib sphinx ipython boto coverage
+    - pip install matplotlib sphinx ipython boto coverage dipy
     - gem install fakes3
     - if [[ ! -d ~/examples/data ]]; then wget "http://tcpdiag.dl.sourceforge.net/project/nipy/nipype/nipype-0.2/nipype-tutorial.tar.bz2" && tar jxvf nipype-tutorial.tar.bz2 && mv nipype-tutorial/* ~/examples/; fi
     - if [[ ! -d ~/examples/fsl_course_data ]]; then wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" && wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz" && wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz" && mkdir ~/examples/fsl_course_data && tar zxvf fdt1.tar.gz -C ~/examples/fsl_course_data && tar zxvf fdt2.tar.gz -C ~/examples/fsl_course_data && tar zxvf tbss.tar.gz -C ~/examples/fsl_course_data; fi

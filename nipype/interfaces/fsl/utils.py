@@ -337,8 +337,7 @@ class ExtractROI(FSLCommand):
             Else, contains path, filename of generated outputfile
 
         """
-        outputs = self._outputs().get()
-        self.outputs.roi_file = self.inputs.roi_file
+                self.outputs.roi_file = self.inputs.roi_file
         if not isdefined(self.outputs.roi_file):
             self.outputs.roi_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_roi')
@@ -388,8 +387,7 @@ class Split(FSLCommand):
             Else, contains path, filename of generated outputfile
 
         """
-        outputs = self._outputs().get()
-        ext = Info.output_type_to_ext(self.inputs.output_type)
+                ext = Info.output_type_to_ext(self.inputs.output_type)
         outbase = 'vol*'
         if isdefined(self.inputs.out_base_name):
             outbase = '%s*' % self.inputs.out_base_name
@@ -449,8 +447,7 @@ class ImageMaths(FSLCommand):
         suffix = '_maths'  # ohinds: build suffix
         if isdefined(self.inputs.suffix):
             suffix = self.inputs.suffix
-        outputs = self._outputs().get()
-        self.outputs.out_file = self.inputs.out_file
+                self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):
             self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix=suffix)
@@ -756,8 +753,7 @@ class Overlay(FSLCommand):
         return super(Overlay, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        out_file = self.inputs.out_file
+                out_file = self.inputs.out_file
         if not isdefined(out_file):
             if isdefined(self.inputs.stat_image2) and (
                 not isdefined(self.inputs.show_negative_stats) or not
@@ -865,8 +861,7 @@ class Slicer(FSLCommand):
         return super(Slicer, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        out_file = self.inputs.out_file
+                out_file = self.inputs.out_file
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file, ext='.png')
         self.outputs.out_file = os.path.abspath(out_file)
@@ -964,8 +959,7 @@ class PlotTimeSeries(FSLCommand):
         return super(PlotTimeSeries, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        out_file = self.inputs.out_file
+                out_file = self.inputs.out_file
         if not isdefined(out_file):
             if isinstance(self.inputs.in_file, list):
                 infile = self.inputs.in_file[0]
@@ -1072,8 +1066,7 @@ class PlotMotionParams(FSLCommand):
         return super(PlotMotionParams, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        out_file = self.inputs.out_file
+                out_file = self.inputs.out_file
         if not isdefined(out_file):
             if isinstance(self.inputs.in_file, list):
                 infile = self.inputs.in_file[0]
@@ -1139,8 +1132,7 @@ class ConvertXFM(FSLCommand):
     output_spec = ConvertXFMOutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        outfile = self.inputs.out_file
+                outfile = self.inputs.out_file
         if not isdefined(outfile):
             _, infile1, _ = split_filename(self.inputs.in_file)
             if self.inputs.invert_xfm:
@@ -1201,8 +1193,7 @@ class SwapDimensions(FSLCommand):
     output_spec = SwapDimensionsOutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_file = self.inputs.out_file
+                self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
             self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_newdims')

@@ -149,8 +149,7 @@ class TestInterface(nib.BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.output1 = [1]
+                self.outputs.output1 = [1]
         return outputs
 
 

@@ -36,8 +36,7 @@ class Analyze2nii(SPMCommand):
         return script
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.nifti_file = self.output_name
+                self.outputs.nifti_file = self.output_name
         return outputs
 
 
@@ -116,8 +115,7 @@ class CalcCoregAffine(SPMCommand):
         return script
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.mat = os.path.abspath(self.inputs.mat)
+                self.outputs.mat = os.path.abspath(self.inputs.mat)
         self.outputs.invmat = os.path.abspath(self.inputs.invmat)
         return outputs
 
@@ -229,8 +227,7 @@ class Reslice(SPMCommand):
         return script
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_file = os.path.abspath(self.inputs.out_file)
+                self.outputs.out_file = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -308,8 +305,7 @@ class ApplyInverseDeformation(SPMCommand):
         return val
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_files = []
+                self.outputs.out_files = []
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
             self.outputs.out_files.append(os.path.realpath('w%s' % fname))
@@ -378,8 +374,7 @@ class ResliceToReference(SPMCommand):
         return val
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        self.outputs.out_files = []
+                self.outputs.out_files = []
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
             self.outputs.out_files.append(os.path.realpath('w%s' % fname))
@@ -461,8 +456,7 @@ class DicomImport(SPMCommand):
 
     def _list_outputs(self):
         from glob import glob
-        outputs = self._outputs().get()
-        od = os.path.abspath(self.inputs.output_dir)
+                od = os.path.abspath(self.inputs.output_dir)
 
         ext = self.inputs.format
         if self.inputs.output_dir_struct == "flat":

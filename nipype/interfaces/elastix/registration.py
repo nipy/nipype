@@ -66,8 +66,7 @@ class Registration(CommandLine):
     output_spec = RegistrationOutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-
+        
         out_dir = op.abspath(self.inputs.output_path)
 
         opts = ['WriteResultImage', 'ResultImageFormat']
@@ -158,8 +157,7 @@ class ApplyWarp(CommandLine):
     output_spec = ApplyWarpOutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        out_dir = op.abspath(self.inputs.output_path)
+                out_dir = op.abspath(self.inputs.output_path)
         self.outputs.warped_file = op.join(out_dir, 'result.nii.gz')
         return outputs
 
@@ -198,8 +196,7 @@ class AnalyzeWarp(CommandLine):
     output_spec = AnalyzeWarpOutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        out_dir = op.abspath(self.inputs.output_path)
+                out_dir = op.abspath(self.inputs.output_path)
         self.outputs.disp_field = op.join(out_dir, 'deformationField.nii.gz')
         self.outputs.jacdet_map = op.join(out_dir, 'spatialJacobian.nii.gz')
         self.outputs.jacmat_map = op.join(out_dir, 'fullSpatialJacobian.nii.gz')
@@ -239,8 +236,7 @@ class PointsWarp(CommandLine):
     output_spec = PointsWarpOutputSpec
 
     def _list_outputs(self):
-        outputs = self._outputs().get()
-        out_dir = op.abspath(self.inputs.output_path)
+                out_dir = op.abspath(self.inputs.output_path)
 
         fname, ext = op.splitext(op.basename(self.inputs.points_file))
 
