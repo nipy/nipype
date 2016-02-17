@@ -330,8 +330,7 @@ class FAST(FSLCommand):
             for i in range(nclasses):
                 self.outputs.probability_maps.append(
                     self._gen_fname(basefile, suffix='_prob_%d' % i))
-        return outputs
-
+        
 
 class FLIRTInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='-in %s', mandatory=True,
@@ -657,8 +656,7 @@ class MCFLIRT(FSLCommand):
         if isdefined(self.inputs.save_rms) and self.inputs.save_rms:
             outfile = self.outputs.out_file
             self.outputs.rms_files = [outfile + '_abs.rms', outfile + '_rel.rms']
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._gen_outfilename()
@@ -962,8 +960,7 @@ class ApplyWarp(FSLCommand):
                                                   suffix='_warp')
         else:
             self.outputs.out_file = os.path.abspath(self.inputs.out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return getattr(self.outputs, name)
@@ -1021,8 +1018,7 @@ class SliceTimer(FSLCommand):
             out_file = self._gen_fname(self.inputs.in_file,
                                        suffix='_st')
         self.outputs.slice_time_corrected_file = os.path.abspath(out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return self.outputs.slice_time_corrected_file
@@ -1101,8 +1097,7 @@ class SUSAN(FSLCommand):
             out_file = self._gen_fname(self.inputs.in_file,
                                        suffix='_smooth')
         self.outputs.smoothed_file = os.path.abspath(out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return self.outputs.smoothed_file
@@ -1414,8 +1409,7 @@ class PRELUDE(FSLCommand):
                 out_file = self._gen_fname(self.inputs.complex_phase_file,
                                            suffix='_phase_unwrapped')
         self.outputs.unwrapped_phase_file = os.path.abspath(out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'unwrapped_phase_file':
             return self.outputs.unwrapped_phase_file
@@ -1515,8 +1509,7 @@ class FIRST(FSLCommand):
         self.outputs.vtk_surfaces = self._gen_mesh_names('vtk_surfaces',
                                                        structures)
         self.outputs.bvars = self._gen_mesh_names('bvars', structures)
-        return outputs
-
+        
     def _gen_fname(self, name):
         path, outname, ext = split_filename(self.inputs.out_file)
 

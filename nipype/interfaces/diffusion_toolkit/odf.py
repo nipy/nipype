@@ -88,8 +88,7 @@ class HARDIMat(CommandLine):
     def _post_run(self):
         
         self.outputs.out_file = os.path.abspath(self.inputs.out_file)
-        return outputs
-
+        
 
 class ODFReconInputSpec(CommandLineInputSpec):
     DWI = File(desc='Input raw data', argstr='%s', exists=True, mandatory=True, position=1)
@@ -150,8 +149,7 @@ class ODFRecon(CommandLine):
         if isdefined(self.inputs.output_entropy):
             self.outputs.entropy = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_entropy.' + output_type))
 
-        return outputs
-
+        
 
 class ODFTrackerInputSpec(CommandLineInputSpec):
     max = File(exists=True, mandatory=True)
@@ -232,4 +230,4 @@ class ODFTracker(CommandLine):
     def _post_run(self):
         
         self.outputs.track_file = os.path.abspath(self.inputs.out_file)
-        return outputs
+        

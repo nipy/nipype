@@ -497,8 +497,7 @@ class NetworkXMetrics(BaseInterface):
         self.outputs.edge_measures_matlab = op.abspath(self._gen_outfilename('edgemetrics', 'mat'))
         self.outputs.matlab_matrix_files = [self.outputs.global_measures_matlab, self.outputs.node_measures_matlab, self.outputs.edge_measures_matlab]
         self.outputs.pickled_extra_measures = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
-        return outputs
-
+        
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext
 
@@ -560,7 +559,6 @@ class AverageNetworks(BaseInterface):
             self.outputs.gexf_groupavg = op.abspath(self.inputs.out_gexf_groupavg)
 
         self.outputs.matlab_groupavgs = matlab_network_list
-        return outputs
-
+        
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext

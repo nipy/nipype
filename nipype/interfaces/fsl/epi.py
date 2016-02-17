@@ -97,8 +97,7 @@ class PrepareFieldmap(FSLCommand):
     def _post_run(self):
         
         self.outputs.out_fieldmap = self.inputs.out_fieldmap
-        return outputs
-
+        
     def _run_interface(self, runtime):
         runtime = super(PrepareFieldmap, self)._run_interface(runtime)
 
@@ -271,8 +270,7 @@ class TOPUP(FSLCommand):
 
         if isdefined(self.inputs.encoding_direction):
             self.outputs.out_enc_file = self._get_encfilename()
-        return outputs
-
+        
     def _get_encfilename(self):
         out_file = os.path.join(os.getcwd(),
                                 ('%s_encfile.txt' %
@@ -496,8 +494,7 @@ class Eddy(FSLCommand):
         
         self.outputs.out_corrected = os.path.abspath('%s.nii.gz' % self.inputs.out_base)
         self.outputs.out_parameter = os.path.abspath('%s.eddy_parameters' % self.inputs.out_base)
-        return outputs
-
+        
 
 class SigLossInputSpec(FSLCommandInputSpec):
     in_file = File(mandatory=True,
@@ -552,8 +549,7 @@ class SigLoss(FSLCommand):
                 (isdefined(self.inputs.in_file))):
             self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_sigloss')
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return self.outputs.out_file
@@ -680,8 +676,7 @@ class EpiReg(FSLCommand):
         self.outputs.wmseg = os.path.join(os.getcwd(),
                                         self.inputs.out_base + '_fast_wmseg.nii.gz')
 
-        return outputs
-
+        
 
 #######################################
 # deprecated interfaces
@@ -810,8 +805,7 @@ class EPIDeWarp(FSLCommand):
         else:
             self.outputs.exf_mask = self._gen_fname(cwd=self.inputs.tmpdir,
                                                   basename='maskexf')
-        return outputs
-
+        
 
 class EddyCorrectInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, desc='4D input file', argstr='%s', position=0,

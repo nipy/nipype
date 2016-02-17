@@ -133,8 +133,7 @@ class EditTransform(BaseInterface):
     def _post_run(self):
         
         self.outputs.output_file = getattr(self, '_out_file')
-        return outputs
-
+        
     def _get_outfile(self):
         val = getattr(self, '_out_file')
         if val is not None and val != '':

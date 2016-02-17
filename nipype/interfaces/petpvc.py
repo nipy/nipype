@@ -171,8 +171,7 @@ class PETPVC(CommandLine):
                                                   suffix='_{}_pvc'.format(method_name))
 
         self.outputs.out_file = os.path.abspath(self.outputs.out_file)
-        return outputs
-
+        
     def _gen_fname(self, basename, cwd=None, suffix=None, change_ext=True,
                    ext='.nii.gz'):
         """Generate a filename based on the given parameters.

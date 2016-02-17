@@ -1713,8 +1713,7 @@ class Blur(StdOutCommandLine):
             self.outputs.partial_dz = output_file_base + '_dz.mnc'
             self.outputs.partial_dxyz = output_file_base + '_dxyz.mnc'
 
-        return outputs
-
+        
     @property
     def cmdline(self):
         output_file_base = self.inputs.output_file_base
@@ -2976,8 +2975,7 @@ class Gennlxfm(CommandLine):
         outputs = super(Gennlxfm, self)._list_outputs()
         self.outputs.output_grid = re.sub(
             '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_file)
-        return outputs
-
+        
 
 class XfmConcatInputSpec(CommandLineInputSpec):
     input_files = InputMultiPath(
@@ -3047,8 +3045,7 @@ class XfmConcat(CommandLine):
                         '_grid_*.mnc',
                         self.outputs.output_file))
 
-        return outputs
-
+        
 
 class BestLinRegInputSpec(CommandLineInputSpec):
     source = File(
@@ -3242,8 +3239,7 @@ class NlpFit(CommandLine):
             self.outputs.output_grid = re.sub(
                 '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_xfm)
 
-        return outputs
-
+        
 
 class XfmAvgInputSpec(CommandLineInputSpec):
     input_files = InputMultiPath(
@@ -3346,8 +3342,7 @@ class XfmAvg(CommandLine):
             self.outputs.output_grid = re.sub(
                 '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_file)
 
-        return outputs
-
+        
 
 class XfmInvertInputSpec(CommandLineInputSpec):
     input_file = traits.File(
@@ -3420,8 +3415,7 @@ class XfmInvert(CommandLine):
             self.outputs.output_grid = re.sub(
                 '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_file)
 
-        return outputs
-
+        
 
 class BigAverageInputSpec(CommandLineInputSpec):
     input_files = InputMultiPath(
@@ -3682,4 +3676,4 @@ class VolSymm(CommandLine):
                 self.outputs.output_grid = re.sub(
                     '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.trans_file)
 
-        return outputs
+        

@@ -98,4 +98,4 @@ class WatershedBEM(FSCommand):
                     if not k.rfind('surface') == -1:
                         mesh_paths.append(out_files)
         self.outputs.mesh_files = mesh_paths
-        return outputs
+        

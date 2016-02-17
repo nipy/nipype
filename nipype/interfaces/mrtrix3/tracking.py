@@ -251,4 +251,4 @@ class Tractography(MRTrix3Base):
     def _post_run(self):
         
         self.outputs.out_file = op.abspath(self.inputs.out_file)
-        return outputs
+        

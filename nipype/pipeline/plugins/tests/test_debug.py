@@ -26,8 +26,7 @@ class TestInterface(nib.BaseInterface):
 
     def _post_run(self):
         self.outputs.output1 = [1, self.inputs.input1]
-        return outputs
-
+        
 
 def callme(node, graph):
     pass

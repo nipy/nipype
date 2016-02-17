@@ -102,8 +102,7 @@ class Registration(CommandLine):
         if self.outputs.warped_files_flags[-1]:
             self.outputs.warped_file = self.outputs.warped_files[-1]
 
-        return outputs
-
+        
     def _cast(self, val):
         if val.startswith('"') and val.endswith('"'):
             if val == '"true"':
@@ -159,8 +158,7 @@ class ApplyWarp(CommandLine):
     def _post_run(self):
         out_dir = op.abspath(self.inputs.output_path)
         self.outputs.warped_file = op.join(out_dir, 'result.nii.gz')
-        return outputs
-
+        
 
 class AnalyzeWarpInputSpec(ElastixBaseInputSpec):
     transform_file = File(exists=True, mandatory=True, argstr='-tp %s',
@@ -200,8 +198,7 @@ class AnalyzeWarp(CommandLine):
         self.outputs.disp_field = op.join(out_dir, 'deformationField.nii.gz')
         self.outputs.jacdet_map = op.join(out_dir, 'spatialJacobian.nii.gz')
         self.outputs.jacmat_map = op.join(out_dir, 'fullSpatialJacobian.nii.gz')
-        return outputs
-
+        
 
 class PointsWarpInputSpec(ElastixBaseInputSpec):
     points_file = File(exists=True, argstr='-def %s', mandatory=True,
@@ -241,4 +238,4 @@ class PointsWarp(CommandLine):
         fname, ext = op.splitext(op.basename(self.inputs.points_file))
 
         self.outputs.warped_file = op.join(out_dir, 'outputpoints%s' % ext)
-        return outputs
+        

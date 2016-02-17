@@ -37,8 +37,7 @@ class Analyze2nii(SPMCommand):
 
     def _post_run(self):
         self.outputs.nifti_file = self.output_name
-        return outputs
-
+        
 
 class CalcCoregAffineInputSpec(SPMCommandInputSpec):
     target = File(exists=True, mandatory=True,
@@ -117,8 +116,7 @@ class CalcCoregAffine(SPMCommand):
     def _post_run(self):
         self.outputs.mat = os.path.abspath(self.inputs.mat)
         self.outputs.invmat = os.path.abspath(self.inputs.invmat)
-        return outputs
-
+        
 
 class ApplyTransformInputSpec(SPMCommandInputSpec):
     in_file = File(exists=True, mandatory=True, copyfile=True,
@@ -178,8 +176,7 @@ class ApplyTransform(SPMCommand):
             self.outputs.out_file = os.path.abspath(self._gen_outfilename())
         else:
             self.outputs.out_file = os.path.abspath(self.inputs.out_file)
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_trans.nii'
@@ -228,8 +225,7 @@ class Reslice(SPMCommand):
 
     def _post_run(self):
         self.outputs.out_file = os.path.abspath(self.inputs.out_file)
-        return outputs
-
+        
 
 class ApplyInverseDeformationInput(SPMCommandInputSpec):
     in_files = InputMultiPath(
@@ -309,8 +305,7 @@ class ApplyInverseDeformation(SPMCommand):
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
             self.outputs.out_files.append(os.path.realpath('w%s' % fname))
-        return outputs
-
+        
 
 class ResliceToReferenceInput(SPMCommandInputSpec):
     in_files = InputMultiPath(
@@ -378,8 +373,7 @@ class ResliceToReference(SPMCommand):
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
             self.outputs.out_files.append(os.path.realpath('w%s' % fname))
-        return outputs
-
+        
 
 class DicomImportInputSpec(SPMCommandInputSpec):
     in_files = InputMultiPath(
@@ -467,4 +461,4 @@ class DicomImport(SPMCommand):
             self.outputs.out_files = glob(os.path.join(od, os.path.join('*', '*', '*.%s' % ext)))
         elif self.inputs.output_dir_struct == 'patid_date':
             self.outputs.out_files = glob(os.path.join(od, os.path.join('*', '*', '*', '*.%s' % ext)))
-        return outputs
+        

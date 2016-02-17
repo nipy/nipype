@@ -137,8 +137,7 @@ class Conmat(CommandLine):
         output_root = self._gen_outputroot()
         self.outputs.conmat_sc = os.path.abspath(output_root + "sc.csv")
         self.outputs.conmat_ts = os.path.abspath(output_root + "ts.csv")
-        return outputs
-
+        
     def _gen_outfilename(self):
         return self._gen_outputroot()
 

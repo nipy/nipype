@@ -64,8 +64,7 @@ class DTI(DipyDiffusionInterface):
 
     def _post_run(self):
         self.outputs.out_file = self._gen_filename('dti')
-        return outputs
-
+        
 
 class TensorModeInputSpec(DipyBaseInterfaceInputSpec):
     mask_file = File(exists=True,
@@ -133,4 +132,4 @@ class TensorMode(DipyDiffusionInterface):
 
     def _post_run(self):
         self.outputs.out_file = self._gen_filename('mode')
-        return outputs
+        

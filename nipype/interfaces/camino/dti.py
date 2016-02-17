@@ -64,8 +64,7 @@ class DTIFit(StdOutCommandLine):
     def _post_run(self):
         
         self.outputs.tensor_fitted = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_DT.Bdouble'
@@ -150,8 +149,7 @@ class DTMetric(CommandLine):
     def _post_run(self):
         
         self.outputs.metric_stats = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         return self._gen_outputfile()
 
@@ -254,8 +252,7 @@ class ModelFit(StdOutCommandLine):
     def _post_run(self):
         
         self.outputs.fitted_data = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_fit.Bdouble'
@@ -336,8 +333,7 @@ class DTLUTGen(StdOutCommandLine):
     def _post_run(self):
         
         self.outputs.dtLUT = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '.dat'
@@ -400,8 +396,7 @@ class PicoPDFs(StdOutCommandLine):
     def _post_run(self):
         
         self.outputs.pdfs = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_pdfs.Bdouble'
@@ -571,8 +566,7 @@ class Track(CommandLine):
         else:
             out_file_path = os.path.abspath(self._gen_outfilename())
         self.outputs.tracked = out_file_path
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_file':
             return self._gen_outfilename()
@@ -875,8 +869,7 @@ class ComputeMeanDiffusivity(StdOutCommandLine):
     def _post_run(self):
         
         self.outputs.md = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + "_MD.img"  # Need to change to self.inputs.outputdatatype
@@ -937,8 +930,7 @@ class ComputeFractionalAnisotropy(StdOutCommandLine):
     def _post_run(self):
         
         self.outputs.fa = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_FA.Bdouble'  # Need to change to self.inputs.outputdatatype
@@ -1001,8 +993,7 @@ class ComputeTensorTrace(StdOutCommandLine):
     def _post_run(self):
         
         self.outputs.trace = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_TrD.img'  # Need to change to self.inputs.outputdatatype
@@ -1061,8 +1052,7 @@ class ComputeEigensystem(StdOutCommandLine):
     def _post_run(self):
         
         self.outputs.eigen = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         datatype = self.inputs.outputdatatype

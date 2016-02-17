@@ -163,8 +163,7 @@ class DcmStack(NiftiGeneratorBase):
 
     def _post_run(self):
         self.outputs.out_file = self.out_path
-        return outputs
-
+        
 
 class GroupAndStackOutputSpec(TraitedSpec):
     out_list = traits.List(desc="List of output nifti files")
@@ -194,8 +193,7 @@ class GroupAndStack(DcmStack):
 
     def _post_run(self):
         self.outputs.out_list = self.out_list
-        return outputs
-
+        
 
 class LookupMetaInputSpec(TraitedSpec):
     in_file = File(mandatory=True,
@@ -249,8 +247,7 @@ class LookupMeta(BaseInterface):
         # Not sure why this is needed
         for out_name in list(self._meta_keys.values()):
             _ = getattr(outputs, out_name)
-        return outputs
-
+        
     def _run_interface(self, runtime):
         # If the 'meta_keys' input is a list, covert it to a dict
         self._make_name_map()
@@ -263,8 +260,7 @@ class LookupMeta(BaseInterface):
 
     def _post_run(self):
         outputs.update(self.result)
-        return outputs
-
+        
 
 class CopyMetaInputSpec(TraitedSpec):
     src_file = File(mandatory=True, exists=True)
@@ -319,8 +315,7 @@ class CopyMeta(BaseInterface):
 
     def _post_run(self):
         self.outputs.dest_file = self.out_path
-        return outputs
-
+        
 
 class MergeNiftiInputSpec(NiftiGeneratorBaseInputSpec):
     in_files = traits.List(mandatory=True,
@@ -376,8 +371,7 @@ class MergeNifti(NiftiGeneratorBase):
 
     def _post_run(self):
         self.outputs.out_file = self.out_path
-        return outputs
-
+        
 
 class SplitNiftiInputSpec(NiftiGeneratorBaseInputSpec):
     in_file = File(exists=True, mandatory=True, desc="Nifti file to split")
@@ -417,4 +411,4 @@ class SplitNifti(NiftiGeneratorBase):
 
     def _post_run(self):
         self.outputs.out_list = self.out_list
-        return outputs
+        

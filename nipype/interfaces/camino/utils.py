@@ -58,8 +58,7 @@ class ImageStats(CommandLine):
     def _post_run(self):
         
         self.outputs.out_file = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         output_root = self.inputs.output_root
         first_file = self.inputs.in_files[0]

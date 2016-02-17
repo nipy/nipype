@@ -118,8 +118,7 @@ class antsIntroduction(ANTSCommand):
                                               self.inputs.out_prefix +
                                               'deformed.nii.gz')
 
-        return outputs
-
+        
 # How do we make a pass through so that GenWarpFields is just an alias for  antsIntroduction ?
 
 
@@ -256,4 +255,4 @@ class buildtemplateparallel(ANTSCommand):
                                                     base)))
             for file_ in temp:
                 self.outputs.subject_outfiles.append(file_)
-        return outputs
+        

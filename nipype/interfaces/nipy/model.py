@@ -204,8 +204,7 @@ class FitGLM(BaseInterface):
             self.outputs.a = self._a_file
         if self.inputs.save_residuals:
             self.outputs.residuals = self._residuals_file
-        return outputs
-
+        
 
 class EstimateContrastInputSpec(BaseInterfaceInputSpec):
     contrasts = traits.List(
@@ -315,4 +314,4 @@ class EstimateContrast(BaseInterface):
         self.outputs.stat_maps = self._stat_maps
         self.outputs.p_maps = self._p_maps
         self.outputs.z_maps = self._z_maps
-        return outputs
+        

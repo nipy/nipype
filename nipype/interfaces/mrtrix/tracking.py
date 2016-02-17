@@ -114,8 +114,7 @@ class Tracks2Prob(CommandLine):
             self.outputs.tract_image = op.abspath(self._gen_outfilename())
         else:
             self.outputs.tract_image = os.path.abspath(self.outputs.tract_image)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()

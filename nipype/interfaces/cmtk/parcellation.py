@@ -599,7 +599,6 @@ class Parcellate(BaseInterface):
         if self.inputs.dilation is True:
             self.outputs.dilated_roi_file_in_structural_space = op.abspath(
                 'ROIv_HR_th.nii.gz')
-        return outputs
-
+        
     def _gen_outfilename(self, ext, prefix='ROI'):
         return prefix + '_' + self.inputs.parcellation_name + '.' + ext

@@ -72,8 +72,7 @@ class ComputeMask(BaseInterface):
 
     def _post_run(self):
         self.outputs.brain_mask = self._brain_mask_path
-        return outputs
-
+        
 
 class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
 
@@ -192,8 +191,7 @@ class FmriRealign4d(BaseInterface):
     def _post_run(self):
         self.outputs.out_file = self._out_file_path
         self.outputs.par_file = self._par_file_path
-        return outputs
-
+        
 
 class SpaceTimeRealignerInputSpec(BaseInterfaceInputSpec):
 
@@ -322,8 +320,7 @@ class SpaceTimeRealigner(BaseInterface):
     def _post_run(self):
         self.outputs.out_file = self._out_file_path
         self.outputs.par_file = self._par_file_path
-        return outputs
-
+        
 
 class TrimInputSpec(BaseInterfaceInputSpec):
     in_file = File(
@@ -381,4 +378,4 @@ class Trim(BaseInterface):
                 newpath=os.getcwd(),
                 suffix=self.inputs.suffix)
         self.outputs.out_file = os.path.abspath(self.outputs.out_file)
-        return outputs
+        

@@ -68,8 +68,7 @@ class Resample(DipyBaseInterface):
 
     def _post_run(self):
         self.outputs.out_file = op.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         fname, fext = op.splitext(op.basename(self.inputs.in_file))
         if fext == '.gz':
@@ -159,8 +158,7 @@ class Denoise(DipyBaseInterface):
 
     def _post_run(self):
         self.outputs.out_file = op.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         fname, fext = op.splitext(op.basename(self.inputs.in_file))
         if fext == '.gz':

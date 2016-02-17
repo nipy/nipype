@@ -76,8 +76,7 @@ class Camino2Trackvis(CommandLine):
     def _post_run(self):
         
         self.outputs.trackvis = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_file':
             return self._gen_outfilename()
@@ -127,8 +126,7 @@ class Trackvis2Camino(CommandLine):
     def _post_run(self):
         
         self.outputs.camino = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_file':
             return self._gen_outfilename()

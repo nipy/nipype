@@ -74,8 +74,7 @@ class MRConvert(CommandLine):
             self.outputs.converted = op.abspath(self._gen_outfilename())
         else:
             self.outputs.converted = op.abspath(self.outputs.converted)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -187,8 +186,7 @@ class Tensor2Vector(CommandLine):
             self.outputs.vector = op.abspath(self._gen_outfilename())
         else:
             self.outputs.vector = op.abspath(self.outputs.vector)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -236,8 +234,7 @@ class Tensor2FractionalAnisotropy(CommandLine):
             self.outputs.FA = op.abspath(self._gen_outfilename())
         else:
             self.outputs.FA = op.abspath(self.outputs.FA)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -285,8 +282,7 @@ class Tensor2ApparentDiffusion(CommandLine):
             self.outputs.ADC = op.abspath(self._gen_outfilename())
         else:
             self.outputs.ADC = op.abspath(self.outputs.ADC)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -335,8 +331,7 @@ class MRMultiply(CommandLine):
             self.outputs.out_file = op.abspath(self._gen_outfilename())
         else:
             self.outputs.out_file = op.abspath(self.outputs.out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -445,8 +440,7 @@ class GenerateWhiteMatterMask(CommandLine):
     def _post_run(self):
         
         self.outputs.WMprobabilitymap = op.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_WMProb_filename':
             return self._gen_outfilename()
@@ -495,8 +489,7 @@ class Erode(CommandLine):
             self.outputs.out_file = op.abspath(self._gen_outfilename())
         else:
             self.outputs.out_file = op.abspath(self.outputs.out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -553,8 +546,7 @@ class Threshold(CommandLine):
             self.outputs.out_file = op.abspath(self._gen_outfilename())
         else:
             self.outputs.out_file = op.abspath(self.outputs.out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -602,8 +594,7 @@ class MedianFilter3D(CommandLine):
             self.outputs.out_file = op.abspath(self._gen_outfilename())
         else:
             self.outputs.out_file = op.abspath(self.outputs.out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()
@@ -660,8 +651,7 @@ class MRTransform(CommandLine):
             self.outputs.out_file = op.abspath(self._gen_outfilename())
         else:
             self.outputs.out_file = op.abspath(self.outputs.out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()

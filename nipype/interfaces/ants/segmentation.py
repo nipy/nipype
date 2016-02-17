@@ -169,8 +169,7 @@ class Atropos(ANTSCommand):
             self.outputs.posteriors = []
             for i in range(self.inputs.number_of_tissue_classes):
                 self.outputs.posteriors.append(os.path.abspath(self.inputs.output_posteriors_name_template % (i + 1)))
-        return outputs
-
+        
 
 class LaplacianThicknessInputSpec(ANTSCommandInputSpec):
     input_wm = File(argstr='%s', mandatory=True, copyfile=True,
@@ -229,8 +228,7 @@ class LaplacianThickness(ANTSCommand):
                                                ''.join((name,
                                                         self.inputs.output_image,
                                                         ext)))
-        return outputs
-
+        
 
 class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d',
@@ -376,8 +374,7 @@ class N4BiasFieldCorrection(ANTSCommand):
         if self.inputs.save_bias or isdefined(self.inputs.bias_image):
             self.outputs.bias_image = os.path.abspath(
                 self._gen_filename('bias_image'))
-        return outputs
-
+        
 
 class CorticalThicknessInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
@@ -591,8 +588,7 @@ class CorticalThickness(ANTSCommand):
         self.outputs.BrainVolumes = os.path.join(os.getcwd(),
                                                self.inputs.out_prefix +
                                                'brainvols.csv')
-        return outputs
-
+        
 
 class antsCorticalThickness(CorticalThickness):
     DeprecationWarning('This class has been replaced by CorticalThickness and will be removed in version 0.13')
@@ -676,8 +672,7 @@ class BrainExtraction(ANTSCommand):
                                                        self.inputs.out_prefix +
                                                        'BrainExtractionBrain.' +
                                                        self.inputs.image_suffix)
-        return outputs
-
+        
 
 class antsBrainExtraction(BrainExtraction):
     DeprecationWarning('This class has been replaced by BrainExtraction and will be removed in version 0.13')
@@ -788,8 +783,7 @@ class JointFusion(ANTSCommand):
     def _post_run(self):
         self.outputs.output_label_image = os.path.abspath(
             self.inputs.output_label_image)
-        return outputs
-
+        
 
 class DenoiseImageInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(2, 3, 4, argstr='-d %d', usedefault=False,
@@ -1059,4 +1053,4 @@ ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz
             outputs['out_atlas_voting_weight_name_format'] = os.path.abspath(
                 self.inputs.out_atlas_voting_weight_name_format)
 
-        return outputs
+        

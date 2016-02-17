@@ -141,7 +141,6 @@ class NetworkBasedStatistic(BaseInterface):
         self.outputs.nbs_network = path
         self.outputs.nbs_pval_network = pval_path
         self.outputs.network_files = [path, pval_path]
-        return outputs
-
+        
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext

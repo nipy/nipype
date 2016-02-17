@@ -101,4 +101,4 @@ class Similarity(BaseInterface):
 
     def _post_run(self):
         self.outputs.similarity = self._similarity
-        return outputs
+        

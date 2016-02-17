@@ -195,8 +195,7 @@ class CoherenceAnalyzer(BaseInterface):
             self.outputs.coherence_fig = fname_presuffix(self.inputs.output_figure_file, suffix='_coherence')
             self.outputs.timedelay_fig = fname_presuffix(self.inputs.output_figure_file, suffix='_delay')
 
-        return outputs
-
+        
     def _make_output_files(self):
         """
         Generate the output csv files.

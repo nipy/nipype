@@ -155,8 +155,7 @@ class Level1Design(SPMCommand):
     def _post_run(self):
         spm = os.path.join(os.getcwd(), 'SPM.mat')
         self.outputs.spm_mat_file = spm
-        return outputs
-
+        
 
 class EstimateModelInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, field='spmmat', desc='absolute path to SPM.mat',
@@ -239,8 +238,7 @@ class EstimateModel(SPMCommand):
         self.outputs.RPVimage = rpv
         spm = os.path.join(pth, 'SPM.mat')
         self.outputs.spm_mat_file = spm
-        return outputs
-
+        
 
 class EstimateContrastInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, field='spmmat',
@@ -407,8 +405,7 @@ class EstimateContrast(SPMCommand):
         if len(spmf) > 0:
             self.outputs.spmF_images = sorted(spmf)
         self.outputs.spm_mat_file = self.inputs.spm_mat_file
-        return outputs
-
+        
 
 class ThresholdInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, desc='absolute path to SPM.mat', copyfile=True, mandatory=True)
@@ -585,13 +582,11 @@ fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
                 setattr(outputs, 'pre_topo_n_clusters', int(line[len("pre_topo_n_clusters = "):].strip()))
             elif line.startswith("cluster_forming_thr = "):
                 setattr(outputs, 'cluster_forming_thr', float(line[len("cluster_forming_thr = "):].strip()))
-        return outputs
-
+        
     def _post_run(self):
         self.outputs.thresholded_map = self._gen_thresholded_map_filename()
         self.outputs.pre_topo_fdr_map = self._gen_pre_topo_map_filename()
-        return outputs
-
+        
 
 class ThresholdStatisticsInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, desc='absolute path to SPM.mat', copyfile=True, mandatory=True)
@@ -694,8 +689,7 @@ clusterwise_P_FDR = spm_P_clusterFDR(extent_threshold*V2R,df,STAT,R,n,cluster_fo
                 cur_output = line.split()[0]
                 continue
 
-        return outputs
-
+        
 
 class FactorialDesignInputSpec(SPMCommandInputSpec):
     spm_mat_dir = Directory(exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
@@ -777,8 +771,7 @@ class FactorialDesign(SPMCommand):
     def _post_run(self):
         spm = os.path.join(os.getcwd(), 'SPM.mat')
         self.outputs.spm_mat_file = spm
-        return outputs
-
+        
 
 class OneSampleTTestDesignInputSpec(FactorialDesignInputSpec):
     in_files = traits.List(File(exists=True), field='des.t1.scans',

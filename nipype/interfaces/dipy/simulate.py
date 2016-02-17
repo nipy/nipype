@@ -252,8 +252,7 @@ class SimulateMultiTensor(DipyBaseInterface):
         self.outputs.out_bvec = op.abspath(self.inputs.out_bvec)
         self.outputs.out_bval = op.abspath(self.inputs.out_bval)
 
-        return outputs
-
+        
 
 def _compute_voxel(args):
     """

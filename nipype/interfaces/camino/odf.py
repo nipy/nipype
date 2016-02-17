@@ -85,8 +85,7 @@ class QBallMX(StdOutCommandLine):
     def _post_run(self):
         
         self.outputs.qmat = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_qmat.Bdouble'
@@ -162,8 +161,7 @@ class LinRecon(StdOutCommandLine):
     def _post_run(self):
         
         self.outputs.recon_data = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_recondata.Bdouble'
@@ -286,8 +284,7 @@ class MESD(StdOutCommandLine):
     def _post_run(self):
         
         self.outputs.mesd_data = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_MESD.Bdouble'
@@ -433,8 +430,7 @@ class SFPeaks(StdOutCommandLine):
     def _post_run(self):
         
         self.outputs.peaks = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_peaks.Bdouble'

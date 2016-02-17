@@ -105,8 +105,7 @@ class DTIRecon(CommandLine):
         self.outputs.V2 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_v2.' + output_type))
         self.outputs.V3 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_v3.' + output_type))
 
-        return outputs
-
+        
 
 class DTITrackerInputSpec(CommandLineInputSpec):
     tensor_file = File(exists=True, desc="reconstructed tensor file")
@@ -169,4 +168,4 @@ class DTITracker(CommandLine):
         if isdefined(self.inputs.output_mask) and self.inputs.output_mask:
             self.outputs.mask_file = os.path.abspath(self.inputs.output_mask)
 
-        return outputs
+        

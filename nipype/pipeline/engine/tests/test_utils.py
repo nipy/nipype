@@ -150,8 +150,7 @@ class TestInterface(nib.BaseInterface):
 
     def _post_run(self):
         self.outputs.output1 = [1]
-        return outputs
-
+        
 
 def test_inputs_removal():
     out_dir = mkdtemp()

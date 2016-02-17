@@ -124,8 +124,7 @@ class MeshFix(CommandLine):
                 self.outputs.mesh_file = op.abspath(name + '.' + self.inputs.output_type)
         else:
             self.outputs.mesh_file = op.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()

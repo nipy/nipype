@@ -210,8 +210,7 @@ class Refit(AFNICommandBase):
     def _post_run(self):
         
         self.outputs.out_file = os.path.abspath(self.inputs.in_file)
-        return outputs
-
+        
 
 class WarpInputSpec(AFNICommandInputSpec):
 
@@ -1168,8 +1167,7 @@ class Allineate(AFNICommand):
                                                      suffix=self.inputs.suffix)
         else:
             self.outputs.out_file = os.path.abspath(self.inputs.out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return getattr(self.outputs, name)
@@ -1535,8 +1533,7 @@ class BrickStat(AFNICommand):
             save_json(outfile, dict(stat=min_val))
         outputs.min_val = min_val
 
-        return outputs
-
+        
 
 class ROIStatsInputSpec(CommandLineInputSpec):
     in_file = File(desc='input file to 3dROIstats',
@@ -1600,8 +1597,7 @@ class ROIStats(AFNICommandBase):
         f.close()
 
         outputs.stats = os.path.abspath(output_filename)
-        return outputs
-
+        
 
 class CalcInputSpec(AFNICommandInputSpec):
     in_file_a = File(desc='input file to 3dcalc',
@@ -1893,8 +1889,7 @@ class Autobox(AFNICommand):
                     d[k] = int(d[k])
                 outputs.set(**d)
         outputs.set(out_file=self._gen_filename('out_file'))
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file' and (not isdefined(self.inputs.out_file)):
             return Undefined
@@ -2198,8 +2193,7 @@ class Hist(AFNICommandBase):
         self.outputs.out_file += '.niml.hist'
         if not self.inputs.showhist:
             self.outputs.out_show = Undefined
-        return outputs
-
+        
 
 class FWHMxInputSpec(CommandLineInputSpec):
     in_file = File(desc='input dataset', argstr='-input %s', mandatory=True, exists=True)
@@ -2408,4 +2402,4 @@ class FWHMx(AFNICommandBase):
                 self.outputs.out_acf = op.abspath(self.inputs.acf)
 
         self.outputs.fwhm = tuple(sout)
-        return outputs
+        

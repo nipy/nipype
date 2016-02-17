@@ -166,8 +166,7 @@ class Dcm2nii(CommandLine):
         self.outputs.reoriented_and_cropped_files = self.reoriented_and_cropped_files
         self.outputs.bvecs = self.bvecs
         self.outputs.bvals = self.bvals
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'output_dir':
             return os.getcwd()

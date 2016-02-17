@@ -70,8 +70,7 @@ class ParseDICOMDir(FSCommand):
         
         if isdefined(self.inputs.dicom_info_file):
             self.outputs.dicom_info_file = os.path.join(os.getcwd(), self.inputs.dicom_info_file)
-        return outputs
-
+        
 
 class UnpackSDICOMDirInputSpec(FSTraitedSpec):
     source_dir = Directory(exists=True, argstr='-src %s',
@@ -412,8 +411,7 @@ class MRIConvert(FSCommand):
                                                     suffix='%03d' % (i + 1)))
                 outfile = outfiles
         self.outputs.out_file = outfile
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._get_outfilename()
@@ -588,8 +586,7 @@ class Resample(FSCommand):
     def _post_run(self):
         
         self.outputs.resampled_file = self._get_outfilename()
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'resampled_file':
             return self._get_outfilename()
@@ -756,8 +753,7 @@ class ReconAll(CommandLine):
                                         hemi=hemi)._list_outputs())
         self.outputs.subject_id = self.inputs.subject_id
         self.outputs.subjects_dir = subjects_dir
-        return outputs
-
+        
     def _is_resuming(self):
         subjects_dir = self.inputs.subjects_dir
         if not isdefined(subjects_dir):
@@ -898,8 +894,7 @@ class BBRegister(FSCommand):
                 self.outputs.out_fsl_file = op.abspath(_in.out_fsl_file)
 
         self.outputs.min_cost_file = self.outputs.out_reg_file + '.mincost'
-        return outputs
-
+        
     def _format_arg(self, name, spec, value):
 
         if name in ['registered_file', 'out_fsl_file']:
@@ -1019,8 +1014,7 @@ class ApplyVolTransform(FSCommand):
     def _post_run(self):
         
         self.outputs.transformed_file = os.path.abspath(self._get_outfile())
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'transformed_file':
             return self._get_outfile()
@@ -1088,8 +1082,7 @@ class Smooth(FSCommand):
             outfile = self._gen_fname(self.inputs.in_file,
                                       suffix='_smooth')
         self.outputs.smoothed_file = outfile
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'smoothed_file':
             return getattr(self.outputs, name)
@@ -1226,8 +1219,7 @@ class RobustRegister(FSCommand):
                                                     use_ext=sufftup[2])
                 else:
                     setattr(self.outputs, name, value
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_reg_file':
             return getattr(self.outputs, name)
@@ -1296,8 +1288,7 @@ class FitMSParams(FSCommand):
         self.outputs.t1_image = os.path.join(out_dir, "T1.mgz")
         self.outputs.pd_image = os.path.join(out_dir, "PD.mgz")
         self.outputs.t2star_image = os.path.join(out_dir, "T2star.mgz")
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == "out_dir":
             return os.getcwd()
@@ -1351,8 +1342,7 @@ class SynthesizeFLASH(FSCommand):
         else:
             self.outputs.out_file = self._gen_fname("synth-flash_%02d.mgz" % self.inputs.flip_angle,
                                                   suffix="")
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == "out_file":
             return self.outputs.out_file

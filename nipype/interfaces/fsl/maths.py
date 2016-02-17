@@ -53,8 +53,7 @@ class MathsCommand(FSLCommand):
         if not isdefined(self.inputs.out_file):
             self.outputs.out_file = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
         self.outputs.out_file = os.path.abspath(self.outputs.out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == "out_file":
             return self.outputs.out_file

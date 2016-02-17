@@ -105,8 +105,7 @@ class MRISPreproc(FSCommand):
             self.outputs.out_file = os.path.join(os.getcwd(),
                                                'concat_%s_%s.mgz' % (self.inputs.hemi,
                                                                      self.inputs.target))
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return getattr(self.outputs, name)
@@ -324,8 +323,7 @@ class GLMFit(FSCommand):
             self.outputs.singluar_values = os.path.join(pcadir, "sdiag.mat")
             self.outputs.svd_stats_file = os.path.join(pcadir, "stats.dat")
 
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'glm_dir':
             return os.getcwd()
@@ -442,8 +440,7 @@ class Binarize(FSCommand):
                                                             use_ext=False)
             else:
                 self.outputs.count_file = value
-        return outputs
-
+        
     def _format_arg(self, name, spec, value):
         if name == 'count_file':
             if isinstance(value, bool):
@@ -533,8 +530,7 @@ class Concatenate(FSCommand):
                                                         'concat_output.nii.gz')
         else:
             self.outputs.concatenated_file = self.inputs.concatenated_file
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'concatenated_file':
             return getattr(self.outputs, name)
@@ -657,8 +653,7 @@ class SegStats(FSCommand):
                                                     use_ext=False)
                 else:
                     setattr(self.outputs, name, os.path.abspath(value)
-        return outputs
-
+        
     def _format_arg(self, name, spec, value):
         if name in ['avgwf_txt_file', 'avgwf_file', 'sf_avg_file']:
             if isinstance(value, bool):
@@ -769,8 +764,7 @@ class Label2Vol(FSCommand):
                                       newpath=os.getcwd(),
                                       use_ext=False)
         self.outputs.vol_label_file = outfile
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'vol_label_file':
             return getattr(self.outputs, name)
@@ -838,8 +832,7 @@ class MS_LDA(FSCommand):
             self.outputs.vol_synth_file = os.path.abspath(self.inputs.vol_synth_file)
         if not isdefined(self.inputs.use_weights) or self.inputs.use_weights is False:
             self.outputs.weight_file = os.path.abspath(self.inputs.weight_file)
-        return outputs
-
+        
     def _verify_weights_file_exists(self):
         if not os.path.exists(os.path.abspath(self.inputs.weight_file)):
             raise traits.TraitError("MS_LDA: use_weights must accompany an existing weights file")

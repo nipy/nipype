@@ -29,8 +29,7 @@ class TestInterface(nib.BaseInterface):
 
     def _post_run(self):
         self.outputs.output1 = [1, self.inputs.input1]
-        return outputs
-
+        
 
 @skipif(soma_not_loaded)
 def test_run_somaflow():

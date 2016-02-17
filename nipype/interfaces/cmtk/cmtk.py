@@ -566,8 +566,7 @@ class CreateMatrix(BaseInterface):
         self.outputs.filtered_tractography_by_intersections = op.abspath(endpoint_name + '_intersections_streamline_final.trk')
         self.outputs.filtered_tractographies = [self.outputs.filtered_tractography, self.outputs.filtered_tractography_by_intersections]
         self.outputs.stats_file = op.abspath(endpoint_name + '_statistics.mat')
-        return outputs
-
+        
     def _gen_outfilename(self, ext):
         if ext.endswith("mat") and isdefined(self.inputs.out_matrix_mat_file):
             _, name, _ = split_filename(self.inputs.out_matrix_mat_file)
@@ -727,8 +726,7 @@ class ROIGen(BaseInterface):
             self.outputs.dict_file = op.abspath(self.inputs.out_dict_file)
         else:
             self.outputs.dict_file = op.abspath(self._gen_outfilename('pck'))
-        return outputs
-
+        
     def _gen_outfilename(self, ext):
         _, name, _ = split_filename(self.inputs.aparc_aseg_file)
         if self.inputs.use_freesurfer_LUT:
@@ -790,4 +788,4 @@ class CreateNodes(BaseInterface):
 
     def _post_run(self):
         self.outputs.node_network = op.abspath(self.inputs.out_filename)
-        return outputs
+        

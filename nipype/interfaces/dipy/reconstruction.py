@@ -147,8 +147,7 @@ class RESTORE(DipyDiffusionInterface):
     def _post_run(self):
         for k in outputs.keys():
             outputs[k] = self._gen_filename(k)
-        return outputs
-
+        
 
 class EstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
     in_evals = File(
@@ -268,8 +267,7 @@ class EstimateResponseSH(DipyDiffusionInterface):
     def _post_run(self):
         outputs['response'] = op.abspath(self.inputs.response)
         outputs['out_mask'] = op.abspath(self.inputs.out_mask)
-        return outputs
-
+        
 
 class CSDInputSpec(DipyBaseInterfaceInputSpec):
     in_mask = File(exists=True, desc=('input mask in which compute tensors'))
@@ -362,4 +360,4 @@ class CSD(DipyDiffusionInterface):
         outputs['model'] = self._gen_filename('csdmodel', ext='.pklz')
         if self.inputs.save_fods:
             outputs['out_fods'] = self._gen_filename('fods')
-        return outputs
+        

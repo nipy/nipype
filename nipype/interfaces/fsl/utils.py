@@ -129,8 +129,7 @@ class ImageMeants(FSLCommand):
                                                   ext='.txt',
                                                   change_ext=True)
         self.outputs.out_file = os.path.abspath(self.outputs.out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return getattr(self.outputs, name)
@@ -342,8 +341,7 @@ class ExtractROI(FSLCommand):
             self.outputs.roi_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_roi')
         self.outputs.roi_file = os.path.abspath(self.outputs.roi_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'roi_file':
             return getattr(self.outputs, name)
@@ -393,8 +391,7 @@ class Split(FSLCommand):
             outbase = '%s*' % self.inputs.out_base_name
         self.outputs.out_files = sorted(glob(os.path.join(os.getcwd(),
                                                         outbase + ext)))
-        return outputs
-
+        
 
 class ImageMathsInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="%s", mandatory=True, position=1)
@@ -452,8 +449,7 @@ class ImageMaths(FSLCommand):
             self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix=suffix)
         self.outputs.out_file = os.path.abspath(self.outputs.out_file)
-        return outputs
-
+        
 
 class FilterRegressorInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr="-i %s",
@@ -514,8 +510,7 @@ class FilterRegressor(FSLCommand):
             self.outputs.out_file = self._gen_fname(
                 self.inputs.in_file, suffix='_regfilt')
         self.outputs.out_file = os.path.abspath(self.outputs.out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return getattr(self.outputs, name)
@@ -597,8 +592,7 @@ class ImageStats(FSLCommand):
                 out_stat = out_stat[0]
             save_json(outfile, dict(stat=out_stat))
         outputs.out_stat = out_stat
-        return outputs
-
+        
 
 class AvScaleInputSpec(FSLCommandInputSpec):
     mat_file = File(exists=True, argstr="%s",
@@ -662,8 +656,7 @@ class AvScale(FSLCommand):
         outputs.forward_half_transform = lines_to_float(out[16:20])
         outputs.backward_half_transform = lines_to_float(out[22:-1])
 
-        return outputs
-
+        
 
 class OverlayInputSpec(FSLCommandInputSpec):
     transparency = traits.Bool(desc='make overlay colors semi-transparent',
@@ -764,8 +757,7 @@ class Overlay(FSLCommand):
                 stem = split_filename(self.inputs.stat_image)[1]
             out_file = self._gen_fname(stem, suffix='_overlay')
         self.outputs.out_file = os.path.abspath(out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return self.outputs.out_file
@@ -865,8 +857,7 @@ class Slicer(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file, ext='.png')
         self.outputs.out_file = os.path.abspath(out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return self.outputs.out_file
@@ -967,8 +958,7 @@ class PlotTimeSeries(FSLCommand):
                 infile = self.inputs.in_file
             out_file = self._gen_fname(infile, ext='.png')
         self.outputs.out_file = os.path.abspath(out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return self.outputs.out_file
@@ -1077,8 +1067,7 @@ class PlotMotionParams(FSLCommand):
             out_file = fname_presuffix(
                 infile, suffix="_%s.png" % plttype, use_ext=False)
         self.outputs.out_file = os.path.abspath(out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return self.outputs.out_file
@@ -1153,8 +1142,7 @@ class ConvertXFM(FSLCommand):
                                               newpath=os.getcwd(),
                                               use_ext=False)
         self.outputs.out_file = os.path.abspath(outfile)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == "out_file":
             return self.outputs.out_file
@@ -1198,8 +1186,7 @@ class SwapDimensions(FSLCommand):
             self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_newdims')
         self.outputs.out_file = os.path.abspath(self.outputs.out_file)
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == "out_file":
             return self.outputs.out_file
@@ -1249,8 +1236,7 @@ class PowerSpectrum(FSLCommand):
     def _post_run(self):
         
         self.outputs.out_file = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._gen_outfilename()
@@ -1305,8 +1291,7 @@ class SigLoss(FSLCommand):
                 isdefined(self.inputs.in_file):
             self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_sigloss')
-        return outputs
-
+        
     def _gen_filename(self, name):
         if name == 'out_file':
             return self.outputs.out_file
@@ -1352,8 +1337,7 @@ class Reorient2Std(FSLCommand):
             self.outputs.out_file = self._gen_filename('out_file')
         else:
             self.outputs.out_file = os.path.abspath(self.inputs.out_file)
-        return outputs
-
+        
 
 class InvWarpInputSpec(FSLCommandInputSpec):
     warp = File(exists=True, argstr='--warp=%s', mandatory=True,
@@ -1562,8 +1546,7 @@ class Complex(FSLCommand):
         elif self.inputs.real_polar:
             self.outputs.magnitude_out_file = self._get_output('magnitude_out_file')
             self.outputs.phase_out_file = self._get_output('phase_out_file')
-        return outputs
-
+        
 
 class WarpUtilsInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='--in=%s', mandatory=True,

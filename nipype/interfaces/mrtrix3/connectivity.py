@@ -107,8 +107,7 @@ class BuildConnectome(MRTrix3Base):
     def _post_run(self):
         
         self.outputs.out_file = op.abspath(self.inputs.out_file)
-        return outputs
-
+        
 
 class LabelConfigInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-3,
@@ -184,4 +183,4 @@ class LabelConfig(MRTrix3Base):
     def _post_run(self):
         
         self.outputs.out_file = op.abspath(self.inputs.out_file)
-        return outputs
+        

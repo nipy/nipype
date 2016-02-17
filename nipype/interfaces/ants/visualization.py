@@ -67,8 +67,7 @@ class ConvertScalarImageToRGB(ANTSCommand):
     def _post_run(self):
         self.outputs.output_image = os.path.join(os.getcwd(),
                                                self.inputs.output_image)
-        return outputs
-
+        
 
 class CreateTiledMosaicInputSpec(ANTSCommandInputSpec):
     input_image = File(argstr='-i %s', exists=True,
@@ -151,4 +150,4 @@ class CreateTiledMosaic(ANTSCommand):
     def _post_run(self):
         self.outputs.output_image = os.path.join(os.getcwd(),
                                                self.inputs.output_image)
-        return outputs
+        

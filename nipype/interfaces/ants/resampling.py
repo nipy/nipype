@@ -96,8 +96,7 @@ ants_Affine.txt'
                                                ''.join((name,
                                                         self.inputs.out_postfix,
                                                         ext)))
-        return outputs
-
+        
     def _run_interface(self, runtime, correct_return_codes=[0]):
         runtime = super(WarpTimeSeriesImageMultiTransform, self)._run_interface(runtime, correct_return_codes=[0, 1])
         if "100 % complete" not in runtime.stdout:
@@ -204,8 +203,7 @@ ants_Affine.txt'
         else:
             self.outputs.output_image = os.path.abspath(
                 self._gen_filename('output_image'))
-        return outputs
-
+        
 
 class ApplyTransformsInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(2, 3, 4, argstr='--dimensionality %d',
@@ -350,8 +348,7 @@ class ApplyTransforms(ANTSCommand):
     def _post_run(self):
         self.outputs.output_image = os.path.abspath(
             self._gen_filename('output_image'))
-        return outputs
-
+        
 
 class ApplyTransformsToPointsInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(2, 3, 4, argstr='--dimensionality %d',

@@ -1159,8 +1159,7 @@ def clean_working_directory(outputs, cwd, inputs, needed_outputs, config,
     for key in outputs.copyable_trait_names():
         if key not in outputs_to_keep:
             setattr(outputs, key, Undefined)
-    return outputs
-
+    
 
 def merge_dict(d1, d2, merge=lambda x, y: y):
     """
