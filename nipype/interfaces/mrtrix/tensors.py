@@ -76,7 +76,7 @@ class DWI2SphericalHarmonicsImage(CommandLine):
     output_spec = DWI2SphericalHarmonicsImageOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.spherical_harmonics_image = self.inputs.out_filename
         if not isdefined(self.outputs.spherical_harmonics_image):
             self.outputs.spherical_harmonics_image = op.abspath(self._gen_outfilename())
@@ -159,7 +159,7 @@ class ConstrainedSphericalDeconvolution(CommandLine):
     output_spec = ConstrainedSphericalDeconvolutionOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.spherical_harmonics_image = self.inputs.out_filename
         if not isdefined(self.outputs.spherical_harmonics_image):
             self.outputs.spherical_harmonics_image = op.abspath(self._gen_outfilename())
@@ -213,7 +213,7 @@ class EstimateResponseForSH(CommandLine):
     output_spec = EstimateResponseForSHOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.response = self.inputs.out_filename
         if not isdefined(self.outputs.response):
             self.outputs.response = op.abspath(self._gen_outfilename())
@@ -297,7 +297,7 @@ class FSL2MRTrix(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.encoding_file = op.abspath(self._gen_filename('out_encoding_file'))
         return outputs
 

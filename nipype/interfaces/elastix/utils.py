@@ -131,7 +131,7 @@ class EditTransform(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.output_file = getattr(self, '_out_file')
         return outputs
 

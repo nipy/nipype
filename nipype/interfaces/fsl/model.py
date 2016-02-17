@@ -344,7 +344,7 @@ class Level1Design(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         cwd = os.getcwd()
         self.outputs.fsf_files = []
         self.outputs.ev_files = []
@@ -1177,7 +1177,7 @@ class L2Model(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         for field in list(outputs.keys()):
-            outputs[field] = os.path.join(os.getcwd(),
+            setattr(self.outputs, field, os.path.join(os.getcwd(),
                                           field.replace('_', '.'))
         return outputs
 
@@ -1339,7 +1339,7 @@ class MultipleRegressDesign(BaseInterface):
         for field in list(outputs.keys()):
             if ('fts' in field) and (nfcons == 0):
                 continue
-            outputs[field] = os.path.join(os.getcwd(),
+            setattr(self.outputs, field, os.path.join(os.getcwd(),
                                           field.replace('_', '.'))
         return outputs
 
@@ -1501,7 +1501,7 @@ class MELODIC(FSLCommand):
     _cmd = 'melodic'
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_dir = self.inputs.out_dir
         if not isdefined(self.outputs.out_dir):
             self.outputs.out_dir = self._gen_filename("out_dir")
@@ -1660,7 +1660,7 @@ class Cluster(FSLCommand):
                'out_mean_file': 'mean', 'out_pval_file': 'pval'}
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         for key, suffix in list(self.filemap.items()):
             outkey = key[4:]
             inval = getattr(self.inputs, key)
@@ -1670,11 +1670,11 @@ class Cluster(FSLCommand):
                         change_ext = True
                         if suffix.endswith('.txt'):
                             change_ext = False
-                        outputs[outkey] = self._gen_fname(self.inputs.in_file,
+                        setattr(self.outputs, outkey, self._gen_fname(self.inputs.in_file,
                                                           suffix='_' + suffix,
                                                           change_ext=change_ext)
                 else:
-                    outputs[outkey] = os.path.abspath(inval)
+                    setattr(self.outputs, outkey, os.path.abspath(inval)
         return outputs
 
     def _format_arg(self, name, spec, value):
@@ -1790,7 +1790,7 @@ class Randomise(FSLCommand):
     output_spec = RandomiseOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.tstat_files = glob(self._gen_fname(
             '%s_tstat*.nii' % self.inputs.base_name))
         self.outputs.fstat_files = glob(self._gen_fname(

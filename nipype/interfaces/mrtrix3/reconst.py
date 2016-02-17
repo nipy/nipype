@@ -72,7 +72,7 @@ class FitTensor(MRTrix3Base):
     output_spec = FitTensorOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs
 
@@ -188,6 +188,6 @@ class EstimateFOD(MRTrix3Base):
     output_spec = EstimateFODOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs

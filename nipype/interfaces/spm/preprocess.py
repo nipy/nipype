@@ -809,7 +809,7 @@ class Segment(SPMCommand):
                                                        ('native', '')]):
                     if getattr(self.inputs, outtype)[idx]:
                         outfield = '%s_%s_image' % (image, tissue)
-                        outputs[outfield] = fname_presuffix(f,
+                        setattr(self.outputs, outfield, fname_presuffix(f,
                                                             prefix='%sc%d' % (prefix,
                                                                               tidx + 1))
         if isdefined(self.inputs.save_bias_corrected) and \

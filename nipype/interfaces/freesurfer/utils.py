@@ -846,7 +846,7 @@ class MRIsConvert(FSCommand):
     output_spec = MRIsConvertOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.converted = os.path.abspath(self._gen_outfilename())
         return outputs
 
@@ -912,7 +912,7 @@ class MRITessellate(FSCommand):
     output_spec = MRITessellateOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.surface = os.path.abspath(self._gen_outfilename())
         return outputs
 
@@ -982,7 +982,7 @@ class MRIPretess(FSCommand):
     output_spec = MRIPretessOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = os.path.abspath(self._gen_outfilename())
         return outputs
 
@@ -1039,7 +1039,7 @@ class MRIMarchingCubes(FSCommand):
     output_spec = MRIMarchingCubesOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.surface = self._gen_outfilename()
         return outputs
 
@@ -1110,7 +1110,7 @@ class SmoothTessellation(FSCommand):
     output_spec = SmoothTessellationOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.surface = self._gen_outfilename()
         return outputs
 
@@ -1167,7 +1167,7 @@ class MakeAverageSubject(FSCommand):
     output_spec = MakeAverageSubjectOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.average_subject_name = self.inputs.out_name
         return outputs
 

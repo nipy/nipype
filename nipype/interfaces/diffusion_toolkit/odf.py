@@ -86,7 +86,7 @@ class HARDIMat(CommandLine):
         return super(HARDIMat, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = os.path.abspath(self.inputs.out_file)
         return outputs
 
@@ -142,7 +142,7 @@ class ODFRecon(CommandLine):
         out_prefix = self.inputs.out_prefix
         output_type = self.inputs.output_type
 
-        outputs = self.output_spec().get()
+        
         self.outputs.B0 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_b0.' + output_type))
         self.outputs.DWI = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_dwi.' + output_type))
         self.outputs.max = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_max.' + output_type))
@@ -230,6 +230,6 @@ class ODFTracker(CommandLine):
         return super(ODFTracker, self)._run_interface(runtime)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.track_file = os.path.abspath(self.inputs.out_file)
         return outputs

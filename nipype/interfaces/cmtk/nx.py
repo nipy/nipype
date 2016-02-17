@@ -483,7 +483,7 @@ class NetworkXMetrics(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.k_core = op.abspath(self._gen_outfilename(self.inputs.out_k_core, 'pck'))
         self.outputs.k_shell = op.abspath(self._gen_outfilename(self.inputs.out_k_shell, 'pck'))
         self.outputs.k_crust = op.abspath(self._gen_outfilename(self.inputs.out_k_crust, 'pck'))
@@ -548,7 +548,7 @@ class AverageNetworks(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         if not isdefined(self.inputs.out_gpickled_groupavg):
             self.outputs.gpickled_groupavg = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'pck'))
         else:

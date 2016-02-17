@@ -208,7 +208,7 @@ class Refit(AFNICommandBase):
     output_spec = AFNICommandOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = os.path.abspath(self.inputs.in_file)
         return outputs
 
@@ -1162,7 +1162,7 @@ class Allineate(AFNICommand):
         return super(Allineate, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         if not isdefined(self.inputs.out_file):
             self.outputs.out_file = self._gen_filename(self.inputs.in_file,
                                                      suffix=self.inputs.suffix)

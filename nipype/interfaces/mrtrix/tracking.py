@@ -108,7 +108,7 @@ class Tracks2Prob(CommandLine):
     output_spec = Tracks2ProbOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.tract_image = self.inputs.out_filename
         if not isdefined(self.outputs.tract_image):
             self.outputs.tract_image = op.abspath(self._gen_outfilename())

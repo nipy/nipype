@@ -91,7 +91,7 @@ class DTIRecon(CommandLine):
         out_prefix = self.inputs.out_prefix
         output_type = self.inputs.output_type
 
-        outputs = self.output_spec().get()
+        
         self.outputs.ADC = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_adc.' + output_type))
         self.outputs.B0 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_b0.' + output_type))
         self.outputs.L1 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_e1.' + output_type))
@@ -164,7 +164,7 @@ class DTITracker(CommandLine):
         return super(DTITracker, self)._run_interface(runtime)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.track_file = os.path.abspath(self.inputs.output_file)
         if isdefined(self.inputs.output_mask) and self.inputs.output_mask:
             self.outputs.mask_file = os.path.abspath(self.inputs.output_mask)

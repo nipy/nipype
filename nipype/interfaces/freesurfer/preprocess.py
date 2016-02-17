@@ -67,7 +67,7 @@ class ParseDICOMDir(FSCommand):
     output_spec = ParseDICOMDirOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         if isdefined(self.inputs.dicom_info_file):
             self.outputs.dicom_info_file = os.path.join(os.getcwd(), self.inputs.dicom_info_file)
         return outputs
@@ -375,7 +375,7 @@ class MRIConvert(FSCommand):
         return os.path.abspath(outfile)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         outfile = self._get_outfilename()
         if isdefined(self.inputs.split) and self.inputs.split:
             size = load(self.inputs.in_file).shape
@@ -586,7 +586,7 @@ class Resample(FSCommand):
         return outfile
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.resampled_file = self._get_outfilename()
         return outputs
 
@@ -870,7 +870,7 @@ class BBRegister(FSCommand):
 
     def _list_outputs(self):
 
-        outputs = self.output_spec().get()
+        
         _in = self.inputs
 
         if isdefined(_in.out_reg_file):
@@ -1018,7 +1018,7 @@ class ApplyVolTransform(FSCommand):
         return outfile
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.transformed_file = os.path.abspath(self._get_outfile())
         return outputs
 
@@ -1083,7 +1083,7 @@ class Smooth(FSCommand):
     output_spec = SmoothOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         outfile = self.inputs.smoothed_file
         if not isdefined(outfile):
             outfile = self._gen_fname(self.inputs.in_file,
@@ -1204,7 +1204,7 @@ class RobustRegister(FSCommand):
         return super(RobustRegister, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_reg_file = self.inputs.out_reg_file
         if not isdefined(self.inputs.out_reg_file) and self.inputs.source_file:
             self.outputs.out_reg_file = fname_presuffix(self.inputs.source_file,
@@ -1221,12 +1221,12 @@ class RobustRegister(FSCommand):
             value = getattr(self.inputs, name)
             if isdefined(value):
                 if isinstance(value, bool):
-                    outputs[name] = fname_presuffix(prefices[sufftup[0]],
+                    setattr(self.outputs, name, fname_presuffix(prefices[sufftup[0]],
                                                     suffix=sufftup[1],
                                                     newpath=os.getcwd(),
                                                     use_ext=sufftup[2])
                 else:
-                    outputs[name] = value
+                    setattr(self.outputs, name, value
         return outputs
 
     def _gen_filename(self, name):
@@ -1289,7 +1289,7 @@ class FitMSParams(FSCommand):
         return super(FitMSParams, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         if not isdefined(self.inputs.out_dir):
             out_dir = self._gen_filename("out_dir")
         else:
@@ -1346,7 +1346,7 @@ class SynthesizeFLASH(FSCommand):
     output_spec = SynthesizeFLASHOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         if isdefined(self.inputs.out_file):
             self.outputs.out_file = self.inputs.out_file
         else:

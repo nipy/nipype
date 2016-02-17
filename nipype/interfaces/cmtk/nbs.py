@@ -128,7 +128,7 @@ class NetworkBasedStatistic(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
 
         THRESH = self.inputs.threshold
         K = self.inputs.number_of_permutations

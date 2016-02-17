@@ -190,7 +190,7 @@ class AFNICommand(AFNICommandBase):
                 if outputs[name]:
                     _, _, ext = split_filename(outputs[name])
                     if ext == "":
-                        outputs[name] = outputs[name] + "+orig.BRIK"
+                        setattr(self.outputs, name, outputs[name] + "+orig.BRIK"
 
 
 def no_afni():

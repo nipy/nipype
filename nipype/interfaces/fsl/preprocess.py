@@ -271,7 +271,7 @@ class FAST(FSLCommand):
 
     def _post_run(self):
 
-        outputs = self.output_spec().get()
+        
         if not isdefined(self.inputs.number_classes):
             nclasses = 3
         else:
@@ -843,7 +843,7 @@ class FNIRT(FSLCommand):
 
     def _post_run(self):
 
-        outputs = self.output_spec().get()
+        
         for key, suffix in list(self.filemap.items()):
             inval = getattr(self.inputs, key)
             change_ext = True
@@ -851,19 +851,19 @@ class FNIRT(FSLCommand):
                 if suffix.endswith('.txt'):
                     change_ext = False
                 if isdefined(inval):
-                    outputs[key] = inval
+                    setattr(self.outputs, key, inval)
                 else:
-                    outputs[key] = self._gen_fname(self.inputs.in_file,
+                    setattr(self.outputs, key, self._gen_fname(self.inputs.in_file,
                                                    suffix='_' + suffix,
                                                    change_ext=change_ext)
             elif isdefined(inval):
                 if isinstance(inval, bool):
                     if inval:
-                        outputs[key] = self._gen_fname(self.inputs.in_file,
+                        setattr(self.outputs, key, self._gen_fname(self.inputs.in_file,
                                                        suffix='_' + suffix,
                                                        change_ext=change_ext)
                 else:
-                    outputs[key] = os.path.abspath(inval)
+                    setattr(self.outputs, key, os.path.abspath(inval)
         return outputs
 
     def _format_arg(self, name, spec, value):
@@ -1498,7 +1498,7 @@ class FIRST(FSLCommand):
 
     def _post_run(self):
 
-        outputs = self.output_spec().get()
+        
 
         if isdefined(self.inputs.list_of_specific_structures):
             structures = self.inputs.list_of_specific_structures

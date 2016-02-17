@@ -98,7 +98,7 @@ class MRISPreproc(FSCommand):
     output_spec = MRISPreprocOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         outfile = self.inputs.out_file
         self.outputs.out_file = outfile
         if not isdefined(outfile):
@@ -278,7 +278,7 @@ class GLMFit(FSCommand):
         return super(GLMFit, self)._format_arg(name, spec, value)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         # Get the top-level output directory
         if not isdefined(self.inputs.glm_dir):
             glmdir = os.getcwd()
@@ -418,7 +418,7 @@ class Binarize(FSCommand):
     output_spec = BinarizeOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         outfile = self.inputs.binary_file
         if not isdefined(outfile):
             if isdefined(self.inputs.out_type):
@@ -527,7 +527,7 @@ class Concatenate(FSCommand):
     output_spec = ConcatenateOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         if not isdefined(self.inputs.concatenated_file):
             self.outputs.concatenated_file = os.path.join(os.getcwd(),
                                                         'concat_output.nii.gz')
@@ -635,7 +635,7 @@ class SegStats(FSCommand):
     output_spec = SegStatsOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         if isdefined(self.inputs.summary_file):
             self.outputs.summary_file = os.path.abspath(self.inputs.summary_file)
         else:
@@ -652,11 +652,11 @@ class SegStats(FSCommand):
             value = getattr(self.inputs, name)
             if isdefined(value):
                 if isinstance(value, bool):
-                    outputs[name] = fname_presuffix(src, suffix=suffix,
+                    setattr(self.outputs, name, fname_presuffix(src, suffix=suffix,
                                                     newpath=os.getcwd(),
                                                     use_ext=False)
                 else:
-                    outputs[name] = os.path.abspath(value)
+                    setattr(self.outputs, name, os.path.abspath(value)
         return outputs
 
     def _format_arg(self, name, spec, value):
@@ -754,7 +754,7 @@ class Label2Vol(FSCommand):
     output_spec = Label2VolOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         outfile = self.inputs.vol_label_file
         if not isdefined(outfile):
             for key in ['label_file', 'annot_file', 'seg_file']:

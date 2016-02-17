@@ -112,7 +112,7 @@ class MeshFix(CommandLine):
     output_spec = MeshFixOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         if isdefined(self.inputs.out_filename):
             path, name, ext = split_filename(self.inputs.out_filename)
             ext = ext.replace('.', '')

@@ -1698,7 +1698,7 @@ class Blur(StdOutCommandLine):
             return output_base
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
 
         output_file_base = self._gen_output_base()
 
@@ -3233,7 +3233,7 @@ class NlpFit(CommandLine):
             raise NotImplemented
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.output_xfm = os.path.abspath(
             self._gen_filename('output_xfm'))
 
@@ -3338,7 +3338,7 @@ class XfmAvg(CommandLine):
         return self._gen_filename('output_file')
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.output_file = os.path.abspath(self._gen_outfilename())
 
         assert os.path.exists(self.outputs.output_file)
@@ -3412,7 +3412,7 @@ class XfmInvert(CommandLine):
         return self._gen_filename('output_file')
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.output_file = os.path.abspath(self._gen_outfilename())
 
         assert os.path.exists(self.outputs.output_file)

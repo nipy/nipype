@@ -48,7 +48,7 @@ class MathsCommand(FSLCommand):
     _suffix = "_maths"
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
             self.outputs.out_file = self._gen_fname(self.inputs.in_file, suffix=self._suffix)

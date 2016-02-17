@@ -121,7 +121,7 @@ class ImageMeants(FSLCommand):
     output_spec = ImageMeantsOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):
             self.outputs.out_file = self._gen_fname(self.inputs.in_file,
@@ -511,7 +511,7 @@ class FilterRegressor(FSLCommand):
         return super(FilterRegressor, self)._format_arg(name, trait_spec, value)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):
             self.outputs.out_file = self._gen_fname(
@@ -1256,7 +1256,7 @@ class PowerSpectrum(FSLCommand):
         return out_file
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = os.path.abspath(self._gen_outfilename())
         return outputs
 
@@ -1308,7 +1308,7 @@ class SigLoss(FSLCommand):
     _cmd = 'sigloss'
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file) and \
                 isdefined(self.inputs.in_file):
@@ -1356,7 +1356,7 @@ class Reorient2Std(FSLCommand):
         return None
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         if not isdefined(self.inputs.out_file):
             self.outputs.out_file = self._gen_filename('out_file')
         else:
@@ -1561,7 +1561,7 @@ class Complex(FSLCommand):
         return os.path.abspath(output)
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         if self.inputs.complex_cartesian or self.inputs.complex_polar or \
                 self.inputs.complex_split or self.inputs.complex_merge:
             self.outputs.complex_out_file = self._get_output('complex_out_file')

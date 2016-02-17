@@ -606,10 +606,10 @@ class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         if key not in self.copyable_trait_names():
             if not isdefined(value):
                 super(AddCSVRowInputSpec, self).__setattr__(key, value)
-            self._outputs[key] = value
+            self._setattr(self.outputs, key, value
         else:
             if key in self._outputs:
-                self._outputs[key] = value
+                self._setattr(self.outputs, key, value
             super(AddCSVRowInputSpec, self).__setattr__(key, value)
 
 
@@ -655,7 +655,7 @@ class AddCSVRow(BaseInterface):
         if infields:
             for key in infields:
                 self.inputs.add_trait(key, traits.Any)
-                self.inputs._outputs[key] = Undefined
+                self.inputs._setattr(self.outputs, key, Undefined
                 undefined_traits[key] = Undefined
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 

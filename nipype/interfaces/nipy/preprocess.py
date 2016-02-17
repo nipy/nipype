@@ -376,7 +376,7 @@ class Trim(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.outputs.out_file):
             self.outputs.out_file = fname_presuffix(

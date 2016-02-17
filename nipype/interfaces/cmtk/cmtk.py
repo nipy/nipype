@@ -497,7 +497,7 @@ class CreateMatrix(BaseInterface):
         return runtime
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         if isdefined(self.inputs.out_matrix_file):
             path, name, _ = split_filename(self.inputs.out_matrix_file)
             out_matrix_file = op.abspath(name + '.pck')

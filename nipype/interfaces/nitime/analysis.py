@@ -168,7 +168,7 @@ class CoherenceAnalyzer(BaseInterface):
 
     # Rewrite _list_outputs (look at BET)
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
 
         # if isdefined(self.inputs.output_csv_file):
 

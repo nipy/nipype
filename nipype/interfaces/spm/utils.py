@@ -175,7 +175,7 @@ class ApplyTransform(SPMCommand):
         return script
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         if not isdefined(self.inputs.out_file):
             self.outputs.out_file = os.path.abspath(self._gen_outfilename())
         else:

@@ -56,7 +56,7 @@ class ImageStats(CommandLine):
     output_spec = ImageStatsOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = os.path.abspath(self._gen_outfilename())
         return outputs
 

@@ -57,7 +57,7 @@ class Image2Voxel(StdOutCommandLine):
     output_spec = Image2VoxelOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.voxel_order = os.path.abspath(self._gen_outfilename())
         return outputs
 
@@ -115,7 +115,7 @@ class FSL2Scheme(StdOutCommandLine):
     output_spec = FSL2SchemeOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.scheme = os.path.abspath(self._gen_outfilename())
         return outputs
 
@@ -171,7 +171,7 @@ class VtkStreamlines(StdOutCommandLine):
     output_spec = VtkStreamlinesOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.vtk = os.path.abspath(self._gen_outfilename())
         return outputs
 
@@ -299,7 +299,7 @@ class ProcStreamlines(StdOutCommandLine):
         return actual_outputroot
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.proc = os.path.abspath(self._gen_outfilename())
         self.outputs.outputroot_files = self.outputroot_files
         return outputs
@@ -352,7 +352,7 @@ class TractShredder(StdOutCommandLine):
     output_spec = TractShredderOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.shredded = os.path.abspath(self._gen_outfilename())
         return outputs
 
@@ -391,7 +391,7 @@ class DT2NIfTI(CommandLine):
     output_spec = DT2NIfTIOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         output_root = self._gen_outputroot()
         self.outputs.dt = os.path.abspath(output_root + "dt.nii")
         self.outputs.exitcode = os.path.abspath(output_root + "exitcode.nii")
@@ -474,7 +474,7 @@ class NIfTIDT2Camino(CommandLine):
     output_spec = NIfTIDT2CaminoOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.out_file = self._gen_filename('out_file')
         return outputs
 
@@ -628,7 +628,7 @@ class AnalyzeHeader(StdOutCommandLine):
     output_spec = AnalyzeHeaderOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.header = os.path.abspath(self._gen_outfilename())
         return outputs
 
@@ -682,7 +682,7 @@ class Shredder(StdOutCommandLine):
     output_spec = ShredderOutputSpec
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         self.outputs.shredded_file = os.path.abspath(self._gen_outfilename())
         return outputs
 

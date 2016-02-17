@@ -100,7 +100,7 @@ class IdentityInterface(IOBase):
         for key in self._fields:
             val = getattr(self.inputs, key)
             if isdefined(val):
-                outputs[key] = val
+                setattr(self.outputs, key, val
         return outputs
 
 
@@ -468,7 +468,7 @@ class Function(IOBase):
     def _list_outputs(self):
         outputs = self._outputs().get()
         for key in self._output_names:
-            outputs[key] = self._out[key]
+            setattr(self.outputs, key, self._out[key]
         return outputs
 
 
@@ -556,10 +556,10 @@ class CSVReader(BaseInterface):
         return add_traits(base, self._get_outfields())
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         isHeader = True
         for key in self._outfields:
-            outputs[key] = []  # initialize outfields
+            setattr(self.outputs, key, []  # initialize outfields
         with open(self.inputs.in_file, 'r') as fid:
             for line in fid.readlines():
                 if self.inputs.header and isHeader:  # skip header line

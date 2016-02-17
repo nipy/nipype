@@ -129,15 +129,15 @@ class SlicerCommandLine(CommandLine):
         return base + ext
 
     def _list_outputs(self):
-        outputs = self.output_spec().get()
+        
         for output_node in self._outputs_nodes:
             name = output_node.getElementsByTagName('name')[0].firstChild.nodeValue
-            outputs[name] = getattr(self.inputs, name)
+            setattr(self.outputs, name, getattr(self.inputs, name)
             if isdefined(outputs[name]) and isinstance(outputs[name], bool):
                 if outputs[name]:
-                    outputs[name] = self._gen_filename(name)
+                    setattr(self.outputs, name, self._gen_filename(name)
                 else:
-                    outputs[name] = Undefined
+                    setattr(self.outputs, name, Undefined
         return outputs
 
     def _format_arg(self, name, spec, value):
