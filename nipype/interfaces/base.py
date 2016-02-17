@@ -1375,8 +1375,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stderr'] = []
         result['merged'] = ''
 
-    setattr(runtime, 'cmd_memory', mem_mb/1024.0)
-    setattr(runtime, 'cmd_threads', num_threads)
+    setattr(runtime, 'runtime_memory', mem_mb/1024.0)
+    setattr(runtime, 'runtime_threads', num_threads)
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])
     runtime.merged = result['merged']

@@ -40,10 +40,10 @@ def run_node(node, updatehash, runtime_profile=False):
             retval = node.run(updatehash=updatehash)
             run_secs = (datetime.datetime.now() - start).total_seconds()
             result['result'] = retval
-            result['run_seconds'] = run_secs
+            result['runtime_seconds'] = run_secs
             if hasattr(retval.runtime, 'get'):
-                result['cmd_memory'] = retval.runtime.get('cmd_memory')
-                result['cmd_threads'] = retval.runtime.get('cmd_threads')
+                result['runtime_memory'] = retval.runtime.get('runtime_memory')
+                result['runtime_threads'] = retval.runtime.get('runtime_threads')
         except:
             etype, eval, etr = sys.exc_info()
             result['traceback'] = format_exception(etype,eval,etr)

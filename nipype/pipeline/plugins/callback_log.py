@@ -10,24 +10,20 @@ def log_nodes_cb(node, status, result=None):
 
     # Check runtime profile stats
     if result is None:
-        node_mem = cmd_mem = run_seconds = cmd_threads = 'N/A'
+        runtime_memory = runtime_seconds = runtime_threads = 'N/A'
     else:
         try:
-            node_mem = result['node_memory']
+            runtime_memory = result['runtime_memory']
         except KeyError:
-            node_mem = 'Unknown'
+            runtime_memory = 'Unknown'
         try:
-            cmd_mem = result['cmd_memory']
+            runtime_seconds = result['runtime_seconds']
         except KeyError:
-            cmd_mem = 'Unknown'
+            runtime_seconds = 'Unknown'
         try:
-            run_seconds = result['run_seconds']
-        except KeyError:
-            run_seconds = 'Unknown'
-        try:
-            cmd_threads = result['cmd_threads']
+            runtime_threads = result['runtime_threads']
         except:
-            cmd_threads = 'Unknown'
+            runtime_threads = 'Unknown'
 
     # Check status and write to log
     # Start
@@ -44,10 +40,9 @@ def log_nodes_cb(node, status, result=None):
         node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) +  \
         '"' + ',"estimated_memory":' + '"'+ str(node._interface.estimated_memory) + '"'+ \
         ',"num_threads":' + '"'+ str(node._interface.num_threads) + '"'+ \
-        ',"cmd-level_threads":' + '"'+ str(cmd_threads) + '"'+ \
-        ',"node-level_memory":' + '"'+ str(node_mem) + '"'+ \
-        ',"cmd-level_memory":' + '"'+ str(cmd_mem) + '"' + \
-        ',"run_seconds":' + '"'+ str(run_seconds) + '"'+ '}'
+        ',"runtime_threads":' + '"'+ str(runtime_threads) + '"'+ \
+        ',"runtime_memory":' + '"'+ str(runtime_memory) + '"' + \
+        ',"runtime_seconds":' + '"'+ str(runtime_seconds) + '"'+ '}'
 
         logger.debug(message)
     # Other

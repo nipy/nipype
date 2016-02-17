@@ -180,6 +180,7 @@ class RefitInputSpec(CommandLineInputSpec):
                         ' template type, e.g. TLRC, MNI, ORIG')
 
 
+
 class Refit(CommandLine):
     """Changes some of the information inside a 3D dataset's header
 
@@ -504,6 +505,104 @@ class Despike(AFNICommand):
     _cmd = '3dDespike'
     input_spec = DespikeInputSpec
     output_spec = AFNICommandOutputSpec
+
+
+class CentralityInputSpec(AFNICommandInputSpec):
+    """
+    inherits the out_file parameter from AFNICommandOutputSpec base class
+    """
+
+    in_file = File(desc='input file to 3dDegreeCentrality',
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+    mask = File(desc='mask file to mask input data',
+                   argstr="-mask %s",
+                   exists=True)
+
+    thresh = traits.Float(desc='threshold to exclude connections where corr <= thresh',
+                          argstr='-thresh %f')
+
+    polort = traits.Int(desc='', argstr='-polort %d')
+
+    autoclip = traits.Bool(desc='Clip off low-intensity regions in the dataset',
+                           argstr='-autoclip')
+
+    automask = traits.Bool(desc='Mask the dataset to target brain-only voxels',
+                           argstr='-automask')
+
+
+class DegreeCentralityInputSpec(CentralityInputSpec):
+    """
+    inherits the out_file parameter from AFNICommandOutputSpec base class
+    """
+
+    in_file = File(desc='input file to 3dDegreeCentrality',
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+    mask = File(desc='mask file to mask input data',
+                   argstr="-mask %s",
+                   exists=True)
+
+    thresh = traits.Float(desc='threshold to exclude connections where corr <= thresh',
+                          argstr='-thresh %f')
+
+    sparsity = traits.Float(desc='only take the top percent of connections',
+                            argstr='-sparsity %f')
+
+    out_1d = traits.Str(desc='output filepath to text dump of correlation matrix',
+                        argstr='-out1D')
+
+    polort = traits.Int(desc='', argstr='-polort %d')
+
+    autoclip = traits.Bool(desc='Clip off low-intensity regions in the dataset',
+                           argstr='-autoclip')
+
+    automask = traits.Bool(desc='Mask the dataset to target brain-only voxels',
+                           argstr='-automask')
+
+
+class DegreeCentralityOutputSpec(AFNICommandOutputSpec):
+    """
+    inherits the out_file parameter from AFNICommandOutputSpec base class
+    """
+
+    one_d_file = File(desc='The text output of the similarity matrix computed'\
+                           'after thresholding with one-dimensional and '\
+                           'ijk voxel indices, correlations, image extents, '\
+                           'and affine matrix')
+
+
+class DegreeCentrality(AFNICommand):
+    """Performs degree centrality on a dataset using a given maskfile
+    via 3dDegreeCentrality
+
+    For complete details, see the `3dDegreeCentrality Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dDegreeCentrality.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> degree = afni.DegreeCentrality()
+    >>> degree.inputs.in_file = 'func_preproc.nii'
+    >>> degree.inputs.mask = 'mask.nii'
+    >>> degree.inputs.sparsity = 1 # keep the top one percent of connections
+    >>> degree.cmdline
+    '3dDegreeCentrality -sparsity 1 -mask mask.nii func_preproc.nii'
+    >>> res = degree.run() # doctest: +SKIP
+    """
+
+    _cmd = '3dDegreeCentrality'
+    input_spec = DegreeCentralityInputSpec
+    output_spec = DegreeCentralityOutputSpec
 
 
 class AutomaskInputSpec(AFNICommandInputSpec):
