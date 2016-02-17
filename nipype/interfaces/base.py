@@ -378,12 +378,6 @@ class Interface(object):
         """Execute the command."""
         raise NotImplementedError
 
-    def _get_filecopy_info(self):
-        """ Provides information about file inputs to copy or link to cwd.
-            Necessary for pipeline operation
-        """
-        raise NotImplementedError
-
 
 class BaseInterface(Interface):
     """Implements common interface functionality.

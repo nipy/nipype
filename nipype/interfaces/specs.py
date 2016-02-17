@@ -368,7 +368,10 @@ class BaseInputSpec(BaseTraitedSpec):
                 xor_list.remove(name)
             # for each xor, set to default_value
             for trait_name in xor_list:
-                if isdefined(getattr(self, trait_name)):
+                trait_val = getattr(self, trait_name)
+                if isdefined(trait_val) and isinstance(trait_val, bool) and not trait_val:
+                    trait_val = Undefined  # Boolean inputs set false should not count as defined
+                if isdefined(trait_val):
                     self.trait_set(trait_change_notify=False,
                                    **{'%s' % name: Undefined})
                     msg = ('Input "%s" is mutually exclusive with input "%s", '
@@ -399,13 +402,13 @@ class BaseInputSpec(BaseTraitedSpec):
             value = getattr(self, name)
             if not isdefined(value):
                 xor_spec = getattr(spec, 'xor', [])
-                xor_defined = ([isdefined(getattr(self, xname)) for xname in xor_spec]
-                               if xor_spec is not None else [])
+                if xor_spec is None:
+                    xor_spec = []
 
-                if not any(xor_defined):
+                if not any([isdefined(xname) for xname in xor_spec]):
                     raise ValueError(
-                        '%s requires a value for input \'%s\'. For a list of required inputs, '
-                        'see %s.help()' % (self.__class__.__name__, name, self.__class__.__name__))
+                        '%s requires a value for one of these inputs \'%s\'. For a list of required inputs, '
+                        'see %s.help()' % (self.__class__.__name__, xor_spec, self.__class__.__name__))
             self._check_requires(name)
 
         for elem in list(self.optional_items()):

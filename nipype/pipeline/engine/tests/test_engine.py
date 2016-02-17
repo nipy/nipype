@@ -17,10 +17,9 @@ from ... import engine as pe
 from ....interfaces import base as nib
 
 
-class InputSpec(nib.TraitedSpec):
+class InputSpec(nib.BaseInterfaceInputSpec):
     input1 = nib.traits.Int(desc='a random int')
     input2 = nib.traits.Int(desc='a random int')
-
 
 class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
@@ -32,13 +31,8 @@ class TestInterface(nib.BaseInterface):
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
+        self.outputs.output1 = [1, self.inputs.input1]
         return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output1'] = [1, self.inputs.input1]
-        return outputs
-
 
 def test_init():
     yield assert_raises, Exception, pe.Workflow

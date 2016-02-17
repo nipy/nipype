@@ -408,12 +408,12 @@ def test_Interface():
     yield assert_raises, NotImplementedError, nif.run
     yield assert_raises, NotImplementedError, nif.aggregate_outputs
     yield assert_raises, NotImplementedError, nif._list_outputs
-    yield assert_raises, NotImplementedError, nif._get_filecopy_info
+    yield assert_raises, NotImplementedError, nif.inputs.get_filecopy_info
 
 
 def test_BaseInterface():
     yield assert_equal, nib.BaseInterface.help(), None
-    yield assert_equal, nib.BaseInterface._get_filecopy_info(), []
+    yield assert_equal, nib.BaseInterface.inputs.get_filecopy_info(), []
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
@@ -432,10 +432,10 @@ def test_BaseInterface():
     yield assert_equal, DerivedInterface.help(), None
     yield assert_true, 'moo' in ''.join(DerivedInterface._inputs_help())
     yield assert_equal, DerivedInterface()._outputs(), None
-    yield assert_equal, DerivedInterface._get_filecopy_info()[0]['key'], 'woo'
-    yield assert_true, DerivedInterface._get_filecopy_info()[0]['copy']
-    yield assert_equal, DerivedInterface._get_filecopy_info()[1]['key'], 'zoo'
-    yield assert_false, DerivedInterface._get_filecopy_info()[1]['copy']
+    yield assert_equal, DerivedInterface.inputs.get_filecopy_info()[0]['key'], 'woo'
+    yield assert_true, DerivedInterface.inputs.get_filecopy_info()[0]['copy']
+    yield assert_equal, DerivedInterface.inputs.get_filecopy_info()[1]['key'], 'zoo'
+    yield assert_false, DerivedInterface.inputs.get_filecopy_info()[1]['copy']
     yield assert_equal, DerivedInterface().inputs.foo, Undefined
     yield assert_raises, ValueError, DerivedInterface()._check_mandatory_inputs
     yield assert_equal, DerivedInterface(goo=1)._check_mandatory_inputs(), None

@@ -20,7 +20,7 @@ import warnings
 
 from ... import LooseVersion
 from ..base import (TraitedSpec, isdefined, File, Directory,
-                    InputMultiPath, OutputMultiPath, traits)
+                    InputMultiPath, OutputMultiPath, traits, Undefined)
 from ..fsl.base import (FSLCommand, FSLCommandInputSpec, Info)
 from ...utils.filemanip import fname_presuffix, split_filename, copyfile
 
@@ -44,7 +44,7 @@ class DTIFitInputSpec(FSLCommandInputSpec):
     max_y = traits.Int(argstr='-Y %d', desc='max y')
     min_x = traits.Int(argstr='-x %d', desc='min x')
     max_x = traits.Int(argstr='-X %d', desc='max x')
-    save_tensor = traits.Bool(desc='save the elements of the tensor',
+    save_tensor = traits.Bool(False, usedefault=True, desc='save the elements of the tensor',
                               argstr='--save_tensor')
     sse = traits.Bool(desc='output sum of squared errors', argstr='--sse')
     cni = File(exists=True, desc='input counfound regressors', argstr='--cni=%s')
@@ -64,9 +64,9 @@ class DTIFitOutputSpec(TraitedSpec):
     MD = File(exists=True, desc='path/name of file with the mean diffusivity')
     FA = File(exists=True, desc='path/name of file with the fractional anisotropy')
     MO = File(exists=True, desc='path/name of file with the mode of anisotropy')
-    S0 = File(exists=True, desc='path/name of file with the raw T2 signal with no ' +
+    S0 = File(exists=True, desc='path/name of file with the raw T2 signal with no '
                                 'diffusion weighting')
-    tensor = File(exists=True, desc='path/name of file with the 4D tensor volume')
+    tensor = File(desc='path/name of file with the 4D tensor volume')
 
 
 class DTIFit(FSLCommand):
@@ -92,14 +92,14 @@ class DTIFit(FSLCommand):
     input_spec = DTIFitInputSpec
     output_spec = DTIFitOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        for k in list(outputs.keys()):
-            if k not in ('outputtype', 'environ', 'args'):
-                if k != 'tensor' or (isdefined(self.inputs.save_tensor) and
-                                     self.inputs.save_tensor):
-                    outputs[k] = self._gen_fname(self.inputs.base_name, suffix='_' + k)
-        return outputs
+    def _post_run(self):
+        for k, _ in list(self.outputs.items()):
+            if k in ('outputtype', 'environ', 'args'):
+                continue
+            value = os.path.abspath(self.inputs.base_name + '_%s' % k)
+            if k == 'tensor' and self.inputs.save_tensor:
+                value = Undefined
+            setattr(self.outputs, k, value)
 
 
 class FSLXCommandInputSpec(FSLCommandInputSpec):
@@ -198,7 +198,7 @@ class FSLXCommand(FSLCommand):
             self.raise_exception(runtime)
         return runtime
 
-    def _list_outputs(self, out_dir=None):
+    def _post_run(self, out_dir=None):
         outputs = self.output_spec().get()
         n_fibres = self.inputs.n_fibres
         if not out_dir:
@@ -354,7 +354,7 @@ class BEDPOSTX5(FSLXCommand):
         self._out_dir = subjectdir + '.bedpostX'
         return retval
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = self.output_spec().get()
         n_fibres = self.inputs.n_fibres
 
@@ -476,7 +476,7 @@ class XFibres4(FSLCommand):
                       DeprecationWarning)
         super(XFibres4, self).__init__(**inputs)
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = self.output_spec().get()
         outputs["mean_dsamples"] = self._gen_fname("mean_dsamples",
                                                    cwd=self.inputs.logdir)
@@ -610,7 +610,7 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
             self.raise_exception(runtime)
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = self.output_spec().get()
         bpx_directory = self._get_bedpostx_dir()
         outputs['bpx_out_directory'] = os.path.join(bpx_directory + '.bedpostX')
@@ -827,7 +827,7 @@ class ProbTrackX(FSLCommand):
         else:
             return super(ProbTrackX, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_dir):
             out_dir = self._gen_filename("out_dir")
@@ -941,8 +941,8 @@ class ProbTrackX2(ProbTrackX):
     input_spec = ProbTrackX2InputSpec
     output_spec = ProbTrackX2OutputSpec
 
-    def _list_outputs(self):
-        outputs = super(ProbTrackX2, self)._list_outputs()
+    def _post_run(self):
+        outputs = super(ProbTrackX2, self)._post_run()
 
         if not isdefined(self.inputs.out_dir):
             out_dir = os.getcwd()
@@ -1022,7 +1022,7 @@ class VecReg(FSLCommand):
                                                    suffix='_vreg')
         return super(VecReg, self)._run_interface(runtime)
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']) and isdefined(self.inputs.in_file):
@@ -1034,7 +1034,7 @@ class VecReg(FSLCommand):
 
     def _gen_filename(self, name):
         if name is 'out_file':
-            return self._list_outputs()[name]
+            return self._post_run()[name]
         else:
             return None
 
@@ -1072,7 +1072,7 @@ class ProjThresh(FSLCommand):
     input_spec = ProjThreshInputSpec
     output_spec = ProjThreshOuputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = self.output_spec().get()
         outputs['out_files'] = []
         for name in self.inputs.in_files:
@@ -1121,7 +1121,7 @@ class FindTheBiggest(FSLCommand):
             self.inputs.out_file = self._gen_fname('biggestSegmentation', suffix='')
         return super(FindTheBiggest, self)._run_interface(runtime)
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = self.output_spec().get()
         outputs['out_file'] = self.inputs.out_file
         if not isdefined(outputs['out_file']):
@@ -1131,7 +1131,7 @@ class FindTheBiggest(FSLCommand):
 
     def _gen_filename(self, name):
         if name is 'out_file':
-            return self._list_outputs()[name]
+            return self._post_run()[name]
         else:
             return None
 
@@ -1198,18 +1198,18 @@ class TractSkeleton(FSLCommand):
                 else:
                     mask_file = _si.search_mask_file
                 if not isdefined(_si.projected_data):
-                    proj_file = self._list_outputs()["projected_data"]
+                    proj_file = self._post_run()["projected_data"]
                 else:
                     proj_file = _si.projected_data
                 return spec.argstr % (_si.threshold, _si.distance_map, mask_file, _si.data_file, proj_file)
         elif name == "skeleton_file":
             if isinstance(value, bool):
-                return spec.argstr % self._list_outputs()["skeleton_file"]
+                return spec.argstr % self._post_run()["skeleton_file"]
             else:
                 return spec.argstr % value
         return super(TractSkeleton, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = self.output_spec().get()
         _si = self.inputs
         if isdefined(_si.project_data) and _si.project_data:
@@ -1271,10 +1271,10 @@ class DistanceMap(FSLCommand):
     def _format_arg(self, name, spec, value):
         if name == "local_max_file":
             if isinstance(value, bool):
-                return spec.argstr % self._list_outputs()["local_max_file"]
+                return spec.argstr % self._post_run()["local_max_file"]
         return super(DistanceMap, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = self.output_spec().get()
         _si = self.inputs
         outputs["distance_map"] = _si.distance_map
@@ -1296,7 +1296,7 @@ class DistanceMap(FSLCommand):
 
     def _gen_filename(self, name):
         if name == "distance_map":
-            return self._list_outputs()["distance_map"]
+            return self._post_run()["distance_map"]
         return None
 
 
@@ -1324,7 +1324,7 @@ class MakeDyadicVectors(FSLCommand):
     input_spec = MakeDyadicVectorsInputSpec
     output_spec = MakeDyadicVectorsOutputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         outputs = self.output_spec().get()
         outputs["dyads"] = self._gen_fname(self.inputs.output)
         outputs["dispersion"] = self._gen_fname(self.inputs.output,

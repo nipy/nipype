@@ -58,27 +58,3 @@ def test_FSLCommand2():
         if out_type != fsl.Info.output_type():
             #  Setting class outputtype should not effect existing instances
             yield assert_not_equal, cmdinst.inputs.output_type, out_type
-
-
-@skipif(no_fsl)  # skip if fsl not installed)
-def test_gen_fname():
-    # Test _gen_fname method of FSLCommand
-    cmd = fsl.FSLCommand(command='junk', output_type='NIFTI_GZ')
-    pth = os.getcwd()
-    # just the filename
-    fname = cmd._gen_fname('foo.nii.gz', suffix='_fsl')
-    desired = os.path.join(pth, 'foo_fsl.nii.gz')
-    yield assert_equal, fname, desired
-    # filename with suffix
-    fname = cmd._gen_fname('foo.nii.gz', suffix='_brain')
-    desired = os.path.join(pth, 'foo_brain.nii.gz')
-    yield assert_equal, fname, desired
-    # filename with suffix and working directory
-    fname = cmd._gen_fname('foo.nii.gz', suffix='_brain', cwd='/data')
-    desired = os.path.join('/data', 'foo_brain.nii.gz')
-    yield assert_equal, fname, desired
-    # filename with suffix and no file extension change
-    fname = cmd._gen_fname('foo.nii.gz', suffix='_brain.mat',
-                           change_ext=False)
-    desired = os.path.join(pth, 'foo_brain.mat')
-    yield assert_equal, fname, desired

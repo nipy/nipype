@@ -48,9 +48,8 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
     reg_header = traits.Bool(argstr="--regheader %s", requires=["subject_id"],
                              mandatory=True, xor=reg_xors,
                              desc="register based on header geometry")
-    mni152reg = traits.Bool(argstr="--mni152reg",
-                            mandatory=True, xor=reg_xors,
-                            desc="source volume is in MNI152 space")
+    mni152reg = traits.Bool(False, argstr="--mni152reg", mandatory=True,
+                            xor=reg_xors, desc="source volume is in MNI152 space")
 
     apply_rot = traits.Tuple(traits.Float, traits.Float, traits.Float,
                              argstr="--rot %.3f %.3f %.3f",

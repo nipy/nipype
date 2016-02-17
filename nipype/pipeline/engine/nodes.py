@@ -658,14 +658,14 @@ class Node(EngineBase):
 
     def _copyfiles_to_wd(self, outdir, execute, linksonly=False):
         """ copy files over and change the inputs"""
-        if hasattr(self._interface, '_get_filecopy_info'):
+        if hasattr(self.inputs, 'get_filecopy_info'):
             logger.debug('copying files to wd [execute=%s, linksonly=%s]' %
                          (str(execute), str(linksonly)))
             if execute and linksonly:
                 olddir = outdir
                 outdir = op.join(outdir, '_tempinput')
                 os.makedirs(outdir)
-            for info in self._interface._get_filecopy_info():
+            for info in self.inputs.get_filecopy_info():
                 files = self.inputs.get().get(info['key'])
                 if not isdefined(files):
                     continue
