@@ -58,7 +58,7 @@ class BrainMask(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -105,7 +105,7 @@ class Mesh2PVE(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -152,7 +152,7 @@ class Generate5tt(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -349,7 +349,7 @@ class ComputeTDI(MRTrix3Base):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -400,5 +400,5 @@ class TCK2VTK(MRTrix3Base):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs

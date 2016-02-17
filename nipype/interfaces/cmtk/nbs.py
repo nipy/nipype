@@ -138,9 +138,9 @@ class NetworkBasedStatistic(BaseInterface):
         path = op.abspath('NBS_Result_' + details)
         pval_path = op.abspath('NBS_P_vals_' + details)
 
-        outputs['nbs_network'] = path
-        outputs['nbs_pval_network'] = pval_path
-        outputs['network_files'] = [path, pval_path]
+        self.outputs.nbs_network = path
+        self.outputs.nbs_pval_network = pval_path
+        self.outputs.network_files = [path, pval_path]
         return outputs
 
     def _gen_outfilename(self, name, ext):

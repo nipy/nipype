@@ -49,10 +49,10 @@ class MathsCommand(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = self.inputs.out_file
+        self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
-            outputs["out_file"] = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
-        outputs["out_file"] = os.path.abspath(outputs["out_file"])
+            self.outputs.out_file = self._gen_fname(self.inputs.in_file, suffix=self._suffix)
+        self.outputs.out_file = os.path.abspath(self.outputs.out_file)
         return outputs
 
     def _gen_filename(self, name):

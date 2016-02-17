@@ -164,12 +164,12 @@ class Atropos(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['classified_image'] = os.path.abspath(
+        self.outputs.classified_image = os.path.abspath(
             self._gen_filename('out_classified_image_name'))
         if isdefined(self.inputs.save_posteriors) and self.inputs.save_posteriors:
-            outputs['posteriors'] = []
+            self.outputs.posteriors = []
             for i in range(self.inputs.number_of_tissue_classes):
-                outputs['posteriors'].append(os.path.abspath(self.inputs.output_posteriors_name_template % (i + 1)))
+                self.outputs.posteriors.append(os.path.abspath(self.inputs.output_posteriors_name_template % (i + 1)))
         return outputs
 
 
@@ -227,7 +227,7 @@ class LaplacianThickness(ANTSCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         _, name, ext = split_filename(os.path.abspath(self.inputs.input_wm))
-        outputs['output_image'] = os.path.join(os.getcwd(),
+        self.outputs.output_image = os.path.join(os.getcwd(),
                                                ''.join((name,
                                                         self.inputs.output_image,
                                                         ext)))
@@ -373,11 +373,11 @@ class N4BiasFieldCorrection(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_image'] = os.path.abspath(
+        self.outputs.output_image = os.path.abspath(
             self._gen_filename('output_image'))
 
         if self.inputs.save_bias or isdefined(self.inputs.bias_image):
-            outputs['bias_image'] = os.path.abspath(
+            self.outputs.bias_image = os.path.abspath(
                 self._gen_filename('bias_image'))
         return outputs
 
@@ -547,15 +547,15 @@ class CorticalThickness(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['BrainExtractionMask'] = os.path.join(os.getcwd(),
+        self.outputs.BrainExtractionMask = os.path.join(os.getcwd(),
                                                       self.inputs.out_prefix +
                                                       'BrainExtractionMask.' +
                                                       self.inputs.image_suffix)
-        outputs['BrainSegmentation'] = os.path.join(os.getcwd(),
+        self.outputs.BrainSegmentation = os.path.join(os.getcwd(),
                                                     self.inputs.out_prefix +
                                                     'BrainSegmentation.' +
                                                     self.inputs.image_suffix)
-        outputs['BrainSegmentationN4'] = os.path.join(os.getcwd(),
+        self.outputs.BrainSegmentationN4 = os.path.join(os.getcwd(),
                                                       self.inputs.out_prefix +
                                                       'BrainSegmentation0N4.' +
                                                       self.inputs.image_suffix)
@@ -565,34 +565,34 @@ class CorticalThickness(ANTSCommand):
                                            self.inputs.out_prefix +
                                            'BrainSegmentationPosteriors%02d.' % (i + 1) +
                                            self.inputs.image_suffix))
-        outputs['BrainSegmentationPosteriors'] = posteriors
-        outputs['CorticalThickness'] = os.path.join(os.getcwd(),
+        self.outputs.BrainSegmentationPosteriors = posteriors
+        self.outputs.CorticalThickness = os.path.join(os.getcwd(),
                                                     self.inputs.out_prefix +
                                                     'CorticalThickness.' +
                                                     self.inputs.image_suffix)
-        outputs['TemplateToSubject1GenericAffine'] = os.path.join(os.getcwd(),
+        self.outputs.TemplateToSubject1GenericAffine = os.path.join(os.getcwd(),
                                                                   self.inputs.out_prefix +
                                                                   'TemplateToSubject1GenericAffine.mat')
-        outputs['TemplateToSubject0Warp'] = os.path.join(os.getcwd(),
+        self.outputs.TemplateToSubject0Warp = os.path.join(os.getcwd(),
                                                          self.inputs.out_prefix +
                                                          'TemplateToSubject0Warp.' +
                                                          self.inputs.image_suffix)
-        outputs['SubjectToTemplate1Warp'] = os.path.join(os.getcwd(),
+        self.outputs.SubjectToTemplate1Warp = os.path.join(os.getcwd(),
                                                          self.inputs.out_prefix +
                                                          'SubjectToTemplate1Warp.' +
                                                          self.inputs.image_suffix)
-        outputs['SubjectToTemplate0GenericAffine'] = os.path.join(os.getcwd(),
+        self.outputs.SubjectToTemplate0GenericAffine = os.path.join(os.getcwd(),
                                                                   self.inputs.out_prefix +
                                                                   'SubjectToTemplate0GenericAffine.mat')
-        outputs['SubjectToTemplateLogJacobian'] = os.path.join(os.getcwd(),
+        self.outputs.SubjectToTemplateLogJacobian = os.path.join(os.getcwd(),
                                                                self.inputs.out_prefix +
                                                                'SubjectToTemplateLogJacobian.' +
                                                                self.inputs.image_suffix)
-        outputs['CorticalThicknessNormedToTemplate'] = os.path.join(os.getcwd(),
+        self.outputs.CorticalThicknessNormedToTemplate = os.path.join(os.getcwd(),
                                                                     self.inputs.out_prefix +
                                                                     'CorticalThickness.' +
                                                                     self.inputs.image_suffix)
-        outputs['BrainVolumes'] = os.path.join(os.getcwd(),
+        self.outputs.BrainVolumes = os.path.join(os.getcwd(),
                                                self.inputs.out_prefix +
                                                'brainvols.csv')
         return outputs
@@ -673,11 +673,11 @@ class BrainExtraction(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['BrainExtractionMask'] = os.path.join(os.getcwd(),
+        self.outputs.BrainExtractionMask = os.path.join(os.getcwd(),
                                                       self.inputs.out_prefix +
                                                       'BrainExtractionMask.' +
                                                       self.inputs.image_suffix)
-        outputs['BrainExtractionBrain'] = os.path.join(os.getcwd(),
+        self.outputs.BrainExtractionBrain = os.path.join(os.getcwd(),
                                                        self.inputs.out_prefix +
                                                        'BrainExtractionBrain.' +
                                                        self.inputs.image_suffix)
@@ -792,7 +792,7 @@ class JointFusion(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_label_image'] = os.path.abspath(
+        self.outputs.output_label_image = os.path.abspath(
             self.inputs.output_label_image)
         return outputs
 

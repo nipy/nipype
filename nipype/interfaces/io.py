@@ -766,7 +766,7 @@ class DataSink(IOBase):
                         out_files.append(dst)
 
         # Return outputs dictionary
-        outputs['out_file'] = out_files
+        self.outputs.out_file = out_files
 
         return outputs
 
@@ -2592,5 +2592,5 @@ class JSONFileSink(IOBase):
         with open(out_file, 'w') as f:
             simplejson.dump(out_dict, f)
         outputs = self.output_spec().get()
-        outputs['out_file'] = out_file
+        self.outputs.out_file = out_file
         return outputs

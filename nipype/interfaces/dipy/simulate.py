@@ -257,10 +257,10 @@ class SimulateMultiTensor(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        outputs['out_mask'] = op.abspath(self.inputs.out_mask)
-        outputs['out_bvec'] = op.abspath(self.inputs.out_bvec)
-        outputs['out_bval'] = op.abspath(self.inputs.out_bval)
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+        self.outputs.out_mask = op.abspath(self.inputs.out_mask)
+        self.outputs.out_bvec = op.abspath(self.inputs.out_bvec)
+        self.outputs.out_bval = op.abspath(self.inputs.out_bval)
 
         return outputs
 

@@ -241,7 +241,7 @@ class MRTrix2TrackVis(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_filename)
+        self.outputs.out_file = op.abspath(self.inputs.out_filename)
         return outputs
 
     def _gen_filename(self, name):

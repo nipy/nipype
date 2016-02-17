@@ -37,7 +37,7 @@ class Analyze2nii(SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['nifti_file'] = self.output_name
+        self.outputs.nifti_file = self.output_name
         return outputs
 
 
@@ -117,8 +117,8 @@ class CalcCoregAffine(SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['mat'] = os.path.abspath(self.inputs.mat)
-        outputs['invmat'] = os.path.abspath(self.inputs.invmat)
+        self.outputs.mat = os.path.abspath(self.inputs.mat)
+        self.outputs.invmat = os.path.abspath(self.inputs.invmat)
         return outputs
 
 
@@ -154,7 +154,7 @@ class ApplyTransform(SPMCommand):
     def _make_matlab_command(self, _):
         """checks for SPM, generates script"""
         outputs = self._list_outputs()
-        self.inputs.out_file = outputs['out_file']
+        self.inputs.out_file = self.outputs.out_file
         script = """
         infile = '%s';
         outfile = '%s'
@@ -177,9 +177,9 @@ class ApplyTransform(SPMCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+            self.outputs.out_file = os.path.abspath(self._gen_outfilename())
         else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+            self.outputs.out_file = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_outfilename(self):
@@ -230,7 +230,7 @@ class Reslice(SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        self.outputs.out_file = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -309,10 +309,10 @@ class ApplyInverseDeformation(SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_files'] = []
+        self.outputs.out_files = []
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
-            outputs['out_files'].append(os.path.realpath('w%s' % fname))
+            self.outputs.out_files.append(os.path.realpath('w%s' % fname))
         return outputs
 
 
@@ -379,10 +379,10 @@ class ResliceToReference(SPMCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_files'] = []
+        self.outputs.out_files = []
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
-            outputs['out_files'].append(os.path.realpath('w%s' % fname))
+            self.outputs.out_files.append(os.path.realpath('w%s' % fname))
         return outputs
 
 
@@ -466,11 +466,11 @@ class DicomImport(SPMCommand):
 
         ext = self.inputs.format
         if self.inputs.output_dir_struct == "flat":
-            outputs['out_files'] = glob(os.path.join(od, '*.%s' % ext))
+            self.outputs.out_files = glob(os.path.join(od, '*.%s' % ext))
         elif self.inputs.output_dir_struct == 'series':
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*.%s' % ext)))
+            self.outputs.out_files = glob(os.path.join(od, os.path.join('*', '*.%s' % ext)))
         elif self.inputs.output_dir_struct in ['patid', 'date_time', 'patname']:
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*', '*.%s' % ext)))
+            self.outputs.out_files = glob(os.path.join(od, os.path.join('*', '*', '*.%s' % ext)))
         elif self.inputs.output_dir_struct == 'patid_date':
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*', '*', '*.%s' % ext)))
+            self.outputs.out_files = glob(os.path.join(od, os.path.join('*', '*', '*', '*.%s' % ext)))
         return outputs

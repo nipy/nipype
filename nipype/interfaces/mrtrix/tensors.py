@@ -77,11 +77,11 @@ class DWI2SphericalHarmonicsImage(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['spherical_harmonics_image'] = self.inputs.out_filename
-        if not isdefined(outputs['spherical_harmonics_image']):
-            outputs['spherical_harmonics_image'] = op.abspath(self._gen_outfilename())
+        self.outputs.spherical_harmonics_image = self.inputs.out_filename
+        if not isdefined(self.outputs.spherical_harmonics_image):
+            self.outputs.spherical_harmonics_image = op.abspath(self._gen_outfilename())
         else:
-            outputs['spherical_harmonics_image'] = op.abspath(outputs['spherical_harmonics_image'])
+            self.outputs.spherical_harmonics_image = op.abspath(self.outputs.spherical_harmonics_image)
         return outputs
 
     def _gen_filename(self, name):
@@ -160,11 +160,11 @@ class ConstrainedSphericalDeconvolution(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['spherical_harmonics_image'] = self.inputs.out_filename
-        if not isdefined(outputs['spherical_harmonics_image']):
-            outputs['spherical_harmonics_image'] = op.abspath(self._gen_outfilename())
+        self.outputs.spherical_harmonics_image = self.inputs.out_filename
+        if not isdefined(self.outputs.spherical_harmonics_image):
+            self.outputs.spherical_harmonics_image = op.abspath(self._gen_outfilename())
         else:
-            outputs['spherical_harmonics_image'] = op.abspath(outputs['spherical_harmonics_image'])
+            self.outputs.spherical_harmonics_image = op.abspath(self.outputs.spherical_harmonics_image)
         return outputs
 
     def _gen_filename(self, name):
@@ -214,11 +214,11 @@ class EstimateResponseForSH(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['response'] = self.inputs.out_filename
-        if not isdefined(outputs['response']):
-            outputs['response'] = op.abspath(self._gen_outfilename())
+        self.outputs.response = self.inputs.out_filename
+        if not isdefined(self.outputs.response):
+            self.outputs.response = op.abspath(self._gen_outfilename())
         else:
-            outputs['response'] = op.abspath(outputs['response'])
+            self.outputs.response = op.abspath(self.outputs.response)
         return outputs
 
     def _gen_filename(self, name):
@@ -298,7 +298,7 @@ class FSL2MRTrix(BaseInterface):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['encoding_file'] = op.abspath(self._gen_filename('out_encoding_file'))
+        self.outputs.encoding_file = op.abspath(self._gen_filename('out_encoding_file'))
         return outputs
 
     def _gen_filename(self, name):

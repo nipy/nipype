@@ -52,7 +52,7 @@ class SplineFilter(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['smoothed_track_file'] = os.path.abspath(self.inputs.output_file)
+        self.outputs.smoothed_track_file = os.path.abspath(self.inputs.output_file)
         return outputs
 
 
@@ -92,5 +92,5 @@ class TrackMerge(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['track_file'] = os.path.abspath(self.inputs.output_file)
+        self.outputs.track_file = os.path.abspath(self.inputs.output_file)
         return outputs

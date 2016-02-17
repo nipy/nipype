@@ -69,7 +69,7 @@ class ParseDICOMDir(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.dicom_info_file):
-            outputs['dicom_info_file'] = os.path.join(os.getcwd(), self.inputs.dicom_info_file)
+            self.outputs.dicom_info_file = os.path.join(os.getcwd(), self.inputs.dicom_info_file)
         return outputs
 
 
@@ -411,7 +411,7 @@ class MRIConvert(FSCommand):
                     outfiles.append(fname_presuffix(outfile,
                                                     suffix='%03d' % (i + 1)))
                 outfile = outfiles
-        outputs['out_file'] = outfile
+        self.outputs.out_file = outfile
         return outputs
 
     def _gen_filename(self, name):
@@ -587,7 +587,7 @@ class Resample(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['resampled_file'] = self._get_outfilename()
+        self.outputs.resampled_file = self._get_outfilename()
         return outputs
 
     def _gen_filename(self, name):
@@ -755,8 +755,8 @@ class ReconAll(CommandLine):
         outputs.update(FreeSurferSource(subject_id=self.inputs.subject_id,
                                         subjects_dir=subjects_dir,
                                         hemi=hemi)._list_outputs())
-        outputs['subject_id'] = self.inputs.subject_id
-        outputs['subjects_dir'] = subjects_dir
+        self.outputs.subject_id = self.inputs.subject_id
+        self.outputs.subjects_dir = subjects_dir
         return outputs
 
     def _is_resuming(self):
@@ -874,19 +874,19 @@ class BBRegister(FSCommand):
         _in = self.inputs
 
         if isdefined(_in.out_reg_file):
-            outputs['out_reg_file'] = op.abspath(_in.out_reg_file)
+            self.outputs.out_reg_file = op.abspath(_in.out_reg_file)
         elif _in.source_file:
             suffix = '_bbreg_%s.dat' % _in.subject_id
-            outputs['out_reg_file'] = fname_presuffix(_in.source_file,
+            self.outputs.out_reg_file = fname_presuffix(_in.source_file,
                                                       suffix=suffix,
                                                       use_ext=False)
 
         if isdefined(_in.registered_file):
             if isinstance(_in.registered_file, bool):
-                outputs['registered_file'] = fname_presuffix(_in.source_file,
+                self.outputs.registered_file = fname_presuffix(_in.source_file,
                                                              suffix='_bbreg')
             else:
-                outputs['registered_file'] = op.abspath(_in.registered_file)
+                self.outputs.registered_file = op.abspath(_in.registered_file)
 
         if isdefined(_in.out_fsl_file):
             if isinstance(_in.out_fsl_file, bool):
@@ -894,11 +894,11 @@ class BBRegister(FSCommand):
                 out_fsl_file = fname_presuffix(_in.source_file,
                                                suffix=suffix,
                                                use_ext=False)
-                outputs['out_fsl_file'] = out_fsl_file
+                self.outputs.out_fsl_file = out_fsl_file
             else:
-                outputs['out_fsl_file'] = op.abspath(_in.out_fsl_file)
+                self.outputs.out_fsl_file = op.abspath(_in.out_fsl_file)
 
-        outputs['min_cost_file'] = outputs['out_reg_file'] + '.mincost'
+        self.outputs.min_cost_file = self.outputs.out_reg_file + '.mincost'
         return outputs
 
     def _format_arg(self, name, spec, value):
@@ -1019,7 +1019,7 @@ class ApplyVolTransform(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['transformed_file'] = os.path.abspath(self._get_outfile())
+        self.outputs.transformed_file = os.path.abspath(self._get_outfile())
         return outputs
 
     def _gen_filename(self, name):
@@ -1088,7 +1088,7 @@ class Smooth(FSCommand):
         if not isdefined(outfile):
             outfile = self._gen_fname(self.inputs.in_file,
                                       suffix='_smooth')
-        outputs['smoothed_file'] = outfile
+        self.outputs.smoothed_file = outfile
         return outputs
 
     def _gen_filename(self, name):
@@ -1205,9 +1205,9 @@ class RobustRegister(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_reg_file'] = self.inputs.out_reg_file
+        self.outputs.out_reg_file = self.inputs.out_reg_file
         if not isdefined(self.inputs.out_reg_file) and self.inputs.source_file:
-            outputs['out_reg_file'] = fname_presuffix(self.inputs.source_file,
+            self.outputs.out_reg_file = fname_presuffix(self.inputs.source_file,
                                                       suffix='_robustreg.lta', use_ext=False)
         prefices = dict(src=self.inputs.source_file, trg=self.inputs.target_file)
         suffices = dict(registered_file=("src", "_robustreg", True),
@@ -1294,9 +1294,9 @@ class FitMSParams(FSCommand):
             out_dir = self._gen_filename("out_dir")
         else:
             out_dir = self.inputs.out_dir
-        outputs["t1_image"] = os.path.join(out_dir, "T1.mgz")
-        outputs["pd_image"] = os.path.join(out_dir, "PD.mgz")
-        outputs["t2star_image"] = os.path.join(out_dir, "T2star.mgz")
+        self.outputs.t1_image = os.path.join(out_dir, "T1.mgz")
+        self.outputs.pd_image = os.path.join(out_dir, "PD.mgz")
+        self.outputs.t2star_image = os.path.join(out_dir, "T2star.mgz")
         return outputs
 
     def _gen_filename(self, name):
@@ -1348,9 +1348,9 @@ class SynthesizeFLASH(FSCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if isdefined(self.inputs.out_file):
-            outputs["out_file"] = self.inputs.out_file
+            self.outputs.out_file = self.inputs.out_file
         else:
-            outputs["out_file"] = self._gen_fname("synth-flash_%02d.mgz" % self.inputs.flip_angle,
+            self.outputs.out_file = self._gen_fname("synth-flash_%02d.mgz" % self.inputs.flip_angle,
                                                   suffix="")
         return outputs
 

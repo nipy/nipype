@@ -63,7 +63,7 @@ class DTIFit(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['tensor_fitted'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.tensor_fitted = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -149,7 +149,7 @@ class DTMetric(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['metric_stats'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.metric_stats = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -253,7 +253,7 @@ class ModelFit(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['fitted_data'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.fitted_data = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -335,7 +335,7 @@ class DTLUTGen(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['dtLUT'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.dtLUT = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -399,7 +399,7 @@ class PicoPDFs(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['pdfs'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.pdfs = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -570,7 +570,7 @@ class Track(CommandLine):
             out_file_path = os.path.abspath(self.inputs.out_file)
         else:
             out_file_path = os.path.abspath(self._gen_outfilename())
-        outputs['tracked'] = out_file_path
+        self.outputs.tracked = out_file_path
         return outputs
 
     def _gen_filename(self, name):
@@ -874,7 +874,7 @@ class ComputeMeanDiffusivity(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["md"] = os.path.abspath(self._gen_outfilename())
+        self.outputs.md = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -936,7 +936,7 @@ class ComputeFractionalAnisotropy(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['fa'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.fa = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -1000,7 +1000,7 @@ class ComputeTensorTrace(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['trace'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.trace = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -1060,7 +1060,7 @@ class ComputeEigensystem(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["eigen"] = os.path.abspath(self._gen_outfilename())
+        self.outputs.eigen = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):

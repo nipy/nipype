@@ -132,7 +132,7 @@ class EditTransform(BaseInterface):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['output_file'] = getattr(self, '_out_file')
+        self.outputs.output_file = getattr(self, '_out_file')
         return outputs
 
     def _get_outfile(self):

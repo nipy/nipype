@@ -202,7 +202,7 @@ class CFFConverter(BaseInterface):
         _, name, ext = split_filename(self.inputs.out_file)
         if not ext == '.cff':
             ext = '.cff'
-        outputs['connectome_file'] = op.abspath(name + ext)
+        self.outputs.connectome_file = op.abspath(name + ext)
         return outputs
 
 
@@ -264,5 +264,5 @@ class MergeCNetworks(BaseInterface):
         _, name, ext = split_filename(self.inputs.out_file)
         if not ext == '.cff':
             ext = '.cff'
-        outputs['connectome_file'] = op.abspath(name + ext)
+        self.outputs.connectome_file = op.abspath(name + ext)
         return outputs

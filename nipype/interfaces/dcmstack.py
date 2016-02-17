@@ -163,7 +163,7 @@ class DcmStack(NiftiGeneratorBase):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = self.out_path
+        self.outputs.out_file = self.out_path
         return outputs
 
 
@@ -195,7 +195,7 @@ class GroupAndStack(DcmStack):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_list"] = self.out_list
+        self.outputs.out_list = self.out_list
         return outputs
 
 
@@ -322,7 +322,7 @@ class CopyMeta(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['dest_file'] = self.out_path
+        self.outputs.dest_file = self.out_path
         return outputs
 
 
@@ -380,7 +380,7 @@ class MergeNifti(NiftiGeneratorBase):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = self.out_path
+        self.outputs.out_file = self.out_path
         return outputs
 
 
@@ -422,5 +422,5 @@ class SplitNifti(NiftiGeneratorBase):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_list'] = self.out_list
+        self.outputs.out_list = self.out_list
         return outputs

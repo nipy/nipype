@@ -161,11 +161,11 @@ class Dcm2nii(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['converted_files'] = self.output_files
-        outputs['reoriented_files'] = self.reoriented_files
-        outputs['reoriented_and_cropped_files'] = self.reoriented_and_cropped_files
-        outputs['bvecs'] = self.bvecs
-        outputs['bvals'] = self.bvals
+        self.outputs.converted_files = self.output_files
+        self.outputs.reoriented_files = self.reoriented_files
+        self.outputs.reoriented_and_cropped_files = self.reoriented_and_cropped_files
+        self.outputs.bvecs = self.bvecs
+        self.outputs.bvals = self.bvals
         return outputs
 
     def _gen_filename(self, name):

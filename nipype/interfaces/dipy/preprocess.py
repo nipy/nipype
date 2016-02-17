@@ -74,7 +74,7 @@ class Resample(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self._gen_outfilename())
+        self.outputs.out_file = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -154,7 +154,7 @@ class Denoise(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self._gen_outfilename())
+        self.outputs.out_file = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):

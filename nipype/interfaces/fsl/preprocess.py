@@ -283,54 +283,54 @@ class FAST(FSLCommand):
         else:
             basefile = self.inputs.in_files[-1]
 
-        outputs['tissue_class_map'] = self._gen_fname(basefile,
+        self.outputs.tissue_class_map = self._gen_fname(basefile,
                                                       suffix='_seg')
         if self.inputs.segments:
-            outputs['tissue_class_files'] = []
+            self.outputs.tissue_class_files = []
             for i in range(nclasses):
-                outputs['tissue_class_files'].append(
+                self.outputs.tissue_class_files.append(
                     self._gen_fname(basefile, suffix='_seg_%d' % i))
         if isdefined(self.inputs.output_biascorrected):
-            outputs['restored_image'] = []
+            self.outputs.restored_image = []
             if len(self.inputs.in_files) > 1:
                 # for multi-image segmentation there is one corrected image
                 # per input
                 for val, f in enumerate(self.inputs.in_files):
                     # image numbering is 1-based
-                    outputs['restored_image'].append(
+                    self.outputs.restored_image.append(
                         self._gen_fname(basefile, suffix='_restore_%d' % (val + 1)))
             else:
                 # single image segmentation has unnumbered output image
-                outputs['restored_image'].append(
+                self.outputs.restored_image.append(
                     self._gen_fname(basefile, suffix='_restore'))
 
-        outputs['mixeltype'] = self._gen_fname(basefile, suffix='_mixeltype')
+        self.outputs.mixeltype = self._gen_fname(basefile, suffix='_mixeltype')
         if not self.inputs.no_pve:
-            outputs['partial_volume_map'] = self._gen_fname(
+            self.outputs.partial_volume_map = self._gen_fname(
                 basefile, suffix='_pveseg')
-            outputs['partial_volume_files'] = []
+            self.outputs.partial_volume_files = []
             for i in range(nclasses):
                 outputs[
                     'partial_volume_files'].append(self._gen_fname(basefile,
                                                                    suffix='_pve_%d' % i))
         if self.inputs.output_biasfield:
-            outputs['bias_field'] = []
+            self.outputs.bias_field = []
             if len(self.inputs.in_files) > 1:
                 # for multi-image segmentation there is one bias field image
                 # per input
                 for val, f in enumerate(self.inputs.in_files):
                     # image numbering is 1-based
-                    outputs['bias_field'].append(
+                    self.outputs.bias_field.append(
                         self._gen_fname(basefile, suffix='_bias_%d' % (val + 1)))
             else:
                 # single image segmentation has unnumbered output image
-                outputs['bias_field'].append(
+                self.outputs.bias_field.append(
                     self._gen_fname(basefile, suffix='_bias'))
 
         if self.inputs.probability_maps:
-            outputs['probability_maps'] = []
+            self.outputs.probability_maps = []
             for i in range(nclasses):
-                outputs['probability_maps'].append(
+                self.outputs.probability_maps.append(
                     self._gen_fname(basefile, suffix='_prob_%d' % i))
         return outputs
 
@@ -626,12 +626,12 @@ class MCFLIRT(FSLCommand):
     def _post_run(self):
 
         cwd = os.getcwd()
-        outputs['out_file'] = self._gen_outfilename()
+        self.outputs.out_file = self._gen_outfilename()
 
         if isdefined(self.inputs.stats_imgs) and self.inputs.stats_imgs:
-            outputs['variance_img'] = self._gen_fname(outputs['out_file'] +
+            self.outputs.variance_img = self._gen_fname(self.outputs.out_file +
                                                       '_variance.ext', cwd=cwd)
-            outputs['std_img'] = self._gen_fname(outputs['out_file'] +
+            self.outputs.std_img = self._gen_fname(self.outputs.out_file +
                                                  '_sigma.ext', cwd=cwd)
 
         # The mean image created if -stats option is specified ('meanvol')
@@ -641,24 +641,24 @@ class MCFLIRT(FSLCommand):
         # Note that the same problem holds for the std and variance image.
 
         if isdefined(self.inputs.mean_vol) and self.inputs.mean_vol:
-            outputs['mean_img'] = self._gen_fname(outputs['out_file'] +
+            self.outputs.mean_img = self._gen_fname(self.outputs.out_file +
                                                   '_mean_reg.ext', cwd=cwd)
 
         if isdefined(self.inputs.save_mats) and self.inputs.save_mats:
-            _, filename = os.path.split(outputs['out_file'])
+            _, filename = os.path.split(self.outputs.out_file)
             matpathname = os.path.join(cwd, filename + '.mat')
             _, _, _, timepoints = load(self.inputs.in_file).shape
-            outputs['mat_file'] = []
+            self.outputs.mat_file = []
             for t in range(timepoints):
-                outputs['mat_file'].append(os.path.join(matpathname,
+                self.outputs.mat_file.append(os.path.join(matpathname,
                                                         'MAT_%04d' % t))
         if isdefined(self.inputs.save_plots) and self.inputs.save_plots:
             # Note - if e.g. out_file has .nii.gz, you get .nii.gz.par,
             # which is what mcflirt does!
-            outputs['par_file'] = outputs['out_file'] + '.par'
+            self.outputs.par_file = self.outputs.out_file + '.par'
         if isdefined(self.inputs.save_rms) and self.inputs.save_rms:
-            outfile = outputs['out_file']
-            outputs['rms_files'] = [outfile + '_abs.rms', outfile + '_rel.rms']
+            outfile = self.outputs.out_file
+            self.outputs.rms_files = [outfile + '_abs.rms', outfile + '_rel.rms']
         return outputs
 
     def _gen_filename(self, name):
@@ -961,10 +961,10 @@ class ApplyWarp(FSLCommand):
     def _post_run(self):
 
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+            self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_warp')
         else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+            self.outputs.out_file = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1019,12 +1019,11 @@ class SliceTimer(FSLCommand):
     output_spec = SliceTimerOutputSpec
 
     def _post_run(self):
-
         out_file = self.inputs.out_file
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                        suffix='_st')
-        outputs['slice_time_corrected_file'] = os.path.abspath(out_file)
+        self.outputs.slice_time_corrected_file = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1103,7 +1102,7 @@ class SUSAN(FSLCommand):
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file,
                                        suffix='_smooth')
-        outputs['smoothed_file'] = os.path.abspath(out_file)
+        self.outputs.smoothed_file = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1416,7 +1415,7 @@ class PRELUDE(FSLCommand):
             elif isdefined(self.inputs.complex_phase_file):
                 out_file = self._gen_fname(self.inputs.complex_phase_file,
                                            suffix='_phase_unwrapped')
-        outputs['unwrapped_phase_file'] = os.path.abspath(out_file)
+        self.outputs.unwrapped_phase_file = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1512,12 +1511,12 @@ class FIRST(FSLCommand):
                           'L_Puta', 'R_Puta',
                           'L_Thal', 'R_Thal',
                           'BrStem']
-        outputs['original_segmentations'] = \
+        self.outputs.original_segmentations = \
             self._gen_fname('original_segmentations')
-        outputs['segmentation_file'] = self._gen_fname('segmentation_file')
-        outputs['vtk_surfaces'] = self._gen_mesh_names('vtk_surfaces',
+        self.outputs.segmentation_file = self._gen_fname('segmentation_file')
+        self.outputs.vtk_surfaces = self._gen_mesh_names('vtk_surfaces',
                                                        structures)
-        outputs['bvars'] = self._gen_mesh_names('bvars', structures)
+        self.outputs.bvars = self._gen_mesh_names('bvars', structures)
         return outputs
 
     def _gen_fname(self, name):

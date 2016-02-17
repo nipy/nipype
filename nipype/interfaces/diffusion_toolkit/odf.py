@@ -87,7 +87,7 @@ class HARDIMat(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+        self.outputs.out_file = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -143,12 +143,12 @@ class ODFRecon(CommandLine):
         output_type = self.inputs.output_type
 
         outputs = self.output_spec().get()
-        outputs['B0'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_b0.' + output_type))
-        outputs['DWI'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_dwi.' + output_type))
-        outputs['max'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_max.' + output_type))
-        outputs['ODF'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_odf.' + output_type))
+        self.outputs.B0 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_b0.' + output_type))
+        self.outputs.DWI = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_dwi.' + output_type))
+        self.outputs.max = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_max.' + output_type))
+        self.outputs.ODF = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_odf.' + output_type))
         if isdefined(self.inputs.output_entropy):
-            outputs['entropy'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_entropy.' + output_type))
+            self.outputs.entropy = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_entropy.' + output_type))
 
         return outputs
 
@@ -231,5 +231,5 @@ class ODFTracker(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['track_file'] = os.path.abspath(self.inputs.out_file)
+        self.outputs.track_file = os.path.abspath(self.inputs.out_file)
         return outputs

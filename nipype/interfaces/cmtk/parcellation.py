@@ -584,21 +584,21 @@ class Parcellate(BaseInterface):
     def _list_outputs(self):
         outputs = self._outputs().get()
         if isdefined(self.inputs.out_roi_file):
-            outputs['roi_file'] = op.abspath(self.inputs.out_roi_file)
+            self.outputs.roi_file = op.abspath(self.inputs.out_roi_file)
         else:
-            outputs['roi_file'] = op.abspath(
+            self.outputs.roi_file = op.abspath(
                 self._gen_outfilename('nii.gz', 'ROI'))
         if self.inputs.dilation is True:
-            outputs['roiv_file'] = op.abspath(self._gen_outfilename(
+            self.outputs.roiv_file = op.abspath(self._gen_outfilename(
                 'nii.gz', 'ROIv'))
-        outputs['white_matter_mask_file'] = op.abspath('fsmask_1mm.nii.gz')
-        outputs['cc_unknown_file'] = op.abspath('cc_unknown.nii.gz')
-        outputs['ribbon_file'] = op.abspath('ribbon.nii.gz')
-        outputs['aseg_file'] = op.abspath('aseg.nii.gz')
-        outputs['roi_file_in_structural_space'] = op.abspath(
+        self.outputs.white_matter_mask_file = op.abspath('fsmask_1mm.nii.gz')
+        self.outputs.cc_unknown_file = op.abspath('cc_unknown.nii.gz')
+        self.outputs.ribbon_file = op.abspath('ribbon.nii.gz')
+        self.outputs.aseg_file = op.abspath('aseg.nii.gz')
+        self.outputs.roi_file_in_structural_space = op.abspath(
             'ROI_HR_th.nii.gz')
         if self.inputs.dilation is True:
-            outputs['dilated_roi_file_in_structural_space'] = op.abspath(
+            self.outputs.dilated_roi_file_in_structural_space = op.abspath(
                 'ROIv_HR_th.nii.gz')
         return outputs
 

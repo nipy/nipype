@@ -111,7 +111,7 @@ class DTI(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self._gen_outfilename())
+        self.outputs.out_file = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -180,7 +180,7 @@ class TensorMode(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self._gen_outfilename())
+        self.outputs.out_file = op.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):

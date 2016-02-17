@@ -250,5 +250,5 @@ class Tractography(MRTrix3Base):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
         return outputs

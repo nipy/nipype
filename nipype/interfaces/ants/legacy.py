@@ -102,20 +102,20 @@ class antsIntroduction(ANTSCommand):
         # When transform is set as 'RI'/'RA', wrap fields should not be expected
         # The default transformation is GR, which outputs the wrap fields
         if not isdefined(transmodel) or (isdefined(transmodel) and transmodel not in ['RI', 'RA']):
-            outputs['warp_field'] = os.path.join(os.getcwd(),
+            self.outputs.warp_field = os.path.join(os.getcwd(),
                                                  self.inputs.out_prefix +
                                                  'Warp.nii.gz')
-            outputs['inverse_warp_field'] = os.path.join(os.getcwd(),
+            self.outputs.inverse_warp_field = os.path.join(os.getcwd(),
                                                          self.inputs.out_prefix +
                                                          'InverseWarp.nii.gz')
 
-        outputs['affine_transformation'] = os.path.join(os.getcwd(),
+        self.outputs.affine_transformation = os.path.join(os.getcwd(),
                                                         self.inputs.out_prefix +
                                                         'Affine.txt')
-        outputs['input_file'] = os.path.join(os.getcwd(),
+        self.outputs.input_file = os.path.join(os.getcwd(),
                                              self.inputs.out_prefix +
                                              'repaired.nii.gz')
-        outputs['output_file'] = os.path.join(os.getcwd(),
+        self.outputs.output_file = os.path.join(os.getcwd(),
                                               self.inputs.out_prefix +
                                               'deformed.nii.gz')
 
@@ -229,7 +229,7 @@ class buildtemplateparallel(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['template_files'] = []
+        self.outputs.template_files = []
         for i in range(len(glob(os.path.realpath('*iteration*')))):
             temp = os.path.realpath('%s_iteration_%d/%stemplate.nii.gz' %
                                     (self.inputs.transformation_model,
@@ -247,15 +247,15 @@ class buildtemplateparallel(ANTSCommand):
                       self.inputs.out_prefix,
                       i))
 
-            outputs['template_files'].append(os.path.realpath(file_))
-            outputs['final_template_file'] = \
+            self.outputs.template_files.append(os.path.realpath(file_))
+            self.outputs.final_template_file = \
                 os.path.realpath('%stemplate.nii.gz' %
                                  self.inputs.out_prefix)
-        outputs['subject_outfiles'] = []
+        self.outputs.subject_outfiles = []
         for filename in self.inputs.in_files:
             _, base, _ = split_filename(filename)
             temp = glob(os.path.realpath('%s%s*' % (self.inputs.out_prefix,
                                                     base)))
             for file_ in temp:
-                outputs['subject_outfiles'].append(file_)
+                self.outputs.subject_outfiles.append(file_)
         return outputs

@@ -58,7 +58,7 @@ class Image2Voxel(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['voxel_order'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.voxel_order = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -116,7 +116,7 @@ class FSL2Scheme(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['scheme'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.scheme = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -172,7 +172,7 @@ class VtkStreamlines(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['vtk'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.vtk = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -300,8 +300,8 @@ class ProcStreamlines(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['proc'] = os.path.abspath(self._gen_outfilename())
-        outputs['outputroot_files'] = self.outputroot_files
+        self.outputs.proc = os.path.abspath(self._gen_outfilename())
+        self.outputs.outputroot_files = self.outputroot_files
         return outputs
 
     def _gen_outfilename(self):
@@ -353,7 +353,7 @@ class TractShredder(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['shredded'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.shredded = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -393,9 +393,9 @@ class DT2NIfTI(CommandLine):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         output_root = self._gen_outputroot()
-        outputs["dt"] = os.path.abspath(output_root + "dt.nii")
-        outputs["exitcode"] = os.path.abspath(output_root + "exitcode.nii")
-        outputs["lns0"] = os.path.abspath(output_root + "lns0.nii")
+        self.outputs.dt = os.path.abspath(output_root + "dt.nii")
+        self.outputs.exitcode = os.path.abspath(output_root + "exitcode.nii")
+        self.outputs.lns0 = os.path.abspath(output_root + "lns0.nii")
         return outputs
 
     def _gen_outfilename(self):
@@ -475,7 +475,7 @@ class NIfTIDT2Camino(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = self._gen_filename('out_file')
+        self.outputs.out_file = self._gen_filename('out_file')
         return outputs
 
     def _gen_filename(self, name):
@@ -629,7 +629,7 @@ class AnalyzeHeader(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['header'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.header = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):
@@ -683,7 +683,7 @@ class Shredder(StdOutCommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['shredded_file'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.shredded_file = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_outfilename(self):

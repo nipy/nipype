@@ -96,7 +96,7 @@ class PrepareFieldmap(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_fieldmap'] = self.inputs.out_fieldmap
+        self.outputs.out_fieldmap = self.inputs.out_fieldmap
         return outputs
 
     def _run_interface(self, runtime):
@@ -256,7 +256,7 @@ class TOPUP(FSLCommand):
 
     def _list_outputs(self):
         outputs = super(TOPUP, self)._list_outputs()
-        del outputs['out_base']
+        del self.outputs.out_base
         base_path = None
         if isdefined(self.inputs.out_base):
             base_path, base, _ = split_filename(self.inputs.out_base)
@@ -264,13 +264,13 @@ class TOPUP(FSLCommand):
                 base_path = None
         else:
             base = split_filename(self.inputs.in_file)[1] + '_base'
-        outputs['out_fieldcoef'] = self._gen_fname(base, suffix='_fieldcoef',
+        self.outputs.out_fieldcoef = self._gen_fname(base, suffix='_fieldcoef',
                                                    cwd=base_path)
-        outputs['out_movpar'] = self._gen_fname(base, suffix='_movpar',
+        self.outputs.out_movpar = self._gen_fname(base, suffix='_movpar',
                                                 ext='.txt', cwd=base_path)
 
         if isdefined(self.inputs.encoding_direction):
-            outputs['out_enc_file'] = self._get_encfilename()
+            self.outputs.out_enc_file = self._get_encfilename()
         return outputs
 
     def _get_encfilename(self):
@@ -494,8 +494,8 @@ class Eddy(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_corrected'] = os.path.abspath('%s.nii.gz' % self.inputs.out_base)
-        outputs['out_parameter'] = os.path.abspath('%s.eddy_parameters' % self.inputs.out_base)
+        self.outputs.out_corrected = os.path.abspath('%s.nii.gz' % self.inputs.out_base)
+        self.outputs.out_parameter = os.path.abspath('%s.eddy_parameters' % self.inputs.out_base)
         return outputs
 
 
@@ -547,10 +547,10 @@ class SigLoss(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if ((not isdefined(outputs['out_file'])) and
+        self.outputs.out_file = self.inputs.out_file
+        if ((not isdefined(self.outputs.out_file)) and
                 (isdefined(self.inputs.in_file))):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+            self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_sigloss')
         return outputs
 
@@ -651,33 +651,33 @@ class EpiReg(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.join(os.getcwd(),
+        self.outputs.out_file = os.path.join(os.getcwd(),
                                            self.inputs.out_base + '.nii.gz')
         if not (isdefined(self.inputs.no_fmapreg) and self.inputs.no_fmapreg) and isdefined(self.inputs.fmap):
-            outputs['out_1vol'] = os.path.join(os.getcwd(),
+            self.outputs.out_1vol = os.path.join(os.getcwd(),
                                                self.inputs.out_base + '_1vol.nii.gz')
-            outputs['fmap2str_mat'] = os.path.join(os.getcwd(),
+            self.outputs.fmap2str_mat = os.path.join(os.getcwd(),
                                                    self.inputs.out_base + '_fieldmap2str.mat')
-            outputs['fmap2epi_mat'] = os.path.join(os.getcwd(),
+            self.outputs.fmap2epi_mat = os.path.join(os.getcwd(),
                                                    self.inputs.out_base + '_fieldmaprads2epi.mat')
-            outputs['fmap_epi'] = os.path.join(os.getcwd(),
+            self.outputs.fmap_epi = os.path.join(os.getcwd(),
                                                self.inputs.out_base + '_fieldmaprads2epi.nii.gz')
-            outputs['fmap_str'] = os.path.join(os.getcwd(),
+            self.outputs.fmap_str = os.path.join(os.getcwd(),
                                                self.inputs.out_base + '_fieldmaprads2str.nii.gz')
-            outputs['fmapmag_str'] = os.path.join(os.getcwd(),
+            self.outputs.fmapmag_str = os.path.join(os.getcwd(),
                                                   self.inputs.out_base + '_fieldmap2str.nii.gz')
-            outputs['shiftmap'] = os.path.join(os.getcwd(),
+            self.outputs.shiftmap = os.path.join(os.getcwd(),
                                                self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
-            outputs['fullwarp'] = os.path.join(os.getcwd(),
+            self.outputs.fullwarp = os.path.join(os.getcwd(),
                                                self.inputs.out_base + '_warp.nii.gz')
-            outputs['epi2str_inv'] = os.path.join(os.getcwd(),
+            self.outputs.epi2str_inv = os.path.join(os.getcwd(),
                                                   self.inputs.out_base + '_inv.mat')
 
-        outputs['epi2str_mat'] = os.path.join(os.getcwd(),
+        self.outputs.epi2str_mat = os.path.join(os.getcwd(),
                                               self.inputs.out_base + '.mat')
-        outputs['wmedge'] = os.path.join(os.getcwd(),
+        self.outputs.wmedge = os.path.join(os.getcwd(),
                                          self.inputs.out_base + '_fast_wmedge.nii.gz')
-        outputs['wmseg'] = os.path.join(os.getcwd(),
+        self.outputs.wmseg = os.path.join(os.getcwd(),
                                         self.inputs.out_base + '_fast_wmseg.nii.gz')
 
         return outputs
@@ -791,24 +791,24 @@ class EPIDeWarp(FSLCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.exfdw):
-            outputs['exfdw'] = self._gen_filename('exfdw')
+            self.outputs.exfdw = self._gen_filename('exfdw')
         else:
-            outputs['exfdw'] = self.inputs.exfdw
+            self.outputs.exfdw = self.inputs.exfdw
         if isdefined(self.inputs.epi_file):
             if isdefined(self.inputs.epidw):
-                outputs['unwarped_file'] = self.inputs.epidw
+                self.outputs.unwarped_file = self.inputs.epidw
             else:
-                outputs['unwarped_file'] = self._gen_filename('epidw')
+                self.outputs.unwarped_file = self._gen_filename('epidw')
         if not isdefined(self.inputs.vsm):
-            outputs['vsm_file'] = self._gen_filename('vsm')
+            self.outputs.vsm_file = self._gen_filename('vsm')
         else:
-            outputs['vsm_file'] = self._gen_fname(self.inputs.vsm)
+            self.outputs.vsm_file = self._gen_fname(self.inputs.vsm)
         if not isdefined(self.inputs.tmpdir):
             outputs[
                 'exf_mask'] = self._gen_fname(cwd=self._gen_filename('tmpdir'),
                                               basename='maskexf')
         else:
-            outputs['exf_mask'] = self._gen_fname(cwd=self.inputs.tmpdir,
+            self.outputs.exf_mask = self._gen_fname(cwd=self.inputs.tmpdir,
                                                   basename='maskexf')
         return outputs
 

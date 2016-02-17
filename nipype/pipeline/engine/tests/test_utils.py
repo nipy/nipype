@@ -150,7 +150,7 @@ class TestInterface(nib.BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output1'] = [1]
+        self.outputs.output1 = [1]
         return outputs
 
 

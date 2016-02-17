@@ -209,7 +209,7 @@ class Refit(AFNICommandBase):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["out_file"] = os.path.abspath(self.inputs.in_file)
+        self.outputs.out_file = os.path.abspath(self.inputs.in_file)
         return outputs
 
 
@@ -1164,10 +1164,10 @@ class Allineate(AFNICommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename(self.inputs.in_file,
+            self.outputs.out_file = self._gen_filename(self.inputs.in_file,
                                                      suffix=self.inputs.suffix)
         else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+            self.outputs.out_file = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -2195,9 +2195,9 @@ class Hist(AFNICommandBase):
 
     def _list_outputs(self):
         outputs = super(Hist, self)._list_outputs()
-        outputs['out_file'] += '.niml.hist'
+        self.outputs.out_file += '.niml.hist'
         if not self.inputs.showhist:
-            outputs['out_show'] = Undefined
+            self.outputs.out_show = Undefined
         return outputs
 
 
@@ -2394,18 +2394,18 @@ class FWHMx(AFNICommandBase):
             if '.gz' in ext:
                 _, ext2 = op.splitext(fname)
                 ext = ext2 + ext
-            outputs['out_detrend'] += ext
+            self.outputs.out_detrend += ext
         else:
-            outputs['out_detrend'] = Undefined
+            self.outputs.out_detrend = Undefined
 
-        sout = np.loadtxt(outputs['out_file'])  #pylint: disable=E1101
+        sout = np.loadtxt(self.outputs.out_file)  #pylint: disable=E1101
         if self._acf:
-            outputs['acf_param'] = tuple(sout[1])
+            self.outputs.acf_param = tuple(sout[1])
             sout = tuple(sout[0])
 
-            outputs['out_acf'] = op.abspath('3dFWHMx.1D')
+            self.outputs.out_acf = op.abspath('3dFWHMx.1D')
             if isinstance(self.inputs.acf, string_types):
-                outputs['out_acf'] = op.abspath(self.inputs.acf)
+                self.outputs.out_acf = op.abspath(self.inputs.acf)
 
-        outputs['fwhm'] = tuple(sout)
+        self.outputs.fwhm = tuple(sout)
         return outputs

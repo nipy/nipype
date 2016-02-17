@@ -155,7 +155,7 @@ class Level1Design(SPMCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         spm = os.path.join(os.getcwd(), 'SPM.mat')
-        outputs['spm_mat_file'] = spm
+        self.outputs.spm_mat_file = spm
         return outputs
 
 
@@ -222,25 +222,25 @@ class EstimateModel(SPMCommand):
             mask = os.path.join(pth, 'mask.nii')
         else:
             mask = os.path.join(pth, 'mask.img')
-        outputs['mask_image'] = mask
+        self.outputs.mask_image = mask
         spm = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
         betas = []
         for vbeta in spm['SPM'][0, 0].Vbeta[0]:
             betas.append(str(os.path.join(pth, vbeta.fname[0])))
         if betas:
-            outputs['beta_images'] = betas
+            self.outputs.beta_images = betas
         if spm12:
             resms = os.path.join(pth, 'ResMS.nii')
         else:
             resms = os.path.join(pth, 'ResMS.img')
-        outputs['residual_image'] = resms
+        self.outputs.residual_image = resms
         if spm12:
             rpv = os.path.join(pth, 'RPV.nii')
         else:
             rpv = os.path.join(pth, 'RPV.img')
-        outputs['RPVimage'] = rpv
+        self.outputs.RPVimage = rpv
         spm = os.path.join(pth, 'SPM.mat')
-        outputs['spm_mat_file'] = spm
+        self.outputs.spm_mat_file = spm
         return outputs
 
 
@@ -394,22 +394,22 @@ class EstimateContrast(SPMCommand):
             con_images.append(str(os.path.join(pth, con.Vcon[0, 0].fname[0])))
             spmT_images.append(str(os.path.join(pth, con.Vspm[0, 0].fname[0])))
         if con_images:
-            outputs['con_images'] = con_images
-            outputs['spmT_images'] = spmT_images
+            self.outputs.con_images = con_images
+            self.outputs.spmT_images = spmT_images
         spm12 = '12' in self.version.split('.')[0]
         if spm12:
             ess = glob(os.path.join(pth, 'ess*.nii'))
         else:
             ess = glob(os.path.join(pth, 'ess*.img'))
         if len(ess) > 0:
-            outputs['ess_images'] = sorted(ess)
+            self.outputs.ess_images = sorted(ess)
         if spm12:
             spmf = glob(os.path.join(pth, 'spmF*.nii'))
         else:
             spmf = glob(os.path.join(pth, 'spmF*.img'))
         if len(spmf) > 0:
-            outputs['spmF_images'] = sorted(spmf)
-        outputs['spm_mat_file'] = self.inputs.spm_mat_file
+            self.outputs.spmF_images = sorted(spmf)
+        self.outputs.spm_mat_file = self.inputs.spm_mat_file
         return outputs
 
 
@@ -592,8 +592,8 @@ fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['thresholded_map'] = self._gen_thresholded_map_filename()
-        outputs['pre_topo_fdr_map'] = self._gen_pre_topo_map_filename()
+        self.outputs.thresholded_map = self._gen_thresholded_map_filename()
+        self.outputs.pre_topo_fdr_map = self._gen_pre_topo_map_filename()
         return outputs
 
 
@@ -781,7 +781,7 @@ class FactorialDesign(SPMCommand):
     def _list_outputs(self):
         outputs = self._outputs().get()
         spm = os.path.join(os.getcwd(), 'SPM.mat')
-        outputs['spm_mat_file'] = spm
+        self.outputs.spm_mat_file = spm
         return outputs
 
 

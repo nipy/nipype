@@ -93,7 +93,7 @@ ants_Affine.txt'
     def _list_outputs(self):
         outputs = self._outputs().get()
         _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
-        outputs['output_image'] = os.path.join(os.getcwd(),
+        self.outputs.output_image = os.path.join(os.getcwd(),
                                                ''.join((name,
                                                         self.inputs.out_postfix,
                                                         ext)))
@@ -202,9 +202,9 @@ ants_Affine.txt'
     def _list_outputs(self):
         outputs = self._outputs().get()
         if isdefined(self.inputs.output_image):
-            outputs['output_image'] = os.path.abspath(self.inputs.output_image)
+            self.outputs.output_image = os.path.abspath(self.inputs.output_image)
         else:
-            outputs['output_image'] = os.path.abspath(
+            self.outputs.output_image = os.path.abspath(
                 self._gen_filename('output_image'))
         return outputs
 
@@ -351,7 +351,7 @@ class ApplyTransforms(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_image'] = os.path.abspath(
+        self.outputs.output_image = os.path.abspath(
             self._gen_filename('output_image'))
         return outputs
 

@@ -484,19 +484,19 @@ class NetworkXMetrics(BaseInterface):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["k_core"] = op.abspath(self._gen_outfilename(self.inputs.out_k_core, 'pck'))
-        outputs["k_shell"] = op.abspath(self._gen_outfilename(self.inputs.out_k_shell, 'pck'))
-        outputs["k_crust"] = op.abspath(self._gen_outfilename(self.inputs.out_k_crust, 'pck'))
-        outputs["gpickled_network_files"] = gpickled
-        outputs["k_networks"] = kntwks
-        outputs["node_measure_networks"] = nodentwks
-        outputs["edge_measure_networks"] = edgentwks
-        outputs["matlab_dict_measures"] = dicts
-        outputs["global_measures_matlab"] = op.abspath(self._gen_outfilename('globalmetrics', 'mat'))
-        outputs["node_measures_matlab"] = op.abspath(self._gen_outfilename('nodemetrics', 'mat'))
-        outputs["edge_measures_matlab"] = op.abspath(self._gen_outfilename('edgemetrics', 'mat'))
-        outputs["matlab_matrix_files"] = [outputs["global_measures_matlab"], outputs["node_measures_matlab"], outputs["edge_measures_matlab"]]
-        outputs["pickled_extra_measures"] = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
+        self.outputs.k_core = op.abspath(self._gen_outfilename(self.inputs.out_k_core, 'pck'))
+        self.outputs.k_shell = op.abspath(self._gen_outfilename(self.inputs.out_k_shell, 'pck'))
+        self.outputs.k_crust = op.abspath(self._gen_outfilename(self.inputs.out_k_crust, 'pck'))
+        self.outputs.gpickled_network_files = gpickled
+        self.outputs.k_networks = kntwks
+        self.outputs.node_measure_networks = nodentwks
+        self.outputs.edge_measure_networks = edgentwks
+        self.outputs.matlab_dict_measures = dicts
+        self.outputs.global_measures_matlab = op.abspath(self._gen_outfilename('globalmetrics', 'mat'))
+        self.outputs.node_measures_matlab = op.abspath(self._gen_outfilename('nodemetrics', 'mat'))
+        self.outputs.edge_measures_matlab = op.abspath(self._gen_outfilename('edgemetrics', 'mat'))
+        self.outputs.matlab_matrix_files = [self.outputs.global_measures_matlab, self.outputs.node_measures_matlab, self.outputs.edge_measures_matlab]
+        self.outputs.pickled_extra_measures = op.abspath(self._gen_outfilename(self.inputs.out_pickled_extra_measures, 'pck'))
         return outputs
 
     def _gen_outfilename(self, name, ext):
@@ -550,16 +550,16 @@ class AverageNetworks(BaseInterface):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_gpickled_groupavg):
-            outputs["gpickled_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'pck'))
+            self.outputs.gpickled_groupavg = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'pck'))
         else:
-            outputs["gpickled_groupavg"] = op.abspath(self.inputs.out_gpickled_groupavg)
+            self.outputs.gpickled_groupavg = op.abspath(self.inputs.out_gpickled_groupavg)
 
         if not isdefined(self.inputs.out_gexf_groupavg):
-            outputs["gexf_groupavg"] = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'gexf'))
+            self.outputs.gexf_groupavg = op.abspath(self._gen_outfilename(self.inputs.group_id + '_average', 'gexf'))
         else:
-            outputs["gexf_groupavg"] = op.abspath(self.inputs.out_gexf_groupavg)
+            self.outputs.gexf_groupavg = op.abspath(self.inputs.out_gexf_groupavg)
 
-        outputs["matlab_groupavgs"] = matlab_network_list
+        self.outputs.matlab_groupavgs = matlab_network_list
         return outputs
 
     def _gen_outfilename(self, name, ext):

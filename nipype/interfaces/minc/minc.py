@@ -1702,16 +1702,16 @@ class Blur(StdOutCommandLine):
 
         output_file_base = self._gen_output_base()
 
-        outputs['output_file'] = output_file_base + '_blur.mnc'
+        self.outputs.output_file = output_file_base + '_blur.mnc'
 
         if isdefined(self.inputs.gradient):
-            outputs['gradient_dxyz'] = output_file_base + '_dxyz.mnc'
+            self.outputs.gradient_dxyz = output_file_base + '_dxyz.mnc'
 
         if isdefined(self.inputs.partial):
-            outputs['partial_dx'] = output_file_base + '_dx.mnc'
-            outputs['partial_dy'] = output_file_base + '_dy.mnc'
-            outputs['partial_dz'] = output_file_base + '_dz.mnc'
-            outputs['partial_dxyz'] = output_file_base + '_dxyz.mnc'
+            self.outputs.partial_dx = output_file_base + '_dx.mnc'
+            self.outputs.partial_dy = output_file_base + '_dy.mnc'
+            self.outputs.partial_dz = output_file_base + '_dz.mnc'
+            self.outputs.partial_dxyz = output_file_base + '_dxyz.mnc'
 
         return outputs
 
@@ -2974,8 +2974,8 @@ class Gennlxfm(CommandLine):
 
     def _list_outputs(self):
         outputs = super(Gennlxfm, self)._list_outputs()
-        outputs['output_grid'] = re.sub(
-            '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
+        self.outputs.output_grid = re.sub(
+            '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_file)
         return outputs
 
 
@@ -3039,13 +3039,13 @@ class XfmConcat(CommandLine):
     def _list_outputs(self):
         outputs = super(XfmConcat, self)._list_outputs()
 
-        if os.path.exists(outputs['output_file']):
-            if 'grid' in open(outputs['output_file'], 'r').read():
-                outputs['output_grids'] = glob.glob(
+        if os.path.exists(self.outputs.output_file):
+            if 'grid' in open(self.outputs.output_file, 'r').read():
+                self.outputs.output_grids = glob.glob(
                     re.sub(
                         '.(nlxfm|xfm)$',
                         '_grid_*.mnc',
-                        outputs['output_file']))
+                        self.outputs.output_file))
 
         return outputs
 
@@ -3234,13 +3234,13 @@ class NlpFit(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['output_xfm'] = os.path.abspath(
+        self.outputs.output_xfm = os.path.abspath(
             self._gen_filename('output_xfm'))
 
-        assert os.path.exists(outputs['output_xfm'])
-        if 'grid' in open(outputs['output_xfm'], 'r').read():
-            outputs['output_grid'] = re.sub(
-                '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_xfm'])
+        assert os.path.exists(self.outputs.output_xfm)
+        if 'grid' in open(self.outputs.output_xfm, 'r').read():
+            self.outputs.output_grid = re.sub(
+                '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_xfm)
 
         return outputs
 
@@ -3339,12 +3339,12 @@ class XfmAvg(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.output_file = os.path.abspath(self._gen_outfilename())
 
-        assert os.path.exists(outputs['output_file'])
-        if 'grid' in open(outputs['output_file'], 'r').read():
-            outputs['output_grid'] = re.sub(
-                '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
+        assert os.path.exists(self.outputs.output_file)
+        if 'grid' in open(self.outputs.output_file, 'r').read():
+            self.outputs.output_grid = re.sub(
+                '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_file)
 
         return outputs
 
@@ -3413,12 +3413,12 @@ class XfmInvert(CommandLine):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['output_file'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.output_file = os.path.abspath(self._gen_outfilename())
 
-        assert os.path.exists(outputs['output_file'])
-        if 'grid' in open(outputs['output_file'], 'r').read():
-            outputs['output_grid'] = re.sub(
-                '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['output_file'])
+        assert os.path.exists(self.outputs.output_file)
+        if 'grid' in open(self.outputs.output_file, 'r').read():
+            self.outputs.output_grid = re.sub(
+                '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.output_file)
 
         return outputs
 
@@ -3677,9 +3677,9 @@ class VolSymm(CommandLine):
         outputs = super(VolSymm, self)._list_outputs()
 
         # Have to manually check for the grid files.
-        if os.path.exists(outputs['trans_file']):
-            if 'grid' in open(outputs['trans_file'], 'r').read():
-                outputs['output_grid'] = re.sub(
-                    '.(nlxfm|xfm)$', '_grid_0.mnc', outputs['trans_file'])
+        if os.path.exists(self.outputs.trans_file):
+            if 'grid' in open(self.outputs.trans_file, 'r').read():
+                self.outputs.output_grid = re.sub(
+                    '.(nlxfm|xfm)$', '_grid_0.mnc', self.outputs.trans_file)
 
         return outputs

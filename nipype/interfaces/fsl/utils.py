@@ -122,13 +122,13 @@ class ImageMeants(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_ts',
                                                   ext='.txt',
                                                   change_ext=True)
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
+        self.outputs.out_file = os.path.abspath(self.outputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -338,11 +338,11 @@ class ExtractROI(FSLCommand):
 
         """
         outputs = self._outputs().get()
-        outputs['roi_file'] = self.inputs.roi_file
-        if not isdefined(outputs['roi_file']):
-            outputs['roi_file'] = self._gen_fname(self.inputs.in_file,
+        self.outputs.roi_file = self.inputs.roi_file
+        if not isdefined(self.outputs.roi_file):
+            self.outputs.roi_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_roi')
-        outputs['roi_file'] = os.path.abspath(outputs['roi_file'])
+        self.outputs.roi_file = os.path.abspath(self.outputs.roi_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -393,7 +393,7 @@ class Split(FSLCommand):
         outbase = 'vol*'
         if isdefined(self.inputs.out_base_name):
             outbase = '%s*' % self.inputs.out_base_name
-        outputs['out_files'] = sorted(glob(os.path.join(os.getcwd(),
+        self.outputs.out_files = sorted(glob(os.path.join(os.getcwd(),
                                                         outbase + ext)))
         return outputs
 
@@ -450,11 +450,11 @@ class ImageMaths(FSLCommand):
         if isdefined(self.inputs.suffix):
             suffix = self.inputs.suffix
         outputs = self._outputs().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix=suffix)
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
+        self.outputs.out_file = os.path.abspath(self.outputs.out_file)
         return outputs
 
 
@@ -512,11 +512,11 @@ class FilterRegressor(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = self._gen_fname(
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = self._gen_fname(
                 self.inputs.in_file, suffix='_regfilt')
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
+        self.outputs.out_file = os.path.abspath(self.outputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -767,7 +767,7 @@ class Overlay(FSLCommand):
             else:
                 stem = split_filename(self.inputs.stat_image)[1]
             out_file = self._gen_fname(stem, suffix='_overlay')
-        outputs['out_file'] = os.path.abspath(out_file)
+        self.outputs.out_file = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -869,7 +869,7 @@ class Slicer(FSLCommand):
         out_file = self.inputs.out_file
         if not isdefined(out_file):
             out_file = self._gen_fname(self.inputs.in_file, ext='.png')
-        outputs['out_file'] = os.path.abspath(out_file)
+        self.outputs.out_file = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -972,7 +972,7 @@ class PlotTimeSeries(FSLCommand):
             else:
                 infile = self.inputs.in_file
             out_file = self._gen_fname(infile, ext='.png')
-        outputs['out_file'] = os.path.abspath(out_file)
+        self.outputs.out_file = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1083,7 +1083,7 @@ class PlotMotionParams(FSLCommand):
                 self.inputs.plot_type[:3]]
             out_file = fname_presuffix(
                 infile, suffix="_%s.png" % plttype, use_ext=False)
-        outputs['out_file'] = os.path.abspath(out_file)
+        self.outputs.out_file = os.path.abspath(out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1160,7 +1160,7 @@ class ConvertXFM(FSLCommand):
                                               suffix="_fix.mat",
                                               newpath=os.getcwd(),
                                               use_ext=False)
-        outputs["out_file"] = os.path.abspath(outfile)
+        self.outputs.out_file = os.path.abspath(outfile)
         return outputs
 
     def _gen_filename(self, name):
@@ -1202,11 +1202,11 @@ class SwapDimensions(FSLCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = self.inputs.out_file
+        self.outputs.out_file = self.inputs.out_file
         if not isdefined(self.inputs.out_file):
-            outputs["out_file"] = self._gen_fname(self.inputs.in_file,
+            self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_newdims')
-        outputs["out_file"] = os.path.abspath(outputs["out_file"])
+        self.outputs.out_file = os.path.abspath(self.outputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -1257,7 +1257,7 @@ class PowerSpectrum(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.out_file = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -1309,10 +1309,10 @@ class SigLoss(FSLCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']) and \
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file) and \
                 isdefined(self.inputs.in_file):
-            outputs['out_file'] = self._gen_fname(self.inputs.in_file,
+            self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_sigloss')
         return outputs
 
@@ -1358,9 +1358,9 @@ class Reorient2Std(FSLCommand):
     def _list_outputs(self):
         outputs = self.output_spec().get()
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = self._gen_filename('out_file')
+            self.outputs.out_file = self._gen_filename('out_file')
         else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
+            self.outputs.out_file = os.path.abspath(self.inputs.out_file)
         return outputs
 
 
@@ -1564,13 +1564,13 @@ class Complex(FSLCommand):
         outputs = self.output_spec().get()
         if self.inputs.complex_cartesian or self.inputs.complex_polar or \
                 self.inputs.complex_split or self.inputs.complex_merge:
-            outputs['complex_out_file'] = self._get_output('complex_out_file')
+            self.outputs.complex_out_file = self._get_output('complex_out_file')
         elif self.inputs.real_cartesian:
-            outputs['real_out_file'] = self._get_output('real_out_file')
-            outputs['imaginary_out_file'] = self._get_output('imaginary_out_file')
+            self.outputs.real_out_file = self._get_output('real_out_file')
+            self.outputs.imaginary_out_file = self._get_output('imaginary_out_file')
         elif self.inputs.real_polar:
-            outputs['magnitude_out_file'] = self._get_output('magnitude_out_file')
-            outputs['phase_out_file'] = self._get_output('phase_out_file')
+            self.outputs.magnitude_out_file = self._get_output('magnitude_out_file')
+            self.outputs.phase_out_file = self._get_output('phase_out_file')
         return outputs
 
 

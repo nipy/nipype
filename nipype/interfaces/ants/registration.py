@@ -204,14 +204,14 @@ class ANTS(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['affine_transform'] = os.path.abspath(
+        self.outputs.affine_transform = os.path.abspath(
             self.inputs.output_transform_prefix + 'Affine.txt')
-        outputs['warp_transform'] = os.path.abspath(
+        self.outputs.warp_transform = os.path.abspath(
             self.inputs.output_transform_prefix + 'Warp.nii.gz')
-        outputs['inverse_warp_transform'] = os.path.abspath(
+        self.outputs.inverse_warp_transform = os.path.abspath(
             self.inputs.output_transform_prefix + 'InverseWarp.nii.gz')
-        # outputs['metaheader'] = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.mhd')
-        # outputs['metaheader_raw'] = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.raw')
+        # self.outputs.metaheader = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.mhd')
+        # self.outputs.metaheader_raw = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.raw')
         return outputs
 
 
@@ -879,10 +879,10 @@ class Registration(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['forward_transforms'] = []
-        outputs['forward_invert_flags'] = []
-        outputs['reverse_transforms'] = []
-        outputs['reverse_invert_flags'] = []
+        self.outputs.forward_transforms = []
+        self.outputs.forward_invert_flags = []
+        self.outputs.reverse_transforms = []
+        self.outputs.reverse_invert_flags = []
 
         # invert_initial_moving_transform should be always defined, even if
         # there's no initial transform
@@ -892,18 +892,18 @@ class Registration(ANTSCommand):
 
         if self.inputs.write_composite_transform:
             filename = self.inputs.output_transform_prefix + 'Composite.h5'
-            outputs['composite_transform'] = os.path.abspath(filename)
+            self.outputs.composite_transform = os.path.abspath(filename)
             filename = self.inputs.output_transform_prefix + \
                 'InverseComposite.h5'
-            outputs['inverse_composite_transform'] = os.path.abspath(filename)
+            self.outputs.inverse_composite_transform = os.path.abspath(filename)
         else:  # If composite transforms are written, then individuals are not written (as of 2014-10-26
             if not self.inputs.collapse_output_transforms:
                 transform_count = 0
                 if isdefined(self.inputs.initial_moving_transform):
-                    outputs['forward_transforms'].append(self.inputs.initial_moving_transform)
-                    outputs['forward_invert_flags'].append(invert_initial_moving_transform)
-                    outputs['reverse_transforms'].insert(0, self.inputs.initial_moving_transform)
-                    outputs['reverse_invert_flags'].insert(0, not invert_initial_moving_transform)  # Prepend
+                    self.outputs.forward_transforms.append(self.inputs.initial_moving_transform)
+                    self.outputs.forward_invert_flags.append(invert_initial_moving_transform)
+                    self.outputs.reverse_transforms.insert(0, self.inputs.initial_moving_transform)
+                    self.outputs.reverse_invert_flags.insert(0, not invert_initial_moving_transform)  # Prepend
                     transform_count += 1
                 elif isdefined(self.inputs.initial_moving_transform_com):
                     forward_filename, forward_inversemode = self._output_filenames(
@@ -915,11 +915,11 @@ class Registration(ANTSCommand):
                         transform_count,
                         'Initial',
                         True)
-                    outputs['forward_transforms'].append(os.path.abspath(forward_filename))
-                    outputs['forward_invert_flags'].append(False)
-                    outputs['reverse_transforms'].insert(0,
+                    self.outputs.forward_transforms.append(os.path.abspath(forward_filename))
+                    self.outputs.forward_invert_flags.append(False)
+                    self.outputs.reverse_transforms.insert(0,
                                                          os.path.abspath(reverse_filename))
-                    outputs['reverse_invert_flags'].insert(0, True)
+                    self.outputs.reverse_invert_flags.insert(0, True)
                     transform_count += 1
 
                 for count in range(len(self.inputs.transforms)):
@@ -929,10 +929,10 @@ class Registration(ANTSCommand):
                     reverse_filename, reverse_inversemode = self._output_filenames(
                         self.inputs.output_transform_prefix, transform_count,
                         self.inputs.transforms[count], True)
-                    outputs['forward_transforms'].append(os.path.abspath(forward_filename))
-                    outputs['forward_invert_flags'].append(forward_inversemode)
-                    outputs['reverse_transforms'].insert(0, os.path.abspath(reverse_filename))
-                    outputs['reverse_invert_flags'].insert(0, reverse_inversemode)
+                    self.outputs.forward_transforms.append(os.path.abspath(forward_filename))
+                    self.outputs.forward_invert_flags.append(forward_inversemode)
+                    self.outputs.reverse_transforms.insert(0, os.path.abspath(reverse_filename))
+                    self.outputs.reverse_invert_flags.insert(0, reverse_inversemode)
                     transform_count += 1
             else:
                 transform_count = 0
@@ -960,18 +960,18 @@ class Registration(ANTSCommand):
                         transform_count,
                         transform,
                         inverse=True)
-                    outputs['forward_transforms'].append(os.path.abspath(forward_filename))
-                    outputs['forward_invert_flags'].append(forward_inversemode)
-                    outputs['reverse_transforms'].append(os.path.abspath(reverse_filename))
-                    outputs['reverse_invert_flags'].append(reverse_inversemode)
+                    self.outputs.forward_transforms.append(os.path.abspath(forward_filename))
+                    self.outputs.forward_invert_flags.append(forward_inversemode)
+                    self.outputs.reverse_transforms.append(os.path.abspath(reverse_filename))
+                    self.outputs.reverse_invert_flags.append(reverse_inversemode)
                     transform_count += 1
 
         out_filename = self._get_outputfilenames(inverse=False)
         inv_out_filename = self._get_outputfilenames(inverse=True)
         if out_filename:
-            outputs['warped_image'] = os.path.abspath(out_filename)
+            self.outputs.warped_image = os.path.abspath(out_filename)
         if inv_out_filename:
-            outputs['inverse_warped_image'] = os.path.abspath(inv_out_filename)
+            self.outputs.inverse_warped_image = os.path.abspath(inv_out_filename)
         if len(self.inputs.save_state):
-            outputs['save_state'] = os.path.abspath(self.inputs.save_state)
+            self.outputs.save_state = os.path.abspath(self.inputs.save_state)
         return outputs

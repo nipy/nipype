@@ -66,7 +66,7 @@ class ConvertScalarImageToRGB(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_image'] = os.path.join(os.getcwd(),
+        self.outputs.output_image = os.path.join(os.getcwd(),
                                                self.inputs.output_image)
         return outputs
 
@@ -151,6 +151,6 @@ class CreateTiledMosaic(ANTSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['output_image'] = os.path.join(os.getcwd(),
+        self.outputs.output_image = os.path.join(os.getcwd(),
                                                self.inputs.output_image)
         return outputs

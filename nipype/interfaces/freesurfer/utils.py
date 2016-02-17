@@ -200,10 +200,10 @@ class SampleToSurface(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self._get_outfilename())
+        self.outputs.out_file = os.path.abspath(self._get_outfilename())
         hitsfile = self.inputs.hits_file
         if isdefined(hitsfile):
-            outputs["hits_file"] = hitsfile
+            self.outputs.hits_file = hitsfile
             if isinstance(hitsfile, bool):
                 hitsfile = self._get_outfilename("hits_file")
         voxfile = self.inputs.vox_file
@@ -214,7 +214,7 @@ class SampleToSurface(FSCommand):
                                           prefix=self.inputs.hemi + ".",
                                           suffix="_vox.txt",
                                           use_ext=False)
-            outputs["vox_file"] = voxfile
+            self.outputs.vox_file = voxfile
         return outputs
 
     def _gen_filename(self, name):
@@ -275,14 +275,14 @@ class SurfaceSmooth(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = self.inputs.out_file
-        if not isdefined(outputs["out_file"]):
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
             in_file = self.inputs.in_file
             if isdefined(self.inputs.fwhm):
                 kernel = self.inputs.fwhm
             else:
                 kernel = self.inputs.smooth_iters
-            outputs["out_file"] = fname_presuffix(in_file,
+            self.outputs.out_file = fname_presuffix(in_file,
                                                   suffix="_smooth%d" % kernel,
                                                   newpath=os.getcwd())
         return outputs
@@ -353,8 +353,8 @@ class SurfaceTransform(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = self.inputs.out_file
-        if not isdefined(outputs["out_file"]):
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
             if isdefined(self.inputs.source_file):
                 source = self.inputs.source_file
             else:
@@ -373,12 +373,12 @@ class SurfaceTransform(FSCommand):
             if isdefined(self.inputs.target_type):
                 ext = "." + filemap[self.inputs.target_type]
                 use_ext = False
-            outputs["out_file"] = fname_presuffix(source,
+            self.outputs.out_file = fname_presuffix(source,
                                                   suffix=".%s%s" % (self.inputs.target_subject, ext),
                                                   newpath=os.getcwd(),
                                                   use_ext=use_ext)
         else:
-            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
+            self.outputs.out_file = os.path.abspath(self.inputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -487,14 +487,14 @@ class ApplyMask(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = self.inputs.out_file
-        if not isdefined(outputs["out_file"]):
-            outputs["out_file"] = fname_presuffix(self.inputs.in_file,
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = fname_presuffix(self.inputs.in_file,
                                                   suffix="_masked",
                                                   newpath=os.getcwd(),
                                                   use_ext=True)
         else:
-            outputs["out_file"] = os.path.abspath(outputs["out_file"])
+            self.outputs.out_file = os.path.abspath(self.outputs.out_file)
         return outputs
 
     def _gen_filename(self, name):
@@ -705,7 +705,7 @@ class SurfaceSnapshots(FSCommand):
         if self.inputs.six_images:
             snapshots.extend(["%s-pos.tif", "%s-ant.tif"])
         snapshots = [self._gen_fname(f % stem, suffix="") for f in snapshots]
-        outputs["snapshots"] = snapshots
+        self.outputs.snapshots = snapshots
         return outputs
 
     def _gen_filename(self, name):
@@ -847,7 +847,7 @@ class MRIsConvert(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs["converted"] = os.path.abspath(self._gen_outfilename())
+        self.outputs.converted = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -913,7 +913,7 @@ class MRITessellate(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['surface'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.surface = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -983,7 +983,7 @@ class MRIPretess(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+        self.outputs.out_file = os.path.abspath(self._gen_outfilename())
         return outputs
 
     def _gen_filename(self, name):
@@ -1040,7 +1040,7 @@ class MRIMarchingCubes(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['surface'] = self._gen_outfilename()
+        self.outputs.surface = self._gen_outfilename()
         return outputs
 
     def _gen_filename(self, name):
@@ -1111,7 +1111,7 @@ class SmoothTessellation(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['surface'] = self._gen_outfilename()
+        self.outputs.surface = self._gen_outfilename()
         return outputs
 
     def _gen_filename(self, name):
@@ -1168,7 +1168,7 @@ class MakeAverageSubject(FSCommand):
 
     def _list_outputs(self):
         outputs = self.output_spec().get()
-        outputs['average_subject_name'] = self.inputs.out_name
+        self.outputs.average_subject_name = self.inputs.out_name
         return outputs
 
 
@@ -1278,9 +1278,9 @@ class Tkregister2(FSCommand):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs['reg_file'] = os.path.abspath(self.inputs.reg_file)
+        self.outputs.reg_file = os.path.abspath(self.inputs.reg_file)
         if isdefined(self.inputs.fsl_out):
-            outputs['fsl_file'] = os.path.abspath(self.inputs.fsl_out)
+            self.outputs.fsl_file = os.path.abspath(self.inputs.fsl_out)
         return outputs
 
     def _gen_outfilename(self):

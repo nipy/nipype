@@ -194,17 +194,17 @@ class FitGLM(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["beta"] = self._beta_file
-        outputs["nvbeta"] = self._nvbeta
-        outputs["s2"] = self._s2_file
-        outputs["dof"] = self._dof
-        outputs["constants"] = self._constants
-        outputs["axis"] = self._axis
-        outputs["reg_names"] = self._reg_names
+        self.outputs.beta = self._beta_file
+        self.outputs.nvbeta = self._nvbeta
+        self.outputs.s2 = self._s2_file
+        self.outputs.dof = self._dof
+        self.outputs.constants = self._constants
+        self.outputs.axis = self._axis
+        self.outputs.reg_names = self._reg_names
         if self.inputs.model == "ar1":
-            outputs["a"] = self._a_file
+            self.outputs.a = self._a_file
         if self.inputs.save_residuals:
-            outputs["residuals"] = self._residuals_file
+            self.outputs.residuals = self._residuals_file
         return outputs
 
 
@@ -314,7 +314,7 @@ class EstimateContrast(BaseInterface):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["stat_maps"] = self._stat_maps
-        outputs["p_maps"] = self._p_maps
-        outputs["z_maps"] = self._z_maps
+        self.outputs.stat_maps = self._stat_maps
+        self.outputs.p_maps = self._p_maps
+        self.outputs.z_maps = self._z_maps
         return outputs

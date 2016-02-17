@@ -176,8 +176,8 @@ class CoherenceAnalyzer(BaseInterface):
         # file name + path)
 
         # Always defined (the arrays):
-        outputs['coherence_array'] = self.coherence
-        outputs['timedelay_array'] = self.delay
+        self.outputs.coherence_array = self.coherence
+        self.outputs.timedelay_array = self.delay
 
         # Conditional
         if isdefined(self.inputs.output_csv_file) and hasattr(self, 'coherence'):
@@ -185,15 +185,15 @@ class CoherenceAnalyzer(BaseInterface):
             # coherence values to this file "coherence_csv" and makes the
             # time_delay csv file??
             self._make_output_files()
-            outputs['coherence_csv'] = fname_presuffix(self.inputs.output_csv_file, suffix='_coherence')
+            self.outputs.coherence_csv = fname_presuffix(self.inputs.output_csv_file, suffix='_coherence')
 
-            outputs['timedelay_csv'] = fname_presuffix(self.inputs.output_csv_file, suffix='_delay')
+            self.outputs.timedelay_csv = fname_presuffix(self.inputs.output_csv_file, suffix='_delay')
 
         if isdefined(self.inputs.output_figure_file) and hasattr(self,
                                                                  'coherence'):
             self._make_output_figures()
-            outputs['coherence_fig'] = fname_presuffix(self.inputs.output_figure_file, suffix='_coherence')
-            outputs['timedelay_fig'] = fname_presuffix(self.inputs.output_figure_file, suffix='_delay')
+            self.outputs.coherence_fig = fname_presuffix(self.inputs.output_figure_file, suffix='_coherence')
+            self.outputs.timedelay_fig = fname_presuffix(self.inputs.output_figure_file, suffix='_delay')
 
         return outputs
 

@@ -155,7 +155,7 @@ class Merge(IOBase):
                 for j in range(self._numinputs):
                     out[i].append(filename_to_list(getattr(self.inputs, 'in%d' % (j + 1)))[i])
         if out:
-            outputs['out'] = out
+            self.outputs.out = out
         return outputs
 
 
@@ -261,7 +261,7 @@ class Rename(IOBase):
 
     def _list_outputs(self):
         outputs = self._outputs().get()
-        outputs["out_file"] = os.path.join(os.getcwd(), self._rename())
+        self.outputs.out_file = os.path.join(os.getcwd(), self._rename())
         return outputs
 
 
@@ -354,7 +354,7 @@ class Select(IOBase):
     def _list_outputs(self):
         outputs = self._outputs().get()
         out = np.array(self.inputs.inlist)[np.array(self.inputs.index)].tolist()
-        outputs['out'] = out
+        self.outputs.out = out
         return outputs
 
 
