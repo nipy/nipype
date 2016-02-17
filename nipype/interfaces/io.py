@@ -37,7 +37,7 @@ import sqlite3
 
 from .traits_extension import traits, Undefined, File, Directory, isdefined
 from .base import BaseInterface
-from .specs import (TraitedSpec, DynamicTraitedSpec, 
+from .specs import (TraitedSpec, DynamicTraitedSpec,
                     BaseInterfaceInputSpec, InputMultiPath,
                     OutputMultiPath)
 from .. import config
@@ -125,7 +125,7 @@ class IOBase(BaseInterface):
     def _run_interface(self, runtime):
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         raise NotImplementedError
 
     def _outputs(self):
@@ -223,10 +223,10 @@ class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         if key not in self.copyable_trait_names():
             if not isdefined(value):
                 super(DataSinkInputSpec, self).__setattr__(key, value)
-            self._setattr(self.outputs, key, value
+            self._outputs[key] = value
         else:
             if key in self._outputs:
-                self._setattr(self.outputs, key, value
+                self._outputs[key] = value
             super(DataSinkInputSpec, self).__setattr__(key, value)
 
 
@@ -320,7 +320,7 @@ class DataSink(IOBase):
         if infields:
             for key in infields:
                 self.inputs.add_trait(key, traits.Any)
-                self.inputs._setattr(self.outputs, key, Undefined
+                self.inputs._outputs[key] = Undefined
                 undefined_traits[key] = Undefined
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
         if force_run:
@@ -637,13 +637,13 @@ class DataSink(IOBase):
                                Callback=ProgressPercentage(src_f))
 
     # List outputs, main run routine
-    def _list_outputs(self):
+    def _post_run(self):
         """Execute this module.
         """
 
         # Init variables
         iflogger = logging.getLogger('interface')
-        
+
         out_files = []
         # Use hardlink
         use_hardlink = str2bool(config.get('execution', 'try_hard_link_datasink'))
@@ -768,8 +768,6 @@ class DataSink(IOBase):
         # Return outputs dictionary
         self.outputs.out_file = out_files
 
-        return outputs
-
 
 class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     anon = traits.Bool(False, usedefault=True,
@@ -862,7 +860,7 @@ class S3DataGrabber(IOBase):
         """
         return add_traits(base, self.inputs.template_args.keys())
 
-    def _list_outputs(self):
+    def _post_run(self):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
         # hence manual check
         if self._infields:
@@ -881,7 +879,7 @@ class S3DataGrabber(IOBase):
 
         # keys are outfields, args are template args for the outfield
         for key, args in self.inputs.template_args.items():
-            setattr(self.outputs, key, []
+            setattr(self.outputs, key, [])
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
@@ -904,7 +902,7 @@ class S3DataGrabber(IOBase):
                 else:
                     if self.inputs.sort_filelist:
                         filelist = human_order_sorted(filelist)
-                    setattr(self.outputs, key, list_to_filename(filelist)
+                    setattr(self.outputs, key, list_to_filename(filelist))
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
@@ -941,17 +939,17 @@ class S3DataGrabber(IOBase):
                             raise IOError(msg)
                         else:
                             warn(msg)
-                        outputs[key].append(None)
+                        getattr(self.outputs, key).append(None)
                     else:
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
-                        outputs[key].append(list_to_filename(outfiles))
-            if any([val is None for val in outputs[key]]):
-                setattr(self.outputs, key, []
-            if len(outputs[key]) == 0:
-                setattr(self.outputs, key, None
-            elif len(outputs[key]) == 1:
-                setattr(self.outputs, key, outputs[key][0]
+                        getattr(self.outputs, key).append(list_to_filename(outfiles))
+            if any([val is None for val in getattr(self.outputs, key)]):
+                setattr(self.outputs, key, [])
+            if len(getattr(self.outputs, key)) == 0:
+                setattr(self.outputs, key, None)
+            elif len(getattr(self.outputs, key)) == 1:
+                setattr(self.outputs, key, getattr(self.outputs, key)[0])
         # Outputs are currently stored as locations on S3.
         # We must convert to the local location specified
         # and download the files.
@@ -961,13 +959,15 @@ class S3DataGrabber(IOBase):
             #tuple, numpy array) and we iterate through each of its
             #values. If it doesn't, it's string-like (string,
             #unicode), and we convert that value directly.
+
+            cur_value = getattr(self.outputs, key)
             if hasattr(val,'__iter__'):
                 for i,path in enumerate(val):
-                    outputs[key][i] = self.s3tolocal(path, bkt)
+                    cur_value[i] = self.s3tolocal(path, bkt)
             else:
-                setattr(self.outputs, key, self.s3tolocal(val, bkt)
+                cur_value[i] = self.s3tolocal(val, bkt)
+            setattr(self.outputs, key, cur_value)
 
-        return outputs
 
     # Takes an s3 address and downloads the file to a local
     # directory, returning the local path.
@@ -1107,7 +1107,7 @@ class DataGrabber(IOBase):
         """
         return add_traits(base, list(self.inputs.template_args.keys()))
 
-    def _list_outputs(self):
+    def _post_run(self):
         # infields are mandatory, however I could not figure out how to set 'mandatory' flag dynamically
         # hence manual check
         if self._infields:
@@ -1120,7 +1120,7 @@ class DataGrabber(IOBase):
 
         outputs = {}
         for key, args in list(self.inputs.template_args.items()):
-            setattr(self.outputs, key, []
+            setattr(self.outputs, key, [])
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
@@ -1143,7 +1143,7 @@ class DataGrabber(IOBase):
                 else:
                     if self.inputs.sort_filelist:
                         filelist = human_order_sorted(filelist)
-                    setattr(self.outputs, key, list_to_filename(filelist)
+                    setattr(self.outputs, key, list_to_filename(filelist))
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
@@ -1177,18 +1177,17 @@ class DataGrabber(IOBase):
                             raise IOError(msg)
                         else:
                             warn(msg)
-                        outputs[key].append(None)
+                        getattr(self.outputs, key).append(None)
                     else:
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
-                        outputs[key].append(list_to_filename(outfiles))
-            if any([val is None for val in outputs[key]]):
-                setattr(self.outputs, key, []
-            if len(outputs[key]) == 0:
-                setattr(self.outputs, key, None
-            elif len(outputs[key]) == 1:
-                setattr(self.outputs, key, outputs[key][0]
-        return outputs
+                        getattr(self.outputs, key).append(list_to_filename(outfiles))
+            if any([val is None for val in getattr(self.outputs, key)]):
+                setattr(self.outputs, key, [])
+            if len(getattr(self.outputs, key)) == 0:
+                setattr(self.outputs, key, None)
+            elif len(getattr(self.outputs, key)) == 1:
+                setattr(self.outputs, key, getattr(self.outputs, key)[0])
 
 
 class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
@@ -1282,7 +1281,7 @@ class SelectFiles(IOBase):
         """Add the dynamic output fields"""
         return add_traits(base, list(self._templates.keys()))
 
-    def _list_outputs(self):
+    def _post_run(self):
         """Find the files and expose them as interface outputs."""
         outputs = {}
         info = dict([(k, v) for k, v in list(self.inputs.__dict__.items())
@@ -1330,9 +1329,7 @@ class SelectFiles(IOBase):
             if field not in force_lists:
                 filelist = list_to_filename(filelist)
 
-            setattr(self.outputs, field, filelist
-
-        return outputs
+            setattr(self.outputs, field, filelist)
 
 
 class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
@@ -1474,11 +1471,8 @@ class DataFinder(IOBase):
         if not self.result:
             raise RuntimeError("Regular expression did not match any files!")
 
+        self.outputs.update(self.result)
         return runtime
-
-    def _list_outputs(self):
-                outputs.update(self.result)
-        return outputs
 
 
 class FSSourceInputSpec(BaseInterfaceInputSpec):
@@ -1611,7 +1605,7 @@ class FreeSurferSource(IOBase):
             keydir, ''.join((globprefix, key, globsuffix)))
         return [os.path.abspath(f) for f in glob.glob(globpattern)]
 
-    def _list_outputs(self):
+    def _post_run(self):
         subjects_dir = self.inputs.subjects_dir
         subject_path = os.path.join(subjects_dir, self.inputs.subject_id)
         output_traits = self._outputs()
@@ -1621,8 +1615,7 @@ class FreeSurferSource(IOBase):
                                   output_traits.traits()[k].loc,
                                   output_traits.traits()[k].altkey)
             if val:
-                setattr(self.outputs, k, list_to_filename(val)
-        return outputs
+                setattr(self.outputs, k, list_to_filename(val))
 
 
 class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
@@ -1734,7 +1727,7 @@ class XNATSource(IOBase):
         """
         return add_traits(base, list(self.inputs.query_template_args.keys()))
 
-    def _list_outputs(self):
+    def _post_run(self):
         # infields are mandatory, however I could not figure out
         # how to set 'mandatory' flag dynamically, hence manual check
 
@@ -1761,7 +1754,7 @@ class XNATSource(IOBase):
 
         outputs = {}
         for key, args in list(self.inputs.query_template_args.items()):
-            setattr(self.outputs, key, []
+            setattr(self.outputs, key, [])
             template = self.inputs.query_template
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
@@ -1777,7 +1770,7 @@ class XNATSource(IOBase):
                     [str(file_object.get())
                      for file_object in file_objects
                      if file_object.exists()
-                     ])
+                     ]))
             for argnum, arglist in enumerate(args):
                 maxlen = 1
                 for arg in arglist:
@@ -1831,12 +1824,11 @@ class XNATSource(IOBase):
                              ]
                         )
 
-                    outputs[key].insert(i, outfiles)
-            if len(outputs[key]) == 0:
-                setattr(self.outputs, key, None
-            elif len(outputs[key]) == 1:
-                setattr(self.outputs, key, outputs[key][0]
-        return outputs
+                    getattr(self.outputs, key).insert(i, outfiles)
+            if len(getattr(self.outputs, key)) == 0:
+                setattr(self.outputs, key, None)
+            elif len(getattr(self.outputs, key)) == 1:
+                setattr(self.outputs, key, getattr(self.outputs, key)[0])
 
 
 class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
@@ -1883,7 +1875,7 @@ class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
 
     def __setattr__(self, key, value):
         if key not in self.copyable_trait_names():
-            self._setattr(self.outputs, key, value
+            self._outputs[key] = value
         else:
             super(XNATSinkInputSpec, self).__setattr__(key, value)
 
@@ -1895,7 +1887,7 @@ class XNATSink(IOBase):
     """
     input_spec = XNATSinkInputSpec
 
-    def _list_outputs(self):
+    def _post_run(self):
         """Execute this module.
         """
 
@@ -2099,7 +2091,7 @@ class SQLiteSink(IOBase):
         self._input_names = filename_to_list(input_names)
         add_traits(self.inputs, [name for name in self._input_names])
 
-    def _list_outputs(self):
+    def _post_run(self):
         """Execute this module.
         """
         conn = sqlite3.connect(self.inputs.database_file,
@@ -2152,7 +2144,7 @@ class MySQLSink(IOBase):
         self._input_names = filename_to_list(input_names)
         add_traits(self.inputs, [name for name in self._input_names])
 
-    def _list_outputs(self):
+    def _post_run(self):
         """Execute this module.
         """
         import MySQLdb
@@ -2293,7 +2285,7 @@ class SSHDataGrabber(DataGrabber):
         ):
             self.inputs.template += '$'
 
-    def _list_outputs(self):
+    def _post_run(self):
         try:
             paramiko
         except NameError:
@@ -2316,7 +2308,7 @@ class SSHDataGrabber(DataGrabber):
 
         outputs = {}
         for key, args in list(self.inputs.template_args.items()):
-            setattr(self.outputs, key, []
+            setattr(self.outputs, key, [])
             template = self.inputs.template
             if hasattr(self.inputs, 'field_template') and \
                     isdefined(self.inputs.field_template) and \
@@ -2344,7 +2336,7 @@ class SSHDataGrabber(DataGrabber):
                 else:
                     if self.inputs.sort_filelist:
                         filelist = human_order_sorted(filelist)
-                    setattr(self.outputs, key, list_to_filename(filelist)
+                    setattr(self.outputs, key, list_to_filename(filelist))
                 if self.inputs.download_files:
                     for f in filelist:
                         sftp.get(f, f)
@@ -2393,28 +2385,26 @@ class SSHDataGrabber(DataGrabber):
                             raise IOError(msg)
                         else:
                             warn(msg)
-                        outputs[key].append(None)
+                        getattr(self.outputs, key).append(None)
                     else:
                         if self.inputs.sort_filelist:
                             outfiles = human_order_sorted(outfiles)
-                        outputs[key].append(list_to_filename(outfiles))
+                        getattr(self.outputs, key).append(list_to_filename(outfiles))
                         if self.inputs.download_files:
                             for f in outfiles:
                                 try:
                                     sftp.get(os.path.join(filledtemplate_dir, f), f)
                                 except IOError:
                                     iflogger.info('remote file %s not found' % f)
-            if any([val is None for val in outputs[key]]):
-                setattr(self.outputs, key, []
-            if len(outputs[key]) == 0:
-                setattr(self.outputs, key, None
-            elif len(outputs[key]) == 1:
-                setattr(self.outputs, key, outputs[key][0]
+            if any([val is None for val in getattr(self.outputs, key)]):
+                setattr(self.outputs, key, [])
+            if len(getattr(self.outputs, key)) == 0:
+                setattr(self.outputs, key, None)
+            elif len(getattr(self.outputs, key)) == 1:
+                setattr(self.outputs, key, getattr(self.outputs, key)[0])
 
         for k, v in list(outputs.items()):
-            setattr(self.outputs, k, os.path.join(os.getcwd(), v)
-
-        return outputs
+            setattr(self.outputs, k, os.path.join(os.getcwd(), v))
 
     def _get_ssh_client(self):
         config = paramiko.SSHConfig()
@@ -2468,7 +2458,7 @@ class JSONFileGrabber(IOBase):
     output_spec = DynamicTraitedSpec
     _always_run = True
 
-    def _list_outputs(self):
+    def _post_run(self):
         import simplejson
 
         outputs = {}
@@ -2480,15 +2470,13 @@ class JSONFileGrabber(IOBase):
                 raise RuntimeError('JSON input has no dictionary structure')
 
             for key, value in data.items():
-                setattr(self.outputs, key, value
+                setattr(self.outputs, key, value)
 
         if isdefined(self.inputs.defaults):
             defaults = self.inputs.defaults
             for key, value in defaults.items():
                 if key not in list(outputs.keys()):
-                    setattr(self.outputs, key, value
-
-        return outputs
+                    setattr(self.outputs, key, value)
 
 
 class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
@@ -2501,10 +2489,10 @@ class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         if key not in self.copyable_trait_names():
             if not isdefined(value):
                 super(JSONFileSinkInputSpec, self).__setattr__(key, value)
-            self._setattr(self.outputs, key, value
+            self._outputs[key] = value
         else:
             if key in self._outputs:
-                self._setattr(self.outputs, key, value
+                self._outputs[key] = value
             super(JSONFileSinkInputSpec, self).__setattr__(key, value)
 
 
@@ -2551,7 +2539,7 @@ class JSONFileSink(IOBase):
         undefined_traits = {}
         for key in infields:
             self.inputs.add_trait(key, traits.Any)
-            self.inputs._setattr(self.outputs, key, Undefined
+            self.inputs._setattr(self.outputs, key, Undefined)
             undefined_traits[key] = Undefined
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
@@ -2570,7 +2558,7 @@ class JSONFileSink(IOBase):
 
         return name, val
 
-    def _list_outputs(self):
+    def _post_run(self):
         import simplejson
         import os.path as op
 
@@ -2590,6 +2578,5 @@ class JSONFileSink(IOBase):
 
         with open(out_file, 'w') as f:
             simplejson.dump(out_dict, f)
-        
+
         self.outputs.out_file = out_file
-        return outputs

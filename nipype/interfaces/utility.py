@@ -23,7 +23,7 @@ import nibabel as nb
 
 from .traits_extension import traits, Undefined, File, isdefined
 from .base import BaseInterface
-from .specs import (TraitedSpec, DynamicTraitedSpec, 
+from .specs import (TraitedSpec, DynamicTraitedSpec,
                     BaseInterfaceInputSpec, InputMultiPath,
                     OutputMultiPath)
 from .io import IOBase, add_traits
@@ -85,7 +85,7 @@ class IdentityInterface(IOBase):
         base.trait_set(trait_change_notify=False, **undefined_traits)
         return base
 
-    def _list_outputs(self):
+    def _post_run(self):
         # manual mandatory inputs check
         if self._fields and self._mandatory_inputs:
             for key in self._fields:
@@ -96,11 +96,10 @@ class IdentityInterface(IOBase):
                         (self.__class__.__name__, key)
                     raise ValueError(msg)
 
-                for key in self._fields:
+        for key in self._fields:
             val = getattr(self.inputs, key)
             if isdefined(val):
-                setattr(self.outputs, key, val
-        return outputs
+                setattr(self.outputs, key, val)
 
 
 class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
@@ -137,8 +136,8 @@ class Merge(IOBase):
         self._numinputs = numinputs
         add_traits(self.inputs, ['in%d' % (i + 1) for i in range(numinputs)])
 
-    def _list_outputs(self):
-                out = []
+    def _post_run(self):
+        out = []
         if self.inputs.axis == 'vstack':
             for idx in range(self._numinputs):
                 value = getattr(self.inputs, 'in%d' % (idx + 1))
@@ -154,7 +153,6 @@ class Merge(IOBase):
                     out[i].append(filename_to_list(getattr(self.inputs, 'in%d' % (j + 1)))[i])
         if out:
             self.outputs.out = out
-        return outputs
 
 
 class RenameInputSpec(DynamicTraitedSpec):
@@ -257,9 +255,8 @@ class Rename(IOBase):
                                                        self._rename()))
         return runtime
 
-    def _list_outputs(self):
-                self.outputs.out_file = os.path.join(os.getcwd(), self._rename())
-        return outputs
+    def _post_run(self):
+        self.outputs.out_file = os.path.join(os.getcwd(), self._rename())
 
 
 class SplitInputSpec(BaseInterfaceInputSpec):
@@ -298,8 +295,8 @@ class Split(IOBase):
         base.trait_set(trait_change_notify=False, **undefined_traits)
         return base
 
-    def _list_outputs(self):
-                if isdefined(self.inputs.splits):
+    def _post_run(self):
+        if isdefined(self.inputs.splits):
             if sum(self.inputs.splits) != len(self.inputs.inlist):
                 raise RuntimeError('sum of splits != num of list elements')
             splits = [0]
@@ -309,8 +306,7 @@ class Split(IOBase):
                 val = np.array(self.inputs.inlist)[splits[i]:splits[i + 1]].tolist()
                 if self.inputs.squeeze and len(val) == 1:
                     val = val[0]
-                outputs['out%d' % (i + 1)] = val
-        return outputs
+                setattr(self.outputs, 'out%d' % (i + 1), val)
 
 
 class SelectInputSpec(BaseInterfaceInputSpec):
@@ -347,11 +343,8 @@ class Select(IOBase):
     input_spec = SelectInputSpec
     output_spec = SelectOutputSpec
 
-    def _list_outputs(self):
-                out = np.array(self.inputs.inlist)[np.array(self.inputs.index)].tolist()
-        self.outputs.out = out
-        return outputs
-
+    def _post_run(self):
+        self.outputs.out = np.array(self.inputs.inlist)[np.array(self.inputs.index)].tolist()
 
 class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
     function_str = traits.Str(mandatory=True, desc='code for function')
@@ -460,10 +453,9 @@ class Function(IOBase):
 
         return runtime
 
-    def _list_outputs(self):
-                for key in self._output_names:
-            setattr(self.outputs, key, self._out[key]
-        return outputs
+    def _post_run(self):
+        for key in self._output_names:
+            setattr(self.outputs, key, self._out[key])
 
 
 class AssertEqualInputSpec(BaseInterfaceInputSpec):
@@ -523,7 +515,6 @@ class CSVReader(BaseInterface):
     def _append_entry(self, outputs, entry):
         for key, value in zip(self._outfields, entry):
             outputs[key].append(value)
-        return outputs
 
     def _parse_line(self, line):
         line = line.replace('\n', '')
@@ -549,11 +540,10 @@ class CSVReader(BaseInterface):
     def _add_output_traits(self, base):
         return add_traits(base, self._get_outfields())
 
-    def _list_outputs(self):
-        
+    def _post_run(self):
         isHeader = True
         for key in self._outfields:
-            setattr(self.outputs, key, []  # initialize outfields
+            setattr(self.outputs, key, [])  # initialize outfields
         with open(self.inputs.in_file, 'r') as fid:
             for line in fid.readlines():
                 if self.inputs.header and isHeader:  # skip header line
@@ -561,4 +551,3 @@ class CSVReader(BaseInterface):
                     continue
                 entry = self._parse_line(line)
                 outputs = self._append_entry(outputs, entry)
-        return outputs

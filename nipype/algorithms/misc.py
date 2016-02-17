@@ -28,19 +28,15 @@ import scipy.io as sio
 import itertools
 import scipy.stats as stats
 
-from nipype import logging
-
-import warnings
-
 from . import metrics as nam
-
-
+from ..utils.filemanip import fname_presuffix, split_filename
 from ..interfaces.traits_extension import traits, File, isdefined, Undefined
 from ..interfaces.specs import BaseInterfaceInputSpec, TraitedSpec, InputMultiPath, OutputMultiPath, DynamicTraitedSpec
 from ..interfaces.base import BaseInterface
 
-from nipype.utils.filemanip import fname_presuffix, split_filename
-iflogger = logging.getLogger('interface')
+
+from ... import logging
+IFLOGGER = logging.getLogger('interface')
 
 
 class PickAtlasInputSpec(BaseInterfaceInputSpec):
@@ -369,14 +365,14 @@ class Matlab2CSV(BaseInterface):
                 if isinstance(in_dict[key][0], np.ndarray):
                     saved_variables.append(key)
                 else:
-                    iflogger.info('One of the keys in the input file, {k}, is not a Numpy array'.format(k=key))
+                    IFLOGGER.info('One of the keys in the input file, {k}, is not a Numpy array'.format(k=key))
 
         if len(saved_variables) > 1:
-            iflogger.info(
+            IFLOGGER.info(
                 '{N} variables found:'.format(N=len(saved_variables)))
-            iflogger.info(saved_variables)
+            IFLOGGER.info(saved_variables)
             for variable in saved_variables:
-                iflogger.info(
+                IFLOGGER.info(
                     '...Converting {var} - type {ty} - to\
                     CSV'.format(var=variable, ty=type(in_dict[variable]))
                 )
@@ -385,13 +381,13 @@ class Matlab2CSV(BaseInterface):
         elif len(saved_variables) == 1:
             _, name, _ = split_filename(self.inputs.in_file)
             variable = saved_variables[0]
-            iflogger.info('Single variable found {var}, type {ty}:'.format(
+            IFLOGGER.info('Single variable found {var}, type {ty}:'.format(
                 var=variable, ty=type(in_dict[variable])))
-            iflogger.info('...Converting {var} to CSV from {f}'.format(
+            IFLOGGER.info('...Converting {var} to CSV from {f}'.format(
                 var=variable, f=self.inputs.in_file))
             matlab2csv(in_dict[variable], name, self.inputs.reshape_matrix)
         else:
-            iflogger.error('No values in the MATLAB file?!')
+            IFLOGGER.error('No values in the MATLAB file?!')
         return runtime
 
     def _post_run(self):
@@ -404,7 +400,7 @@ class Matlab2CSV(BaseInterface):
                 if isinstance(in_dict[key][0], np.ndarray):
                     saved_variables.append(key)
                 else:
-                    iflogger.error('One of the keys in the input file, {k}, is\
+                    IFLOGGER.error('One of the keys in the input file, {k}, is\
                                    not a Numpy array'.format(k=key))
 
         if len(saved_variables) > 1:
@@ -413,7 +409,7 @@ class Matlab2CSV(BaseInterface):
             _, name, ext = split_filename(self.inputs.in_file)
             self.outputs.csv_files = op.abspath(name + '.csv')
         else:
-            iflogger.error('No values in the MATLAB file?!')
+            IFLOGGER.error('No values in the MATLAB file?!')
 
 
 class MergeCSVFilesInputSpec(TraitedSpec):
@@ -471,41 +467,41 @@ class MergeCSVFiles(BaseInterface):
         This block defines the column headings.
         """
         if isdefined(self.inputs.column_headings):
-            iflogger.info('Column headings have been provided:')
+            IFLOGGER.info('Column headings have been provided:')
             headings = self.inputs.column_headings
         else:
-            iflogger.info(
+            IFLOGGER.info(
                 'Column headings not provided! Pulled from input filenames:')
             headings = remove_identical_paths(self.inputs.in_files)
 
         if isdefined(self.inputs.extra_field):
             if isdefined(self.inputs.extra_column_heading):
                 extraheading = self.inputs.extra_column_heading
-                iflogger.info('Extra column heading provided: {col}'.format(
+                IFLOGGER.info('Extra column heading provided: {col}'.format(
                     col=extraheading))
             else:
                 extraheading = 'type'
-                iflogger.info(
+                IFLOGGER.info(
                     'Extra column heading was not defined. Using "type"')
             headings.append(extraheading)
             extraheadingBool = True
 
         if len(self.inputs.in_files) == 1:
-            iflogger.warn('Only one file input!')
+            IFLOGGER.warn('Only one file input!')
 
         if isdefined(self.inputs.row_headings):
-            iflogger.info('Row headings have been provided. Adding "labels"\
+            IFLOGGER.info('Row headings have been provided. Adding "labels"\
                           column header.')
             prefix = '"{p}","'.format(p=self.inputs.row_heading_title)
             csv_headings = prefix + '","'.join(itertools.chain(
                 headings)) + '"\n'
             rowheadingsBool = True
         else:
-            iflogger.info('Row headings have not been provided.')
+            IFLOGGER.info('Row headings have not been provided.')
             csv_headings = '"' + '","'.join(itertools.chain(headings)) + '"\n'
 
-        iflogger.info('Final Headings:')
-        iflogger.info(csv_headings)
+        IFLOGGER.info('Final Headings:')
+        IFLOGGER.info(csv_headings)
 
         """
         Next we merge the arrays and define the output text file
@@ -543,10 +539,10 @@ class MergeCSVFiles(BaseInterface):
                 mx = 1
             for idx in range(0, mx):
                 extrafieldlist.append(self.inputs.extra_field)
-            iflogger.info(len(extrafieldlist))
+            IFLOGGER.info(len(extrafieldlist))
             output[extraheading] = extrafieldlist
-        iflogger.info(output)
-        iflogger.info(fmt)
+        IFLOGGER.info(output)
+        IFLOGGER.info(fmt)
         np.savetxt(file_handle, output, fmt, delimiter=',')
         file_handle.close()
         return runtime
@@ -606,10 +602,10 @@ class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
         if key not in self.copyable_trait_names():
             if not isdefined(value):
                 super(AddCSVRowInputSpec, self).__setattr__(key, value)
-            self._setattr(self.outputs, key, value
+            self._outputs[key] = value
         else:
             if key in self._outputs:
-                self._setattr(self.outputs, key, value
+                self.outputs[key] = value
             super(AddCSVRowInputSpec, self).__setattr__(key, value)
 
 
@@ -655,7 +651,7 @@ class AddCSVRow(BaseInterface):
         if infields:
             for key in infields:
                 self.inputs.add_trait(key, traits.Any)
-                self.inputs._setattr(self.outputs, key, Undefined
+                self.inputs._outputs[key] = Undefined
                 undefined_traits[key] = Undefined
         self.inputs.trait_set(trait_change_notify=False, **undefined_traits)
 
@@ -673,9 +669,8 @@ class AddCSVRow(BaseInterface):
             import lockfile as pl
             self._have_lock = True
         except ImportError:
-            from warnings import warn
-            warn(('Python module lockfile was not found: AddCSVRow will not be'
-                  ' thread-safe in multi-processor execution'))
+            IFLOGGER.warn('Python module lockfile was not found: AddCSVRow will not be'
+                          ' thread-safe in multi-processor execution')
 
         input_dict = {}
         for key, val in list(self.inputs._outputs.items()):
@@ -997,7 +992,7 @@ def matlab2csv(in_array, name, reshape):
         if len(np.shape(output_array)) > 1:
             output_array = np.reshape(output_array, (
                 np.shape(output_array)[0] * np.shape(output_array)[1], 1))
-            iflogger.info(np.shape(output_array))
+            IFLOGGER.info(np.shape(output_array))
     output_name = op.abspath(name + '.csv')
     np.savetxt(output_name, output_array, delimiter=',')
     return output_name
@@ -1027,8 +1022,8 @@ def merge_csvs(in_list):
         else:
             out_array = np.dstack((out_array, in_array))
     out_array = np.squeeze(out_array)
-    iflogger.info('Final output array shape:')
-    iflogger.info(np.shape(out_array))
+    IFLOGGER.info('Final output array shape:')
+    IFLOGGER.info(np.shape(out_array))
     return out_array
 
 
@@ -1064,7 +1059,7 @@ def maketypelist(rowheadings, shape, extraheadingBool, extraheading):
             typelist.append((str(idx), float))
     if extraheadingBool:
         typelist.append((extraheading, 'a40'))
-    iflogger.info(typelist)
+    IFLOGGER.info(typelist)
     return typelist
 
 
@@ -1239,8 +1234,7 @@ def split_rois(in_file, mask=None, roishape=None):
     return out_files, out_mask, out_idxs
 
 
-def merge_rois(in_files, in_idxs, in_ref,
-               dtype=None, out_file=None):
+def merge_rois(in_files, in_idxs, in_ref, dtype=None, out_file=None):
     """
     Re-builds an image resulting from a parallelized processing
     """
@@ -1259,7 +1253,7 @@ def merge_rois(in_files, in_idxs, in_ref,
     # to avoid memory errors
     if op.splitext(in_ref)[1] == '.gz':
         try:
-            iflogger.info('uncompress %i' % in_ref)
+            IFLOGGER.info('uncompress %i' % in_ref)
             sp.check_call(['gunzip', in_ref], stdout=sp.PIPE, shell=True)
             in_ref = op.splitext(in_ref)[0]
         except:
@@ -1338,10 +1332,9 @@ class Distance(nam.Distance):
        Use :py:class:`nipype.algorithms.metrics.Distance` instead.
     """
     def __init__(self, **inputs):
-        super(nam.Distance, self).__init__(**inputs)
-        warnings.warn(("This interface has been deprecated since 0.10.0,"
-                       " please use nipype.algorithms.metrics.Distance"),
-                      DeprecationWarning)
+        super(Distance, self).__init__(**inputs)
+        IFLOGGER.warn("This interface has been deprecated since 0.10.0,"
+                      " please use nipype.algorithms.metrics.Distance")
 
 
 class Overlap(nam.Overlap):
@@ -1351,10 +1344,9 @@ class Overlap(nam.Overlap):
        Use :py:class:`nipype.algorithms.metrics.Overlap` instead.
     """
     def __init__(self, **inputs):
-        super(nam.Overlap, self).__init__(**inputs)
-        warnings.warn(("This interface has been deprecated since 0.10.0,"
-                       " please use nipype.algorithms.metrics.Overlap"),
-                      DeprecationWarning)
+        super(Overlap, self).__init__(**inputs)
+        IFLOGGER.warn("This interface has been deprecated since 0.10.0,"
+                      " please use nipype.algorithms.metrics.Overlap")
 
 
 class FuzzyOverlap(nam.FuzzyOverlap):
@@ -1365,7 +1357,6 @@ class FuzzyOverlap(nam.FuzzyOverlap):
        Use :py:class:`nipype.algorithms.metrics.FuzzyOverlap` instead.
     """
     def __init__(self, **inputs):
-        super(nam.FuzzyOverlap, self).__init__(**inputs)
-        warnings.warn(("This interface has been deprecated since 0.10.0,"
-                       " please use nipype.algorithms.metrics.FuzzyOverlap"),
-                      DeprecationWarning)
+        super(FuzzyOverlap, self).__init__(**inputs)
+        IFLOGGER.warn("This interface has been deprecated since 0.10.0,"
+                      " please use nipype.algorithms.metrics.FuzzyOverlap")
