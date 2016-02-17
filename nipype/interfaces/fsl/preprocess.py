@@ -271,7 +271,7 @@ class FAST(FSLCommand):
 
     def _post_run(self):
 
-        
+
         if not isdefined(self.inputs.number_classes):
             nclasses = 3
         else:
@@ -789,6 +789,12 @@ class FNIRTInputSpec(FSLCommandInputSpec):
                                     desc='Precision for representing Hessian, double or float. Default double')
 
 
+    def _format_arg(self, name, spec, value):
+        if name in list(self.filemap.keys()):
+            return spec.argstr % getattr(self.outputs, name)
+        return super(FSLCommandInputSpec, self)._format_arg(name, spec, value)
+
+
 class FNIRTOutputSpec(TraitedSpec):
     fieldcoeff_file = File(exists=True, desc='file with field coefficients')
     warped_file = File(exists=True, desc='warped image')
@@ -842,8 +848,6 @@ class FNIRT(FSLCommand):
                'fieldcoeff_file': 'fieldwarp'}
 
     def _post_run(self):
-
-        
         for key, suffix in list(self.filemap.items()):
             inval = getattr(self.inputs, key)
             change_ext = True
@@ -855,21 +859,15 @@ class FNIRT(FSLCommand):
                 else:
                     setattr(self.outputs, key, self._gen_fname(self.inputs.in_file,
                                                    suffix='_' + suffix,
-                                                   change_ext=change_ext)
+                                                   change_ext=change_ext))
             elif isdefined(inval):
                 if isinstance(inval, bool):
                     if inval:
                         setattr(self.outputs, key, self._gen_fname(self.inputs.in_file,
                                                        suffix='_' + suffix,
-                                                       change_ext=change_ext)
+                                                       change_ext=change_ext))
                 else:
-                    setattr(self.outputs, key, os.path.abspath(inval)
-        return outputs
-
-    def _format_arg(self, name, spec, value):
-        if name in list(self.filemap.keys()):
-            return spec.argstr % getattr(self.outputs, name)
-        return super(FNIRT, self)._format_arg(name, spec, value)
+                    setattr(self.outputs, key, os.path.abspath(inval))
 
     def _gen_filename(self, name):
         if name in ['warped_file', 'log_file']:
@@ -929,6 +927,12 @@ class ApplyWarpInputSpec(FSLCommandInputSpec):
         desc='interpolation method')
 
 
+    def _format_arg(self, name, spec, value):
+        if name == 'superlevel':
+            return spec.argstr % str(value)
+        return super(ApplyWarpInputSpec, self)._format_arg(name, spec, value)
+
+
 class ApplyWarpOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='Warped output file')
 
@@ -952,11 +956,6 @@ class ApplyWarp(FSLCommand):
     _cmd = 'applywarp'
     input_spec = ApplyWarpInputSpec
     output_spec = ApplyWarpOutputSpec
-
-    def _format_arg(self, name, spec, value):
-        if name == 'superlevel':
-            return spec.argstr % str(value)
-        return super(ApplyWarp, self)._format_arg(name, spec, value)
 
     def _post_run(self):
 
@@ -1059,6 +1058,19 @@ class SUSANInputSpec(FSLCommandInputSpec):
                     desc='output file name', hash_files=False)
 
 
+    def _format_arg(self, name, spec, value):
+        if name == 'fwhm':
+            return spec.argstr % (float(value) / np.sqrt(8 * np.log(2)))
+        if name == 'usans':
+            if not value:
+                return '0'
+            arglist = [str(len(value))]
+            for filename, thresh in value:
+                arglist.extend([filename, '%.10f' % thresh])
+            return ' '.join(arglist)
+        return super(SUSANInputSpec, self)._format_arg(name, spec, value)
+
+
 class SUSANOutputSpec(TraitedSpec):
     smoothed_file = File(exists=True, desc='smoothed output file')
 
@@ -1083,18 +1095,6 @@ class SUSAN(FSLCommand):
     _cmd = 'susan'
     input_spec = SUSANInputSpec
     output_spec = SUSANOutputSpec
-
-    def _format_arg(self, name, spec, value):
-        if name == 'fwhm':
-            return spec.argstr % (float(value) / np.sqrt(8 * np.log(2)))
-        if name == 'usans':
-            if not value:
-                return '0'
-            arglist = [str(len(value))]
-            for filename, thresh in value:
-                arglist.extend([filename, '%.10f' % thresh])
-            return ' '.join(arglist)
-        return super(SUSAN, self)._format_arg(name, spec, value)
 
     def _post_run(self):
 
@@ -1181,80 +1181,6 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     save_unmasked_fmap = traits.Bool(False, argstr='--unmaskfmap', xor=['save_fmap'],
                                      desc='saves the unmasked fieldmap when using --savefmap')
 
-
-class FUGUEOutputSpec(TraitedSpec):
-    unwarped_file = File(desc='unwarped file')
-    warped_file = File(desc='forward warped file')
-    shift_out_file = File(desc='voxel shift map file')
-    fmap_out_file = File(desc='fieldmap file')
-
-
-class FUGUE(FSLCommand):
-    """
-    `FUGUE <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE>`_ is, most generally, a set of tools for
-    EPI distortion correction.
-
-    Distortions may be corrected for
-        1. improving registration with non-distorted images (e.g. structurals), or
-        2. dealing with motion-dependent changes.
-
-    FUGUE is designed to deal only with the first case - improving registration.
-
-
-    Examples
-    --------
-
-
-    Unwarping an input image (shift map is known)
-
-    >>> from nipype.interfaces.fsl.preprocess import FUGUE
-    >>> fugue = FUGUE()
-    >>> fugue.inputs.in_file = 'epi.nii'
-    >>> fugue.inputs.mask_file = 'epi_mask.nii'
-    >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
-    >>> fugue.inputs.unwarp_direction = 'y'
-    >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline #doctest: +ELLIPSIS
-    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz'
-    >>> fugue.run() #doctest: +SKIP
-
-
-    Warping an input image (shift map is known)
-
-    >>> from nipype.interfaces.fsl.preprocess import FUGUE
-    >>> fugue = FUGUE()
-    >>> fugue.inputs.in_file = 'epi.nii'
-    >>> fugue.inputs.forward_warping = True
-    >>> fugue.inputs.mask_file = 'epi_mask.nii'
-    >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
-    >>> fugue.inputs.unwarp_direction = 'y'
-    >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline #doctest: +ELLIPSIS
-    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --warp=epi_warped.nii.gz'
-    >>> fugue.run() #doctest: +SKIP
-
-
-    Computing the vsm (unwrapped phase map is known)
-
-    >>> from nipype.interfaces.fsl.preprocess import FUGUE
-    >>> fugue = FUGUE()
-    >>> fugue.inputs.phasemap_in_file = 'epi_phasediff.nii'
-    >>> fugue.inputs.mask_file = 'epi_mask.nii'
-    >>> fugue.inputs.dwell_to_asym_ratio = (0.77e-3 * 3) / 2.46e-3
-    >>> fugue.inputs.unwarp_direction = 'y'
-    >>> fugue.inputs.save_shift = True
-    >>> fugue.inputs.output_type = "NIFTI_GZ"
-    >>> fugue.cmdline #doctest: +ELLIPSIS
-    'fugue --dwelltoasym=0.9390243902 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y'
-    >>> fugue.run() #doctest: +SKIP
-
-
-    """
-
-    _cmd = 'fugue'
-    input_spec = FUGUEInputSpec
-    output_spec = FUGUEOutputSpec
-
     def _parse_inputs(self, skip=None):
         if skip is None:
             skip = []
@@ -1336,8 +1262,82 @@ class FUGUE(FSLCommand):
             else:
                 skip += ['save_fmap', 'save_unmasked_fmap', 'fmap_out_file']
 
-        return super(FUGUE, self)._parse_inputs(skip=skip)
+        return super(FUGUEInputSpec, self)._parse_inputs(skip=skip)
 
+
+
+class FUGUEOutputSpec(TraitedSpec):
+    unwarped_file = File(desc='unwarped file')
+    warped_file = File(desc='forward warped file')
+    shift_out_file = File(desc='voxel shift map file')
+    fmap_out_file = File(desc='fieldmap file')
+
+
+class FUGUE(FSLCommand):
+    """
+    `FUGUE <http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FUGUE>`_ is, most generally, a set of tools for
+    EPI distortion correction.
+
+    Distortions may be corrected for
+        1. improving registration with non-distorted images (e.g. structurals), or
+        2. dealing with motion-dependent changes.
+
+    FUGUE is designed to deal only with the first case - improving registration.
+
+
+    Examples
+    --------
+
+
+    Unwarping an input image (shift map is known)
+
+    >>> from nipype.interfaces.fsl.preprocess import FUGUE
+    >>> fugue = FUGUE()
+    >>> fugue.inputs.in_file = 'epi.nii'
+    >>> fugue.inputs.mask_file = 'epi_mask.nii'
+    >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
+    >>> fugue.inputs.unwarp_direction = 'y'
+    >>> fugue.inputs.output_type = "NIFTI_GZ"
+    >>> fugue.cmdline #doctest: +ELLIPSIS
+    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --unwarp=epi_unwarped.nii.gz'
+    >>> fugue.run() #doctest: +SKIP
+
+
+    Warping an input image (shift map is known)
+
+    >>> from nipype.interfaces.fsl.preprocess import FUGUE
+    >>> fugue = FUGUE()
+    >>> fugue.inputs.in_file = 'epi.nii'
+    >>> fugue.inputs.forward_warping = True
+    >>> fugue.inputs.mask_file = 'epi_mask.nii'
+    >>> fugue.inputs.shift_in_file = 'vsm.nii'  # Previously computed with fugue as well
+    >>> fugue.inputs.unwarp_direction = 'y'
+    >>> fugue.inputs.output_type = "NIFTI_GZ"
+    >>> fugue.cmdline #doctest: +ELLIPSIS
+    'fugue --in=epi.nii --mask=epi_mask.nii --loadshift=vsm.nii --unwarpdir=y --warp=epi_warped.nii.gz'
+    >>> fugue.run() #doctest: +SKIP
+
+
+    Computing the vsm (unwrapped phase map is known)
+
+    >>> from nipype.interfaces.fsl.preprocess import FUGUE
+    >>> fugue = FUGUE()
+    >>> fugue.inputs.phasemap_in_file = 'epi_phasediff.nii'
+    >>> fugue.inputs.mask_file = 'epi_mask.nii'
+    >>> fugue.inputs.dwell_to_asym_ratio = (0.77e-3 * 3) / 2.46e-3
+    >>> fugue.inputs.unwarp_direction = 'y'
+    >>> fugue.inputs.save_shift = True
+    >>> fugue.inputs.output_type = "NIFTI_GZ"
+    >>> fugue.cmdline #doctest: +ELLIPSIS
+    'fugue --dwelltoasym=0.9390243902 --mask=epi_mask.nii --phasemap=epi_phasediff.nii --saveshift=epi_phasediff_vsm.nii.gz --unwarpdir=y'
+    >>> fugue.run() #doctest: +SKIP
+
+
+    """
+
+    _cmd = 'fugue'
+    input_spec = FUGUEInputSpec
+    output_spec = FUGUEOutputSpec
 
 class PRELUDEInputSpec(FSLCommandInputSpec):
     complex_phase_file = File(exists=True, argstr='--complex=%s',
@@ -1498,7 +1498,7 @@ class FIRST(FSLCommand):
 
     def _post_run(self):
 
-        
+
 
         if isdefined(self.inputs.list_of_specific_structures):
             structures = self.inputs.list_of_specific_structures
