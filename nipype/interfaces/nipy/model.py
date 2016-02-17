@@ -73,9 +73,9 @@ class FitGLMOutputSpec(TraitedSpec):
 
 
 class FitGLM(BaseInterface):
-    '''
+    """
     Fit GLM model based on the specified design. Supports only single or concatenated runs.
-    '''
+    """
     input_spec = FitGLMInputSpec
     output_spec = FitGLMOutputSpec
 
@@ -251,9 +251,9 @@ class EstimateContrastOutputSpec(TraitedSpec):
 
 
 class EstimateContrast(BaseInterface):
-    '''
+    """
     Estimate contrast of a fitted model.
-    '''
+    """
     input_spec = EstimateContrastInputSpec
     output_spec = EstimateContrastOutputSpec
 

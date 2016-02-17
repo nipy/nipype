@@ -137,14 +137,14 @@ class IOBase(BaseInterface):
 
 # Class to track percentage of S3 file upload
 class ProgressPercentage(object):
-    '''
+    """
     Callable class instsance (via __call__ method) that displays
     upload percentage of a file to S3
-    '''
+    """
 
     def __init__(self, filename):
-        '''
-        '''
+        """
+        """
 
         # Import packages
         import threading
@@ -156,8 +156,8 @@ class ProgressPercentage(object):
         self._lock = threading.Lock()
 
     def __call__(self, bytes_amount):
-        '''
-        '''
+        """
+        """
 
         # Import packages
         import sys
@@ -179,8 +179,8 @@ class ProgressPercentage(object):
 
 # DataSink inputs
 class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
-    '''
-    '''
+    """
+    """
 
     # Init inputspec data attributes
     base_directory = Directory(
@@ -373,7 +373,7 @@ class DataSink(IOBase):
 
     # Check for s3 in base directory
     def _check_s3_base_dir(self):
-        '''
+        """
         Method to see if the datasink's base directory specifies an
         S3 bucket path; if it does, it parses the path for the bucket
         name in the form 's3://bucket_name/...' and returns it
@@ -389,7 +389,7 @@ class DataSink(IOBase):
         bucket_name : string
             name of the S3 bucket to connect to; if the base directory
             is not a valid S3 path, defaults to '<N/A>'
-        '''
+        """
 
         # Init variables
         s3_str = 's3://'
@@ -420,7 +420,7 @@ class DataSink(IOBase):
 
     # Function to return AWS secure environment variables
     def _return_aws_keys(self):
-        '''
+        """
         Method to return AWS access key id and secret access key using
         credentials found in a local file.
 
@@ -435,7 +435,7 @@ class DataSink(IOBase):
             string of the AWS access key ID
         aws_secret_access_key : string
             string of the AWS secret access key
-        '''
+        """
 
         # Import packages
         import os
@@ -475,7 +475,7 @@ class DataSink(IOBase):
 
     # Fetch bucket object
     def _fetch_bucket(self, bucket_name):
-        '''
+        """
         Method to return a bucket object which can be used to interact
         with an AWS S3 bucket using credentials found in a local file.
 
@@ -491,7 +491,7 @@ class DataSink(IOBase):
         bucket : boto3.resources.factory.s3.Bucket
             boto3 s3 Bucket object which is used to interact with files
             in an S3 bucket on AWS
-        '''
+        """
 
         # Import packages
         import logging
@@ -568,9 +568,9 @@ class DataSink(IOBase):
 
     # Send up to S3 method
     def _upload_to_s3(self, bucket, src, dst):
-        '''
+        """
         Method to upload outputs to S3 bucket instead of on local disk
-        '''
+        """
 
         # Import packages
         import hashlib

@@ -304,16 +304,16 @@ class Unplugger(object):
 
 
 class KnownFailureTest(Exception):
-    '''Raise this exception to mark a test as a known failing test.'''
+    """Raise this exception to mark a test as a known failing test."""
     pass
 
 
 class KnownFailure(ErrorClassPlugin):
-    '''Plugin that installs a KNOWNFAIL error class for the
+    """Plugin that installs a KNOWNFAIL error class for the
     KnownFailureClass exception.  When KnownFailureTest is raised,
     the exception will be logged in the knownfail attribute of the
     result, 'K' or 'KNOWNFAIL' (verbose) will be output, and the
-    exception will not be counted as an error or failure.'''
+    exception will not be counted as an error or failure."""
     enabled = True
     knownfail = ErrorClass(KnownFailureTest,
                            label='KNOWNFAIL',

@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-'''
+"""
 Image assessment algorithms. Typical overlap and error computation
 measures to evaluate results from other processing units.
 
@@ -10,7 +10,7 @@ measures to evaluate results from other processing units.
     >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
     >>> os.chdir(datadir)
 
-'''
+"""
 from __future__ import division
 from builtins import zip
 from builtins import range

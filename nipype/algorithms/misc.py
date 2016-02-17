@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-'''
+"""
 Miscellaneous algorithms
 
     Change directory to provide relative paths for doctests
@@ -9,7 +9,7 @@ Miscellaneous algorithms
     >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
     >>> os.chdir(datadir)
 
-'''
+"""
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division

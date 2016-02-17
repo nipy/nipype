@@ -116,11 +116,11 @@ class Info(object):
 
     @staticmethod
     def standard_image(img_name=None):
-        '''Grab an image from the standard location.
+        """Grab an image from the standard location.
 
         Returns a list of standard images if called without arguments.
 
-        Could be made more fancy to allow for more relocatability'''
+        Could be made more fancy to allow for more relocatability"""
         try:
             fsldir = os.environ['FSLDIR']
         except KeyError:

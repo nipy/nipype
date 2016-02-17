@@ -429,7 +429,7 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
     posterior_formulation = traits.Str(argstr='-b %s',
                                        desc=('Atropos posterior formulation and whether or not'
                                              'to use mixture model proportions.'
-                                             '''e.g 'Socrates[1]' (default) or 'Aristotle[1]'.'''
+                                             """e.g 'Socrates[1]' (default) or 'Aristotle[1]'."""
                                              'Choose the latter if you'
                                              'want use the distance priors (see also the -l option'
                                              'for label propagation control).'))
@@ -446,7 +446,7 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
                                 desc='Cortical ROI labels to use as a prior for ATITH.')
     label_propagation = traits.Str(argstr='-l %s',
                                    desc=('Incorporate a distance prior one the posterior formulation.  Should be'
-                                         '''of the form 'label[lambda,boundaryProbability]' where label'''
+                                         """of the form 'label[lambda,boundaryProbability]' where label"""
                                          'is a value of 1,2,3,... denoting label ID.  The label'
                                          'probability for anything outside the current label'
                                          '  = boundaryProbability * exp( -lambda * distanceFromBoundary )'

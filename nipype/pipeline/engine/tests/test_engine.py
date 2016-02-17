@@ -385,7 +385,7 @@ def test_doubleconnect():
     yield assert_raises, Exception, x
 
 
-'''
+"""
 Test for order of iterables
 
 import nipype.pipeline.engine as pe
@@ -415,9 +415,9 @@ wf1.base_dir = os.path.join(os.getcwd(),'testit')
 wf1.run(inseries=True, createdirsonly=True)
 
 wf1.write_graph(graph2use='exec')
-'''
+"""
 
-'''
+"""
 import nipype.pipeline.engine as pe
 import nipype.interfaces.spm as spm
 import os
@@ -453,7 +453,7 @@ workflow.connect([(segment, smooth_wm, [('native_wm_image','in_files')])])
 workflow.run()
 
 workflow.run()
-'''
+"""
 
 # Node
 

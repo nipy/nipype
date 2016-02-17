@@ -433,7 +433,7 @@ class ThresholdOutputSpec(TraitedSpec):
 
 
 class Threshold(SPMCommand):
-    '''Topological FDR thresholding based on cluster extent/size. Smoothness is
+    """Topological FDR thresholding based on cluster extent/size. Smoothness is
     estimated from GLM residuals but is assumed to be the same for all of the
     voxels.
 
@@ -446,7 +446,7 @@ class Threshold(SPMCommand):
     >>> thresh.inputs.contrast_index = 1
     >>> thresh.inputs.extent_fdr_p_threshold = 0.05
     >>> thresh.run() # doctest: +SKIP
-    '''
+    """
     input_spec = ThresholdInputSpec
     output_spec = ThresholdOutputSpec
 
@@ -611,7 +611,7 @@ class ThresholdStatisticsOutputSpec(TraitedSpec):
 
 
 class ThresholdStatistics(SPMCommand):
-    '''Given height and cluster size threshold calculate theoretical probabilities
+    """Given height and cluster size threshold calculate theoretical probabilities
     concerning false positives
 
     Examples
@@ -623,7 +623,7 @@ class ThresholdStatistics(SPMCommand):
     >>> thresh.inputs.contrast_index = 1
     >>> thresh.inputs.height_threshold = 4.56
     >>> thresh.run() # doctest: +SKIP
-    '''
+    """
     input_spec = ThresholdStatisticsInputSpec
     output_spec = ThresholdStatisticsOutputSpec
 

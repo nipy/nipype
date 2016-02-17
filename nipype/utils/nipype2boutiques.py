@@ -51,14 +51,14 @@ def main(argv):
 
 
 def generate_boutiques_descriptor(module, interface_name, ignored_template_inputs, docker_image, docker_index, verbose, ignore_template_numbers):
-    '''
+    """
     Returns a JSON string containing a JSON Boutiques description of a Nipype interface.
     Arguments:
     * module: module where the Nipype interface is declared.
     * interface: Nipype interface.
     * ignored_template_inputs: a list of input names that should be ignored in the generation of output path templates.
     * ignore_template_numbers: True if numbers must be ignored in output path creations.
-    '''
+    """
 
     if not module:
         raise Exception("Undefined module.")
@@ -206,10 +206,10 @@ def get_boutiques_output(name, interface, tool_inputs, verbose=False):
 
 
 def get_type_from_spec_info(spec_info):
-    '''
+    """
     Returns an input type from the spec info. There must be a better
     way to get an input type in Nipype than to parse the spec info.
-    '''
+    """
     if ("an existing file name" in spec_info) or ("input volumes" in spec_info):
         return "File"
     elif ("an integer" in spec_info or "a float" in spec_info):
@@ -220,21 +220,21 @@ def get_type_from_spec_info(spec_info):
 
 
 def is_list(spec_info):
-    '''
+    """
     Returns True if the spec info looks like it describes a list
     parameter. There must be a better way in Nipype to check if an input
     is a list.
-    '''
+    """
     if "a list" in spec_info:
         return True
     return False
 
 
 def get_unique_value(type, id):
-    '''
+    """
     Returns a unique value of type 'type', for input with id 'id',
     assuming id is unique.
-    '''
+    """
     return {
         "File": os.path.abspath(create_tempfile()),
         "Boolean": True,
@@ -244,9 +244,9 @@ def get_unique_value(type, id):
 
 
 def create_tempfile():
-    '''
+    """
     Creates a temp file and returns its name.
-    '''
+    """
     fileTemp = tempfile.NamedTemporaryFile(delete=False)
     fileTemp.write("hello")
     fileTemp.close()
@@ -254,7 +254,7 @@ def create_tempfile():
 
 
 def must_generate_value(name, type, ignored_template_inputs, spec_info, spec, ignore_template_numbers):
-    '''
+    """
     Return True if a temporary value must be generated for this input.
     Arguments:
     * name: input name.
@@ -262,7 +262,7 @@ def must_generate_value(name, type, ignored_template_inputs, spec_info, spec, ig
     * ignored_template_inputs: a list of inputs names for which no value must be generated.
     * spec_info: spec info of the Nipype input
     * ignore_template_numbers: True if numbers must be ignored.
-    '''
+    """
     # Return false when type is number and numbers must be ignored.
     if ignore_template_numbers and type == "Number":
         return False

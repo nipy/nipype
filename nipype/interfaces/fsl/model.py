@@ -1353,11 +1353,11 @@ class SMMOutputSpec(TraitedSpec):
 
 
 class SMM(FSLCommand):
-    '''
+    """
     Spatial Mixture Modelling. For more detail on the spatial mixture modelling see
     Mixture Models with Adaptive Spatial Regularisation for Segmentation with an Application to FMRI Data;
     Woolrich, M., Behrens, T., Beckmann, C., and Smith, S.; IEEE Trans. Medical Imaging, 24(1):1-11, 2005.
-    '''
+    """
     _cmd = 'mm --ld=logdir'
     input_spec = SMMInputSpec
     output_spec = SMMOutputSpec

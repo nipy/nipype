@@ -104,9 +104,9 @@ class Info(object):
 
     @staticmethod
     def standard_image(img_name):
-        '''Grab an image from the standard location.
+        """Grab an image from the standard location.
 
-        Could be made more fancy to allow for more relocatability'''
+        Could be made more fancy to allow for more relocatability"""
         clout = CommandLine('which afni',
                             terminal_output='allatonce').run()
         if clout.runtime.returncode is not 0:

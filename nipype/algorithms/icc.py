@@ -1,13 +1,27 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""
+Algorithms to compute the Interclass Correlation Coefficient
+
+    Change directory to provide relative paths for doctests
+    >>> import os
+    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
+    >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+    >>> os.chdir(datadir)
+
+"""
+
 from __future__ import division
-from builtins import range
+import os
+import numpy as np
 from numpy import ones, kron, mean, eye, hstack, dot, tile
 from scipy.linalg import pinv
+import nibabel as nb
+
+from builtins import range
 from ..interfaces.traits_extension import traits, File
 from ..interfaces.specs import BaseInterfaceInputSpec, TraitedSpec
 from ..interfaces.base import BaseInterface
-import nibabel as nb
-import numpy as np
-import os
 
 
 class ICCInputSpec(BaseInterfaceInputSpec):
@@ -29,12 +43,12 @@ class ICCOutputSpec(TraitedSpec):
 
 
 class ICC(BaseInterface):
-    '''
+    """
     Calculates Interclass Correlation Coefficient (3,1) as defined in
     P. E. Shrout & Joseph L. Fleiss (1979). "Intraclass Correlations: Uses in
     Assessing Rater Reliability". Psychological Bulletin 86 (2): 420-428. This
     particular implementation is aimed at relaibility (test-retest) studies.
-    '''
+    """
     input_spec = ICCInputSpec
     output_spec = ICCOutputSpec
 
@@ -78,7 +92,7 @@ class ICC(BaseInterface):
 
 
 def ICC_rep_anova(data):
-    '''
+    """
     the data (Y) are entered as a 'table' ie subjects are in rows and repeated
     measures in columns
 
@@ -87,7 +101,7 @@ def ICC_rep_anova(data):
     .. math::
 
       Y = XB + E with X = [FaTor / Subjects]
-    '''
+    """
 
     [nb_subjects, nb_conditions] = data.shape
     dfc = nb_conditions - 1

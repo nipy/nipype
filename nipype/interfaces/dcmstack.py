@@ -53,10 +53,10 @@ class NiftiGeneratorBaseInputSpec(TraitedSpec):
 
 
 class NiftiGeneratorBase(BaseInterface):
-    '''Base class for interfaces that produce Nifti files, potentially with
-    embedded meta data.'''
+    """Base class for interfaces that produce Nifti files, potentially with
+    embedded meta data."""
     def _get_out_path(self, meta, idx=None):
-        '''Return the output path for the gernerated Nifti.'''
+        """Return the output path for the gernerated Nifti."""
         if self.inputs.out_format:
             out_fmt = self.inputs.out_format
         else:
@@ -112,7 +112,7 @@ class DcmStackOutputSpec(TraitedSpec):
 
 
 class DcmStack(NiftiGeneratorBase):
-    '''Create one Nifti file from a set of DICOM files. Can optionally embed
+    """Create one Nifti file from a set of DICOM files. Can optionally embed
     meta data.
 
     Example
@@ -124,7 +124,7 @@ class DcmStack(NiftiGeneratorBase):
     >>> stacker.run() # doctest: +SKIP
     >>> result.outputs.out_file # doctest: +SKIP
     '/path/to/cwd/sequence.nii.gz'
-    '''
+    """
     input_spec = DcmStackInputSpec
     output_spec = DcmStackOutputSpec
 
@@ -171,8 +171,8 @@ class GroupAndStackOutputSpec(TraitedSpec):
 
 
 class GroupAndStack(DcmStack):
-    '''Create (potentially) multiple Nifti files for a set of DICOM files.
-    '''
+    """Create (potentially) multiple Nifti files for a set of DICOM files.
+    """
     input_spec = DcmStackInputSpec
     output_spec = GroupAndStackOutputSpec
 
@@ -211,7 +211,7 @@ class LookupMetaInputSpec(TraitedSpec):
 
 
 class LookupMeta(BaseInterface):
-    '''Lookup meta data values from a Nifti with embedded meta data.
+    """Lookup meta data values from a Nifti with embedded meta data.
 
     Example
     -------
@@ -226,7 +226,7 @@ class LookupMeta(BaseInterface):
     9500.0
     >>> result.outputs.TE # doctest: +SKIP
     95.0
-    '''
+    """
     input_spec = LookupMetaInputSpec
     output_spec = DynamicTraitedSpec
 
@@ -281,8 +281,8 @@ class CopyMetaOutputSpec(TraitedSpec):
 
 
 class CopyMeta(BaseInterface):
-    '''Copy meta data from one Nifti file to another. Useful for preserving
-    meta data after some processing steps.'''
+    """Copy meta data from one Nifti file to another. Useful for preserving
+    meta data after some processing steps."""
     input_spec = CopyMetaInputSpec
     output_spec = CopyMetaOutputSpec
 
@@ -347,8 +347,8 @@ def make_key_func(meta_keys, index=None):
 
 
 class MergeNifti(NiftiGeneratorBase):
-    '''Merge multiple Nifti files into one. Merges together meta data
-    extensions as well.'''
+    """Merge multiple Nifti files into one. Merges together meta data
+    extensions as well."""
     input_spec = MergeNiftiInputSpec
     output_spec = MergeNiftiOutputSpec
 
@@ -391,10 +391,10 @@ class SplitNiftiOutputSpec(TraitedSpec):
 
 
 class SplitNifti(NiftiGeneratorBase):
-    '''
+    """
     Split one Nifti file into many along the specified dimension. Each
     result has an updated meta data extension as well.
-    '''
+    """
     input_spec = SplitNiftiInputSpec
     output_spec = SplitNiftiOutputSpec
 

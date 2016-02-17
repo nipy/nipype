@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-'''
+"""
 Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 
     Change directory to provide relative paths for doctests
@@ -9,13 +9,11 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
     >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
     >>> os.chdir(datadir)
 
-'''
+"""
 from __future__ import division
 from builtins import zip
 
 import os.path as op
-from warnings import warn
-
 import numpy as np
 from numpy import linalg as nla
 
@@ -25,7 +23,7 @@ from ..interfaces.traits_extension import traits, File
 from ..interfaces.specs import BaseInterfaceInputSpec, TraitedSpec
 from ..interfaces.base import BaseInterface
 
-iflogger = logging.getLogger('interface')
+IFLOGGER = logging.getLogger('interface')
 
 
 class TVTKBaseInterface(BaseInterface):
@@ -37,7 +35,7 @@ class TVTKBaseInterface(BaseInterface):
             from tvtk.tvtk_classes.vtk_version import vtk_build_version
             self._vtk_major = int(vtk_build_version[0])
         except ImportError:
-            iflogger.warning('VTK version-major inspection using tvtk failed.')
+            IFLOGGER.warning('VTK version-major inspection using tvtk failed.')
 
         super(TVTKBaseInterface, self).__init__(**inputs)
 
@@ -404,6 +402,5 @@ class P2PDistance(ComputeMeshWarp):
 
     def __init__(self, **inputs):
         super(P2PDistance, self).__init__(**inputs)
-        warn(('This interface has been deprecated since 1.0, please use '
-              'ComputeMeshWarp'),
-             DeprecationWarning)
+        IFLOGGER.warn('This interface has been deprecated since 1.0, please use '
+                      'ComputeMeshWarp')
