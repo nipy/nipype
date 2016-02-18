@@ -47,6 +47,7 @@ from hashlib import sha1
 import numpy as np
 import networkx as nx
 
+from ...external.six import string_types
 from ...utils.misc import package_check, str2bool
 from ... import config, logging
 
@@ -55,11 +56,10 @@ from ...utils.filemanip import md5, save_json, FileNotFoundError, filename_to_li
     list_to_filename, copyfiles, fnames_presuffix, loadpkl, split_filename, load_json, \
     savepkl, write_rst_header, write_rst_dict, write_rst_list
 
-from ...interfaces.traits_extension import traits, Undefined, isdefined
-from ...interfaces.specs import InputMultiPath, DynamicTraitedSpec
-from ...interfaces.base import CommandLine, Bunch, InterfaceResult, Interface
+from ...interfaces.base import (traits, Undefined, isdefined,
+                                InputMultiPath, DynamicTraitedSpec,
+                                CommandLine, Bunch, InterfaceResult, Interface)
 
-from ...external.six import string_types
 from .utils import (modify_paths, make_output_dir, write_workflow_prov,
                     clean_working_directory, format_dot, topological_sort,
                     get_print_name, merge_dict, evaluate_connect_function)

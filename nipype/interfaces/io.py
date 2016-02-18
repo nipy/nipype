@@ -35,11 +35,10 @@ from warnings import warn
 
 import sqlite3
 
-from .traits_extension import traits, Undefined, File, Directory, isdefined
+from .traits_extension import (traits, Undefined, File, Directory, isdefined, InputMultiPath,
+                               OutputMultiPath)
 from .base import BaseInterface
-from .specs import (TraitedSpec, DynamicTraitedSpec,
-                    BaseInterfaceInputSpec, InputMultiPath,
-                    OutputMultiPath)
+from .specs import (TraitedSpec, DynamicTraitedSpec, BaseInterfaceInputSpec)
 from .. import config
 from ..external.six import string_types
 from ..utils.filemanip import (copyfile, list_to_filename,

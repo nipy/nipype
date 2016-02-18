@@ -17,6 +17,7 @@ all of these bugs and they've been fixed in enthought svn repository
 """
 import os
 import re
+import itertools as itools
 
 from ..external.six import string_types
 # perform all external trait imports here
@@ -124,29 +125,43 @@ class File (BaseFile):
 class GenFile(File):
     """ A file which default name is automatically generated from other
     traits.
+
+    >>> # The traits start undefined
+    >>> from nipype.interfaces.base import GenFile, Undefined
+    >>> class A(TraitedSpec):
+    ...     src = File(exists=False)
+    ...     foo = GenFile(template='{src}_foo')
+    >>> a = A()
+    >>> a.src
+    <undefined>
+    >>> a.foo
+    <undefined>
+
+    >>> # If the source trait is set, foo can be sourced ...
+    >>> a.src = '/software/temp/src.txt'
+    >>> a.foo
+    'src_foo.txt'
+
+    >>> # ... and updates with the update of src ...
+    >>> a.src = '/software/temp/foo.txt'
+    >>> a.foo
+    'foo_foo.txt'
+
+    >>> # ... util it is explicitly set.
+    >>> a.foo = '/software/temp/goo.txt'
+    >>> a.foo
+    '/software/temp/goo.txt'
+
+    >>> # Setting it Undefined will restore the sourcing behavior
+    >>> a.foo = Undefined
+    >>> a.foo
+    'foo_foo.txt'
+
     """
+
     def __init__(self, template=None, keep_extension=True, value='',
                  filter=None, auto_set=False, entries=0, exists=False, **metadata):
-        """ Creates a File trait.
-
-        Parameters
-        ----------
-        value : string
-            The default value for the trait
-        filter : string
-            A wildcard string to filter filenames in the file dialog box used by
-            the attribute trait editor.
-        auto_set : boolean
-            Indicates whether the file editor updates the trait value after
-            every key stroke.
-        exists : boolean
-            Indicates whether the trait value must be an existing file or
-            not.
-
-        Default Value
-        -------------
-        *value* or ''
-        """
+        """ Creates a GenFile trait. """
 
         if template is None or not isinstance(template, string_types):
             raise TraitError('GenFile requires a valid template argument')
@@ -165,7 +180,7 @@ class GenFile(File):
                     'invalid source field found in template \'%s\'' % nsrc)
 
         super(GenFile, self).__init__(value, filter, auto_set, entries, exists,
-                                   **metadata)
+                                      **metadata)
 
 
     def validate(self, object, name, value):
@@ -187,19 +202,40 @@ class GenFile(File):
 
     def get(self, obj, name):
         # Compute expected name iff trait is not set
+
         if self.value is None:
             srcvals = {}
             ext = ''
             for nsrc in self.name_source:
-                IFLOGGER.debug('nsrc=%s', nsrc)
-                val = getattr(obj, nsrc)
-                try:
-                    _, val, ext = split_filename(val)
-                except:
-                    pass
+                srcvalue = getattr(obj, nsrc)
 
-                if isdefined(val):
-                    srcvals.update({nsrc: val})
+                if not isdefined(srcvalue):
+                    return Undefined
+
+                if isinstance(srcvalue, string_types):
+                    vallist = [srcvalue]
+                else:
+                    vallist = list(srcvalue)
+
+                outvals = []
+                for val in vallist:
+                    try:
+                        _, val, ext = split_filename(val)
+                    except:
+                        pass
+
+                    if isdefined(val):
+                        outvals.append(val)
+
+                if not outvals:
+                    continue
+
+                if isinstance(srcvalue, string_types):
+                    srcvals.update({nsrc: outvals[0]})
+                elif isinstance(srcvalue, tuple):
+                    srcvals.update({nsrc: tuple(outvals)})
+                else:
+                    srcvals.update({nsrc: outvals})
 
             # Check that no source is missing
             missing = list(set(self.name_source) - set(srcvals.keys()))
@@ -210,13 +246,225 @@ class GenFile(File):
                 return retval
             else:
                 return Undefined
-        return self.value
+        return self.get_value(obj, name)
 
     def set(self, obj, name, value):
-        if isdefined(value):
-            self.value = value
+        self.set_value(obj, name, value)
+
+
+class MultiPath(traits.List):
+    """ Abstract class - shared functionality of input and output MultiPath
+    """
+
+    def validate(self, obj, name, value):
+        if not isdefined(value) or \
+                (isinstance(value, list) and len(value) == 0):
+            return Undefined
+        newvalue = value
+
+        if not isinstance(value, list) \
+            or (self.inner_traits() and
+                isinstance(self.inner_traits()[0].trait_type,
+                           traits.List) and not
+                isinstance(self.inner_traits()[0].trait_type,
+                           InputMultiPath) and
+                isinstance(value, list) and
+                value and not
+                isinstance(value[0], list)):
+            newvalue = [value]
+        value = super(MultiPath, self).validate(obj, name, newvalue)
+
+        if len(value) > 0:
+            return value
+
+        self.error(obj, name, value)
+
+
+class GenMultiFile(traits.List):
+    def __init__(self, template=None, keep_extension=True, **metadata):
+        if template is None or not isinstance(template, string_types):
+            raise TraitError('GenMultiFile requires a valid template argument')
+
+        self.name_source = [i[1:-1].split('!')[0].split(':')[0].split('[')[0]
+                            for i in re.findall('\{.*?\}', template)]
+        self.template = template.format
+        self.keep_ext = keep_extension
+
+        for nsrc in self.name_source:
+            if not isinstance(nsrc, string_types):
+                raise TraitError('template contains an invalid name_source '
+                                 'entry (found %s).' % nsrc)
+            if '%' in nsrc or len(nsrc) == 0:
+                raise TraitError(
+                    'invalid source field found in template \'%s\'' % nsrc)
+        super(GenMultiFile, self).__init__(**metadata)
+
+    def validate(self, obj, name, value):
+        if not isdefined(value) or \
+                (isinstance(value, list) and len(value) == 0):
+            return Undefined
+        newvalue = value
+
+        if not isinstance(value, list) \
+            or (self.inner_traits() and
+                isinstance(self.inner_traits()[0].trait_type,
+                           traits.List) and not
+                isinstance(self.inner_traits()[0].trait_type,
+                           InputMultiPath) and
+                isinstance(value, list) and
+                value and not
+                isinstance(value[0], list)):
+            newvalue = [value]
+        value = super(GenMultiFile, self).validate(obj, name, newvalue)
+
+        if len(value) > 0:
+            return value
+
+        self.error(obj, name, value)
+
+    def get(self, obj, name):
+        # Compute expected name iff trait is not set
+        value = self.get_value(obj, name)
+
+        if not isdefined(value) or not value:
+            srcvals = {}
+            ext = ''
+            for nsrc in self.name_source:
+                srcvalue = getattr(obj, nsrc)
+
+                if not isdefined(srcvalue):
+                    return Undefined
+
+                if isinstance(srcvalue, string_types):
+                    vallist = [srcvalue]
+                else:
+                    vallist = list(srcvalue)
+
+                outvals = []
+                for val in vallist:
+                    try:
+                        _, val, ext = split_filename(val)
+                    except:
+                        pass
+
+                    if isdefined(val):
+                        outvals.append(val)
+
+                if outvals:
+                    srcvals.update({nsrc: outvals})
+
+            # Check that no source is missing
+            missing = list(set(self.name_source) - set(srcvals.keys()))
+            if not missing:
+                results = []
+                combs = list(itools.product(*tuple(srcvals[k] for k in self.name_source)))
+
+                # Get the formatting dictionaries ready
+                dlist = [{self.name_source[i]: v for i, v in enumerate(kvalues)}
+                          for kvalues in combs]
+                # ... and create a formatted entry for each of them
+                for fmtdict in dlist:
+                    retval = self.template(**fmtdict)
+                    if self.keep_ext:
+                        retval += ext
+                    results.append(retval)
+
+                if results:
+                    if len(results) == 1:
+                        return results[0]
+                    return results
+
+            return Undefined
+
+        if len(value) == 0:
+            return Undefined
+        elif len(value) == 1:
+            return value[0]
         else:
-            self.value = None
+            return value
+
+    def set(self, obj, name, value):
+        self.set_value(obj, name, value)
+
+
+class OutputMultiPath(MultiPath):
+    """ Implements a user friendly traits that accepts one or more
+    paths to files or directories. This is the output version which
+    return a single string whenever possible (when it was set to a
+    single value or a list of length 1). Default value of this trait
+    is _Undefined. It does not accept empty lists.
+
+    XXX This should only be used as a final resort. We should stick to
+    established Traits to the extent possible.
+
+    XXX This needs to be vetted by somebody who understands traits
+
+    >>> from nipype.interfaces.base import OutputMultiPath
+    >>> class A(TraitedSpec):
+    ...     foo = OutputMultiPath(File(exists=False))
+    >>> a = A()
+    >>> a.foo
+    <undefined>
+
+    >>> a.foo = '/software/temp/foo.txt'
+    >>> a.foo
+    '/software/temp/foo.txt'
+
+    >>> a.foo = ['/software/temp/foo.txt']
+    >>> a.foo
+    '/software/temp/foo.txt'
+
+    >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    >>> a.foo
+    ['/software/temp/foo.txt', '/software/temp/goo.txt']
+
+    """
+
+    def get(self, obj, name):
+        value = self.get_value(obj, name)
+        if len(value) == 0:
+            return Undefined
+        elif len(value) == 1:
+            return value[0]
+        else:
+            return value
+
+    def set(self, obj, name, value):
+        self.set_value(obj, name, value)
+
+
+class InputMultiPath(MultiPath):
+    """ Implements a user friendly traits that accepts one or more
+    paths to files or directories. This is the input version which
+    always returns a list. Default value of this trait
+    is _Undefined. It does not accept empty lists.
+
+    XXX This should only be used as a final resort. We should stick to
+    established Traits to the extent possible.
+
+    XXX This needs to be vetted by somebody who understands traits
+
+    >>> from nipype.interfaces.base import InputMultiPath
+    >>> class A(TraitedSpec):
+    ...     foo = InputMultiPath(File(exists=False))
+    >>> a = A()
+    >>> a.foo
+    <undefined>
+
+    >>> a.foo = '/software/temp/foo.txt'
+    >>> a.foo
+    ['/software/temp/foo.txt']
+
+    >>> a.foo = ['/software/temp/foo.txt']
+    >>> a.foo
+    ['/software/temp/foo.txt']
+
+    >>> a.foo = ['/software/temp/foo.txt', '/software/temp/goo.txt']
+    >>> a.foo
+    ['/software/temp/foo.txt', '/software/temp/goo.txt']
+
+    """
+    pass
 
 
 # -------------------------------------------------------------------------------

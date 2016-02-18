@@ -21,7 +21,8 @@ from nibabel import load
 
 from builtins import range
 
-from ..base import (TraitedSpec, File, GenFile, InputMultiPath, OutputMultiPath, traits, isdefined)
+from ..base import (TraitedSpec, File, GenFile, GenMultiFile,
+                    InputMultiPath, OutputMultiPath, traits, isdefined)
 from ..fsl.base import FSLCommand, FSLCommandInputSpec
 from ...utils.filemanip import split_filename
 
@@ -157,10 +158,9 @@ class BET(FSLCommand):
 
 class FASTInputSpec(FSLCommandInputSpec):
     """ Defines inputs (trait classes) for FAST """
-    in_files = InputMultiPath(File(exists=True), copyfile=False,
-                              desc='image, or multi-channel set of images, '
-                              'to be segmented',
-                              argstr='%s', position=-1, mandatory=True)
+    in_files = InputMultiPath(
+        File(exists=True), copyfile=False, argstr='%s', position=-1, mandatory=True,
+        desc='image, or multi-channel set of images, to be segmented')
     number_classes = traits.Range(low=1, high=10, argstr='-n %d',
                                   desc='number of tissue-type classes')
     output_biasfield = traits.Bool(desc='output estimated bias field',
@@ -224,19 +224,21 @@ class FASTInputSpec(FSLCommandInputSpec):
     probability_maps = traits.Bool(desc='outputs individual probability maps',
                                    argstr='-p')
 
-    out_basename = GenFile(
-        ns='in_files', template='%s', keep_extension=False, argstr='-o %s',
-        desc='base name of output files')
+    # Automatically generated names
+    out_basename = GenFile(template='{in_files[0]}', argstr='-o %s', keep_extension=False,
+                           desc='base name of output files')
+    tissue_class_map = GenFile(template='{out_basename}_seg{output_type_}',
+                               desc='binary segmented volume file one val for each class')
+    partial_volume_map = GenFile(template='{out_basename}_pveseg{output_type_}',
+                                 desc="segmentation corresponding to the partial volume files")
+    mixeltype = GenFile(template='{out_basename}_mixeltype{output_type_}',
+                        desc="path/name of mixeltype volume file ")
 
-    tissue_class_map = GenFile(
-        ns=['out_basename', 'output_type_'], template='%s_seg%s',
-        desc='binary segmented volume file one val for each class')
-    partial_volume_map = GenFile(
-        ns=['out_basename', 'output_type_'], template='%s_pveseg%s',
-        desc="segmentation corresponding to the partial volume files")
-    mixeltype = GenFile(
-        ns=['out_basename', 'output_type_'], template='%s_mixeltype%s',
-        desc="path/name of mixeltype volume file ")
+    restored_image = GenMultiFile(
+        template='{in_files}_restore{output_type_}',
+        desc='restored images (one for each input image) named according to the input images')
+    bias_field = GenMultiFile(
+        template='{in_files}_bias{output_type_}', desc='Estimated bias field')
 
     def _format_arg(self, name, spec, value):
         # first do what should be done in general
@@ -255,13 +257,14 @@ class FASTOutputSpec(TraitedSpec):
     partial_volume_map = File(desc="path/name of partial volume file _pveseg")
     mixeltype = File(desc="path/name of mixeltype volume file _mixeltype")
 
-    tissue_class_files = OutputMultiPath(File(desc='path/name of binary segmented volumes '
-                                              'one file for each class  _seg_x'))
     restored_image = OutputMultiPath(File(desc='restored images (one for each input image) '
                                           'named according to the input images _restore'))
+    bias_field = OutputMultiPath(File(desc='Estimated bias field _bias'))
+
+    tissue_class_files = OutputMultiPath(File(desc='path/name of binary segmented volumes '
+                                              'one file for each class  _seg_x'))
     partial_volume_files = OutputMultiPath(File(desc='path/name of partial volumes files '
                                                 'one for each class, _pve_x'))
-    bias_field = OutputMultiPath(File(desc='Estimated bias field _bias'))
     probability_maps = OutputMultiPath(File(desc='filenames, one for each class, for each '
                                             'input, prob_x'))
 
