@@ -192,40 +192,6 @@ class BaseTraitedSpec(traits.HasTraits):
                     out = undefinedval
         return out
 
-    def format_ns(self, source_names, out_name, source_traits=None):
-        if source_traits is None:
-            source_traits = self
-
-        if isinstance(source_names, string_types):
-            source_names = [source_names]
-
-        values = [None] * len(source_names)
-
-        ext = ''
-        for i, srcname in enumerate(source_names):
-            src_value = getattr(self, srcname)
-
-            if isinstance(source_traits.traits()[srcname], File):
-                _, src_value, ext = split_filename(src_value)
-            values[i] = src_value
-
-        out_spec = self.traits()[out_name]
-        keep_ext = not isdefined(out_spec.keep_extension) or out_spec.keep_extension
-        name_template = out_spec.name_template
-        if name_template is None:
-            name_template = '%s_generated'
-
-        retval = name_template % tuple(values)
-        if isinstance(out_spec, File):
-            if keep_ext:
-                retval += ext
-            else:
-                retval = self._overload_extension(retval, out_name, ext)
-        return retval
-
-    def _overload_extension(self, value, name=None, ext=None):
-        return value
-
     def get_hashval(self, hash_method=None):
         """Return a dictionary of our items with hashes for each file.
 
@@ -450,92 +416,6 @@ class BaseInputSpec(BaseTraitedSpec):
 
         for elem in list(self.optional_items()):
             self._check_requires(*elem)
-
-    def _resolve_namesource(self, name, chain=None):
-        if chain is None:
-            chain = []
-
-        spec = self.traits()[name]
-        retval = getattr(self, name)
-
-        name_template = spec.name_template
-        # Default name template
-        if name_template is None:
-            if '%' in retval:
-                name_template = retval
-                retval = Undefined
-            else:
-                name_template = "%s_generated"
-
-        # If input is already set, do nothing
-        if isdefined(retval):
-            return retval
-
-        # Prevent entering here twice
-        if name in chain:
-            raise InterfaceInputsError('Mutually pointing name_sources')
-        chain.append(name)
-
-        keep_ext = not isdefined(spec.keep_extension) or spec.keep_extension
-        name_source = spec.name_source
-        if isinstance(name_source, string_types):
-            name_source = [name_source]
-        if isinstance(name_source, tuple):
-            name_source = list(name_source)
-
-        if not isinstance(name_source, list):
-            raise ValueError(
-                'name_source of input \'%s\' sould be a string, or list/tuple of '
-                'strings denoting input trait names, but got %s' % (name, name_source))
-
-        sourced_values = [None] * len(name_source)
-
-        for i, nsrc in enumerate(name_source):
-            if not isinstance(nsrc, string_types):
-                raise ValueError(('name_source \'%s\' of \'%s\' trait sould be an '
-                                  'input trait name') % (nsrc, name))
-
-            src_value = getattr(self, nsrc)
-            if not isdefined(src_value):
-                sourced_values[i] = self._resolve_namesource(nsrc, chain)
-            else:
-                if isinstance(src_value, list):
-                    raise NotImplementedError('Multiple sourced values not allowed yet')
-
-                try:
-                    # special treatment for files
-                    _, base, ext = split_filename(src_value)
-                except AttributeError:
-                    base = src_value
-                    ext = ''
-                sourced_values[i] = base
-
-        retval = name_template % tuple(sourced_values)
-        if keep_ext:
-            retval += ext
-        else:
-            retval = self._overload_extension(retval, name, ext)
-        return retval
-
-    def update_autonames(self):
-        """
-        Checks for inputs undefined but providing name_source
-        """
-
-        metadata = dict(name_source=lambda t: t is not None)
-        for name, spec in self.traits(**metadata).items():
-            value = getattr(self, name)
-
-            if isdefined(value):
-                continue
-
-            name_source = spec.name_source
-            if name_source is not None:
-                value = self._resolve_namesource(name)
-
-                if isdefined(value):
-                    setattr(self, name, value)
-
 
     def get_filecopy_info(self):
         """ Provides information about file inputs to copy or link to cwd.

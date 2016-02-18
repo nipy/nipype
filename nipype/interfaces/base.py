@@ -467,7 +467,6 @@ class BaseInterface(Interface):
         self.outputs = self.output_spec()
         self.inputs.set(**inputs)
         self.inputs.check_inputs()
-        self.inputs.update_autonames()
         if self.version:
             self.inputs.check_version(LooseVersion(str(self.version)))
 
@@ -836,7 +835,6 @@ class CommandLine(BaseInterface):
         validates arguments and generates command line"""
         self.outputs = self.output_spec()
         self.inputs.check_inputs()
-        self.inputs.update_autonames()
         allargs = self.inputs.parse_args()
         allargs.insert(0, self.cmd)
         return ' '.join(allargs)

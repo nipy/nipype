@@ -21,7 +21,7 @@ from nibabel import load
 
 from builtins import range
 
-from ..base import (TraitedSpec, File, InputMultiPath, OutputMultiPath, traits, isdefined)
+from ..base import (TraitedSpec, File, GenFile, InputMultiPath, OutputMultiPath, traits, isdefined)
 from ..fsl.base import FSLCommand, FSLCommandInputSpec
 from ...utils.filemanip import split_filename
 
@@ -32,33 +32,28 @@ IFLOGGER = logging.getLogger('interface')
 class BETInputSpec(FSLCommandInputSpec):
     # We use position args here as list indices - so a negative number
     # will put something on the end
-    in_file = File(exists=True,
-                   desc='input file to skull strip',
-                   argstr='%s', position=0, mandatory=True)
-    out_file = File(desc='name of output skull stripped image',
-                    argstr='%s', position=1, name_source=['in_file'],
-                    name_template='%s_brain', hash_files=False)
-    outline = traits.Bool(desc='create surface outline image',
-                          argstr='-o')
-    mask = traits.Bool(desc='create binary mask image',
-                       argstr='-m')
-    skull = traits.Bool(desc='create skull image',
-                        argstr='-s')
-    no_output = traits.Bool(argstr='-n',
+    in_file = File(exists=True, argstr='%s', position=0, mandatory=True,
+                   desc='input file to skull strip')
+    out_file = GenFile(argstr='%s', position=1, ns=['in_file'], template='%s_brain',
+                       hash_files=False, desc='name of output skull stripped image')
+    outline = traits.Bool(False, usedefault=True, argstr='-o',
+                          desc='create surface outline image')
+    mask = traits.Bool(False, usedefault=True, argstr='-m',
+                       desc='create binary mask image')
+    skull = traits.Bool(False, usedefault=True, argstr='-s',
+                        desc='create skull image')
+    no_output = traits.Bool(False, usedefault=True, argstr='-n',
                             desc="Don't generate segmented output")
-    frac = traits.Float(desc='fractional intensity threshold',
-                        argstr='-f %.2f')
-    vertical_gradient = traits.Float(argstr='-g %.2f',
-                                     desc='vertical gradient in fractional intensity '
-                                     'threshold (-1, 1)')
-    radius = traits.Int(argstr='-r %d', units='mm',
-                        desc="head radius")
-    center = traits.List(traits.Int, desc='center of gravity in voxels',
-                         argstr='-c %s', minlen=0, maxlen=3,
-                         units='voxels')
-    threshold = traits.Bool(argstr='-t',
+    frac = traits.Float(desc='fractional intensity threshold', argstr='-f %.2f')
+    vertical_gradient = traits.Float(
+      argstr='-g %.2f', desc='vertical gradient in fractional intensity '
+                             'threshold (-1, 1)')
+    radius = traits.Int(argstr='-r %d', units='mm', desc="head radius")
+    center = traits.List(traits.Int, argstr='-c %s', minlen=0, maxlen=3, units='voxels',
+                         desc='center of gravity in voxels')
+    threshold = traits.Bool(False, usedefault=True, argstr='-t',
                             desc="apply thresholding to segmented brain image and mask")
-    mesh = traits.Bool(argstr='-e',
+    mesh = traits.Bool(False, usedefault=True, argstr='-e',
                        desc="generate a vtk mesh brain surface")
     # the remaining 'options' are more like modes (mutually exclusive) that
     # FSL actually implements in a shell script wrapper around the bet binary.
@@ -67,9 +62,9 @@ class BETInputSpec(FSLCommandInputSpec):
     # supported
     _xor_inputs = ('functional', 'reduce_bias', 'robust', 'padding',
                    'remove_eyes', 'surfaces', 't2_guided')
-    robust = traits.Bool(desc='robust brain centre estimation '
-                              '(iterates BET several times)',
-                         argstr='-R', xor=_xor_inputs)
+    robust = traits.Bool(False, usedefault=True, argstr='-R', xor=_xor_inputs,
+                         desc='robust brain centre estimation '
+                              '(iterates BET several times)')
     padding = traits.Bool(desc='improve BET if FOV is very small in Z '
                                '(by temporarily padding end slices)',
                           argstr='-Z', xor=_xor_inputs)
@@ -87,28 +82,44 @@ class BETInputSpec(FSLCommandInputSpec):
                              desc="apply to 4D fMRI data")
     reduce_bias = traits.Bool(argstr='-B', xor=_xor_inputs,
                               desc="bias field and neck cleanup")
+    mask_file = GenFile(ns='in_file', template='%s_mask',
+                        desc="path/name of binary brain mask")
+    meshfile = GenFile(
+        ns='in_file', template='%s_mesh.vtk', keep_extension=False,
+        desc="path/name of vtk mesh file")
+    outline_file = GenFile(ns='in_file', template='%s_overlay',
+                           desc="path/name of outline file")
+    inskull_mask_file = GenFile(ns='in_file', template='%s_inskull_mask',
+                                desc="path/name of inskull mask")
+    inskull_mesh_file = GenFile(
+        ns='in_file', template='%s_inskull_mesh.vtk', keep_extension=False,
+        desc="path/name of inskull mesh outline")
+    outskull_mask_file = GenFile(ns='in_file', template='%s_outskull_mask',
+                                 desc="path/name of outskull mask")
+    outskull_mesh_file = GenFile(
+        ns='in_file', template='%s_outskull_mesh.vtk', keep_extension=False,
+        desc="path/name of outskull mesh outline")
+    outskin_mask_file = GenFile(ns='in_file', template='%s_outskin_mask',
+                                desc="path/name of outskin mask")
+    outskin_mesh_file = GenFile(
+        ns='in_file', template='%s_outskin_mesh.vtk', keep_extension=False,
+        desc="path/name of outskin mesh outline")
+    skull_mask_file = GenFile(ns='in_file', template='%s_skull_mask',
+                              desc="path/name of skull mask")
+
 
 
 class BETOutputSpec(TraitedSpec):
     out_file = File(desc="path/name of skullstripped file")
-    mask_file = File(name_source='in_file', name_template='%s_mask',
-                     desc="path/name of binary brain mask")
-    meshfile = File(name_source='in_file', name_template='%s_mesh.vtk',
-                    keep_extension=False, desc="path/name of vtk mesh file")
-    outline_file = File(name_source='in_file', name_template='%s_overlay',
-                        desc="path/name of outline file")
-    inskull_mask_file = File(name_source='in_file', name_template='%s_inskull_mask',
-                             desc="path/name of inskull mask")
-    inskull_mesh_file = File(name_source='in_file', name_template='%s_inskull_mesh.vtk',
-                             keep_extension=False, desc="path/name of inskull mesh outline")
-    outskull_mask_file = File(name_source='in_file', name_template='%s_outskull_mask',
-                              desc="path/name of outskull mask")
-    outskull_mesh_file = File(name_source='in_file', name_template='%s_outskull_mesh.vtk',
-                              keep_extension=False, desc="path/name of outskull mesh outline")
-    outskin_mask_file = File(name_source='in_file', name_template='%s_outskin_mask',
-                             desc="path/name of outskin mask")
-    outskin_mesh_file = File(name_source='in_file', name_template='%s_outskin_mesh.vtk',
-                             keep_extension=False, desc="path/name of outskin mesh outline")
+    mask_file = File(desc="path/name of binary brain mask")
+    meshfile = File(desc="path/name of vtk mesh file")
+    outline_file = File(desc="path/name of outline file")
+    inskull_mask_file = File(desc="path/name of inskull mask")
+    inskull_mesh_file = File(desc="path/name of inskull mesh outline")
+    outskull_mask_file = File(desc="path/name of outskull mask")
+    outskull_mesh_file = File(desc="path/name of outskull mesh outline")
+    outskin_mask_file = File(desc="path/name of outskin mask")
+    outskin_mesh_file = File(desc="path/name of outskin mesh outline")
     skull_mask_file = File(desc="path/name of skull mask")
 
 
