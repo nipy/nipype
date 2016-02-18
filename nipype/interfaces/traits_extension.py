@@ -166,7 +166,7 @@ class GenFile(File):
         if template is None or not isinstance(template, string_types):
             raise TraitError('GenFile requires a valid template argument')
 
-        self.name_source = [i[1:-1].split('!')[0].split(':')[0].split('[')[0]
+        self.name_source = [i[1:-1].split('.')[0].split('!')[0].split(':')[0].split('[')[0]
                             for i in re.findall('\{.*?\}', template)]
         self.template = template.format
         self.keep_ext = keep_extension
@@ -281,11 +281,66 @@ class MultiPath(traits.List):
 
 
 class GenMultiFile(traits.List):
-    def __init__(self, template=None, keep_extension=True, **metadata):
+    """ Traits to generate lists of files.
+
+    >>> # The traits start undefined
+    >>> from nipype.interfaces.base import GenFile, Undefined, traits
+    >>> class A(TraitedSpec):
+    ...     src = InputMultiPath(File(exists=False))
+    ...     foo = GenMultiFile(template='{src}_foo')
+    >>> a = A()
+    >>> a.src
+    <undefined>
+    >>> a.foo
+    <undefined>
+
+    >>> # If the source trait is set, foo can be sourced ...
+    >>> a.src = ['/software/temp/src1.txt', '/software/temp/src2.txt']
+    >>> a.foo
+    ['src1_foo.txt', 'src2_foo.txt']
+
+    >>> # ... and updates with the update of src ...
+    >>> a.src = ['/software/temp/foo1.txt', '/software/temp/foo2.txt']
+    >>> a.foo
+    ['foo1_foo.txt', 'foo2_foo.txt']
+
+    >>> # ... util it is explicitly set.
+    >>> a.foo = ['/software/temp/goo1.txt', '/software/temp/goo2.txt']
+    >>> a.foo
+    ['/software/temp/goo1.txt', '/software/temp/goo2.txt']
+
+    >>> # Setting it Undefined will restore the sourcing behavior
+    >>> a.foo = Undefined
+    >>> a.foo
+    ['foo1_foo.txt', 'foo2_foo.txt']
+
+    >>> # It works with several replacements and defining ranges
+    >>> class B(TraitedSpec):
+    ...     src = File(exists=False)
+    ...     num = traits.Int()
+    ...     foo = GenMultiFile(template='{src}_foo_{num:03d}', range_source='num')
+    >>> a.src = '/software/temp/source.txt'
+    >>> a.num = 3
+    >>> a.foo
+    ['source_foo_000.txt', 'source_foo_001.txt', 'source_foo_002.txt']
+
+    >>> # And altogether with InputMultiPaths
+    >>> class B(TraitedSpec):
+    ...     src = InputMultiPath(File(exists=False))
+    ...     num = traits.Int()
+    ...     foo = GenMultiFile(template='{src}_foo_{num:03d}', range_source='num')
+    >>> a.src = ['/software/temp/source.txt', '/software/temp/alt.txt']
+    >>> a.num = 2
+    >>> a.foo
+    ['source_foo_000.txt', 'alt_foo_000.txt', 'source_foo_001.txt', 'alt_foo_001.txt']
+
+
+    """
+    def __init__(self, template=None, keep_extension=True, range_source=None, **metadata):
         if template is None or not isinstance(template, string_types):
             raise TraitError('GenMultiFile requires a valid template argument')
 
-        self.name_source = [i[1:-1].split('!')[0].split(':')[0].split('[')[0]
+        self.name_source = [i[1:-1].split('.')[0].split('!')[0].split(':')[0].split('[')[0]
                             for i in re.findall('\{.*?\}', template)]
         self.template = template.format
         self.keep_ext = keep_extension
@@ -297,6 +352,19 @@ class GenMultiFile(traits.List):
             if '%' in nsrc or len(nsrc) == 0:
                 raise TraitError(
                     'invalid source field found in template \'%s\'' % nsrc)
+
+        self.range_source = None
+        if range_source is not None:
+            if not isinstance(range_source, string_types):
+                raise TraitError(
+                    'range_source is not valid (found %s).' % range_source)
+
+            if range_source not in self.name_source:
+                raise TraitError(
+                    'range_source field should also be found in the'
+                    ' template (valid fields = %s).' % self.name_source)
+            self.range_source = range_source
+
         super(GenMultiFile, self).__init__(**metadata)
 
     def validate(self, obj, name, value):
@@ -334,6 +402,10 @@ class GenMultiFile(traits.List):
 
                 if not isdefined(srcvalue):
                     return Undefined
+
+                if self.range_source is not None and nsrc == self.range_source:
+                    srcvalue = range(int(srcvalue))
+                    vallist = srcvalue
 
                 if isinstance(srcvalue, string_types):
                     vallist = [srcvalue]

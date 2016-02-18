@@ -161,7 +161,7 @@ class FASTInputSpec(FSLCommandInputSpec):
     in_files = InputMultiPath(
         File(exists=True), copyfile=False, argstr='%s', position=-1, mandatory=True,
         desc='image, or multi-channel set of images, to be segmented')
-    number_classes = traits.Range(low=1, high=10, argstr='-n %d',
+    number_classes = traits.Range(low=1, high=10, argstr='-n %d', usedefault=True, default=3,
                                   desc='number of tissue-type classes')
     output_biasfield = traits.Bool(desc='output estimated bias field',
                                    argstr='-b')
@@ -234,11 +234,24 @@ class FASTInputSpec(FSLCommandInputSpec):
     mixeltype = GenFile(template='{out_basename}_mixeltype{output_type_}',
                         desc="path/name of mixeltype volume file ")
 
+    # Automatically generated lists of names, one element per in_files
     restored_image = GenMultiFile(
         template='{in_files}_restore{output_type_}',
         desc='restored images (one for each input image) named according to the input images')
     bias_field = GenMultiFile(
         template='{in_files}_bias{output_type_}', desc='Estimated bias field')
+
+    # Automatically generated lists of names, using range
+    tissue_class_files = GenMultiFile(
+        template='{out_basename}_seg_{number_classes:d}{output_type_}', range_source='number_classes',
+        desc='path/name of binary segmented volumes one file for each class  _seg_x')
+    partial_volume_files = GenMultiFile(
+        template='{out_basename}_pve_{number_classes:d}{output_type_}', range_source='number_classes',
+        desc='path/name of partial volumes files one for each class, _pve_x')
+    probability_maps_files = GenMultiFile(
+        template='{out_basename}_prob_{number_classes:d}{output_type_}', range_source='number_classes',
+        desc='filenames, one for each class, for each input, prob_x', output_name='probability_maps')
+
 
     def _format_arg(self, name, spec, value):
         # first do what should be done in general
@@ -260,6 +273,7 @@ class FASTOutputSpec(TraitedSpec):
     restored_image = OutputMultiPath(File(desc='restored images (one for each input image) '
                                           'named according to the input images _restore'))
     bias_field = OutputMultiPath(File(desc='Estimated bias field _bias'))
+
 
     tissue_class_files = OutputMultiPath(File(desc='path/name of binary segmented volumes '
                                               'one file for each class  _seg_x'))
