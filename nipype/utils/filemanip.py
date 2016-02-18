@@ -20,7 +20,6 @@ import numpy as np
 
 from .misc import is_container
 from ..external.six import string_types
-from ..interfaces.traits_extension import isdefined
 
 from .. import logging, config
 fmlogger = logging.getLogger("filemanip")
@@ -134,7 +133,7 @@ def fname_presuffix(fname, prefix='', suffix='', newpath=None, use_ext=True):
     pth, fname, ext = split_filename(fname)
     if not use_ext:
         ext = ''
-    if newpath and isdefined(newpath):
+    if newpath is not None:
         pth = os.path.abspath(newpath)
     return os.path.join(pth, prefix + fname + suffix + ext)
 
@@ -172,7 +171,7 @@ def auto_hash(afile, hash_method=None, chunk_len=8192, crypto=hashlib.md5):
     """Checks the hash method and calls the appropriate function"""
     if hash_method is None:
         hash_method = config.get('execution', 'hash_method').lower()
-    
+
     if hash_method not in ['content', 'timestamp']:
         raise ValueError("Unknown hash method: %s" % hash_method)
     func = getattr(sys.modules[__name__], 'hash_' + hash_method)

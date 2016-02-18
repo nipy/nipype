@@ -80,27 +80,6 @@ class Info(object):
         return out
 
     @classmethod
-    def output_type_to_ext(cls, output_type):
-        """Get the file extension for the given output type.
-
-        Parameters
-        ----------
-        output_type : {'NIFTI', 'NIFTI_GZ', 'NIFTI_PAIR', 'NIFTI_PAIR_GZ'}
-            String specifying the output type.
-
-        Returns
-        -------
-        extension : str
-            The file extension for the output type.
-        """
-
-        try:
-            return cls.ftypes[output_type]
-        except KeyError:
-            msg = 'Invalid FSLOUTPUTTYPE: ', output_type
-            raise KeyError(msg)
-
-    @classmethod
     def output_type(cls):
         """Get the global FSL output file type FSLOUTPUTTYPE.
 
@@ -143,11 +122,8 @@ class FSLCommandInputSpec(CommandLineInputSpec):
     -------
     fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
     """
-    output_type = traits.Enum(FSLOUTPUTTYPE, list(Info.ftypes.keys()), usedefault=True,
-                              desc='FSL output type')
-
-    def _overload_extension(self, value, name=None):
-        return value + Info.output_type_to_ext(self.output_type)
+    output_type = traits.Trait(FSLOUTPUTTYPE, Info.ftypes, usedefault=True,
+                               desc='FSL output type')
 
 
 class FSLCommand(CommandLine):  # pylint: disable=W0223
@@ -158,35 +134,10 @@ class FSLCommand(CommandLine):  # pylint: disable=W0223
     def __init__(self, **inputs):
         super(FSLCommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'output_type')
-        self._output_type = FSLOUTPUTTYPE
         self.inputs.environ.update({'FSLOUTPUTTYPE': FSLOUTPUTTYPE})
 
     def _output_update(self):
-        self._output_type = self.inputs.output_type
         self.inputs.environ.update({'FSLOUTPUTTYPE': self.inputs.output_type})
-
-    def _get_ext(self):
-        return Info.output_type_to_ext(self.input_spec.output_type)
-
-    def _gen_fname(self, basename, out_path=None, suffix=''):
-        if out_path is None:
-            out_path = os.getcwd()
-        return os.path.join(out_path, basename + suffix + self._get_ext())
-
-    @classmethod
-    def set_default_output_type(cls, output_type):
-        """Set the default output type for FSL classes.
-
-        This method is used to set the default output type for all fSL
-        subclasses.  However, setting this will not update the output
-        type for any existing instances.  For these, assign the
-        <instance>.inputs.output_type.
-        """
-
-        if output_type in Info.ftypes:
-            cls._output_type = output_type
-        else:
-            raise AttributeError('Invalid FSL output_type: %s' % output_type)
 
     @property
     def version(self):

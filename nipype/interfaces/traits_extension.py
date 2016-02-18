@@ -16,6 +16,7 @@ all of these bugs and they've been fixed in enthought svn repository
 
 """
 import os
+import re
 
 from ..external.six import string_types
 # perform all external trait imports here
@@ -124,9 +125,8 @@ class GenFile(File):
     """ A file which default name is automatically generated from other
     traits.
     """
-    def __init__(self, name_source=None, ns=None, template='%s_generated',
-                 keep_extension=True, value='', filter=None, auto_set=False,
-                 entries=0, exists=False, **metadata):
+    def __init__(self, template=None, keep_extension=True, value='',
+                 filter=None, auto_set=False, entries=0, exists=False, **metadata):
         """ Creates a File trait.
 
         Parameters
@@ -148,28 +148,21 @@ class GenFile(File):
         *value* or ''
         """
 
-        if name_source is None and ns is None:
-            raise TraitError('GenFile requires a name_source')
+        if template is None or not isinstance(template, string_types):
+            raise TraitError('GenFile requires a valid template argument')
 
-        if ns is not None and name_source is None:
-            name_source = ns
-
-        self.name_source = name_source
-        if isinstance(name_source, string_types):
-            self.name_source = [name_source]
-        elif isinstance(name_source, tuple):
-            self.name_source = list(name_source)
-        
-        if not isinstance(self.name_source, list):
-            raise TraitError('name_source should be a string, or a '
-                             'tuple/list of strings. Got %s' % name_source)
+        self.name_source = [i[1:-1].split('!')[0].split(':')[0].split('[')[0]
+                            for i in re.findall('\{.*?\}', template)]
+        self.template = template.format
+        self.keep_ext = keep_extension
 
         for nsrc in self.name_source:
             if not isinstance(nsrc, string_types):
-                raise TraitError('name_source contains an invalid name_source '
+                raise TraitError('template contains an invalid name_source '
                                  'entry (found %s).' % nsrc)
-        self.keep_ext = keep_extension
-        self.template = template
+            if '%' in nsrc or len(nsrc) == 0:
+                raise TraitError(
+                    'invalid source field found in template \'%s\'' % nsrc)
 
         super(GenFile, self).__init__(value, filter, auto_set, entries, exists,
                                    **metadata)
@@ -184,7 +177,7 @@ class GenFile(File):
         if not isdefined(value):
             return value
 
-        validated_value = super(BaseFile, self).validate(object, name, value)
+        validated_value = super(GenFile, self).validate(object, name, value)
         if not self.exists:
             return validated_value
         elif os.path.isfile(value):
@@ -193,19 +186,25 @@ class GenFile(File):
         self.error(object, name, value)
 
     def get(self, obj, name):
+        # Compute expected name iff trait is not set
         if self.value is None:
-            srcvals = []
+            srcvals = {}
             ext = ''
             for nsrc in self.name_source:
+                IFLOGGER.debug('nsrc=%s', nsrc)
                 val = getattr(obj, nsrc)
                 try:
                     _, val, ext = split_filename(val)
                 except:
                     pass
-                srcvals.append(val)
-                
-            if all(isdefined(v) for v in srcvals):
-                retval = self.template % tuple(srcvals)
+
+                if isdefined(val):
+                    srcvals.update({nsrc: val})
+
+            # Check that no source is missing
+            missing = list(set(self.name_source) - set(srcvals.keys()))
+            if not missing:
+                retval = self.template(**srcvals)
                 if self.keep_ext:
                     retval += ext
                 return retval

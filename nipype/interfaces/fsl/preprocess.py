@@ -34,8 +34,6 @@ class BETInputSpec(FSLCommandInputSpec):
     # will put something on the end
     in_file = File(exists=True, argstr='%s', position=0, mandatory=True,
                    desc='input file to skull strip')
-    out_file = GenFile(argstr='%s', position=1, ns=['in_file'], template='%s_brain',
-                       hash_files=False, desc='name of output skull stripped image')
     outline = traits.Bool(False, usedefault=True, argstr='-o',
                           desc='create surface outline image')
     mask = traits.Bool(False, usedefault=True, argstr='-m',
@@ -82,31 +80,34 @@ class BETInputSpec(FSLCommandInputSpec):
                              desc="apply to 4D fMRI data")
     reduce_bias = traits.Bool(argstr='-B', xor=_xor_inputs,
                               desc="bias field and neck cleanup")
-    mask_file = GenFile(ns='in_file', template='%s_mask',
+
+    # Automatically generated input names
+    out_file = GenFile(argstr='%s', position=1, template='{in_file}_brain{output_type_}',
+                       hash_files=False, desc='name of output skull stripped image')
+    mask_file = GenFile(template='{in_file}_mask{output_type_}',
                         desc="path/name of binary brain mask")
     meshfile = GenFile(
-        ns='in_file', template='%s_mesh.vtk', keep_extension=False,
+        template='{in_file}_mesh.vtk', keep_extension=False,
         desc="path/name of vtk mesh file")
-    outline_file = GenFile(ns='in_file', template='%s_overlay',
+    outline_file = GenFile(template='{in_file}_overlay{output_type_}',
                            desc="path/name of outline file")
-    inskull_mask_file = GenFile(ns='in_file', template='%s_inskull_mask',
+    inskull_mask_file = GenFile(template='{in_file}_inskull_mask{output_type_}',
                                 desc="path/name of inskull mask")
     inskull_mesh_file = GenFile(
-        ns='in_file', template='%s_inskull_mesh.vtk', keep_extension=False,
+        template='{in_file}_inskull_mesh.vtk', keep_extension=False,
         desc="path/name of inskull mesh outline")
-    outskull_mask_file = GenFile(ns='in_file', template='%s_outskull_mask',
+    outskull_mask_file = GenFile(template='{in_file}_outskull_mask{output_type_}',
                                  desc="path/name of outskull mask")
     outskull_mesh_file = GenFile(
-        ns='in_file', template='%s_outskull_mesh.vtk', keep_extension=False,
+        template='{in_file}_outskull_mesh.vtk', keep_extension=False,
         desc="path/name of outskull mesh outline")
-    outskin_mask_file = GenFile(ns='in_file', template='%s_outskin_mask',
+    outskin_mask_file = GenFile(template='{in_file}_outskin_mask{output_type_}',
                                 desc="path/name of outskin mask")
     outskin_mesh_file = GenFile(
-        ns='in_file', template='%s_outskin_mesh.vtk', keep_extension=False,
+        template='{in_file}_outskin_mesh.vtk', keep_extension=False,
         desc="path/name of outskin mesh outline")
-    skull_mask_file = GenFile(ns='in_file', template='%s_skull_mask',
+    skull_mask_file = GenFile(template='{in_file}_skull_mask{output_type_}',
                               desc="path/name of skull mask")
-
 
 
 class BETOutputSpec(TraitedSpec):
@@ -160,8 +161,6 @@ class FASTInputSpec(FSLCommandInputSpec):
                               desc='image, or multi-channel set of images, '
                               'to be segmented',
                               argstr='%s', position=-1, mandatory=True)
-    out_basename = File(desc='base name of output files',
-                        argstr='-o %s')  # uses in_file name as basename if none given
     number_classes = traits.Range(low=1, high=10, argstr='-n %d',
                                   desc='number of tissue-type classes')
     output_biasfield = traits.Bool(desc='output estimated bias field',
@@ -225,6 +224,20 @@ class FASTInputSpec(FSLCommandInputSpec):
     probability_maps = traits.Bool(desc='outputs individual probability maps',
                                    argstr='-p')
 
+    out_basename = GenFile(
+        ns='in_files', template='%s', keep_extension=False, argstr='-o %s',
+        desc='base name of output files')
+
+    tissue_class_map = GenFile(
+        ns=['out_basename', 'output_type_'], template='%s_seg%s',
+        desc='binary segmented volume file one val for each class')
+    partial_volume_map = GenFile(
+        ns=['out_basename', 'output_type_'], template='%s_pveseg%s',
+        desc="segmentation corresponding to the partial volume files")
+    mixeltype = GenFile(
+        ns=['out_basename', 'output_type_'], template='%s_mixeltype%s',
+        desc="path/name of mixeltype volume file ")
+
     def _format_arg(self, name, spec, value):
         # first do what should be done in general
         formatted = super(FASTInputSpec, self)._format_arg(name, spec, value)
@@ -237,20 +250,17 @@ class FASTInputSpec(FSLCommandInputSpec):
 
 class FASTOutputSpec(TraitedSpec):
     """Specify possible outputs from FAST"""
-    tissue_class_map = File(exists=True,
-                            desc='path/name of binary segmented volume file'
-                            ' one val for each class  _seg')
+    tissue_class_map = File(
+        desc='path/name of binary segmented volume file one val for each class  _seg')
+    partial_volume_map = File(desc="path/name of partial volume file _pveseg")
+    mixeltype = File(desc="path/name of mixeltype volume file _mixeltype")
+
     tissue_class_files = OutputMultiPath(File(desc='path/name of binary segmented volumes '
                                               'one file for each class  _seg_x'))
     restored_image = OutputMultiPath(File(desc='restored images (one for each input image) '
                                           'named according to the input images _restore'))
-
-    mixeltype = File(desc="path/name of mixeltype volume file _mixeltype")
-
-    partial_volume_map = File(desc="path/name of partial volume file _pveseg")
     partial_volume_files = OutputMultiPath(File(desc='path/name of partial volumes files '
                                                 'one for each class, _pve_x'))
-
     bias_field = OutputMultiPath(File(desc='Estimated bias field _bias'))
     probability_maps = OutputMultiPath(File(desc='filenames, one for each class, for each '
                                             'input, prob_x'))
@@ -292,8 +302,6 @@ class FAST(FSLCommand):
         else:
             basefile = self.inputs.in_files[-1]
 
-        self.outputs.tissue_class_map = self._gen_fname(basefile,
-                                                      suffix='_seg')
         if self.inputs.segments:
             self.outputs.tissue_class_files = []
             for i in range(nclasses):
@@ -313,7 +321,6 @@ class FAST(FSLCommand):
                 self.outputs.restored_image.append(
                     self._gen_fname(basefile, suffix='_restore'))
 
-        self.outputs.mixeltype = self._gen_fname(basefile, suffix='_mixeltype')
         if not self.inputs.no_pve:
             self.outputs.partial_volume_map = self._gen_fname(
                 basefile, suffix='_pveseg')
@@ -341,7 +348,7 @@ class FAST(FSLCommand):
             for i in range(nclasses):
                 self.outputs.probability_maps.append(
                     self._gen_fname(basefile, suffix='_prob_%d' % i))
-        
+
 
 class FLIRTInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, argstr='-in %s', mandatory=True,
@@ -667,7 +674,7 @@ class MCFLIRT(FSLCommand):
         if isdefined(self.inputs.save_rms) and self.inputs.save_rms:
             outfile = self.outputs.out_file
             self.outputs.rms_files = [outfile + '_abs.rms', outfile + '_rel.rms']
-        
+
     def _gen_filename(self, name):
         if name == 'out_file':
             return self._gen_outfilename()
@@ -971,7 +978,7 @@ class ApplyWarp(FSLCommand):
                                                   suffix='_warp')
         else:
             self.outputs.out_file = os.path.abspath(self.inputs.out_file)
-        
+
     def _gen_filename(self, name):
         if name == 'out_file':
             return getattr(self.outputs, name)
@@ -1029,7 +1036,7 @@ class SliceTimer(FSLCommand):
             out_file = self._gen_fname(self.inputs.in_file,
                                        suffix='_st')
         self.outputs.slice_time_corrected_file = os.path.abspath(out_file)
-        
+
     def _gen_filename(self, name):
         if name == 'out_file':
             return self.outputs.slice_time_corrected_file
@@ -1108,7 +1115,7 @@ class SUSAN(FSLCommand):
             out_file = self._gen_fname(self.inputs.in_file,
                                        suffix='_smooth')
         self.outputs.smoothed_file = os.path.abspath(out_file)
-        
+
     def _gen_filename(self, name):
         if name == 'out_file':
             return self.outputs.smoothed_file
@@ -1420,7 +1427,7 @@ class PRELUDE(FSLCommand):
                 out_file = self._gen_fname(self.inputs.complex_phase_file,
                                            suffix='_phase_unwrapped')
         self.outputs.unwrapped_phase_file = os.path.abspath(out_file)
-        
+
     def _gen_filename(self, name):
         if name == 'unwrapped_phase_file':
             return self.outputs.unwrapped_phase_file
@@ -1520,7 +1527,7 @@ class FIRST(FSLCommand):
         self.outputs.vtk_surfaces = self._gen_mesh_names('vtk_surfaces',
                                                        structures)
         self.outputs.bvars = self._gen_mesh_names('bvars', structures)
-        
+
     def _gen_fname(self, name):
         path, outname, ext = split_filename(self.inputs.out_file)
 
