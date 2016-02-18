@@ -47,11 +47,57 @@ class AtroposInputSpec(ANTSCommandInputSpec):
                                   usedefault=True)
     use_mixture_model_proportions = traits.Bool(
         requires=['posterior_formulation'])
-    out_classified_image_name = File(argstr="%s", genfile=True,
-                                     hash_files=False)
-    save_posteriors = traits.Bool()
-    output_posteriors_name_template = traits.Str('POSTERIOR_%02d.nii.gz',
-                                                 usedefault=True)
+    out_classified_image_name = File(
+        name_source='intensity_images', name_template='%s_labeled', keep_extension=True,
+        argstr='--output [%s]', hash_files=False)
+    save_posteriors = traits.Bool(False, usedefault=True, desc='save posterior probability maps')
+    posteriors = File('posterior_%02d.nii.gz', usedefault=True)
+
+    def _format_arg(self, opt, spec, val):
+        if opt == 'initialization':
+            retval = "--initialization %s[%d" % (val,
+                                                 self.number_of_tissue_classes)
+            if val == "PriorProbabilityImages":
+                _, _, ext = split_filename(
+                    self.prior_probability_images[0])
+                retval += ",priors/priorProbImages%02d" + \
+                    ext + ",%g" % self.prior_weighting
+                if isdefined(self.prior_probability_threshold):
+                    retval += ",%g" % self.prior_probability_threshold
+            return retval + "]"
+        if opt == 'mrf_smoothing_factor':
+            retval = "--mrf [%g" % val
+            if isdefined(self.mrf_radius):
+                retval += ",%s" % self._format_xarray([str(s) for s in self.mrf_radius])
+            return retval + "]"
+        if opt == "icm_use_synchronous_update":
+            retval = "--icm [%d" % val
+            if isdefined(self.maximum_number_of_icm_terations):
+                retval += ",%g" % self.maximum_number_of_icm_terations
+            return retval + "]"
+        if opt == "n_iterations":
+            retval = "--convergence [%d" % val
+            if isdefined(self.convergence_threshold):
+                retval += ",%g" % self.convergence_threshold
+            return retval + "]"
+        if opt == "posterior_formulation":
+            retval = "--posterior-formulation %s" % val
+            if isdefined(self.use_mixture_model_proportions):
+                retval += "[%d]" % self.use_mixture_model_proportions
+            return retval
+        if opt == "out_classified_image_name":
+            retval = super(AtroposInputSpec, self)._format_arg(opt, spec, val)
+            if self.save_posteriors:
+                retval = retval[:-1] + ', ' + super(
+                    AtroposInputSpec, self)._format_arg('posteriors') + ']'
+            return retval
+        return super(AtroposInputSpec, self)._format_arg(opt, spec, val)
+
+    def parse_args(self, skip=None):
+        if skip is None:
+            skip = []
+        skip += ['save_posteriors', 'posteriors']
+        return super(AtroposInputSpec, self).parse_args(skip=skip)
 
 
 class AtroposOutputSpec(TraitedSpec):
@@ -99,45 +145,6 @@ class Atropos(ANTSCommand):
     output_spec = AtroposOutputSpec
     _cmd = 'Atropos'
 
-    def _format_arg(self, opt, spec, val):
-        if opt == 'initialization':
-            retval = "--initialization %s[%d" % (val,
-                                                 self.inputs.number_of_tissue_classes)
-            if val == "PriorProbabilityImages":
-                _, _, ext = split_filename(
-                    self.inputs.prior_probability_images[0])
-                retval += ",priors/priorProbImages%02d" + \
-                    ext + ",%g" % self.inputs.prior_weighting
-                if isdefined(self.inputs.prior_probability_threshold):
-                    retval += ",%g" % self.inputs.prior_probability_threshold
-            return retval + "]"
-        if opt == 'mrf_smoothing_factor':
-            retval = "--mrf [%g" % val
-            if isdefined(self.inputs.mrf_radius):
-                retval += ",%s" % self._format_xarray([str(s) for s in self.inputs.mrf_radius])
-            return retval + "]"
-        if opt == "icm_use_synchronous_update":
-            retval = "--icm [%d" % val
-            if isdefined(self.inputs.maximum_number_of_icm_terations):
-                retval += ",%g" % self.inputs.maximum_number_of_icm_terations
-            return retval + "]"
-        if opt == "n_iterations":
-            retval = "--convergence [%d" % val
-            if isdefined(self.inputs.convergence_threshold):
-                retval += ",%g" % self.inputs.convergence_threshold
-            return retval + "]"
-        if opt == "posterior_formulation":
-            retval = "--posterior-formulation %s" % val
-            if isdefined(self.inputs.use_mixture_model_proportions):
-                retval += "[%d]" % self.inputs.use_mixture_model_proportions
-            return retval
-        if opt == "out_classified_image_name":
-            retval = "--output [%s" % val
-            if isdefined(self.inputs.save_posteriors):
-                retval += ",%s" % self.inputs.output_posteriors_name_template
-            return retval + "]"
-        return super(ANTSCommand, self)._format_arg(opt, spec, val)
-
     def _run_interface(self, runtime, correct_return_codes=[0]):
         if self.inputs.initialization == "PriorProbabilityImages":
             priors_directory = os.path.join(os.getcwd(), "priors")
@@ -153,23 +160,6 @@ class Atropos(ANTSCommand):
         runtime = super(Atropos, self)._run_interface(runtime)
         return runtime
 
-    def _gen_filename(self, name):
-        if name == 'out_classified_image_name':
-            output = self.inputs.out_classified_image_name
-            if not isdefined(output):
-                _, name, ext = split_filename(self.inputs.intensity_images[0])
-                output = name + '_labeled' + ext
-            return output
-        return None
-
-    def _post_run(self):
-        self.outputs.classified_image = os.path.abspath(
-            self._gen_filename('out_classified_image_name'))
-        if isdefined(self.inputs.save_posteriors) and self.inputs.save_posteriors:
-            self.outputs.posteriors = []
-            for i in range(self.inputs.number_of_tissue_classes):
-                self.outputs.posteriors.append(os.path.abspath(self.inputs.output_posteriors_name_template % (i + 1)))
-        
 
 class LaplacianThicknessInputSpec(ANTSCommandInputSpec):
     input_wm = File(argstr='%s', mandatory=True, copyfile=True,
@@ -228,7 +218,7 @@ class LaplacianThickness(ANTSCommand):
                                                ''.join((name,
                                                         self.inputs.output_image,
                                                         ext)))
-        
+
 
 class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d',
@@ -239,9 +229,10 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
                              'coregistered functional)'))
     mask_image = File(argstr='--mask-image %s')
     weight_image = File(argstr='--weight-image %s')
-    output_image = traits.Str(argstr='--output %s',
-                              desc='output file name', genfile=True,
-                              hash_files=False)
+    output_image = File(
+        name_source='input_image', name_template='%s_corrected',
+        argstr='--output %s', desc='output file name', keep_extension=True,
+        hash_files=False)
     bspline_fitting_distance = traits.Float(argstr="--bspline-fitting %s")
     bspline_order = traits.Int(requires=['bspline_fitting_distance'])
     shrink_factor = traits.Int(argstr="--shrink-factor %d")
@@ -250,9 +241,41 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     save_bias = traits.Bool(False, mandatory=True, usedefault=True,
                             desc=('True if the estimated bias should be saved'
                                   ' to file.'), xor=['bias_image'])
-    bias_image = File(desc='Filename for the estimated bias.',
-                      hash_files=False)
+    bias_image = File(name_source='input_image', name_template='%s_bias',
+                      keep_extension=True, hash_files=False, argstr='%s',
+                      desc='Filename for the estimated bias.')
 
+    def _format_arg(self, name, trait_spec, value):
+        if name == 'bspline_fitting_distance':
+            if isdefined(self.bspline_order):
+                newval = '[ %g, %d ]' % (value, self.bspline_order)
+            else:
+                newval = '[ %g ]' % value
+            return trait_spec.argstr % newval
+
+        if name == 'n_iterations':
+            if isdefined(self.convergence_threshold):
+                newval = '[ %s, %g ]' % (self._format_xarray([str(elt) for elt in value]),
+                                         self.convergence_threshold)
+            else:
+                newval = '[ %s ]' % self._format_xarray([str(elt) for elt in value])
+            return trait_spec.argstr % newval
+
+        if name == 'output_image' and self.save_bias:
+            val_out = super(N4BiasFieldCorrectionInputSpec, self)._format_arg(
+                name, trait_spec, value)
+            val_bias = super(N4BiasFieldCorrectionInputSpec, self)._format_arg('bias_image')
+            retval = '[ ' + val_out[9:] + ', ' + val_bias + ' ]'
+            return trait_spec.argstr % retval
+
+        return super(N4BiasFieldCorrectionInputSpec,
+                     self)._format_arg(name, trait_spec, value)
+
+    def parse_args(self, skip=None):
+        if skip is None:
+            skip = []
+        skip += ['save_bias', 'bias_image']
+        return super(N4BiasFieldCorrectionInputSpec, self).parse_args(skip=skip)
 
 class N4BiasFieldCorrectionOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc='Warped image')
@@ -319,62 +342,6 @@ class N4BiasFieldCorrection(ANTSCommand):
     input_spec = N4BiasFieldCorrectionInputSpec
     output_spec = N4BiasFieldCorrectionOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'output_image':
-            output = self.inputs.output_image
-            if not isdefined(output):
-                _, name, ext = split_filename(self.inputs.input_image)
-                output = name + '_corrected' + ext
-            return output
-
-        if name == 'bias_image':
-            output = self.inputs.bias_image
-            if not isdefined(output):
-                _, name, ext = split_filename(self.inputs.input_image)
-                output = name + '_bias' + ext
-            return output
-        return None
-
-    def _format_arg(self, name, trait_spec, value):
-        if ((name == 'output_image') and
-                (self.inputs.save_bias or isdefined(self.inputs.bias_image))):
-            bias_image = self._gen_filename('bias_image')
-            output = self._gen_filename('output_image')
-            newval = '[ %s, %s ]' % (output, bias_image)
-            return trait_spec.argstr % newval
-
-        if name == 'bspline_fitting_distance':
-            if isdefined(self.inputs.bspline_order):
-                newval = '[ %g, %d ]' % (value, self.inputs.bspline_order)
-            else:
-                newval = '[ %g ]' % value
-            return trait_spec.argstr % newval
-
-        if name == 'n_iterations':
-            if isdefined(self.inputs.convergence_threshold):
-                newval = '[ %s, %g ]' % (self._format_xarray([str(elt) for elt in value]),
-                                         self.inputs.convergence_threshold)
-            else:
-                newval = '[ %s ]' % self._format_xarray([str(elt) for elt in value])
-            return trait_spec.argstr % newval
-
-        return super(N4BiasFieldCorrection,
-                     self)._format_arg(name, trait_spec, value)
-
-    def parse_args(self, skip=None):
-        if skip is None:
-            skip = []
-        skip += ['save_bias', 'bias_image']
-        return super(N4BiasFieldCorrection, self).parse_args(skip=skip)
-
-    def _post_run(self):
-        self.outputs.output_image = os.path.abspath(
-            self._gen_filename('output_image'))
-
-        if self.inputs.save_bias or isdefined(self.inputs.bias_image):
-            self.outputs.bias_image = os.path.abspath(
-                self._gen_filename('bias_image'))
-        
 
 class CorticalThicknessInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
@@ -461,6 +428,29 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
                               'Requires single thread computation for complete reproducibility.'))
 
 
+    def _format_arg(self, opt, spec, val):
+        if opt == 'anatomical_image':
+            retval = '-a %s' % val
+            return retval
+        if opt == 'brain_template':
+            retval = '-e %s' % val
+            return retval
+        if opt == 'brain_probability_mask':
+            retval = '-m %s' % val
+            return retval
+        if opt == 'out_prefix':
+            retval = '-o %s' % val
+            return retval
+        if opt == 't1_registration_template':
+            retval = '-t %s' % val
+            return retval
+        if opt == 'segmentation_priors':
+            _, _, ext = split_filename(self.segmentation_priors[0])
+            retval = "-p nipype_priors/BrainSegmentationPrior%02d" + ext
+            return retval
+        return super(CorticalThicknessInputSpec, self)._format_arg(opt, spec, val)
+
+
 class CorticalThicknessOutputSpec(TraitedSpec):
     BrainExtractionMask = File(exists=True, desc='brain extraction mask')
     BrainSegmentation = File(exists=True, desc='brain segmentaion image')
@@ -503,28 +493,6 @@ class CorticalThickness(ANTSCommand):
     input_spec = CorticalThicknessInputSpec
     output_spec = CorticalThicknessOutputSpec
     _cmd = 'antsCorticalThickness.sh'
-
-    def _format_arg(self, opt, spec, val):
-        if opt == 'anatomical_image':
-            retval = '-a %s' % val
-            return retval
-        if opt == 'brain_template':
-            retval = '-e %s' % val
-            return retval
-        if opt == 'brain_probability_mask':
-            retval = '-m %s' % val
-            return retval
-        if opt == 'out_prefix':
-            retval = '-o %s' % val
-            return retval
-        if opt == 't1_registration_template':
-            retval = '-t %s' % val
-            return retval
-        if opt == 'segmentation_priors':
-            _, _, ext = split_filename(self.inputs.segmentation_priors[0])
-            retval = "-p nipype_priors/BrainSegmentationPrior%02d" + ext
-            return retval
-        return super(ANTSCommand, self)._format_arg(opt, spec, val)
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
         priors_directory = os.path.join(os.getcwd(), "nipype_priors")
@@ -588,7 +556,7 @@ class CorticalThickness(ANTSCommand):
         self.outputs.BrainVolumes = os.path.join(os.getcwd(),
                                                self.inputs.out_prefix +
                                                'brainvols.csv')
-        
+
 
 class antsCorticalThickness(CorticalThickness):
     DeprecationWarning('This class has been replaced by CorticalThickness and will be removed in version 0.13')
@@ -672,7 +640,7 @@ class BrainExtraction(ANTSCommand):
                                                        self.inputs.out_prefix +
                                                        'BrainExtractionBrain.' +
                                                        self.inputs.image_suffix)
-        
+
 
 class antsBrainExtraction(BrainExtraction):
     DeprecationWarning('This class has been replaced by BrainExtraction and will be removed in version 0.13')
@@ -719,6 +687,24 @@ class JointFusionInputSpec(ANTSCommandInputSpec):
     atlas_group_weights = traits.ListInt(argstr='-gpw %d...',
                                          desc=('Assign the voting weights to '
                                                'each atlas group'))
+    def _format_arg(self, opt, spec, val):
+        if opt == 'method':
+            if '[' in val:
+                retval = '-m {0}'.format(val)
+            else:
+                retval = '-m {0}[{1},{2}]'.format(
+                    self.method, self.alpha, self.beta)
+        elif opt == 'patch_radius':
+            retval = '-rp {0}'.format(self._format_xarray(val))
+        elif opt == 'search_radius':
+            retval = '-rs {0}'.format(self._format_xarray(val))
+        else:
+            if opt == 'warped_intensity_images':
+                assert len(val) == self.modalities * len(self.warped_label_images), \
+                    "Number of intensity images and label maps must be the same {0}!={1}".format(
+                    len(val), len(self.warped_label_images))
+            return super(JointFusionInputSpec, self)._format_arg(opt, spec, val)
+        return retval
 
 
 class JointFusionOutputSpec(TraitedSpec):
@@ -761,29 +747,10 @@ class JointFusion(ANTSCommand):
     output_spec = JointFusionOutputSpec
     _cmd = 'jointfusion'
 
-    def _format_arg(self, opt, spec, val):
-        if opt == 'method':
-            if '[' in val:
-                retval = '-m {0}'.format(val)
-            else:
-                retval = '-m {0}[{1},{2}]'.format(
-                    self.inputs.method, self.inputs.alpha, self.inputs.beta)
-        elif opt == 'patch_radius':
-            retval = '-rp {0}'.format(self._format_xarray(val))
-        elif opt == 'search_radius':
-            retval = '-rs {0}'.format(self._format_xarray(val))
-        else:
-            if opt == 'warped_intensity_images':
-                assert len(val) == self.inputs.modalities * len(self.inputs.warped_label_images), \
-                    "Number of intensity images and label maps must be the same {0}!={1}".format(
-                    len(val), len(self.inputs.warped_label_images))
-            return super(ANTSCommand, self)._format_arg(opt, spec, val)
-        return retval
-
     def _post_run(self):
         self.outputs.output_label_image = os.path.abspath(
             self.inputs.output_label_image)
-        
+
 
 class DenoiseImageInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(2, 3, 4, argstr='-d %d', usedefault=False,
@@ -808,10 +775,27 @@ class DenoiseImageInputSpec(ANTSCommandInputSpec):
     save_noise = traits.Bool(False, mandatory=True, usedefault=True,
                              desc=('True if the estimated noise should be saved '
                                    'to file.'), xor=['noise_image'])
-    noise_image = File(name_source=['input_image'], hash_files=False,
+    noise_image = File(name_source=['input_image'], hash_files=False, argstr='%s',
                        keep_extension=True, name_template='%s_noise',
                        desc='Filename for the estimated noise.')
     verbose = traits.Bool(False, argstr="-v", desc=('Verbose output.'))
+
+    def _format_arg(self, name, trait_spec, value):
+        if (name == 'output_image') and self.save_noise:
+            val_out = super(DenoiseImageInputSpec, self)._format_arg(
+                name, trait_spec, value)
+            val_noise = super(DenoiseImageInputSpec, self)._format_arg('noise_image')
+            newval = '[ ' + val_out[3:] + ', ' + val_noise + ' ]'
+            return trait_spec.argstr % newval
+
+        return super(DenoiseImageInputSpec,
+                     self)._format_arg(name, trait_spec, value)
+
+    def parse_args(self, skip=None):
+        if skip is None:
+            skip = []
+        skip += ['save_noise', 'noise_image']
+        return super(DenoiseImageInputSpec, self).parse_args(skip)
 
 
 class DenoiseImageOutputSpec(TraitedSpec):
@@ -847,16 +831,6 @@ class DenoiseImage(ANTSCommand):
     input_spec = DenoiseImageInputSpec
     output_spec = DenoiseImageOutputSpec
     _cmd = 'DenoiseImage'
-
-    def _format_arg(self, name, trait_spec, value):
-        if ((name == 'output_image') and
-                (self.inputs.save_noise or isdefined(self.inputs.noise_image))):
-            newval = '[ %s, %s ]' % (self._filename_from_source('output_image'),
-                                     self._filename_from_source('noise_image'))
-            return trait_spec.argstr % newval
-
-        return super(DenoiseImage,
-                     self)._format_arg(name, trait_spec, value)
 
 
 class AntsJointFusionInputSpec(ANTSCommandInputSpec):
@@ -926,6 +900,46 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
                                                           'file name format.')
     verbose = traits.Bool(False, argstr="-v", desc=('Verbose output.'))
 
+    def _format_arg(self, opt, spec, val):
+        if opt == 'exclusion_image_label':
+            retval = []
+            for ii in range(len(self.exclusion_image_label)):
+                retval.append('-e {0}[{1}]'.format(
+                    self.exclusion_image_label[ii],
+                    self.exclusion_image[ii]))
+            retval = ' '.join(retval)
+        elif opt == 'patch_radius':
+            retval = '-p {0}'.format(self._format_xarray(val))
+        elif opt == 'search_radius':
+            retval = '-s {0}'.format(self._format_xarray(val))
+        elif opt == 'out_label_fusion':
+            if isdefined(self.out_intensity_fusion_name_format):
+                if isdefined(self.out_label_post_prob_name_format):
+                    if isdefined(self.out_atlas_voting_weight_name_format):
+                        retval = '-o [{0}, {1}, {2}, {3}]'.format(self.out_label_fusion,
+                                                self.out_intensity_fusion_name_format,
+                                                self.out_label_post_prob_name_format,
+                                                self.out_atlas_voting_weight_name_format)
+                    else:
+                        retval = '-o [{0}, {1}, {2}]'.format(self.out_label_fusion,
+                                                self.out_intensity_fusion_name_format,
+                                                self.out_label_post_prob_name_format)
+                else:
+                    retval = '-o [{0}, {1}]'.format(self.out_label_fusion,
+                                                self.out_intensity_fusion_name_format)
+            else:
+                retval = '-o {0}'.format(self.out_label_fusion)
+        elif opt == 'out_intensity_fusion_name_format':
+            retval = ''
+            if not isdefined(self.out_label_fusion):
+                retval = '-o {0}'.format(self.out_intensity_fusion_name_format)
+        else:
+            if opt == 'atlas_segmentation_image':
+                assert len(val) == len(self.atlas_image), "Number of specified " \
+                    "segmentations should be identical to the number of atlas image " \
+                    "sets {0}!={1}".format(len(val), len(self.atlas_image))
+            return super(AntsJointFusionInputSpec, self)._format_arg(opt, spec, val)
+        return retval
 
 class AntsJointFusionOutputSpec(TraitedSpec):
     out_label_fusion = File(exists=True)
@@ -998,46 +1012,6 @@ ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz
     output_spec = AntsJointFusionOutputSpec
     _cmd = 'antsJointFusion'
 
-    def _format_arg(self, opt, spec, val):
-        if opt == 'exclusion_image_label':
-            retval = []
-            for ii in range(len(self.inputs.exclusion_image_label)):
-                retval.append('-e {0}[{1}]'.format(
-                    self.inputs.exclusion_image_label[ii],
-                    self.inputs.exclusion_image[ii]))
-            retval = ' '.join(retval)
-        elif opt == 'patch_radius':
-            retval = '-p {0}'.format(self._format_xarray(val))
-        elif opt == 'search_radius':
-            retval = '-s {0}'.format(self._format_xarray(val))
-        elif opt == 'out_label_fusion':
-            if isdefined(self.inputs.out_intensity_fusion_name_format):
-                if isdefined(self.inputs.out_label_post_prob_name_format):
-                    if isdefined(self.inputs.out_atlas_voting_weight_name_format):
-                        retval = '-o [{0}, {1}, {2}, {3}]'.format(self.inputs.out_label_fusion,
-                                                self.inputs.out_intensity_fusion_name_format,
-                                                self.inputs.out_label_post_prob_name_format,
-                                                self.inputs.out_atlas_voting_weight_name_format)
-                    else:
-                        retval = '-o [{0}, {1}, {2}]'.format(self.inputs.out_label_fusion,
-                                                self.inputs.out_intensity_fusion_name_format,
-                                                self.inputs.out_label_post_prob_name_format)
-                else:
-                    retval = '-o [{0}, {1}]'.format(self.inputs.out_label_fusion,
-                                                self.inputs.out_intensity_fusion_name_format)
-            else:
-                retval = '-o {0}'.format(self.inputs.out_label_fusion)
-        elif opt == 'out_intensity_fusion_name_format':
-            retval = ''
-            if not isdefined(self.inputs.out_label_fusion):
-                retval = '-o {0}'.format(self.inputs.out_intensity_fusion_name_format)
-        else:
-            if opt == 'atlas_segmentation_image':
-                assert len(val) == len(self.inputs.atlas_image), "Number of specified " \
-                    "segmentations should be identical to the number of atlas image " \
-                    "sets {0}!={1}".format(len(val), len(self.inputs.atlas_image))
-            return super(ANTSCommand, self)._format_arg(opt, spec, val)
-        return retval
 
     def _post_run(self):
         if isdefined(self.inputs.out_label_fusion):
@@ -1053,4 +1027,4 @@ ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz
             outputs['out_atlas_voting_weight_name_format'] = os.path.abspath(
                 self.inputs.out_atlas_voting_weight_name_format)
 
-        
+

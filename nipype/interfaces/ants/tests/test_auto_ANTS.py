@@ -82,11 +82,20 @@ def test_ANTS_inputs():
 
 
 def test_ANTS_outputs():
-    output_map = dict(affine_transform=dict(),
-    inverse_warp_transform=dict(),
+    output_map = dict(affine_transform=dict(keep_extension=False,
+    name_source='output_transform_prefix',
+    name_template='%sAffine.txt',
+    ),
+    inverse_warp_transform=dict(keep_extension=False,
+    name_source='output_transform_prefix',
+    name_template='%sInverseWarp.nii.gz',
+    ),
     metaheader=dict(),
     metaheader_raw=dict(),
-    warp_transform=dict(),
+    warp_transform=dict(keep_extension=False,
+    name_source='output_transform_prefix',
+    name_template='%sWarp.nii.gz',
+    ),
     )
     outputs = ANTS.output_spec()
 

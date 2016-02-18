@@ -95,19 +95,80 @@ class ANTSInputSpec(ANTSCommandInputSpec):
         elif opt == 'affine_gradient_descent_option':
             return self._affine_gradient_descent_option_constructor()
         elif opt == 'use_histogram_matching':
-            if self.inputs.use_histogram_matching:
+            if self.use_histogram_matching:
                 return '--use-Histogram-Matching 1'
             else:
                 return '--use-Histogram-Matching 0'
         return super(ANTSInputSpec, self)._format_arg(opt, spec, val)
 
+    def _image_metric_constructor(self):
+        retval = []
+        intensity_based = ['CC', 'MI', 'SMI', 'PR', 'SSD', 'MSQ']
+        point_set_based = ['PSE', 'JTB']
+        for ii in range(len(self.moving_image)):
+            if self.metric[ii] in intensity_based:
+                retval.append(
+                    '--image-metric %s[ %s, %s, %g, %d ]' % (self.metric[ii],
+                                                             self.fixed_image[
+                                                                 ii],
+                                                             self.moving_image[
+                                                                 ii],
+                                                             self.metric_weight[
+                                                                 ii],
+                                                             self.radius[ii]))
+            elif self.metric[ii] == point_set_based:
+                pass
+                # retval.append('--image-metric %s[%s, %s, ...'.format(self.metric[ii],
+                #               self.fixed_image[ii], self.moving_image[ii], ...))
+        return ' '.join(retval)
+
+    def _transformation_constructor(self):
+        model = self.transformation_model
+        step_length = self.gradient_step_length
+        time_step = self.number_of_time_steps
+        delta_time = self.delta_time
+        symmetry_type = self.symmetry_type
+        retval = ['--transformation-model %s' % model]
+        parameters = []
+        for elem in (step_length, time_step, delta_time, symmetry_type):
+            if elem is not traits.Undefined:
+                parameters.append('%#.2g' % elem)
+        if len(parameters) > 0:
+            if len(parameters) > 1:
+                parameters = ','.join(parameters)
+            else:
+                parameters = ''.join(parameters)
+            retval.append('[%s]' % parameters)
+        return ''.join(retval)
+
+    def _regularization_constructor(self):
+        return '--regularization {0}[{1},{2}]'.format(self.regularization,
+                                                      self.regularization_gradient_field_sigma,
+                                                      self.regularization_deformation_field_sigma)
+
+    def _affine_gradient_descent_option_constructor(self):
+        values = self.affine_gradient_descent_option
+        defaults = [0.1, 0.5, 1.e-4, 1.e-4]
+        for ii in range(len(defaults)):
+            try:
+                defaults[ii] = values[ii]
+            except IndexError:
+                break
+        parameters = self._format_xarray([('%g' % defaults[index]) for index in range(4)])
+        retval = ['--affine-gradient-descent-option', parameters]
+        return ' '.join(retval)
 
 
 class ANTSOutputSpec(TraitedSpec):
-    affine_transform = File(exists=True, desc='Affine transform file')
-    warp_transform = File(exists=True, desc='Warping deformation field')
+    affine_transform = File(
+        name_source='output_transform_prefix', name_template='%sAffine.txt',
+        keep_extension=False, desc='Affine transform file')
+    warp_transform = File(
+        name_source='output_transform_prefix', name_template='%sWarp.nii.gz',
+        keep_extension=False, desc='Warping deformation field')
     inverse_warp_transform = File(
-        exists=True, desc='Inverse warping deformation field')
+        name_source='output_transform_prefix', name_template='%sInverseWarp.nii.gz',
+        keep_extension=False, desc='Inverse warping deformation field')
     metaheader = File(exists=True, desc='VTK metaheader .mhd file')
     metaheader_raw = File(exists=True, desc='VTK metaheader .raw file')
 
@@ -146,73 +207,6 @@ class ANTS(ANTSCommand):
     _cmd = 'ANTS'
     input_spec = ANTSInputSpec
     output_spec = ANTSOutputSpec
-
-    def _image_metric_constructor(self):
-        retval = []
-        intensity_based = ['CC', 'MI', 'SMI', 'PR', 'SSD', 'MSQ']
-        point_set_based = ['PSE', 'JTB']
-        for ii in range(len(self.inputs.moving_image)):
-            if self.inputs.metric[ii] in intensity_based:
-                retval.append(
-                    '--image-metric %s[ %s, %s, %g, %d ]' % (self.inputs.metric[ii],
-                                                             self.inputs.fixed_image[
-                                                                 ii],
-                                                             self.inputs.moving_image[
-                                                                 ii],
-                                                             self.inputs.metric_weight[
-                                                                 ii],
-                                                             self.inputs.radius[ii]))
-            elif self.inputs.metric[ii] == point_set_based:
-                pass
-                # retval.append('--image-metric %s[%s, %s, ...'.format(self.inputs.metric[ii],
-                #               self.inputs.fixed_image[ii], self.inputs.moving_image[ii], ...))
-        return ' '.join(retval)
-
-    def _transformation_constructor(self):
-        model = self.inputs.transformation_model
-        step_length = self.inputs.gradient_step_length
-        time_step = self.inputs.number_of_time_steps
-        delta_time = self.inputs.delta_time
-        symmetry_type = self.inputs.symmetry_type
-        retval = ['--transformation-model %s' % model]
-        parameters = []
-        for elem in (step_length, time_step, delta_time, symmetry_type):
-            if elem is not traits.Undefined:
-                parameters.append('%#.2g' % elem)
-        if len(parameters) > 0:
-            if len(parameters) > 1:
-                parameters = ','.join(parameters)
-            else:
-                parameters = ''.join(parameters)
-            retval.append('[%s]' % parameters)
-        return ''.join(retval)
-
-    def _regularization_constructor(self):
-        return '--regularization {0}[{1},{2}]'.format(self.inputs.regularization,
-                                                      self.inputs.regularization_gradient_field_sigma,
-                                                      self.inputs.regularization_deformation_field_sigma)
-
-    def _affine_gradient_descent_option_constructor(self):
-        values = self.inputs.affine_gradient_descent_option
-        defaults = [0.1, 0.5, 1.e-4, 1.e-4]
-        for ii in range(len(defaults)):
-            try:
-                defaults[ii] = values[ii]
-            except IndexError:
-                break
-        parameters = self._format_xarray([('%g' % defaults[index]) for index in range(4)])
-        retval = ['--affine-gradient-descent-option', parameters]
-        return ' '.join(retval)
-
-    def _post_run(self):
-        self.outputs.affine_transform = os.path.abspath(
-            self.inputs.output_transform_prefix + 'Affine.txt')
-        self.outputs.warp_transform = os.path.abspath(
-            self.inputs.output_transform_prefix + 'Warp.nii.gz')
-        self.outputs.inverse_warp_transform = os.path.abspath(
-            self.inputs.output_transform_prefix + 'InverseWarp.nii.gz')
-        # self.outputs.metaheader = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.mhd')
-        # self.outputs.metaheader_raw = os.path.abspath(self.inputs.output_transform_prefix + 'velocity.raw')
 
 
 class RegistrationInputSpec(ANTSCommandInputSpec):
@@ -380,60 +374,252 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
         low=0.0, high=1.0, value=0.0, argstr='%s', usedefault=True, desc="The Lower quantile to clip image ranges")
 
 
+    def parse_args(self, skip=None):
+        if skip is None:
+            skip = []
+
+        if (isdefined(self.winsorize_upper_quantile) and
+            isdefined(self.winsorize_lower_quantile)):
+            skip += ['winsorize_upper_quantile']
+        return super(RegistrationInputSpec, self).parse_args(skip)
+
     def _format_arg(self, opt, spec, val):
         if opt == 'fixed_image_mask':
-            if isdefined(self.inputs.moving_image_mask):
-                return '--masks [ %s, %s ]' % (self.inputs.fixed_image_mask,
-                                               self.inputs.moving_image_mask)
+            if isdefined(self.moving_image_mask):
+                return '--masks [ %s, %s ]' % (self.fixed_image_mask,
+                                               self.moving_image_mask)
             else:
-                return '--masks %s' % self.inputs.fixed_image_mask
+                return '--masks %s' % self.fixed_image_mask
         elif opt == 'transforms':
             return self._format_registration()
         elif opt == 'initial_moving_transform':
             try:
-                do_invert_transform = int(self.inputs.invert_initial_moving_transform)
+                do_invert_transform = int(self.invert_initial_moving_transform)
             except ValueError:
                 do_invert_transform = 0  # Just do the default behavior
-            return '--initial-moving-transform [ %s, %d ]' % (self.inputs.initial_moving_transform,
+            return '--initial-moving-transform [ %s, %d ]' % (self.initial_moving_transform,
                                                               do_invert_transform)
         elif opt == 'initial_moving_transform_com':
             try:
-                do_center_of_mass_init = int(self.inputs.initial_moving_transform_com)
+                do_center_of_mass_init = int(self.initial_moving_transform_com)
             except ValueError:
                 do_center_of_mass_init = 0  # Just do the default behavior
-            return '--initial-moving-transform [ %s, %s, %d ]' % (self.inputs.fixed_image[0],
-                                                                  self.inputs.moving_image[0],
+            return '--initial-moving-transform [ %s, %s, %d ]' % (self.fixed_image[0],
+                                                                  self.moving_image[0],
                                                                   do_center_of_mass_init)
         elif opt == 'interpolation':
-            if self.inputs.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
-                    isdefined(self.inputs.interpolation_parameters):
-                return '--interpolation %s[ %s ]' % (self.inputs.interpolation,
+            if self.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
+                    isdefined(self.interpolation_parameters):
+                return '--interpolation %s[ %s ]' % (self.interpolation,
                                                      ', '.join([str(param)
-                                                                for param in self.inputs.interpolation_parameters]))
+                                                                for param in self.interpolation_parameters]))
             else:
-                return '--interpolation %s' % self.inputs.interpolation
+                return '--interpolation %s' % self.interpolation
         elif opt == 'output_transform_prefix':
             out_filename = self._get_outputfilenames(inverse=False)
             inv_out_filename = self._get_outputfilenames(inverse=True)
             if out_filename and inv_out_filename:
-                return '--output [ %s, %s, %s ]' % (self.inputs.output_transform_prefix,
+                return '--output [ %s, %s, %s ]' % (self.output_transform_prefix,
                                                     out_filename,
                                                     inv_out_filename)
             elif out_filename:
-                return '--output [ %s, %s ]' % (self.inputs.output_transform_prefix,
+                return '--output [ %s, %s ]' % (self.output_transform_prefix,
                                                 out_filename)
             else:
-                return '--output %s' % self.inputs.output_transform_prefix
+                return '--output %s' % self.output_transform_prefix
         elif opt == 'winsorize_upper_quantile' or opt == 'winsorize_lower_quantile':
-            if not self._quantilesDone:
-                return self._format_winsorize_image_intensities()
-            else:
-                self._quantilesDone = False
-                return ''  # Must return something for argstr!
+            return self._format_winsorize_image_intensities()
+
         # This feature was removed from recent versions of antsRegistration due to corrupt outputs.
         # elif opt == 'collapse_linear_transforms_to_fixed_image_header':
         #    return self._formatCollapseLinearTransformsToFixedImageHeader()
         return super(RegistrationInputSpec, self)._format_arg(opt, spec, val)
+
+
+    def _format_metric(self, index):
+        """
+        Format the antsRegistration -m metric argument(s).
+
+        Parameters
+        ----------
+        index: the stage index
+        """
+        # The metric name input for the current stage.
+        name_input = self.metric[index]
+        # The stage-specific input dictionary.
+        stage_inputs = dict(
+            fixed_image=self.fixed_image[0],
+            moving_image=self.moving_image[0],
+            metric=name_input,
+            weight=self.metric_weight[index],
+            radius_or_bins=self.radius_or_number_of_bins[index],
+            optional=self.radius_or_number_of_bins[index]
+        )
+        # The optional sampling strategy and percentage.
+        if isdefined(self.sampling_strategy) and self.sampling_strategy:
+            sampling_strategy = self.sampling_strategy[index]
+            if sampling_strategy:
+                stage_inputs['sampling_strategy'] = sampling_strategy
+        if isdefined(self.sampling_percentage) and self.sampling_percentage:
+            sampling_percentage = self.sampling_percentage[index]
+            if sampling_percentage:
+                stage_inputs['sampling_percentage'] = sampling_percentage
+
+        # Make a list of metric specifications, one per -m command line
+        # argument for the current stage.
+        # If there are multiple inputs for this stage, then convert the
+        # dictionary of list inputs into a list of metric specifications.
+        # Otherwise, make a singleton list of the metric specification
+        # from the non-list inputs.
+        if isinstance(name_input, list):
+            items = list(stage_inputs.items())
+            indexes = list(range(0, len(name_input)))
+            specs = list()
+            for i in indexes:
+                temp = dict([(k, v[i]) for k, v in items])
+                if len(self.fixed_image) == 1:
+                    temp["fixed_image"] = self.fixed_image[0]
+                else:
+                    temp["fixed_image"] = self.fixed_image[i]
+
+                if len(self.moving_image) == 1:
+                    temp["moving_image"] = self.moving_image[0]
+                else:
+                    temp["moving_image"] = self.moving_image[i]
+
+                specs.append(temp)
+        else:
+            specs = [stage_inputs]
+
+        # Format the --metric command line metric arguments, one per
+        # specification.
+        return [self._format_metric_argument(**spec) for spec in specs]
+
+    @staticmethod
+    def _format_metric_argument(**kwargs):
+        retval = '%s[ %s, %s, %g, %d' % (kwargs['metric'],
+                                         kwargs['fixed_image'],
+                                         kwargs['moving_image'],
+                                         kwargs['weight'],
+                                         kwargs['radius_or_bins'])
+
+        # The optional sampling strategy.
+        if 'sampling_strategy' in kwargs:
+            sampling_strategy = kwargs['sampling_strategy']
+        elif 'sampling_percentage' in kwargs:
+            # The sampling percentage is specified but not the
+            # sampling strategy. Use the default strategy.
+            sampling_strategy = Registration.DEF_SAMPLING_STRATEGY
+        else:
+            sampling_strategy = None
+        # Format the optional sampling arguments.
+        if sampling_strategy:
+            retval += ', %s' % sampling_strategy
+            if 'sampling_percentage' in kwargs:
+                retval += ', %g' % kwargs['sampling_percentage']
+
+        retval += ' ]'
+
+        return retval
+
+    def _format_transform(self, index):
+        retval = []
+        retval.append('%s[ ' % self.transforms[index])
+        parameters = ', '.join([str(
+            element) for element in self.transform_parameters[index]])
+        retval.append('%s' % parameters)
+        retval.append(' ]')
+        return "".join(retval)
+
+    def _format_registration(self):
+        retval = []
+        for ii in range(len(self.transforms)):
+            retval.append('--transform %s' % (self._format_transform(ii)))
+            for metric in self._format_metric(ii):
+                retval.append('--metric %s' % metric)
+            retval.append('--convergence %s' % self._format_convergence(ii))
+            if isdefined(self.sigma_units):
+                retval.append('--smoothing-sigmas %s%s' %
+                              (self._format_xarray(self.smoothing_sigmas[ii]),
+                               self.sigma_units[ii]))
+            else:
+                retval.append('--smoothing-sigmas %s' %
+                              self._format_xarray(self.smoothing_sigmas[ii]))
+            retval.append('--shrink-factors %s' %
+                          self._format_xarray(self.shrink_factors[ii]))
+            if isdefined(self.use_estimate_learning_rate_once):
+                retval.append('--use-estimate-learning-rate-once %d' %
+                              self.use_estimate_learning_rate_once[ii])
+            if isdefined(self.use_histogram_matching):
+                # use_histogram_matching is either a common flag for all transforms
+                # or a list of transform-specific flags
+                if isinstance(self.use_histogram_matching, bool):
+                    histval = self.use_histogram_matching
+                else:
+                    histval = self.use_histogram_matching[ii]
+                retval.append('--use-histogram-matching %d' % histval)
+        return " ".join(retval)
+
+    def _get_outputfilenames(self, inverse=False):
+        output_filename = None
+        if not inverse:
+            if isdefined(self.output_warped_image) and \
+                    self.output_warped_image:
+                output_filename = self.output_warped_image
+                if isinstance(output_filename, bool):
+                    output_filename = '%s_Warped.nii.gz' % self.output_transform_prefix
+                else:
+                    output_filename = output_filename
+            return output_filename
+        inv_output_filename = None
+        if isdefined(self.output_inverse_warped_image) and \
+                self.output_inverse_warped_image:
+            inv_output_filename = self.output_inverse_warped_image
+            if isinstance(inv_output_filename, bool):
+                inv_output_filename = '%s_InverseWarped.nii.gz' % self.output_transform_prefix
+            else:
+                inv_output_filename = inv_output_filename
+        return inv_output_filename
+
+    def _format_convergence(self, ii):
+        convergence_iter = self._format_xarray(self.number_of_iterations[ii])
+        if len(self.convergence_threshold) > ii:
+            convergence_value = self.convergence_threshold[ii]
+        else:
+            convergence_value = self.convergence_threshold[0]
+        if len(self.convergence_window_size) > ii:
+            convergence_ws = self.convergence_window_size[ii]
+        else:
+            convergence_ws = self.convergence_window_size[0]
+        return '[ %s, %g, %d ]' % (convergence_iter, convergence_value, convergence_ws)
+
+    def _format_winsorize_image_intensities(self):
+        if not self.winsorize_upper_quantile > self.winsorize_lower_quantile:
+            raise RuntimeError("Upper bound MUST be more than lower bound: %g > %g"
+                               % (self.winsorize_upper_quantile, self.winsorize_lower_quantile))
+        return '--winsorize-image-intensities [ %s, %s ]' % (self.winsorize_lower_quantile,
+                                                             self.winsorize_upper_quantile)
+
+
+    def _output_filenames(self, prefix, count, transform, inverse=False):
+        self.low_dimensional_transform_map = {'Rigid': 'Rigid.mat',
+                                              'Affine': 'Affine.mat',
+                                              'GenericAffine': 'GenericAffine.mat',
+                                              'CompositeAffine': 'Affine.mat',
+                                              'Similarity': 'Similarity.mat',
+                                              'Translation': 'Translation.mat',
+                                              'BSpline': 'BSpline.txt',
+                                              'Initial': 'DerivedInitialMovingTranslation.mat'}
+        if transform in list(self.low_dimensional_transform_map.keys()):
+            suffix = self.low_dimensional_transform_map[transform]
+            inverse_mode = inverse
+        else:
+            inverse_mode = False  # These are not analytically invertable
+            if inverse:
+                suffix = 'InverseWarp.nii.gz'
+            else:
+                suffix = 'Warp.nii.gz'
+        return '%s%d%s' % (prefix, count, suffix), inverse_mode
 
 
 class RegistrationOutputSpec(TraitedSpec):
@@ -496,7 +682,7 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ] --write-composite-transform 1'
     >>> reg1.run()  # doctest: +SKIP
 
     >>> reg2 = copy.deepcopy(reg)
@@ -509,7 +695,7 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ] --write-composite-transform 1'
 
     >>> reg3 = copy.deepcopy(reg)
     >>> reg3.inputs.winsorize_lower_quantile = 0.025
@@ -522,7 +708,7 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ] --write-composite-transform 1'
 
     >>> reg3a = copy.deepcopy(reg)
     >>> reg3a.inputs.float = True
@@ -534,7 +720,7 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ] \
 --write-composite-transform 1'
 
     >>> reg3b = copy.deepcopy(reg)
@@ -547,7 +733,7 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ] \
 --write-composite-transform 1'
 
     >>> # Test collapse transforms flag
@@ -556,8 +742,7 @@ class Registration(ANTSCommand):
     >>> reg4.inputs.restore_state = 'trans.mat'
     >>> reg4.inputs.initialize_transforms_per_stage = True
     >>> reg4.inputs.collapse_output_transforms = True
-    >>> outputs = reg4._list_outputs()
-    >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> pprint.pprint(reg4.outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     {'composite_transform': '.../nipype/testing/data/output_Composite.h5',
      'forward_invert_flags': [],
      'forward_transforms': [],
@@ -575,14 +760,14 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ] \
 --write-composite-transform 1'
 
     >>> # Test collapse transforms flag
     >>> reg4b = copy.deepcopy(reg4)
     >>> reg4b.inputs.write_composite_transform = False
     >>> outputs = reg4b._list_outputs()
-    >>> pprint.pprint(outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    >>> pprint.pprint(reg4b.outputs)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     {'composite_transform': <undefined>,
      'forward_invert_flags': [False, False],
      'forward_transforms': ['.../nipype/testing/data/output_0GenericAffine.mat',
@@ -603,7 +788,7 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ] \
 --write-composite-transform 0'
 
     >>> # Test multiple metrics per stage
@@ -624,7 +809,7 @@ class Registration(ANTSCommand):
 --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] \
 --metric CC[ fixed1.nii, moving1.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ] --write-composite-transform 1'
 
     >>> # Test multiple inputs
     >>> reg6 = copy.deepcopy(reg5)
@@ -639,7 +824,7 @@ class Registration(ANTSCommand):
 --metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] \
 --metric CC[ fixed2.nii, moving2.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ] --write-composite-transform 1'
 
     >>> # Test Interpolation Parameters (BSpline)
     >>> reg7a = copy.deepcopy(reg)
@@ -653,7 +838,7 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ] --write-composite-transform 1'
 
     >>> # Test Interpolation Parameters (MultiLabel/Gaussian)
     >>> reg7b = copy.deepcopy(reg)
@@ -667,7 +852,7 @@ class Registration(ANTSCommand):
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
 --transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
---use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
+--use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ] \
 --write-composite-transform 1'
 
     >>> # Test Extended Transform Parameters
@@ -682,7 +867,7 @@ class Registration(ANTSCommand):
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform BSplineSyN[ 0.25, 26, 0, 3 ] \
 --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
---use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
+--use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ] --write-composite-transform 1'
     """
     DEF_SAMPLING_STRATEGY = 'None'
     """The default sampling strategy argument."""
@@ -690,194 +875,7 @@ class Registration(ANTSCommand):
     _cmd = 'antsRegistration'
     input_spec = RegistrationInputSpec
     output_spec = RegistrationOutputSpec
-    _quantilesDone = False
     _linear_transform_names = ['Rigid', 'Affine', 'Translation', 'CompositeAffine', 'Similarity']
-
-    def _format_metric(self, index):
-        """
-        Format the antsRegistration -m metric argument(s).
-
-        Parameters
-        ----------
-        index: the stage index
-        """
-        # The metric name input for the current stage.
-        name_input = self.inputs.metric[index]
-        # The stage-specific input dictionary.
-        stage_inputs = dict(
-            fixed_image=self.inputs.fixed_image[0],
-            moving_image=self.inputs.moving_image[0],
-            metric=name_input,
-            weight=self.inputs.metric_weight[index],
-            radius_or_bins=self.inputs.radius_or_number_of_bins[index],
-            optional=self.inputs.radius_or_number_of_bins[index]
-        )
-        # The optional sampling strategy and percentage.
-        if isdefined(self.inputs.sampling_strategy) and self.inputs.sampling_strategy:
-            sampling_strategy = self.inputs.sampling_strategy[index]
-            if sampling_strategy:
-                stage_inputs['sampling_strategy'] = sampling_strategy
-        if isdefined(self.inputs.sampling_percentage) and self.inputs.sampling_percentage:
-            sampling_percentage = self.inputs.sampling_percentage[index]
-            if sampling_percentage:
-                stage_inputs['sampling_percentage'] = sampling_percentage
-
-        # Make a list of metric specifications, one per -m command line
-        # argument for the current stage.
-        # If there are multiple inputs for this stage, then convert the
-        # dictionary of list inputs into a list of metric specifications.
-        # Otherwise, make a singleton list of the metric specification
-        # from the non-list inputs.
-        if isinstance(name_input, list):
-            items = list(stage_inputs.items())
-            indexes = list(range(0, len(name_input)))
-            specs = list()
-            for i in indexes:
-                temp = dict([(k, v[i]) for k, v in items])
-                if len(self.inputs.fixed_image) == 1:
-                    temp["fixed_image"] = self.inputs.fixed_image[0]
-                else:
-                    temp["fixed_image"] = self.inputs.fixed_image[i]
-
-                if len(self.inputs.moving_image) == 1:
-                    temp["moving_image"] = self.inputs.moving_image[0]
-                else:
-                    temp["moving_image"] = self.inputs.moving_image[i]
-
-                specs.append(temp)
-        else:
-            specs = [stage_inputs]
-
-        # Format the --metric command line metric arguments, one per
-        # specification.
-        return [self._format_metric_argument(**spec) for spec in specs]
-
-    @staticmethod
-    def _format_metric_argument(**kwargs):
-        retval = '%s[ %s, %s, %g, %d' % (kwargs['metric'],
-                                         kwargs['fixed_image'],
-                                         kwargs['moving_image'],
-                                         kwargs['weight'],
-                                         kwargs['radius_or_bins'])
-
-        # The optional sampling strategy.
-        if 'sampling_strategy' in kwargs:
-            sampling_strategy = kwargs['sampling_strategy']
-        elif 'sampling_percentage' in kwargs:
-            # The sampling percentage is specified but not the
-            # sampling strategy. Use the default strategy.
-            sampling_strategy = Registration.DEF_SAMPLING_STRATEGY
-        else:
-            sampling_strategy = None
-        # Format the optional sampling arguments.
-        if sampling_strategy:
-            retval += ', %s' % sampling_strategy
-            if 'sampling_percentage' in kwargs:
-                retval += ', %g' % kwargs['sampling_percentage']
-
-        retval += ' ]'
-
-        return retval
-
-    def _format_transform(self, index):
-        retval = []
-        retval.append('%s[ ' % self.inputs.transforms[index])
-        parameters = ', '.join([str(
-            element) for element in self.inputs.transform_parameters[index]])
-        retval.append('%s' % parameters)
-        retval.append(' ]')
-        return "".join(retval)
-
-    def _format_registration(self):
-        retval = []
-        for ii in range(len(self.inputs.transforms)):
-            retval.append('--transform %s' % (self._format_transform(ii)))
-            for metric in self._format_metric(ii):
-                retval.append('--metric %s' % metric)
-            retval.append('--convergence %s' % self._format_convergence(ii))
-            if isdefined(self.inputs.sigma_units):
-                retval.append('--smoothing-sigmas %s%s' %
-                              (self._format_xarray(self.inputs.smoothing_sigmas[ii]),
-                               self.inputs.sigma_units[ii]))
-            else:
-                retval.append('--smoothing-sigmas %s' %
-                              self._format_xarray(self.inputs.smoothing_sigmas[ii]))
-            retval.append('--shrink-factors %s' %
-                          self._format_xarray(self.inputs.shrink_factors[ii]))
-            if isdefined(self.inputs.use_estimate_learning_rate_once):
-                retval.append('--use-estimate-learning-rate-once %d' %
-                              self.inputs.use_estimate_learning_rate_once[ii])
-            if isdefined(self.inputs.use_histogram_matching):
-                # use_histogram_matching is either a common flag for all transforms
-                # or a list of transform-specific flags
-                if isinstance(self.inputs.use_histogram_matching, bool):
-                    histval = self.inputs.use_histogram_matching
-                else:
-                    histval = self.inputs.use_histogram_matching[ii]
-                retval.append('--use-histogram-matching %d' % histval)
-        return " ".join(retval)
-
-    def _get_outputfilenames(self, inverse=False):
-        output_filename = None
-        if not inverse:
-            if isdefined(self.inputs.output_warped_image) and \
-                    self.inputs.output_warped_image:
-                output_filename = self.inputs.output_warped_image
-                if isinstance(output_filename, bool):
-                    output_filename = '%s_Warped.nii.gz' % self.inputs.output_transform_prefix
-                else:
-                    output_filename = output_filename
-            return output_filename
-        inv_output_filename = None
-        if isdefined(self.inputs.output_inverse_warped_image) and \
-                self.inputs.output_inverse_warped_image:
-            inv_output_filename = self.inputs.output_inverse_warped_image
-            if isinstance(inv_output_filename, bool):
-                inv_output_filename = '%s_InverseWarped.nii.gz' % self.inputs.output_transform_prefix
-            else:
-                inv_output_filename = inv_output_filename
-        return inv_output_filename
-
-    def _format_convergence(self, ii):
-        convergence_iter = self._format_xarray(self.inputs.number_of_iterations[ii])
-        if len(self.inputs.convergence_threshold) > ii:
-            convergence_value = self.inputs.convergence_threshold[ii]
-        else:
-            convergence_value = self.inputs.convergence_threshold[0]
-        if len(self.inputs.convergence_window_size) > ii:
-            convergence_ws = self.inputs.convergence_window_size[ii]
-        else:
-            convergence_ws = self.inputs.convergence_window_size[0]
-        return '[ %s, %g, %d ]' % (convergence_iter, convergence_value, convergence_ws)
-
-    def _format_winsorize_image_intensities(self):
-        if not self.inputs.winsorize_upper_quantile > self.inputs.winsorize_lower_quantile:
-            raise RuntimeError("Upper bound MUST be more than lower bound: %g > %g"
-                               % (self.inputs.winsorize_upper_quantile, self.inputs.winsorize_lower_quantile))
-        self._quantilesDone = True
-        return '--winsorize-image-intensities [ %s, %s ]' % (self.inputs.winsorize_lower_quantile,
-                                                             self.inputs.winsorize_upper_quantile)
-
-
-    def _output_filenames(self, prefix, count, transform, inverse=False):
-        self.low_dimensional_transform_map = {'Rigid': 'Rigid.mat',
-                                              'Affine': 'Affine.mat',
-                                              'GenericAffine': 'GenericAffine.mat',
-                                              'CompositeAffine': 'Affine.mat',
-                                              'Similarity': 'Similarity.mat',
-                                              'Translation': 'Translation.mat',
-                                              'BSpline': 'BSpline.txt',
-                                              'Initial': 'DerivedInitialMovingTranslation.mat'}
-        if transform in list(self.low_dimensional_transform_map.keys()):
-            suffix = self.low_dimensional_transform_map[transform]
-            inverse_mode = inverse
-        else:
-            inverse_mode = False  # These are not analytically invertable
-            if inverse:
-                suffix = 'InverseWarp.nii.gz'
-            else:
-                suffix = 'Warp.nii.gz'
-        return '%s%d%s' % (prefix, count, suffix), inverse_mode
 
     def _post_run(self):
         self.outputs.forward_transforms = []
