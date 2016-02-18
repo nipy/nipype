@@ -17,7 +17,7 @@ def test_TCorr1D_inputs():
     xor=['pearson', 'spearman', 'quadrant'],
     ),
     out_file=dict(argstr='-prefix %s',
-    keep_extension=True,
+    keep_extension=False,
     name_source='xset',
     name_template='%s_correlation.nii.gz',
     ),

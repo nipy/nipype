@@ -22,6 +22,7 @@ def test_AutoTcorrelate_inputs():
     mask=dict(argstr='-mask %s',
     ),
     mask_only_targets=dict(argstr='-mask_only_targets',
+    usedefault=True,
     xor=['mask_source'],
     ),
     mask_source=dict(argstr='-mask_source %s',

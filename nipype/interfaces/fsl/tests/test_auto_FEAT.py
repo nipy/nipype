@@ -16,7 +16,8 @@ def test_FEAT_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

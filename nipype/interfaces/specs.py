@@ -220,10 +220,10 @@ class BaseTraitedSpec(traits.HasTraits):
             if keep_ext:
                 retval += ext
             else:
-                retval = self._overload_extension(retval)
+                retval = self._overload_extension(retval, out_name, ext)
         return retval
 
-    def _overload_extension(self, value, name=None):
+    def _overload_extension(self, value, name=None, ext=None):
         return value
 
     def get_hashval(self, hash_method=None):
@@ -455,7 +455,6 @@ class BaseInputSpec(BaseTraitedSpec):
         if chain is None:
             chain = []
 
-
         spec = self.traits()[name]
         retval = getattr(self, name)
 
@@ -515,8 +514,7 @@ class BaseInputSpec(BaseTraitedSpec):
         if keep_ext:
             retval += ext
         else:
-            retval = self._overload_extension(retval, name)
-
+            retval = self._overload_extension(retval, name, ext)
         return retval
 
     def update_autonames(self):

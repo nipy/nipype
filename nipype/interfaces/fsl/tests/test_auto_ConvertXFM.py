@@ -38,7 +38,8 @@ def test_ConvertXFM_inputs():
     hash_files=False,
     position=1,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

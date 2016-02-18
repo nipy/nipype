@@ -34,7 +34,8 @@ def test_MeanImage_inputs():
     output_datatype=dict(argstr='-odt %s',
     position=-1,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -31,7 +31,8 @@ def test_ChangeDataType_inputs():
     mandatory=True,
     position=-1,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

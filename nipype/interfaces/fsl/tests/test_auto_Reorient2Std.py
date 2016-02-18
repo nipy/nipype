@@ -19,7 +19,8 @@ def test_Reorient2Std_inputs():
     genfile=True,
     hash_files=False,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

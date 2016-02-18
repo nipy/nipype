@@ -18,7 +18,7 @@ def test_Copy_inputs():
     position=-2,
     ),
     out_file=dict(argstr='%s',
-    keep_extension=True,
+    keep_extension=False,
     name_source='in_file',
     name_template='%s_copy',
     position=-1,

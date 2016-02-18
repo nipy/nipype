@@ -13,6 +13,7 @@ def test_AFNICommand_inputs():
     usedefault=True,
     ),
     out_file=dict(argstr='-prefix %s',
+    keep_extension=False,
     name_source=['in_file'],
     name_template='%s_afni',
     ),

@@ -15,7 +15,8 @@ def test_AvScale_inputs():
     mat_file=dict(argstr='%s',
     position=0,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

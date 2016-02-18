@@ -207,7 +207,7 @@ class Node(EngineBase):
     @property
     def outputs(self):
         """Return the output fields of the underlying interface"""
-        return self._interface._outputs()
+        return self._interface.outputs
 
     def output_dir(self):
         """Return the location of the output directory for the node"""

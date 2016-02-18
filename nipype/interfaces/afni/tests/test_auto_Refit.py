@@ -7,6 +7,7 @@ def test_Refit_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
     deoblique=dict(argstr='-deoblique',
+    usedefault=True,
     ),
     environ=dict(nohash=True,
     usedefault=True,
@@ -44,7 +45,10 @@ def test_Refit_inputs():
 
 
 def test_Refit_outputs():
-    output_map = dict(out_file=dict(),
+    output_map = dict(out_file=dict(keep_extension=False,
+    name_source='in_file',
+    name_template='%s',
+    ),
     )
     outputs = Refit.output_spec()
 

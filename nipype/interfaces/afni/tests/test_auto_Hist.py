@@ -52,7 +52,9 @@ def test_Hist_inputs():
 
 
 def test_Hist_outputs():
-    output_map = dict(out_file=dict(),
+    output_map = dict(out_file=dict(mandatory=True,
+    suffix='.niml.hist',
+    ),
     out_show=dict(),
     )
     outputs = Hist.output_spec()

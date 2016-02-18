@@ -40,7 +40,8 @@ def test_ApplyTOPUP_inputs():
     name_source=['in_files'],
     name_template='%s_corrected',
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

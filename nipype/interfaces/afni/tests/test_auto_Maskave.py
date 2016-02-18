@@ -21,7 +21,7 @@ def test_Maskave_inputs():
     position=1,
     ),
     out_file=dict(argstr='> %s',
-    keep_extension=True,
+    keep_extension=False,
     name_source='in_file',
     name_template='%s_maskave.1D',
     position=-1,
