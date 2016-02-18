@@ -14,7 +14,7 @@ import os.path as op
 import re
 import numpy as np
 
-from ..base import (Directory, traits, isdefined,File, Undefined,
+from ..base import (Directory, traits, isdefined, File, GenFile, Undefined,
                     CommandLineInputSpec, TraitedSpec, InputMultiPath)
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
                    AFNICommandOutputSpec, Info, no_afni)

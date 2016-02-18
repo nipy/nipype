@@ -6,7 +6,6 @@ import os
 from builtins import object
 
 from ... import logging
-from ...utils.filemanip import split_filename
 from ..base import traits, File, CommandLine, CommandLineInputSpec, TraitedSpec
 
 # Use nipype's logging system
