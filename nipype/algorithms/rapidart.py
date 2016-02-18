@@ -33,10 +33,8 @@ from ..external.six import string_types
 
 from ..utils.filemanip import filename_to_list, save_json, split_filename
 from ..utils.misc import find_indices
-
-from ..interfaces.traits_extension import traits, File, isdefined
-from ..interfaces.specs import BaseInterfaceInputSpec, TraitedSpec, InputMultiPath, OutputMultiPath
-from ..interfaces.base import BaseInterface
+from ..interfaces.base import (traits, File, GenMultiFile, isdefined, BaseInterfaceInputSpec,
+                               TraitedSpec, InputMultiPath, OutputMultiPath, BaseInterface)
 
 from .. import logging, config
 iflogger = logging.getLogger('interface')
@@ -438,9 +436,8 @@ class StimCorrInputSpec(BaseInterfaceInputSpec):
                         desc='SPM mat file (use pre-estimate SPM.mat file)')
     concatenated_design = traits.Bool(
         mandatory=True, desc='state if the design matrix contains concatenated sessions')
-    stimcorr_files = OutputMultiPath(File(exists=True), name_source='realignment_parameters',
-        name_template='qa.%s_stimcorr.txt', keep_extension=False,
-        desc='List of files containing correlation values')
+    stimcorr_files = GenMultiFile(template='qa.{realignment_parameters}_stimcorr.txt',
+        keep_extension=False, desc='List of files containing correlation values')
 
 class StimCorrOutputSpec(TraitedSpec):
     stimcorr_files = OutputMultiPath(

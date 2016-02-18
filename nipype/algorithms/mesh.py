@@ -19,9 +19,7 @@ from numpy import linalg as nla
 
 from .. import logging
 from ..external.six import string_types
-from ..interfaces.traits_extension import traits, File
-from ..interfaces.specs import BaseInterfaceInputSpec, TraitedSpec
-from ..interfaces.base import BaseInterface
+from ..interfaces.base import traits, File, GenFile, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
 
 IFLOGGER = logging.getLogger('interface')
 
@@ -47,8 +45,8 @@ class WarpPointsInputSpec(BaseInterfaceInputSpec):
                 desc=('dense deformation field to be applied'))
     interp = traits.Enum('cubic', 'nearest', 'linear', usedefault=True,
                          mandatory=True, desc='interpolation')
-    out_points = File(name_source='points', name_template='%s_warped', keep_extension=True,
-                      desc='the warped point set')
+    out_points = GenFile(template='{points}_warped', keep_extension=True,
+                         desc='the warped point set')
 
 
 class WarpPointsOutputSpec(TraitedSpec):
@@ -273,18 +271,16 @@ class MeshWarpMathsInputSpec(BaseInterfaceInputSpec):
     operation = traits.Enum('sum', 'sub', 'mul', 'div', usedefault=True,
                             desc=('operation to be performed'))
 
-    out_warp = File(name_source='in_surf', name_template='%s_warp', keep_extension=True,
-                    usedefault=True, desc='vtk file based on in_surf and warpings mapping it '
-                                          'to out_file')
-    out_file = File(name_source='in_surf', name_template='%s_warped', keep_extension=True,
-                    usedefault=True, desc='vtk with surface warped')
+    out_warp = GenFile(template='{in_surf}_warping', keep_extension=True,
+                       desc='vtk file based on in_surf and warpings mapping it to out_file')
+    out_file = File(template='{in_surf}_warped', keep_extension=True,
+                    desc='vtk with surface warped')
 
 
 class MeshWarpMathsOutputSpec(TraitedSpec):
     out_warp = File(exists=True, desc=('vtk file with the vertex-wise '
                                        'mapping of surface1 to surface2'))
-    out_file = File(exists=True,
-                    desc='vtk with surface warped')
+    out_file = File(exists=True, desc='vtk with surface warped')
 
 
 class MeshWarpMaths(TVTKBaseInterface):

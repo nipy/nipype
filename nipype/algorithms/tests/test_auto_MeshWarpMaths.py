@@ -15,15 +15,9 @@ def test_MeshWarpMaths_inputs():
     operator=dict(mandatory=True,
     ),
     out_file=dict(keep_extension=True,
-    name_source='in_surf',
-    name_template='%s_warped',
-    usedefault=True,
+    template='{in_surf}_warped',
     ),
-    out_warp=dict(keep_extension=True,
-    name_source='in_surf',
-    name_template='%s_warp',
-    usedefault=True,
-    ),
+    out_warp=dict(),
     )
     inputs = MeshWarpMaths.input_spec()
 

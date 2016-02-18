@@ -19,10 +19,8 @@ from scipy.linalg import pinv
 import nibabel as nb
 
 from builtins import range
-from ..interfaces.traits_extension import traits, File
-from ..interfaces.specs import BaseInterfaceInputSpec, TraitedSpec
-from ..interfaces.base import BaseInterface
-
+from ..interfaces.base import (traits, File, BaseInterface, BaseInterfaceInputSpec,
+                               TraitedSpec)
 
 class ICCInputSpec(BaseInterfaceInputSpec):
     subjects_sessions = traits.List(traits.List(File(exists=True)),

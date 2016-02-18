@@ -9,9 +9,7 @@
     >>> os.chdir(datadir)
 """
 
-
-from ..traits_extension import traits, File
-from ..specs import TraitedSpec
+from ..base import traits, File, TraitedSpec
 from .base import AFNICommand, AFNICommandInputSpec, AFNICommandOutputSpec
 
 from ... import logging

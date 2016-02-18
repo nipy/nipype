@@ -30,9 +30,8 @@ from scipy.special import gammaln
 
 from ..external.six import string_types
 
-from ..interfaces.traits_extension import traits, File, isdefined, Undefined
-from ..interfaces.specs import BaseInterfaceInputSpec, TraitedSpec, InputMultiPath
-from ..interfaces.base import BaseInterface, Bunch
+from ..interfaces.base import (traits, File, isdefined, Undefined, BaseInterfaceInputSpec,
+                               TraitedSpec, InputMultiPath, BaseInterface, Bunch)
 
 from ..utils.filemanip import filename_to_list
 from .. import config, logging

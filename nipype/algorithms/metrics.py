@@ -27,9 +27,8 @@ from scipy.ndimage.measurements import center_of_mass, label
 from .. import logging
 from ..utils.misc import package_check
 
-from ..interfaces.traits_extension import traits, File, isdefined
-from ..interfaces.specs import BaseInterfaceInputSpec, TraitedSpec, InputMultiPath
-from ..interfaces.base import BaseInterface
+from ..interfaces.base import (traits, File, GenFile, isdefined, BaseInterfaceInputSpec,
+                               TraitedSpec, InputMultiPath, BaseInterface)
 
 iflogger = logging.getLogger('interface')
 
@@ -464,8 +463,8 @@ class ErrorMapInputSpec(BaseInterfaceInputSpec):
     metric = traits.Enum("sqeuclidean", "euclidean",
                          desc='error map metric (as implemented in scipy cdist)',
                          usedefault=True, mandatory=True)
-    out_map = File(name_source='in_tst', name_template='%s_errormap', keep_extension=True,
-                   desc="Name for the output file")
+    out_map = GenFile(template='{in_tst}_errormap', keep_extension=True,
+                      desc="Name for the output file")
 
 
 class ErrorMapOutputSpec(TraitedSpec):

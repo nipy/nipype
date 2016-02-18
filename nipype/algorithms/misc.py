@@ -30,9 +30,9 @@ import scipy.stats as stats
 
 from . import metrics as nam
 from ..utils.filemanip import fname_presuffix, split_filename
-from ..interfaces.traits_extension import traits, File, GenFile, isdefined, Undefined
-from ..interfaces.specs import BaseInterfaceInputSpec, TraitedSpec, InputMultiPath, OutputMultiPath, DynamicTraitedSpec
-from ..interfaces.base import BaseInterface
+from ..interfaces.base import (traits, File, GenFile, GenMultiFile, isdefined, Undefined,
+                               BaseInterfaceInputSpec, TraitedSpec, InputMultiPath,
+                               OutputMultiPath, DynamicTraitedSpec, BaseInterface)
 
 
 from .. import logging
@@ -115,9 +115,8 @@ class SimpleThresholdInputSpec(BaseInterfaceInputSpec):
                              desc='volumes to be thresholded')
     threshold = traits.Float(mandatory=True, desc='volumes to be thresholdedeverything below '
                                                   'this value will be set to zero')
-    thresholded_volumes = OutputMultiPath(
-        File(exists=True), name_source='volumes', name_template='%s_thresholded',
-        keep_extension=True, desc="thresholded volumes")
+    thresholded_volumes = GenMultiFile(template='{volumes}_thresholded', keep_extension=True,
+                                       desc="thresholded volumes")
 
 
 class SimpleThresholdOutputSpec(TraitedSpec):
@@ -153,9 +152,8 @@ class ModifyAffineInputSpec(BaseInterfaceInputSpec):
     transformation_matrix = traits.Array(
         value=np.eye(4), shape=(4, 4), usedefault=True,
         desc='transformation matrix that will be left multiplied by the affine matrix')
-    transformed_volumes = OutputMultiPath(
-        File(exist=True), name_source='volumes', name_template='%s_transformed',
-        keep_extension=True, desc='output transformed files')
+    transformed_volumes = GenMultiFile(template='{volumes}_transformed', keep_extension=True,
+                                       desc='output transformed files')
 
 
 class ModifyAffineOutputSpec(TraitedSpec):
@@ -852,8 +850,8 @@ class AddNoise(BaseInterface):
 class NormalizeProbabilityMapSetInputSpec(TraitedSpec):
     in_files = InputMultiPath(File(exists=True, mandatory=True,
                                    desc='The tpms to be normalized'))
-    out_files = OutputMultiPath(File(), name_source='in_files', name_template='%s_norm',
-                                keep_extension=True, desc="normalized maps")
+    out_files = GenMultiFile(template='{in_files}_norm', keep_extension=True,
+                             desc="normalized maps")
     in_mask = File(exists=True, desc='Masked voxels must sum up 1.0, 0.0 otherwise.')
 
 
