@@ -17,6 +17,7 @@ all of these bugs and they've been fixed in enthought svn repository
 """
 import os
 
+from ..external.six import string_types
 # perform all external trait imports here
 import traits
 if traits.__version__ < '3.7.0':
@@ -26,6 +27,10 @@ from traits.trait_handlers import TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
 from traits.trait_base import _Undefined
 
+from ..utils.filemanip import split_filename
+
+from .. import logging
+IFLOGGER = logging.getLogger('interface')
 
 class BaseFile (traits.BaseStr):
     """ Defines a trait whose value must be the name of a file.
@@ -113,6 +118,108 @@ class File (BaseFile):
 
         super(File, self).__init__(value, filter, auto_set, entries, exists,
                                    **metadata)
+
+
+class GenFile(File):
+    """ A file which default name is automatically generated from other
+    traits.
+    """
+    def __init__(self, name_source=None, ns=None, template='%s_generated',
+                 keep_extension=True, value='', filter=None, auto_set=False,
+                 entries=0, exists=False, **metadata):
+        """ Creates a File trait.
+
+        Parameters
+        ----------
+        value : string
+            The default value for the trait
+        filter : string
+            A wildcard string to filter filenames in the file dialog box used by
+            the attribute trait editor.
+        auto_set : boolean
+            Indicates whether the file editor updates the trait value after
+            every key stroke.
+        exists : boolean
+            Indicates whether the trait value must be an existing file or
+            not.
+
+        Default Value
+        -------------
+        *value* or ''
+        """
+
+        if name_source is None and ns is None:
+            raise TraitError('GenFile requires a name_source')
+
+        if ns is not None and name_source is None:
+            name_source = ns
+
+        self.name_source = name_source
+        if isinstance(name_source, string_types):
+            self.name_source = [name_source]
+        elif isinstance(name_source, tuple):
+            self.name_source = list(name_source)
+        
+        if not isinstance(self.name_source, list):
+            raise TraitError('name_source should be a string, or a '
+                             'tuple/list of strings. Got %s' % name_source)
+
+        for nsrc in self.name_source:
+            if not isinstance(nsrc, string_types):
+                raise TraitError('name_source contains an invalid name_source '
+                                 'entry (found %s).' % nsrc)
+        self.keep_ext = keep_extension
+        self.template = template
+
+        super(GenFile, self).__init__(value, filter, auto_set, entries, exists,
+                                   **metadata)
+
+
+    def validate(self, object, name, value):
+        """ Validates that a specified value is valid for this trait.
+
+            Note: The 'fast validator' version performs this check in C.
+        """
+        if not isdefined(value):
+            return value
+
+        validated_value = super(BaseFile, self).validate(object, name, value)
+        if not self.exists:
+            return validated_value
+        elif os.path.isfile(value):
+            return validated_value
+
+        self.error(object, name, value)
+
+    def get(self, obj, name):
+        if self.value is None:
+            srcvals = []
+            ext = ''
+            for nsrc in self.name_source:
+                val = getattr(obj, nsrc)
+
+                IFLOGGER.debug('Object class is %s' % type(obj.traits()[nsrc]).__name__)
+                try:
+                    _, val, ext = split_filename(val)
+                except:
+                    pass
+                srcvals.append(val)
+                
+            if all(isdefined(v) for v in srcvals):
+                retval = self.template % tuple(srcvals)
+                if self.keep_ext:
+                    retval += ext
+                return retval
+            else:
+                return Undefined
+        return self.value
+
+    def set(self, obj, name, value):
+        if isdefined(value):
+            self.value = value
+        else:
+            self.value = None
+
 
 # -------------------------------------------------------------------------------
 #  'BaseDirectory' and 'Directory' traits:

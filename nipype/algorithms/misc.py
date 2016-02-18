@@ -30,7 +30,7 @@ import scipy.stats as stats
 
 from . import metrics as nam
 from ..utils.filemanip import fname_presuffix, split_filename
-from ..interfaces.traits_extension import traits, File, isdefined, Undefined
+from ..interfaces.traits_extension import traits, File, GenFile, isdefined, Undefined
 from ..interfaces.specs import BaseInterfaceInputSpec, TraitedSpec, InputMultiPath, OutputMultiPath, DynamicTraitedSpec
 from ..interfaces.base import BaseInterface
 
@@ -56,8 +56,8 @@ class PickAtlasInputSpec(BaseInterfaceInputSpec):
         desc="Defines how much the mask will be dilated (expanded in 3D).")
     output_file = File(deprecated=True, new_name='mask_file',
                        desc="Where to store the output mask.")
-    mask_file = File(name_source='atlas', name_template='%s_mask', keep_extension=True,
-                     desc="Where to store the output mask.")
+    mask_file = GenFile(ns='atlas', template='%s_mask',
+                        desc="Where to store the output mask.")
 
 class PickAtlasOutputSpec(TraitedSpec):
     mask_file = File(exists=True, desc="output mask file")
@@ -183,8 +183,8 @@ class CreateNiftiInputSpec(BaseInterfaceInputSpec):
     header_file = File(
         exists=True, mandatory=True, desc="corresponding ANALYZE hdr file")
     affine = traits.Array(desc="affine transformation array")
-    nifti_file = File(name_source='data_file', name_template='%s_nifti.nii',
-                      keep_extension=False, desc='output nifti file')
+    nifti_file = GenFile(ns='data_file', template='%s_nifti.nii',
+                         keep_extension=False, desc='output nifti file')
 
 
 class CreateNiftiOutputSpec(TraitedSpec):
