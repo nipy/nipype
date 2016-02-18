@@ -12,6 +12,7 @@ import os
 def test_errormap():
 
     tempdir = mkdtemp()
+    os.chdir(tempdir)
     # Single-Spectual
     # Make two fake 2*2*2 voxel volumes
     volume1 = np.array([[[2.0, 8.0], [1.0, 2.0]], [[1.0, 9.0], [0.0, 3.0]]])  # John von Neumann's birthday
