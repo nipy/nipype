@@ -180,6 +180,7 @@ class GenFile(File):
 
             Note: The 'fast validator' version performs this check in C.
         """
+        # Allow unsetting the input
         if not isdefined(value):
             return value
 
@@ -197,8 +198,6 @@ class GenFile(File):
             ext = ''
             for nsrc in self.name_source:
                 val = getattr(obj, nsrc)
-
-                IFLOGGER.debug('Object class is %s' % type(obj.traits()[nsrc]).__name__)
                 try:
                     _, val, ext = split_filename(val)
                 except:

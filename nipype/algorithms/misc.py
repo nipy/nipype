@@ -216,14 +216,14 @@ class TSNRInputSpec(BaseInterfaceInputSpec):
     in_file = InputMultiPath(File(exists=True), mandatory=True,
                              desc='realigned 4D file or a list of 3D files')
     regress_poly = traits.Range(low=1, desc='Remove polynomials')
-    tsnr_file = File(name_source='in_file', name_template='%s_tsnr', keep_extension=True,
-                     hash_files=False, desc='output tSNR file')
-    mean_file = File(name_source='in_file', name_template='%s_mean', keep_extension=True,
-                     hash_files=False, desc='output mean file')
-    stddev_file = File(name_source='in_file', name_template='%s_stdev',
-                       keep_extension=True, hash_files=False, desc='output std deviation file')
-    detrended_file = File(
-        name_source='in_file', name_template='%s_detrend', keep_extension=True, hash_files=False,
+    tsnr_file = GenFile(ns='in_file', template='%s_tsnr',
+                        hash_files=False, desc='output tSNR file')
+    mean_file = GenFile(ns='in_file', template='%s_mean',
+                        hash_files=False, desc='output mean file')
+    stddev_file = GenFile(ns='in_file', template='%s_stdev',
+                          hash_files=False, desc='output std deviation file')
+    detrended_file = GenFile(
+        ns='in_file', template='%s_detrend', hash_files=False,
         desc='input file after detrending')
 
 
@@ -295,7 +295,7 @@ class TSNR(BaseInterface):
 
 class GunzipInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True)
-    out_file = File(name_source='in_file', name_template='%s', name_remove='.gz',
+    out_file = GenFile(ns='in_file', template='%s', name_remove='.gz',
                     keep_extension=False, desc='output file')
 
 
@@ -551,8 +551,8 @@ class MergeCSVFiles(BaseInterface):
 class AddCSVColumnInputSpec(TraitedSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='Input comma-separated value (CSV) files')
-    out_file = File(name_source='in_file', name_template='%s_col_added', keep_extension=True,
-                    output_name='csv_file', desc='Output filename for merged CSV file')
+    out_file = GenFile(ns='in_file', template='%s_col_added', output_name='csv_file',
+                       desc='Output filename for merged CSV file')
     extra_column_heading = traits.Str(
         desc='New heading to add for the added field.')
     extra_field = traits.Str(
@@ -763,7 +763,7 @@ class AddNoiseInputSpec(TraitedSpec):
     bg_dist = traits.Enum('normal', 'rayleigh', usedefault=True, mandatory=True,
                           desc='desired noise distribution, currently '
                                'only normal is implemented')
-    out_file = File(name_source=['in_file', 'snr'], name_template='%s_SNR%.02f',
+    out_file = GenFile(ns=['in_file', 'snr'], template='%s_SNR%.02f',
                     keep_extension=True, desc='desired output filename')
 
 
