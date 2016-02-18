@@ -81,7 +81,7 @@ class PrepareFieldmap(FSLCommand):
     input_spec = PrepareFieldmapInputSpec
     output_spec = PrepareFieldmapOutputSpec
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         if skip is None:
             skip = []
 
@@ -92,7 +92,7 @@ class PrepareFieldmap(FSLCommand):
         if not isdefined(self.inputs.nocheck) or not self.inputs.nocheck:
             skip += ['nocheck']
 
-        return super(PrepareFieldmap, self)._parse_inputs(skip=skip)
+        return super(PrepareFieldmap, self).parse_args(skip=skip)
 
     def _post_run(self):
         

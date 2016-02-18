@@ -123,10 +123,10 @@ class Level1Design(SPMCommand):
                 return val
         return super(Level1Design, self)._format_arg(opt, spec, val)
 
-    def _parse_inputs(self):
+    def parse_args(self):
         """validate spm realign options if set to None ignore
         """
-        einputs = super(Level1Design, self)._parse_inputs(skip=('mask_threshold'))
+        einputs = super(Level1Design, self).parse_args(skip=('mask_threshold'))
         for sessinfo in einputs[0]['sess']:
             sessinfo['scans'] = scans_for_fnames(filename_to_list(sessinfo['scans']), keep4d=False)
         if not isdefined(self.inputs.spm_mat_dir):
@@ -204,10 +204,10 @@ class EstimateModel(SPMCommand):
                 return val
         return super(EstimateModel, self)._format_arg(opt, spec, val)
 
-    def _parse_inputs(self):
+    def parse_args(self):
         """validate spm realign options if set to None ignore
         """
-        einputs = super(EstimateModel, self)._parse_inputs(skip=('flags'))
+        einputs = super(EstimateModel, self).parse_args(skip=('flags'))
         if isdefined(self.inputs.flags):
             einputs[0].update(self.inputs.flags)
         return einputs
@@ -760,10 +760,10 @@ class FactorialDesign(SPMCommand):
             return outlist
         return super(FactorialDesign, self)._format_arg(opt, spec, val)
 
-    def _parse_inputs(self):
+    def parse_args(self):
         """validate spm realign options if set to None ignore
         """
-        einputs = super(FactorialDesign, self)._parse_inputs()
+        einputs = super(FactorialDesign, self).parse_args()
         if not isdefined(self.inputs.spm_mat_dir):
             einputs[0]['dir'] = np.array([str(os.getcwd())], dtype=object)
         return einputs

@@ -199,10 +199,10 @@ class Realign(SPMCommand):
                                     separate_sessions=separate_sessions)
         return super(Realign, self)._format_arg(opt, spec, val)
 
-    def _parse_inputs(self):
+    def parse_args(self):
         """validate spm realign options if set to None ignore
         """
-        einputs = super(Realign, self)._parse_inputs()
+        einputs = super(Realign, self).parse_args()
         return [{'%s' % (self.inputs.jobtype): einputs[0]}]
 
     def _post_run(self):
@@ -330,13 +330,13 @@ class Coregister(SPMCommand):
                 return scans_for_fnames(val)
         return super(Coregister, self)._format_arg(opt, spec, val)
 
-    def _parse_inputs(self):
+    def parse_args(self):
         """validate spm coregister options if set to None ignore
         """
         if self.inputs.jobtype == "write":
-            einputs = super(Coregister, self)._parse_inputs(skip=('jobtype', 'apply_to_files'))
+            einputs = super(Coregister, self).parse_args(skip=('jobtype', 'apply_to_files'))
         else:
-            einputs = super(Coregister, self)._parse_inputs(skip=('jobtype'))
+            einputs = super(Coregister, self).parse_args(skip=('jobtype'))
         jobtype = self.inputs.jobtype
         return [{'%s' % (jobtype): einputs[0]}]
 
@@ -456,10 +456,10 @@ class Normalize(SPMCommand):
                 raise ValueError('%s must have 3 elements' % opt)
         return super(Normalize, self)._format_arg(opt, spec, val)
 
-    def _parse_inputs(self):
+    def parse_args(self):
         """validate spm normalize options if set to None ignore
         """
-        einputs = super(Normalize, self)._parse_inputs(skip=('jobtype',
+        einputs = super(Normalize, self).parse_args(skip=('jobtype',
                                                              'apply_to_files'))
         if isdefined(self.inputs.apply_to_files):
             inputfiles = deepcopy(self.inputs.apply_to_files)
@@ -616,10 +616,10 @@ class Normalize12(SPMCommand):
                 raise ValueError('%s must have 5 elements' % opt)
         return super(Normalize12, self)._format_arg(opt, spec, val)
 
-    def _parse_inputs(self, skip=()):
+    def parse_args(self, skip=()):
         """validate spm normalize options if set to None ignore
         """
-        einputs = super(Normalize12, self)._parse_inputs(skip=('jobtype',
+        einputs = super(Normalize12, self).parse_args(skip=('jobtype',
                                                                'apply_to_files'))
         if isdefined(self.inputs.apply_to_files):
             inputfiles = deepcopy(self.inputs.apply_to_files)
@@ -1603,11 +1603,11 @@ class VBMSegment(SPMCommand):
         else:
             return super(VBMSegment, self)._format_arg(opt, spec, val)
 
-    def _parse_inputs(self):
+    def parse_args(self):
         if self.inputs.spatial_normalization == 'low':
-            einputs = super(VBMSegment, self)._parse_inputs(
+            einputs = super(VBMSegment, self).parse_args(
                 skip=('spatial_normalization', 'dartel_template'))
             einputs[0]['estwrite']['extopts']['dartelwarp'] = {'normlow': 1}
             return einputs
         else:
-            return super(VBMSegment, self)._parse_inputs(skip=('spatial_normalization'))
+            return super(VBMSegment, self).parse_args(skip=('spatial_normalization'))

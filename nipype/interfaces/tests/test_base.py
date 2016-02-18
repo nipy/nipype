@@ -605,20 +605,20 @@ def test_Commandline():
     ci4.inputs.noo = 0
     ci4.inputs.roo = 'hello'
     ci4.inputs.soo = False
-    cmd = ci4._parse_inputs()
+    cmd = ci4.parse_args()
     yield assert_equal, cmd[0], '-g'
     yield assert_equal, cmd[-1], '-i 1 -i 2 -i 3'
     yield assert_true, 'hello' not in ' '.join(cmd)
     yield assert_true, '-soo' not in ' '.join(cmd)
     ci4.inputs.soo = True
-    cmd = ci4._parse_inputs()
+    cmd = ci4.parse_args()
     yield assert_true, '-soo' in ' '.join(cmd)
 
     class CommandLineInputSpec2(nib.CommandLineInputSpec):
         foo = nib.File(argstr='%s', desc='a str', genfile=True)
     nib.CommandLine.input_spec = CommandLineInputSpec2
     ci5 = nib.CommandLine(command='cmd')
-    yield assert_raises, NotImplementedError, ci5._parse_inputs
+    yield assert_raises, NotImplementedError, ci5.parse_args
 
     class DerivedClass(nib.CommandLine):
         input_spec = CommandLineInputSpec2
@@ -627,7 +627,7 @@ def test_Commandline():
             return 'filename'
 
     ci6 = DerivedClass(command='cmd')
-    yield assert_equal, ci6._parse_inputs()[0], 'filename'
+    yield assert_equal, ci6.parse_args()[0], 'filename'
     nib.CommandLine.input_spec = nib.CommandLineInputSpec
 
 

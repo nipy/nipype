@@ -109,10 +109,8 @@ class AFNICommandInputSpec(CommandLineInputSpec):
                     name_source=["in_file"], argstr='-prefix %s')
 
     def _overload_extension(self, value, name=None, ext=None):
-        IFLOGGER.info('Current out type: %s', self.outputtype)
-        if value.endswith('+orig.BRIK'):
-            return value
-        if value.endswith('.1D'):
+        # Do not overload certain extensions
+        if value.endswith('+orig.BRIK') or value.endswith('.1D'):
             return value
         return value + AFNI_FTYPES.get(self.outputtype, '')
 

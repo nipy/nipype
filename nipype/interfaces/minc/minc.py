@@ -1967,7 +1967,7 @@ class MathInputSpec(CommandLineInputSpec):
         'segment',
         'nsegment',
         'isnan',
-        'isnan']  # FIXME enforce this in _parse_inputs and check for other members
+        'isnan']  # FIXME enforce this in parse_args and check for other members
 
     invert = traits.Either(
         traits.Float(),
@@ -2093,7 +2093,7 @@ class Math(StdOutCommandLine):
 
         return super(Math, self)._format_arg(name, spec, value)
 
-    def _parse_inputs(self):
+    def parse_args(self):
         """A number of the command line options expect precisely one or two files.
         """
 
@@ -2145,7 +2145,7 @@ class Math(StdOutCommandLine):
                         'Due to the %s option we expected at least one file but input_files is of length %d' %
                         (n, nr_input_files,))
 
-        return super(Math, self)._parse_inputs()
+        return super(Math, self).parse_args()
 
 
 class ResampleInputSpec(CommandLineInputSpec):

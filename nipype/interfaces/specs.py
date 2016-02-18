@@ -672,7 +672,7 @@ class CommandLineInputSpec(BaseInterfaceInputSpec):
             value = getattr(self, name)
 
         argstr = spec.argstr
-        IFLOGGER.debug('%s_%s' % (name, str(value)))
+        IFLOGGER.debug('Formatting %s, value=%s' % (name, str(value)))
         if spec.is_trait_type(traits.Bool) and "%" not in argstr:
             if value:
                 # Boolean options have no format string. Just append options

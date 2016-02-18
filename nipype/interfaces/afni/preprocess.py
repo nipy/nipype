@@ -1885,10 +1885,10 @@ class EvalInputSpec(AFNICommandInputSpec):
             return arg
         return super(EvalInputSpec, self)._format_arg(name, trait_spec, value)
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         """Skip the arguments without argstr metadata
         """
-        return super(EvalInputSpec, self)._parse_inputs(
+        return super(EvalInputSpec, self).parse_args(
             skip=('start_idx', 'stop_idx', 'out1D', 'other'))
 
 
@@ -1984,12 +1984,12 @@ class HistInputSpec(CommandLineInputSpec):
     min_value = traits.Float(argstr='-min %f', desc='minimum intensity value')
     bin_width = traits.Float(argstr='-binwidth %f', desc='bin width')
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         if not self.showhist:
             if skip is None:
                 skip = []
             skip += ['out_show']
-        return super(HistInputSpec, self)._parse_inputs(skip=skip)
+        return super(HistInputSpec, self).parse_args(skip=skip)
 
 class HistOutputSpec(TraitedSpec):
     out_file = File(desc='output file', mandatory=True, suffix='.niml.hist')
@@ -2068,15 +2068,15 @@ class FWHMxInputSpec(CommandLineInputSpec):
     combine = traits.Bool(argstr='-combine', desc='combine the final measurements along each axis')
     compat = traits.Bool(argstr='-compat', desc='be compatible with the older 3dFWHM')
     acf = traits.Either(
-        False, traits.Bool(), File(), traits.Tuple(File(exists=True), traits.Float()),
+        traits.Bool(), File(), traits.Tuple(File(exists=True), traits.Float()), default=False,
         usedefault=True, argstr='-acf', desc='computes the spatial autocorrelation')
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         if not self.detrend:
             if skip is None:
                 skip = []
             skip += ['out_detrend']
-        return super(FWHMxInputSpec, self)._parse_inputs(skip=skip)
+        return super(FWHMxInputSpec, self).parse_args(skip=skip)
 
     def arg_used(self, name):
         return self._format_arg(name) is None
@@ -2098,6 +2098,8 @@ class FWHMxInputSpec(CommandLineInputSpec):
                 return trait_spec.argstr + ' %d' % value
 
         if name == 'acf':
+            if value is None:
+                return None
             if isinstance(value, bool):
                 if value:
                     return trait_spec.argstr

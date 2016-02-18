@@ -361,11 +361,11 @@ class N4BiasFieldCorrection(ANTSCommand):
         return super(N4BiasFieldCorrection,
                      self)._format_arg(name, trait_spec, value)
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         if skip is None:
             skip = []
         skip += ['save_bias', 'bias_image']
-        return super(N4BiasFieldCorrection, self)._parse_inputs(skip=skip)
+        return super(N4BiasFieldCorrection, self).parse_args(skip=skip)
 
     def _post_run(self):
         self.outputs.output_image = os.path.abspath(

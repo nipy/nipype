@@ -162,7 +162,7 @@ class LabelConfig(MRTrix3Base):
     input_spec = LabelConfigInputSpec
     output_spec = LabelConfigOutputSpec
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         if skip is None:
             skip = []
 
@@ -178,7 +178,7 @@ class LabelConfig(MRTrix3Base):
                 path, 'src/dwi/tractography/connectomics/'
                       'example_configs/fs_default.txt')
 
-        return super(LabelConfig, self)._parse_inputs(skip=skip)
+        return super(LabelConfig, self).parse_args(skip=skip)
 
     def _post_run(self):
         

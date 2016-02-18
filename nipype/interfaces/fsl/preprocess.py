@@ -457,13 +457,13 @@ class FLIRTInputSpec(FSLCommandInputSpec):
         argstr='-bbrslope %f', min_ver='5.0.0',
         desc='value of bbr slope')
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         skip = []
         if isdefined(self.inputs.save_log) and self.inputs.save_log:
             if not isdefined(self.inputs.verbose) or self.inputs.verbose == 0:
                 self.inputs.verbose = 1
         skip.append('save_log')
-        return super(FLIRTInputSpec, self)._parse_inputs(skip=skip)
+        return super(FLIRTInputSpec, self).parse_args(skip=skip)
 
 
 class FLIRTOutputSpec(TraitedSpec):
@@ -1174,7 +1174,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
     save_unmasked_fmap = traits.Bool(False, argstr='--unmaskfmap', xor=['save_fmap'],
                                      desc='saves the unmasked fieldmap when using --savefmap')
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         if skip is None:
             skip = []
 
@@ -1255,7 +1255,7 @@ class FUGUEInputSpec(FSLCommandInputSpec):
             else:
                 skip += ['save_fmap', 'save_unmasked_fmap', 'fmap_out_file']
 
-        return super(FUGUEInputSpec, self)._parse_inputs(skip=skip)
+        return super(FUGUEInputSpec, self).parse_args(skip=skip)
 
 
 

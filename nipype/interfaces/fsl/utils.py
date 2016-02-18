@@ -437,8 +437,8 @@ class ImageMaths(FSLCommand):
             return getattr(self.outputs, name)
         return None
 
-    def _parse_inputs(self, skip=None):
-        return super(ImageMaths, self)._parse_inputs(skip=['suffix'])
+    def parse_args(self, skip=None):
+        return super(ImageMaths, self).parse_args(skip=['suffix'])
 
     def _post_run(self):
         suffix = '_maths'  # ohinds: build suffix
@@ -1497,7 +1497,7 @@ class Complex(FSLCommand):
     input_spec = ComplexInputSpec
     output_spec = ComplexOuputSpec
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         if skip is None:
             skip = []
         if self.inputs.real_cartesian:
@@ -1506,7 +1506,7 @@ class Complex(FSLCommand):
             skip += self.inputs._ofs[:1] + self.inputs._ofs[3:]
         else:
             skip += self.inputs._ofs[1:]
-        return super(Complex, self)._parse_inputs(skip)
+        return super(Complex, self).parse_args(skip)
 
     def _gen_filename(self, name):
         if name == 'complex_out_file':
@@ -1639,7 +1639,7 @@ class WarpUtils(FSLCommand):
 
     _cmd = 'fnirtfileutils'
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         if skip is None:
             skip = []
 
@@ -1660,7 +1660,7 @@ class WarpUtils(FSLCommand):
             skip += ['out_jacobian']
 
         skip += ['write_jacobian']
-        return super(WarpUtils, self)._parse_inputs(skip=skip)
+        return super(WarpUtils, self).parse_args(skip=skip)
 
 
 class ConvertWarpInputSpec(FSLCommandInputSpec):
@@ -1841,13 +1841,13 @@ class WarpPoints(CommandLine):
         else:
             return super(WarpPoints, self)._format_arg(name, trait_spec, value)
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         import os.path as op
 
         fname, ext = op.splitext(self.inputs.in_coords)
         setattr(self, '_in_file', fname)
         setattr(self, '_outformat', ext[1:])
-        first_args = super(WarpPoints, self)._parse_inputs(skip=['in_coords', 'out_file'])
+        first_args = super(WarpPoints, self).parse_args(skip=['in_coords', 'out_file'])
 
         second_args = fname + '.txt'
 
