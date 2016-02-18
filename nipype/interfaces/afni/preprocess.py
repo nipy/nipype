@@ -512,13 +512,6 @@ class CentralityInputSpec(AFNICommandInputSpec):
     inherits the out_file parameter from AFNICommandOutputSpec base class
     """
 
-    in_file = File(desc='input file to 3dDegreeCentrality',
-                   argstr='%s',
-                   position=-1,
-                   mandatory=True,
-                   exists=True,
-                   copyfile=False)
-
     mask = File(desc='mask file to mask input data',
                    argstr="-mask %s",
                    exists=True)
@@ -547,26 +540,11 @@ class DegreeCentralityInputSpec(CentralityInputSpec):
                    exists=True,
                    copyfile=False)
 
-    mask = File(desc='mask file to mask input data',
-                   argstr="-mask %s",
-                   exists=True)
-
-    thresh = traits.Float(desc='threshold to exclude connections where corr <= thresh',
-                          argstr='-thresh %f')
-
     sparsity = traits.Float(desc='only take the top percent of connections',
                             argstr='-sparsity %f')
 
-    out_1d = traits.Str(desc='output filepath to text dump of correlation matrix',
-                        argstr='-out1D')
-
-    polort = traits.Int(desc='', argstr='-polort %d')
-
-    autoclip = traits.Bool(desc='Clip off low-intensity regions in the dataset',
-                           argstr='-autoclip')
-
-    automask = traits.Bool(desc='Mask the dataset to target brain-only voxels',
-                           argstr='-automask')
+    oned_file = traits.Str(desc='output filepath to text dump of correlation matrix',
+                           argstr='-out1D %s', mandatory=False)
 
 
 class DegreeCentralityOutputSpec(AFNICommandOutputSpec):
@@ -574,10 +552,10 @@ class DegreeCentralityOutputSpec(AFNICommandOutputSpec):
     inherits the out_file parameter from AFNICommandOutputSpec base class
     """
 
-    one_d_file = File(desc='The text output of the similarity matrix computed'\
-                           'after thresholding with one-dimensional and '\
-                           'ijk voxel indices, correlations, image extents, '\
-                           'and affine matrix')
+    oned_file = File(desc='The text output of the similarity matrix computed'\
+                          'after thresholding with one-dimensional and '\
+                          'ijk voxel indices, correlations, image extents, '\
+                          'and affine matrix')
 
 
 class DegreeCentrality(AFNICommand):
@@ -603,6 +581,56 @@ class DegreeCentrality(AFNICommand):
     _cmd = '3dDegreeCentrality'
     input_spec = DegreeCentralityInputSpec
     output_spec = DegreeCentralityOutputSpec
+
+    # Re-define generated inputs
+    def _list_outputs(self):
+        # Import packages
+        import os
+
+        # Update outputs dictionary if oned file is defined
+        outputs = super(DegreeCentrality, self)._list_outputs()
+        if self.inputs.oned_file:
+            outputs['oned_file'] = os.path.abspath(self.inputs.oned_file)
+
+        return outputs
+
+
+class LFCDInputSpec(CentralityInputSpec):
+    """
+    inherits the out_file parameter from AFNICommandOutputSpec base class
+    """
+
+    in_file = File(desc='input file to 3dLFCD',
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True,
+                   copyfile=False)
+
+
+class LFCD(AFNICommand):
+    """Performs degree centrality on a dataset using a given maskfile
+    via 3dLFCD
+
+    For complete details, see the `3dLFCD Documentation.
+    <http://afni.nimh.nih.gov/pub/dist/doc/program_help/3dLFCD.html>
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces import afni as afni
+    >>> lfcd = afni.LFCD()
+    >>> lfcd.inputs.in_file = 'func_preproc.nii'
+    >>> lfcd.inputs.mask = 'mask.nii'
+    >>> lfcd.inputs.threshold = .8 # keep all connections with corr >= 0.8
+    >>> lfcd.cmdline
+    '3dLFCD -threshold 0.8 -mask mask.nii func_preproc.nii'
+    >>> res = lfcd.run() # doctest: +SKIP
+    """
+
+    _cmd = '3dLFCD'
+    input_spec = LFCDInputSpec
+    output_spec = AFNICommandOutputSpec
 
 
 class AutomaskInputSpec(AFNICommandInputSpec):
