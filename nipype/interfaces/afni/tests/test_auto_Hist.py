@@ -27,16 +27,14 @@ def test_Hist_inputs():
     ),
     nbin=dict(argstr='-nbin %d',
     ),
-    out_file=dict(argstr='-prefix %s',
-    keep_extension=False,
-    name_source=['in_file'],
-    name_template='%s_hist',
-    ),
+    out_file=dict(),
     out_show=dict(argstr='> %s',
     keep_extension=False,
     name_source='in_file',
     name_template='%s_hist.out',
     position=-1,
+    ),
+    prefix=dict(argstr='-prefix %s',
     ),
     showhist=dict(argstr='-showhist',
     usedefault=True,
@@ -52,9 +50,7 @@ def test_Hist_inputs():
 
 
 def test_Hist_outputs():
-    output_map = dict(out_file=dict(mandatory=True,
-    suffix='.niml.hist',
-    ),
+    output_map = dict(out_file=dict(),
     out_show=dict(),
     )
     outputs = Hist.output_spec()

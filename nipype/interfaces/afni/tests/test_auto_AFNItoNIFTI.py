@@ -22,7 +22,8 @@ def test_AFNItoNIFTI_inputs():
     name_source='in_file',
     name_template='%s.nii',
     ),
-    outputtype=dict(),
+    outputtype=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -12,12 +12,8 @@ def test_AFNICommand_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    out_file=dict(argstr='-prefix %s',
-    keep_extension=False,
-    name_source=['in_file'],
-    name_template='%s_afni',
+    outputtype=dict(usedefault=True,
     ),
-    outputtype=dict(),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -23,7 +23,8 @@ def test_ZCutUp_inputs():
     name_source='in_file',
     name_template='%s_zcupup',
     ),
-    outputtype=dict(),
+    outputtype=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

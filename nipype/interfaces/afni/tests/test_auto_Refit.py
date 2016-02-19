@@ -20,6 +20,9 @@ def test_Refit_inputs():
     mandatory=True,
     position=-1,
     ),
+    out_file=dict(),
+    outputtype=dict(usedefault=True,
+    ),
     space=dict(argstr='-space %s',
     ),
     terminal_output=dict(nohash=True,
@@ -45,10 +48,7 @@ def test_Refit_inputs():
 
 
 def test_Refit_outputs():
-    output_map = dict(out_file=dict(keep_extension=False,
-    name_source='in_file',
-    name_template='%s',
-    ),
+    output_map = dict(out_file=dict(),
     )
     outputs = Refit.output_spec()
 

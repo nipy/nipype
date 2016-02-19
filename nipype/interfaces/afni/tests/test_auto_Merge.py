@@ -23,10 +23,9 @@ def test_Merge_inputs():
     position=-1,
     ),
     out_file=dict(argstr='-prefix %s',
-    name_source='in_file',
-    name_template='%s_merge',
     ),
-    outputtype=dict(),
+    outputtype=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

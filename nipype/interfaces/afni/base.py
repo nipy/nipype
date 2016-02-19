@@ -6,7 +6,7 @@ import os
 from builtins import object
 
 from ... import logging
-from ..base import traits, File, CommandLine, CommandLineInputSpec, TraitedSpec
+from ..base import traits, File, GenFile, CommandLine, CommandLineInputSpec, TraitedSpec
 
 # Use nipype's logging system
 IFLOGGER = logging.getLogger('interface')
@@ -58,23 +58,6 @@ class Info(object):
             return currv
         return tuple(version)
 
-    @classmethod
-    def outputtype_to_ext(cls, outputtype):
-        """Get the file extension for the given output type.
-
-        Parameters
-        ----------
-        outputtype : {'NIFTI', 'NIFTI_GZ', 'AFNI'}
-            String specifying the output type.
-
-        Returns
-        -------
-        extension : str
-            The file extension for the output type.
-        """
-        return AFNI_FTYPES.get(outputtype, 'AFNI')
-
-
     @staticmethod
     def standard_image(img_name):
         """Grab an image from the standard location.
@@ -101,19 +84,11 @@ class AFNICommandBase(CommandLine):
 
 
 class AFNICommandInputSpec(CommandLineInputSpec):
-    outputtype = traits.Enum(tuple(AFNI_FTYPES.keys()), desc='AFNI output filetype')
-    out_file = File(name_template="%s_afni", desc='output image file name', keep_extension=False,
-                    name_source=["in_file"], argstr='-prefix %s')
-
-    def _overload_extension(self, value, name=None, ext=None):
-        # Do not overload certain extensions
-        if value.endswith('+orig.BRIK') or value.endswith('.1D'):
-            return value
-        return value + AFNI_FTYPES.get(self.outputtype, '')
-
+    outputtype = traits.Trait('AFNI', AFNI_FTYPES, usedefault=True,
+                              desc='AFNI output filetype')
 
 class AFNICommandOutputSpec(TraitedSpec):
-    out_file = File(desc='output file', exists=True)
+    out_file = File(exists=True, desc='output file')
 
 
 class AFNICommand(AFNICommandBase):

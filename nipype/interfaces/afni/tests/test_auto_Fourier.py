@@ -29,7 +29,8 @@ def test_Fourier_inputs():
     name_source='in_file',
     name_template='%s_fourier',
     ),
-    outputtype=dict(),
+    outputtype=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )
