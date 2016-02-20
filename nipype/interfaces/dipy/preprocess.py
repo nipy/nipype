@@ -66,11 +66,9 @@ class Resample(DipyBaseInterface):
         IFLOGGER.info('Resliced image saved as {i}'.format(i=out_file))
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self._gen_outfilename())
-        return outputs
-
+    def _post_run(self):
+        self.outputs.out_file = op.abspath(self._gen_outfilename())
+        
     def _gen_outfilename(self):
         fname, fext = op.splitext(op.basename(self.inputs.in_file))
         if fext == '.gz':
@@ -158,11 +156,9 @@ class Denoise(DipyBaseInterface):
                        'SNR={s}').format(i=out_file, s=str(s)))
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self._gen_outfilename())
-        return outputs
-
+    def _post_run(self):
+        self.outputs.out_file = op.abspath(self._gen_outfilename())
+        
     def _gen_outfilename(self):
         fname, fext = op.splitext(op.basename(self.inputs.in_file))
         if fext == '.gz':

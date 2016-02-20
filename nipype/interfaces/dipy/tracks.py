@@ -97,11 +97,9 @@ class TrackDensityMap(DipyBaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_filename)
-        return outputs
-
+    def _post_run(self):
+        self.outputs.out_file = op.abspath(self.inputs.out_filename)
+        
 
 class StreamlineTractographyInputSpec(BaseInterfaceInputSpec):
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
@@ -272,8 +270,7 @@ class StreamlineTractography(DipyBaseInterface):
         trkfilev.to_file(self._gen_filename('tracked', ext='.trk'))
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         outputs['tracks'] = self._gen_filename('tracked', ext='.trk')
         outputs['gfa'] = self._gen_filename('gfa')
         if self._save_peaks:
@@ -285,8 +282,7 @@ class StreamlineTractography(DipyBaseInterface):
                 outputs['out_seeds'] = self._gen_filename('seeds',
                                                           ext='.txt')
 
-        return outputs
-
+        
     def _gen_filename(self, name, ext=None):
         fname, fext = op.splitext(op.basename(self.inputs.in_file))
         if fext == '.gz':

@@ -1,6 +1,8 @@
 Next release
 ============
 
+* ENH: The name_source feature now available for all Interfaces derived from BaseInterface
+       (https://github.com/nipy/nipype/pull/1240)
 * ENH: New interfaces in dipy: RESTORE, EstimateResponseSH, CSD and StreamlineTractography
        (https://github.com/nipy/nipype/pull/1090)
 * ENH: Added interfaces of AFNI (https://github.com/nipy/nipype/pull/1360,

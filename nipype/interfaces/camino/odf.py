@@ -82,11 +82,10 @@ class QBallMX(StdOutCommandLine):
     input_spec = QBallMXInputSpec
     output_spec = QBallMXOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['qmat'] = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.qmat = os.path.abspath(self._gen_outfilename())
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_qmat.Bdouble'
@@ -159,11 +158,10 @@ class LinRecon(StdOutCommandLine):
     input_spec = LinReconInputSpec
     output_spec = LinReconOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['recon_data'] = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.recon_data = os.path.abspath(self._gen_outfilename())
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_recondata.Bdouble'
@@ -283,11 +281,10 @@ class MESD(StdOutCommandLine):
     input_spec = MESDInputSpec
     output_spec = MESDOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['mesd_data'] = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.mesd_data = os.path.abspath(self._gen_outfilename())
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.scheme_file)
         return name + '_MESD.Bdouble'
@@ -430,11 +427,10 @@ class SFPeaks(StdOutCommandLine):
     input_spec = SFPeaksInputSpec
     output_spec = SFPeaksOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['peaks'] = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.peaks = os.path.abspath(self._gen_outfilename())
+        
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
         return name + '_peaks.Bdouble'

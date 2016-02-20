@@ -15,6 +15,7 @@ def test_StimulusCorrelation_inputs():
     ),
     spm_mat_file=dict(mandatory=True,
     ),
+    stimcorr_files=dict(),
     )
     inputs = StimulusCorrelation.input_spec()
 

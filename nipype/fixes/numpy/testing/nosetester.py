@@ -126,7 +126,7 @@ class NoseTester(object):
                 'swig_ext']
 
     def __init__(self, package=None):
-        ''' Test class init
+        """ Test class init
 
         Parameters
         ----------
@@ -134,7 +134,7 @@ class NoseTester(object):
             If string, gives full path to package
             If None, extract calling module path
             Default is None
-        '''
+        """
         package_name = None
         if package is None:
             f = sys._getframe(1)
@@ -158,7 +158,7 @@ class NoseTester(object):
         self.package_name = package_name
 
     def _test_argv(self, label, verbose, extra_argv):
-        ''' Generate argv for nosetest command
+        """ Generate argv for nosetest command
 
         Parameters
         ----------
@@ -173,7 +173,7 @@ class NoseTester(object):
         -------
         argv : list
             command line arguments that will be passed to nose
-        '''
+        """
         argv = [__file__, self.package_path, '-s']
         if label and label != 'full':
             if not isinstance(label, string_types):

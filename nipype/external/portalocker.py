@@ -1,6 +1,6 @@
 # portalocker.py - Cross-platform (posix/nt) API for flock-style file locking.
 #                  Requires python 1.5.2 or better.
-'''Cross-platform (posix/nt) API for flock-style file locking.
+"""Cross-platform (posix/nt) API for flock-style file locking.
 
 Synopsis:
 
@@ -47,7 +47,7 @@ Author: Jonathan Feinberg <jdf@pobox.com>,
         Lowell Alleman <lalleman@mfps.com>
 Version: $Id: portalocker.py 5474 2008-05-16 20:53:50Z lowell $
 
-'''
+"""
 from __future__ import print_function
 from __future__ import absolute_import
 

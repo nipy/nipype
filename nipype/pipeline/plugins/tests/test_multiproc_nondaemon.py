@@ -9,9 +9,9 @@ from nipype.interfaces.utility import Function
 
 
 def mytestFunction(insum=0):
-    '''
+    """
     Run a multiprocessing job and spawn child processes.
-    '''
+    """
 
     # need to import here since this is executed as an external process
     import multiprocessing
@@ -31,9 +31,9 @@ def mytestFunction(insum=0):
     f = [None] * numberOfThreads
 
     def dummyFunction(filename):
-        '''
+        """
         This function writes the value 45 to the given filename.
-        '''
+        """
         j = 0
         for i in range(0, 10):
             j += i
@@ -83,9 +83,9 @@ def mytestFunction(insum=0):
 
 
 def run_multiproc_nondaemon_with_flag(nondaemon_flag):
-    '''
+    """
     Start a pipe with two nodes using the multiproc plugin and passing the nondaemon_flag.
-    '''
+    """
 
     cur_dir = os.getcwd()
     temp_dir = mkdtemp(prefix='test_engine_')
@@ -124,13 +124,13 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
 
 
 def test_run_multiproc_nondaemon_false():
-    '''
+    """
     This is the entry point for the test. Two times a pipe of several multiprocessing jobs gets
     executed. First, without the nondaemon flag. Second, with the nondaemon flag.
 
     Since the processes of the pipe start child processes, the execution only succeeds when the
     non_daemon flag is on.
-    '''
+    """
     shouldHaveFailed = False
     try:
             # with nondaemon_flag = False, the execution should fail

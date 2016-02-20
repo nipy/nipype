@@ -45,12 +45,10 @@ class AverageAffineTransform(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         return super(AverageAffineTransform, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['affine_transform'] = os.path.abspath(
+    def _post_run(self):
+        self.outputs.affine_transform = os.path.abspath(
             self.inputs.output_affine_transform)
-        return outputs
-
+        
 
 class AverageImagesInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', mandatory=True,
@@ -87,12 +85,10 @@ class AverageImages(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         return super(AverageImages, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output_average_image'] = os.path.realpath(
+    def _post_run(self):
+        self.outputs.output_average_image = os.path.realpath(
             self.inputs.output_average_image)
-        return outputs
-
+        
 
 class MultiplyImagesInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True, position=0,
@@ -128,12 +124,10 @@ class MultiplyImages(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         return super(MultiplyImages, self)._format_arg(opt, spec, val)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output_product_image'] = os.path.abspath(
+    def _post_run(self):
+        self.outputs.output_product_image = os.path.abspath(
             self.inputs.output_product_image)
-        return outputs
-
+        
 
 class JacobianDeterminantInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='%d', usedefault=False, mandatory=True,
@@ -187,12 +181,11 @@ class JacobianDeterminant(ANTSCommand):
             return output
         return None
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         if self.inputs.use_log == 1:
-            outputs['jacobian_image'] = os.path.abspath(
+            self.outputs.jacobian_image = os.path.abspath(
                 self._gen_filename('output_prefix') + 'logjacobian.nii.gz')
         else:
-            outputs['jacobian_image'] = os.path.abspath(
+            self.outputs.jacobian_image = os.path.abspath(
                 self._gen_filename('output_prefix') + 'jacobian.nii.gz')
-        return outputs
+        

@@ -18,12 +18,14 @@ from ...utils.filemanip import split_filename
 class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(4, 3, argstr='%d', usedefault=True,
                             desc='image dimension (3 or 4)', position=1)
-    input_image = File(argstr='%s', mandatory=True, copyfile=True,
-                       desc=('image to apply transformation to (generally a '
-                              'coregistered functional)'))
-    out_postfix = traits.Str('_wtsimt', argstr='%s', usedefault=True,
-                             desc=('Postfix that is prepended to all output '
-                                   'files (default = _wtsimt)'))
+    input_image = File(
+        argstr='%s', mandatory=True, copyfile=True,
+        desc='image to apply transformation to (generally a coregistered functional)')
+    output_image = File(name_source='input_image', name_template='%s_wtsimt', argstr='%s',
+                        keep_extension=True, desc='filename of output warped image')
+    out_postfix = traits.Str(
+        '_wtsimt', argstr='%s', deprecated=True, new_name='output_image',
+        desc='Postfix that is prepended to all output files (default = _wtsimt)')
     reference_image = File(argstr='-R %s', xor=['tightest_box'],
                            desc='reference image space that you wish to warp INTO')
     tightest_box = traits.Bool(argstr='--tightest-bounding-box',
@@ -46,6 +48,20 @@ class WarpTimeSeriesImageMultiTransformInputSpec(ANTSCommandInputSpec):
                                       'E.g.: [1,4,5] inverts the 1st, 4th, and 5th Affines '
                                       'found in transformation_series'))
 
+    def _format_arg(self, opt, spec, val):
+        if opt == 'transformation_series':
+            series = []
+            affine_counter = 0
+            for transformation in val:
+                if 'Affine' in transformation and \
+                        isdefined(self.invert_affine):
+                    affine_counter += 1
+                    if affine_counter in self.invert_affine:
+                        series += ['-i'],
+                series += [transformation]
+            return ' '.join(series)
+        return super(
+            WarpTimeSeriesImageMultiTransformInputSpec, self)._format_arg(opt, spec, val)
 
 class WarpTimeSeriesImageMultiTransformOutputSpec(TraitedSpec):
     output_image = File(exists=True, desc='Warped image')
@@ -72,33 +88,6 @@ ants_Affine.txt'
     input_spec = WarpTimeSeriesImageMultiTransformInputSpec
     output_spec = WarpTimeSeriesImageMultiTransformOutputSpec
 
-    def _format_arg(self, opt, spec, val):
-        if opt == 'out_postfix':
-            _, name, ext = split_filename(
-                os.path.abspath(self.inputs.input_image))
-            return name + val + ext
-        if opt == 'transformation_series':
-            series = []
-            affine_counter = 0
-            for transformation in val:
-                if 'Affine' in transformation and \
-                        isdefined(self.inputs.invert_affine):
-                    affine_counter += 1
-                    if affine_counter in self.inputs.invert_affine:
-                        series += ['-i'],
-                series += [transformation]
-            return ' '.join(series)
-        return super(WarpTimeSeriesImageMultiTransform, self)._format_arg(opt, spec, val)
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        _, name, ext = split_filename(os.path.abspath(self.inputs.input_image))
-        outputs['output_image'] = os.path.join(os.getcwd(),
-                                               ''.join((name,
-                                                        self.inputs.out_postfix,
-                                                        ext)))
-        return outputs
-
     def _run_interface(self, runtime, correct_return_codes=[0]):
         runtime = super(WarpTimeSeriesImageMultiTransform, self)._run_interface(runtime, correct_return_codes=[0, 1])
         if "100 % complete" not in runtime.stdout:
@@ -112,11 +101,12 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
     input_image = File(argstr='%s', mandatory=True,
                        desc=('image to apply transformation to (generally a '
                               'coregistered functional)'), position=2)
-    output_image = File(genfile=True, hash_files=False, argstr='%s',
-                        desc='name of the output warped image', position=3, xor=['out_postfix'])
-    out_postfix = File("_wimt", usedefault=True, hash_files=False,
-                       desc=('Postfix that is prepended to all output '
-                             'files (default = _wimt)'), xor=['output_image'])
+    output_image = File(name_source='input_image', name_template='%s_wimt', argstr='%s',
+                        keep_extension=True, desc='filename of output warped image')
+    out_postfix = File(
+        "_wimt", usedefault=True, hash_files=False, deprecated=True, new_name='output_image',
+        desc=('Postfix that is prepended to all output files (default = _wimt)'),
+        xor=['output_image'])
     reference_image = File(argstr='-R %s', xor=['tightest_box'],
                            desc='reference image space that you wish to warp INTO')
     tightest_box = traits.Bool(argstr='--tightest-bounding-box',
@@ -141,6 +131,20 @@ class WarpImageMultiTransformInputSpec(ANTSCommandInputSpec):
                                       'starts with 1 and does not include warp fields. Affine '
                                       'transformations are distinguished '
                                       'from warp fields by the word "affine" included in their filenames.'))
+
+    def _format_arg(self, opt, spec, val):
+        if opt == 'transformation_series':
+            series = []
+            affine_counter = 0
+            for transformation in val:
+                if "affine" in transformation.lower() and \
+                        isdefined(self.invert_affine):
+                    affine_counter += 1
+                    if affine_counter in self.invert_affine:
+                        series += '-i',
+                series += [transformation]
+            return ' '.join(series)
+        return super(WarpImageMultiTransformInputSpec, self)._format_arg(opt, spec, val)
 
 
 class WarpImageMultiTransformOutputSpec(TraitedSpec):
@@ -178,36 +182,6 @@ ants_Affine.txt'
     input_spec = WarpImageMultiTransformInputSpec
     output_spec = WarpImageMultiTransformOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'output_image':
-            _, name, ext = split_filename(
-                os.path.abspath(self.inputs.input_image))
-            return ''.join((name, self.inputs.out_postfix, ext))
-        return None
-
-    def _format_arg(self, opt, spec, val):
-        if opt == 'transformation_series':
-            series = []
-            affine_counter = 0
-            for transformation in val:
-                if "affine" in transformation.lower() and \
-                        isdefined(self.inputs.invert_affine):
-                    affine_counter += 1
-                    if affine_counter in self.inputs.invert_affine:
-                        series += '-i',
-                series += [transformation]
-            return ' '.join(series)
-        return super(WarpImageMultiTransform, self)._format_arg(opt, spec, val)
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        if isdefined(self.inputs.output_image):
-            outputs['output_image'] = os.path.abspath(self.inputs.output_image)
-        else:
-            outputs['output_image'] = os.path.abspath(
-                self._gen_filename('output_image'))
-        return outputs
-
 
 class ApplyTransformsInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(2, 3, 4, argstr='--dimensionality %d',
@@ -224,8 +198,8 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
                        desc=('image to apply transformation to (generally a '
                               'coregistered functional)'),
                        exists=True)
-    output_image = traits.Str(argstr='--output %s', desc='output file name',
-                              genfile=True, hash_files=False)
+    output_image = File(name_source='input_image', name_template='%s_warped', keep_extension=True,
+                        argstr='--output %s', desc='output file name', hash_files=False)
     out_postfix = traits.Str("_trans", usedefault=True,
                              desc=('Postfix that is appended to all output '
                                    'files (default = _trans)'))
@@ -250,9 +224,45 @@ class ApplyTransformsInputSpec(ANTSCommandInputSpec):
         File(exists=True), argstr='%s', mandatory=True, desc='transform files: will be applied in reverse order. For example, the last specified transform will be applied first')
     invert_transform_flags = InputMultiPath(traits.Bool())
     default_value = traits.Float(0.0, argstr='--default-value %g', usedefault=True)
-    print_out_composite_warp_file = traits.Bool(False, requires=["output_image"],
-                                                desc='output a composite warp file instead of a transformed image')
+    print_out_composite_warp_file = traits.Bool(
+        False, usedefault=True, desc='output a composite warp file instead of a transformed image')
     float = traits.Bool(argstr='--float %d', default=False, desc='Use float instead of double for computations.')
+
+    def _get_transform_filenames(self):
+        retval = []
+        for ii in range(len(self.transforms)):
+            if isdefined(self.invert_transform_flags):
+                if len(self.transforms) == len(self.invert_transform_flags):
+                    invert_code = 1 if self.invert_transform_flags[
+                        ii] else 0
+                    retval.append("--transform [ %s, %d ]" %
+                                  (self.transforms[ii], invert_code))
+                else:
+                    raise Exception(("ERROR: The useInverse list must have the same number "
+                                     "of entries as the transformsFileName list."))
+            else:
+                retval.append("--transform %s" % self.transforms[ii])
+        return " ".join(retval)
+
+    def _format_arg(self, opt, spec, val):
+        retval = super(ApplyTransformsInputSpec, self)._format_arg(opt, spec, val)
+
+        if opt == "output_image":
+            if self.print_out_composite_warp_file:
+                modval = super(ApplyTransformsInputSpec,
+                               self)._format_arg('print_out_composite_warp_file')
+                return '--output [ ' + retval[6:] + ', ' + modval + ' ]'
+        elif opt == "transforms":
+            return self._get_transform_filenames()
+        elif opt == 'interpolation':
+            if self.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
+                    isdefined(self.interpolation_parameters):
+                return '--interpolation %s[ %s ]' % (self.interpolation,
+                                                     ', '.join([str(param)
+                                                                for param in self.interpolation_parameters]))
+            else:
+                return '--interpolation %s' % self.interpolation
+        return retval
 
 
 class ApplyTransformsOutputSpec(TraitedSpec):
@@ -302,59 +312,6 @@ class ApplyTransforms(ANTSCommand):
     input_spec = ApplyTransformsInputSpec
     output_spec = ApplyTransformsOutputSpec
 
-    def _gen_filename(self, name):
-        if name == 'output_image':
-            output = self.inputs.output_image
-            if not isdefined(output):
-                _, name, ext = split_filename(self.inputs.input_image)
-                output = name + self.inputs.out_postfix + ext
-            return output
-        return None
-
-    def _get_transform_filenames(self):
-        retval = []
-        for ii in range(len(self.inputs.transforms)):
-            if isdefined(self.inputs.invert_transform_flags):
-                if len(self.inputs.transforms) == len(self.inputs.invert_transform_flags):
-                    invert_code = 1 if self.inputs.invert_transform_flags[
-                        ii] else 0
-                    retval.append("--transform [ %s, %d ]" %
-                                  (self.inputs.transforms[ii], invert_code))
-                else:
-                    raise Exception(("ERROR: The useInverse list must have the same number "
-                                     "of entries as the transformsFileName list."))
-            else:
-                retval.append("--transform %s" % self.inputs.transforms[ii])
-        return " ".join(retval)
-
-    def _get_output_warped_filename(self):
-        if isdefined(self.inputs.print_out_composite_warp_file):
-            return "--output [ %s, %d ]" % (self._gen_filename("output_image"),
-                                            int(self.inputs.print_out_composite_warp_file))
-        else:
-            return "--output %s" % (self._gen_filename("output_image"))
-
-    def _format_arg(self, opt, spec, val):
-        if opt == "output_image":
-            return self._get_output_warped_filename()
-        elif opt == "transforms":
-            return self._get_transform_filenames()
-        elif opt == 'interpolation':
-            if self.inputs.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
-                    isdefined(self.inputs.interpolation_parameters):
-                return '--interpolation %s[ %s ]' % (self.inputs.interpolation,
-                                                     ', '.join([str(param)
-                                                                for param in self.inputs.interpolation_parameters]))
-            else:
-                return '--interpolation %s' % self.inputs.interpolation
-        return super(ApplyTransforms, self)._format_arg(opt, spec, val)
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output_image'] = os.path.abspath(
-            self._gen_filename('output_image'))
-        return outputs
-
 
 class ApplyTransformsToPointsInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(2, 3, 4, argstr='--dimensionality %d',
@@ -380,6 +337,27 @@ class ApplyTransformsToPointsInputSpec(ANTSCommandInputSpec):
                              desc='transforms that will be applied to the points')
     invert_transform_flags = traits.List(traits.Bool(),
                                          desc='list indicating if a transform should be reversed')
+
+    def _get_transform_filenames(self):
+        retval = []
+        for ii in range(len(self.transforms)):
+            if isdefined(self.invert_transform_flags):
+                if len(self.transforms) == len(self.invert_transform_flags):
+                    invert_code = 1 if self.invert_transform_flags[
+                        ii] else 0
+                    retval.append("--transform [ %s, %d ]" %
+                                  (self.transforms[ii], invert_code))
+                else:
+                    raise Exception(("ERROR: The useInverse list must have the same number "
+                                     "of entries as the transformsFileName list."))
+            else:
+                retval.append("--transform %s" % self.transforms[ii])
+        return " ".join(retval)
+
+    def _format_arg(self, opt, spec, val):
+        if opt == "transforms":
+            return self._get_transform_filenames()
+        return super(ApplyTransformsToPointsInputSpec, self)._format_arg(opt, spec, val)
 
 
 class ApplyTransformsToPointsOutputSpec(TraitedSpec):
@@ -408,24 +386,3 @@ class ApplyTransformsToPoints(ANTSCommand):
     _cmd = 'antsApplyTransformsToPoints'
     input_spec = ApplyTransformsToPointsInputSpec
     output_spec = ApplyTransformsToPointsOutputSpec
-
-    def _get_transform_filenames(self):
-        retval = []
-        for ii in range(len(self.inputs.transforms)):
-            if isdefined(self.inputs.invert_transform_flags):
-                if len(self.inputs.transforms) == len(self.inputs.invert_transform_flags):
-                    invert_code = 1 if self.inputs.invert_transform_flags[
-                        ii] else 0
-                    retval.append("--transform [ %s, %d ]" %
-                                  (self.inputs.transforms[ii], invert_code))
-                else:
-                    raise Exception(("ERROR: The useInverse list must have the same number "
-                                     "of entries as the transformsFileName list."))
-            else:
-                retval.append("--transform %s" % self.inputs.transforms[ii])
-        return " ".join(retval)
-
-    def _format_arg(self, opt, spec, val):
-        if opt == "transforms":
-            return self._get_transform_filenames()
-        return super(ApplyTransformsToPoints, self)._format_arg(opt, spec, val)

@@ -197,14 +197,12 @@ class CFFConverter(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         _, name, ext = split_filename(self.inputs.out_file)
         if not ext == '.cff':
             ext = '.cff'
-        outputs['connectome_file'] = op.abspath(name + ext)
-        return outputs
-
+        self.outputs.connectome_file = op.abspath(name + ext)
+        
 
 class MergeCNetworksInputSpec(BaseInterfaceInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='List of CFF files to extract networks from')
@@ -259,10 +257,9 @@ class MergeCNetworks(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         _, name, ext = split_filename(self.inputs.out_file)
         if not ext == '.cff':
             ext = '.cff'
-        outputs['connectome_file'] = op.abspath(name + ext)
-        return outputs
+        self.outputs.connectome_file = op.abspath(name + ext)
+        

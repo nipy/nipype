@@ -87,26 +87,25 @@ class DTIRecon(CommandLine):
             return super(DTIRecon, self)._format_arg("bvecs", spec, new_val)
         return super(DTIRecon, self)._format_arg(name, spec, value)
 
-    def _list_outputs(self):
+    def _post_run(self):
         out_prefix = self.inputs.out_prefix
         output_type = self.inputs.output_type
 
-        outputs = self.output_spec().get()
-        outputs['ADC'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_adc.' + output_type))
-        outputs['B0'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_b0.' + output_type))
-        outputs['L1'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_e1.' + output_type))
-        outputs['L2'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_e2.' + output_type))
-        outputs['L3'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_e3.' + output_type))
-        outputs['exp'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_exp.' + output_type))
-        outputs['FA'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_fa.' + output_type))
-        outputs['FA_color'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_fa_color.' + output_type))
-        outputs['tensor'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_tensor.' + output_type))
-        outputs['V1'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_v1.' + output_type))
-        outputs['V2'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_v2.' + output_type))
-        outputs['V3'] = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_v3.' + output_type))
+        
+        self.outputs.ADC = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_adc.' + output_type))
+        self.outputs.B0 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_b0.' + output_type))
+        self.outputs.L1 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_e1.' + output_type))
+        self.outputs.L2 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_e2.' + output_type))
+        self.outputs.L3 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_e3.' + output_type))
+        self.outputs.exp = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_exp.' + output_type))
+        self.outputs.FA = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_fa.' + output_type))
+        self.outputs.FA_color = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_fa_color.' + output_type))
+        self.outputs.tensor = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_tensor.' + output_type))
+        self.outputs.V1 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_v1.' + output_type))
+        self.outputs.V2 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_v2.' + output_type))
+        self.outputs.V3 = os.path.abspath(fname_presuffix("", prefix=out_prefix, suffix='_v3.' + output_type))
 
-        return outputs
-
+        
 
 class DTITrackerInputSpec(CommandLineInputSpec):
     tensor_file = File(exists=True, desc="reconstructed tensor file")
@@ -163,10 +162,10 @@ class DTITracker(CommandLine):
 
         return super(DTITracker, self)._run_interface(runtime)
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['track_file'] = os.path.abspath(self.inputs.output_file)
+    def _post_run(self):
+        
+        self.outputs.track_file = os.path.abspath(self.inputs.output_file)
         if isdefined(self.inputs.output_mask) and self.inputs.output_mask:
-            outputs['mask_file'] = os.path.abspath(self.inputs.output_mask)
+            self.outputs.mask_file = os.path.abspath(self.inputs.output_mask)
 
-        return outputs
+        

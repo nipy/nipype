@@ -62,11 +62,9 @@ class DTI(DipyDiffusionInterface):
         IFLOGGER.info('DTI parameters image saved as {i}'.format(i=out_file))
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = self._gen_filename('dti')
-        return outputs
-
+    def _post_run(self):
+        self.outputs.out_file = self._gen_filename('dti')
+        
 
 class TensorModeInputSpec(DipyBaseInterfaceInputSpec):
     mask_file = File(exists=True,
@@ -132,7 +130,6 @@ class TensorMode(DipyDiffusionInterface):
         IFLOGGER.info('Tensor mode image saved as {i}'.format(i=out_file))
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = self._gen_filename('mode')
-        return outputs
+    def _post_run(self):
+        self.outputs.out_file = self._gen_filename('mode')
+        

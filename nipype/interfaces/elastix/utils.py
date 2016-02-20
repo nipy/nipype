@@ -130,11 +130,10 @@ class EditTransform(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['output_file'] = getattr(self, '_out_file')
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.output_file = getattr(self, '_out_file')
+        
     def _get_outfile(self):
         val = getattr(self, '_out_file')
         if val is not None and val != '':

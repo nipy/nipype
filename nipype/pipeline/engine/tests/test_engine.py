@@ -17,10 +17,9 @@ from ... import engine as pe
 from ....interfaces import base as nib
 
 
-class InputSpec(nib.TraitedSpec):
+class InputSpec(nib.BaseInterfaceInputSpec):
     input1 = nib.traits.Int(desc='a random int')
     input2 = nib.traits.Int(desc='a random int')
-
 
 class OutputSpec(nib.TraitedSpec):
     output1 = nib.traits.List(nib.traits.Int, desc='outputs')
@@ -32,13 +31,8 @@ class TestInterface(nib.BaseInterface):
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
+        self.outputs.output1 = [1, self.inputs.input1]
         return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output1'] = [1, self.inputs.input1]
-        return outputs
-
 
 def test_init():
     yield assert_raises, Exception, pe.Workflow
@@ -391,7 +385,7 @@ def test_doubleconnect():
     yield assert_raises, Exception, x
 
 
-'''
+"""
 Test for order of iterables
 
 import nipype.pipeline.engine as pe
@@ -421,19 +415,19 @@ wf1.base_dir = os.path.join(os.getcwd(),'testit')
 wf1.run(inseries=True, createdirsonly=True)
 
 wf1.write_graph(graph2use='exec')
-'''
+"""
 
-'''
+"""
 import nipype.pipeline.engine as pe
 import nipype.interfaces.spm as spm
 import os
 from nipype.external.six import StringIO
 from nipype.utils.config import config
 
-config.readfp(StringIO("""
+config.readfp(StringIO('''
 [execution]
 remove_unnecessary_outputs = true
-"""))
+'''))
 
 
 segment = pe.Node(interface=spm.Segment(), name="segment")
@@ -459,7 +453,7 @@ workflow.connect([(segment, smooth_wm, [('native_wm_image','in_files')])])
 workflow.run()
 
 workflow.run()
-'''
+"""
 
 # Node
 

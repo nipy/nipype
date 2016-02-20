@@ -13,6 +13,16 @@ class SlicerCommandLineInputSpec(DynamicTraitedSpec, CommandLineInputSpec):
     module = traits.Str(desc="name of the Slicer command line module you want to use")
 
 
+    def _format_arg(self, name, spec, value):
+        if name in [output_node.getElementsByTagName('name')[0].firstChild.nodeValue for output_node in self._outputs_nodes]:
+            if isinstance(value, bool):
+                fname = self._gen_filename(name)
+            else:
+                fname = value
+            return spec.argstr % fname
+        return super(SlicerCommandLineInputSpec, self)._format_arg(name, spec, value)
+
+
 class SlicerCommandLine(CommandLine):
     """Experimental Slicer wrapper. Work in progress.
 
@@ -128,26 +138,17 @@ class SlicerCommandLine(CommandLine):
             ext = {'image': '.nii', 'transform': '.txt', 'file': ''}[param.nodeName]
         return base + ext
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         for output_node in self._outputs_nodes:
             name = output_node.getElementsByTagName('name')[0].firstChild.nodeValue
-            outputs[name] = getattr(self.inputs, name)
+            setattr(self.outputs, name, getattr(self.inputs, name))
             if isdefined(outputs[name]) and isinstance(outputs[name], bool):
                 if outputs[name]:
-                    outputs[name] = self._gen_filename(name)
+                    setattr(self.outputs, name, self._gen_filename(name))
                 else:
-                    outputs[name] = Undefined
-        return outputs
+                    setattr(self.outputs, name, Undefined)
 
-    def _format_arg(self, name, spec, value):
-        if name in [output_node.getElementsByTagName('name')[0].firstChild.nodeValue for output_node in self._outputs_nodes]:
-            if isinstance(value, bool):
-                fname = self._gen_filename(name)
-            else:
-                fname = value
-            return spec.argstr % fname
-        return super(SlicerCommandLine, self)._format_arg(name, spec, value)
 
 #    test = SlicerCommandLine(module="BRAINSFit")
 #    test.inputs.fixedVolume = "/home/filo/workspace/fmri_tumour/data/pilot1/10_co_COR_3D_IR_PREP.nii"

@@ -64,7 +64,7 @@ class MRTrix3Base(CommandLine):
 
         return super(MRTrix3Base, self)._format_arg(name, trait_spec, value)
 
-    def _parse_inputs(self, skip=None):
+    def parse_args(self, skip=None):
         if skip is None:
             skip = []
 
@@ -83,4 +83,4 @@ class MRTrix3Base(CommandLine):
         except AttributeError:
             pass
 
-        return super(MRTrix3Base, self)._parse_inputs(skip=skip)
+        return super(MRTrix3Base, self).parse_args(skip=skip)

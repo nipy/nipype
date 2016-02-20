@@ -28,7 +28,7 @@ class InterfaceChecker(object):
                  module_skip_patterns=None,
                  class_skip_patterns=None
                  ):
-        ''' Initialize package for parsing
+        """ Initialize package for parsing
 
         Parameters
         ----------
@@ -55,7 +55,7 @@ class InterfaceChecker(object):
             Sequence of strings giving classes to be excluded
             Default is: None
 
-        '''
+        """
         if package_skip_patterns is None:
             package_skip_patterns = ['\\.tests$']
         if module_skip_patterns is None:
@@ -117,14 +117,14 @@ class InterfaceChecker(object):
         return path
 
     def _path2uri(self, dirpath):
-        ''' Convert directory path to uri '''
+        """ Convert directory path to uri """
         relpath = dirpath.replace(self.root_path, self.package_name)
         if relpath.startswith(os.path.sep):
             relpath = relpath[1:]
         return relpath.replace(os.path.sep, '.')
 
     def _parse_module(self, uri):
-        ''' Parse module defined in *uri* '''
+        """ Parse module defined in *uri* """
         filename = self._uri2path(uri)
         if filename is None:
             # nothing that we could handle here.
@@ -135,7 +135,7 @@ class InterfaceChecker(object):
         return functions, classes
 
     def _parse_lines(self, linesource, module):
-        ''' Parse lines of text for functions and classes '''
+        """ Parse lines of text for functions and classes """
         functions = []
         classes = []
         for line in linesource:
@@ -293,7 +293,7 @@ class InterfaceChecker(object):
         return bad_specs
 
     def _survives_exclude(self, matchstr, match_type):
-        ''' Returns True if *matchstr* does not match patterns
+        """ Returns True if *matchstr* does not match patterns
 
         ``self.package_name`` removed from front of string if present
 
@@ -312,7 +312,7 @@ class InterfaceChecker(object):
         >>> dw.module_skip_patterns.append('^\\.badmod$')
         >>> dw._survives_exclude('sphinx.badmod', 'module')
         False
-        '''
+        """
         if match_type == 'module':
             patterns = self.module_skip_patterns
         elif match_type == 'package':
@@ -336,7 +336,7 @@ class InterfaceChecker(object):
         return True
 
     def discover_modules(self):
-        ''' Return module sequence discovered from ``self.package_name``
+        """ Return module sequence discovered from ``self.package_name``
 
 
         Parameters
@@ -350,7 +350,7 @@ class InterfaceChecker(object):
 
         Examples
         --------
-        '''
+        """
         modules = [self.package_name]
         # raw directory parsing
         for dirpath, dirnames, filenames in os.walk(self.root_path):

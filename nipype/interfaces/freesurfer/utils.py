@@ -48,9 +48,8 @@ class SampleToSurfaceInputSpec(FSTraitedSpec):
     reg_header = traits.Bool(argstr="--regheader %s", requires=["subject_id"],
                              mandatory=True, xor=reg_xors,
                              desc="register based on header geometry")
-    mni152reg = traits.Bool(argstr="--mni152reg",
-                            mandatory=True, xor=reg_xors,
-                            desc="source volume is in MNI152 space")
+    mni152reg = traits.Bool(False, argstr="--mni152reg", mandatory=True,
+                            xor=reg_xors, desc="source volume is in MNI152 space")
 
     apply_rot = traits.Tuple(traits.Float, traits.Float, traits.Float,
                              argstr="--rot %.3f %.3f %.3f",
@@ -199,12 +198,11 @@ class SampleToSurface(FSCommand):
                                       use_ext=False)
         return outfile
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = os.path.abspath(self._get_outfilename())
+    def _post_run(self):
+        self.outputs.out_file = os.path.abspath(self._get_outfilename())
         hitsfile = self.inputs.hits_file
         if isdefined(hitsfile):
-            outputs["hits_file"] = hitsfile
+            self.outputs.hits_file = hitsfile
             if isinstance(hitsfile, bool):
                 hitsfile = self._get_outfilename("hits_file")
         voxfile = self.inputs.vox_file
@@ -215,12 +213,11 @@ class SampleToSurface(FSCommand):
                                           prefix=self.inputs.hemi + ".",
                                           suffix="_vox.txt",
                                           use_ext=False)
-            outputs["vox_file"] = voxfile
-        return outputs
+            self.outputs.vox_file = voxfile
 
     def _gen_filename(self, name):
         if name == "out_file":
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -274,23 +271,21 @@ class SurfaceSmooth(FSCommand):
     input_spec = SurfaceSmoothInputSpec
     output_spec = SurfaceSmoothOutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = self.inputs.out_file
-        if not isdefined(outputs["out_file"]):
+    def _post_run(self):
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
             in_file = self.inputs.in_file
             if isdefined(self.inputs.fwhm):
                 kernel = self.inputs.fwhm
             else:
                 kernel = self.inputs.smooth_iters
-            outputs["out_file"] = fname_presuffix(in_file,
+            self.outputs.out_file = fname_presuffix(in_file,
                                                   suffix="_smooth%d" % kernel,
                                                   newpath=os.getcwd())
-        return outputs
 
     def _gen_filename(self, name):
         if name == "out_file":
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -352,10 +347,9 @@ class SurfaceTransform(FSCommand):
     input_spec = SurfaceTransformInputSpec
     output_spec = SurfaceTransformOutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = self.inputs.out_file
-        if not isdefined(outputs["out_file"]):
+    def _post_run(self):
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
             if isdefined(self.inputs.source_file):
                 source = self.inputs.source_file
             else:
@@ -374,17 +368,16 @@ class SurfaceTransform(FSCommand):
             if isdefined(self.inputs.target_type):
                 ext = "." + filemap[self.inputs.target_type]
                 use_ext = False
-            outputs["out_file"] = fname_presuffix(source,
+            self.outputs.out_file = fname_presuffix(source,
                                                   suffix=".%s%s" % (self.inputs.target_subject, ext),
                                                   newpath=os.getcwd(),
                                                   use_ext=use_ext)
         else:
-            outputs["out_file"] = os.path.abspath(self.inputs.out_file)
-        return outputs
+            self.outputs.out_file = os.path.abspath(self.inputs.out_file)
 
     def _gen_filename(self, name):
         if name == "out_file":
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -486,21 +479,19 @@ class ApplyMask(FSCommand):
     input_spec = ApplyMaskInputSpec
     output_spec = ApplyMaskOutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["out_file"] = self.inputs.out_file
-        if not isdefined(outputs["out_file"]):
-            outputs["out_file"] = fname_presuffix(self.inputs.in_file,
+    def _post_run(self):
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = fname_presuffix(self.inputs.in_file,
                                                   suffix="_masked",
                                                   newpath=os.getcwd(),
                                                   use_ext=True)
         else:
-            outputs["out_file"] = os.path.abspath(outputs["out_file"])
-        return outputs
+            self.outputs.out_file = os.path.abspath(self.outputs.out_file)
 
     def _gen_filename(self, name):
         if name == "out_file":
-            return self._list_outputs()[name]
+            return getattr(self.outputs, name)
         return None
 
 
@@ -692,8 +683,7 @@ class SurfaceSnapshots(FSCommand):
         fid.write("\n".join(script))
         fid.close()
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         if not isdefined(self.inputs.screenshot_stem):
             stem = "%s_%s_%s" % (self.inputs.subject_id, self.inputs.hemi, self.inputs.surface)
         else:
@@ -706,8 +696,7 @@ class SurfaceSnapshots(FSCommand):
         if self.inputs.six_images:
             snapshots.extend(["%s-pos.tif", "%s-ant.tif"])
         snapshots = [self._gen_fname(f % stem, suffix="") for f in snapshots]
-        outputs["snapshots"] = snapshots
-        return outputs
+        self.outputs.snapshots = snapshots
 
     def _gen_filename(self, name):
         if name == "tcl_script":
@@ -776,7 +765,6 @@ class ImageInfo(FSCommand):
         outputs.file_format = ftype
         outputs.data_type = dtype
 
-        return outputs
 
 
 class MRIsConvertInputSpec(FSTraitedSpec):
@@ -852,11 +840,10 @@ class MRIsConvert(FSCommand):
         if name == "out_file" and not os.path.isabs(value):
             value = os.path.abspath(value)
         return super(MRIsConvert, self)._format_arg(name, spec, value)
-    
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs["converted"] = os.path.abspath(self._gen_outfilename())
-        return outputs
+
+    def _post_run(self):
+
+        self.outputs.converted = os.path.abspath(self._gen_outfilename())
 
     def _gen_filename(self, name):
         if name is 'out_file':
@@ -921,10 +908,9 @@ class MRITessellate(FSCommand):
     input_spec = MRITessellateInputSpec
     output_spec = MRITessellateOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['surface'] = os.path.abspath(self._gen_outfilename())
-        return outputs
+    def _post_run(self):
+
+        self.outputs.surface = os.path.abspath(self._gen_outfilename())
 
     def _gen_filename(self, name):
         if name is 'out_file':
@@ -991,10 +977,9 @@ class MRIPretess(FSCommand):
     input_spec = MRIPretessInputSpec
     output_spec = MRIPretessOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
-        return outputs
+    def _post_run(self):
+
+        self.outputs.out_file = os.path.abspath(self._gen_outfilename())
 
     def _gen_filename(self, name):
         if name is 'out_file':
@@ -1048,10 +1033,9 @@ class MRIMarchingCubes(FSCommand):
     input_spec = MRIMarchingCubesInputSpec
     output_spec = MRIMarchingCubesOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['surface'] = self._gen_outfilename()
-        return outputs
+    def _post_run(self):
+
+        self.outputs.surface = self._gen_outfilename()
 
     def _gen_filename(self, name):
         if name is 'out_file':
@@ -1119,10 +1103,9 @@ class SmoothTessellation(FSCommand):
     input_spec = SmoothTessellationInputSpec
     output_spec = SmoothTessellationOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['surface'] = self._gen_outfilename()
-        return outputs
+    def _post_run(self):
+
+        self.outputs.surface = self._gen_outfilename()
 
     def _gen_filename(self, name):
         if name is 'out_file':
@@ -1176,10 +1159,9 @@ class MakeAverageSubject(FSCommand):
     input_spec = MakeAverageSubjectInputSpec
     output_spec = MakeAverageSubjectOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['average_subject_name'] = self.inputs.out_name
-        return outputs
+    def _post_run(self):
+
+        self.outputs.average_subject_name = self.inputs.out_name
 
 
 class ExtractMainComponentInputSpec(CommandLineInputSpec):
@@ -1286,12 +1268,10 @@ class Tkregister2(FSCommand):
     input_spec = Tkregister2InputSpec
     output_spec = Tkregister2OutputSpec
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['reg_file'] = os.path.abspath(self.inputs.reg_file)
+    def _post_run(self):
+        self.outputs.reg_file = os.path.abspath(self.inputs.reg_file)
         if isdefined(self.inputs.fsl_out):
-            outputs['fsl_file'] = os.path.abspath(self.inputs.fsl_out)
-        return outputs
+            self.outputs.fsl_file = os.path.abspath(self.inputs.fsl_out)
 
     def _gen_outfilename(self):
         if isdefined(self.inputs.out_file):

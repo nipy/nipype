@@ -5,7 +5,7 @@ from ..misc import TSNR
 
 def test_TSNR_inputs():
     input_map = dict(detrended_file=dict(hash_files=False,
-    usedefault=True,
+    ns='in_file',
     ),
     ignore_exception=dict(nohash=True,
     usedefault=True,
@@ -13,14 +13,14 @@ def test_TSNR_inputs():
     in_file=dict(mandatory=True,
     ),
     mean_file=dict(hash_files=False,
-    usedefault=True,
+    ns='in_file',
     ),
     regress_poly=dict(),
     stddev_file=dict(hash_files=False,
-    usedefault=True,
+    ns='in_file',
     ),
     tsnr_file=dict(hash_files=False,
-    usedefault=True,
+    ns='in_file',
     ),
     )
     inputs = TSNR.input_spec()

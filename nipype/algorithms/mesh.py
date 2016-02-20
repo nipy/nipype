@@ -1,6 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-'''
+"""
 Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
 
     Change directory to provide relative paths for doctests
@@ -9,21 +9,19 @@ Miscellaneous algorithms for 2D contours and 3D triangularized meshes handling
     >>> datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
     >>> os.chdir(datadir)
 
-'''
+"""
 from __future__ import division
 from builtins import zip
 
 import os.path as op
-from warnings import warn
-
 import numpy as np
 from numpy import linalg as nla
 
 from .. import logging
 from ..external.six import string_types
-from ..interfaces.base import (BaseInterface, traits, TraitedSpec, File,
-                               BaseInterfaceInputSpec)
-iflogger = logging.getLogger('interface')
+from ..interfaces.base import traits, File, GenFile, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
+
+IFLOGGER = logging.getLogger('interface')
 
 
 class TVTKBaseInterface(BaseInterface):
@@ -35,7 +33,7 @@ class TVTKBaseInterface(BaseInterface):
             from tvtk.tvtk_classes.vtk_version import vtk_build_version
             self._vtk_major = int(vtk_build_version[0])
         except ImportError:
-            iflogger.warning('VTK version-major inspection using tvtk failed.')
+            IFLOGGER.warning('VTK version-major inspection using tvtk failed.')
 
         super(TVTKBaseInterface, self).__init__(**inputs)
 
@@ -47,9 +45,8 @@ class WarpPointsInputSpec(BaseInterfaceInputSpec):
                 desc=('dense deformation field to be applied'))
     interp = traits.Enum('cubic', 'nearest', 'linear', usedefault=True,
                          mandatory=True, desc='interpolation')
-    out_points = File(name_source='points', name_template='%s_warped',
-                      output_name='out_points', keep_extension=True,
-                      desc='the warped point set')
+    out_points = GenFile(template='{points}_warped', keep_extension=True,
+                         desc='the warped point set')
 
 
 class WarpPointsOutputSpec(TraitedSpec):
@@ -76,22 +73,6 @@ class WarpPoints(TVTKBaseInterface):
     """
     input_spec = WarpPointsInputSpec
     output_spec = WarpPointsOutputSpec
-
-    def _gen_fname(self, in_file, suffix='generated', ext=None):
-        import os.path as op
-
-        fname, fext = op.splitext(op.basename(in_file))
-
-        if fext == '.gz':
-            fname, fext2 = op.splitext(fname)
-            fext = fext2 + fext
-
-        if ext is None:
-            ext = fext
-
-        if ext[0] == '.':
-            ext = ext[1:]
-        return op.abspath('%s_%s.%s' % (fname, suffix, ext))
 
     def _run_interface(self, runtime):
         import nibabel as nb
@@ -137,18 +118,9 @@ class WarpPoints(TVTKBaseInterface):
         else:
             w.set_input_data_object(mesh)
 
-        w.file_name = self._gen_fname(self.inputs.points,
-                                      suffix='warped',
-                                      ext='.vtk')
+        w.file_name = self.inputs.out_points
         w.write()
         return runtime
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_points'] = self._gen_fname(self.inputs.points,
-                                                suffix='warped',
-                                                ext='.vtk')
-        return outputs
 
 
 class ComputeMeshWarpInputSpec(BaseInterfaceInputSpec):
@@ -277,15 +249,12 @@ class ComputeMeshWarp(TVTKBaseInterface):
 
         writer.write()
 
-        self._distance = np.average(errvector, weights=weights)
-        return runtime
+        _distance = np.average(errvector, weights=weights)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        outputs['out_warp'] = op.abspath(self.inputs.out_warp)
-        outputs['distance'] = self._distance
-        return outputs
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+        self.outputs.out_warp = op.abspath(self.inputs.out_warp)
+        self.outputs.distance = _distance
+        return runtime
 
 
 class MeshWarpMathsInputSpec(BaseInterfaceInputSpec):
@@ -302,18 +271,16 @@ class MeshWarpMathsInputSpec(BaseInterfaceInputSpec):
     operation = traits.Enum('sum', 'sub', 'mul', 'div', usedefault=True,
                             desc=('operation to be performed'))
 
-    out_warp = File('warp_maths.vtk', usedefault=True,
-                    desc='vtk file based on in_surf and warpings mapping it '
-                    'to out_file')
-    out_file = File('warped_surf.vtk', usedefault=True,
+    out_warp = GenFile(template='{in_surf}_warping', keep_extension=True,
+                       desc='vtk file based on in_surf and warpings mapping it to out_file')
+    out_file = File(template='{in_surf}_warped', keep_extension=True,
                     desc='vtk with surface warped')
 
 
 class MeshWarpMathsOutputSpec(TraitedSpec):
     out_warp = File(exists=True, desc=('vtk file with the vertex-wise '
                                        'mapping of surface1 to surface2'))
-    out_file = File(exists=True,
-                    desc='vtk with surface warped')
+    out_file = File(exists=True, desc='vtk with surface warped')
 
 
 class MeshWarpMaths(TVTKBaseInterface):
@@ -416,12 +383,6 @@ class MeshWarpMaths(TVTKBaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        outputs['out_warp'] = op.abspath(self.inputs.out_warp)
-        return outputs
-
 
 class P2PDistance(ComputeMeshWarp):
 
@@ -437,6 +398,5 @@ class P2PDistance(ComputeMeshWarp):
 
     def __init__(self, **inputs):
         super(P2PDistance, self).__init__(**inputs)
-        warn(('This interface has been deprecated since 1.0, please use '
-              'ComputeMeshWarp'),
-             DeprecationWarning)
+        IFLOGGER.warn('This interface has been deprecated since 1.0, please use '
+                      'ComputeMeshWarp')

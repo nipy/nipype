@@ -127,8 +127,8 @@ class NetworkBasedStatistic(BaseInterface):
         iflogger.info('Saving output p-value network as {out}'.format(out=pval_path))
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+        
 
         THRESH = self.inputs.threshold
         K = self.inputs.number_of_permutations
@@ -138,10 +138,9 @@ class NetworkBasedStatistic(BaseInterface):
         path = op.abspath('NBS_Result_' + details)
         pval_path = op.abspath('NBS_P_vals_' + details)
 
-        outputs['nbs_network'] = path
-        outputs['nbs_pval_network'] = pval_path
-        outputs['network_files'] = [path, pval_path]
-        return outputs
-
+        self.outputs.nbs_network = path
+        self.outputs.nbs_pval_network = pval_path
+        self.outputs.network_files = [path, pval_path]
+        
     def _gen_outfilename(self, name, ext):
         return name + '.' + ext

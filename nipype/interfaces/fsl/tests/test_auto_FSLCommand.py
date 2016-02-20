@@ -12,7 +12,8 @@ def test_FSLCommand_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )
@@ -22,3 +23,11 @@ def test_FSLCommand_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
+def test_FSLCommand_outputs():
+    output_map = dict()
+    outputs = FSLCommand.output_spec()
+
+    for key, metadata in list(output_map.items()):
+        for metakey, value in list(metadata.items()):
+            yield assert_equal, getattr(outputs.traits()[key], metakey), value

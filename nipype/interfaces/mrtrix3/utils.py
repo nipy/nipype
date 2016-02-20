@@ -56,10 +56,9 @@ class BrainMask(CommandLine):
     input_spec = BrainMaskInputSpec
     output_spec = BrainMaskOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
 
 
 class Mesh2PVEInputSpec(CommandLineInputSpec):
@@ -103,10 +102,9 @@ class Mesh2PVE(CommandLine):
     input_spec = Mesh2PVEInputSpec
     output_spec = Mesh2PVEOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
 
 
 class Generate5ttInputSpec(CommandLineInputSpec):
@@ -150,10 +148,9 @@ class Generate5tt(CommandLine):
     input_spec = Generate5ttInputSpec
     output_spec = Generate5ttOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
 
 
 class TensorMetricsInputSpec(CommandLineInputSpec):
@@ -207,14 +204,11 @@ class TensorMetrics(CommandLine):
     input_spec = TensorMetricsInputSpec
     output_spec = TensorMetricsOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-
+    def _post_run(self):
         for k in list(outputs.keys()):
             if isdefined(getattr(self.inputs, k)):
-                outputs[k] = op.abspath(getattr(self.inputs, k))
+                setattr(self.outputs, k, op.abspath(getattr(self.inputs, k)))
 
-        return outputs
 
 
 class ComputeTDIInputSpec(CommandLineInputSpec):
@@ -347,10 +341,9 @@ class ComputeTDI(MRTrix3Base):
     input_spec = ComputeTDIInputSpec
     output_spec = ComputeTDIOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
 
 
 class TCK2VTKInputSpec(CommandLineInputSpec):
@@ -398,7 +391,7 @@ class TCK2VTK(MRTrix3Base):
     input_spec = TCK2VTKInputSpec
     output_spec = TCK2VTKOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+

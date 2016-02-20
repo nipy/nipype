@@ -1,10 +1,10 @@
-'''
+"""
 Created on Aug 2, 2013
 
 @author: chadcumba
 
 Parallel workflow execution with SLURM
-'''
+"""
 
 import os
 import re
@@ -17,7 +17,7 @@ from nipype.interfaces.base import CommandLine
 
 
 class SLURMPlugin(SGELikeBatchManagerBase):
-    '''
+    """
     Execute using SLURM
 
     The plugin_args input to run can be used to control the SLURM execution.
@@ -28,7 +28,7 @@ class SLURMPlugin(SGELikeBatchManagerBase):
     - sbatch_args: arguments to pass prepend to the sbatch call
 
 
-    '''
+    """
 
     def __init__(self, **kwargs):
 

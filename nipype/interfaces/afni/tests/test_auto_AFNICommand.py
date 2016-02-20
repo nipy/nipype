@@ -12,11 +12,8 @@ def test_AFNICommand_inputs():
     ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
-    out_file=dict(argstr='-prefix %s',
-    name_source=['in_file'],
-    name_template='%s_afni',
+    outputtype=dict(usedefault=True,
     ),
-    outputtype=dict(),
     terminal_output=dict(nohash=True,
     ),
     )
@@ -26,3 +23,11 @@ def test_AFNICommand_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
+def test_AFNICommand_outputs():
+    output_map = dict()
+    outputs = AFNICommand.output_spec()
+
+    for key, metadata in list(output_map.items()):
+        for metakey, value in list(metadata.items()):
+            yield assert_equal, getattr(outputs.traits()[key], metakey), value

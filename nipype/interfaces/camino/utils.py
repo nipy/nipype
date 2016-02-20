@@ -55,11 +55,10 @@ class ImageStats(CommandLine):
     input_spec = ImageStatsInputSpec
     output_spec = ImageStatsOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = os.path.abspath(self._gen_outfilename())
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.out_file = os.path.abspath(self._gen_outfilename())
+        
     def _gen_outfilename(self):
         output_root = self.inputs.output_root
         first_file = self.inputs.in_files[0]

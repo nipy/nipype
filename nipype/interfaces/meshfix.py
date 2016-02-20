@@ -111,21 +111,20 @@ class MeshFix(CommandLine):
     input_spec = MeshFixInputSpec
     output_spec = MeshFixOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+        
         if isdefined(self.inputs.out_filename):
             path, name, ext = split_filename(self.inputs.out_filename)
             ext = ext.replace('.', '')
             out_types = ['stl', 'msh', 'wrl', 'vrml', 'fs', 'off']
             # Make sure that the output filename uses one of the possible file types
             if any(ext == out_type.lower() for out_type in out_types):
-                outputs['mesh_file'] = op.abspath(self.inputs.out_filename)
+                self.outputs.mesh_file = op.abspath(self.inputs.out_filename)
             else:
-                outputs['mesh_file'] = op.abspath(name + '.' + self.inputs.output_type)
+                self.outputs.mesh_file = op.abspath(name + '.' + self.inputs.output_type)
         else:
-            outputs['mesh_file'] = op.abspath(self._gen_outfilename())
-        return outputs
-
+            self.outputs.mesh_file = op.abspath(self._gen_outfilename())
+        
     def _gen_filename(self, name):
         if name is 'out_filename':
             return self._gen_outfilename()

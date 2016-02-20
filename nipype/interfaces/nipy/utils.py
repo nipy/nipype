@@ -99,7 +99,6 @@ class Similarity(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['similarity'] = self._similarity
-        return outputs
+    def _post_run(self):
+        self.outputs.similarity = self._similarity
+        

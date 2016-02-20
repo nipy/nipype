@@ -163,10 +163,10 @@ def test_bool():
         _jobname = 'jobname'
     dc = TestClass()  # dc = derived_class
     dc.inputs.test_in = True
-    out = dc._make_matlab_command(dc._parse_inputs())
+    out = dc._make_matlab_command(dc.parse_args())
     yield assert_equal, out.find('jobs{1}.spm.jobtype.jobname.testfield = 1;') > 0, 1
     dc.inputs.use_v8struct = False
-    out = dc._make_matlab_command(dc._parse_inputs())
+    out = dc._make_matlab_command(dc.parse_args())
     yield assert_equal, out.find('jobs{1}.jobtype{1}.jobname{1}.testfield = 1;') > 0, 1
 
 

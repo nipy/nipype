@@ -23,7 +23,8 @@ def test_Split_inputs():
     out_base_name=dict(argstr='%s',
     position=1,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

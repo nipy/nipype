@@ -8,7 +8,8 @@ def test_AddCSVColumn_inputs():
     extra_field=dict(),
     in_file=dict(mandatory=True,
     ),
-    out_file=dict(usedefault=True,
+    out_file=dict(ns='in_file',
+    output_name='csv_file',
     ),
     )
     inputs = AddCSVColumn.input_spec()

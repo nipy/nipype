@@ -148,11 +148,9 @@ class TestInterface(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output1'] = [1]
-        return outputs
-
+    def _post_run(self):
+        self.outputs.output1 = [1]
+        
 
 def test_inputs_removal():
     out_dir = mkdtemp()

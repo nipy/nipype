@@ -13,8 +13,8 @@ def test_StdOutCommandLine_inputs():
     usedefault=True,
     ),
     out_file=dict(argstr='> %s',
-    genfile=True,
     position=-1,
+    usedefault=True,
     ),
     terminal_output=dict(nohash=True,
     ),
@@ -25,3 +25,12 @@ def test_StdOutCommandLine_inputs():
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(inputs.traits()[key], metakey), value
 
+
+def test_StdOutCommandLine_outputs():
+    output_map = dict(out_file=dict(),
+    )
+    outputs = StdOutCommandLine.output_spec()
+
+    for key, metadata in list(output_map.items()):
+        for metakey, value in list(metadata.items()):
+            yield assert_equal, getattr(outputs.traits()[key], metakey), value

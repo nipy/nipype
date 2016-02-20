@@ -35,10 +35,8 @@ class Analyze2nii(SPMCommand):
 
         return script
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['nifti_file'] = self.output_name
-        return outputs
+    def _post_run(self):
+        self.outputs.nifti_file = self.output_name
 
 
 class CalcCoregAffineInputSpec(SPMCommandInputSpec):
@@ -115,11 +113,9 @@ class CalcCoregAffine(SPMCommand):
                self.inputs.invmat)
         return script
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['mat'] = os.path.abspath(self.inputs.mat)
-        outputs['invmat'] = os.path.abspath(self.inputs.invmat)
-        return outputs
+    def _post_run(self):
+        self.outputs.mat = os.path.abspath(self.inputs.mat)
+        self.outputs.invmat = os.path.abspath(self.inputs.invmat)
 
 
 class ApplyTransformInputSpec(SPMCommandInputSpec):
@@ -154,7 +150,7 @@ class ApplyTransform(SPMCommand):
     def _make_matlab_command(self, _):
         """checks for SPM, generates script"""
         outputs = self._list_outputs()
-        self.inputs.out_file = outputs['out_file']
+        self.inputs.out_file = self.outputs.out_file
         script = """
         infile = '%s';
         outfile = '%s'
@@ -174,13 +170,12 @@ class ApplyTransform(SPMCommand):
         # spm_get_space(infile, transform.M * img_space);
         return script
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+
         if not isdefined(self.inputs.out_file):
-            outputs['out_file'] = os.path.abspath(self._gen_outfilename())
+            self.outputs.out_file = os.path.abspath(self._gen_outfilename())
         else:
-            outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        return outputs
+            self.outputs.out_file = os.path.abspath(self.inputs.out_file)
 
     def _gen_outfilename(self):
         _, name, _ = split_filename(self.inputs.in_file)
@@ -228,10 +223,8 @@ class Reslice(SPMCommand):
                self.inputs.in_file)
         return script
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = os.path.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+        self.outputs.out_file = os.path.abspath(self.inputs.out_file)
 
 
 class ApplyInverseDeformationInput(SPMCommandInputSpec):
@@ -267,6 +260,19 @@ class ApplyInverseDeformationInput(SPMCommandInputSpec):
         minlen=3, maxlen=3,
         desc='3-element list (opt)')
 
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt == 'in_files':
+            return scans_for_fnames(filename_to_list(val))
+        if opt == 'target':
+            return scans_for_fname(filename_to_list(val))
+        if opt == 'deformation':
+            return np.array([list_to_filename(val)], dtype=object)
+        if opt == 'deformation_field':
+            return np.array([list_to_filename(val)], dtype=object)
+        return val
+
 
 class ApplyInverseDeformationOutput(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True),
@@ -294,26 +300,11 @@ class ApplyInverseDeformation(SPMCommand):
     _jobtype = 'util'
     _jobname = 'defs'
 
-    def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
-        if opt == 'in_files':
-            return scans_for_fnames(filename_to_list(val))
-        if opt == 'target':
-            return scans_for_fname(filename_to_list(val))
-        if opt == 'deformation':
-            return np.array([list_to_filename(val)], dtype=object)
-        if opt == 'deformation_field':
-            return np.array([list_to_filename(val)], dtype=object)
-        return val
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_files'] = []
+    def _post_run(self):
+        self.outputs.out_files = []
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
-            outputs['out_files'].append(os.path.realpath('w%s' % fname))
-        return outputs
+            self.outputs.out_files.append(os.path.realpath('w%s' % fname))
 
 
 class ResliceToReferenceInput(SPMCommandInputSpec):
@@ -377,13 +368,11 @@ class ResliceToReference(SPMCommand):
             return np.array([list_to_filename(val)], dtype=object)
         return val
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_files'] = []
+    def _post_run(self):
+        self.outputs.out_files = []
         for filename in self.inputs.in_files:
             _, fname = os.path.split(filename)
-            outputs['out_files'].append(os.path.realpath('w%s' % fname))
-        return outputs
+            self.outputs.out_files.append(os.path.realpath('w%s' % fname))
 
 
 class DicomImportInputSpec(SPMCommandInputSpec):
@@ -415,6 +404,21 @@ class DicomImportInputSpec(SPMCommandInputSpec):
               exactly the same file names.')
 
 
+    def _format_arg(self, opt, spec, val):
+        """Convert input to appropriate format for spm
+        """
+        if opt == 'in_files':
+            return np.array(val, dtype=object)
+        if opt == 'output_dir':
+            return np.array([val], dtype=object)
+        if opt == 'output_dir':
+            return os.path.abspath(val)
+        if opt == 'icedims':
+            if val:
+                return 1
+            return 0
+        return super(DicomImportInputSpec, self)._format_arg(opt, spec, val)
+
 class DicomImportOutputSpec(TraitedSpec):
     out_files = OutputMultiPath(File(exists=True),
                                 desc='converted files')
@@ -438,39 +442,22 @@ class DicomImport(SPMCommand):
     _jobtype = 'util'
     _jobname = 'dicom'
 
-    def _format_arg(self, opt, spec, val):
-        """Convert input to appropriate format for spm
-        """
-        if opt == 'in_files':
-            return np.array(val, dtype=object)
-        if opt == 'output_dir':
-            return np.array([val], dtype=object)
-        if opt == 'output_dir':
-            return os.path.abspath(val)
-        if opt == 'icedims':
-            if val:
-                return 1
-            return 0
-        return super(DicomImport, self)._format_arg(opt, spec, val)
-
     def _run_interface(self, runtime):
         od = os.path.abspath(self.inputs.output_dir)
         if not os.path.isdir(od):
             os.mkdir(od)
         return super(DicomImport, self)._run_interface(runtime)
 
-    def _list_outputs(self):
+    def _post_run(self):
         from glob import glob
-        outputs = self._outputs().get()
         od = os.path.abspath(self.inputs.output_dir)
-
         ext = self.inputs.format
         if self.inputs.output_dir_struct == "flat":
-            outputs['out_files'] = glob(os.path.join(od, '*.%s' % ext))
+            self.outputs.out_files = glob(os.path.join(od, '*.%s' % ext))
         elif self.inputs.output_dir_struct == 'series':
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*.%s' % ext)))
+            self.outputs.out_files = glob(os.path.join(od, os.path.join('*', '*.%s' % ext)))
         elif self.inputs.output_dir_struct in ['patid', 'date_time', 'patname']:
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*', '*.%s' % ext)))
+            self.outputs.out_files = glob(os.path.join(od, os.path.join('*', '*', '*.%s' % ext)))
         elif self.inputs.output_dir_struct == 'patid_date':
-            outputs['out_files'] = glob(os.path.join(od, os.path.join('*', '*', '*', '*.%s' % ext)))
-        return outputs
+            self.outputs.out_files = glob(os.path.join(od, os.path.join('*', '*', '*', '*.%s' % ext)))
+

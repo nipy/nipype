@@ -25,11 +25,9 @@ class TestInterface(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output1'] = [1, self.inputs.input1]
-        return outputs
-
+    def _post_run(self):
+        self.outputs.output1 = [1, self.inputs.input1]
+        
 
 @skipif(True)
 def test_run_pbsgraph():

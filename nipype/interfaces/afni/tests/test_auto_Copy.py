@@ -18,11 +18,10 @@ def test_Copy_inputs():
     position=-2,
     ),
     out_file=dict(argstr='%s',
-    name_source='in_file',
-    name_template='%s_copy',
     position=-1,
     ),
-    outputtype=dict(),
+    outputtype=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -70,11 +70,9 @@ class ComputeMask(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["brain_mask"] = self._brain_mask_path
-        return outputs
-
+    def _post_run(self):
+        self.outputs.brain_mask = self._brain_mask_path
+        
 
 class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
 
@@ -190,12 +188,10 @@ class FmriRealign4d(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = self._out_file_path
-        outputs['par_file'] = self._par_file_path
-        return outputs
-
+    def _post_run(self):
+        self.outputs.out_file = self._out_file_path
+        self.outputs.par_file = self._par_file_path
+        
 
 class SpaceTimeRealignerInputSpec(BaseInterfaceInputSpec):
 
@@ -321,12 +317,10 @@ class SpaceTimeRealigner(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['out_file'] = self._out_file_path
-        outputs['par_file'] = self._par_file_path
-        return outputs
-
+    def _post_run(self):
+        self.outputs.out_file = self._out_file_path
+        self.outputs.par_file = self._par_file_path
+        
 
 class TrimInputSpec(BaseInterfaceInputSpec):
     in_file = File(
@@ -365,7 +359,7 @@ class Trim(BaseInterface):
     output_spec = TrimOutputSpec
 
     def _run_interface(self, runtime):
-        out_file = self._list_outputs()['out_file']
+        out_file = self.outputs.out_file
         nii = nb.load(self.inputs.in_file)
         if self.inputs.end_index == 0:
             s = slice(self.inputs.begin_index, nii.shape[3])
@@ -375,13 +369,13 @@ class Trim(BaseInterface):
         nb.save(nii2, out_file)
         return runtime
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = self.inputs.out_file
-        if not isdefined(outputs['out_file']):
-            outputs['out_file'] = fname_presuffix(
+    def _post_run(self):
+        
+        self.outputs.out_file = self.inputs.out_file
+        if not isdefined(self.outputs.out_file):
+            self.outputs.out_file = fname_presuffix(
                 self.inputs.in_file,
                 newpath=os.getcwd(),
                 suffix=self.inputs.suffix)
-        outputs['out_file'] = os.path.abspath(outputs['out_file'])
-        return outputs
+        self.outputs.out_file = os.path.abspath(self.outputs.out_file)
+        

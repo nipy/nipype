@@ -15,7 +15,11 @@ def test_PickAtlas_inputs():
     ),
     labels=dict(mandatory=True,
     ),
-    output_file=dict(),
+    mask_file=dict(ns='atlas',
+    ),
+    output_file=dict(deprecated=True,
+    new_name='mask_file',
+    ),
     )
     inputs = PickAtlas.input_spec()
 

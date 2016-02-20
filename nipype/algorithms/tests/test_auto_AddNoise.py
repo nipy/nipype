@@ -13,7 +13,8 @@ def test_AddNoise_inputs():
     in_file=dict(mandatory=True,
     ),
     in_mask=dict(),
-    out_file=dict(),
+    out_file=dict(ns=['in_file', 'snr'],
+    ),
     snr=dict(usedefault=True,
     ),
     )

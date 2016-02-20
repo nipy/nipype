@@ -31,10 +31,8 @@ class PickFirst(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output1'] = self.inputs.in_files[0]
-        return outputs
+    def _post_run(self):
+        self.outputs.output1 = self.inputs.in_files[0]
 
 
 class IncrementInputSpec(nib.TraitedSpec):
@@ -54,10 +52,8 @@ class IncrementInterface(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['output1'] = self.inputs.input1 + self.inputs.inc
-        return outputs
+    def _post_run(self):
+        self.outputs.output1 = self.inputs.input1 + self.inputs.inc
 
 _sums = []
 
@@ -81,15 +77,13 @@ class SumInterface(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         global _sum
         global _sum_operands
-        outputs = self._outputs().get()
-        outputs['operands'] = self.inputs.input1
-        _sum_operands.append(outputs['operands'])
-        outputs['output1'] = sum(self.inputs.input1)
-        _sums.append(outputs['output1'])
-        return outputs
+        self.outputs.operands = self.inputs.input1
+        _sum_operands.append(self.outputs.operands)
+        self.outputs.output1 = sum(self.inputs.input1)
+        _sums.append(self.outputs.output1)
 
 
 _set_len = None
@@ -112,11 +106,9 @@ class SetInterface(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         global _set_len
-        outputs = self._outputs().get()
-        _set_len = outputs['output1'] = len(self.inputs.input1)
-        return outputs
+                _set_len = self.outputs.output1 = len(self.inputs.input1)
 
 
 _products = []
@@ -140,12 +132,10 @@ class ProductInterface(nib.BaseInterface):
         runtime.returncode = 0
         return runtime
 
-    def _list_outputs(self):
+    def _post_run(self):
         global _products
-        outputs = self._outputs().get()
-        outputs['output1'] = self.inputs.input1 * self.inputs.input2
-        _products.append(outputs['output1'])
-        return outputs
+                self.outputs.output1 = self.inputs.input1 * self.inputs.input2
+        _products.append(self.outputs.output1)
 
 
 def test_join_expansion():

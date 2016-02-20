@@ -123,10 +123,10 @@ class Level1Design(SPMCommand):
                 return val
         return super(Level1Design, self)._format_arg(opt, spec, val)
 
-    def _parse_inputs(self):
+    def parse_args(self):
         """validate spm realign options if set to None ignore
         """
-        einputs = super(Level1Design, self)._parse_inputs(skip=('mask_threshold'))
+        einputs = super(Level1Design, self).parse_args(skip=('mask_threshold'))
         for sessinfo in einputs[0]['sess']:
             sessinfo['scans'] = scans_for_fnames(filename_to_list(sessinfo['scans']), keep4d=False)
         if not isdefined(self.inputs.spm_mat_dir):
@@ -152,12 +152,10 @@ class Level1Design(SPMCommand):
             postscript = None
         return super(Level1Design, self)._make_matlab_command(content, postscript=postscript)
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         spm = os.path.join(os.getcwd(), 'SPM.mat')
-        outputs['spm_mat_file'] = spm
-        return outputs
-
+        self.outputs.spm_mat_file = spm
+        
 
 class EstimateModelInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, field='spmmat', desc='absolute path to SPM.mat',
@@ -206,43 +204,41 @@ class EstimateModel(SPMCommand):
                 return val
         return super(EstimateModel, self)._format_arg(opt, spec, val)
 
-    def _parse_inputs(self):
+    def parse_args(self):
         """validate spm realign options if set to None ignore
         """
-        einputs = super(EstimateModel, self)._parse_inputs(skip=('flags'))
+        einputs = super(EstimateModel, self).parse_args(skip=('flags'))
         if isdefined(self.inputs.flags):
             einputs[0].update(self.inputs.flags)
         return einputs
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         pth, _ = os.path.split(self.inputs.spm_mat_file)
         spm12 = '12' in self.version.split('.')[0]
         if spm12:
             mask = os.path.join(pth, 'mask.nii')
         else:
             mask = os.path.join(pth, 'mask.img')
-        outputs['mask_image'] = mask
+        self.outputs.mask_image = mask
         spm = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
         betas = []
         for vbeta in spm['SPM'][0, 0].Vbeta[0]:
             betas.append(str(os.path.join(pth, vbeta.fname[0])))
         if betas:
-            outputs['beta_images'] = betas
+            self.outputs.beta_images = betas
         if spm12:
             resms = os.path.join(pth, 'ResMS.nii')
         else:
             resms = os.path.join(pth, 'ResMS.img')
-        outputs['residual_image'] = resms
+        self.outputs.residual_image = resms
         if spm12:
             rpv = os.path.join(pth, 'RPV.nii')
         else:
             rpv = os.path.join(pth, 'RPV.img')
-        outputs['RPVimage'] = rpv
+        self.outputs.RPVimage = rpv
         spm = os.path.join(pth, 'SPM.mat')
-        outputs['spm_mat_file'] = spm
-        return outputs
-
+        self.outputs.spm_mat_file = spm
+        
 
 class EstimateContrastInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, field='spmmat',
@@ -384,8 +380,7 @@ class EstimateContrast(SPMCommand):
         script += "spm_jobman('run',jobs);"
         return script
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         pth, _ = os.path.split(self.inputs.spm_mat_file)
         spm = sio.loadmat(self.inputs.spm_mat_file, struct_as_record=False)
         con_images = []
@@ -394,24 +389,23 @@ class EstimateContrast(SPMCommand):
             con_images.append(str(os.path.join(pth, con.Vcon[0, 0].fname[0])))
             spmT_images.append(str(os.path.join(pth, con.Vspm[0, 0].fname[0])))
         if con_images:
-            outputs['con_images'] = con_images
-            outputs['spmT_images'] = spmT_images
+            self.outputs.con_images = con_images
+            self.outputs.spmT_images = spmT_images
         spm12 = '12' in self.version.split('.')[0]
         if spm12:
             ess = glob(os.path.join(pth, 'ess*.nii'))
         else:
             ess = glob(os.path.join(pth, 'ess*.img'))
         if len(ess) > 0:
-            outputs['ess_images'] = sorted(ess)
+            self.outputs.ess_images = sorted(ess)
         if spm12:
             spmf = glob(os.path.join(pth, 'spmF*.nii'))
         else:
             spmf = glob(os.path.join(pth, 'spmF*.img'))
         if len(spmf) > 0:
-            outputs['spmF_images'] = sorted(spmf)
-        outputs['spm_mat_file'] = self.inputs.spm_mat_file
-        return outputs
-
+            self.outputs.spmF_images = sorted(spmf)
+        self.outputs.spm_mat_file = self.inputs.spm_mat_file
+        
 
 class ThresholdInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, desc='absolute path to SPM.mat', copyfile=True, mandatory=True)
@@ -436,7 +430,7 @@ class ThresholdOutputSpec(TraitedSpec):
 
 
 class Threshold(SPMCommand):
-    '''Topological FDR thresholding based on cluster extent/size. Smoothness is
+    """Topological FDR thresholding based on cluster extent/size. Smoothness is
     estimated from GLM residuals but is assumed to be the same for all of the
     voxels.
 
@@ -449,7 +443,7 @@ class Threshold(SPMCommand):
     >>> thresh.inputs.contrast_index = 1
     >>> thresh.inputs.extent_fdr_p_threshold = 0.05
     >>> thresh.run() # doctest: +SKIP
-    '''
+    """
     input_spec = ThresholdInputSpec
     output_spec = ThresholdOutputSpec
 
@@ -588,14 +582,11 @@ fprintf('cluster_forming_thr = %f\\n',cluster_forming_thr);
                 setattr(outputs, 'pre_topo_n_clusters', int(line[len("pre_topo_n_clusters = "):].strip()))
             elif line.startswith("cluster_forming_thr = "):
                 setattr(outputs, 'cluster_forming_thr', float(line[len("cluster_forming_thr = "):].strip()))
-        return outputs
-
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs['thresholded_map'] = self._gen_thresholded_map_filename()
-        outputs['pre_topo_fdr_map'] = self._gen_pre_topo_map_filename()
-        return outputs
-
+        
+    def _post_run(self):
+        self.outputs.thresholded_map = self._gen_thresholded_map_filename()
+        self.outputs.pre_topo_fdr_map = self._gen_pre_topo_map_filename()
+        
 
 class ThresholdStatisticsInputSpec(SPMCommandInputSpec):
     spm_mat_file = File(exists=True, desc='absolute path to SPM.mat', copyfile=True, mandatory=True)
@@ -615,7 +606,7 @@ class ThresholdStatisticsOutputSpec(TraitedSpec):
 
 
 class ThresholdStatistics(SPMCommand):
-    '''Given height and cluster size threshold calculate theoretical probabilities
+    """Given height and cluster size threshold calculate theoretical probabilities
     concerning false positives
 
     Examples
@@ -627,7 +618,7 @@ class ThresholdStatistics(SPMCommand):
     >>> thresh.inputs.contrast_index = 1
     >>> thresh.inputs.height_threshold = 4.56
     >>> thresh.run() # doctest: +SKIP
-    '''
+    """
     input_spec = ThresholdStatisticsInputSpec
     output_spec = ThresholdStatisticsOutputSpec
 
@@ -698,8 +689,7 @@ clusterwise_P_FDR = spm_P_clusterFDR(extent_threshold*V2R,df,STAT,R,n,cluster_fo
                 cur_output = line.split()[0]
                 continue
 
-        return outputs
-
+        
 
 class FactorialDesignInputSpec(SPMCommandInputSpec):
     spm_mat_dir = Directory(exists=True, field='dir', desc='directory to store SPM.mat file (opt)')
@@ -770,20 +760,18 @@ class FactorialDesign(SPMCommand):
             return outlist
         return super(FactorialDesign, self)._format_arg(opt, spec, val)
 
-    def _parse_inputs(self):
+    def parse_args(self):
         """validate spm realign options if set to None ignore
         """
-        einputs = super(FactorialDesign, self)._parse_inputs()
+        einputs = super(FactorialDesign, self).parse_args()
         if not isdefined(self.inputs.spm_mat_dir):
             einputs[0]['dir'] = np.array([str(os.getcwd())], dtype=object)
         return einputs
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
+    def _post_run(self):
         spm = os.path.join(os.getcwd(), 'SPM.mat')
-        outputs['spm_mat_file'] = spm
-        return outputs
-
+        self.outputs.spm_mat_file = spm
+        
 
 class OneSampleTTestDesignInputSpec(FactorialDesignInputSpec):
     in_files = traits.List(File(exists=True), field='des.t1.scans',

@@ -14,7 +14,7 @@ def test_SwapDimensions_inputs():
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
-    position='1',
+    position=1,
     ),
     new_dims=dict(argstr='%s %s %s',
     mandatory=True,
@@ -23,7 +23,8 @@ def test_SwapDimensions_inputs():
     genfile=True,
     hash_files=False,
     ),
-    output_type=dict(),
+    output_type=dict(usedefault=True,
+    ),
     terminal_output=dict(nohash=True,
     ),
     )

@@ -105,14 +105,13 @@ class ResponseSD(MRTrix3Base):
     input_spec = ResponseSDInputSpec
     output_spec = ResponseSDOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
+    def _post_run(self):
+        
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
 
         if isdefined(self.inputs.out_sf):
-            outputs['out_sf'] = op.abspath(self.inputs.out_sf)
-        return outputs
-
+            self.outputs.out_sf = op.abspath(self.inputs.out_sf)
+        
 
 class ACTPrepareFSLInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-2,
@@ -148,11 +147,10 @@ class ACTPrepareFSL(CommandLine):
     input_spec = ACTPrepareFSLInputSpec
     output_spec = ACTPrepareFSLOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
-
+    def _post_run(self):
+        
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+        
 
 class ReplaceFSwithFIRSTInputSpec(CommandLineInputSpec):
     in_file = File(exists=True, argstr='%s', mandatory=True, position=-4,
@@ -195,7 +193,7 @@ mrtrix3_labelconfig.txt aparc+first.mif'
     input_spec = ReplaceFSwithFIRSTInputSpec
     output_spec = ReplaceFSwithFIRSTOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
-        outputs['out_file'] = op.abspath(self.inputs.out_file)
-        return outputs
+    def _post_run(self):
+        
+        self.outputs.out_file = op.abspath(self.inputs.out_file)
+        

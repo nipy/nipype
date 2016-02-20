@@ -73,9 +73,9 @@ class FitGLMOutputSpec(TraitedSpec):
 
 
 class FitGLM(BaseInterface):
-    '''
+    """
     Fit GLM model based on the specified design. Supports only single or concatenated runs.
-    '''
+    """
     input_spec = FitGLMInputSpec
     output_spec = FitGLMOutputSpec
 
@@ -192,21 +192,19 @@ class FitGLM(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["beta"] = self._beta_file
-        outputs["nvbeta"] = self._nvbeta
-        outputs["s2"] = self._s2_file
-        outputs["dof"] = self._dof
-        outputs["constants"] = self._constants
-        outputs["axis"] = self._axis
-        outputs["reg_names"] = self._reg_names
+    def _post_run(self):
+        self.outputs.beta = self._beta_file
+        self.outputs.nvbeta = self._nvbeta
+        self.outputs.s2 = self._s2_file
+        self.outputs.dof = self._dof
+        self.outputs.constants = self._constants
+        self.outputs.axis = self._axis
+        self.outputs.reg_names = self._reg_names
         if self.inputs.model == "ar1":
-            outputs["a"] = self._a_file
+            self.outputs.a = self._a_file
         if self.inputs.save_residuals:
-            outputs["residuals"] = self._residuals_file
-        return outputs
-
+            self.outputs.residuals = self._residuals_file
+        
 
 class EstimateContrastInputSpec(BaseInterfaceInputSpec):
     contrasts = traits.List(
@@ -252,9 +250,9 @@ class EstimateContrastOutputSpec(TraitedSpec):
 
 
 class EstimateContrast(BaseInterface):
-    '''
+    """
     Estimate contrast of a fitted model.
-    '''
+    """
     input_spec = EstimateContrastInputSpec
     output_spec = EstimateContrastOutputSpec
 
@@ -312,9 +310,8 @@ class EstimateContrast(BaseInterface):
 
         return runtime
 
-    def _list_outputs(self):
-        outputs = self._outputs().get()
-        outputs["stat_maps"] = self._stat_maps
-        outputs["p_maps"] = self._p_maps
-        outputs["z_maps"] = self._z_maps
-        return outputs
+    def _post_run(self):
+        self.outputs.stat_maps = self._stat_maps
+        self.outputs.p_maps = self._p_maps
+        self.outputs.z_maps = self._z_maps
+        

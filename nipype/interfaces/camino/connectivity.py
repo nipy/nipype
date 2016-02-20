@@ -132,13 +132,12 @@ class Conmat(CommandLine):
     input_spec = ConmatInputSpec
     output_spec = ConmatOutputSpec
 
-    def _list_outputs(self):
-        outputs = self.output_spec().get()
+    def _post_run(self):
+        
         output_root = self._gen_outputroot()
-        outputs['conmat_sc'] = os.path.abspath(output_root + "sc.csv")
-        outputs['conmat_ts'] = os.path.abspath(output_root + "ts.csv")
-        return outputs
-
+        self.outputs.conmat_sc = os.path.abspath(output_root + "sc.csv")
+        self.outputs.conmat_ts = os.path.abspath(output_root + "ts.csv")
+        
     def _gen_outfilename(self):
         return self._gen_outputroot()
 

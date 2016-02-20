@@ -9,6 +9,7 @@ def test_ModifyAffine_inputs():
     ),
     transformation_matrix=dict(usedefault=True,
     ),
+    transformed_volumes=dict(),
     volumes=dict(mandatory=True,
     ),
     )

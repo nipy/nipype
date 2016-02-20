@@ -408,12 +408,12 @@ def test_Interface():
     yield assert_raises, NotImplementedError, nif.run
     yield assert_raises, NotImplementedError, nif.aggregate_outputs
     yield assert_raises, NotImplementedError, nif._list_outputs
-    yield assert_raises, NotImplementedError, nif._get_filecopy_info
+    yield assert_raises, NotImplementedError, nif.inputs.get_filecopy_info
 
 
 def test_BaseInterface():
     yield assert_equal, nib.BaseInterface.help(), None
-    yield assert_equal, nib.BaseInterface._get_filecopy_info(), []
+    yield assert_equal, nib.BaseInterface.inputs.get_filecopy_info(), []
 
     class InputSpec(nib.TraitedSpec):
         foo = nib.traits.Int(desc='a random int')
@@ -432,10 +432,10 @@ def test_BaseInterface():
     yield assert_equal, DerivedInterface.help(), None
     yield assert_true, 'moo' in ''.join(DerivedInterface._inputs_help())
     yield assert_equal, DerivedInterface()._outputs(), None
-    yield assert_equal, DerivedInterface._get_filecopy_info()[0]['key'], 'woo'
-    yield assert_true, DerivedInterface._get_filecopy_info()[0]['copy']
-    yield assert_equal, DerivedInterface._get_filecopy_info()[1]['key'], 'zoo'
-    yield assert_false, DerivedInterface._get_filecopy_info()[1]['copy']
+    yield assert_equal, DerivedInterface.inputs.get_filecopy_info()[0]['key'], 'woo'
+    yield assert_true, DerivedInterface.inputs.get_filecopy_info()[0]['copy']
+    yield assert_equal, DerivedInterface.inputs.get_filecopy_info()[1]['key'], 'zoo'
+    yield assert_false, DerivedInterface.inputs.get_filecopy_info()[1]['copy']
     yield assert_equal, DerivedInterface().inputs.foo, Undefined
     yield assert_raises, ValueError, DerivedInterface()._check_mandatory_inputs
     yield assert_equal, DerivedInterface(goo=1)._check_mandatory_inputs(), None
@@ -568,7 +568,7 @@ def test_output_version():
         def _run_interface(self, runtime):
             return runtime
 
-        def _list_outputs(self):
+        def _post_run(self):
             return {'foo': 1}
     obj = DerivedInterface1()
     yield assert_raises, KeyError, obj.run
@@ -605,20 +605,20 @@ def test_Commandline():
     ci4.inputs.noo = 0
     ci4.inputs.roo = 'hello'
     ci4.inputs.soo = False
-    cmd = ci4._parse_inputs()
+    cmd = ci4.parse_args()
     yield assert_equal, cmd[0], '-g'
     yield assert_equal, cmd[-1], '-i 1 -i 2 -i 3'
     yield assert_true, 'hello' not in ' '.join(cmd)
     yield assert_true, '-soo' not in ' '.join(cmd)
     ci4.inputs.soo = True
-    cmd = ci4._parse_inputs()
+    cmd = ci4.parse_args()
     yield assert_true, '-soo' in ' '.join(cmd)
 
     class CommandLineInputSpec2(nib.CommandLineInputSpec):
         foo = nib.File(argstr='%s', desc='a str', genfile=True)
     nib.CommandLine.input_spec = CommandLineInputSpec2
     ci5 = nib.CommandLine(command='cmd')
-    yield assert_raises, NotImplementedError, ci5._parse_inputs
+    yield assert_raises, NotImplementedError, ci5.parse_args
 
     class DerivedClass(nib.CommandLine):
         input_spec = CommandLineInputSpec2
@@ -627,7 +627,7 @@ def test_Commandline():
             return 'filename'
 
     ci6 = DerivedClass(command='cmd')
-    yield assert_equal, ci6._parse_inputs()[0], 'filename'
+    yield assert_equal, ci6.parse_args()[0], 'filename'
     nib.CommandLine.input_spec = nib.CommandLineInputSpec
 
 
