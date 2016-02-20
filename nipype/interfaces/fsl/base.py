@@ -122,6 +122,7 @@ class FSLCommand(CommandLine):  # pylint: disable=W0223
     def __init__(self, **inputs):
         super(FSLCommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'output_type')
+        self.inputs.output_type = FSLOUTPUTTYPE
 
     def _output_update(self):
         self.inputs.environ.update({'FSLOUTPUTTYPE': self.inputs.output_type})

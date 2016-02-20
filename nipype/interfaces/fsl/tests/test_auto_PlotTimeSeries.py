@@ -18,6 +18,7 @@ def test_PlotTimeSeries_inputs():
     sep=',',
     ),
     labels=dict(argstr='-a %s',
+    sep=',',
     ),
     legend_file=dict(argstr='--legend=%s',
     ),

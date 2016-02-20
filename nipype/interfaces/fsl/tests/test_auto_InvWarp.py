@@ -17,8 +17,6 @@ def test_InvWarp_inputs():
     ),
     inverse_warp=dict(argstr='--out=%s',
     hash_files=False,
-    name_source=['warp'],
-    name_template='%s_inverse',
     ),
     jacobian_max=dict(argstr='--jmax=%f',
     ),

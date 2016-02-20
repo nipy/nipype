@@ -121,9 +121,6 @@ class File (BaseFile):
         super(File, self).__init__(value, filter, auto_set, entries, exists,
                                    **metadata)
 
-    def isfile(self, obj, name):
-        return True
-
 
 class GenFile(File):
     """ A file which default name is automatically generated from other
@@ -220,11 +217,12 @@ class GenFile(File):
                     vallist = list(srcvalue)
 
                 outvals = []
+
+                isfile = obj.trait(nsrc).is_trait_type((
+                    File, MultiPath, GenMultiFile))
                 for val in vallist:
-                    try:
+                    if isfile:
                         _, val, ext = split_filename(val)
-                    except:
-                        pass
 
                     if isdefined(val):
                         outvals.append(val)
@@ -424,11 +422,12 @@ class GenMultiFile(traits.List):
                     vallist = list(srcvalue)
 
                 outvals = []
+
+                isfile = obj.trait(nsrc).is_trait_type((
+                    File, MultiPath, GenMultiFile))
                 for val in vallist:
-                    try:
+                    if isfile:
                         _, val, ext = split_filename(val)
-                    except:
-                        pass
 
                     if isdefined(val):
                         outvals.append(val)

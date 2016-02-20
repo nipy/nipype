@@ -183,10 +183,13 @@ class TOPUPInputSpec(FSLCommandInputSpec):
     out_logfile = GenFile(
         template='{in_file}_topup.log', argstr='--logout=%s', hash_files=False,
         desc='name of log-file')
-    out_fieldcoef = GenFile(
-        template='{in_file}_fieldcoef{output_type_}', argstr='--fout=%s', hash_files=False,
-        desc='name of image file with field (Hz)')
 
+    out_fieldcoef = GenFile(
+        template='{out_base}_fieldcoef{output_type_}', hash_files=False,
+        desc='file containing the field coefficients')
+    out_movpar = GenFile(
+        template='{out_base}_movpar.txt', hash_files=False,
+        desc='file containing the field coefficients')
 
 class TOPUPOutputSpec(TraitedSpec):
     out_fieldcoef = File(exists=True,

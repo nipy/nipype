@@ -1548,30 +1548,6 @@ class ClusterInputSpec(FSLCommandInputSpec):
     threshold = traits.Float(argstr='--thresh=%.10f',
                              mandatory=True,
                              desc='threshold for input volume')
-    out_index_file = traits.Either(traits.Bool, File,
-                                   argstr='--oindex=%s',
-                                   desc='output of cluster index (in size order)', hash_files=False)
-    out_threshold_file = traits.Either(traits.Bool, File,
-                                       argstr='--othresh=%s',
-                                       desc='thresholded image', hash_files=False)
-    out_localmax_txt_file = traits.Either(traits.Bool, File,
-                                          argstr='--olmax=%s',
-                                          desc='local maxima text file', hash_files=False)
-    out_localmax_vol_file = traits.Either(traits.Bool, File,
-                                          argstr='--olmaxim=%s',
-                                          desc='output of local maxima volume', hash_files=False)
-    out_size_file = traits.Either(traits.Bool, File,
-                                  argstr='--osize=%s',
-                                  desc='filename for output of size image', hash_files=False)
-    out_max_file = traits.Either(traits.Bool, File,
-                                 argstr='--omax=%s',
-                                 desc='filename for output of max image', hash_files=False)
-    out_mean_file = traits.Either(traits.Bool, File,
-                                  argstr='--omean=%s',
-                                  desc='filename for output of mean image', hash_files=False)
-    out_pval_file = traits.Either(traits.Bool, File,
-                                  argstr='--opvals=%s',
-                                  desc='filename for image output of log pvals', hash_files=False)
     pthreshold = traits.Float(argstr='--pthresh=%.10f',
                               requires=['dlh', 'volume'],
                               desc='p-threshold for clusters')
@@ -1602,8 +1578,40 @@ class ClusterInputSpec(FSLCommandInputSpec):
     warpfield_file = File(argstr='--warpvol=%s',
                           desc='file contining warpfield')
 
+
+    out_index_file = traits.Either(traits.Bool, File,
+                                   argstr='--oindex=%s',
+                                   desc='output of cluster index (in size order)', hash_files=False)
+    out_threshold_file = traits.Either(traits.Bool, File,
+                                       argstr='--othresh=%s',
+                                       desc='thresholded image', hash_files=False)
+    out_localmax_txt_file = traits.Either(traits.Bool, File,
+                                          argstr='--olmax=%s',
+                                          desc='local maxima text file', hash_files=False)
+    out_localmax_vol_file = traits.Either(traits.Bool, File,
+                                          argstr='--olmaxim=%s',
+                                          desc='output of local maxima volume', hash_files=False)
+    out_size_file = traits.Either(traits.Bool, File,
+                                  argstr='--osize=%s',
+                                  desc='filename for output of size image', hash_files=False)
+    out_max_file = traits.Either(traits.Bool, File,
+                                 argstr='--omax=%s',
+                                 desc='filename for output of max image', hash_files=False)
+    out_mean_file = traits.Either(traits.Bool, File,
+                                  argstr='--omean=%s',
+                                  desc='filename for output of mean image', hash_files=False)
+    out_pval_file = traits.Either(traits.Bool, File,
+                                  argstr='--opvals=%s',
+                                  desc='filename for image output of log pvals', hash_files=False)
+
     def _format_arg(self, name, spec, value):
-        if name in list(self.filemap.keys()):
+        filemap = {'out_index_file': 'index', 'out_threshold_file': 'threshold',
+                   'out_localmax_txt_file': 'localmax.txt',
+                   'out_localmax_vol_file': 'localmax',
+                   'out_size_file': 'size', 'out_max_file': 'max',
+                   'out_mean_file': 'mean', 'out_pval_file': 'pval'}
+
+        if name in list(filemap.keys()):
             if isinstance(value, bool):
                 fname = self._list_outputs()[name[4:]]
             else:
@@ -1640,12 +1648,6 @@ class Cluster(FSLCommand):
     input_spec = ClusterInputSpec
     output_spec = ClusterOutputSpec
     _cmd = 'cluster'
-
-    filemap = {'out_index_file': 'index', 'out_threshold_file': 'threshold',
-               'out_localmax_txt_file': 'localmax.txt',
-               'out_localmax_vol_file': 'localmax',
-               'out_size_file': 'size', 'out_max_file': 'max',
-               'out_mean_file': 'mean', 'out_pval_file': 'pval'}
 
     def _post_run(self):
 

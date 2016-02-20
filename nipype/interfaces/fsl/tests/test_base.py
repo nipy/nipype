@@ -20,13 +20,6 @@ def test_fslversion():
         yield assert_equal, None, ver
 
 
-def test_fsloutputtype():
-    types = list(fsl.Info.ftypes.keys())
-    orig_out_type = fsl.Info.output_type()
-    yield assert_true, orig_out_type in types
-    yield assert_raises, KeyError, lambda: fsl.Info.ftypes['JUNK']
-
-
 def test_FSLCommand():
     # Most methods in FSLCommand are tested in the subclasses.  Only
     # testing the one item that is not.
@@ -42,7 +35,7 @@ def test_FSLCommandInputSpec():
 
 def test_FSLCommand2():
     cmd = fsl.FSLCommand(command='junk')
-    yield assert_equal, cmd.inputs.environ['FSLOUTPUTTYPE'], cmd.inputs.output_type
+    yield assert_equal, cmd.inputs.environ.get('FSLOUTPUTTYPE'), cmd.inputs.output_type
     for out_type in fsl.Info.ftypes:
         cmd.inputs.output_type = out_type
         yield assert_equal, cmd.inputs.output_type_, fsl.Info.ftypes[out_type]

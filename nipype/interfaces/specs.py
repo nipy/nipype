@@ -408,10 +408,10 @@ class BaseInputSpec(BaseTraitedSpec):
                 if xor_spec is None:
                     xor_spec = []
 
-                if not any([isdefined(xname) for xname in xor_spec]):
+                if xor_spec and not any([isdefined(getattr(self, xname)) for xname in xor_spec]):
                     raise ValueError(
-                        '%s requires a value for one of these inputs \'%s\'. For a list of required inputs, '
-                        'see %s.help()' % (self.__class__.__name__, xor_spec, self.__class__.__name__))
+                        '%s requires a value for one of these inputs %s. For a list of required inputs, '
+                        'see %s.help()' % (self.__class__.__name__, [name] + xor_spec, self.__class__.__name__))
             self._check_requires(name)
 
         for elem in list(self.optional_items()):

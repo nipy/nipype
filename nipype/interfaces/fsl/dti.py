@@ -267,7 +267,7 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
 
     # Add dyads dispersion
     dyads_dispersion = GenMultiFile(
-        template='{n_fibres:d}{output_type_}', keep_extension=False, source_range='n_fibres+1',
+        template='{n_fibres:d}{output_type_}', keep_extension=False, range_source='n_fibres+1',
         desc='Dispersion')
 
 class BEDPOSTX5OutputSpec(FSLXCommandOutputSpec):

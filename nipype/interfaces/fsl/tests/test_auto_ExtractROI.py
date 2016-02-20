@@ -25,7 +25,6 @@ def test_ExtractROI_inputs():
     roi_file=dict(argstr='%s',
     hash_files=False,
     position=1,
-    template='{in_file}_roi{output_type_}',
     ),
     t_min=dict(argstr='%d',
     position=8,

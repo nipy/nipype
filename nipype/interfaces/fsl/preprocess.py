@@ -494,9 +494,9 @@ class FLIRTInputSpec(FSLCommandInputSpec):
 
     def parse_args(self, skip=None):
         skip = []
-        if isdefined(self.inputs.save_log) and self.inputs.save_log:
-            if not isdefined(self.inputs.verbose) or self.inputs.verbose == 0:
-                self.inputs.verbose = 1
+        if isdefined(self.save_log) and self.save_log:
+            if not isdefined(self.verbose) or self.verbose == 0:
+                self.verbose = 1
         skip.append('save_log')
         return super(FLIRTInputSpec, self).parse_args(skip=skip)
 
@@ -1213,37 +1213,37 @@ class FUGUEInputSpec(FSLCommandInputSpec):
         if skip is None:
             skip = []
 
-        input_phase = isdefined(self.inputs.phasemap_in_file)
-        input_vsm = isdefined(self.inputs.shift_in_file)
-        input_fmap = isdefined(self.inputs.fmap_in_file)
+        input_phase = isdefined(self.phasemap_in_file)
+        input_vsm = isdefined(self.shift_in_file)
+        input_fmap = isdefined(self.fmap_in_file)
 
         if not input_phase and not input_vsm and not input_fmap:
             raise RuntimeError('Either phasemap_in_file, shift_in_file or fmap_in_file must be set.')
 
-        if not isdefined(self.inputs.in_file):
+        if not isdefined(self.in_file):
             skip += ['unwarped_file', 'warped_file']
         else:
-            if self.inputs.forward_warping:
+            if self.forward_warping:
                 skip += ['unwarped_file']
-                trait_spec = self.inputs.trait('warped_file')
+                trait_spec = self.trait('warped_file')
                 trait_spec.name_template = "%s_warped"
                 trait_spec.name_source = 'in_file'
                 trait_spec.output_name = 'warped_file'
             else:
                 skip += ['warped_file']
-                trait_spec = self.inputs.trait('unwarped_file')
+                trait_spec = self.trait('unwarped_file')
                 trait_spec.name_template = "%s_unwarped"
                 trait_spec.name_source = 'in_file'
                 trait_spec.output_name = 'unwarped_file'
 
         # Handle shift output
-        if not isdefined(self.inputs.shift_out_file):
-            vsm_save_masked = (isdefined(self.inputs.save_shift) and self.inputs.save_shift)
-            vsm_save_unmasked = (isdefined(self.inputs.save_unmasked_shift) and
-                                 self.inputs.save_unmasked_shift)
+        if not isdefined(self.shift_out_file):
+            vsm_save_masked = (isdefined(self.save_shift) and self.save_shift)
+            vsm_save_unmasked = (isdefined(self.save_unmasked_shift) and
+                                 self.save_unmasked_shift)
 
             if (vsm_save_masked or vsm_save_unmasked):
-                trait_spec = self.inputs.trait('shift_out_file')
+                trait_spec = self.trait('shift_out_file')
                 trait_spec.output_name = 'shift_out_file'
 
                 if input_fmap:
@@ -1264,13 +1264,13 @@ class FUGUEInputSpec(FSLCommandInputSpec):
                 skip += ['save_shift', 'save_unmasked_shift', 'shift_out_file']
 
         # Handle fieldmap output
-        if not isdefined(self.inputs.fmap_out_file):
-            fmap_save_masked = (isdefined(self.inputs.save_fmap) and self.inputs.save_fmap)
-            fmap_save_unmasked = (isdefined(self.inputs.save_unmasked_fmap) and
-                                  self.inputs.save_unmasked_fmap)
+        if not isdefined(self.fmap_out_file):
+            fmap_save_masked = (isdefined(self.save_fmap) and self.save_fmap)
+            fmap_save_unmasked = (isdefined(self.save_unmasked_fmap) and
+                                  self.save_unmasked_fmap)
 
             if (fmap_save_masked or fmap_save_unmasked):
-                trait_spec = self.inputs.trait('fmap_out_file')
+                trait_spec = self.trait('fmap_out_file')
                 trait_spec.output_name = 'fmap_out_file'
 
                 if input_vsm:

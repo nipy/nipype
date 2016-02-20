@@ -37,8 +37,6 @@ def test_ApplyTOPUP_inputs():
     method=dict(argstr='--method=%s',
     ),
     out_corrected=dict(argstr='--out=%s',
-    name_source=['in_files'],
-    name_template='%s_corrected',
     ),
     output_type=dict(usedefault=True,
     ),
