@@ -19,6 +19,7 @@ import os
 import re
 import itertools as itools
 
+from ast import literal_eval
 from ..external.six import string_types
 # perform all external trait imports here
 import traits
@@ -166,19 +167,14 @@ class GenFile(File):
         if template is None or not isinstance(template, string_types):
             raise TraitError('GenFile requires a valid template argument')
 
-        self.name_source = [i[1:-1].split('.')[0].split('!')[0].split(':')[0].split('[')[0]
-                            for i in re.findall('\{.*?\}', template)]
+        self.name_source = list(_parse_name_source(template))
+        # Remove range indexing tokens (not allowed by string.Formatter)
+        for _, itoken, _ in self.name_source:
+            if itoken:
+                template = template.replace(itoken, '')
+
         self.template = template.format
         self.keep_ext = keep_extension
-
-        for nsrc in self.name_source:
-            if not isinstance(nsrc, string_types):
-                raise TraitError('template contains an invalid name_source '
-                                 'entry (found %s).' % nsrc)
-            if '%' in nsrc or len(nsrc) == 0:
-                raise TraitError(
-                    'invalid source field found in template \'%s\'' % nsrc)
-
         super(GenFile, self).__init__(value, filter, auto_set, entries, exists,
                                       **metadata)
 
@@ -206,7 +202,7 @@ class GenFile(File):
         if self.value is None:
             srcvals = {}
             ext = ''
-            for nsrc in self.name_source:
+            for nsrc, indexing, fstr in self.name_source:
                 srcvalue = getattr(obj, nsrc)
                 if not isdefined(srcvalue):
                     return Undefined
@@ -223,7 +219,10 @@ class GenFile(File):
                 for val in vallist:
                     if isfile:
                         _, val, ext = split_filename(val)
-
+                    elif indexing:
+                        # eval should be safe since we only
+                        # accept indexing elements
+                        val = literal_eval(val+indexing[0])
                     if isdefined(val):
                         outvals.append(val)
 
@@ -238,7 +237,7 @@ class GenFile(File):
                     srcvals.update({nsrc: outvals})
 
             # Check that no source is missing
-            missing = list(set(self.name_source) - set(srcvals.keys()))
+            missing = list(set([ns[0] for ns in self.name_source]) - set(srcvals.keys()))
             if not missing:
                 retval = self.template(**srcvals)
                 if self.keep_ext:
@@ -340,19 +339,13 @@ class GenMultiFile(traits.List):
         if template is None or not isinstance(template, string_types):
             raise TraitError('GenMultiFile requires a valid template argument')
 
-        self.name_source = [i[1:-1].split('.')[0].split('!')[0].split(':')[0].split('[')[0]
-                            for i in re.findall('\{.*?\}', template)]
-        self.template = template.format
+        self.name_source = list(_parse_name_source(template))
+        # Remove range indexing tokens (not allowed by string.Formatter)
+        for _, itoken, _ in self.name_source:
+            if itoken:
+                template = template.replace(itoken, '')
+        self.template = template
         self.keep_ext = keep_extension
-
-        for nsrc in self.name_source:
-            if not isinstance(nsrc, string_types):
-                raise TraitError('template contains an invalid name_source '
-                                 'entry (found %s).' % nsrc)
-            if '%' in nsrc or len(nsrc) == 0:
-                raise TraitError(
-                    'invalid source field found in template \'%s\'' % nsrc)
-
         self.range_source = None
         if range_source is not None:
             if not isinstance(range_source, string_types):
@@ -365,7 +358,7 @@ class GenMultiFile(traits.List):
             except ValueError:
                 self.offset = 0
 
-            if range_source not in self.name_source:
+            if range_source not in [nsrc[0] for nsrc in self.name_source]:
                 raise TraitError(
                     'range_source field should also be found in the'
                     ' template (valid fields = %s).' % self.name_source)
@@ -403,7 +396,7 @@ class GenMultiFile(traits.List):
         if not isdefined(value) or not value:
             srcvals = {}
             ext = ''
-            for nsrc in self.name_source:
+            for nsrc, indexing, fstr in self.name_source:
                 srcvalue = getattr(obj, nsrc)
                 IFLOGGER.debug('Parsing source (%s) = %s', nsrc, obj.traits()[nsrc].trait_type())
                 if not isdefined(srcvalue):
@@ -436,17 +429,17 @@ class GenMultiFile(traits.List):
                     srcvals.update({nsrc: outvals})
 
             # Check that no source is missing
-            missing = list(set(self.name_source) - set(srcvals.keys()))
+            missing = list(set([ns[0] for ns in self.name_source]) - set(srcvals.keys()))
             if not missing:
                 results = []
-                combs = list(itools.product(*tuple(srcvals[k] for k in self.name_source)))
+                combs = list(itools.product(*tuple(srcvals[k[0]] for k in self.name_source)))
 
                 # Get the formatting dictionaries ready
-                dlist = [{self.name_source[i]: v for i, v in enumerate(kvalues)}
+                dlist = [{self.name_source[i][0]: v for i, v in enumerate(kvalues)}
                           for kvalues in combs]
                 # ... and create a formatted entry for each of them
                 for fmtdict in dlist:
-                    retval = self.template(**fmtdict)
+                    retval = self.template.format(**fmtdict)
                     if self.keep_ext:
                         retval += ext
                     results.append(retval)
@@ -685,3 +678,18 @@ def has_metadata(trait, metadata, value=None, recursive=True):
                 count += has_metadata(handler, metadata, recursive)
 
     return count > 0
+
+def _parse_name_source(name_source):
+    """Parse template strings"""
+    format_str = [i[1:-1] for i in re.findall(r'\{.*?\}', name_source)]
+
+    for fchunk in format_str:
+        indexing = [i for i in re.findall(r'\[[0-9]*:[0-9]*\]', fchunk)]
+        # Only one complex indexing replacement is allowed
+        if indexing:
+            indexing = indexing[0]
+
+        name = fchunk.split('.')[0].split('!')[0].split(':')[0].split('[')[0]
+        yield (name, indexing, fchunk)
+
+
