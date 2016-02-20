@@ -25,7 +25,7 @@ from nibabel import load
 
 from ... import LooseVersion
 from .base import (FSLCommand, FSLCommandInputSpec, Info)
-from ..base import (load_template, File, traits, isdefined,
+from ..base import (load_template, File, GenFile, traits, isdefined,
                     TraitedSpec, BaseInterface, Directory,
                     InputMultiPath, OutputMultiPath,
                     BaseInterfaceInputSpec)
@@ -1579,56 +1579,55 @@ class ClusterInputSpec(FSLCommandInputSpec):
                           desc='file contining warpfield')
 
 
-    out_index_file = traits.Either(traits.Bool, File,
-                                   argstr='--oindex=%s',
-                                   desc='output of cluster index (in size order)', hash_files=False)
-    out_threshold_file = traits.Either(traits.Bool, File,
-                                       argstr='--othresh=%s',
-                                       desc='thresholded image', hash_files=False)
-    out_localmax_txt_file = traits.Either(traits.Bool, File,
-                                          argstr='--olmax=%s',
-                                          desc='local maxima text file', hash_files=False)
-    out_localmax_vol_file = traits.Either(traits.Bool, File,
-                                          argstr='--olmaxim=%s',
-                                          desc='output of local maxima volume', hash_files=False)
-    out_size_file = traits.Either(traits.Bool, File,
-                                  argstr='--osize=%s',
-                                  desc='filename for output of size image', hash_files=False)
-    out_max_file = traits.Either(traits.Bool, File,
-                                 argstr='--omax=%s',
-                                 desc='filename for output of max image', hash_files=False)
-    out_mean_file = traits.Either(traits.Bool, File,
-                                  argstr='--omean=%s',
-                                  desc='filename for output of mean image', hash_files=False)
-    out_pval_file = traits.Either(traits.Bool, File,
-                                  argstr='--opvals=%s',
-                                  desc='filename for image output of log pvals', hash_files=False)
+    out_index_file = GenFile(
+        template='{in_file}_index{output_type_}',  argstr='--oindex=%s', hash_files=False,
+        desc='output of cluster index (in size order)')
+    out_threshold_file = GenFile(
+        template='{in_file}_threshold{output_type_}', argstr='--othresh=%s', hash_files=False,
+        desc='thresholded image')
+    out_localmax_txt_file = GenFile(template='{in_file}_localmax.txt', argstr='--olmax=%s',
+                                    hash_files=False, desc='local maxima text file')
+    out_localmax_vol_file = GenFile(
+        template='{in_file}_localmax{output_type_}', argstr='--olmaxim=%s', hash_files=False,
+        desc='output of local maxima volume')
+    out_size_file = GenFile(template='{in_file}_size{output_type_}', argstr='--osize=%s',
+                            hash_files=False, desc='filename for output of size image')
+    out_max_file = GenFile(template='{in_file}_max{output_type_}', argstr='--omax=%s',
+                           hash_files=False, desc='filename for output of max image')
+    out_mean_file = GenFile(template='{in_file}_mean{output_type_}', argstr='--omean=%s',
+                            hash_files=False, desc='filename for output of mean image')
+    out_pval_file = GenFile(template='{in_file}_pval{output_type_}', argstr='--opvals=%s',
+                            hash_files=False, desc='filename for image output of log pvals')
 
-    def _format_arg(self, name, spec, value):
-        filemap = {'out_index_file': 'index', 'out_threshold_file': 'threshold',
-                   'out_localmax_txt_file': 'localmax.txt',
-                   'out_localmax_vol_file': 'localmax',
-                   'out_size_file': 'size', 'out_max_file': 'max',
-                   'out_mean_file': 'mean', 'out_pval_file': 'pval'}
+    save_threshold_file = traits.Bool(False, usedefault=True, desc='enable this output')
+    save_localmax_txt_file = traits.Bool(False, usedefault=True, desc='enable this output')
+    save_localmax_vol_file = traits.Bool(False, usedefault=True, desc='enable this output')
+    save_size_file = traits.Bool(False, usedefault=True, desc='enable this output')
+    save_max_file = traits.Bool(False, usedefault=True, desc='enable this output')
+    save_mean_file = traits.Bool(False, usedefault=True, desc='enable this output')
+    save_pval_file = traits.Bool(False, usedefault=True, desc='enable this output')
 
-        if name in list(filemap.keys()):
-            if isinstance(value, bool):
-                fname = self._list_outputs()[name[4:]]
-            else:
-                fname = value
-            return spec.argstr % fname
-        return super(ClusterInputSpec, self)._format_arg(name, spec, value)
+    def parse_args(self, skip=None):
+        if skip is None:
+            skip = []
 
+        for name, _ in list(self.items()):
+            if not name.startswith('save_'):
+                continue
+            if getattr(self, name):
+                skip += ['out_' + name[5:]]
+
+        return super(ClusterInputSpec, self).parse_args(skip)
 
 class ClusterOutputSpec(TraitedSpec):
     index_file = File(desc='output of cluster index (in size order)')
-    threshold_file = File(desc='thresholded image')
-    localmax_txt_file = File(desc='local maxima text file')
-    localmax_vol_file = File(desc='output of local maxima volume')
-    size_file = File(desc='filename for output of size image')
-    max_file = File(desc='filename for output of max image')
-    mean_file = File(desc='filename for output of mean image')
-    pval_file = File(desc='filename for image output of log pvals')
+    out_threshold_file = File(desc='thresholded image')
+    out_localmax_txt_file = File(desc='local maxima text file')
+    out_localmax_vol_file = File(desc='output of local maxima volume')
+    out_size_file = File(desc='filename for output of size image')
+    out_max_file = File(desc='filename for output of max image')
+    out_mean_file = File(desc='filename for output of mean image')
+    out_pval_file = File(desc='filename for image output of log pvals')
 
 
 class Cluster(FSLCommand):
