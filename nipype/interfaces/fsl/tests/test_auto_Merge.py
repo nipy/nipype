@@ -22,8 +22,6 @@ def test_Merge_inputs():
     ),
     merged_file=dict(argstr='%s',
     hash_files=False,
-    name_source='in_files',
-    name_template='%s_merged',
     position=1,
     ),
     output_type=dict(usedefault=True,

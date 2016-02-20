@@ -30,8 +30,6 @@ def test_Smooth_inputs():
     ),
     smoothed_file=dict(argstr='%s',
     hash_files=False,
-    name_source=['in_file'],
-    name_template='%s_smooth',
     position=2,
     ),
     terminal_output=dict(nohash=True,

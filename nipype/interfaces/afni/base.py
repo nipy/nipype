@@ -6,7 +6,7 @@ import os
 from builtins import object
 
 from ... import logging
-from ..base import traits, File, GenFile, CommandLine, CommandLineInputSpec, TraitedSpec
+from ..base import traits, File, CommandLine, CommandLineInputSpec, TraitedSpec
 
 # Use nipype's logging system
 IFLOGGER = logging.getLogger('interface')

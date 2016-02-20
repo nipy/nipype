@@ -19,7 +19,7 @@ import os.path as op
 import shutil
 
 from ... import LooseVersion
-from ..base import (TraitedSpec, isdefined, File, Directory,
+from ..base import (TraitedSpec, isdefined, File, GenFile, GenMultiFile, Directory,
                     InputMultiPath, OutputMultiPath, traits, Undefined)
 from ..fsl.base import (FSLCommand, FSLCommandInputSpec, Info)
 from ...utils.filemanip import fname_presuffix, split_filename, copyfile
@@ -54,30 +54,43 @@ class DTIFitInputSpec(FSLCommandInputSpec):
     gradnonlin = File(exists=True, argstr='--gradnonlin=%s',
                       desc='gradient non linearities')
 
+    # Auto-generated outputs
+    out_v1 = GenFile(template='{base_name}V1{output_type_}',
+                     keep_extension=False, desc='1st eigenvector')
+    out_v2 = GenFile(template='{base_name}V2{output_type_}',
+                     keep_extension=False, desc='2nd eigenvector')
+    out_v3 = GenFile(template='{base_name}V3{output_type_}',
+                     keep_extension=False, desc='3rd eigenvector')
+    out_l1 = GenFile(template='{base_name}L1{output_type_}',
+                     keep_extension=False, desc='1st eigenvalue')
+    out_l2 = GenFile(template='{base_name}L2{output_type_}',
+                     keep_extension=False, desc='2nd eigenvalue')
+    out_l3 = GenFile(template='{base_name}L3{output_type_}',
+                     keep_extension=False, desc='3rd eigenvalue')
+    out_md = GenFile(template='{base_name}MD{output_type_}',
+                     keep_extension=False, desc='mean diffusivity')
+    out_fa = GenFile(template='{base_name}FA{output_type_}',
+                     keep_extension=False, desc='fractional anisotropy')
+    out_mo = GenFile(template='{base_name}MO{output_type_}',
+                     keep_extension=False, desc='mode of anisotropy')
+    out_s0 = GenFile(template='{base_name}S0{output_type_}',
+                     keep_extension=False, desc='raw T2 signal with no diffusion weighting')
+    tensor = GenFile(template='{base_name}tensor{output_type_}',
+                     keep_extension=False, desc='path/name of file with the 4D tensor volume')
+
 
 class DTIFitOutputSpec(TraitedSpec):
-    out_v1 = File(name_source='base_name', name_template='%s_V1',
-                  exists=True, desc='1st eigenvector')
-    out_v2 = File(name_source='base_name', name_template='%s_V2',
-                  exists=True, desc='2nd eigenvector')
-    out_v3 = File(name_source='base_name', name_template='%s_V3',
-                  exists=True, desc='3rd eigenvector')
-    out_l1 = File(name_source='base_name', name_template='%s_L1',
-                  exists=True, desc='1st eigenvalue')
-    out_l2 = File(name_source='base_name', name_template='%s_L2',
-                  exists=True, desc='2nd eigenvalue')
-    out_l3 = File(name_source='base_name', name_template='%s_L3',
-                  exists=True, desc='3rd eigenvalue')
-    out_md = File(name_source='base_name', name_template='%s_MD',
-                  exists=True, desc='mean diffusivity')
-    out_fa = File(name_source='base_name', name_template='%s_FA',
-                  exists=True, desc='fractional anisotropy')
-    out_mo = File(name_source='base_name', name_template='%s_MO',
-                  exists=True, desc='mode of anisotropy')
-    out_s0 = File(name_source='base_name', name_template='%s_S0',
-                  exists=True, desc='raw T2 signal with no diffusion weighting')
-    tensor = File(name_source='base_name', name_template='%s_tensor',
-                  desc='path/name of file with the 4D tensor volume')
+    out_v1 = File(exists=True, desc='1st eigenvector')
+    out_v2 = File(exists=True, desc='2nd eigenvector')
+    out_v3 = File(exists=True, desc='3rd eigenvector')
+    out_l1 = File(exists=True, desc='1st eigenvalue')
+    out_l2 = File(exists=True, desc='2nd eigenvalue')
+    out_l3 = File(exists=True, desc='3rd eigenvalue')
+    out_md = File(exists=True, desc='mean diffusivity')
+    out_fa = File(exists=True, desc='fractional anisotropy')
+    out_mo = File(exists=True, desc='mode of anisotropy')
+    out_s0 = File(exists=True, desc='raw T2 signal with no diffusion weighting')
+    tensor = File(desc='path/name of file with the 4D tensor volume')
 
 
 class DTIFit(FSLCommand):
@@ -104,13 +117,8 @@ class DTIFit(FSLCommand):
     output_spec = DTIFitOutputSpec
 
     def _post_run(self):
-        for k, _ in list(self.outputs.items()):
-            if k in ('outputtype', 'environ', 'args'):
-                continue
-            value = op.abspath(self.inputs.base_name + '_%s' % k)
-            if k == 'tensor' and self.inputs.save_tensor:
-                value = Undefined
-            setattr(self.outputs, k, value)
+        if not self.inputs.save_tensor:
+            self.outputs.tensor = Undefined
 
 
 class FSLXCommandInputSpec(FSLCommandInputSpec):
@@ -125,7 +133,7 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
 
     logdir = Directory('.', argstr='--logdir=%s', usedefault=True)
     n_fibres = traits.Range(
-        usedefault=True, low=1, default=2, argstr='--nfibres=%d',
+        usedefault=True, low=1, value=2, argstr='--nfibres=%d',
         desc=('Maximum number of fibres to fit in each voxel'), mandatory=True)
     model = traits.Enum(1, 2, 3, argstr='--model=%d',
                         desc=('use monoexponential (1, default, required for '
@@ -165,7 +173,7 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
     cnlinear = traits.Bool(argstr='--cnonlinear', xor=_xor_inputs2,
                            desc=('Initialise with constrained nonlinear '
                                  'fitting'))
-    rician = traits.Bool(argstr='--rician', desc=('use Rician noise modeling'))
+    rician = traits.Bool(False, usedefault=True, argstr='--rician', desc='use Rician noise modeling')
 
     _xor_inputs3 = ['f0_noard', 'f0_ard']
     f0_noard = traits.Bool(argstr='--f0', xor=_xor_inputs3,
@@ -178,21 +186,37 @@ class FSLXCommandInputSpec(FSLCommandInputSpec):
                             desc=('use the actual directory name given '
                                   '(do not add + to make a new directory)'))
 
+    mean_dsamples = GenFile(template='mean_dsamples{output_type_}', keep_extension=False,
+                            desc='Mean of distribution on diffusivity d')
+    mean_S0samples = GenFile(template='mean_S0samples{output_type_}', keep_extension=False,
+                             desc='Mean of distribution on T2w baseline signal intensity S0')
+    mean_tausamples = GenFile(template='mean_tausamples{output_type_}', keep_extension=False,
+                             desc='Mean of distribution on tau samples (only with rician noise)')
+    dyads = GenMultiFile(template='dyads{n_fibres:d}{output_type_}', range_source='n_fibres+1',
+                         keep_extension=False, desc='Mean of PDD distribution in vector form.')
+    fsamples = GenMultiFile(template='f{n_fibres:d}samples{output_type_}', range_source='n_fibres+1',
+                            keep_extension=False, desc='Samples from the distribution on f anisotropy')
+    mean_fsamples = GenMultiFile(template='mean_f{n_fibres:d}samples{output_type_}', range_source='n_fibres+1',
+                                 keep_extension=False, desc='Mean of distribution on f anisotropy')
+    phsamples = GenMultiFile(template='ph{n_fibres:d}samples{output_type_}', range_source='n_fibres+1',
+                             keep_extension=False, desc='phi samples, per fiber')
+    thsamples = GenMultiFile(template='th{n_fibres:d}samples{output_type_}', range_source='n_fibres+1',
+                             keep_extension=False, desc='theta samples, per fiber')
+
 
 class FSLXCommandOutputSpec(TraitedSpec):
-    dyads = OutputMultiPath(File(exists=True), desc=('Mean of PDD distribution'
-                                                     ' in vector form.'))
-    fsamples = OutputMultiPath(File(exists=True), desc=('Samples from the '
-                                                        'distribution on f anisotropy'))
     mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
-    mean_fsamples = OutputMultiPath(File(exists=True), desc=('Mean of '
-                                                             'distribution on f anisotropy'))
-    mean_S0samples = File(exists=True, desc=('Mean of distribution on T2w'
-                                             'baseline signal intensity S0'))
-    mean_tausamples = File(exists=True, desc=('Mean of distribution on '
-                                              'tau samples (only with rician noise)'))
-    phsamples = OutputMultiPath(File(exists=True), desc=('phi samples, per fiber'))
-    thsamples = OutputMultiPath(File(exists=True), desc=('theta samples, per fiber'))
+    mean_S0samples = File(
+        exists=True, desc='Mean of distribution on T2w baseline signal intensity S0')
+    mean_tausamples = File(
+        exists=True, desc='Mean of distribution on tau samples (only with rician noise)')
+    dyads = OutputMultiPath(File(exists=True), desc='Mean of PDD distribution in vector form.')
+    fsamples = OutputMultiPath(File(exists=True),
+                               desc='Samples from the distribution on f anisotropy')
+    mean_fsamples = OutputMultiPath(File(exists=True),
+                                    desc='Mean of distribution on f anisotropy')
+    phsamples = OutputMultiPath(File(exists=True), desc='phi samples, per fiber')
+    thsamples = OutputMultiPath(File(exists=True), desc='theta samples, per fiber')
 
 
 class FSLXCommand(FSLCommand):
@@ -203,40 +227,13 @@ class FSLXCommand(FSLCommand):
     output_spec = FSLXCommandOutputSpec
 
     def _run_interface(self, runtime):
-        self._out_dir = os.getcwd()
         runtime = super(FSLXCommand, self)._run_interface(runtime)
         if runtime.stderr:
             self.raise_exception(runtime)
+
+        if not self.inputs.rician:
+            self.outputs.mean_tausamples = Undefined
         return runtime
-
-    def _post_run(self, out_dir=None):
-        n_fibres = self.inputs.n_fibres
-        if not out_dir:
-            if isdefined(self.inputs.logdir):
-                out_dir = op.abspath(self.inputs.logdir)
-            else:
-                out_dir = op.abspath('logdir')
-
-        multi_out = ['dyads', 'fsamples', 'mean_fsamples',
-                     'phsamples', 'thsamples']
-        single_out = ['mean_dsamples', 'mean_S0samples']
-
-        for k in single_out:
-            setattr(self.outputs, k, self._gen_fname(k, out_dir))
-
-        if isdefined(self.inputs.rician) and self.inputs.rician:
-            self.outputs.mean_tausamples = self._gen_fname('mean_tausamples', out_dir)
-
-        for k in multi_out:
-            setattr(self.outputs, k, [])
-
-        for i in range(1, n_fibres + 1):
-            self.outputs.fsamples.append(self._gen_fname('f%dsamples' % i, out_dir))
-            self.outputs.mean_fsamples.append(self._gen_fname('mean_f%dsamples' % i, out_dir))
-
-            self.outputs.dyads.append(self._gen_fname('dyads%d' % i, out_dir))
-            self.outputs.phsamples.append(self._gen_fname('ph%dsamples' % i, out_dir))
-            self.outputs.thsamples.append(self._gen_fname('th%dsamples' % i, out_dir))
 
 
 class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
@@ -268,23 +265,12 @@ class BEDPOSTX5InputSpec(FSLXCommandInputSpec):
                                                        'nonlinearities, default off'))
     use_gpu = traits.Bool(False, desc='Use the GPU version of bedpostx')
 
+    # Add dyads dispersion
+    dyads_dispersion = GenMultiFile(
+        template='{n_fibres:d}{output_type_}', keep_extension=False, source_range='n_fibres+1',
+        desc='Dispersion')
 
-class BEDPOSTX5OutputSpec(TraitedSpec):
-    mean_dsamples = File(exists=True, desc='Mean of distribution on diffusivity d')
-    mean_fsamples = OutputMultiPath(
-        File(exists=True), desc='Mean of distribution on f anisotropy')
-    mean_S0samples = File(
-        exists=True, desc='Mean of distribution on T2w baseline signal intensity S0')
-    mean_phsamples = OutputMultiPath(File(exists=True), desc='Mean of distribution on phi')
-    mean_thsamples = OutputMultiPath(File(exists=True),
-                                     desc='Mean of distribution on theta')
-    merged_thsamples = OutputMultiPath(File(exists=True),
-                                       desc='Samples from the distribution on theta')
-    merged_phsamples = OutputMultiPath(File(exists=True),
-                                       desc=('Samples from the distribution on phi'))
-    merged_fsamples = OutputMultiPath(
-        File(exists=True), desc='Samples from the distribution on anisotropic volume fraction')
-    dyads = OutputMultiPath(File(exists=True), desc='Mean of PDD distribution in vector form.')
+class BEDPOSTX5OutputSpec(FSLXCommandOutputSpec):
     dyads_dispersion = OutputMultiPath(File(exists=True), desc='Dispersion')
 
 

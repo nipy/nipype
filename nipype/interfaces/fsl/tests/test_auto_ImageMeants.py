@@ -26,7 +26,6 @@ def test_ImageMeants_inputs():
     usedefault=True,
     ),
     out_file=dict(argstr='-o %s',
-    genfile=True,
     hash_files=False,
     ),
     output_type=dict(usedefault=True,

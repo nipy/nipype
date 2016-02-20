@@ -13,19 +13,18 @@ was written to work with FSL version 5.0.4.
 """
 
 import os
-import warnings
 from glob import glob
 
 import numpy as np
 import nibabel as nib
 
 from ..fsl.base import FSLCommand, FSLCommandInputSpec, Info
-from ..base import (traits, TraitedSpec, InputMultiPath, File,
+from ..base import (traits, TraitedSpec, InputMultiPath, File, GenFile,
                     isdefined, Undefined)
 from ...utils.filemanip import (load_json, save_json, split_filename,
                                 fname_presuffix)
-
-warn = warnings.warn
+from ... import logging
+IFLOGGER = logging.getLogger('interface')
 
 
 class PrepareFieldmapInputSpec(FSLCommandInputSpec):
@@ -41,12 +40,11 @@ class PrepareFieldmapInputSpec(FSLCommandInputSpec):
                             desc=('echo time difference of the '
                                   'fieldmap sequence in ms. (usually 2.46ms in'
                                   ' Siemens)'))
-    nocheck = traits.Bool(False, position=-1, argstr='--nocheck',
-                          usedefault=True,
+    nocheck = traits.Bool(False, position=-1, argstr='--nocheck', usedefault=True,
                           desc=('do not perform sanity checks for image '
                                 'size/range/dimensions'))
-    out_fieldmap = File(argstr='%s', position=4,
-                        desc='output name for prepared fieldmap')
+    out_fieldmap = GenFile(template='{in_phase}_fslprepared{output_type_}', argstr='%s',
+                           position=4, desc='output name for prepared fieldmap')
 
 
 class PrepareFieldmapOutputSpec(TraitedSpec):
@@ -72,7 +70,7 @@ class PrepareFieldmap(FSLCommand):
     >>> prepare.inputs.output_type = "NIFTI_GZ"
     >>> prepare.cmdline #doctest: +ELLIPSIS
     'fsl_prepare_fieldmap SIEMENS phase.nii magnitude.nii \
-.../phase_fslprepared.nii.gz 2.460000'
+phase_fslprepared.nii.gz 2.460000'
     >>> res = prepare.run() # doctest: +SKIP
 
 
@@ -81,27 +79,12 @@ class PrepareFieldmap(FSLCommand):
     input_spec = PrepareFieldmapInputSpec
     output_spec = PrepareFieldmapOutputSpec
 
-    def parse_args(self, skip=None):
-        if skip is None:
-            skip = []
-
-        if not isdefined(self.inputs.out_fieldmap):
-            self.inputs.out_fieldmap = self._gen_fname(
-                self.inputs.in_phase, suffix='_fslprepared')
-
-        if not isdefined(self.inputs.nocheck) or not self.inputs.nocheck:
-            skip += ['nocheck']
-
-        return super(PrepareFieldmap, self).parse_args(skip=skip)
-
-    def _post_run(self):
-        
-        self.outputs.out_fieldmap = self.inputs.out_fieldmap
-        
     def _run_interface(self, runtime):
         runtime = super(PrepareFieldmap, self)._run_interface(runtime)
 
         if runtime.returncode == 0:
+            # Add an empty volume to the output, since downstream software
+            # expects two GRE images to compute the difference
             out_file = self.inputs.out_fieldmap
             im = nib.load(out_file)
             dumb_img = nib.Nifti1Image(np.zeros(im.shape), im.affine,
@@ -115,35 +98,19 @@ class PrepareFieldmap(FSLCommand):
 class TOPUPInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='name of 4D file with images', argstr='--imain=%s')
-    encoding_file = File(exists=True, mandatory=True,
-                         xor=['encoding_direction'],
-                         desc='name of text file with PE directions/times',
-                         argstr='--datain=%s')
-    encoding_direction = traits.List(traits.Enum('y', 'x', 'z', 'x-', 'y-',
-                                                 'z-'), mandatory=True,
-                                     xor=['encoding_file'],
-                                     requires=['readout_times'],
-                                     argstr='--datain=%s',
-                                     desc=('encoding direction for automatic '
-                                           'generation of encoding_file'))
-    readout_times = InputMultiPath(traits.Float,
-                                   requires=['encoding_direction'],
-                                   xor=['encoding_file'], mandatory=True,
-                                   desc=('readout times (dwell times by # '
-                                         'phase-encode steps minus 1)'))
-    out_base = File(desc=('base-name of output files (spline '
-                          'coefficients (Hz) and movement parameters)'),
-                    name_source=['in_file'], name_template='%s_base',
-                    argstr='--out=%s', hash_files=False)
-    out_field = File(argstr='--fout=%s', hash_files=False,
-                     name_source=['in_file'], name_template='%s_field',
-                     desc='name of image file with field (Hz)')
-    out_corrected = File(argstr='--iout=%s', hash_files=False,
-                         name_source=['in_file'], name_template='%s_corrected',
-                         desc='name of 4D image file with unwarped images')
-    out_logfile = File(argstr='--logout=%s', desc='name of log-file',
-                       name_source=['in_file'], name_template='%s_topup.log',
-                       keep_extension=True, hash_files=False)
+    encoding_file = File(
+        template='{in_file}_encfile.txt', hash_files=False,
+        output_name='out_enc_file', mandatory=True, xor=['encoding_direction'],
+        argstr='--datain=%s', desc='name of text file with PE directions/times')
+
+    encoding_direction = traits.List(traits.Enum(
+        'y', 'x', 'z', 'x-', 'y-', 'z-'), mandatory=True, xor=['encoding_file'],
+        requires=['readout_times'], desc='encoding direction for automatic '
+                                         'generation of encoding_file')
+    readout_times = InputMultiPath(
+        traits.Float, requires=['encoding_direction'], xor=['encoding_file'],
+        mandatory=True, desc='readout times (dwell times by # phase-encode '
+                             'steps minus 1)')
 
     # TODO: the following traits admit values separated by commas, one value
     # per registration level inside topup.
@@ -203,6 +170,23 @@ class TOPUPInputSpec(FSLCommandInputSpec):
                          desc=('If set (=1), the calculations are done in a '
                                'different grid'))
 
+    # Outputs
+    out_base = GenFile(
+        template='{in_file}_base', argstr='--out=%s', hash_files=False,
+        desc='base-name of output files (spline coefficients (Hz) and movement parameters)')
+    out_field = GenFile(
+        template='{in_file}_field{output_type_}', argstr='--fout=%s', hash_files=False,
+        desc='name of image file with field (Hz)')
+    out_corrected = GenFile(
+        template='{in_file}_corrected{output_type_}', argstr='--iout=%s', hash_files=False,
+        desc='name of 4D image file with unwarped images')
+    out_logfile = GenFile(
+        template='{in_file}_topup.log', argstr='--logout=%s', hash_files=False,
+        desc='name of log-file')
+    out_fieldcoef = GenFile(
+        template='{in_file}_fieldcoef{output_type_}', argstr='--fout=%s', hash_files=False,
+        desc='name of image file with field (Hz)')
+
 
 class TOPUPOutputSpec(TraitedSpec):
     out_fieldcoef = File(exists=True,
@@ -243,66 +227,13 @@ class TOPUP(FSLCommand):
     input_spec = TOPUPInputSpec
     output_spec = TOPUPOutputSpec
 
-    def _format_arg(self, name, trait_spec, value):
-        if name == 'encoding_direction':
-            return trait_spec.argstr % self._generate_encfile()
-        if name == 'out_base':
-            path, name, ext = split_filename(value)
-            if path != '':
-                if not os.path.exists(path):
-                    raise ValueError('out_base path must exist if provided')
-        return super(TOPUP, self)._format_arg(name, trait_spec, value)
-
-    def _post_run(self):
-        outputs = super(TOPUP, self)._list_outputs()
-        del self.outputs.out_base
-        base_path = None
-        if isdefined(self.inputs.out_base):
-            base_path, base, _ = split_filename(self.inputs.out_base)
-            if base_path == '':
-                base_path = None
-        else:
-            base = split_filename(self.inputs.in_file)[1] + '_base'
-        self.outputs.out_fieldcoef = self._gen_fname(base, suffix='_fieldcoef',
-                                                   cwd=base_path)
-        self.outputs.out_movpar = self._gen_fname(base, suffix='_movpar',
-                                                ext='.txt', cwd=base_path)
-
-        if isdefined(self.inputs.encoding_direction):
-            self.outputs.out_enc_file = self._get_encfilename()
-        
-    def _get_encfilename(self):
-        out_file = os.path.join(os.getcwd(),
-                                ('%s_encfile.txt' %
-                                 split_filename(self.inputs.in_file)[1]))
-        return out_file
-
-    def _generate_encfile(self):
-        """Generate a topup compatible encoding file based on given directions
-        """
-        out_file = self._get_encfilename()
-        durations = self.inputs.readout_times
-        if len(self.inputs.encoding_direction) != len(durations):
-            if len(self.inputs.readout_times) != 1:
-                raise ValueError(('Readout time must be a float or match the'
-                                  'length of encoding directions'))
-            durations = durations * len(self.inputs.encoding_direction)
-
-        lines = []
-        for idx, encdir in enumerate(self.inputs.encoding_direction):
-            direction = 1.0
-            if encdir.endswith('-'):
-                direction = -1.0
-            line = [float(val[0] == encdir[0]) * direction
-                    for val in ['x', 'y', 'z']] + [durations[idx]]
-            lines.append(line)
-        np.savetxt(out_file, np.array(lines), fmt='%d %d %d %.8f')
-        return out_file
-
-    def _overload_extension(self, value, name=None):
-        if name == 'out_base':
-            return value
-        return super(TOPUP, self)._overload_extension(value, name)
+    def _run_interface(self, runtime):
+        if not os.path.isfile(self.inputs.encoding_file):
+            topup_generate_encfile(
+                self.inputs.readout_times,
+                self.inputs.encoding_direction,
+                self.inputs.encoding_file)
+        return super(TOPUP, self)._run_interface(runtime)
 
 
 class ApplyTOPUPInputSpec(FSLCommandInputSpec):
@@ -323,10 +254,9 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
                                     'coefficients'))
     in_topup_movpar = File(exists=True, requires=['in_topup_fieldcoef'],
                            copyfile=False, desc='topup movpar.txt file')
-    out_corrected = File(desc='output (warped) image',
-                         name_source=['in_files'],
-                         name_template='%s_corrected',
-                         argstr='--out=%s')
+    out_corrected = GenFile(
+        template='{in_files[0]}_corrected{output_type_}', argstr='--out=%s',
+        desc='output (warped) image')
     method = traits.Enum('jac', 'lsr', argstr='--method=%s',
                          desc=('use jacobian modulation (jac) or least-squares'
                                ' resampling (lsr)'))
@@ -335,6 +265,11 @@ class ApplyTOPUPInputSpec(FSLCommandInputSpec):
     datatype = traits.Enum('char', 'short', 'int', 'float', 'double',
                            argstr='-d=%s', desc='force output data type')
 
+
+    def _format_arg(self, name, spec, value):
+        if name == 'in_topup_fieldcoef':
+            return spec.argstr % value.split('_fieldcoef')[0]
+        return super(ApplyTOPUPInputSpec, self)._format_arg(name, spec, value)
 
 class ApplyTOPUPOutputSpec(TraitedSpec):
     out_corrected = File(exists=True, desc=('name of 4D image file with '
@@ -371,11 +306,6 @@ class ApplyTOPUP(FSLCommand):
     _cmd = 'applytopup'
     input_spec = ApplyTOPUPInputSpec
     output_spec = ApplyTOPUPOutputSpec
-
-    def _format_arg(self, name, spec, value):
-        if name == 'in_topup_fieldcoef':
-            return spec.argstr % value.split('_fieldcoef')[0]
-        return super(ApplyTOPUP, self)._format_arg(name, spec, value)
 
 
 class EddyInputSpec(FSLCommandInputSpec):
@@ -456,7 +386,7 @@ class Eddy(FSLCommand):
     >>> eddy.cmdline #doctest: +ELLIPSIS
     'eddy --acqp=epi_acqp.txt --bvals=bvals.scheme --bvecs=bvecs.scheme \
 --imain=epi.nii --index=epi_index.txt --mask=epi_mask.nii \
---out=.../eddy_corrected'
+--out=eddy_corrected'
     >>> res = eddy.run() # doctest: +SKIP
 
     """
@@ -491,19 +421,19 @@ class Eddy(FSLCommand):
         return super(Eddy, self)._format_arg(name, spec, value)
 
     def _post_run(self):
-        
+
         self.outputs.out_corrected = os.path.abspath('%s.nii.gz' % self.inputs.out_base)
         self.outputs.out_parameter = os.path.abspath('%s.eddy_parameters' % self.inputs.out_base)
-        
+
 
 class SigLossInputSpec(FSLCommandInputSpec):
     in_file = File(mandatory=True,
                    exists=True,
                    argstr='-i %s',
                    desc='b0 fieldmap file')
-    out_file = File(argstr='-s %s',
-                    desc='output signal loss estimate file',
-                    genfile=True)
+    out_file = GenFile(
+        template='{in_file}_sigloss{output_type_}', argstr='-s %s',
+        desc='output signal loss estimate file')
 
     mask_file = File(exists=True,
                      argstr='-m %s',
@@ -533,7 +463,7 @@ class SigLoss(FSLCommand):
     >>> sigloss.inputs.echo_time = 0.03
     >>> sigloss.inputs.output_type = "NIFTI_GZ"
     >>> sigloss.cmdline #doctest: +ELLIPSIS
-    'sigloss --te=0.030000 -i phase.nii -s .../phase_sigloss.nii.gz'
+    'sigloss --te=0.030000 -i phase.nii -s phase_sigloss.nii.gz'
     >>> res = sigloss.run() # doctest: +SKIP
 
 
@@ -543,13 +473,13 @@ class SigLoss(FSLCommand):
     _cmd = 'sigloss'
 
     def _post_run(self):
-        
+
         self.outputs.out_file = self.inputs.out_file
         if ((not isdefined(self.outputs.out_file)) and
                 (isdefined(self.inputs.in_file))):
             self.outputs.out_file = self._gen_fname(self.inputs.in_file,
                                                   suffix='_sigloss')
-        
+
     def _gen_filename(self, name):
         if name == 'out_file':
             return self.outputs.out_file
@@ -582,11 +512,37 @@ class EpiRegInputSpec(FSLCommandInputSpec):
 
     weight_image = File(exists=True, argstr='--weight=%s',
                         desc='weighting image (in T1 space)')
-    no_fmapreg = traits.Bool(False, argstr='--nofmapreg',
-                             desc='do not perform registration of fmap to T1 \
-                        (use if fmap already registered)')
+    no_fmapreg = traits.Bool(False, usedefault=True, argstr='--nofmapreg',
+                             desc='do not perform registration of fmap to T1 '
+                                  '(use if fmap already registered).')
     no_clean = traits.Bool(True, argstr='--noclean', usedefault=True,
                            desc='do not clean up intermediate files')
+
+    out_file = GenFile(template='{out_base}{output_type_}', keep_extension=False,
+                       desc='output file name')
+    epi2str_mat = GenFile(template='{out_base}.mat', keep_extension=False,
+                          desc='rigid epi-to-structural transform')
+    wmedge = GenFile(template='{out_base}_fast_wmedge{output_type_}', keep_extension=False,
+                     desc='output file name')
+    wmseg = GenFile(template='{out_base}_fast_wmseg{output_type_}', keep_extension=False,
+                    desc='output file name')
+    # Optional outputs
+    out_1vol = GenFile(template='{out_base}_1vol{output_type_}', keep_extension=False,
+                       desc='output file name')
+    fmap2str_mat = GenFile(template='{out_base}_fieldmap2str.mat', keep_extension=False,
+                       desc='output file name')
+    fmap2epi_mat = GenFile(template='{out_base}_fieldmaprads2epi.mat', keep_extension=False,
+                       desc='output file name')
+    fmap_epi = GenFile(template='{out_base}_fieldmaprads2epi{output_type_}', keep_extension=False,
+                       desc='output file name')
+    fmap_str = GenFile(template='{out_base}_fieldmaprads2str{output_type_}', keep_extension=False,
+                       desc='output file name')
+    shiftmap = GenFile(template='{out_base}_fieldmaprads2epi_shift{output_type_}',
+                       keep_extension=False, desc='output file name')
+    fullwarp = GenFile(template='{out_base}_warp{output_type_}', keep_extension=False,
+                       desc='output file name')
+    epi2str_inv = GenFile(template='{out_base}_inv.mat', keep_extension=False,
+                          desc='output file name')
 
 
 class EpiRegOutputSpec(TraitedSpec):
@@ -612,6 +568,18 @@ class EpiRegOutputSpec(TraitedSpec):
                     structural space')
     wmseg = File(exists=True, desc='white matter segmentation used in flirt bbr')
     wmedge = File(exists=True, desc='white matter edges for visualization')
+
+    def _post_run(self):
+        if self.inputs.no_fmapreg or not isdefined(self.inputs.fmap):
+            self.outputs.out_1vol = Undefined
+            self.outputs.fmap2str_mat = Undefined
+            self.outputs.fmap2epi_mat = Undefined
+            self.outputs.fmap_epi = Undefined
+            self.outputs.fmap_str = Undefined
+            self.outputs.fmapmag_str = Undefined
+            self.outputs.shiftmap = Undefined
+            self.outputs.fullwarp = Undefined
+            self.outputs.epi2str_inv = Undefined
 
 
 class EpiReg(FSLCommand):
@@ -645,84 +613,30 @@ class EpiReg(FSLCommand):
     input_spec = EpiRegInputSpec
     output_spec = EpiRegOutputSpec
 
-    def _post_run(self):
-        
-        self.outputs.out_file = os.path.join(os.getcwd(),
-                                           self.inputs.out_base + '.nii.gz')
-        if not (isdefined(self.inputs.no_fmapreg) and self.inputs.no_fmapreg) and isdefined(self.inputs.fmap):
-            self.outputs.out_1vol = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_1vol.nii.gz')
-            self.outputs.fmap2str_mat = os.path.join(os.getcwd(),
-                                                   self.inputs.out_base + '_fieldmap2str.mat')
-            self.outputs.fmap2epi_mat = os.path.join(os.getcwd(),
-                                                   self.inputs.out_base + '_fieldmaprads2epi.mat')
-            self.outputs.fmap_epi = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_fieldmaprads2epi.nii.gz')
-            self.outputs.fmap_str = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_fieldmaprads2str.nii.gz')
-            self.outputs.fmapmag_str = os.path.join(os.getcwd(),
-                                                  self.inputs.out_base + '_fieldmap2str.nii.gz')
-            self.outputs.shiftmap = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_fieldmaprads2epi_shift.nii.gz')
-            self.outputs.fullwarp = os.path.join(os.getcwd(),
-                                               self.inputs.out_base + '_warp.nii.gz')
-            self.outputs.epi2str_inv = os.path.join(os.getcwd(),
-                                                  self.inputs.out_base + '_inv.mat')
 
-        self.outputs.epi2str_mat = os.path.join(os.getcwd(),
-                                              self.inputs.out_base + '.mat')
-        self.outputs.wmedge = os.path.join(os.getcwd(),
-                                         self.inputs.out_base + '_fast_wmedge.nii.gz')
-        self.outputs.wmseg = os.path.join(os.getcwd(),
-                                        self.inputs.out_base + '_fast_wmseg.nii.gz')
+# Helper functions ------------------------
+def topup_generate_encfile(durations, encoding_direction, out_file):
+    """Generate a topup compatible encoding file based on given directions
+    """
+    if len(encoding_direction) != len(durations):
+        if len(durations) != 1:
+            raise ValueError('Readout time must be a float or match the '
+                             'length of encoding directions')
+        durations = durations * len(encoding_direction)
 
-        
+    lines = []
+    for idx, encdir in enumerate(encoding_direction):
+        direction = 1.0
+        if encdir.endswith('-'):
+            direction = -1.0
+        line = [float(val[0] == encdir[0]) * direction
+                for val in ['x', 'y', 'z']] + [durations[idx]]
+        lines.append(line)
+    np.savetxt(out_file, np.array(lines), fmt='%d %d %d %.8f')
 
 #######################################
 # deprecated interfaces
 #######################################
-
-
-class EPIDeWarpInputSpec(FSLCommandInputSpec):
-    mag_file = File(exists=True,
-                    desc='Magnitude file',
-                    argstr='--mag %s', position=0, mandatory=True)
-    dph_file = File(exists=True,
-                    desc='Phase file assumed to be scaled from 0 to 4095',
-                    argstr='--dph %s', mandatory=True)
-    exf_file = File(exists=True,
-                    desc='example func volume (or use epi)',
-                    argstr='--exf %s')
-    epi_file = File(exists=True,
-                    desc='EPI volume to unwarp',
-                    argstr='--epi %s')
-    tediff = traits.Float(2.46, usedefault=True,
-                          desc='difference in B0 field map TEs',
-                          argstr='--tediff %s')
-    esp = traits.Float(0.58, desc='EPI echo spacing',
-                       argstr='--esp %s', usedefault=True)
-    sigma = traits.Int(2, usedefault=True, argstr='--sigma %s',
-                       desc="2D spatial gaussing smoothing \
-                       stdev (default = 2mm)")
-    vsm = traits.String(genfile=True, desc='voxel shift map',
-                        argstr='--vsm %s')
-    exfdw = traits.String(desc='dewarped example func volume', genfile=True,
-                          argstr='--exfdw %s')
-    epidw = traits.String(desc='dewarped epi volume', genfile=False,
-                          argstr='--epidw %s')
-    tmpdir = traits.String(genfile=True, desc='tmpdir',
-                           argstr='--tmpdir %s')
-    nocleanup = traits.Bool(True, usedefault=True, desc='no cleanup',
-                            argstr='--nocleanup')
-    cleanup = traits.Bool(desc='cleanup',
-                          argstr='--cleanup')
-
-
-class EPIDeWarpOutputSpec(TraitedSpec):
-    unwarped_file = File(desc="unwarped epi file")
-    vsm_file = File(desc="voxel shift map")
-    exfdw = File(desc="dewarped functional volume example")
-    exf_mask = File(desc="Mask from example functional volume")
 
 
 class EPIDeWarp(FSLCommand):
@@ -733,93 +647,18 @@ class EPIDeWarp(FSLCommand):
     .. warning:: deprecated in FSL, please use
       :func:`nipype.workflows.dmri.preprocess.epi.sdc_fmb` instead.
 
-    Examples
-    --------
-
-    >>> from nipype.interfaces.fsl import EPIDeWarp
-    >>> dewarp = EPIDeWarp()
-    >>> dewarp.inputs.epi_file = "functional.nii"
-    >>> dewarp.inputs.mag_file = "magnitude.nii"
-    >>> dewarp.inputs.dph_file = "phase.nii"
-    >>> dewarp.inputs.output_type = "NIFTI_GZ"
-    >>> dewarp.cmdline #doctest: +ELLIPSIS
-    'epidewarp.fsl --mag magnitude.nii --dph phase.nii --epi functional.nii \
---esp 0.58 --exfdw .../exfdw.nii.gz --nocleanup --sigma 2 --tediff 2.46 \
---tmpdir .../temp --vsm .../vsm.nii.gz'
-    >>> res = dewarp.run() # doctest: +SKIP
-
+    >>> from nipype.interfaces import fsl
+    >>> fsl.EPIDeWarp()
+    Traceback (most recent call last):
+    ...
+    NotImplementedError: deprecated, please use nipype.workflows.dmri.preprocess.epi.sdc_fmb instead
 
     """
     _cmd = 'epidewarp.fsl'
-    input_spec = EPIDeWarpInputSpec
-    output_spec = EPIDeWarpOutputSpec
 
     def __init__(self, **inputs):
-        warnings.warn(("Deprecated: Please use "
-                       "nipype.workflows.dmri.preprocess.epi.sdc_fmb instead"),
-                      DeprecationWarning)
-        return super(EPIDeWarp, self).__init__(**inputs)
-
-    def _run_interface(self, runtime):
-        runtime = super(EPIDeWarp, self)._run_interface(runtime)
-        if runtime.stderr:
-            self.raise_exception(runtime)
-        return runtime
-
-    def _gen_filename(self, name):
-        if name == 'exfdw':
-            if isdefined(self.inputs.exf_file):
-                return self._gen_fname(self.inputs.exf_file,
-                                       suffix="_exfdw")
-            else:
-                return self._gen_fname("exfdw")
-        if name == 'epidw':
-            if isdefined(self.inputs.epi_file):
-                return self._gen_fname(self.inputs.epi_file,
-                                       suffix="_epidw")
-        if name == 'vsm':
-            return self._gen_fname('vsm')
-        if name == 'tmpdir':
-            return os.path.join(os.getcwd(), 'temp')
-        return None
-
-    def _post_run(self):
-        
-        if not isdefined(self.inputs.exfdw):
-            self.outputs.exfdw = self._gen_filename('exfdw')
-        else:
-            self.outputs.exfdw = self.inputs.exfdw
-        if isdefined(self.inputs.epi_file):
-            if isdefined(self.inputs.epidw):
-                self.outputs.unwarped_file = self.inputs.epidw
-            else:
-                self.outputs.unwarped_file = self._gen_filename('epidw')
-        if not isdefined(self.inputs.vsm):
-            self.outputs.vsm_file = self._gen_filename('vsm')
-        else:
-            self.outputs.vsm_file = self._gen_fname(self.inputs.vsm)
-        if not isdefined(self.inputs.tmpdir):
-            outputs[
-                'exf_mask'] = self._gen_fname(cwd=self._gen_filename('tmpdir'),
-                                              basename='maskexf')
-        else:
-            self.outputs.exf_mask = self._gen_fname(cwd=self.inputs.tmpdir,
-                                                  basename='maskexf')
-        
-
-class EddyCorrectInputSpec(FSLCommandInputSpec):
-    in_file = File(exists=True, desc='4D input file', argstr='%s', position=0,
-                   mandatory=True)
-    out_file = File(desc='4D output file', argstr='%s', position=1,
-                    name_source=['in_file'], name_template='%s_edc',
-                    output_name='eddy_corrected')
-    ref_num = traits.Int(0, argstr='%d', position=2, desc='reference number',
-                         mandatory=True, usedefault=True)
-
-
-class EddyCorrectOutputSpec(TraitedSpec):
-    eddy_corrected = File(exists=True,
-                          desc='path/name of 4D eddy corrected output file')
+        raise NotImplementedError(
+            'deprecated, please use nipype.workflows.dmri.preprocess.epi.sdc_fmb instead')
 
 
 class EddyCorrect(FSLCommand):
@@ -828,27 +667,16 @@ class EddyCorrect(FSLCommand):
     .. warning:: Deprecated in FSL. Please use
       :class:`nipype.interfaces.fsl.epi.Eddy` instead
 
-    Example
-    -------
-
-    >>> from nipype.interfaces.fsl import EddyCorrect
-    >>> eddyc = EddyCorrect(in_file='diffusion.nii',
-    ...                     out_file="diffusion_edc.nii", ref_num=0)
-    >>> eddyc.cmdline
-    'eddy_correct diffusion.nii diffusion_edc.nii 0'
+    >>> from nipype.interfaces import fsl
+    >>> fsl.EddyCorrect()
+    Traceback (most recent call last):
+    ...
+    NotImplementedError: deprecated, please use nipype.interfaces.fsl.epi.Eddy instead
 
     """
     _cmd = 'eddy_correct'
-    input_spec = EddyCorrectInputSpec
-    output_spec = EddyCorrectOutputSpec
 
     def __init__(self, **inputs):
-        warnings.warn(("Deprecated: Please use nipype.interfaces.fsl.epi.Eddy "
-                       "instead"), DeprecationWarning)
-        return super(EddyCorrect, self).__init__(**inputs)
+        raise NotImplementedError(
+            'deprecated, please use nipype.interfaces.fsl.epi.Eddy instead')
 
-    def _run_interface(self, runtime):
-        runtime = super(EddyCorrect, self)._run_interface(runtime)
-        if runtime.stderr:
-            self.raise_exception(runtime)
-        return runtime

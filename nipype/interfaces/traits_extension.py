@@ -121,6 +121,9 @@ class File (BaseFile):
         super(File, self).__init__(value, filter, auto_set, entries, exists,
                                    **metadata)
 
+    def isfile(self, obj, name):
+        return True
+
 
 class GenFile(File):
     """ A file which default name is automatically generated from other
@@ -159,7 +162,7 @@ class GenFile(File):
 
     """
 
-    def __init__(self, template=None, keep_extension=True, value='',
+    def __init__(self, template=None, keep_extension=False, value='',
                  filter=None, auto_set=False, entries=0, exists=False, **metadata):
         """ Creates a GenFile trait. """
 
@@ -208,7 +211,6 @@ class GenFile(File):
             ext = ''
             for nsrc in self.name_source:
                 srcvalue = getattr(obj, nsrc)
-
                 if not isdefined(srcvalue):
                     return Undefined
 
@@ -336,7 +338,7 @@ class GenMultiFile(traits.List):
 
 
     """
-    def __init__(self, template=None, keep_extension=True, range_source=None, **metadata):
+    def __init__(self, template=None, keep_extension=False, range_source=None, **metadata):
         if template is None or not isinstance(template, string_types):
             raise TraitError('GenMultiFile requires a valid template argument')
 
@@ -358,6 +360,12 @@ class GenMultiFile(traits.List):
             if not isinstance(range_source, string_types):
                 raise TraitError(
                     'range_source is not valid (found %s).' % range_source)
+
+            try:
+                range_source, offset = range_source.split('+')
+                self.offset = int(offset)
+            except ValueError:
+                self.offset = 0
 
             if range_source not in self.name_source:
                 raise TraitError(
@@ -399,13 +407,16 @@ class GenMultiFile(traits.List):
             ext = ''
             for nsrc in self.name_source:
                 srcvalue = getattr(obj, nsrc)
-
+                IFLOGGER.debug('Parsing source (%s) = %s', nsrc, obj.traits()[nsrc].trait_type())
                 if not isdefined(srcvalue):
                     return Undefined
 
+                IFLOGGER.debug('Autogenerating output for: %s (%s=%s)', name, nsrc, srcvalue)
+                IFLOGGER.debug('range_source=%s', self.range_source)
                 if self.range_source is not None and nsrc == self.range_source:
-                    srcvalue = range(int(srcvalue))
+                    srcvalue = range(self.offset, int(srcvalue) + self.offset)
                     vallist = srcvalue
+                    IFLOGGER.debug('Generating range of outputs: %s', vallist)
 
                 if isinstance(srcvalue, string_types):
                     vallist = [srcvalue]

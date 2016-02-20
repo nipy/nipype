@@ -32,7 +32,6 @@ def test_Overlay_inputs():
     usedefault=True,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     position=-1,
     ),

@@ -79,20 +79,6 @@ class Info(object):
                 out = vfile.read().strip('\n')
         return out
 
-    @classmethod
-    def output_type(cls):
-        """Get the global FSL output file type FSLOUTPUTTYPE.
-
-        This returns the value of the environment variable
-        FSLOUTPUTTYPE.  An exception is raised if it is not defined.
-
-        Returns
-        -------
-        fsl_ftype : string
-            Represents the current environment setting of FSLOUTPUTTYPE
-        """
-        return FSLOUTPUTTYPE
-
     @staticmethod
     def standard_image(img_name=None):
         """Grab an image from the standard location.
@@ -118,9 +104,11 @@ class FSLCommandInputSpec(CommandLineInputSpec):
     All command support specifying FSLOUTPUTTYPE dynamically
     via output_type.
 
-    Example
-    -------
-    fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
+    Example::
+
+      fsl.ExtractRoi(tmin=42, tsize=1, output_type='NIFTI')
+
+
     """
     output_type = traits.Trait(FSLOUTPUTTYPE, Info.ftypes, usedefault=True,
                                desc='FSL output type')
@@ -134,7 +122,6 @@ class FSLCommand(CommandLine):  # pylint: disable=W0223
     def __init__(self, **inputs):
         super(FSLCommand, self).__init__(**inputs)
         self.inputs.on_trait_change(self._output_update, 'output_type')
-        self.inputs.environ.update({'FSLOUTPUTTYPE': FSLOUTPUTTYPE})
 
     def _output_update(self):
         self.inputs.environ.update({'FSLOUTPUTTYPE': self.inputs.output_type})
