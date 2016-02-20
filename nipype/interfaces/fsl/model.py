@@ -1581,7 +1581,7 @@ class ClusterInputSpec(FSLCommandInputSpec):
 
     out_index_file = GenFile(
         template='{in_file}_index{output_type_}',  argstr='--oindex=%s', hash_files=False,
-        desc='output of cluster index (in size order)')
+        desc='output of cluster index (in size order)', output_name='index_file')
     out_threshold_file = GenFile(
         template='{in_file}_threshold{output_type_}', argstr='--othresh=%s', hash_files=False,
         desc='thresholded image')
@@ -1599,6 +1599,7 @@ class ClusterInputSpec(FSLCommandInputSpec):
     out_pval_file = GenFile(template='{in_file}_pval{output_type_}', argstr='--opvals=%s',
                             hash_files=False, desc='filename for image output of log pvals')
 
+    save_index_file = traits.Bool(False, usedefault=True, desc='enable this output')
     save_threshold_file = traits.Bool(False, usedefault=True, desc='enable this output')
     save_localmax_txt_file = traits.Bool(False, usedefault=True, desc='enable this output')
     save_localmax_vol_file = traits.Bool(False, usedefault=True, desc='enable this output')
@@ -1614,9 +1615,8 @@ class ClusterInputSpec(FSLCommandInputSpec):
         for name, _ in list(self.items()):
             if not name.startswith('save_'):
                 continue
-            if getattr(self, name):
+            if not getattr(self, name):
                 skip += ['out_' + name[5:]]
-
         return super(ClusterInputSpec, self).parse_args(skip)
 
 class ClusterOutputSpec(TraitedSpec):
