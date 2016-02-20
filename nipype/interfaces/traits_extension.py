@@ -173,7 +173,7 @@ class GenFile(File):
             if itoken:
                 template = template.replace(itoken, '')
 
-        self.template = template.format
+        self.template = template
         self.keep_ext = keep_extension
         super(GenFile, self).__init__(value, filter, auto_set, entries, exists,
                                       **metadata)
@@ -198,14 +198,24 @@ class GenFile(File):
 
     def get(self, obj, name):
         # Compute expected name iff trait is not set
-
+        template = self.template
         if self.value is None:
             srcvals = {}
             ext = ''
-            for nsrc, indexing, fstr in self.name_source:
-                srcvalue = getattr(obj, nsrc)
+            final_nsrcs = []
+            for nsrc_list, indexing, fstr in self.name_source:
+                for nel in nsrc_list:
+                    srcvalue = getattr(obj, nel)
+                    if isdefined(srcvalue):
+                        nsrc = nel
+                        break
+
                 if not isdefined(srcvalue):
                     return Undefined
+
+                template = template.replace('|'.join(nsrc_list), nsrc)
+                IFLOGGER.debug('replacing %s with %s. Result=%s', '|'.join(nsrc_list), nsrc, template)
+                final_nsrcs.append(nsrc)
 
                 if isinstance(srcvalue, string_types):
                     vallist = [srcvalue]
@@ -221,8 +231,8 @@ class GenFile(File):
                         _, val, ext = split_filename(val)
                     elif indexing:
                         # eval should be safe since we only
-                        # accept indexing elements
-                        val = literal_eval(val+indexing[0])
+                        # accept indexing elements with format [n:n]
+                        val = eval('val%s' % indexing) # pylint: disable=W0123
                     if isdefined(val):
                         outvals.append(val)
 
@@ -237,9 +247,10 @@ class GenFile(File):
                     srcvals.update({nsrc: outvals})
 
             # Check that no source is missing
-            missing = list(set([ns[0] for ns in self.name_source]) - set(srcvals.keys()))
+            IFLOGGER.debug('Final sources: %s and values %s', final_nsrcs, srcvals)
+            missing = list(set(final_nsrcs) - set(srcvals.keys()))
             if not missing:
-                retval = self.template(**srcvals)
+                retval = template.format(**srcvals)
                 if self.keep_ext:
                     retval += ext
                 return retval
@@ -358,7 +369,7 @@ class GenMultiFile(traits.List):
             except ValueError:
                 self.offset = 0
 
-            if range_source not in [nsrc[0] for nsrc in self.name_source]:
+            if range_source not in [n for nsrc in self.name_source for n in nsrc[0]]:
                 raise TraitError(
                     'range_source field should also be found in the'
                     ' template (valid fields = %s).' % self.name_source)
@@ -392,15 +403,25 @@ class GenMultiFile(traits.List):
     def get(self, obj, name):
         # Compute expected name iff trait is not set
         value = self.get_value(obj, name)
-
+        template = self.template
         if not isdefined(value) or not value:
             srcvals = {}
             ext = ''
-            for nsrc, indexing, fstr in self.name_source:
-                srcvalue = getattr(obj, nsrc)
-                IFLOGGER.debug('Parsing source (%s) = %s', nsrc, obj.traits()[nsrc].trait_type())
+
+            final_nsrcs = []
+            for nsrc_list, indexing, fstr in self.name_source:
+                for nel in nsrc_list:
+                    srcvalue = getattr(obj, nel)
+                    if isdefined(srcvalue):
+                        nsrc = nel
+                        break
+
                 if not isdefined(srcvalue):
                     return Undefined
+
+                template = template.replace('|'.join(nsrc_list), nsrc)
+                IFLOGGER.debug('replacing %s with %s. Result=%s', '|'.join(nsrc_list), nsrc, template)
+                final_nsrcs.append(nsrc)
 
                 IFLOGGER.debug('Autogenerating output for: %s (%s=%s)', name, nsrc, srcvalue)
                 IFLOGGER.debug('range_source=%s', self.range_source)
@@ -428,18 +449,19 @@ class GenMultiFile(traits.List):
                 if outvals:
                     srcvals.update({nsrc: outvals})
 
+            IFLOGGER.debug('Final sources: %s and values %s', final_nsrcs, srcvals)
             # Check that no source is missing
-            missing = list(set([ns[0] for ns in self.name_source]) - set(srcvals.keys()))
+            missing = list(set(final_nsrcs) - set(srcvals.keys()))
             if not missing:
                 results = []
-                combs = list(itools.product(*tuple(srcvals[k[0]] for k in self.name_source)))
+                combs = list(itools.product(*tuple(srcvals[k] for k in final_nsrcs)))
 
                 # Get the formatting dictionaries ready
-                dlist = [{self.name_source[i][0]: v for i, v in enumerate(kvalues)}
+                dlist = [{final_nsrcs[i]: v for i, v in enumerate(kvalues)}
                           for kvalues in combs]
                 # ... and create a formatted entry for each of them
                 for fmtdict in dlist:
-                    retval = self.template.format(**fmtdict)
+                    retval = template.format(**fmtdict)
                     if self.keep_ext:
                         retval += ext
                     results.append(retval)
@@ -690,6 +712,6 @@ def _parse_name_source(name_source):
             indexing = indexing[0]
 
         name = fchunk.split('.')[0].split('!')[0].split(':')[0].split('[')[0]
-        yield (name, indexing, fchunk)
+        yield (name.split('|'), indexing, fchunk)
 
 

@@ -897,7 +897,7 @@ class ConvertXFMInputSpec(FSLCommandInputSpec):
                    desc='input transformation matrix')
     in_file2 = File(exists=True, argstr='%s', position=-2,
                     desc='second input matrix (for use with fix_scale_skew or '
-                          'concat_xfm')
+                         'concat_xfm')
     operation = traits.Enum(
         'inverse', 'concat', 'fixscaleskew', usedefault=True, mandatory=True,
         argstr='-%s', position=-3, desc='operation mode')
@@ -913,7 +913,7 @@ class ConvertXFMInputSpec(FSLCommandInputSpec):
                                  xor=_options, requires=['in_file2'],
                                  desc='use secondary matrix to fix scale and '
                                       'skew')
-    out_file = GenFile(template='{in_file}_{operation[:5]}.mat', argstr='-omat %s', position=1,
+    out_file = GenFile(template='{in_file}_{operation[:3]}.mat', argstr='-omat %s', position=1,
                        desc='final transformation matrix', hash_files=False)
 
     def parse_args(self, skip=None):
@@ -949,7 +949,13 @@ class ConvertXFM(FSLCommand):
     >>> invt.inputs.in_file = 'flirt.mat'
     >>> invt.inputs.invert_xfm = True
     >>> invt.cmdline
-    'convert_xfm -omat flirt_inverse.mat -inverse flirt.mat'
+    'convert_xfm -omat flirt_inv.mat -inverse flirt.mat'
+
+    >>> invt.inputs.in_file2 = 'flirt.mat'
+    >>> invt.inputs.invert_xfm = False
+    >>> invt.inputs.operation = 'concat'
+    >>> invt.cmdline
+    'convert_xfm -omat flirt_con.mat -concat flirt.mat flirt.mat'
 
 
     """
@@ -969,8 +975,9 @@ class SwapDimensionsInputSpec(FSLCommandInputSpec):
                             traits.Enum(_dims), argstr='%s %s %s',
                             mandatory=True,
                             desc='3-tuple of new dimension order')
-    out_file = File(genfile=True, argstr='%s',
-                    desc='image to write', hash_files=False)
+    out_file = GenFile(
+        template='{in_file}_newdims{output_type_}', argstr='%s',
+        desc='image to write', hash_files=False)
 
 
 class SwapDimensionsOutputSpec(TraitedSpec):
@@ -989,18 +996,6 @@ class SwapDimensions(FSLCommand):
     input_spec = SwapDimensionsInputSpec
     output_spec = SwapDimensionsOutputSpec
 
-    def _post_run(self):
-        self.outputs.out_file = self.inputs.out_file
-        if not isdefined(self.inputs.out_file):
-            self.outputs.out_file = self._gen_fname(self.inputs.in_file,
-                                                  suffix='_newdims')
-        self.outputs.out_file = os.path.abspath(self.outputs.out_file)
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self.outputs.out_file
-        return None
-
 
 class PowerSpectrumInputSpec(FSLCommandInputSpec):
     # We use position args here as list indices - so a negative number
@@ -1008,8 +1003,9 @@ class PowerSpectrumInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True,
                    desc='input 4D file to estimate the power spectrum',
                    argstr='%s', position=0, mandatory=True)
-    out_file = File(desc='name of output 4D file for power spectrum',
-                    argstr='%s', position=1, genfile=True, hash_files=False)
+    out_file = GenFile(
+        template='{in_file}_ps{output_type_}', argstr='%s', position=1, hash_files=False,
+        desc='name of output 4D file for power spectrum')
 
 
 class PowerSpectrumOutputSpec(TraitedSpec):
@@ -1035,31 +1031,15 @@ class PowerSpectrum(FSLCommand):
     input_spec = PowerSpectrumInputSpec
     output_spec = PowerSpectrumOutputSpec
 
-    def _gen_outfilename(self):
-        out_file = self.inputs.out_file
-        if not isdefined(out_file) and isdefined(self.inputs.in_file):
-            out_file = self._gen_fname(self.inputs.in_file,
-                                       suffix='_ps')
-        return out_file
-
-    def _post_run(self):
-
-        self.outputs.out_file = os.path.abspath(self._gen_outfilename())
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._gen_outfilename()
-        return None
-
 
 class SigLossInputSpec(FSLCommandInputSpec):
     in_file = File(mandatory=True,
                    exists=True,
                    argstr='-i %s',
                    desc='b0 fieldmap file')
-    out_file = File(argstr='-s %s',
-                    desc='output signal loss estimate file',
-                    genfile=True)
+    out_file = GenFile(
+        template='{in_file}_sigloss{output_type_}', argstr='-s %s', hash_files=False,
+        desc='output signal loss estimate file')
 
     mask_file = File(exists=True,
                      argstr='-m %s',
@@ -1093,23 +1073,11 @@ class SigLoss(FSLCommand):
     output_spec = SigLossOuputSpec
     _cmd = 'sigloss'
 
-    def _post_run(self):
-
-        self.outputs.out_file = self.inputs.out_file
-        if not isdefined(self.outputs.out_file) and \
-                isdefined(self.inputs.in_file):
-            self.outputs.out_file = self._gen_fname(self.inputs.in_file,
-                                                  suffix='_sigloss')
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self.outputs.out_file
-        return None
-
 
 class Reorient2StdInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, mandatory=True, argstr='%s')
-    out_file = File(genfile=True, hash_files=False, argstr='%s')
+    out_file = GenFile(template='{in_file}_reoriented{output_type_}',
+                       hash_files=False, argstr='%s')
 
 
 class Reorient2StdOutputSpec(TraitedSpec):
@@ -1133,19 +1101,6 @@ class Reorient2Std(FSLCommand):
     _cmd = 'fslreorient2std'
     input_spec = Reorient2StdInputSpec
     output_spec = Reorient2StdOutputSpec
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._gen_fname(self.inputs.in_file,
-                                   suffix='_reoriented')
-        return None
-
-    def _post_run(self):
-
-        if not isdefined(self.inputs.out_file):
-            self.outputs.out_file = self._gen_filename('out_file')
-        else:
-            self.outputs.out_file = os.path.abspath(self.inputs.out_file)
 
 
 class InvWarpInputSpec(FSLCommandInputSpec):
@@ -1242,16 +1197,6 @@ class ComplexInputSpec(FSLCommandInputSpec):
                    'complex_cartesian', 'complex_polar',
                    'complex_split', 'complex_merge', ]
 
-    complex_out_file = File(genfile=True, argstr='%s', position=-3,
-                            xor=_ofs + _conversion[:2])
-    magnitude_out_file = File(genfile=True, argstr='%s', position=-4,
-                              xor=_ofs[:1] + _ofs[3:] + _conversion[1:])
-    phase_out_file = File(genfile=True, argstr='%s', position=-3,
-                          xor=_ofs[:1] + _ofs[3:] + _conversion[1:])
-    real_out_file = File(genfile=True, argstr='%s', position=-4,
-                         xor=_ofs[:3] + _conversion[:1] + _conversion[2:])
-    imaginary_out_file = File(genfile=True, argstr='%s', position=-3,
-                              xor=_ofs[:3] + _conversion[:1] + _conversion[2:])
 
     start_vol = traits.Int(position=-2, argstr='%d')
     end_vol = traits.Int(position=-1, argstr='%d')
@@ -1276,6 +1221,19 @@ class ComplexInputSpec(FSLCommandInputSpec):
         argstr='-complexmerge', xor=_conversion + ['start_vol', 'end_vol'],
         position=1,)
 #        requires=['complex_in_file','complex_in_file2','complex_out_file'])
+
+    # Auto-generate output file names
+    complex_out_file = GenFile(
+        template='generated_cplx{output_type_}', argstr='%s', position=-3)
+    magnitude_out_file = GenFile(
+        template='{complex_in_file}_mag{output_type_}', argstr='%s', position=-4)
+    phase_out_file = GenFile(
+        template='{complex_in_file}_phase{output_type_}', argstr='%s', position=-3)
+    real_out_file = GenFile(
+        template='{complex_in_file}_real{output_type_}', argstr='%s', position=-4)
+    imaginary_out_file = GenFile(
+        template='{complex_in_file}_imag{output_type_}', argstr='%s', position=-3)
+
 
     def parse_args(self, skip=None):
         if skip is None:
@@ -1312,46 +1270,6 @@ class Complex(FSLCommand):
     _cmd = 'fslcomplex'
     input_spec = ComplexInputSpec
     output_spec = ComplexOuputSpec
-
-
-    def _gen_filename(self, name):
-        if name == 'complex_out_file':
-            if self.inputs.complex_cartesian:
-                in_file = self.inputs.real_in_file
-            elif self.inputs.complex_polar:
-                in_file = self.inputs.magnitude_in_file
-            elif self.inputs.complex_split or self.inputs.complex_merge:
-                in_file = self.inputs.complex_in_file
-            else:
-                return None
-            return self._gen_fname(in_file, suffix='_cplx')
-        elif name == 'magnitude_out_file':
-            return self._gen_fname(self.inputs.complex_in_file, suffix='_mag')
-        elif name == 'phase_out_file':
-            return self._gen_fname(self.inputs.complex_in_file, suffix='_phase')
-        elif name == 'real_out_file':
-            return self._gen_fname(self.inputs.complex_in_file, suffix='_real')
-        elif name == 'imaginary_out_file':
-            return self._gen_fname(self.inputs.complex_in_file, suffix='_imag')
-        return None
-
-    def _get_output(self, name):
-        output = getattr(self.inputs, name)
-        if not isdefined(output):
-            output = self._gen_filename(name)
-        return os.path.abspath(output)
-
-    def _post_run(self):
-
-        if self.inputs.complex_cartesian or self.inputs.complex_polar or \
-                self.inputs.complex_split or self.inputs.complex_merge:
-            self.outputs.complex_out_file = self._get_output('complex_out_file')
-        elif self.inputs.real_cartesian:
-            self.outputs.real_out_file = self._get_output('real_out_file')
-            self.outputs.imaginary_out_file = self._get_output('imaginary_out_file')
-        elif self.inputs.real_polar:
-            self.outputs.magnitude_out_file = self._get_output('magnitude_out_file')
-            self.outputs.phase_out_file = self._get_output('phase_out_file')
 
 
 class WarpUtilsInputSpec(FSLCommandInputSpec):
