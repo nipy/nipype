@@ -556,16 +556,8 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         return dup
 
 
-@provides(IInputSpec)
-class BaseInterfaceInputSpec(BaseInputSpec):
-    """ BaseInputSpec with an input added to ignore exceptions """
-    ignore_exception = traits.Bool(False, usedefault=True, nohash=True,
-                                   desc='Print an error message instead of throwing an exception'
-                                        ' in case the interface fails to run')
-
-
 @provides(IInputSpec, IInputCommandLineSpec)
-class CommandLineInputSpec(BaseInterfaceInputSpec):
+class CommandLineInputSpec(BaseInputSpec):
     """ The InputSpec for interfaces wrapping a command line """
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
 

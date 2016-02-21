@@ -10,13 +10,13 @@ transform files (to configure warpings)
 import os.path as op
 import re
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, isdefined,
+from ..base import (BaseInterface, BaseInputSpec, isdefined,
                     TraitedSpec, File, traits, InputMultiPath)
 from ... import logging
 logger = logging.getLogger('interface')
 
 
-class EditTransformInputSpec(BaseInterfaceInputSpec):
+class EditTransformInputSpec(BaseInputSpec):
     transform_file = File(exists=True, mandatory=True,
                           desc='transform-parameter file, only 1')
     reference_image = File(exists=True,

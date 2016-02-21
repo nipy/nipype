@@ -17,7 +17,7 @@ from ... import engine as pe
 from ....interfaces import base as nib
 
 
-class InputSpec(nib.BaseInterfaceInputSpec):
+class InputSpec(nib.BaseInputSpec):
     input1 = nib.traits.Int(desc='a random int')
     input2 = nib.traits.Int(desc='a random int')
 

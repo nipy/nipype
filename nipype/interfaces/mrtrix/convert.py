@@ -19,7 +19,7 @@ import numpy as np
 from nibabel.trackvis import HeaderError
 from nibabel.volumeutils import native_code
 
-from ..base import (TraitedSpec, BaseInterface, BaseInterfaceInputSpec,
+from ..base import (TraitedSpec, BaseInterface, BaseInputSpec,
                     File, isdefined, traits)
 from ...utils.filemanip import split_filename
 from ...utils.misc import package_check

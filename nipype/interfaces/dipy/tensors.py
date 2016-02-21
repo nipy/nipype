@@ -8,13 +8,13 @@
 import nibabel as nb
 
 from ..base import TraitedSpec, File, isdefined
-from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
+from .base import DipyDiffusionInterface, DipyBaseInputSpec
 
 from ... import logging
 IFLOGGER = logging.getLogger('interface')
 
 
-class DTIInputSpec(DipyBaseInterfaceInputSpec):
+class DTIInputSpec(DipyBaseInputSpec):
     mask_file = File(exists=True,
                      desc='An optional white matter mask')
 
@@ -66,7 +66,7 @@ class DTI(DipyDiffusionInterface):
         self.outputs.out_file = self._gen_filename('dti')
         
 
-class TensorModeInputSpec(DipyBaseInterfaceInputSpec):
+class TensorModeInputSpec(DipyBaseInputSpec):
     mask_file = File(exists=True,
                      desc='An optional white matter mask')
 

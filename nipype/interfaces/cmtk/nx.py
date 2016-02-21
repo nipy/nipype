@@ -19,7 +19,7 @@ import numpy as np
 import networkx as nx
 import scipy.io as sio
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits, File,
+from ..base import (BaseInterface, BaseInputSpec, traits, File,
                     TraitedSpec, InputMultiPath, OutputMultiPath, isdefined)
 from ...utils.filemanip import split_filename
 from ...utils.misc import package_check
@@ -343,7 +343,7 @@ def add_edge_data(edge_array, ntwk, above=0, below=0):
     return edge_ntwk
 
 
-class NetworkXMetricsInputSpec(BaseInterfaceInputSpec):
+class NetworkXMetricsInputSpec(BaseInputSpec):
     in_file = File(exists=True, mandatory=True, desc='Input network')
     out_k_core = File('k_core', usedefault=True, desc='Computed k-core network stored as a NetworkX pickle.')
     out_k_shell = File('k_shell', usedefault=True, desc='Computed k-shell network stored as a NetworkX pickle.')
@@ -502,7 +502,7 @@ class NetworkXMetrics(BaseInterface):
         return name + '.' + ext
 
 
-class AverageNetworksInputSpec(BaseInterfaceInputSpec):
+class AverageNetworksInputSpec(BaseInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for a group of subjects')
     resolution_network_file = File(exists=True, desc='Parcellation files from Connectome Mapping Toolkit. This is not necessary'
                                    ', but if included, the interface will output the statistical maps as networkx graphs.')

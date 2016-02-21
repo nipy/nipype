@@ -31,7 +31,7 @@ from scipy.io import savemat
 
 # Local imports
 from ..base import (BaseInterface, traits, isdefined, InputMultiPath,
-                    BaseInterfaceInputSpec, Directory, Undefined)
+                    BaseInputSpec, Directory, Undefined)
 from ..matlab import MatlabCommand
 from ...utils import spm_docs as sd
 from ...external.six import string_types
@@ -209,7 +209,7 @@ def no_spm():
         return False
 
 
-class SPMCommandInputSpec(BaseInterfaceInputSpec):
+class SPMCommandInputSpec(BaseInputSpec):
     matlab_cmd = traits.Str(desc='matlab command to use')
     paths = InputMultiPath(Directory(), desc='Paths to add to matlabpath')
     mfile = traits.Bool(True, desc='Run m-code using m-file',

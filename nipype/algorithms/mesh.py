@@ -19,7 +19,7 @@ from numpy import linalg as nla
 
 from .. import logging
 from ..external.six import string_types
-from ..interfaces.base import traits, File, GenFile, BaseInterface, BaseInterfaceInputSpec, TraitedSpec
+from ..interfaces.base import traits, File, GenFile, BaseInterface, BaseInputSpec, TraitedSpec
 
 IFLOGGER = logging.getLogger('interface')
 
@@ -38,7 +38,7 @@ class TVTKBaseInterface(BaseInterface):
         super(TVTKBaseInterface, self).__init__(**inputs)
 
 
-class WarpPointsInputSpec(BaseInterfaceInputSpec):
+class WarpPointsInputSpec(BaseInputSpec):
     points = File(exists=True, mandatory=True,
                   desc=('file containing the point set'))
     warp = File(exists=True, mandatory=True,
@@ -123,7 +123,7 @@ class WarpPoints(TVTKBaseInterface):
         return runtime
 
 
-class ComputeMeshWarpInputSpec(BaseInterfaceInputSpec):
+class ComputeMeshWarpInputSpec(BaseInputSpec):
     surface1 = File(exists=True, mandatory=True,
                     desc=('Reference surface (vtk format) to which compute '
                           'distance.'))
@@ -257,7 +257,7 @@ class ComputeMeshWarp(TVTKBaseInterface):
         return runtime
 
 
-class MeshWarpMathsInputSpec(BaseInterfaceInputSpec):
+class MeshWarpMathsInputSpec(BaseInputSpec):
     in_surf = File(exists=True, mandatory=True,
                    desc=('Input surface in vtk format, with associated warp '
                          'field as point data (ie. from ComputeMeshWarp'))

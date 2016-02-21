@@ -23,7 +23,7 @@ import nibabel as nb
 
 from .base import (traits, Undefined, File, isdefined, InputMultiPath,
                    OutputMultiPath, TraitedSpec, DynamicTraitedSpec,
-                   BaseInterfaceInputSpec, BaseInterface)
+                   BaseInputSpec, BaseInterface)
 from .io import IOBase, add_traits
 from ..external.six import string_types
 from ..testing import assert_equal
@@ -100,7 +100,7 @@ class IdentityInterface(IOBase):
                 setattr(self.outputs, key, val)
 
 
-class MergeInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class MergeInputSpec(DynamicTraitedSpec, BaseInputSpec):
     axis = traits.Enum('vstack', 'hstack', usedefault=True,
                        desc='direction in which to merge, hstack requires same number of elements in each input')
     no_flatten = traits.Bool(False, usedefault=True, desc='append to outlist instead of extending in vstack mode')
@@ -257,7 +257,7 @@ class Rename(IOBase):
         self.outputs.out_file = os.path.join(os.getcwd(), self._rename())
 
 
-class SplitInputSpec(BaseInterfaceInputSpec):
+class SplitInputSpec(BaseInputSpec):
     inlist = traits.List(traits.Any, mandatory=True,
                          desc='list of values to split')
     splits = traits.List(traits.Int, mandatory=True,
@@ -307,7 +307,7 @@ class Split(IOBase):
                 setattr(self.outputs, 'out%d' % (i + 1), val)
 
 
-class SelectInputSpec(BaseInterfaceInputSpec):
+class SelectInputSpec(BaseInputSpec):
     inlist = InputMultiPath(traits.Any, mandatory=True,
                             desc='list of values to choose from')
     index = InputMultiPath(traits.Int, mandatory=True,
@@ -344,7 +344,7 @@ class Select(IOBase):
     def _post_run(self):
         self.outputs.out = np.array(self.inputs.inlist)[np.array(self.inputs.index)].tolist()
 
-class FunctionInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class FunctionInputSpec(DynamicTraitedSpec, BaseInputSpec):
     function_str = traits.Str(mandatory=True, desc='code for function')
 
 
@@ -456,7 +456,7 @@ class Function(IOBase):
             setattr(self.outputs, key, self._out[key])
 
 
-class AssertEqualInputSpec(BaseInterfaceInputSpec):
+class AssertEqualInputSpec(BaseInputSpec):
     volume1 = File(exists=True, mandatory=True)
     volume2 = File(exists=True, mandatory=True)
 

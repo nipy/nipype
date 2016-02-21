@@ -27,13 +27,13 @@ from scipy.ndimage.measurements import center_of_mass, label
 from .. import logging
 from ..utils.misc import package_check
 
-from ..interfaces.base import (traits, File, GenFile, isdefined, BaseInterfaceInputSpec,
+from ..interfaces.base import (traits, File, GenFile, isdefined, BaseInputSpec,
                                TraitedSpec, InputMultiPath, BaseInterface)
 
 iflogger = logging.getLogger('interface')
 
 
-class DistanceInputSpec(BaseInterfaceInputSpec):
+class DistanceInputSpec(BaseInputSpec):
     volume1 = File(exists=True, mandatory=True,
                    desc="Has to have the same dimensions as volume2.")
     volume2 = File(
@@ -209,7 +209,7 @@ class Distance(BaseInterface):
         return runtime
 
 
-class OverlapInputSpec(BaseInterfaceInputSpec):
+class OverlapInputSpec(BaseInputSpec):
     volume1 = File(exists=True, mandatory=True,
                    desc='Has to have the same dimensions as volume2.')
     volume2 = File(exists=True, mandatory=True,
@@ -347,7 +347,7 @@ class Overlap(BaseInterface):
         return runtime
 
 
-class FuzzyOverlapInputSpec(BaseInterfaceInputSpec):
+class FuzzyOverlapInputSpec(BaseInputSpec):
     in_ref = InputMultiPath(File(exists=True), mandatory=True,
                             desc='Reference image. Requires the same dimensions as in_tst.')
     in_tst = InputMultiPath(File(exists=True), mandatory=True,
@@ -454,7 +454,7 @@ class FuzzyOverlap(BaseInterface):
         return runtime
 
 
-class ErrorMapInputSpec(BaseInterfaceInputSpec):
+class ErrorMapInputSpec(BaseInputSpec):
     in_ref = File(exists=True, mandatory=True,
                   desc="Reference image. Requires the same dimensions as in_tst.")
     in_tst = File(exists=True, mandatory=True,
@@ -546,7 +546,7 @@ class ErrorMap(BaseInterface):
         return runtime
 
 
-class SimilarityInputSpec(BaseInterfaceInputSpec):
+class SimilarityInputSpec(BaseInputSpec):
     volume1 = File(exists=True, desc="3D/4D volume", mandatory=True)
     volume2 = File(exists=True, desc="3D/4D volume", mandatory=True)
     mask1 = File(exists=True, desc="3D volume")

@@ -9,13 +9,13 @@ import numpy as np
 import nibabel as nb
 
 from nipype.interfaces.base import TraitedSpec, File, traits, isdefined
-from .base import DipyDiffusionInterface, DipyBaseInterfaceInputSpec
+from .base import DipyDiffusionInterface, DipyBaseInputSpec
 
 from nipype import logging
 IFLOGGER = logging.getLogger('interface')
 
 
-class RESTOREInputSpec(DipyBaseInterfaceInputSpec):
+class RESTOREInputSpec(DipyBaseInputSpec):
     in_mask = File(exists=True, desc=('input mask in which compute tensors'))
     noise_mask = File(
         exists=True, desc=('input mask in which compute noise variance'))
@@ -149,7 +149,7 @@ class RESTORE(DipyDiffusionInterface):
             outputs[k] = self._gen_filename(k)
         
 
-class EstimateResponseSHInputSpec(DipyBaseInterfaceInputSpec):
+class EstimateResponseSHInputSpec(DipyBaseInputSpec):
     in_evals = File(
         exists=True, mandatory=True, desc=('input eigenvalues file'))
     in_mask = File(
@@ -269,7 +269,7 @@ class EstimateResponseSH(DipyDiffusionInterface):
         outputs['out_mask'] = op.abspath(self.inputs.out_mask)
         
 
-class CSDInputSpec(DipyBaseInterfaceInputSpec):
+class CSDInputSpec(DipyBaseInputSpec):
     in_mask = File(exists=True, desc=('input mask in which compute tensors'))
     response = File(exists=True, desc=('single fiber estimated response'))
     sh_order = traits.Int(8, exists=True, usedefault=True,

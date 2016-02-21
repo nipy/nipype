@@ -36,9 +36,9 @@ from ...external.six import string_types
 # Make all the traits and spec interfaces available through base
 # for backwards compatibility, even though import * is discouraged
 # in production environments.
-from .traits_extension import isdefined, Command, _exists_in_path
+from .traits_extension import isdefined, Command
 from .specs import (IInputSpec, IOutputSpec, IInputCommandLineSpec,
-                    BaseInterfaceInputSpec, CommandLineInputSpec,
+                    BaseInputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, StdOutCommandLineOutputSpec,
                     MpiCommandLineInputSpec,
                     SEMLikeCommandLineInputSpec)
@@ -67,7 +67,7 @@ class IBase(Interface):
     def pre_run(self, **inputs):
         """Hook executed before running"""
 
-    def run(self, **inputs):
+    def run(self, dry_run=False, **inputs):
         """
         The interface runner
 
@@ -84,12 +84,15 @@ class IBase(Interface):
     def post_run(self):
         """Hook executed after running"""
 
+    def _aggregate_outputs(self):
+        """Fill in ouputs after running interface"""
+
 class ICommandBase(Interface):
     """Abstract class for interfaces wrapping a command line"""
 
     @property
     def cmdline(self):
-        """The command line that is to be executed""" 
+        """The command line that is to be executed"""
 
 
 @provides(IBase)
@@ -99,14 +102,15 @@ class BaseInterface(HasTraits):
     """
     inputs = Instance(IInputSpec)
     outputs = Instance(IOutputSpec)
-    _input_spec = BaseInterfaceInputSpec
-    # _output_spec = 
-    status = traits.Enum('waiting', 'starting', 'running', 'ending', 
+    _input_spec = BaseInputSpec
+    # _output_spec =
+    status = traits.Enum('waiting', 'starting', 'running', 'ending',
                          'errored', 'finished')
     version = traits.Str
     redirect_x = traits.Bool
     can_resume = traits.Bool(True)
     always_run = traits.Bool
+    ignore_exception = traits.Bool
 
     def __init__(self, **inputs):
         self.inputs = self._input_spec()
@@ -160,6 +164,9 @@ class BaseInterface(HasTraits):
 
     def post_run(self):
         """ Implementation of the post-execution hook"""
+        pass
+
+    def _aggregate_outputs(self):
         # ns_outputs = {}
         # for ns_input, ns_spec in list(self.inputs.namesource_items()):
         #     ns_pointer = getattr(ns_spec, 'out_name', None)
@@ -184,68 +191,65 @@ class BaseInterface(HasTraits):
         #     setattr(self.outputs, out_name, value)
         pass
 
-    def run(self, **inputs):
+    def run(self, dry_run=False, **inputs):
         """Basic implementation of the interface runner"""
         self.status = 'starting'
         self.pre_run(**inputs)
         # initialize provenance tracking
-
         runtime = Bunch(
             cwd=os.getcwd(), returncode=None, duration=None, environ=deepcopy(dict(os.environ)),
             startTime=dt.isoformat(dt.utcnow()), endTime=None, traceback=None,
             platform=platform.platform(), hostname=getfqdn(), version=self.version)
-        
+
         self.status = 'running'
+        exception = None
         try:
-            runtime = self._run_wrapper(runtime)
-        except Exception as e:  # pylint: disable=W0703
-            self.status = 'errored'
-            if len(e.args) == 0:
-                e.args = ("")
-
-            message = "\nInterface %s failed to run." % self.__class__.__name__
-
-            if config.has_option('logging', 'interface_level') and \
-                    config.get('logging', 'interface_level').lower() == 'debug':
-                inputs_str = "Inputs:" + str(self.inputs) + "\n"
+            if not dry_run:
+                runtime = self._run_wrapper(runtime)
             else:
-                inputs_str = ''
-
-            if len(e.args) == 1 and isinstance(e.args[0], string_types):
-                e.args = (e.args[0] + " ".join([message, inputs_str]),)
-            else:
-                e.args += (message, )
-                if inputs_str != '':
-                    e.args += (inputs_str, )
-
-            # exception raising inhibition for special cases
-            import traceback
-            runtime.traceback = traceback.format_exc()
-            runtime.traceback_args = e.args  # pylint: disable=W0201
-
-        runtime.endTime = dt.isoformat(dt.utcnow())
-        timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
-        runtime.duration = (timediff.days * 86400 + timediff.seconds +
-                            timediff.microseconds / 1e5)
-        results = InterfaceResult(self.__class__, runtime,
-                                  inputs=self.inputs.get_traitsfree())
-
-        if runtime.traceback is None:
-            self.status = 'ending'
-            self.post_run()
-            results.outputs = self.outputs
-
-        prov_record = None
-        if str2bool(config.get('execution', 'write_provenance')):
-            prov_record = write_provenance(results)
-        results.provenance = prov_record
-
-        if self.status == 'errored':
-            if not getattr(self.inputs, 'ignore_exception', False):
+                runtime = self._dry_run(runtime)
+        except Exception as error:  # pylint: disable=W0703
+            runtime, exception = self.handle_error(runtime, error)
+            if not self.ignore_exception:
                 raise
-        else:
+        finally:
+            runtime.endTime = dt.isoformat(dt.utcnow())
+            timediff = parseutc(runtime.endTime) - parseutc(runtime.startTime)
+            runtime.duration = (timediff.days * 86400 + timediff.seconds +
+                                timediff.microseconds / 1e5)
+            results = InterfaceResult(self.__class__, runtime,
+                                      inputs=self.inputs.get_traitsfree())
+
+            if exception is None:
+                self.status = 'ending'
+                self._aggregate_outputs()
+                self.post_run()
+                results.outputs = self.outputs
+
+            prov_record = None
+            if str2bool(config.get('execution', 'write_provenance')):
+                prov_record = write_provenance(results)
+            results.provenance = prov_record
+
+        if exception is None:
             self.status = 'finished'
         return results
+
+    def handle_error(self, runtime, exception):
+        import traceback
+        self.status = 'errored'
+        message = ["Interface %s failed to run." % self.__class__.__name__]
+        if config.get('logging', 'interface_level', 'info').lower() == 'debug':
+            message += ["Inputs:\n%s\n" % str(self.inputs)]
+
+        if len(exception.args) == 1 and isinstance(exception.args[0], string_types):
+            message.insert(0, exception.args[0])
+        else:
+            message += list(exception.args)
+        # exception raising inhibition for special cases
+        runtime.traceback = traceback.format_exc()
+        runtime.traceback_args = message  # pylint: disable=W0201
+        return runtime, message
 
     @classmethod
     def help(cls, returnhelp=False):
@@ -254,7 +258,7 @@ class BaseInterface(HasTraits):
         docstring = ['']
         if cls.__doc__:
             docstring = trim(cls.__doc__).split('\n') + docstring
-        
+
         allhelp = '\n'.join(docstring + cls._input_spec.help() + cls._output_spec.help())
         if returnhelp:
             return allhelp
@@ -321,7 +325,7 @@ class CommandLine(BaseInterface):
                 pass
 
 
-    def __init__(self, command=None, environ=None, **inputs):        
+    def __init__(self, command=None, environ=None, **inputs):
         # Force refresh of the redirect_x trait
         self._redirect_x_changed(self.redirect_x)
 
@@ -338,9 +342,9 @@ class CommandLine(BaseInterface):
         else:
             raise RuntimeError('CommandLine interfaces require'
                                ' the definition of a command')
-        
+
         super(CommandLine, self).__init__(**inputs)
-        
+
 
     @property
     def cmdline(self):
@@ -371,7 +375,7 @@ class CommandLine(BaseInterface):
         correct_return_codes = [0]
         if 'correct_return_codes' in kwargs.keys():
             correct_return_codes = kwargs[correct_return_codes]
-        
+
         runtime.environ.update(self.environ)
         setattr(runtime, 'stdout', None)
         setattr(runtime, 'stderr', None)

@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 import networkx as nx
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+from ..base import (BaseInterface, BaseInputSpec, traits,
                     File, TraitedSpec, InputMultiPath,
                     OutputMultiPath, isdefined)
 from ...utils.misc import package_check
@@ -36,7 +36,7 @@ def ntwks_to_matrices(in_files, edge_key):
     return matrix
 
 
-class NetworkBasedStatisticInputSpec(BaseInterfaceInputSpec):
+class NetworkBasedStatisticInputSpec(BaseInputSpec):
     in_group1 = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for the first group of subjects')
     in_group2 = InputMultiPath(File(exists=True), mandatory=True, desc='Networks for the second group of subjects')
     node_position_network = File(desc='An optional network used to position the nodes for the output networks')

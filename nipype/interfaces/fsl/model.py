@@ -28,7 +28,7 @@ from .base import (FSLCommand, FSLCommandInputSpec, Info)
 from ..base import (load_template, File, GenFile, traits, isdefined,
                     TraitedSpec, BaseInterface, Directory,
                     InputMultiPath, OutputMultiPath,
-                    BaseInterfaceInputSpec)
+                    BaseInputSpec)
 from ...utils.filemanip import (list_to_filename, filename_to_list)
 from ...utils.misc import human_order_sorted
 
@@ -36,7 +36,7 @@ from ... import logging
 IFLOGGER = logging.getLogger('interface')
 
 
-class Level1DesignInputSpec(BaseInterfaceInputSpec):
+class Level1DesignInputSpec(BaseInputSpec):
     interscan_interval = traits.Float(mandatory=True,
                                       desc='Interscan  interval (in secs)')
     session_info = traits.Any(mandatory=True,
@@ -747,7 +747,7 @@ threshold=10, results_dir='stats')
                 self.outputs.zfstats = zfstats
 
 
-class FEATRegisterInputSpec(BaseInterfaceInputSpec):
+class FEATRegisterInputSpec(BaseInputSpec):
     feat_dirs = InputMultiPath(
         Directory(exists=True), desc="Lower level feat dirs",
         mandatory=True)
@@ -1096,7 +1096,7 @@ class ContrastMgr(FSLCommand):
             self.outputs.zfstats = zfstats
 
 
-class L2ModelInputSpec(BaseInterfaceInputSpec):
+class L2ModelInputSpec(BaseInputSpec):
     num_copes = traits.Range(low=1, mandatory=True,
                              desc='number of copes to be combined')
 
@@ -1168,7 +1168,7 @@ class L2Model(BaseInterface):
             setattr(self.outputs, field, os.path.join(os.getcwd(), field.replace('_', '.')))
 
 
-class MultipleRegressDesignInputSpec(BaseInterfaceInputSpec):
+class MultipleRegressDesignInputSpec(BaseInputSpec):
     contrasts = traits.List(
         traits.Either(traits.Tuple(traits.Str,
                                    traits.Enum('T'),

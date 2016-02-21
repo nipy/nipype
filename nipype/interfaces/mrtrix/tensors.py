@@ -13,7 +13,7 @@ import os.path as op
 import numpy as np
 
 from ..base import (CommandLineInputSpec, CommandLine, BaseInterface,
-                    BaseInterfaceInputSpec, traits, File, TraitedSpec,
+                    BaseInputSpec, traits, File, TraitedSpec,
                     Directory, InputMultiPath, OutputMultiPath, isdefined)
 from ...utils.filemanip import split_filename
 from ... import logging

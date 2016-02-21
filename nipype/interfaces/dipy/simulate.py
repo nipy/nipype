@@ -14,14 +14,14 @@ from builtins import range
 
 import nibabel as nb
 
-from ..base import (traits, TraitedSpec, BaseInterfaceInputSpec,
+from ..base import (traits, TraitedSpec, BaseInputSpec,
                     File, InputMultiPath, isdefined)
 from .base import DipyBaseInterface
 from ... import logging
 IFLOGGER = logging.getLogger('interface')
 
 
-class SimulateMultiTensorInputSpec(BaseInterfaceInputSpec):
+class SimulateMultiTensorInputSpec(BaseInputSpec):
     in_dirs = InputMultiPath(File(exists=True), mandatory=True,
                              desc='list of fibers (principal directions)')
     in_frac = InputMultiPath(File(exists=True), mandatory=True,

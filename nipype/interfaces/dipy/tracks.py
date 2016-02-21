@@ -11,14 +11,14 @@ import numpy as np
 import nibabel as nb
 import nibabel.trackvis as nbt
 
-from ..base import (TraitedSpec, BaseInterfaceInputSpec,
+from ..base import (TraitedSpec, BaseInputSpec,
                     File, isdefined, traits)
 from .base import DipyBaseInterface
 from ... import logging
 IFLOGGER = logging.getLogger('interface')
 
 
-class TrackDensityMapInputSpec(BaseInterfaceInputSpec):
+class TrackDensityMapInputSpec(BaseInputSpec):
     in_file = File(exists=True, mandatory=True,
                    desc='The input TrackVis track file')
     reference = File(exists=True,
@@ -101,7 +101,7 @@ class TrackDensityMap(DipyBaseInterface):
         self.outputs.out_file = op.abspath(self.inputs.out_filename)
         
 
-class StreamlineTractographyInputSpec(BaseInterfaceInputSpec):
+class StreamlineTractographyInputSpec(BaseInputSpec):
     in_file = File(exists=True, mandatory=True, desc=('input diffusion data'))
     in_model = File(exists=True, desc=('input f/d-ODF model extracted from.'))
     tracking_mask = File(exists=True,

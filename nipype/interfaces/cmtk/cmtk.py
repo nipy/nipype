@@ -21,7 +21,7 @@ import nibabel as nb
 import networkx as nx
 import scipy.io as sio
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+from ..base import (BaseInterface, BaseInputSpec, traits,
                     File, TraitedSpec, InputMultiPath, Directory,
                     OutputMultiPath, isdefined)
 from ...utils.filemanip import split_filename
@@ -577,7 +577,7 @@ class CreateMatrix(BaseInterface):
         return name + ext
 
 
-class ROIGenInputSpec(BaseInterfaceInputSpec):
+class ROIGenInputSpec(BaseInputSpec):
     aparc_aseg_file = File(exists=True, mandatory=True, desc='Freesurfer aparc+aseg file')
     LUT_file = File(exists=True, xor=['use_freesurfer_LUT'], desc='Custom lookup table (cf. FreeSurferColorLUT.txt)')
     use_freesurfer_LUT = traits.Bool(xor=['LUT_file'], desc='Boolean value; Set to True to use default Freesurfer LUT, False for custom LUT')
@@ -753,7 +753,7 @@ def create_nodes(roi_file, resolution_network_file, out_filename):
     return out_filename
 
 
-class CreateNodesInputSpec(BaseInterfaceInputSpec):
+class CreateNodesInputSpec(BaseInputSpec):
     roi_file = File(exists=True, mandatory=True, desc='Region of interest file')
     resolution_network_file = File(exists=True, mandatory=True, desc='Parcellation file from Connectome Mapping Toolkit')
     out_filename = File('nodenetwork.pck', usedefault=True, desc='Output gpickled network with the nodes defined.')

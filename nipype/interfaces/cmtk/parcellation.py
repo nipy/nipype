@@ -20,7 +20,7 @@ import numpy as np
 import nibabel as nb
 import networkx as nx
 
-from ..base import (BaseInterface, BaseInterfaceInputSpec, traits,
+from ..base import (BaseInterface, BaseInputSpec, traits,
                     File, TraitedSpec, Directory, isdefined)
 from ...utils.misc import package_check
 from ... import logging
@@ -513,7 +513,7 @@ R: the neighbourhood of the specified point in Z
     return R
 
 
-class ParcellateInputSpec(BaseInterfaceInputSpec):
+class ParcellateInputSpec(BaseInputSpec):
     subject_id = traits.String(mandatory=True, desc='Subject ID')
     parcellation_name = traits.Enum('scale500', ['scale33', 'scale60', 'scale125', 'scale250', 'scale500'], usedefault=True)
     freesurfer_dir = Directory(exists=True, desc='Freesurfer main directory')

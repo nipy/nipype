@@ -19,7 +19,7 @@ import tempfile
 from ...utils.misc import package_check
 
 from ..base import (TraitedSpec, File, Undefined, traits,
-                    BaseInterface, isdefined, BaseInterfaceInputSpec)
+                    BaseInterface, isdefined, BaseInputSpec)
 
 from ...utils.filemanip import fname_presuffix
 
@@ -34,7 +34,7 @@ else:
     import nitime.viz as viz
 
 
-class CoherenceAnalyzerInputSpec(BaseInterfaceInputSpec):
+class CoherenceAnalyzerInputSpec(BaseInputSpec):
 
     # Input either csv file, or time-series object and use _xor_inputs to
     # discriminate

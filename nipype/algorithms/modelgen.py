@@ -30,7 +30,7 @@ from scipy.special import gammaln
 
 from ..external.six import string_types
 
-from ..interfaces.base import (traits, File, isdefined, Undefined, BaseInterfaceInputSpec,
+from ..interfaces.base import (traits, File, isdefined, Undefined, BaseInputSpec,
                                TraitedSpec, InputMultiPath, BaseInterface, Bunch)
 
 from ..utils.filemanip import filename_to_list
@@ -176,7 +176,7 @@ def gen_info(run_event_files):
     return info
 
 
-class SpecifyModelInputSpec(BaseInterfaceInputSpec):
+class SpecifyModelInputSpec(BaseInputSpec):
     subject_info = InputMultiPath(Bunch, mandatory=True, xor=['subject_info',
                                                               'event_files'],
                                   desc=("Bunch or List(Bunch) subject specific condition information. "

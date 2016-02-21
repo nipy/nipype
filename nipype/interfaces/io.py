@@ -36,7 +36,7 @@ from warnings import warn
 import sqlite3
 from .base import (traits, Undefined, File, Directory, isdefined, InputMultiPath,
                    OutputMultiPath, TraitedSpec, DynamicTraitedSpec,
-                   BaseInterfaceInputSpec, BaseInterface)
+                   BaseInputSpec, BaseInterface)
 from .. import config
 from ..external.six import string_types
 from ..utils.filemanip import (copyfile, list_to_filename,
@@ -175,7 +175,7 @@ class ProgressPercentage(object):
 
 
 # DataSink inputs
-class DataSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class DataSinkInputSpec(DynamicTraitedSpec, BaseInputSpec):
     """
     """
 
@@ -766,7 +766,7 @@ class DataSink(IOBase):
         self.outputs.out_file = out_files
 
 
-class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class S3DataGrabberInputSpec(DynamicTraitedSpec, BaseInputSpec):
     anon = traits.Bool(False, usedefault=True,
                        desc='Use anonymous connection to s3.  If this is set to True, boto may print' +
                             ' a urlopen error, but this does not prevent data from being downloaded.')
@@ -987,7 +987,7 @@ class S3DataGrabber(IOBase):
         return localpath
 
 
-class DataGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class DataGrabberInputSpec(DynamicTraitedSpec, BaseInputSpec):
     base_directory = Directory(exists=True,
                                desc='Path to the base directory consisting of subject data.')
     raise_on_empty = traits.Bool(True, usedefault=True,
@@ -1187,7 +1187,7 @@ class DataGrabber(IOBase):
                 setattr(self.outputs, key, getattr(self.outputs, key)[0])
 
 
-class SelectFilesInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class SelectFilesInputSpec(DynamicTraitedSpec, BaseInputSpec):
 
     base_directory = Directory(exists=True,
                                desc="Root path common to templates.")
@@ -1329,7 +1329,7 @@ class SelectFiles(IOBase):
             setattr(self.outputs, field, filelist)
 
 
-class DataFinderInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class DataFinderInputSpec(DynamicTraitedSpec, BaseInputSpec):
     root_paths = traits.Either(traits.List(),
                                traits.Str(),
                                mandatory=True,)
@@ -1472,7 +1472,7 @@ class DataFinder(IOBase):
         return runtime
 
 
-class FSSourceInputSpec(BaseInterfaceInputSpec):
+class FSSourceInputSpec(BaseInputSpec):
     subjects_dir = Directory(mandatory=True,
                              desc='Freesurfer subjects directory.')
     subject_id = traits.Str(mandatory=True,
@@ -1615,7 +1615,7 @@ class FreeSurferSource(IOBase):
                 setattr(self.outputs, k, list_to_filename(val))
 
 
-class XNATSourceInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class XNATSourceInputSpec(DynamicTraitedSpec, BaseInputSpec):
 
     query_template = traits.Str(
         mandatory=True,
@@ -1828,7 +1828,7 @@ class XNATSource(IOBase):
                 setattr(self.outputs, key, getattr(self.outputs, key)[0])
 
 
-class XNATSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class XNATSinkInputSpec(DynamicTraitedSpec, BaseInputSpec):
 
     _outputs = traits.Dict(traits.Str, value={}, usedefault=True)
 
@@ -2055,7 +2055,7 @@ def push_provenance():
     pass
 
 
-class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class SQLiteSinkInputSpec(DynamicTraitedSpec, BaseInputSpec):
     database_file = File(exists=True, mandatory=True)
     table_name = traits.Str(mandatory=True)
 
@@ -2103,7 +2103,7 @@ class SQLiteSink(IOBase):
         return None
 
 
-class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class MySQLSinkInputSpec(DynamicTraitedSpec, BaseInputSpec):
     host = traits.Str('localhost', mandatory=True,
                       requires=['username', 'password'],
                       xor=['config'], usedefault=True)
@@ -2422,7 +2422,7 @@ class SSHDataGrabber(DataGrabber):
         return client
 
 
-class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class JSONFileGrabberInputSpec(DynamicTraitedSpec, BaseInputSpec):
     in_file = File(exists=True, desc='JSON source file')
     defaults = traits.Dict(desc=('JSON dictionary that sets default output'
                                  'values, overridden by values found in in_file'))
@@ -2476,7 +2476,7 @@ class JSONFileGrabber(IOBase):
                     setattr(self.outputs, key, value)
 
 
-class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class JSONFileSinkInputSpec(DynamicTraitedSpec, BaseInputSpec):
     out_file = File(desc='JSON sink file')
     in_dict = traits.Dict(value={}, usedefault=True,
                           desc='input JSON dictionary')

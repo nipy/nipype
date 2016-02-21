@@ -27,11 +27,11 @@ else:
     nipy_version = nipy.__version__
 
 from ..base import (TraitedSpec, BaseInterface, traits,
-                    BaseInterfaceInputSpec, isdefined, File,
+                    BaseInputSpec, isdefined, File,
                     InputMultiPath, OutputMultiPath)
 
 
-class ComputeMaskInputSpec(BaseInterfaceInputSpec):
+class ComputeMaskInputSpec(BaseInputSpec):
     mean_volume = File(exists=True, mandatory=True,
                        desc="mean EPI image, used to compute the threshold for the mask")
     reference_volume = File(exists=True,
@@ -54,7 +54,7 @@ class ComputeMask(BaseInterface):
         from nipy.labs.mask import compute_mask
         args = {}
         for key in [k for k, _ in list(self.inputs.items())
-                    if k not in BaseInterfaceInputSpec().trait_names()]:
+                    if k not in BaseInputSpec().trait_names()]:
             value = getattr(self.inputs, key)
             if isdefined(value):
                 if key in ['mean_volume', 'reference_volume']:
@@ -74,7 +74,7 @@ class ComputeMask(BaseInterface):
         self.outputs.brain_mask = self._brain_mask_path
         
 
-class FmriRealign4dInputSpec(BaseInterfaceInputSpec):
+class FmriRealign4dInputSpec(BaseInputSpec):
 
     in_file = InputMultiPath(File(exists=True),
                              mandatory=True,
@@ -193,7 +193,7 @@ class FmriRealign4d(BaseInterface):
         self.outputs.par_file = self._par_file_path
         
 
-class SpaceTimeRealignerInputSpec(BaseInterfaceInputSpec):
+class SpaceTimeRealignerInputSpec(BaseInputSpec):
 
     in_file = InputMultiPath(File(exists=True),
                              mandatory=True, min_ver='0.4.0.dev',
@@ -322,7 +322,7 @@ class SpaceTimeRealigner(BaseInterface):
         self.outputs.par_file = self._par_file_path
         
 
-class TrimInputSpec(BaseInterfaceInputSpec):
+class TrimInputSpec(BaseInputSpec):
     in_file = File(
         exists=True, mandatory=True,
         desc="EPI image to trim")

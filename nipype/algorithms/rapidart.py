@@ -33,14 +33,14 @@ from ..external.six import string_types
 
 from ..utils.filemanip import filename_to_list, save_json, split_filename
 from ..utils.misc import find_indices
-from ..interfaces.base import (traits, File, GenMultiFile, isdefined, BaseInterfaceInputSpec,
+from ..interfaces.base import (traits, File, GenMultiFile, isdefined, BaseInputSpec,
                                TraitedSpec, InputMultiPath, OutputMultiPath, BaseInterface)
 
 from .. import logging, config
 iflogger = logging.getLogger('interface')
 
 
-class ArtifactDetectInputSpec(BaseInterfaceInputSpec):
+class ArtifactDetectInputSpec(BaseInputSpec):
     realigned_files = InputMultiPath(File(exists=True),
                                      desc="Names of realigned functional data files",
                                      mandatory=True)
@@ -426,7 +426,7 @@ class ArtifactDetect(BaseInterface):
         return runtime
 
 
-class StimCorrInputSpec(BaseInterfaceInputSpec):
+class StimCorrInputSpec(BaseInputSpec):
     realignment_parameters = InputMultiPath(
         File(exists=True), mandatory=True,
         desc='Names of realignment parameters corresponding to the functional data files')

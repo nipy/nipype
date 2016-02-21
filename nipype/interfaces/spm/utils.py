@@ -6,7 +6,7 @@ import numpy as np
 from .base import SPMCommandInputSpec, SPMCommand, Info, scans_for_fnames, scans_for_fname
 from ..matlab import MatlabCommand
 from ..base import (TraitedSpec, BaseInterface,
-                    BaseInterfaceInputSpec, isdefined,
+                    BaseInputSpec, isdefined,
                     OutputMultiPath, InputMultiPath)
 from ..base import File, traits
 from ...utils.filemanip import split_filename, fname_presuffix, filename_to_list, list_to_filename

@@ -22,10 +22,10 @@ else:
     from nipy.algorithms.registration.affine import Affine
 
 from ..base import (TraitedSpec, BaseInterface, traits,
-                    BaseInterfaceInputSpec, File, isdefined)
+                    BaseInputSpec, File, isdefined)
 
 
-class SimilarityInputSpec(BaseInterfaceInputSpec):
+class SimilarityInputSpec(BaseInputSpec):
     volume1 = File(exists=True, desc="3D volume", mandatory=True)
     volume2 = File(exists=True, desc="3D volume", mandatory=True)
     mask1 = File(exists=True, desc="3D volume")

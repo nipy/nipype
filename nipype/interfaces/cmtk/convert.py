@@ -14,7 +14,7 @@ import string
 import warnings
 import networkx as nx
 
-from nipype.interfaces.base import (BaseInterface, BaseInterfaceInputSpec, traits,
+from nipype.interfaces.base import (BaseInterface, BaseInputSpec, traits,
                                     File, TraitedSpec, InputMultiPath, isdefined)
 from nipype.utils.filemanip import split_filename
 from nipype.utils.misc import package_check
@@ -28,7 +28,7 @@ else:
     import cfflib as cf
 
 
-class CFFConverterInputSpec(BaseInterfaceInputSpec):
+class CFFConverterInputSpec(BaseInputSpec):
     graphml_networks = InputMultiPath(File(exists=True), desc='list of graphML networks')
     gpickled_networks = InputMultiPath(File(exists=True), desc='list of gpickled Networkx graphs')
 
@@ -204,7 +204,7 @@ class CFFConverter(BaseInterface):
         self.outputs.connectome_file = op.abspath(name + ext)
         
 
-class MergeCNetworksInputSpec(BaseInterfaceInputSpec):
+class MergeCNetworksInputSpec(BaseInputSpec):
     in_files = InputMultiPath(File(exists=True), mandatory=True, desc='List of CFF files to extract networks from')
     out_file = File('merged_network_connectome.cff', usedefault=True, desc='Output CFF file with all the networks added')
 

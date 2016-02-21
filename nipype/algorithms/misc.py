@@ -31,7 +31,7 @@ import scipy.stats as stats
 from . import metrics as nam
 from ..utils.filemanip import fname_presuffix, split_filename
 from ..interfaces.base import (traits, File, GenFile, GenMultiFile, isdefined, Undefined,
-                               BaseInterfaceInputSpec, TraitedSpec, InputMultiPath,
+                               BaseInputSpec, TraitedSpec, InputMultiPath,
                                OutputMultiPath, DynamicTraitedSpec, BaseInterface)
 
 
@@ -39,7 +39,7 @@ from .. import logging
 IFLOGGER = logging.getLogger('interface')
 
 
-class PickAtlasInputSpec(BaseInterfaceInputSpec):
+class PickAtlasInputSpec(BaseInputSpec):
     atlas = File(exists=True, desc="Location of the atlas that will be used.",
                  mandatory=True)
     labels = traits.Either(
@@ -110,7 +110,7 @@ class PickAtlas(BaseInterface):
         return nb.Nifti1Image(newdata, nii.affine, nii.header)
 
 
-class SimpleThresholdInputSpec(BaseInterfaceInputSpec):
+class SimpleThresholdInputSpec(BaseInputSpec):
     volumes = InputMultiPath(File(exists=True), mandatory=True,
                              desc='volumes to be thresholded')
     threshold = traits.Float(mandatory=True, desc='volumes to be thresholdedeverything below '
@@ -145,7 +145,7 @@ class SimpleThreshold(BaseInterface):
         return runtime
 
 
-class ModifyAffineInputSpec(BaseInterfaceInputSpec):
+class ModifyAffineInputSpec(BaseInputSpec):
     volumes = InputMultiPath(
         File(exists=True), mandatory=True,
         desc='volumes which affine matrices will be modified')
@@ -176,7 +176,7 @@ class ModifyAffine(BaseInterface):
         return runtime
 
 
-class CreateNiftiInputSpec(BaseInterfaceInputSpec):
+class CreateNiftiInputSpec(BaseInputSpec):
     data_file = File(exists=True, mandatory=True, desc="ANALYZE img file")
     header_file = File(
         exists=True, mandatory=True, desc="corresponding ANALYZE hdr file")
@@ -210,7 +210,7 @@ class CreateNifti(BaseInterface):
         return runtime
 
 
-class TSNRInputSpec(BaseInterfaceInputSpec):
+class TSNRInputSpec(BaseInputSpec):
     in_file = InputMultiPath(File(exists=True), mandatory=True,
                              desc='realigned 4D file or a list of 3D files')
     regress_poly = traits.Range(low=1, desc='Remove polynomials')
@@ -291,7 +291,7 @@ class TSNR(BaseInterface):
         return runtime
 
 
-class GunzipInputSpec(BaseInterfaceInputSpec):
+class GunzipInputSpec(BaseInputSpec):
     in_file = File(exists=True, mandatory=True)
     out_file = GenFile(ns='in_file', template='%s', name_remove='.gz',
                     keep_extension=False, desc='output file')
@@ -592,7 +592,7 @@ class AddCSVColumn(BaseInterface):
         return runtime
 
 
-class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInterfaceInputSpec):
+class AddCSVRowInputSpec(DynamicTraitedSpec, BaseInputSpec):
     in_file = File(mandatory=True, desc='Input comma-separated value (CSV) files')
     _outputs = traits.Dict(traits.Any, value={}, usedefault=True)
 

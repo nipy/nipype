@@ -19,10 +19,10 @@ from scipy.linalg import pinv
 import nibabel as nb
 
 from builtins import range
-from ..interfaces.base import (traits, File, BaseInterface, BaseInterfaceInputSpec,
+from ..interfaces.base import (traits, File, BaseInterface, BaseInputSpec,
                                TraitedSpec)
 
-class ICCInputSpec(BaseInterfaceInputSpec):
+class ICCInputSpec(BaseInputSpec):
     subjects_sessions = traits.List(traits.List(File(exists=True)),
                                     desc="n subjects m sessions 3D stat files",
                                     mandatory=True)
