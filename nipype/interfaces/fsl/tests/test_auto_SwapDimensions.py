@@ -20,7 +20,6 @@ def test_SwapDimensions_inputs():
     mandatory=True,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     ),
     output_type=dict(usedefault=True,

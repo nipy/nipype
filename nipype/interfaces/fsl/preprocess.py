@@ -580,8 +580,8 @@ class ApplyXfm(FLIRT):
 class MCFLIRTInputSpec(FSLCommandInputSpec):
     in_file = File(exists=True, position=0, argstr="-in %s", mandatory=True,
                    desc="timeseries to motion-correct")
-    out_file = File(argstr='-out %s', genfile=True,
-                    desc="file to write", hash_files=False)
+    out_file = GenFile(template='{in_file}_mcf{output_type_}', argstr='-out %s',
+                       hash_files=False, desc="file to write")
     cost = traits.Enum(
         'mutualinfo', 'woods', 'corratio', 'normcorr', 'normmi', 'leastsquares',
         argstr='-cost %s', desc="cost function to optimize")
@@ -691,20 +691,6 @@ class MCFLIRT(FSLCommand):
         if isdefined(self.inputs.save_rms) and self.inputs.save_rms:
             outfile = self.outputs.out_file
             self.outputs.rms_files = [outfile + '_abs.rms', outfile + '_rel.rms']
-
-    def _gen_filename(self, name):
-        if name == 'out_file':
-            return self._gen_outfilename()
-        return None
-
-    def _gen_outfilename(self):
-        out_file = self.inputs.out_file
-        if isdefined(out_file):
-            out_file = os.path.realpath(out_file)
-        if not isdefined(out_file) and isdefined(self.inputs.in_file):
-            out_file = self._gen_fname(self.inputs.in_file,
-                                       suffix='_mcf')
-        return os.path.abspath(out_file)
 
 
 class FNIRTInputSpec(FSLCommandInputSpec):

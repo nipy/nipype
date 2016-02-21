@@ -17,20 +17,60 @@ standard_library.install_aliases()
 from builtins import range
 from builtins import object
 
+from traits.api import Interface, provides
+from ...utils.filemanip import md5, auto_hash, split_filename
+from ...utils.misc import is_container
+from ...utils.errors import InterfaceInputsError
+from ... import logging, LooseVersion
+from ... import __version__
+from ...external.six import string_types
+
 from .traits_extension import (traits, Undefined, TraitDictObject, TraitListObject, TraitError,
                                isdefined, File, has_metadata)
-from ..utils.filemanip import md5, auto_hash, split_filename
-from ..utils.misc import is_container
-from ..utils.errors import InterfaceInputsError
-from .. import logging, LooseVersion
-from .. import __version__
-from ..external.six import string_types
+
 
 NIPYPE_VERSION = LooseVersion(__version__)
 IFLOGGER = logging.getLogger('interface')
 __docformat__ = 'restructuredtext'
 
+class IInputSpec(Interface):
+    """The abstract interface for inputs specifications"""
+    def items(self):
+        """Name, trait generator for user modifiable traits"""
 
+    def check_inputs(self):
+        """Checks the correctness of inputs set"""
+
+    def check_version(self):
+        """
+        Checks if the version the implemented interface
+        matches that of the installed software
+        """
+
+    def get_outputs(self):
+        """Infers the outputs and returns a dictionary of results"""
+
+    @classmethod
+    def help(cls):
+        """Print help of these traits"""
+
+
+class IOutputSpec(Interface):
+    """The abstract interface for outputs specifications"""
+    def items(self):
+        """Name, trait generator for user modifiable traits"""
+
+    @classmethod
+    def help(cls):
+        """Print help of these traits"""
+
+
+class IInputCommandLineSpec(Interface):
+    def parse_args(self):
+        """Parse inputs to commandline arguments"""
+
+
+@provides(IInputSpec)
 class BaseTraitedSpec(traits.HasTraits):
     """Provide a few methods necessary to support nipype interface api
 
@@ -86,12 +126,6 @@ class BaseTraitedSpec(traits.HasTraits):
         """
         for name in sorted(self.copyable_trait_names()):
             yield name, self.traits()[name]
-
-    def namesource_items(self):
-        """Get inputs that will generate outputs"""
-        meta = dict(name_source=lambda t: t is not None)
-        meta_ns = dict(ns=lambda t: t is not None)
-        return list(self.traits(**meta).items()) + list(self.traits(**meta_ns).items())
 
     def _check_deprecated(self, name, new):
         """ Generate a warning when a deprecated trait is set """
@@ -331,6 +365,7 @@ class TraitedSpec(BaseTraitedSpec):
     _ = traits.Disallow
 
 
+@provides(IInputSpec)
 class BaseInputSpec(BaseTraitedSpec):
     """ Base class for InputSpecs with strict traits """
     _ = traits.Disallow
@@ -489,6 +524,7 @@ class BaseInputSpec(BaseTraitedSpec):
         return helpstr
 
 
+@provides(IInputSpec)
 class DynamicTraitedSpec(BaseTraitedSpec):
     """ A subclass to handle dynamic traits
 
@@ -520,6 +556,7 @@ class DynamicTraitedSpec(BaseTraitedSpec):
         return dup
 
 
+@provides(IInputSpec)
 class BaseInterfaceInputSpec(BaseInputSpec):
     """ BaseInputSpec with an input added to ignore exceptions """
     ignore_exception = traits.Bool(False, usedefault=True, nohash=True,
@@ -527,18 +564,10 @@ class BaseInterfaceInputSpec(BaseInputSpec):
                                         ' in case the interface fails to run')
 
 
+@provides(IInputSpec, IInputCommandLineSpec)
 class CommandLineInputSpec(BaseInterfaceInputSpec):
     """ The InputSpec for interfaces wrapping a command line """
     args = traits.Str(argstr='%s', desc='Additional parameters to the command')
-    environ = traits.DictStrStr(desc='Environment variables', usedefault=True,
-                                nohash=True)
-    # This input does not have a "usedefault=True" so the set_default_terminal_output()
-    # method would work
-    terminal_output = traits.Enum(
-        'stream', 'allatonce', 'file', 'none', nohash=True,
-        desc='Control terminal output: `stream` - displays to terminal immediately (default), '
-             '`allatonce` - waits till command is finished to display output, `file` - '
-             'writes output to file, `none` - output is ignored')
 
     def _format_arg(self, name, spec=None, value=None):
         """A helper function for parse_args
@@ -637,6 +666,7 @@ class StdOutCommandLineOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='file containing the standard output')
 
 
+@provides(IInputSpec, IInputCommandLineSpec)
 class MpiCommandLineInputSpec(CommandLineInputSpec):
     """Appends the necessary inputs to run MpiCommandLine interfaces"""
     use_mpi = traits.Bool(False, usedefault=True,
@@ -645,6 +675,7 @@ class MpiCommandLineInputSpec(CommandLineInputSpec):
                               'is managed externally (e.g. through SGE)')
 
 
+@provides(IInputSpec, IInputCommandLineSpec)
 class SEMLikeCommandLineInputSpec(CommandLineInputSpec):
     """Redefines the formatting of outputs"""
 

@@ -16,11 +16,11 @@ all of these bugs and they've been fixed in enthought svn repository
 
 """
 import os
+import os.path as op
 import re
 import itertools as itools
 
-from ast import literal_eval
-from ..external.six import string_types
+from ...external.six import string_types
 # perform all external trait imports here
 import traits
 if traits.__version__ < '3.7.0':
@@ -30,10 +30,11 @@ from traits.trait_handlers import TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
 from traits.trait_base import _Undefined
 
-from ..utils.filemanip import split_filename
+from ...utils.filemanip import split_filename
 
-from .. import logging
+from ... import logging
 IFLOGGER = logging.getLogger('interface')
+
 
 class BaseFile (traits.BaseStr):
     """ Defines a trait whose value must be the name of a file.
@@ -82,7 +83,7 @@ class BaseFile (traits.BaseStr):
         validated_value = super(BaseFile, self).validate(object, name, value)
         if not self.exists:
             return validated_value
-        elif os.path.isfile(value):
+        elif op.isfile(value):
             return validated_value
 
         self.error(object, name, value)
@@ -191,7 +192,7 @@ class GenFile(File):
         validated_value = super(GenFile, self).validate(object, name, value)
         if not self.exists:
             return validated_value
-        elif os.path.isfile(value):
+        elif op.isfile(value):
             return validated_value
 
         self.error(object, name, value)
@@ -613,7 +614,7 @@ class BaseDirectory (traits.BaseStr):
         if not self.exists:
             return validated_value
 
-        if os.path.isdir(value):
+        if op.isdir(value):
             return validated_value
 
         self.error(object, name, value)
@@ -650,6 +651,37 @@ class Directory (BaseDirectory):
 
         super(Directory, self).__init__(value, auto_set, entries, exists,
                                         **metadata)
+
+class Command(traits.BaseStr):
+    """ Defines a trait whose value must be an executable command
+    """
+
+    # A description of the type of value this trait accepts:
+    info_text = 'an executable file'
+    
+    def __init__(self, path='', **metadata):
+        super(Command, self).__init__(path, **metadata)
+        self.metadata['path'] = path
+
+    def validate(self, obj, name, value):
+        """ Validates that a specified value is valid for this trait.
+
+            Note: The 'fast validator' version performs this check in C.
+        """
+        validated_value = super(Command, self).validate(object, name, value)
+        env = getattr(obj, 'environ', None)
+        if self.metadata['path']:
+            valid = op.isfile(op.join(self.metadata['path'],
+                                      validated_value.split()[0]))
+        else:
+            valid, cmdpath = _exists_in_path(validated_value.split()[0], env)
+            self.metadata['path'] = cmdpath
+        if valid:
+            return validated_value
+        raise TraitError(
+            'The \'%s\' trait of an interface must be an executable '
+            'file, but \'%s\' was not found in the system\'s PATH.' %
+            (name, value))
 
 
 """
@@ -715,3 +747,21 @@ def _parse_name_source(name_source):
         yield (name.split('|'), indexing, fchunk)
 
 
+def _exists_in_path(cmd, environ=None):
+    """
+    Based on a code snippet from
+     http://orip.org/2009/08/python-checking-if-executable-exists-in.html
+    """
+    # Read environ from variable, use system's environ as failback
+    if environ is not None:
+        environ = {}
+
+    input_environ = environ.get("PATH", os.environ.get("PATH", ""))
+    extensions = os.environ.get("PATHEXT", "").split(os.pathsep)
+    for directory in input_environ.split(os.pathsep):
+        base = op.join(directory, cmd)
+        options = [base] + [(base + ext) for ext in extensions]
+        for filename in options:
+            if op.exists(filename):
+                return True, filename
+    return False, None

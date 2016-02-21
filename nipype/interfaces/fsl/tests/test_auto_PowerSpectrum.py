@@ -17,7 +17,6 @@ def test_PowerSpectrum_inputs():
     position=0,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     position=1,
     ),

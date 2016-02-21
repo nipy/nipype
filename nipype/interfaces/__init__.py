@@ -9,5 +9,6 @@ Requires Packages to be installed
 from __future__ import absolute_import
 __docformat__ = 'restructuredtext'
 
+from . import base
 from .io import DataGrabber, DataSink, SelectFiles
 from .utility import IdentityInterface, Rename, Function, Select, Merge

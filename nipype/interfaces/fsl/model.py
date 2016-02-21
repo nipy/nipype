@@ -1328,13 +1328,25 @@ class MultipleRegressDesign(BaseInterface):
 
 
 class SMMInputSpec(FSLCommandInputSpec):
+    logdir = traits.Directory('logdir', argstr='--ld=%s', usedefault=True, mandatory=True,
+                              position=0, desc='output directory base')
     spatial_data_file = File(
-        exists=True, position=0, argstr='--sdf="%s"', mandatory=True,
+        exists=True, position=1, argstr='--sdf="%s"', mandatory=True,
         desc="statistics spatial map", copyfile=False)
-    mask = File(exists=True, position=1, argstr='--mask="%s"', mandatory=True,
+    mask = File(exists=True, position=2, argstr='--mask="%s"', mandatory=True,
                 desc="mask file", copyfile=False)
     no_deactivation_class = traits.Bool(position=2, argstr="--zfstatmode",
                                         desc="enforces no deactivation class")
+
+    null_p_map = GenFile(
+        template='{logdir}/{spatial_data_file}_w1mean.txt', hash_files=False,
+        desc='output null p-values map')
+    activation_p_map = GenFile(
+        template='{logdir}/{spatial_data_file}_w2mean.txt', hash_files=False,
+        desc='output activation p-values map')
+    deactivation_p_map = GenFile(
+        template='{logdir}/{spatial_data_file}_w3mean.txt', hash_files=False,
+        desc='output deactivation p-values map')
 
 
 class SMMOutputSpec(TraitedSpec):
@@ -1349,19 +1361,9 @@ class SMM(FSLCommand):
     Mixture Models with Adaptive Spatial Regularisation for Segmentation with an Application to FMRI Data;
     Woolrich, M., Behrens, T., Beckmann, C., and Smith, S.; IEEE Trans. Medical Imaging, 24(1):1-11, 2005.
     """
-    _cmd = 'mm --ld=logdir'
+    _cmd = 'mm'
     input_spec = SMMInputSpec
     output_spec = SMMOutputSpec
-
-    def _post_run(self):
-        # TODO get the true logdir from the stdout
-        self.outputs.null_p_map = self._gen_fname(basename="w1_mean",
-                                                cwd="logdir")
-        self.outputs.activation_p_map = self._gen_fname(
-            basename="w2_mean", cwd="logdir")
-        if not isdefined(self.inputs.no_deactivation_class) or not self.inputs.no_deactivation_class:
-            self.outputs.deactivation_p_map = self._gen_fname(
-                basename="w3_mean", cwd="logdir")
 
 
 class MELODICInputSpec(FSLCommandInputSpec):
@@ -1647,23 +1649,6 @@ class Cluster(FSLCommand):
     input_spec = ClusterInputSpec
     output_spec = ClusterOutputSpec
     _cmd = 'cluster'
-
-    def _post_run(self):
-
-        for key, suffix in list(self.filemap.items()):
-            outkey = key[4:]
-            inval = getattr(self.inputs, key)
-            if isdefined(inval):
-                if isinstance(inval, bool):
-                    if inval:
-                        change_ext = True
-                        if suffix.endswith('.txt'):
-                            change_ext = False
-                        setattr(self.outputs, outkey, self._gen_fname(self.inputs.in_file,
-                                                          suffix='_' + suffix,
-                                                          change_ext=change_ext))
-                else:
-                    setattr(self.outputs, outkey, os.path.abspath(inval))
 
 
 class RandomiseInputSpec(FSLCommandInputSpec):

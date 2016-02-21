@@ -113,6 +113,9 @@ class FSLCommandInputSpec(CommandLineInputSpec):
     output_type = traits.Trait(FSLOUTPUTTYPE, Info.ftypes, usedefault=True,
                                desc='FSL output type')
 
+    # This is the easiest way to manage both synchronized
+    def _output_type_changed(self, new):
+        self.environ.update({'FSLOUTPUTTYPE': new})
 
 class FSLCommand(CommandLine):  # pylint: disable=W0223
     """Base support for FSL commands."""
@@ -121,11 +124,8 @@ class FSLCommand(CommandLine):  # pylint: disable=W0223
 
     def __init__(self, **inputs):
         super(FSLCommand, self).__init__(**inputs)
-        self.inputs.on_trait_change(self._output_update, 'output_type')
         self.inputs.output_type = FSLOUTPUTTYPE
-
-    def _output_update(self):
-        self.inputs.environ.update({'FSLOUTPUTTYPE': self.inputs.output_type})
+        self.inputs.environ.update({'FSLOUTPUTTYPE': FSLOUTPUTTYPE})
 
     @property
     def version(self):

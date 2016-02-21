@@ -1165,7 +1165,6 @@ class TractSkeleton(FSLCommand):
 
 
 class DistanceMapInputSpec(FSLCommandInputSpec):
-
     in_file = File(exists=True, mandatory=True, argstr="--in=%s",
                    desc="image to calculate distance values for")
     mask_file = File(exists=True, argstr="--mask=%s",
@@ -1173,7 +1172,15 @@ class DistanceMapInputSpec(FSLCommandInputSpec):
     invert_input = traits.Bool(argstr="--invert", desc="invert input image")
     local_max_file = traits.Either(traits.Bool, File, argstr="--localmax=%s",
                                    desc="write an image of the local maxima", hash_files=False)
-    distance_map = File(genfile=True, argstr="--out=%s", desc="distance map to write", hash_files=False)
+    distance_map = GenFile(template='{in_file}_dstmap{output_type_}', argstr="--out=%s",
+                           hash_files=False, desc="distance map to write")
+
+
+    def _format_arg(self, name, spec, value):
+        if name == 'local_max_file':
+            if isinstance(value, bool):
+                return spec.argstr % self.outputs.local_max_file
+        return super(DistanceMap, self)._format_arg(name, spec, value)
 
 
 class DistanceMapOutputSpec(TraitedSpec):
@@ -1198,12 +1205,6 @@ class DistanceMap(FSLCommand):
     _cmd = 'distancemap'
     input_spec = DistanceMapInputSpec
     output_spec = DistanceMapOutputSpec
-
-    def _format_arg(self, name, spec, value):
-        if name == 'local_max_file':
-            if isinstance(value, bool):
-                return spec.argstr % self.outputs.local_max_file
-        return super(DistanceMap, self)._format_arg(name, spec, value)
 
     def _post_run(self):
         _si = self.inputs

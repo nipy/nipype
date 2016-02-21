@@ -20,7 +20,7 @@ def test_SigLoss_inputs():
     mask_file=dict(argstr='-m %s',
     ),
     out_file=dict(argstr='-s %s',
-    genfile=True,
+    hash_files=False,
     ),
     output_type=dict(usedefault=True,
     ),

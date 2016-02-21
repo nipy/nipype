@@ -16,7 +16,6 @@ def test_Reorient2Std_inputs():
     mandatory=True,
     ),
     out_file=dict(argstr='%s',
-    genfile=True,
     hash_files=False,
     ),
     output_type=dict(usedefault=True,
