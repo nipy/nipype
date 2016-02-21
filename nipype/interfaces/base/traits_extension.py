@@ -19,8 +19,6 @@ import os
 import os.path as op
 import re
 import itertools as itools
-
-from ...external.six import string_types
 # perform all external trait imports here
 import traits
 if traits.__version__ < '3.7.0':
@@ -30,8 +28,8 @@ from traits.trait_handlers import TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
 from traits.trait_base import _Undefined
 
+from ...external.six import string_types
 from ...utils.filemanip import split_filename
-
 from ... import logging
 IFLOGGER = logging.getLogger('interface')
 
@@ -75,18 +73,18 @@ class BaseFile (traits.BaseStr):
 
         super(BaseFile, self).__init__(value, **metadata)
 
-    def validate(self, object, name, value):
+    def validate(self, obj, name, value):
         """ Validates that a specified value is valid for this trait.
 
             Note: The 'fast validator' version performs this check in C.
         """
-        validated_value = super(BaseFile, self).validate(object, name, value)
+        validated_value = super(BaseFile, self).validate(obj, name, value)
         if not self.exists:
             return validated_value
         elif op.isfile(value):
             return validated_value
 
-        self.error(object, name, value)
+        self.error(obj, name, value)
 
 
 class File (BaseFile):
@@ -180,7 +178,7 @@ class GenFile(File):
                                       **metadata)
 
 
-    def validate(self, object, name, value):
+    def validate(self, obj, name, value):
         """ Validates that a specified value is valid for this trait.
 
             Note: The 'fast validator' version performs this check in C.
@@ -189,13 +187,13 @@ class GenFile(File):
         if not isdefined(value):
             return value
 
-        validated_value = super(GenFile, self).validate(object, name, value)
+        validated_value = super(GenFile, self).validate(obj, name, value)
         if not self.exists:
             return validated_value
         elif op.isfile(value):
             return validated_value
 
-        self.error(object, name, value)
+        self.error(obj, name, value)
 
     def get(self, obj, name):
         # Compute expected name iff trait is not set
@@ -260,6 +258,7 @@ class GenFile(File):
         return self.get_value(obj, name)
 
     def set(self, obj, name, value):
+        """Implement set so that the trait is modifiable"""
         self.set_value(obj, name, value)
 
 
@@ -605,19 +604,19 @@ class BaseDirectory (traits.BaseStr):
 
         super(BaseDirectory, self).__init__(value, **metadata)
 
-    def validate(self, object, name, value):
+    def validate(self, obj, name, value):
         """ Validates that a specified value is valid for this trait.
 
             Note: The 'fast validator' version performs this check in C.
         """
-        validated_value = super(BaseDirectory, self).validate(object, name, value)
+        validated_value = super(BaseDirectory, self).validate(obj, name, value)
         if not self.exists:
             return validated_value
 
         if op.isdir(value):
             return validated_value
 
-        self.error(object, name, value)
+        self.error(obj, name, value)
 
 
 class Directory (BaseDirectory):
@@ -658,24 +657,17 @@ class Command(traits.BaseStr):
 
     # A description of the type of value this trait accepts:
     info_text = 'an executable file'
-    
-    def __init__(self, path='', **metadata):
-        super(Command, self).__init__(path, **metadata)
-        self.metadata['path'] = path
 
     def validate(self, obj, name, value):
         """ Validates that a specified value is valid for this trait.
 
             Note: The 'fast validator' version performs this check in C.
         """
-        validated_value = super(Command, self).validate(object, name, value)
-        env = getattr(obj, 'environ', None)
-        if self.metadata['path']:
-            valid = op.isfile(op.join(self.metadata['path'],
-                                      validated_value.split()[0]))
-        else:
-            valid, cmdpath = _exists_in_path(validated_value.split()[0], env)
-            self.metadata['path'] = cmdpath
+        validated_value = super(Command, self).validate(obj, name, value)
+        env = obj.environ
+        IFLOGGER.debug('Environ now: %s', env)
+        valid, _ = _exists_in_path(validated_value.split()[0], env)
+        
         if valid:
             return validated_value
         raise TraitError(
@@ -684,37 +676,30 @@ class Command(traits.BaseStr):
             (name, value))
 
 
-"""
-The functions that pop-up the Traits GUIs, edit_traits and
-configure_traits, were failing because all of our inputs default to
-Undefined deep and down in traits/ui/wx/list_editor.py it checks for
-the len() of the elements of the list.  The _Undefined class in traits
-does not define the __len__ method and would error.  I tried defining
-our own Undefined and even sublassing Undefined, but both of those
-failed with a TraitError in our initializer when we assign the
-Undefined to the inputs because of an incompatible type:
 
-TraitError: The 'vertical_gradient' trait of a BetInputSpec instance must be a float, but a value of <undefined> <class 'nipype.interfaces.traits._Undefined'> was specified.
+# The functions that pop-up the Traits GUIs, edit_traits and
+# configure_traits, were failing because all of our inputs default to
+# Undefined deep and down in traits/ui/wx/list_editor.py it checks for
+# the len() of the elements of the list.  The _Undefined class in traits
+# does not define the __len__ method and would error.  I tried defining
+# our own Undefined and even sublassing Undefined, but both of those
+# failed with a TraitError in our initializer when we assign the
+# Undefined to the inputs because of an incompatible type:
 
-So... in order to keep the same type but add the missing method, I
-monkey patched.
-"""
+# TraitError: The 'vertical_gradient' trait of a BetInputSpec instance must be a float, but a value of <undefined> <class 'nipype.interfaces.traits._Undefined'> was specified.
 
-
-def length(self):
-    return 0
-
+# So... in order to keep the same type but add the missing method, I
+# monkey patched.
 ##########################################################################
 # Apply monkeypatch here
-_Undefined.__len__ = length
+_Undefined.__len__ = lambda cls: 0
 ##########################################################################
 
 Undefined = _Undefined()
 
-
-def isdefined(object):
-    return not isinstance(object, _Undefined)
-
+def isdefined(obj):
+    """Checks if a certain trait was set"""
+    return not isinstance(obj, _Undefined)
 
 def has_metadata(trait, metadata, value=None, recursive=True):
     """
@@ -746,14 +731,13 @@ def _parse_name_source(name_source):
         name = fchunk.split('.')[0].split('!')[0].split(':')[0].split('[')[0]
         yield (name.split('|'), indexing, fchunk)
 
-
 def _exists_in_path(cmd, environ=None):
     """
     Based on a code snippet from
      http://orip.org/2009/08/python-checking-if-executable-exists-in.html
     """
     # Read environ from variable, use system's environ as failback
-    if environ is not None:
+    if environ is None:
         environ = {}
 
     input_environ = environ.get("PATH", os.environ.get("PATH", ""))

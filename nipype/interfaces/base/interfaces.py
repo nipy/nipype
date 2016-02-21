@@ -84,6 +84,13 @@ class IBase(Interface):
     def post_run(self):
         """Hook executed after running"""
 
+class ICommandBase(Interface):
+    """Abstract class for interfaces wrapping a command line"""
+
+    @property
+    def cmdline(self):
+        """The command line that is to be executed""" 
+
 
 @provides(IBase)
 class BaseInterface(HasTraits):
@@ -104,19 +111,6 @@ class BaseInterface(HasTraits):
     def __init__(self, **inputs):
         self.inputs = self._input_spec()
         self.inputs.set(**inputs)
-
-    @classmethod
-    def help(cls, returnhelp=False):
-        """ Prints class help """
-
-        docstring = ['']
-        if cls.__doc__:
-            docstring = trim(cls.__doc__).split('\n') + docstring
-        
-        allhelp = '\n'.join(docstring + cls._input_spec.help() + cls._output_spec.help())
-        if returnhelp:
-            return allhelp
-        print(allhelp)
 
     def _run_wrapper(self, runtime):
         sysdisplay = os.getenv('DISPLAY')
@@ -253,8 +247,21 @@ class BaseInterface(HasTraits):
             self.status = 'finished'
         return results
 
+    @classmethod
+    def help(cls, returnhelp=False):
+        """ Prints class help """
 
-@provides(IBase)
+        docstring = ['']
+        if cls.__doc__:
+            docstring = trim(cls.__doc__).split('\n') + docstring
+        
+        allhelp = '\n'.join(docstring + cls._input_spec.help() + cls._output_spec.help())
+        if returnhelp:
+            return allhelp
+        print(allhelp)
+
+
+@provides(IBase, ICommandBase)
 class CommandLine(BaseInterface):
     """Implements functionality to interact with command line programs
     class must be instantiated with a command argument
@@ -309,12 +316,21 @@ class CommandLine(BaseInterface):
         if not new:
             try:
                 display_var = config.get('execution', 'display_variable')
+                self.environ['DISPLAY'] = display_var
             except NoOptionError:
-                return
-            out_environ = {'DISPLAY': display_var}
-            self.environ.update(out_environ)
+                pass
 
-    def __init__(self, command=None, **inputs):
+
+    def __init__(self, command=None, environ=None, **inputs):        
+        # Force refresh of the redirect_x trait
+        self._redirect_x_changed(self.redirect_x)
+
+        # First modify environment variables if passed
+        if environ is not None:
+            for k, v in list(environ.items()):
+                self.environ[k] = v
+
+        # Set command to force validation
         if command is not None:
             self.command = command
         elif self._cmd is not None:
@@ -322,11 +338,9 @@ class CommandLine(BaseInterface):
         else:
             raise RuntimeError('CommandLine interfaces require'
                                ' the definition of a command')
-        self._redirect_x_changed(self.redirect_x)
-        self.inputs = self._input_spec()
-        self.inputs.set(environ=self.environ,
-                        terminal_output=self.terminal_output,
-                        **inputs)
+        
+        super(CommandLine, self).__init__(**inputs)
+        
 
     @property
     def cmdline(self):
@@ -336,24 +350,6 @@ class CommandLine(BaseInterface):
         allargs = self.inputs.parse_args()
         allargs.insert(0, self._cmd)
         return ' '.join(allargs)
-
-    @classmethod
-    def help(cls, returnhelp=False):
-        allhelp = super(CommandLine, cls).help(returnhelp=True)
-        allhelp = "Wraps command ``%s``\n\n" % cls.command + allhelp
-
-        if returnhelp:
-            return allhelp
-        print(allhelp)
-
-    def version_from_command(self, flag='-v'):
-        """Call command -v to get version"""
-        cmdname = self.command.split()[0]
-        proc = subprocess.Popen(
-            ' '.join((cmdname, flag)), shell=True, env=self.environ,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
-        out, _ = proc.communicate()
-        return out
 
     def _run_wrapper(self, runtime):
         runtime = self._run_interface(runtime)
@@ -390,13 +386,32 @@ class CommandLine(BaseInterface):
             raise_exception(runtime)
         return runtime
 
+    def version_from_command(self, flag='-v'):
+        """Call command -v to get version"""
+        cmdname = self.command.split()[0]
+        proc = subprocess.Popen(
+            ' '.join((cmdname, flag)), shell=True, env=self.environ,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
+        out, _ = proc.communicate()
+        return out
 
+    @classmethod
+    def help(cls, returnhelp=False):
+        allhelp = super(CommandLine, cls).help(returnhelp=True)
+        allhelp = "Wraps command ``%s``\n\n" % cls.command + allhelp
+
+        if returnhelp:
+            return allhelp
+        print(allhelp)
+
+@provides(IBase, ICommandBase)
 class StdOutCommandLine(CommandLine):
     """A command line that writes into the output stream"""
     _input_spec = StdOutCommandLineInputSpec
     _output_spec = StdOutCommandLineOutputSpec
 
 
+@provides(IBase, ICommandBase)
 class MpiCommandLine(CommandLine):
     """Implements functionality to interact with command line programs
     that can be run with MPI (i.e. using 'mpiexec').
@@ -428,6 +443,7 @@ class MpiCommandLine(CommandLine):
         return ' '.join(result)
 
 
+@provides(IBase, ICommandBase)
 class SEMLikeCommandLine(CommandLine):
     """In SEM derived interface all outputs have corresponding inputs.
     However, some SEM commands create outputs that are not defined in the XML.
