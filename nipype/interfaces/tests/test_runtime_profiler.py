@@ -71,7 +71,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
             a unittest.TestCase-inherited class
         '''
 
-        self.num_gb = 2
+        self.num_gb = 1
         self.num_procs = 2
 
     # Test node
@@ -95,6 +95,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Import packages
         import logging
         import os
+        import shutil
         import tempfile
 
         import nipype.pipeline.engine as pe
@@ -152,8 +153,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
     # Test resources were used as expected
     def test_wf_logfile(self):
         '''
-        Test to see that the input resources to consume match what was
-        recorded during runtime
+        Test runtime profiler correctly records workflow RAM/CPUs consumption
         '''
 
         # Import packages
@@ -171,12 +171,15 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         runtime_gb = float(node_stats['runtime_memory'])
         runtime_procs = int(node_stats['runtime_threads'])
 
-        # Assert runtime stats are what was input
+        # Error message formatting
         mem_err = 'Input memory: %.5f is not within %d places of runtime '\
                   'memory: %.5f' % (self.num_gb, places, runtime_gb)
-        self.assertAlmostEqual(self.num_gb, runtime_gb, places=places, msg=mem_err)
         procs_err = 'Input procs: %d is not equal to runtime procs: %d' \
                     % (self.num_procs, runtime_procs)
+
+        # Assert runtime stats are what was input
+        self.assertAlmostEqual(self.num_gb, runtime_gb, places=places,
+                               msg=mem_err)
         self.assertEqual(self.num_procs, runtime_procs, msg=procs_err)
 
 
