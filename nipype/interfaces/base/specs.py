@@ -18,9 +18,8 @@ from builtins import range
 from builtins import object
 
 from traits.api import Interface, provides
-from ...utils.filemanip import md5, auto_hash, split_filename
+from ...utils.filemanip import md5, auto_hash
 from ...utils.misc import is_container
-from ...utils.errors import InterfaceInputsError
 from ... import logging, LooseVersion
 from ... import __version__
 from ...external.six import string_types
@@ -47,8 +46,11 @@ class IInputSpec(Interface):
         matches that of the installed software
         """
 
-    def get_outputs(self):
-        """Infers the outputs and returns a dictionary of results"""
+    def get(self, **kwargs):
+        """ Returns traited class as a dict"""
+
+    def get_traitsfree(self, **kwargs):
+        """ Returns traited class as a dict without traits"""
 
     @classmethod
     def help(cls):
@@ -60,18 +62,178 @@ class IOutputSpec(Interface):
     def items(self):
         """Name, trait generator for user modifiable traits"""
 
+    def get(self, **kwargs):
+        """ Returns traited class as a dict"""
+
+    def get_traitsfree(self, **kwargs):
+        """ Returns traited class as a dict without traits"""
+
     @classmethod
     def help(cls):
         """Print help of these traits"""
 
 
 class IInputCommandLineSpec(Interface):
+    """An interface definition for command line interfaces"""
     def parse_args(self):
         """Parse inputs to commandline arguments"""
 
 
+@provides(IOutputSpec)
+class BaseSpec(traits.HasTraits):
+    """A common interface for inputs and outputs"""
+
+    def __repr__(self):
+        """ Return a well-formatted representation of the traits """
+        outstr = []
+        for name, value in sorted(self.trait_get().items()):
+            outstr.append('%s = %s' % (name, value))
+        return '\n' + '\n'.join(outstr) + '\n'
+
+    def items(self):
+        """ Name, trait generator for user modifiable traits
+        """
+        for name in sorted(self.copyable_trait_names()):
+            yield name, self.traits()[name]
+
+    @classmethod
+    def help(cls):
+        """Print help of these traits"""
+        helpstr = []
+        for name, spec in sorted(cls().traits(transient=None).items()):
+            helpstr += cls._get_trait_desc(name, spec)
+        if len(helpstr) == 0:
+            helpstr += ['\tNone']
+        return helpstr
+
+    def get(self, **kwargs):
+        """ Returns traited class as a dict
+
+        Augments the trait get function to return a dictionary without
+        notification handles
+        """
+        out = super(BaseSpec, self).get(**kwargs)
+        out = self._clean_container(out, Undefined)
+        return out
+
+    def get_traitsfree(self, **kwargs):
+        """ Returns traited class as a dict
+
+        Augments the trait get function to return a dictionary without
+        any traits. The dictionary does not contain any attributes that
+        were Undefined
+        """
+        out = super(BaseSpec, self).get(**kwargs)
+        out = self._clean_container(out, skipundefined=True)
+        return out
+
+    def _clean_container(self, obj, undefinedval=None, skipundefined=False):
+        """Convert a traited obejct into a pure python representation.
+        """
+        if isinstance(obj, TraitDictObject) or isinstance(obj, dict):
+            outdict = {}
+            for key, val in list(obj.items()):
+                if isdefined(val):
+                    outdict[key] = self._clean_container(val, undefinedval)
+                else:
+                    if not skipundefined:
+                        outdict[key] = undefinedval
+            return outdict
+        elif (isinstance(obj, TraitListObject) or
+              isinstance(obj, list) or isinstance(obj, tuple)):
+            out = []
+            for val in obj:
+                if isdefined(val):
+                    out.append(self._clean_container(val, undefinedval))
+                else:
+                    if not skipundefined:
+                        out.append(undefinedval)
+                    else:
+                        out.append(None)
+            if isinstance(obj, tuple):
+                return tuple(out)
+        else:
+            if isdefined(obj):
+                out = obj
+            else:
+                if not skipundefined:
+                    out = undefinedval
+        return out
+
+    @classmethod
+    def _get_trait_desc(cls, name, spec=None):
+        obj = cls()
+        if spec is None:
+            spec = obj.traits()[name]
+
+        desc = spec.desc
+        xor = spec.xor
+        requires = spec.requires
+        argstr = spec.argstr
+        name_source = spec.name_source
+        if name_source is None:
+            name_source = spec.ns
+
+        manhelpstr = ['\t%s' % name]
+
+        type_info = spec.full_info(obj, name, None)
+
+        default = ''
+        if spec.usedefault:
+            default = ', nipype default value: %s' % str(spec.default_value()[1])
+        line = "(%s%s)" % (type_info, default)
+
+        manhelpstr = wrap(line, 70,
+                          initial_indent=manhelpstr[0] + ': ',
+                          subsequent_indent='\t\t ')
+
+        if desc:
+            for line in desc.split('\n'):
+                line = re.sub(r'\s+', ' ', line)
+                manhelpstr += wrap(line, 70, initial_indent='\t\t',
+                                   subsequent_indent='\t\t')
+
+        if argstr:
+            pos = spec.position
+            if pos is not None:
+                manhelpstr += wrap('flag: %s, position: %s' % (argstr, pos), 70,
+                                   initial_indent='\t\t', subsequent_indent='\t\t')
+            else:
+                manhelpstr += wrap('flag: %s' % argstr, 70, initial_indent='\t\t',
+                                   subsequent_indent='\t\t')
+
+        if xor:
+            line = '%s' % ', '.join(xor)
+            manhelpstr += wrap(line, 70, initial_indent='\t\tmutually_exclusive: ',
+                               subsequent_indent='\t\t ')
+
+        if requires:
+            others = [field for field in requires if field != name]
+            line = '%s' % ', '.join(others)
+            manhelpstr += wrap(line, 70, initial_indent='\t\trequires: ',
+                               subsequent_indent='\t\t ')
+
+        if name_source:
+            tpl = ', name_template not defined'
+            if spec.name_template:
+                tpl = ', name_template is \'%s\'' % spec.name_template
+            manhelpstr += wrap(('name source: %s' % name_source) + tpl, 70,
+                               initial_indent='\t\t', subsequent_indent='\t\t ')
+        return manhelpstr
+
+
+@provides(IOutputSpec)
+class BaseOutputSpec(BaseSpec):
+    """ Base class for OutputSpecs with strict traits """
+    _ = traits.Disallow
+
+    @classmethod
+    def help(cls):
+        return ['Outputs ::', ''] + super(BaseOutputSpec, cls).help()
+
+
 @provides(IInputSpec)
-class BaseTraitedSpec(traits.HasTraits):
+class BaseTraitedSpec(BaseSpec):
     """Provide a few methods necessary to support nipype interface api
 
     The inputs attribute of interfaces call certain methods that are not
@@ -121,14 +283,9 @@ class BaseTraitedSpec(traits.HasTraits):
             outstr.append('%s = %s' % (name, value))
         return '\n' + '\n'.join(outstr) + '\n'
 
-    def items(self):
-        """ Name, trait generator for user modifiable traits
-        """
-        for name in sorted(self.copyable_trait_names()):
-            yield name, self.traits()[name]
-
     def _check_deprecated(self, name, new):
         """ Generate a warning when a deprecated trait is set """
+        warn = False
         if isdefined(new):
             spec = self.traits()[name]
             msg1 = ('Input %s in interface %s is deprecated.' %
@@ -151,10 +308,12 @@ class BaseTraitedSpec(traits.HasTraits):
                     msg += 'Unsetting old value %s; setting new value %s.' % (
                         name, spec.new_name)
                 IFLOGGER.warn(msg)
+                warn = True
                 if spec.new_name:
                     self.trait_set(trait_change_notify=False,
                                    **{'%s' % name: Undefined,
                                       '%s' % spec.new_name: new})
+        return warn
 
     def _hash_infile(self, adict, key):
         """ Inject file hashes into adict[key]"""
@@ -171,60 +330,6 @@ class BaseTraitedSpec(traits.HasTraits):
 
             file_list.append((afile, hashval))
         return file_list
-
-    def get(self, **kwargs):
-        """ Returns traited class as a dict
-
-        Augments the trait get function to return a dictionary without
-        notification handles
-        """
-        out = super(BaseTraitedSpec, self).get(**kwargs)
-        out = self._clean_container(out, Undefined)
-        return out
-
-    def get_traitsfree(self, **kwargs):
-        """ Returns traited class as a dict
-
-        Augments the trait get function to return a dictionary without
-        any traits. The dictionary does not contain any attributes that
-        were Undefined
-        """
-        out = super(BaseTraitedSpec, self).get(**kwargs)
-        out = self._clean_container(out, skipundefined=True)
-        return out
-
-    def _clean_container(self, obj, undefinedval=None, skipundefined=False):
-        """Convert a traited obejct into a pure python representation.
-        """
-        if isinstance(obj, TraitDictObject) or isinstance(obj, dict):
-            outdict = {}
-            for key, val in list(obj.items()):
-                if isdefined(val):
-                    outdict[key] = self._clean_container(val, undefinedval)
-                else:
-                    if not skipundefined:
-                        outdict[key] = undefinedval
-            return outdict
-        elif (isinstance(obj, TraitListObject) or
-                isinstance(obj, list) or isinstance(obj, tuple)):
-            out = []
-            for val in obj:
-                if isdefined(val):
-                    out.append(self._clean_container(val, undefinedval))
-                else:
-                    if not skipundefined:
-                        out.append(undefinedval)
-                    else:
-                        out.append(None)
-            if isinstance(obj, tuple):
-                return tuple(out)
-        else:
-            if isdefined(obj):
-                out = obj
-            else:
-                if not skipundefined:
-                    out = undefinedval
-        return out
 
     def get_hashval(self, hash_method=None):
         """Return a dictionary of our items with hashes for each file.
@@ -288,82 +393,6 @@ class BaseTraitedSpec(traits.HasTraits):
             out = obj
         return out
 
-    def _get_trait_desc(self, name, spec=None):
-        if spec is None:
-            spec = self.traits()[name]
-
-        desc = spec.desc
-        xor = spec.xor
-        requires = spec.requires
-        argstr = spec.argstr
-        name_source = spec.name_source
-        if name_source is None:
-            name_source = spec.ns
-
-        manhelpstr = ['\t%s' % name]
-
-        type_info = spec.full_info(self, name, None)
-
-        default = ''
-        if spec.usedefault:
-            default = ', nipype default value: %s' % str(spec.default_value()[1])
-        line = "(%s%s)" % (type_info, default)
-
-        manhelpstr = wrap(line, 70,
-                          initial_indent=manhelpstr[0] + ': ',
-                          subsequent_indent='\t\t ')
-
-        if desc:
-            for line in desc.split('\n'):
-                line = re.sub(r'\s+', ' ', line)
-                manhelpstr += wrap(line, 70, initial_indent='\t\t',
-                                   subsequent_indent='\t\t')
-
-        if argstr:
-            pos = spec.position
-            if pos is not None:
-                manhelpstr += wrap('flag: %s, position: %s' % (argstr, pos), 70,
-                                   initial_indent='\t\t', subsequent_indent='\t\t')
-            else:
-                manhelpstr += wrap('flag: %s' % argstr, 70, initial_indent='\t\t',
-                                   subsequent_indent='\t\t')
-
-        if xor:
-            line = '%s' % ', '.join(xor)
-            manhelpstr += wrap(line, 70, initial_indent='\t\tmutually_exclusive: ',
-                               subsequent_indent='\t\t ')
-
-        if requires:
-            others = [field for field in requires if field != name]
-            line = '%s' % ', '.join(others)
-            manhelpstr += wrap(line, 70, initial_indent='\t\trequires: ',
-                               subsequent_indent='\t\t ')
-
-        if name_source:
-            tpl = ', name_template not defined'
-            if spec.name_template:
-                tpl = ', name_template is \'%s\'' % spec.name_template
-            manhelpstr += wrap(('name source: %s' % name_source) + tpl, 70,
-                               initial_indent='\t\t', subsequent_indent='\t\t ')
-        return manhelpstr
-
-    def help(self):
-        """Print help of these traits"""
-        helpstr = []
-        for name, spec in sorted(self.traits(transient=None).items()):
-            helpstr += self._get_trait_desc(name, spec)
-        if len(helpstr) == 0:
-            helpstr += ['\tNone']
-        return helpstr
-
-
-class TraitedSpec(BaseTraitedSpec):
-    """ Create a subclass with strict traits.
-
-    This is used in 90% of the cases.
-    """
-    _ = traits.Disallow
-
 
 @provides(IInputSpec)
 class BaseInputSpec(BaseTraitedSpec):
@@ -396,7 +425,7 @@ class BaseInputSpec(BaseTraitedSpec):
 
     def _check_xor(self, obj, name, old, new):
         """ Checks inputs with xor list """
-        IFLOGGER.error('Called check_xorg with name %s' % name)
+        IFLOGGER.debug('Called check_xorg with name %s', name)
         if isdefined(getattr(self, name)):
             xor_list = self.traits()[name].xor
             if not isinstance(xor_list, list):
@@ -443,7 +472,7 @@ class BaseInputSpec(BaseTraitedSpec):
                 if xor_spec is None:
                     xor_spec = []
 
-                if xor_spec and not any([isdefined(getattr(self, xname)) for xname in xor_spec]):
+                if not any([isdefined(getattr(self, xname)) for xname in xor_spec]):
                     raise ValueError(
                         '%s requires a value for one of these inputs %s. For a list of required inputs, '
                         'see %s.help()' % (self.__class__.__name__, [name] + xor_spec, self.__class__.__name__))
@@ -464,10 +493,12 @@ class BaseInputSpec(BaseTraitedSpec):
 
     def check_version(self, version, raise_exception=True):
         """ Raises an exception on version mismatch"""
+        if not version or version is None:
+            return
+
         unavailable_traits = []
         # check minimum version
         check = dict(min_ver=lambda t: t is not None)
-
         for name in self.trait_names(**check):
             min_ver = LooseVersion(str(self.traits()[name].min_ver))
             if min_ver > version:
@@ -499,16 +530,17 @@ class BaseInputSpec(BaseTraitedSpec):
 
         return unavailable_traits
 
-    def help(self):
+    @classmethod
+    def help(cls):
         """Print inputs formatted"""
         manhelpstr = []
-        for name, spec in sorted(self.mandatory_items()):
-            manhelpstr += self._get_trait_desc(name, spec)
+        for name, spec in sorted(cls().mandatory_items()):
+            manhelpstr += cls()._get_trait_desc(name, spec)
         opthelpstr = []
-        for name, spec in sorted(self.optional_items()):
-            opthelpstr += self._get_trait_desc(name, spec)
+        for name, spec in sorted(cls().optional_items()):
+            opthelpstr += cls()._get_trait_desc(name, spec)
 
-        helpstr = []
+        helpstr = ['Inputs ::']
         if manhelpstr:
             manhelpstr.insert(0, '')
             manhelpstr.insert(1, '\t[Mandatory]')
@@ -519,9 +551,16 @@ class BaseInputSpec(BaseTraitedSpec):
             helpstr += opthelpstr
 
         if not helpstr:
-            return ['', '\tNone']
-
+            helpstr = ['', '\tNone']
         return helpstr
+
+@provides(IOutputSpec)
+class TraitedSpec(BaseTraitedSpec):
+    """ Create a subclass with strict traits.
+
+    This is used in 90% of the cases.
+    """
+    _ = traits.Disallow
 
 
 @provides(IInputSpec)
@@ -573,7 +612,6 @@ class CommandLineInputSpec(BaseInputSpec):
             value = getattr(self, name)
 
         argstr = spec.argstr
-        IFLOGGER.debug('Formatting %s, value=%s' % (name, str(value)))
         if spec.is_trait_type(traits.Bool) and "%" not in argstr:
             if value:
                 # Boolean options have no format string. Just append options
@@ -635,7 +673,7 @@ class CommandLineInputSpec(BaseInputSpec):
                 continue
 
             arg = self._format_arg(name, spec, value)
-            if arg is None:
+            if arg is None or not arg:
                 continue
             pos = spec.position
             if pos is not None:
@@ -677,5 +715,5 @@ class SEMLikeCommandLineInputSpec(CommandLineInputSpec):
                 if value:
                     value = os.path.abspath(self._outputs_filenames[name])
                 else:
-                    return ""
+                    return None
         return super(SEMLikeCommandLineInputSpec, self)._format_arg(name, spec, value)

@@ -121,8 +121,8 @@ class NipypeConfig(object):
         """
         self._config.set('logging', 'log_directory', log_dir)
 
-    def get(self, section, option):
-        return self._config.get(section, option)
+    def get(self, section, option, default=None):
+        return self._config.get(section, option, default)
 
     def set(self, section, option, value):
         if isinstance(value, bool):

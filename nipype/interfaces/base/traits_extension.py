@@ -198,7 +198,8 @@ class GenFile(File):
     def get(self, obj, name):
         # Compute expected name iff trait is not set
         template = self.template
-        if self.value is None:
+        value = self.get_value(obj, name)
+        if not value or not isdefined(value) or value is None:
             srcvals = {}
             ext = ''
             final_nsrcs = []
@@ -216,10 +217,11 @@ class GenFile(File):
                 IFLOGGER.debug('replacing %s with %s. Result=%s', '|'.join(nsrc_list), nsrc, template)
                 final_nsrcs.append(nsrc)
 
-                if isinstance(srcvalue, string_types):
+                if isinstance(srcvalue, tuple):
+                    vallist = list(tuple)
+
+                if not isinstance(srcvalue, list):
                     vallist = [srcvalue]
-                else:
-                    vallist = list(srcvalue)
 
                 outvals = []
 
@@ -238,12 +240,12 @@ class GenFile(File):
                 if not outvals:
                     continue
 
-                if isinstance(srcvalue, string_types):
-                    srcvals.update({nsrc: outvals[0]})
+                if isinstance(srcvalue, list):
+                    srcvals.update({nsrc: outvals})
                 elif isinstance(srcvalue, tuple):
                     srcvals.update({nsrc: tuple(outvals)})
                 else:
-                    srcvals.update({nsrc: outvals})
+                    srcvals.update({nsrc: outvals[0]})
 
             # Check that no source is missing
             IFLOGGER.debug('Final sources: %s and values %s', final_nsrcs, srcvals)
@@ -401,10 +403,10 @@ class GenMultiFile(traits.List):
         self.error(obj, name, value)
 
     def get(self, obj, name):
+        template = self.template
         # Compute expected name iff trait is not set
         value = self.get_value(obj, name)
-        template = self.template
-        if not isdefined(value) or not value:
+        if not value or not isdefined(value) or value is None:
             srcvals = {}
             ext = ''
 
@@ -430,10 +432,12 @@ class GenMultiFile(traits.List):
                     vallist = srcvalue
                     IFLOGGER.debug('Generating range of outputs: %s', vallist)
 
-                if isinstance(srcvalue, string_types):
+
+                if isinstance(srcvalue, tuple):
+                    vallist = list(tuple)
+
+                if not isinstance(srcvalue, list):
                     vallist = [srcvalue]
-                else:
-                    vallist = list(srcvalue)
 
                 outvals = []
 
@@ -665,9 +669,9 @@ class Command(traits.BaseStr):
         """
         validated_value = super(Command, self).validate(obj, name, value)
         env = obj.environ
-        IFLOGGER.debug('Environ now: %s', env)
+        # IFLOGGER.debug('Environ now: %s', env)
         valid, _ = _exists_in_path(validated_value.split()[0], env)
-        
+
         if valid:
             return validated_value
         raise TraitError(

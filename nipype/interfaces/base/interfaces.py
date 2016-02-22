@@ -38,7 +38,7 @@ from ...external.six import string_types
 # in production environments.
 from .traits_extension import isdefined, Command
 from .specs import (IInputSpec, IOutputSpec, IInputCommandLineSpec,
-                    BaseInputSpec, CommandLineInputSpec,
+                    BaseInputSpec, BaseOutputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, StdOutCommandLineOutputSpec,
                     MpiCommandLineInputSpec,
                     SEMLikeCommandLineInputSpec)
@@ -56,14 +56,6 @@ class IBase(Interface):
     and methods all Interface objects should have.
 
     """
-
-    @classmethod
-    def help(cls, returnhelp=False):
-        """Prints class help"""
-
-    def version(self):
-        """Provides the underlying interface version"""
-
     def pre_run(self, **inputs):
         """Hook executed before running"""
 
@@ -85,7 +77,7 @@ class IBase(Interface):
         """Hook executed after running"""
 
     def _aggregate_outputs(self):
-        """Fill in ouputs after running interface"""
+        """Fill in the ouputs after running the interface"""
 
 class ICommandBase(Interface):
     """Abstract class for interfaces wrapping a command line"""
@@ -103,7 +95,7 @@ class BaseInterface(HasTraits):
     inputs = Instance(IInputSpec)
     outputs = Instance(IOutputSpec)
     _input_spec = BaseInputSpec
-    # _output_spec =
+    _output_spec = BaseOutputSpec
     status = traits.Enum('waiting', 'starting', 'running', 'ending',
                          'errored', 'finished')
     version = traits.Str
@@ -115,6 +107,7 @@ class BaseInterface(HasTraits):
     def __init__(self, **inputs):
         self.inputs = self._input_spec()
         self.inputs.set(**inputs)
+        self.outputs = self._output_spec()
 
     def _run_wrapper(self, runtime):
         sysdisplay = os.getenv('DISPLAY')
@@ -144,23 +137,37 @@ class BaseInterface(HasTraits):
             vdisp.stop()
             _unlock_display(vdisp_num)
 
+        self._aggregate_outputs()
+        return runtime
+
+
+    def _dry_run(self, runtime, *kwargs):
+        """
+        A fake runner which creates empty files when they do not exist,
+        but required by the output
+
+        """
+        self._aggregate_outputs()
+
+        for name, spec in list(self.outputs.items()):
+            if spec.exists:
+                value = getattr(self.outputs, name)
+                if not op.isfile(value):
+                    with open(value, 'a'):
+                        os.utime(value)
         return runtime
 
     def _run_interface(self, runtime, *kwargs):
         """ Core function that executes interface
         """
-        raise NotImplementedError
+        raise NotImplementedError('BaseInterface running is disabled.')
 
     def pre_run(self, **inputs):
         """ Implementation of the pre-execution hook"""
+        inputs.pop('dry_run', None)  # Remove the dry_run key
         self.inputs.set(**inputs)
         self.inputs.check_inputs()
-        if not self.version:
-            if str2bool(config.get('execution', 'stop_on_unknown_version')):
-                raise ValueError('Interface %s has no version information' %
-                                 self.__class__.__name__)
-        else:
-            self.inputs.check_version(LooseVersion(str(self.version)))
+        self.check_version()
 
     def post_run(self):
         """ Implementation of the post-execution hook"""
@@ -222,7 +229,6 @@ class BaseInterface(HasTraits):
 
             if exception is None:
                 self.status = 'ending'
-                self._aggregate_outputs()
                 self.post_run()
                 results.outputs = self.outputs
 
@@ -259,10 +265,19 @@ class BaseInterface(HasTraits):
         if cls.__doc__:
             docstring = trim(cls.__doc__).split('\n') + docstring
 
-        allhelp = '\n'.join(docstring + cls._input_spec.help() + cls._output_spec.help())
+        allhelp = '\n'.join(docstring + cls._input_spec().help())
         if returnhelp:
             return allhelp
         print(allhelp)
+
+    def check_version(self):
+        if not self.version:
+            if str2bool(config.get('execution', 'stop_on_unknown_version')):
+                raise ValueError('Interface %s has no version information' %
+                                 self.__class__.__name__)
+            return []
+
+        return self.inputs.check_version(LooseVersion(str(self.version)))
 
 
 @provides(IBase, ICommandBase)
@@ -290,10 +305,7 @@ class CommandLine(BaseInterface):
     'ls -al'
 
     >>> pprint.pprint(cli.inputs.trait_get())  # doctest: +NORMALIZE_WHITESPACE
-    {'args': '-al',
-     'environ': {'DISPLAY': ':1'},
-     'ignore_exception': False,
-     'terminal_output': 'stream'}
+    {'args': '-al'}
 
     >>> cli.inputs.get_hashval()
     ([('args', '-al')], '11c37f97649cd61627f4afe5136af8c0')
@@ -331,19 +343,30 @@ class CommandLine(BaseInterface):
 
         # First modify environment variables if passed
         if environ is not None:
-            for k, v in list(environ.items()):
-                self.environ[k] = v
+            for k, value in list(environ.items()):
+                self.environ[k] = value
 
+        args = []
         # Set command to force validation
         if command is not None:
-            self.command = command
+            cmdchunks = command.split()
+            self.command = cmdchunks[0]
+            if len(cmdchunks) > 1:
+                args += cmdchunks[1:]
         elif self._cmd is not None:
             self.command = self._cmd
         else:
             raise RuntimeError('CommandLine interfaces require'
                                ' the definition of a command')
-
         super(CommandLine, self).__init__(**inputs)
+
+        newargs = inputs.pop('args', [])
+        if newargs:
+            if not isinstance(newargs, list):
+                newargs = [newargs]
+            args += newargs
+        if args:
+            self.inputs.args = ' '.join(args)
 
 
     @property
@@ -351,9 +374,7 @@ class CommandLine(BaseInterface):
         """ `command` plus any arguments (args)
         validates arguments and generates command line"""
         self.inputs.check_inputs()
-        allargs = self.inputs.parse_args()
-        allargs.insert(0, self._cmd)
-        return ' '.join(allargs)
+        return ' '.join([self.command] + self.inputs.parse_args())
 
     def _run_wrapper(self, runtime):
         runtime = self._run_interface(runtime)
@@ -402,7 +423,7 @@ class CommandLine(BaseInterface):
     @classmethod
     def help(cls, returnhelp=False):
         allhelp = super(CommandLine, cls).help(returnhelp=True)
-        allhelp = "Wraps command ``%s``\n\n" % cls.command + allhelp
+        allhelp = "Wraps command ``%s``\n\n" % cls._cmd + allhelp
 
         if returnhelp:
             return allhelp
