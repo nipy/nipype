@@ -4,10 +4,7 @@ from ..mesh import P2PDistance
 
 
 def test_P2PDistance_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    metric=dict(usedefault=True,
+    input_map = dict(metric=dict(usedefault=True,
     ),
     out_file=dict(usedefault=True,
     ),

@@ -92,10 +92,12 @@ class BaseInterface(HasTraits):
     """Implements common interface functionality.
 
     """
-    inputs = Instance(IInputSpec)
-    outputs = Instance(IOutputSpec)
+    _additional_metadata = []
     _input_spec = BaseInputSpec
     _output_spec = BaseOutputSpec
+
+    inputs = Instance(IInputSpec)
+    outputs = Instance(IOutputSpec)
     status = traits.Enum('waiting', 'starting', 'running', 'ending',
                          'errored', 'finished')
     version = traits.Str
