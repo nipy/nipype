@@ -12,14 +12,22 @@ dependencies:
     - bash <(wget -q -O- http://neuro.debian.net/_files/neurodebian-travis.sh)
   override:
     # Install apt packages
-    - sudo apt-get install -y fsl-core fsl-atlases fsl-mni152-templates fsl-feeds afni
-    - echo "source /etc/fsl/fsl.sh" >> $HOME/.profile
-    - echo "source /etc/afni/afni.sh" >> $HOME/.profile
+    - sudo apt-get install -y fsl-core fsl-atlases fsl-mni152-templates fsl-feeds afni swig python-vtk xvfb
+    - echo 'source /etc/fsl/fsl.sh' >> $HOME/.profile
+    - echo 'source /etc/afni/afni.sh' >> $HOME/.profile
     - mkdir -p ~/examples/ && ln -sf /usr/share/fsl-feeds/ ~/examples/feeds
+    # Enable system-wide vtk
+    - ln -sf /usr/lib/pymodules/python2.7/vtk ~/virtualenvs/venv-system/lib/python2.7/site-packages/
     # Set up python environment
     - pip install --upgrade pip
     - pip install -e .
     - pip install matplotlib sphinx ipython boto coverage dipy
+    # Add tvtk
+    - pip install http://effbot.org/downloads/Imaging-1.1.7.tar.gz
+    - pip install -e git+https://github.com/enthought/etsdevtools.git#egg=etsdevtools
+    - pip install -e git+https://github.com/enthought/blockcanvas.git#egg=blockcanvas
+    - pip install -e git+https://github.com/enthought/etsproxy.git#egg=etsproxy
+    - pip install -e git+https://github.com/enthought/ets.git#egg=ets
     - gem install fakes3
     - if [[ ! -d ~/examples/data ]]; then wget "http://tcpdiag.dl.sourceforge.net/project/nipy/nipype/nipype-0.2/nipype-tutorial.tar.bz2" && tar jxvf nipype-tutorial.tar.bz2 && mv nipype-tutorial/* ~/examples/; fi
     - if [[ ! -d ~/examples/fsl_course_data ]]; then wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt1.tar.gz" && wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/fdt2.tar.gz" && wget -c "http://fsl.fmrib.ox.ac.uk/fslcourse/tbss.tar.gz" && mkdir ~/examples/fsl_course_data && tar zxvf fdt1.tar.gz -C ~/examples/fsl_course_data && tar zxvf fdt2.tar.gz -C ~/examples/fsl_course_data && tar zxvf tbss.tar.gz -C ~/examples/fsl_course_data; fi

@@ -166,7 +166,11 @@ class BaseInterface(HasTraits):
 
             vdisp = Xvfb(nolisten='tcp')
             vdisp.start()
-            vdisp_num = vdisp.vdisplay_num
+
+            try:
+                vdisp_num = vdisp.new_display
+            except AttributeError:  # outdated version of xvfbwrapper
+                vdisp_num = vdisp.vdisplay_num
 
             IFLOGGER.info('Redirecting X to :%d', vdisp_num)
             runtime.environ['DISPLAY'] = ':%d' % vdisp_num
@@ -174,14 +178,8 @@ class BaseInterface(HasTraits):
         runtime = self._run_interface(runtime)
 
         if self.redirect_x:
-            if sysdisplay is None:
-                os.unsetenv('DISPLAY')
-            else:
-                os.environ['DISPLAY'] = sysdisplay
-
-            IFLOGGER.info('Freeing X :%d', vdisp_num)
             vdisp.stop()
-            _unlock_display(vdisp_num)
+
         return runtime
 
     def _run_interface(self, runtime, dry_run=False, **kwargs):
@@ -531,26 +529,18 @@ class SEMLikeCommandLine(CommandLine):
 
 
 def _genfile_dryrun(name, value, out_name=None):
-        if out_name is None:
-            out_name = name
+    if out_name is None:
+        out_name = name
 
-        if isinstance(value, string_types):
-            files = [value]
+    if isinstance(value, string_types):
+        files = [value]
+    else:
+        files = value
+
+    for fname in files:
+        if not op.isfile(op.abspath(fname)):
+            with open(fname, 'a'):
+                os.utime(fname, None)
+                IFLOGGER.debug('Successfully created dry-run output: %s', fname)
         else:
-            files = value
-
-        for fname in files:
-            if not op.isfile(op.abspath(fname)):
-                with open(fname, 'a'):
-                    os.utime(fname, None)
-                    IFLOGGER.debug('Successfully created dry-run output: %s', fname)
-            else:
-                IFLOGGER.debug('File exists, skipping touch %s', fname)
-
-def _unlock_display(ndisplay):
-    lockf = op.join('/tmp', '.X%d-lock' % ndisplay)
-    try:
-        os.remove(lockf)
-    except:
-        return False
-    return True
+            IFLOGGER.debug('File exists, skipping touch %s', fname)

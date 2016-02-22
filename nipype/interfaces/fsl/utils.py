@@ -8,11 +8,12 @@ Examples
 --------
 See the docstrings of the individual classes for examples.
 
-    Change directory to provide relative paths for doctests
-    >>> import os
-    >>> filepath = os.path.dirname( os.path.realpath( __file__ ) )
-    >>> datadir = os.path.realpath(os.path.join(filepath, '../../testing/data'))
-    >>> os.chdir(datadir)
+  .. testsetup::
+    # Change directory to provide relative paths for doctests
+    import os
+    filepath = os.path.dirname(os.path.realpath( __file__ ))
+    datadir = os.path.realpath(os.path.join(filepath, '../testing/data'))
+    os.chdir(datadir)
 """
 
 from __future__ import division
@@ -20,6 +21,7 @@ from builtins import map
 from builtins import range
 
 import os
+import os.path as op
 from glob import glob
 import warnings
 import tempfile
@@ -86,10 +88,9 @@ class ImageMeantsInputSpec(FSLCommandInputSpec):
     out_file = GenFile(template='{in_file}_ts.txt', argstr='-o %s',
                        hash_files=False, desc='name of output text matrix')
     mask = File(exists=True, desc='input 3D mask', argstr='-m %s')
-    spatial_coord = traits.List(traits.Int,
+    spatial_coord = traits.List(traits.Int, argstr='-c %s',
                                 desc='<x y z>	requested spatial coordinate '
-                                      '(instead of mask)',
-                                argstr='-c %s')
+                                      '(instead of mask)')
     use_mm = traits.Bool(desc='use mm instead of voxel coordinates (for -c '
                                'option)', argstr='--usemm')
     show_all = traits.Bool(desc='show all voxel time series (within mask) '
@@ -1341,10 +1342,6 @@ class WarpUtilsOutputSpec(TraitedSpec):
     out_jacobian = File(desc='Name of output file, containing the map of the determinant of '
                               'the Jacobian')
 
-    def post_run(self):
-        if not self.inputs.write_jacobian:
-            self.outputs.out_jacobian = Undefined
-
 
 class WarpUtils(FSLCommand):
     """Use FSL `fnirtfileutils <http://fsl.fmrib.ox.ac.uk/fsl/fsl-4.1.9/fnirt/warp_utils.html>`_
@@ -1373,6 +1370,10 @@ class WarpUtils(FSLCommand):
 
     _cmd = 'fnirtfileutils'
 
+    def post_run(self):
+        if not self.inputs.write_jacobian:
+            self.outputs.out_jacobian = Undefined
+
 
 class ConvertWarpInputSpec(FSLCommandInputSpec):
     reference = File(exists=True, argstr='--ref=%s', mandatory=True, position=1,
@@ -1397,57 +1398,57 @@ class ConvertWarpInputSpec(FSLCommandInputSpec):
 
     warp2 = File(exists=True, argstr='--warp2=%s',
                  desc='Name of file containing secondary warp-fields/coefficients (after warp1/midmat but before postmat). This could e.g. be a '
-                       'fnirt-transform from the average of a group of subjects to some standard '
-                       'space (e.g. MNI152).')
+                      'fnirt-transform from the average of a group of subjects to some standard '
+                      'space (e.g. MNI152).')
 
     postmat = File(exists=True, argstr='--postmat=%s',
                    desc='Name of file containing an affine transform (applied last). It could e.g. be an affine '
-                         'transform that maps the MNI152-space into a better approximation to the '
-                         'Talairach-space (if indeed there is one).')
+                        'transform that maps the MNI152-space into a better approximation to the '
+                        'Talairach-space (if indeed there is one).')
 
     shift_in_file = File(exists=True, argstr='--shiftmap=%s',
                          desc='Name of file containing a \'shiftmap\', a non-linear transform with '
-                               'displacements only in one direction (applied first, before premat). This would typically be a '
-                               'fieldmap that has been pre-processed using fugue that maps a '
-                               'subjects functional (EPI) data onto an undistorted space (i.e. a space '
-                               'that corresponds to his/her true anatomy).')
+                              'displacements only in one direction (applied first, before premat). This would typically be a '
+                              'fieldmap that has been pre-processed using fugue that maps a '
+                              'subjects functional (EPI) data onto an undistorted space (i.e. a space '
+                              'that corresponds to his/her true anatomy).')
 
     shift_direction = traits.Enum('y-', 'y', 'x', 'x-', 'z', 'z-',
                                   argstr='--shiftdir=%s', requires=['shift_in_file'],
                                   desc='Indicates the direction that the distortions from '
-                                        '--shiftmap goes. It depends on the direction and '
-                                        'polarity of the phase-encoding in the EPI sequence.')
+                                       '--shiftmap goes. It depends on the direction and '
+                                       'polarity of the phase-encoding in the EPI sequence.')
 
     cons_jacobian = traits.Bool(False, argstr='--constrainj',
                                 desc='Constrain the Jacobian of the warpfield to lie within specified '
-                                      'min/max limits.')
+                                     'min/max limits.')
 
     jacobian_min = traits.Float(argstr='--jmin=%f',
                                 desc='Minimum acceptable Jacobian value for '
-                                      'constraint (default 0.01)')
+                                     'constraint (default 0.01)')
     jacobian_max = traits.Float(argstr='--jmax=%f',
                                 desc='Maximum acceptable Jacobian value for '
-                                      'constraint (default 100.0)')
+                                     'constraint (default 100.0)')
 
     abswarp = traits.Bool(argstr='--abs', xor=['relwarp'],
                           desc='If set it indicates that the warps in --warp1 and --warp2 should be '
-                                'interpreted as absolute. I.e. the values in --warp1/2 are the '
-                                'coordinates in the next space, rather than displacements. This flag '
-                                'is ignored if --warp1/2 was created by fnirt, which always creates '
-                                'relative displacements.')
+                               'interpreted as absolute. I.e. the values in --warp1/2 are the '
+                               'coordinates in the next space, rather than displacements. This flag '
+                               'is ignored if --warp1/2 was created by fnirt, which always creates '
+                               'relative displacements.')
 
     relwarp = traits.Bool(argstr='--rel', xor=['abswarp'],
                           desc='If set it indicates that the warps in --warp1/2 should be interpreted '
-                                'as relative. I.e. the values in --warp1/2 are displacements from the '
-                                'coordinates in the next space.')
+                               'as relative. I.e. the values in --warp1/2 are displacements from the '
+                               'coordinates in the next space.')
 
     out_abswarp = traits.Bool(argstr='--absout', xor=['out_relwarp'],
                               desc='If set it indicates that the warps in --out should be absolute, i.e. '
-                                    'the values in --out are displacements from the coordinates in --ref.')
+                                   'the values in --out are displacements from the coordinates in --ref.')
 
     out_relwarp = traits.Bool(argstr='--relout', xor=['out_abswarp'],
                               desc='If set it indicates that the warps in --out should be relative, i.e. '
-                                    'the values in --out are displacements from the coordinates in --ref.')
+                                   'the values in --out are displacements from the coordinates in --ref.')
 
 
 class ConvertWarpOutputSpec(TraitedSpec):
@@ -1471,7 +1472,7 @@ class ConvertWarp(FSLCommand):
     >>> warputils.inputs.output_type = 'NIFTI_GZ'
     >>> warputils.cmdline # doctest: +ELLIPSIS
     'convertwarp --ref=T1.nii --rel --warp1=warpfield.nii --out=T1_concatwarp.nii.gz'
-    >>> res = invwarp.run() # doctest: +SKIP
+    >>> res = warputils.run() # doctest: +SKIP
 
 
     """
@@ -1488,7 +1489,7 @@ class WarpPointsBaseInputSpec(CommandLineInputSpec):
                     desc='filename of affine transform (e.g. source2dest.mat)')
     warp_file = File(exists=True, argstr='-warp %s', xor=['xfm_file'],
                      desc='filename of warpfield (e.g. '
-                           'intermediate2dest_warp.nii.gz)')
+                          'intermediate2dest_warp.nii.gz)')
     coord_vox = traits.Bool(True, argstr='-vox', xor=['coord_mm'],
                             desc='all coordinates in voxels - default')
     coord_mm = traits.Bool(False, argstr='-mm', xor=['coord_vox'],
@@ -1496,6 +1497,23 @@ class WarpPointsBaseInputSpec(CommandLineInputSpec):
     out_file = File(name_source='in_coords',
                     name_template='%s_warped', output_name='out_file',
                     desc='output file name')
+
+    def parse_args(self, skip=None):
+        import os.path as op
+
+        fname, ext = op.splitext(self.in_coords)
+        setattr(self, '_in_file', fname)
+        setattr(self, '_outformat', ext[1:])
+        first_args = super(WarpPoints, self).parse_args(skip=['in_coords', 'out_file'])
+        second_args = fname + '.txt'
+
+        if ext in ['.vtk', '.trk']:
+            if self._tmpfile is None:
+                self._tmpfile = tempfile.NamedTemporaryFile(suffix='.txt', dir=os.getcwd(),
+                                                            delete=False).name
+            second_args = self._tmpfile
+
+        return first_args + [second_args]
 
 
 class WarpPointsInputSpec(WarpPointsBaseInputSpec):
@@ -1529,7 +1547,7 @@ class WarpPoints(CommandLine):
     >>> warppoints.inputs.coord_mm = True
     >>> warppoints.cmdline # doctest: +ELLIPSIS
     'img2imgcoord -mm -dest T1.nii -src epi.nii -warp warpfield.nii surf.txt'
-    >>> res = invwarp.run() # doctest: +SKIP
+    >>> res = warppoints.run() # doctest: +SKIP
 
 
     """
@@ -1537,7 +1555,7 @@ class WarpPoints(CommandLine):
     _input_spec = WarpPointsInputSpec
     _output_spec = WarpPointsOutputSpec
     _cmd = 'img2imgcoord'
-    _terminal_output = 'stream'
+    terminal_output = 'stream'
 
     def __init__(self, command=None, **inputs):
         self._tmpfile = None
@@ -1546,48 +1564,16 @@ class WarpPoints(CommandLine):
 
         super(WarpPoints, self).__init__(command=command, **inputs)
 
-    def _format_arg(self, name, trait_spec, value):
-        if name == 'out_file':
-            return ''
-        else:
-            return super(WarpPoints, self)._format_arg(name, trait_spec, value)
-
-    def parse_args(self, skip=None):
-        import os.path as op
-
-        fname, ext = op.splitext(self.in_coords)
-        setattr(self, '_in_file', fname)
-        setattr(self, '_outformat', ext[1:])
-        first_args = super(WarpPoints, self).parse_args(skip=['in_coords', 'out_file'])
-
-        second_args = fname + '.txt'
-
-        if ext in ['.vtk', '.trk']:
-            if self._tmpfile is None:
-                self._tmpfile = tempfile.NamedTemporaryFile(suffix='.txt', dir=os.getcwd(),
-                                                            delete=False).name
-            second_args = self._tmpfile
-
-        return first_args + [second_args]
-
     def _vtk_to_coords(self, in_file, out_file=None):
-        import os.path as op
-        try:
-            from tvtk.api import tvtk
-        except ImportError:
-            raise ImportError('This interface requires tvtk to run.')
+        from ..vtkbase import tvtk
+        from ...interfaces import vtkbase as VTKInfo
 
-        vtk_major = 5
-        try:
-            from tvtk.tvtk_classes.vtk_version import vtk_build_version
-            vtk_major = int(vtk_build_version[0])
-        except ImportError:
-            iflogger.warning('VTK version-major inspection using tvtk failed.')
+        if VTKInfo.no_tvtk():
+            raise ImportError('TVTK is required and tvtk package was not found')
 
         reader = tvtk.PolyDataReader(file_name=in_file + '.vtk')
         reader.update()
-
-        mesh = reader.output if vtk_major < 6 else reader.get_output()
+        mesh = VTKInfo.vtk_output(reader)
         points = mesh.points
 
         if out_file is None:
@@ -1597,46 +1583,31 @@ class WarpPoints(CommandLine):
         return out_file
 
     def _coords_to_vtk(self, points, out_file):
-        import os.path as op
-        try:
-            from tvtk.api import tvtk
-        except ImportError:
-            raise ImportError('This interface requires tvtk to run.')
+        from ..vtkbase import tvtk
+        from ...interfaces import vtkbase as VTKInfo
 
-        vtk_major = 5
-        try:
-            from tvtk.tvtk_classes.vtk_version import vtk_build_version
-            vtk_major = int(vtk_build_version[0])
-        except ImportError:
-            iflogger.warning('VTK version-major inspection using tvtk failed.')
+        if VTKInfo.no_tvtk():
+            raise ImportError('TVTK is required and tvtk package was not found')
 
         reader = tvtk.PolyDataReader(file_name=self.inputs.in_file)
         reader.update()
 
-        mesh = reader.output if vtk_major < 6 else reader.get_output()
+        mesh = VTKInfo.vtk_output(reader)
         mesh.points = points
 
         writer = tvtk.PolyDataWriter(file_name=out_file)
-        if vtk_major < 6:
-            writer.input = mesh
-        else:
-            writer.set_input_data_object(mesh)
+        VTKInfo.configure_input_data(writer, mesh)
         writer.write()
 
     def _trk_to_coords(self, in_file, out_file=None):
-        raise NotImplementedError('trk files are not yet supported')
-        try:
-            from nibabel.trackvis import TrackvisFile
-        except ImportError:
-            raise ImportError('This interface requires nibabel to run')
-
+        from nibabel.trackvis import TrackvisFile
         trkfile = TrackvisFile.from_file(in_file)
         streamlines = trkfile.streamlines
 
         if out_file is None:
             out_file, _ = op.splitext(in_file)
 
-        np.savetxt(points, out_file + '.txt')
+        np.savetxt(streamlines, out_file + '.txt')
         return out_file + '.txt'
 
     def _coords_to_trk(self, points, out_file):
@@ -1659,7 +1630,8 @@ class WarpPoints(CommandLine):
             self._trk_to_coords(fname, out_file=tmpfile)
 
         runtime = super(WarpPoints, self)._run_interface(runtime)
-        newpoints = np.fromstring('\n'.join(runtime.stdout.split('\n')[1:]), sep=' ')
+        newpoints = np.fromstring(
+            '\n'.join(runtime.stdout.split('\n')[1:]), sep=' ')
 
         if tmpfile is not None:
             try:
@@ -1710,7 +1682,7 @@ class WarpPointsToStd(WarpPoints):
     >>> warppoints.inputs.coord_mm = True
     >>> warppoints.cmdline # doctest: +ELLIPSIS
     'img2stdcoord -mm -img T1.nii -std mni.nii -warp warpfield.nii surf.txt'
-    >>> res = invwarp.run() # doctest: +SKIP
+    >>> res = warppoints.run() # doctest: +SKIP
 
 
     """
