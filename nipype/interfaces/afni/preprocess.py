@@ -87,7 +87,6 @@ class TShiftInputSpec(AFNICommandInputSpec):
                    exists=True, copyfile=False)
     prefix = GenFile(template='{in_file}_tshift', keep_extension=False, argstr='-prefix %s',
                      desc='output files prefix')
-    out_file = GenFile(template='{prefix}{output_type_}', desc='output image file name')
     tr = traits.Str(argstr='-TR %s', desc='manually set the TR You can attach suffix "s" for '
                                           'seconds or "ms" for milliseconds.')
     tzero = traits.Float(argstr='-tzero %s', xor=['tslice'],
@@ -103,6 +102,7 @@ class TShiftInputSpec(AFNICommandInputSpec):
     rlt = traits.Bool(argstr="-rlt", desc='Before shifting, remove the mean and linear trend')
     rltplus = traits.Bool(argstr="-rlt+", desc='Before shifting, remove the mean and linear trend'
                                                ' and later put back the mean')
+    out_file = GenFile(template='{prefix}{output_type_}', desc='output image file name')
 
 class TShift(AFNICommand):
 
@@ -319,7 +319,7 @@ class TStatInputSpec(AFNICommandInputSpec):
                    desc='input file to 3dTstat')
     prefix = GenFile(template='{in_file}_tstat', keep_extension=False, argstr='-prefix %s',
                      desc='output files prefix')
-    out_file = GenFile(template="{in_file}{output_type_}", keep_extension=False,
+    out_file = GenFile(template="{prefix}{output_type_}", keep_extension=False,
                        desc='output image file name')
     mask = File(desc='mask file', argstr='-mask %s', exists=True)
     options = traits.Str(desc='selected statistical output', argstr='%s')
