@@ -56,8 +56,8 @@ class IdentityInterface(IOBase):
     >>> out = ii2.run() # doctest: +SKIP
     ValueError: IdentityInterface requires a value for input 'b' because it was listed in 'fields' Interface IdentityInterface failed to run.
     """
-    input_spec = DynamicTraitedSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = DynamicTraitedSpec
+    _output_spec = DynamicTraitedSpec
 
     def __init__(self, fields=None, mandatory_inputs=True, **inputs):
         super(IdentityInterface, self).__init__(**inputs)
@@ -126,8 +126,8 @@ class Merge(IOBase):
     [1, 2, 5, 3]
 
     """
-    input_spec = MergeInputSpec
-    output_spec = MergeOutputSpec
+    _input_spec = MergeInputSpec
+    _output_spec = MergeOutputSpec
 
     def __init__(self, numinputs=0, **inputs):
         super(Merge, self).__init__(**inputs)
@@ -213,8 +213,8 @@ class Rename(IOBase):
     'subj_201_epi_run02.nii'         # doctest: +SKIP
 
     """
-    input_spec = RenameInputSpec
-    output_spec = RenameOutputSpec
+    _input_spec = RenameInputSpec
+    _output_spec = RenameOutputSpec
 
     def __init__(self, format_string=None, **inputs):
         super(Rename, self).__init__(**inputs)
@@ -281,8 +281,8 @@ class Split(IOBase):
 
     """
 
-    input_spec = SplitInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = SplitInputSpec
+    _output_spec = DynamicTraitedSpec
 
     def _add_output_traits(self, base):
         undefined_traits = {}
@@ -338,8 +338,8 @@ class Select(IOBase):
 
     """
 
-    input_spec = SelectInputSpec
-    output_spec = SelectOutputSpec
+    _input_spec = SelectInputSpec
+    _output_spec = SelectOutputSpec
 
     def _post_run(self):
         self.outputs.out = np.array(self.inputs.inlist)[np.array(self.inputs.index)].tolist()
@@ -363,8 +363,8 @@ class Function(IOBase):
 
     """
 
-    input_spec = FunctionInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = FunctionInputSpec
+    _output_spec = DynamicTraitedSpec
 
     def __init__(self, input_names, output_names, function=None, imports=None,
                  **inputs):
@@ -462,7 +462,7 @@ class AssertEqualInputSpec(BaseInputSpec):
 
 
 class AssertEqual(BaseInterface):
-    input_spec = AssertEqualInputSpec
+    _input_spec = AssertEqualInputSpec
 
     def _run_interface(self, runtime):
 
@@ -506,8 +506,8 @@ class CSVReader(BaseInterface):
     True
 
     """
-    input_spec = CSVReaderInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = CSVReaderInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = True
 
     def _append_entry(self, outputs, entry):

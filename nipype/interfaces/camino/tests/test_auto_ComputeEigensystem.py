@@ -33,7 +33,7 @@ def test_ComputeEigensystem_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ComputeEigensystem.input_spec()
+    inputs = ComputeEigensystem._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +43,7 @@ def test_ComputeEigensystem_inputs():
 def test_ComputeEigensystem_outputs():
     output_map = dict(eigen=dict(),
     )
-    outputs = ComputeEigensystem.output_spec()
+    outputs = ComputeEigensystem._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

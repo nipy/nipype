@@ -37,7 +37,7 @@ def test_JistLaminarProfileGeometry_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistLaminarProfileGeometry.input_spec()
+    inputs = JistLaminarProfileGeometry._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +47,7 @@ def test_JistLaminarProfileGeometry_inputs():
 def test_JistLaminarProfileGeometry_outputs():
     output_map = dict(outResult=dict(),
     )
-    outputs = JistLaminarProfileGeometry.output_spec()
+    outputs = JistLaminarProfileGeometry._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

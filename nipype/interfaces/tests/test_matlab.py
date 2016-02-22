@@ -62,7 +62,7 @@ def test_mlab_init():
     default_script_file = clean_workspace_and_get_default_script_file()
 
     yield assert_equal, mlab.MatlabCommand._cmd, 'matlab'
-    yield assert_equal, mlab.MatlabCommand.input_spec, mlab.MatlabInputSpec
+    yield assert_equal, mlab.MatlabCommand._input_spec, mlab.MatlabInputSpec
 
     yield assert_equal, mlab.MatlabCommand().cmd, matlab_cmd
     mc = mlab.MatlabCommand(matlab_cmd='foo_m')

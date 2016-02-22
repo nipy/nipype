@@ -47,8 +47,8 @@ class ICC(BaseInterface):
     Assessing Rater Reliability". Psychological Bulletin 86 (2): 420-428. This
     particular implementation is aimed at relaibility (test-retest) studies.
     """
-    input_spec = ICCInputSpec
-    output_spec = ICCOutputSpec
+    _input_spec = ICCInputSpec
+    _output_spec = ICCOutputSpec
 
     def _run_interface(self, runtime):
         maskdata = nb.load(self.inputs.mask).get_data()

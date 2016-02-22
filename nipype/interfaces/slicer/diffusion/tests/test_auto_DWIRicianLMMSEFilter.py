@@ -44,7 +44,7 @@ def test_DWIRicianLMMSEFilter_inputs():
     uav=dict(argstr='--uav ',
     ),
     )
-    inputs = DWIRicianLMMSEFilter.input_spec()
+    inputs = DWIRicianLMMSEFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +55,7 @@ def test_DWIRicianLMMSEFilter_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = DWIRicianLMMSEFilter.output_spec()
+    outputs = DWIRicianLMMSEFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

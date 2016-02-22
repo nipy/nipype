@@ -42,8 +42,8 @@ acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); (1=University of Iowa D
 
 """
 
-    input_spec = fiberstatsInputSpec
-    output_spec = fiberstatsOutputSpec
+    _input_spec = fiberstatsInputSpec
+    _output_spec = fiberstatsOutputSpec
     _cmd = " fiberstats "
     _outputs_filenames = {}
     _redirect_x = False

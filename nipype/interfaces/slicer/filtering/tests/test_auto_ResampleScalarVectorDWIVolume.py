@@ -70,7 +70,7 @@ def test_ResampleScalarVectorDWIVolume_inputs():
     window_function=dict(argstr='--window_function %s',
     ),
     )
-    inputs = ResampleScalarVectorDWIVolume.input_spec()
+    inputs = ResampleScalarVectorDWIVolume._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -81,7 +81,7 @@ def test_ResampleScalarVectorDWIVolume_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = ResampleScalarVectorDWIVolume.output_spec()
+    outputs = ResampleScalarVectorDWIVolume._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -22,7 +22,7 @@ def test_FlippedDifference_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = FlippedDifference.input_spec()
+    inputs = FlippedDifference._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -32,7 +32,7 @@ def test_FlippedDifference_inputs():
 def test_FlippedDifference_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = FlippedDifference.output_spec()
+    outputs = FlippedDifference._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

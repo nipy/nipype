@@ -39,7 +39,7 @@ def test_SliceTimer_inputs():
     time_repetition=dict(argstr='--repeat=%f',
     ),
     )
-    inputs = SliceTimer.input_spec()
+    inputs = SliceTimer._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +49,7 @@ def test_SliceTimer_inputs():
 def test_SliceTimer_outputs():
     output_map = dict(slice_time_corrected_file=dict(),
     )
-    outputs = SliceTimer.output_spec()
+    outputs = SliceTimer._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

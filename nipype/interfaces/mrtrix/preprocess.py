@@ -64,8 +64,8 @@ class MRConvert(CommandLine):
     """
 
     _cmd = 'mrconvert'
-    input_spec = MRConvertInputSpec
-    output_spec = MRConvertOutputSpec
+    _input_spec = MRConvertInputSpec
+    _output_spec = MRConvertOutputSpec
 
     def _post_run(self):
         
@@ -146,8 +146,8 @@ class DWI2Tensor(CommandLine):
     """
 
     _cmd = 'dwi2tensor'
-    input_spec = DWI2TensorInputSpec
-    output_spec = DWI2TensorOutputSpec
+    _input_spec = DWI2TensorInputSpec
+    _output_spec = DWI2TensorOutputSpec
 
 
 class Tensor2VectorInputSpec(CommandLineInputSpec):
@@ -176,8 +176,8 @@ class Tensor2Vector(CommandLine):
     """
 
     _cmd = 'tensor2vector'
-    input_spec = Tensor2VectorInputSpec
-    output_spec = Tensor2VectorOutputSpec
+    _input_spec = Tensor2VectorInputSpec
+    _output_spec = Tensor2VectorOutputSpec
 
     def _post_run(self):
         
@@ -224,8 +224,8 @@ class Tensor2FractionalAnisotropy(CommandLine):
     """
 
     _cmd = 'tensor2FA'
-    input_spec = Tensor2FractionalAnisotropyInputSpec
-    output_spec = Tensor2FractionalAnisotropyOutputSpec
+    _input_spec = Tensor2FractionalAnisotropyInputSpec
+    _output_spec = Tensor2FractionalAnisotropyOutputSpec
 
     def _post_run(self):
         
@@ -272,8 +272,8 @@ class Tensor2ApparentDiffusion(CommandLine):
     """
 
     _cmd = 'tensor2ADC'
-    input_spec = Tensor2ApparentDiffusionInputSpec
-    output_spec = Tensor2ApparentDiffusionOutputSpec
+    _input_spec = Tensor2ApparentDiffusionInputSpec
+    _output_spec = Tensor2ApparentDiffusionOutputSpec
 
     def _post_run(self):
         
@@ -321,8 +321,8 @@ class MRMultiply(CommandLine):
     """
 
     _cmd = 'mrmult'
-    input_spec = MRMultiplyInputSpec
-    output_spec = MRMultiplyOutputSpec
+    _input_spec = MRMultiplyInputSpec
+    _output_spec = MRMultiplyOutputSpec
 
     def _post_run(self):
         
@@ -369,8 +369,8 @@ class MRTrixViewer(CommandLine):
     """
 
     _cmd = 'mrview'
-    input_spec = MRTrixViewerInputSpec
-    output_spec = MRTrixViewerOutputSpec
+    _input_spec = MRTrixViewerInputSpec
+    _output_spec = MRTrixViewerOutputSpec
 
     def _post_run(self):
         return
@@ -399,8 +399,8 @@ class MRTrixInfo(CommandLine):
     """
 
     _cmd = 'mrinfo'
-    input_spec = MRTrixInfoInputSpec
-    output_spec = MRTrixInfoOutputSpec
+    _input_spec = MRTrixInfoInputSpec
+    _output_spec = MRTrixInfoOutputSpec
 
     def _post_run(self):
         return
@@ -434,8 +434,8 @@ class GenerateWhiteMatterMask(CommandLine):
     """
 
     _cmd = 'gen_WM_mask'
-    input_spec = GenerateWhiteMatterMaskInputSpec
-    output_spec = GenerateWhiteMatterMaskOutputSpec
+    _input_spec = GenerateWhiteMatterMaskInputSpec
+    _output_spec = GenerateWhiteMatterMaskOutputSpec
 
     def _post_run(self):
         
@@ -479,8 +479,8 @@ class Erode(CommandLine):
     >>> erode.run()                                     # doctest: +SKIP
     """
     _cmd = 'erode'
-    input_spec = ErodeInputSpec
-    output_spec = ErodeOutputSpec
+    _input_spec = ErodeInputSpec
+    _output_spec = ErodeOutputSpec
 
     def _post_run(self):
         
@@ -536,8 +536,8 @@ class Threshold(CommandLine):
     """
 
     _cmd = 'threshold'
-    input_spec = ThresholdInputSpec
-    output_spec = ThresholdOutputSpec
+    _input_spec = ThresholdInputSpec
+    _output_spec = ThresholdOutputSpec
 
     def _post_run(self):
         
@@ -584,8 +584,8 @@ class MedianFilter3D(CommandLine):
     """
 
     _cmd = 'median3D'
-    input_spec = MedianFilter3DInputSpec
-    output_spec = MedianFilter3DOutputSpec
+    _input_spec = MedianFilter3DInputSpec
+    _output_spec = MedianFilter3DOutputSpec
 
     def _post_run(self):
         
@@ -641,8 +641,8 @@ class MRTransform(CommandLine):
     """
 
     _cmd = 'mrtransform'
-    input_spec = MRTransformInputSpec
-    output_spec = MRTransformOutputSpec
+    _input_spec = MRTransformInputSpec
+    _output_spec = MRTransformOutputSpec
 
     def _post_run(self):
         

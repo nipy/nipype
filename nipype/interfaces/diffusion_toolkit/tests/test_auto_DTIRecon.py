@@ -39,7 +39,7 @@ def test_DTIRecon_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DTIRecon.input_spec()
+    inputs = DTIRecon._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -60,7 +60,7 @@ def test_DTIRecon_outputs():
     exp=dict(),
     tensor=dict(),
     )
-    outputs = DTIRecon.output_spec()
+    outputs = DTIRecon._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -30,7 +30,7 @@ def test_SMM_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = SMM.input_spec()
+    inputs = SMM._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +42,7 @@ def test_SMM_outputs():
     deactivation_p_map=dict(),
     null_p_map=dict(),
     )
-    outputs = SMM.output_spec()
+    outputs = SMM._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

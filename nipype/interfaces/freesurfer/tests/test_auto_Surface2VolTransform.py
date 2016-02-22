@@ -51,7 +51,7 @@ def test_Surface2VolTransform_inputs():
     name_template='%s_asVol_vertex.nii',
     ),
     )
-    inputs = Surface2VolTransform.input_spec()
+    inputs = Surface2VolTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -62,7 +62,7 @@ def test_Surface2VolTransform_outputs():
     output_map = dict(transformed_file=dict(),
     vertexvol_file=dict(),
     )
-    outputs = Surface2VolTransform.output_spec()
+    outputs = Surface2VolTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

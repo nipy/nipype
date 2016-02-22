@@ -38,7 +38,7 @@ def test_Conmat_inputs():
     xor=['tract_prop'],
     ),
     )
-    inputs = Conmat.input_spec()
+    inputs = Conmat._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +49,7 @@ def test_Conmat_outputs():
     output_map = dict(conmat_sc=dict(),
     conmat_ts=dict(),
     )
-    outputs = Conmat.output_spec()
+    outputs = Conmat._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

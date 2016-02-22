@@ -70,7 +70,7 @@ def test_Overlay_inputs():
     position=3,
     ),
     )
-    inputs = Overlay.input_spec()
+    inputs = Overlay._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -80,7 +80,7 @@ def test_Overlay_inputs():
 def test_Overlay_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Overlay.output_spec()
+    outputs = Overlay._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

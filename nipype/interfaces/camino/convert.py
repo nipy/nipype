@@ -53,8 +53,8 @@ class Image2Voxel(StdOutCommandLine):
     >>> img2vox.run()                  # doctest: +SKIP
     """
     _cmd = 'image2voxel'
-    input_spec = Image2VoxelInputSpec
-    output_spec = Image2VoxelOutputSpec
+    _input_spec = Image2VoxelInputSpec
+    _output_spec = Image2VoxelOutputSpec
 
     def _post_run(self):
         
@@ -110,8 +110,8 @@ class FSL2Scheme(StdOutCommandLine):
 
     """
     _cmd = 'fsl2scheme'
-    input_spec = FSL2SchemeInputSpec
-    output_spec = FSL2SchemeOutputSpec
+    _input_spec = FSL2SchemeInputSpec
+    _output_spec = FSL2SchemeOutputSpec
 
     def _post_run(self):
         
@@ -165,8 +165,8 @@ class VtkStreamlines(StdOutCommandLine):
     >>> vtk.run()                  # doctest: +SKIP
     """
     _cmd = 'vtkstreamlines'
-    input_spec = VtkStreamlinesInputSpec
-    output_spec = VtkStreamlinesOutputSpec
+    _input_spec = VtkStreamlinesInputSpec
+    _output_spec = VtkStreamlinesOutputSpec
 
     def _post_run(self):
         
@@ -269,8 +269,8 @@ class ProcStreamlines(StdOutCommandLine):
     >>> proc.run()                  # doctest: +SKIP
     """
     _cmd = 'procstreamlines'
-    input_spec = ProcStreamlinesInputSpec
-    output_spec = ProcStreamlinesOutputSpec
+    _input_spec = ProcStreamlinesInputSpec
+    _output_spec = ProcStreamlinesOutputSpec
 
     def _format_arg(self, name, spec, value):
         if name == 'outputroot':
@@ -344,8 +344,8 @@ class TractShredder(StdOutCommandLine):
     >>> shred.run()                  # doctest: +SKIP
     """
     _cmd = 'tractshredder'
-    input_spec = TractShredderInputSpec
-    output_spec = TractShredderOutputSpec
+    _input_spec = TractShredderInputSpec
+    _output_spec = TractShredderOutputSpec
 
     def _post_run(self):
         
@@ -382,8 +382,8 @@ class DT2NIfTI(CommandLine):
     Reads Camino diffusion tensors, and converts them to NIFTI format as three .nii files.
     """
     _cmd = 'dt2nii'
-    input_spec = DT2NIfTIInputSpec
-    output_spec = DT2NIfTIOutputSpec
+    _input_spec = DT2NIfTIInputSpec
+    _output_spec = DT2NIfTIOutputSpec
 
     def _post_run(self):
         
@@ -464,8 +464,8 @@ class NIfTIDT2Camino(CommandLine):
 
     """
     _cmd = 'niftidt2camino'
-    input_spec = NIfTIDT2CaminoInputSpec
-    output_spec = NIfTIDT2CaminoOutputSpec
+    _input_spec = NIfTIDT2CaminoInputSpec
+    _output_spec = NIfTIDT2CaminoOutputSpec
 
     def _post_run(self):
         
@@ -617,8 +617,8 @@ class AnalyzeHeader(StdOutCommandLine):
     >>> hdr.run()                  # doctest: +SKIP
     """
     _cmd = 'analyzeheader'
-    input_spec = AnalyzeHeaderInputSpec
-    output_spec = AnalyzeHeaderOutputSpec
+    _input_spec = AnalyzeHeaderInputSpec
+    _output_spec = AnalyzeHeaderOutputSpec
 
     def _post_run(self):
         
@@ -670,8 +670,8 @@ class Shredder(StdOutCommandLine):
     >>> shred.run()                  # doctest: +SKIP
     """
     _cmd = 'shredder'
-    input_spec = ShredderInputSpec
-    output_spec = ShredderOutputSpec
+    _input_spec = ShredderInputSpec
+    _output_spec = ShredderOutputSpec
 
     def _post_run(self):
         

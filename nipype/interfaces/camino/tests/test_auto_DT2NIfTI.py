@@ -27,7 +27,7 @@ def test_DT2NIfTI_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DT2NIfTI.input_spec()
+    inputs = DT2NIfTI._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +39,7 @@ def test_DT2NIfTI_outputs():
     exitcode=dict(),
     lns0=dict(),
     )
-    outputs = DT2NIfTI.output_spec()
+    outputs = DT2NIfTI._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

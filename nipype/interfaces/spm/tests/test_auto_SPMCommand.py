@@ -16,7 +16,7 @@ def test_SPMCommand_inputs():
     usedefault=True,
     ),
     )
-    inputs = SPMCommand.input_spec()
+    inputs = SPMCommand._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -25,7 +25,7 @@ def test_SPMCommand_inputs():
 
 def test_SPMCommand_outputs():
     output_map = dict()
-    outputs = SPMCommand.output_spec()
+    outputs = SPMCommand._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

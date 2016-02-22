@@ -28,7 +28,7 @@ def test_ZCutUp_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ZCutUp.input_spec()
+    inputs = ZCutUp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +38,7 @@ def test_ZCutUp_inputs():
 def test_ZCutUp_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ZCutUp.output_spec()
+    outputs = ZCutUp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

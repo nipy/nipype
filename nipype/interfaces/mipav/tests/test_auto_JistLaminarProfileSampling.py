@@ -36,7 +36,7 @@ def test_JistLaminarProfileSampling_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistLaminarProfileSampling.input_spec()
+    inputs = JistLaminarProfileSampling._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +47,7 @@ def test_JistLaminarProfileSampling_outputs():
     output_map = dict(outProfile2=dict(),
     outProfilemapped=dict(),
     )
-    outputs = JistLaminarProfileSampling.output_spec()
+    outputs = JistLaminarProfileSampling._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

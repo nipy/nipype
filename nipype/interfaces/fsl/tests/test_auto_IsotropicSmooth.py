@@ -45,7 +45,7 @@ def test_IsotropicSmooth_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = IsotropicSmooth.input_spec()
+    inputs = IsotropicSmooth._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +55,7 @@ def test_IsotropicSmooth_inputs():
 def test_IsotropicSmooth_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = IsotropicSmooth.output_spec()
+    outputs = IsotropicSmooth._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

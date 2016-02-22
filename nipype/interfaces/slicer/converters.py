@@ -39,8 +39,8 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = DicomToNrrdConverterInputSpec
-    output_spec = DicomToNrrdConverterOutputSpec
+    _input_spec = DicomToNrrdConverterInputSpec
+    _output_spec = DicomToNrrdConverterOutputSpec
     _cmd = "DicomToNrrdConverter "
     _outputs_filenames = {'outputDirectory': 'outputDirectory'}
 
@@ -72,7 +72,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = OrientScalarVolumeInputSpec
-    output_spec = OrientScalarVolumeOutputSpec
+    _input_spec = OrientScalarVolumeInputSpec
+    _output_spec = OrientScalarVolumeOutputSpec
     _cmd = "OrientScalarVolume "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}

@@ -74,7 +74,7 @@ def test_TrackBedpostxDeter_inputs():
     units='mm',
     ),
     )
-    inputs = TrackBedpostxDeter.input_spec()
+    inputs = TrackBedpostxDeter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -84,7 +84,7 @@ def test_TrackBedpostxDeter_inputs():
 def test_TrackBedpostxDeter_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = TrackBedpostxDeter.output_spec()
+    outputs = TrackBedpostxDeter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

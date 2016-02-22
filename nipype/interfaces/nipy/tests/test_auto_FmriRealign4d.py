@@ -26,7 +26,7 @@ def test_FmriRealign4d_inputs():
     tr_slices=dict(requires=['time_interp'],
     ),
     )
-    inputs = FmriRealign4d.input_spec()
+    inputs = FmriRealign4d._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +37,7 @@ def test_FmriRealign4d_outputs():
     output_map = dict(out_file=dict(),
     par_file=dict(),
     )
-    outputs = FmriRealign4d.output_spec()
+    outputs = FmriRealign4d._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

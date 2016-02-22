@@ -30,7 +30,7 @@ def test_LabelMapSmoothing_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = LabelMapSmoothing.input_spec()
+    inputs = LabelMapSmoothing._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +41,7 @@ def test_LabelMapSmoothing_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = LabelMapSmoothing.output_spec()
+    outputs = LabelMapSmoothing._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

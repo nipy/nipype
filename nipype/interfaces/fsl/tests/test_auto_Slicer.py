@@ -84,7 +84,7 @@ def test_Slicer_inputs():
     position=6,
     ),
     )
-    inputs = Slicer.input_spec()
+    inputs = Slicer._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -94,7 +94,7 @@ def test_Slicer_inputs():
 def test_Slicer_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Slicer.output_spec()
+    outputs = Slicer._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

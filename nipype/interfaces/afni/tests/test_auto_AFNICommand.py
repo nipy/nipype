@@ -17,7 +17,7 @@ def test_AFNICommand_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = AFNICommand.input_spec()
+    inputs = AFNICommand._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +26,7 @@ def test_AFNICommand_inputs():
 
 def test_AFNICommand_outputs():
     output_map = dict()
-    outputs = AFNICommand.output_spec()
+    outputs = AFNICommand._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

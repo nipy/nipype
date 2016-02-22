@@ -65,7 +65,7 @@ def test_gtractCoRegAnatomy_inputs():
     vectorIndex=dict(argstr='--vectorIndex %d',
     ),
     )
-    inputs = gtractCoRegAnatomy.input_spec()
+    inputs = gtractCoRegAnatomy._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -75,7 +75,7 @@ def test_gtractCoRegAnatomy_inputs():
 def test_gtractCoRegAnatomy_outputs():
     output_map = dict(outputTransformName=dict(),
     )
-    outputs = gtractCoRegAnatomy.output_spec()
+    outputs = gtractCoRegAnatomy._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

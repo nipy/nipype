@@ -24,7 +24,7 @@ def test_EstimateModel_inputs():
     usedefault=True,
     ),
     )
-    inputs = EstimateModel.input_spec()
+    inputs = EstimateModel._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +38,7 @@ def test_EstimateModel_outputs():
     residual_image=dict(),
     spm_mat_file=dict(),
     )
-    outputs = EstimateModel.output_spec()
+    outputs = EstimateModel._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -24,7 +24,7 @@ def test_BRAINSResize_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = BRAINSResize.input_spec()
+    inputs = BRAINSResize._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_BRAINSResize_inputs():
 def test_BRAINSResize_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = BRAINSResize.output_spec()
+    outputs = BRAINSResize._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

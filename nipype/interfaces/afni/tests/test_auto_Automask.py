@@ -32,7 +32,7 @@ def test_Automask_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Automask.input_spec()
+    inputs = Automask._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +43,7 @@ def test_Automask_outputs():
     output_map = dict(brain_file=dict(),
     out_file=dict(),
     )
-    outputs = Automask.output_spec()
+    outputs = Automask._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

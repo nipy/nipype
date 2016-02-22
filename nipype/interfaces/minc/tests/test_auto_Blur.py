@@ -51,7 +51,7 @@ def test_Blur_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Blur.input_spec()
+    inputs = Blur._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -66,7 +66,7 @@ def test_Blur_outputs():
     partial_dy=dict(),
     partial_dz=dict(),
     )
-    outputs = Blur.output_spec()
+    outputs = Blur._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

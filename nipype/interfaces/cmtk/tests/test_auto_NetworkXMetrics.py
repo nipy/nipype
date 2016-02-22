@@ -28,7 +28,7 @@ def test_NetworkXMetrics_inputs():
     treat_as_weighted_graph=dict(usedefault=True,
     ),
     )
-    inputs = NetworkXMetrics.input_spec()
+    inputs = NetworkXMetrics._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -50,7 +50,7 @@ def test_NetworkXMetrics_outputs():
     node_measures_matlab=dict(),
     pickled_extra_measures=dict(),
     )
-    outputs = NetworkXMetrics.output_spec()
+    outputs = NetworkXMetrics._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

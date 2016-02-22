@@ -32,7 +32,7 @@ def test_DWIToDTIEstimation_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DWIToDTIEstimation.input_spec()
+    inputs = DWIToDTIEstimation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +45,7 @@ def test_DWIToDTIEstimation_outputs():
     outputTensor=dict(position=-2,
     ),
     )
-    outputs = DWIToDTIEstimation.output_spec()
+    outputs = DWIToDTIEstimation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

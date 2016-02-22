@@ -42,7 +42,7 @@ def test_fibertrack_inputs():
     whole_brain=dict(argstr='--whole_brain ',
     ),
     )
-    inputs = fibertrack.input_spec()
+    inputs = fibertrack._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +52,7 @@ def test_fibertrack_inputs():
 def test_fibertrack_outputs():
     output_map = dict(output_fiber_file=dict(),
     )
-    outputs = fibertrack.output_spec()
+    outputs = fibertrack._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

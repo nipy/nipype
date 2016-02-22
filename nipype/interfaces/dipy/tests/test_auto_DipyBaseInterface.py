@@ -8,7 +8,7 @@ def test_DipyBaseInterface_inputs():
     usedefault=True,
     ),
     )
-    inputs = DipyBaseInterface.input_spec()
+    inputs = DipyBaseInterface._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -17,7 +17,7 @@ def test_DipyBaseInterface_inputs():
 
 def test_DipyBaseInterface_outputs():
     output_map = dict()
-    outputs = DipyBaseInterface.output_spec()
+    outputs = DipyBaseInterface._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

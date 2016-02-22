@@ -12,7 +12,7 @@ def test_AssertEqual_inputs():
     volume2=dict(mandatory=True,
     ),
     )
-    inputs = AssertEqual.input_spec()
+    inputs = AssertEqual._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -21,7 +21,7 @@ def test_AssertEqual_inputs():
 
 def test_AssertEqual_outputs():
     output_map = dict()
-    outputs = AssertEqual.output_spec()
+    outputs = AssertEqual._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

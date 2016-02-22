@@ -108,8 +108,8 @@ class MeshFix(CommandLine):
     'meshfix lh-pial.stl rh-pial.stl -o lh-pial_fixed.off'
     """
     _cmd = 'meshfix'
-    input_spec = MeshFixInputSpec
-    output_spec = MeshFixOutputSpec
+    _input_spec = MeshFixInputSpec
+    _output_spec = MeshFixOutputSpec
 
     def _post_run(self):
         

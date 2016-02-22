@@ -61,7 +61,7 @@ def test_MCFLIRT_inputs():
     use_gradient=dict(argstr='-gdt',
     ),
     )
-    inputs = MCFLIRT.input_spec()
+    inputs = MCFLIRT._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -77,7 +77,7 @@ def test_MCFLIRT_outputs():
     std_img=dict(),
     variance_img=dict(),
     )
-    outputs = MCFLIRT.output_spec()
+    outputs = MCFLIRT._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

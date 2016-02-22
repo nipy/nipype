@@ -87,7 +87,7 @@ def test_SegStats_inputs():
     wm_vol_from_surf=dict(argstr='--surf-wm-vol',
     ),
     )
-    inputs = SegStats.input_spec()
+    inputs = SegStats._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -100,7 +100,7 @@ def test_SegStats_outputs():
     sf_avg_file=dict(),
     summary_file=dict(),
     )
-    outputs = SegStats.output_spec()
+    outputs = SegStats._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -107,7 +107,7 @@ def test_Allineate_inputs():
     zclip=dict(argstr='-zclip',
     ),
     )
-    inputs = Allineate.input_spec()
+    inputs = Allineate._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -118,7 +118,7 @@ def test_Allineate_outputs():
     output_map = dict(matrix=dict(),
     out_file=dict(),
     )
-    outputs = Allineate.output_spec()
+    outputs = Allineate._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

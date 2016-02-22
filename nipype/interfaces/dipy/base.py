@@ -54,7 +54,7 @@ class DipyDiffusionInterface(DipyBaseInterface):
     """
     A base interface for py:mod:`dipy` computations
     """
-    input_spec = DipyBaseInputSpec
+    _input_spec = DipyBaseInputSpec
 
     def _get_gradient_table(self):
         bval = np.loadtxt(self.inputs.in_bval)

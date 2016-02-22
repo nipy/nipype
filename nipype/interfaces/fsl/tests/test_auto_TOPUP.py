@@ -82,7 +82,7 @@ def test_TOPUP_inputs():
     warp_res=dict(argstr='--warpres=%f',
     ),
     )
-    inputs = TOPUP.input_spec()
+    inputs = TOPUP._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -97,7 +97,7 @@ def test_TOPUP_outputs():
     out_logfile=dict(),
     out_movpar=dict(),
     )
-    outputs = TOPUP.output_spec()
+    outputs = TOPUP._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -5,7 +5,7 @@ from ..utility import IdentityInterface
 
 def test_IdentityInterface_inputs():
     input_map = dict()
-    inputs = IdentityInterface.input_spec()
+    inputs = IdentityInterface._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -14,7 +14,7 @@ def test_IdentityInterface_inputs():
 
 def test_IdentityInterface_outputs():
     output_map = dict()
-    outputs = IdentityInterface.output_spec()
+    outputs = IdentityInterface._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

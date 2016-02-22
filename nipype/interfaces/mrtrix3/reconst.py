@@ -68,8 +68,8 @@ class FitTensor(MRTrix3Base):
     """
 
     _cmd = 'dwi2tensor'
-    input_spec = FitTensorInputSpec
-    output_spec = FitTensorOutputSpec
+    _input_spec = FitTensorInputSpec
+    _output_spec = FitTensorOutputSpec
 
     def _post_run(self):
         
@@ -183,8 +183,8 @@ class EstimateFOD(MRTrix3Base):
     """
 
     _cmd = 'dwi2fod'
-    input_spec = EstimateFODInputSpec
-    output_spec = EstimateFODOutputSpec
+    _input_spec = EstimateFODInputSpec
+    _output_spec = EstimateFODOutputSpec
 
     def _post_run(self):
         

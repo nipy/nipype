@@ -82,8 +82,8 @@ class SliceTiming(SPMCommand):
 
     """
 
-    input_spec = SliceTimingInputSpec
-    output_spec = SliceTimingOutputSpec
+    _input_spec = SliceTimingInputSpec
+    _output_spec = SliceTimingOutputSpec
 
     _jobtype = 'temporal'
     _jobname = 'st'
@@ -180,8 +180,8 @@ class Realign(SPMCommand):
 
     """
 
-    input_spec = RealignInputSpec
-    output_spec = RealignOutputSpec
+    _input_spec = RealignInputSpec
+    _output_spec = RealignOutputSpec
 
     _jobtype = 'spatial'
     _jobname = 'realign'
@@ -310,8 +310,8 @@ class Coregister(SPMCommand):
 
     """
 
-    input_spec = CoregisterInputSpec
-    output_spec = CoregisterOutputSpec
+    _input_spec = CoregisterInputSpec
+    _output_spec = CoregisterOutputSpec
     _jobtype = 'spatial'
     _jobname = 'coreg'
 
@@ -435,8 +435,8 @@ class Normalize(SPMCommand):
 
     """
 
-    input_spec = NormalizeInputSpec
-    output_spec = NormalizeOutputSpec
+    _input_spec = NormalizeInputSpec
+    _output_spec = NormalizeOutputSpec
     _jobtype = 'spatial'
     _jobname = 'normalise'
 
@@ -595,8 +595,8 @@ class Normalize12(SPMCommand):
 
     """
 
-    input_spec = Normalize12InputSpec
-    output_spec = Normalize12OutputSpec
+    _input_spec = Normalize12InputSpec
+    _output_spec = Normalize12OutputSpec
     _jobtype = 'spatial'
     _jobname = 'normalise'
 
@@ -755,8 +755,8 @@ class Segment(SPMCommand):
 
     """
 
-    input_spec = SegmentInputSpec
-    output_spec = SegmentOutputSpec
+    _input_spec = SegmentInputSpec
+    _output_spec = SegmentOutputSpec
 
     def __init__(self, **inputs):
         _local_version = SPMCommand().version
@@ -882,8 +882,8 @@ class NewSegment(SPMCommand):
 
     """
 
-    input_spec = NewSegmentInputSpec
-    output_spec = NewSegmentOutputSpec
+    _input_spec = NewSegmentInputSpec
+    _output_spec = NewSegmentOutputSpec
 
     def __init__(self, **inputs):
         _local_version = SPMCommand().version
@@ -1009,8 +1009,8 @@ class Smooth(SPMCommand):
     >>> smooth.run() # doctest: +SKIP
     """
 
-    input_spec = SmoothInputSpec
-    output_spec = SmoothOutputSpec
+    _input_spec = SmoothInputSpec
+    _output_spec = SmoothOutputSpec
     _jobtype = 'spatial'
     _jobname = 'smooth'
 
@@ -1093,8 +1093,8 @@ class DARTEL(SPMCommand):
 
     """
 
-    input_spec = DARTELInputSpec
-    output_spec = DARTELOutputSpec
+    _input_spec = DARTELInputSpec
+    _output_spec = DARTELOutputSpec
     _jobtype = 'tools'
     _jobname = 'dartel'
 
@@ -1187,8 +1187,8 @@ class DARTELNorm2MNI(SPMCommand):
 
     """
 
-    input_spec = DARTELNorm2MNIInputSpec
-    output_spec = DARTELNorm2MNIOutputSpec
+    _input_spec = DARTELNorm2MNIInputSpec
+    _output_spec = DARTELNorm2MNIOutputSpec
     _jobtype = 'tools'
     _jobname = 'dartel'
 
@@ -1269,8 +1269,8 @@ class CreateWarped(SPMCommand):
 
     """
 
-    input_spec = CreateWarpedInputSpec
-    output_spec = CreateWarpedOutputSpec
+    _input_spec = CreateWarpedInputSpec
+    _output_spec = CreateWarpedOutputSpec
     _jobtype = 'tools'
     _jobname = 'dartel'
 
@@ -1312,8 +1312,8 @@ class ApplyDeformationFieldOutputSpec(TraitedSpec):
 
 
 class ApplyDeformations(SPMCommand):
-    input_spec = ApplyDeformationFieldInputSpec
-    output_spec = ApplyDeformationFieldOutputSpec
+    _input_spec = ApplyDeformationFieldInputSpec
+    _output_spec = ApplyDeformationFieldOutputSpec
 
     _jobtype = 'util'
     _jobname = 'defs'
@@ -1495,8 +1495,8 @@ class VBMSegment(SPMCommand):
     >>> seg.run() # doctest: +SKIP
     """
 
-    input_spec = VBMSegmentInputSpec
-    output_spec = VBMSegmentOuputSpec
+    _input_spec = VBMSegmentInputSpec
+    _output_spec = VBMSegmentOuputSpec
 
     _jobtype = 'tools'
     _jobname = 'vbm8'

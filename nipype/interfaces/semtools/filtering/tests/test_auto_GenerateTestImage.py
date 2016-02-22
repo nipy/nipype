@@ -26,7 +26,7 @@ def test_GenerateTestImage_inputs():
     upperBoundOfOutputVolume=dict(argstr='--upperBoundOfOutputVolume %f',
     ),
     )
-    inputs = GenerateTestImage.input_spec()
+    inputs = GenerateTestImage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_GenerateTestImage_inputs():
 def test_GenerateTestImage_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = GenerateTestImage.output_spec()
+    outputs = GenerateTestImage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

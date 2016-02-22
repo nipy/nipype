@@ -33,7 +33,7 @@ def test_BRAINSMultiSTAPLE_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = BRAINSMultiSTAPLE.input_spec()
+    inputs = BRAINSMultiSTAPLE._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -44,7 +44,7 @@ def test_BRAINSMultiSTAPLE_outputs():
     output_map = dict(outputConfusionMatrix=dict(),
     outputMultiSTAPLE=dict(),
     )
-    outputs = BRAINSMultiSTAPLE.output_spec()
+    outputs = BRAINSMultiSTAPLE._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

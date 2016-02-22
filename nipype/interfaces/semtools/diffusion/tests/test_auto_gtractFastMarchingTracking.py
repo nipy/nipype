@@ -44,7 +44,7 @@ def test_gtractFastMarchingTracking_inputs():
     writeXMLPolyDataFile=dict(argstr='--writeXMLPolyDataFile ',
     ),
     )
-    inputs = gtractFastMarchingTracking.input_spec()
+    inputs = gtractFastMarchingTracking._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -54,7 +54,7 @@ def test_gtractFastMarchingTracking_inputs():
 def test_gtractFastMarchingTracking_outputs():
     output_map = dict(outputTract=dict(),
     )
-    outputs = gtractFastMarchingTracking.output_spec()
+    outputs = gtractFastMarchingTracking._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

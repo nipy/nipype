@@ -54,7 +54,7 @@ def test_WarpImageMultiTransform_inputs():
     use_nearest=dict(argstr='--use-NN',
     ),
     )
-    inputs = WarpImageMultiTransform.input_spec()
+    inputs = WarpImageMultiTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -64,7 +64,7 @@ def test_WarpImageMultiTransform_inputs():
 def test_WarpImageMultiTransform_outputs():
     output_map = dict(output_image=dict(),
     )
-    outputs = WarpImageMultiTransform.output_spec()
+    outputs = WarpImageMultiTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

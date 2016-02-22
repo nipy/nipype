@@ -72,7 +72,7 @@ def test_gtractFiberTracking_inputs():
     writeXMLPolyDataFile=dict(argstr='--writeXMLPolyDataFile ',
     ),
     )
-    inputs = gtractFiberTracking.input_spec()
+    inputs = gtractFiberTracking._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -82,7 +82,7 @@ def test_gtractFiberTracking_inputs():
 def test_gtractFiberTracking_outputs():
     output_map = dict(outputTract=dict(),
     )
-    outputs = gtractFiberTracking.output_spec()
+    outputs = gtractFiberTracking._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

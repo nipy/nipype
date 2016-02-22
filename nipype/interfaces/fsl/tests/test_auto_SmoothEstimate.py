@@ -30,7 +30,7 @@ def test_SmoothEstimate_inputs():
     xor=['dof'],
     ),
     )
-    inputs = SmoothEstimate.input_spec()
+    inputs = SmoothEstimate._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +42,7 @@ def test_SmoothEstimate_outputs():
     resels=dict(),
     volume=dict(),
     )
-    outputs = SmoothEstimate.output_spec()
+    outputs = SmoothEstimate._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

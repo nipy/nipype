@@ -29,7 +29,7 @@ def test_BRAINSTransformConvert_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = BRAINSTransformConvert.input_spec()
+    inputs = BRAINSTransformConvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +40,7 @@ def test_BRAINSTransformConvert_outputs():
     output_map = dict(displacementVolume=dict(),
     outputTransform=dict(),
     )
-    outputs = BRAINSTransformConvert.output_spec()
+    outputs = BRAINSTransformConvert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

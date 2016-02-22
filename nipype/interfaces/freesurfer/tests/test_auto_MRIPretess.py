@@ -39,7 +39,7 @@ def test_MRIPretess_inputs():
     test=dict(argstr='-test',
     ),
     )
-    inputs = MRIPretess.input_spec()
+    inputs = MRIPretess._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +49,7 @@ def test_MRIPretess_inputs():
 def test_MRIPretess_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MRIPretess.output_spec()
+    outputs = MRIPretess._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

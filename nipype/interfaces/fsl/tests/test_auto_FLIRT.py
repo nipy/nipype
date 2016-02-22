@@ -145,7 +145,7 @@ def test_FLIRT_inputs():
     min_ver='5.0.0',
     ),
     )
-    inputs = FLIRT.input_spec()
+    inputs = FLIRT._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -157,7 +157,7 @@ def test_FLIRT_outputs():
     out_log=dict(),
     out_matrix_file=dict(),
     )
-    outputs = FLIRT.output_spec()
+    outputs = FLIRT._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

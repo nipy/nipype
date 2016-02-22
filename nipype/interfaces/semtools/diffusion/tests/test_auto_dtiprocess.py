@@ -88,7 +88,7 @@ def test_dtiprocess_inputs():
     verbose=dict(argstr='--verbose ',
     ),
     )
-    inputs = dtiprocess.input_spec()
+    inputs = dtiprocess._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -112,7 +112,7 @@ def test_dtiprocess_outputs():
     principal_eigenvector_output=dict(),
     rot_output=dict(),
     )
-    outputs = dtiprocess.output_spec()
+    outputs = dtiprocess._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

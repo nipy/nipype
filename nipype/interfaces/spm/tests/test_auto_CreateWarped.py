@@ -30,7 +30,7 @@ def test_CreateWarped_inputs():
     usedefault=True,
     ),
     )
-    inputs = CreateWarped.input_spec()
+    inputs = CreateWarped._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +40,7 @@ def test_CreateWarped_inputs():
 def test_CreateWarped_outputs():
     output_map = dict(warped_files=dict(),
     )
-    outputs = CreateWarped.output_spec()
+    outputs = CreateWarped._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -205,8 +205,8 @@ class ANTS(ANTSCommand):
 --transformation-model SyN[0.25] --use-Histogram-Matching 1'
     """
     _cmd = 'ANTS'
-    input_spec = ANTSInputSpec
-    output_spec = ANTSOutputSpec
+    _input_spec = ANTSInputSpec
+    _output_spec = ANTSOutputSpec
 
 
 class RegistrationInputSpec(ANTSCommandInputSpec):
@@ -873,8 +873,8 @@ class Registration(ANTSCommand):
     """The default sampling strategy argument."""
 
     _cmd = 'antsRegistration'
-    input_spec = RegistrationInputSpec
-    output_spec = RegistrationOutputSpec
+    _input_spec = RegistrationInputSpec
+    _output_spec = RegistrationOutputSpec
     _linear_transform_names = ['Rigid', 'Affine', 'Translation', 'CompositeAffine', 'Similarity']
 
     def _post_run(self):

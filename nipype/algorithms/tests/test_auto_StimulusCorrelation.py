@@ -17,7 +17,7 @@ def test_StimulusCorrelation_inputs():
     ),
     stimcorr_files=dict(),
     )
-    inputs = StimulusCorrelation.input_spec()
+    inputs = StimulusCorrelation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -27,7 +27,7 @@ def test_StimulusCorrelation_inputs():
 def test_StimulusCorrelation_outputs():
     output_map = dict(stimcorr_files=dict(),
     )
-    outputs = StimulusCorrelation.output_spec()
+    outputs = StimulusCorrelation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

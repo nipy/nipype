@@ -76,7 +76,7 @@ def test_Binarize_inputs():
     zero_slice_edge=dict(argstr='--zero-slice-edges',
     ),
     )
-    inputs = Binarize.input_spec()
+    inputs = Binarize._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -87,7 +87,7 @@ def test_Binarize_outputs():
     output_map = dict(binary_file=dict(),
     count_file=dict(),
     )
-    outputs = Binarize.output_spec()
+    outputs = Binarize._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

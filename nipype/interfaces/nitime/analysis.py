@@ -96,8 +96,8 @@ class CoherenceAnalyzerOutputSpec(TraitedSpec):
 
 class CoherenceAnalyzer(BaseInterface):
 
-    input_spec = CoherenceAnalyzerInputSpec
-    output_spec = CoherenceAnalyzerOutputSpec
+    _input_spec = CoherenceAnalyzerInputSpec
+    _output_spec = CoherenceAnalyzerOutputSpec
 
     def _read_csv(self):
         """

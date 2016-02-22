@@ -281,8 +281,8 @@ class SpecifyModel(BaseInterface):
     >>> s.inputs.subject_info = info
 
     """
-    input_spec = SpecifyModelInputSpec
-    output_spec = SpecifyModelOutputSpec
+    _input_spec = SpecifyModelInputSpec
+    _output_spec = SpecifyModelOutputSpec
 
     def _generate_standard_design(self, infolist,
                                   functional_runs=None,
@@ -446,7 +446,7 @@ class SpecifySPMModel(SpecifyModel):
 
     """
 
-    input_spec = SpecifySPMModelInputSpec
+    _input_spec = SpecifySPMModelInputSpec
 
     def _concatenate_info(self, infolist):
         nscans = []
@@ -608,8 +608,8 @@ class SpecifySparseModel(SpecifyModel):
     >>> s.inputs.subject_info = info
 
     """
-    input_spec = SpecifySparseModelInputSpec
-    output_spec = SpecifySparseModelOutputSpec
+    _input_spec = SpecifySparseModelInputSpec
+    _output_spec = SpecifySparseModelOutputSpec
 
     def _gen_regress(self, i_onsets, i_durations, i_amplitudes, nscans):
         """Generates a regressor for a sparse/clustered-sparse acquisition

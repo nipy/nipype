@@ -52,7 +52,7 @@ def test_Concatenate_inputs():
     vote=dict(argstr='--vote',
     ),
     )
-    inputs = Concatenate.input_spec()
+    inputs = Concatenate._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -62,7 +62,7 @@ def test_Concatenate_inputs():
 def test_Concatenate_outputs():
     output_map = dict(concatenated_file=dict(),
     )
-    outputs = Concatenate.output_spec()
+    outputs = Concatenate._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

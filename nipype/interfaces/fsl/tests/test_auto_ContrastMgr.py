@@ -43,7 +43,7 @@ def test_ContrastMgr_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ContrastMgr.input_spec()
+    inputs = ContrastMgr._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -59,7 +59,7 @@ def test_ContrastMgr_outputs():
     zfstats=dict(),
     zstats=dict(),
     )
-    outputs = ContrastMgr.output_spec()
+    outputs = ContrastMgr._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

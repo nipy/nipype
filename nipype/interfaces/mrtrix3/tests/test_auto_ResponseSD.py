@@ -57,7 +57,7 @@ def test_ResponseSD_inputs():
     vol_ratio=dict(argstr='-volume_ratio %f',
     ),
     )
-    inputs = ResponseSD.input_spec()
+    inputs = ResponseSD._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -68,7 +68,7 @@ def test_ResponseSD_outputs():
     output_map = dict(out_file=dict(),
     out_sf=dict(),
     )
-    outputs = ResponseSD.output_spec()
+    outputs = ResponseSD._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

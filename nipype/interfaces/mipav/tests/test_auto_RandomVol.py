@@ -45,7 +45,7 @@ def test_RandomVol_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = RandomVol.input_spec()
+    inputs = RandomVol._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +55,7 @@ def test_RandomVol_inputs():
 def test_RandomVol_outputs():
     output_map = dict(outRand1=dict(),
     )
-    outputs = RandomVol.output_spec()
+    outputs = RandomVol._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

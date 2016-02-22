@@ -28,7 +28,7 @@ def test_gtractResampleFibers_inputs():
     writeXMLPolyDataFile=dict(argstr='--writeXMLPolyDataFile ',
     ),
     )
-    inputs = gtractResampleFibers.input_spec()
+    inputs = gtractResampleFibers._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +38,7 @@ def test_gtractResampleFibers_inputs():
 def test_gtractResampleFibers_outputs():
     output_map = dict(outputTract=dict(),
     )
-    outputs = gtractResampleFibers.output_spec()
+    outputs = gtractResampleFibers._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -75,8 +75,8 @@ class CFFConverter(BaseInterface):
     >>> cvt.run()                 # doctest: +SKIP
     """
 
-    input_spec = CFFConverterInputSpec
-    output_spec = CFFConverterOutputSpec
+    _input_spec = CFFConverterInputSpec
+    _output_spec = CFFConverterOutputSpec
 
     def _run_interface(self, runtime):
         a = cf.connectome()
@@ -225,8 +225,8 @@ class MergeCNetworks(BaseInterface):
     >>> mrg.run()                  # doctest: +SKIP
 
     """
-    input_spec = MergeCNetworksInputSpec
-    output_spec = MergeCNetworksOutputSpec
+    _input_spec = MergeCNetworksInputSpec
+    _output_spec = MergeCNetworksOutputSpec
 
     def _run_interface(self, runtime):
         extracted_networks = []

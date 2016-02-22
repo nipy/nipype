@@ -24,7 +24,7 @@ def test_ExtractMainComponent_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ExtractMainComponent.input_spec()
+    inputs = ExtractMainComponent._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_ExtractMainComponent_inputs():
 def test_ExtractMainComponent_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ExtractMainComponent.output_spec()
+    outputs = ExtractMainComponent._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

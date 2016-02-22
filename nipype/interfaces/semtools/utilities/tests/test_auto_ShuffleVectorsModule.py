@@ -22,7 +22,7 @@ def test_ShuffleVectorsModule_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ShuffleVectorsModule.input_spec()
+    inputs = ShuffleVectorsModule._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -32,7 +32,7 @@ def test_ShuffleVectorsModule_inputs():
 def test_ShuffleVectorsModule_outputs():
     output_map = dict(outputVectorFileBaseName=dict(),
     )
-    outputs = ShuffleVectorsModule.output_spec()
+    outputs = ShuffleVectorsModule._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

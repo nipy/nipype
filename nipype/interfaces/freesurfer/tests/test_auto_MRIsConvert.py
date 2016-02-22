@@ -59,7 +59,7 @@ def test_MRIsConvert_inputs():
     xyz_ascii=dict(argstr='-a',
     ),
     )
-    inputs = MRIsConvert.input_spec()
+    inputs = MRIsConvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -69,7 +69,7 @@ def test_MRIsConvert_inputs():
 def test_MRIsConvert_outputs():
     output_map = dict(converted=dict(),
     )
-    outputs = MRIsConvert.output_spec()
+    outputs = MRIsConvert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

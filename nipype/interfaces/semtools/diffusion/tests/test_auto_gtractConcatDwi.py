@@ -24,7 +24,7 @@ def test_gtractConcatDwi_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = gtractConcatDwi.input_spec()
+    inputs = gtractConcatDwi._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_gtractConcatDwi_inputs():
 def test_gtractConcatDwi_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractConcatDwi.output_spec()
+    outputs = gtractConcatDwi._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

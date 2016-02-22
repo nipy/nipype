@@ -104,7 +104,7 @@ def test_SampleToSurface_inputs():
     vox_file=dict(argstr='--nvox %s',
     ),
     )
-    inputs = SampleToSurface.input_spec()
+    inputs = SampleToSurface._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -116,7 +116,7 @@ def test_SampleToSurface_outputs():
     out_file=dict(),
     vox_file=dict(),
     )
-    outputs = SampleToSurface.output_spec()
+    outputs = SampleToSurface._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

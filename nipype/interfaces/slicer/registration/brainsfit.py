@@ -99,7 +99,7 @@ acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); Gregory Harris(1), Vinc
 
 """
 
-    input_spec = BRAINSFitInputSpec
-    output_spec = BRAINSFitOutputSpec
+    _input_spec = BRAINSFitInputSpec
+    _output_spec = BRAINSFitOutputSpec
     _cmd = "BRAINSFit "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii', 'bsplineTransform': 'bsplineTransform.mat', 'outputTransform': 'outputTransform.mat', 'outputFixedVolumeROI': 'outputFixedVolumeROI.nii', 'strippedOutputTransform': 'strippedOutputTransform.mat', 'outputMovingVolumeROI': 'outputMovingVolumeROI.nii', 'linearTransform': 'linearTransform.mat'}

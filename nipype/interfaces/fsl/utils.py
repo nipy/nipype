@@ -59,8 +59,8 @@ class CopyGeom(FSLCommand):
     in loss of information or potentially incorrect settings.
     """
     _cmd = 'fslcpgeom'
-    input_spec = CopyGeomInputSpec
-    output_spec = CopyGeomOutputSpec
+    _input_spec = CopyGeomInputSpec
+    _output_spec = CopyGeomOutputSpec
 
 
 class RobustFOVInputSpec(FSLCommandInputSpec):
@@ -76,8 +76,8 @@ class RobustFOVOutputSpec(TraitedSpec):
 
 class RobustFOV(FSLCommand):
     _cmd = 'robustfov'
-    input_spec = RobustFOVInputSpec
-    output_spec = RobustFOVOutputSpec
+    _input_spec = RobustFOVInputSpec
+    _output_spec = RobustFOVOutputSpec
 
 
 class ImageMeantsInputSpec(FSLCommandInputSpec):
@@ -115,8 +115,8 @@ class ImageMeants(FSLCommand):
 
     """
     _cmd = 'fslmeants'
-    input_spec = ImageMeantsInputSpec
-    output_spec = ImageMeantsOutputSpec
+    _input_spec = ImageMeantsInputSpec
+    _output_spec = ImageMeantsOutputSpec
 
 
 class SmoothInputSpec(FSLCommandInputSpec):
@@ -174,8 +174,8 @@ class Smooth(FSLCommand):
 
     """
 
-    input_spec = SmoothInputSpec
-    output_spec = SmoothOutputSpec
+    _input_spec = SmoothInputSpec
+    _output_spec = SmoothOutputSpec
     _cmd = 'fslmaths'
 
 
@@ -236,8 +236,8 @@ class Merge(FSLCommand):
     """
 
     _cmd = 'fslmerge'
-    input_spec = MergeInputSpec
-    output_spec = MergeOutputSpec
+    _input_spec = MergeInputSpec
+    _output_spec = MergeOutputSpec
 
 
 class ExtractROIInputSpec(FSLCommandInputSpec):
@@ -296,8 +296,8 @@ class ExtractROI(FSLCommand):
     """
 
     _cmd = 'fslroi'
-    input_spec = ExtractROIInputSpec
-    output_spec = ExtractROIOutputSpec
+    _input_spec = ExtractROIInputSpec
+    _output_spec = ExtractROIOutputSpec
 
 
 class SplitInputSpec(FSLCommandInputSpec):
@@ -318,8 +318,8 @@ class Split(FSLCommand):
     time, x, y or z dimension.
     """
     _cmd = 'fslsplit'
-    input_spec = SplitInputSpec
-    output_spec = SplitOutputSpec
+    _input_spec = SplitInputSpec
+    _output_spec = SplitOutputSpec
 
     def _post_run(self):
         ext = self.inputs.output_type_
@@ -367,8 +367,8 @@ class ImageMaths(FSLCommand):
 
 
     """
-    input_spec = ImageMathsInputSpec
-    output_spec = ImageMathsOutputSpec
+    _input_spec = ImageMathsInputSpec
+    _output_spec = ImageMathsOutputSpec
     _cmd = 'fslmaths'
 
 
@@ -420,8 +420,8 @@ class FilterRegressor(FSLCommand):
 
     Uses simple OLS regression on 4D images
     """
-    input_spec = FilterRegressorInputSpec
-    output_spec = FilterRegressorOutputSpec
+    _input_spec = FilterRegressorInputSpec
+    _output_spec = FilterRegressorOutputSpec
     _cmd = 'fsl_regfilt'
 
 
@@ -473,8 +473,8 @@ class ImageStats(FSLCommand):
 
 
     """
-    input_spec = ImageStatsInputSpec
-    output_spec = ImageStatsOutputSpec
+    _input_spec = ImageStatsInputSpec
+    _output_spec = ImageStatsOutputSpec
 
     _cmd = 'fslstats'
 
@@ -534,8 +534,8 @@ class AvScale(FSLCommand):
 
 
     """
-    input_spec = AvScaleInputSpec
-    output_spec = AvScaleOutputSpec
+    _input_spec = AvScaleInputSpec
+    _output_spec = AvScaleOutputSpec
 
     _cmd = 'avscale'
 
@@ -655,8 +655,8 @@ class Overlay(FSLCommand):
 
     """
     _cmd = 'overlay'
-    input_spec = OverlayInputSpec
-    output_spec = OverlayOutputSpec
+    _input_spec = OverlayInputSpec
+    _output_spec = OverlayOutputSpec
 
 
 class SlicerInputSpec(FSLCommandInputSpec):
@@ -741,8 +741,8 @@ class Slicer(FSLCommand):
 
     """
     _cmd = 'slicer'
-    input_spec = SlicerInputSpec
-    output_spec = SlicerOutputSpec
+    _input_spec = SlicerInputSpec
+    _output_spec = SlicerOutputSpec
 
 
 class PlotTimeSeriesInputSpec(FSLCommandInputSpec):
@@ -805,8 +805,8 @@ class PlotTimeSeries(FSLCommand):
 
     """
     _cmd = 'fsl_tsplot'
-    input_spec = PlotTimeSeriesInputSpec
-    output_spec = PlotTimeSeriesOutputSpec
+    _input_spec = PlotTimeSeriesInputSpec
+    _output_spec = PlotTimeSeriesOutputSpec
 
 
 class PlotMotionParamsInputSpec(FSLCommandInputSpec):
@@ -888,8 +888,8 @@ class PlotMotionParams(FSLCommand):
 
     """
     _cmd = 'fsl_tsplot'
-    input_spec = PlotMotionParamsInputSpec
-    output_spec = PlotMotionParamsOutputSpec
+    _input_spec = PlotMotionParamsInputSpec
+    _output_spec = PlotMotionParamsOutputSpec
 
 
 class ConvertXFMInputSpec(FSLCommandInputSpec):
@@ -961,8 +961,8 @@ class ConvertXFM(FSLCommand):
     """
 
     _cmd = 'convert_xfm'
-    input_spec = ConvertXFMInputSpec
-    output_spec = ConvertXFMOutputSpec
+    _input_spec = ConvertXFMInputSpec
+    _output_spec = ConvertXFMOutputSpec
 
 
 class SwapDimensionsInputSpec(FSLCommandInputSpec):
@@ -993,8 +993,8 @@ class SwapDimensions(FSLCommand):
 
     """
     _cmd = 'fslswapdim'
-    input_spec = SwapDimensionsInputSpec
-    output_spec = SwapDimensionsOutputSpec
+    _input_spec = SwapDimensionsInputSpec
+    _output_spec = SwapDimensionsOutputSpec
 
 
 class PowerSpectrumInputSpec(FSLCommandInputSpec):
@@ -1028,8 +1028,8 @@ class PowerSpectrum(FSLCommand):
     """
 
     _cmd = 'fslpspec'
-    input_spec = PowerSpectrumInputSpec
-    output_spec = PowerSpectrumOutputSpec
+    _input_spec = PowerSpectrumInputSpec
+    _output_spec = PowerSpectrumOutputSpec
 
 
 class SigLossInputSpec(FSLCommandInputSpec):
@@ -1069,8 +1069,8 @@ class SigLoss(FSLCommand):
 
 
     """
-    input_spec = SigLossInputSpec
-    output_spec = SigLossOuputSpec
+    _input_spec = SigLossInputSpec
+    _output_spec = SigLossOuputSpec
     _cmd = 'sigloss'
 
 
@@ -1099,8 +1099,8 @@ class Reorient2Std(FSLCommand):
 
     """
     _cmd = 'fslreorient2std'
-    input_spec = Reorient2StdInputSpec
-    output_spec = Reorient2StdOutputSpec
+    _input_spec = Reorient2StdInputSpec
+    _output_spec = Reorient2StdOutputSpec
 
 
 class InvWarpInputSpec(FSLCommandInputSpec):
@@ -1175,8 +1175,8 @@ class InvWarp(FSLCommand):
 
     """
 
-    input_spec = InvWarpInputSpec
-    output_spec = InvWarpOutputSpec
+    _input_spec = InvWarpInputSpec
+    _output_spec = InvWarpOutputSpec
 
     _cmd = 'invwarp'
 
@@ -1268,8 +1268,8 @@ class Complex(FSLCommand):
 
     """
     _cmd = 'fslcomplex'
-    input_spec = ComplexInputSpec
-    output_spec = ComplexOuputSpec
+    _input_spec = ComplexInputSpec
+    _output_spec = ComplexOuputSpec
 
 
 class WarpUtilsInputSpec(FSLCommandInputSpec):
@@ -1368,8 +1368,8 @@ class WarpUtils(FSLCommand):
 
     """
 
-    input_spec = WarpUtilsInputSpec
-    output_spec = WarpUtilsOutputSpec
+    _input_spec = WarpUtilsInputSpec
+    _output_spec = WarpUtilsOutputSpec
 
     _cmd = 'fnirtfileutils'
 
@@ -1476,8 +1476,8 @@ class ConvertWarp(FSLCommand):
 
     """
 
-    input_spec = ConvertWarpInputSpec
-    output_spec = ConvertWarpOutputSpec
+    _input_spec = ConvertWarpInputSpec
+    _output_spec = ConvertWarpOutputSpec
     _cmd = 'convertwarp'
 
 
@@ -1534,8 +1534,8 @@ class WarpPoints(CommandLine):
 
     """
 
-    input_spec = WarpPointsInputSpec
-    output_spec = WarpPointsOutputSpec
+    _input_spec = WarpPointsInputSpec
+    _output_spec = WarpPointsOutputSpec
     _cmd = 'img2imgcoord'
     _terminal_output = 'stream'
 
@@ -1715,8 +1715,8 @@ class WarpPointsToStd(WarpPoints):
 
     """
 
-    input_spec = WarpPointsToStdInputSpec
-    output_spec = WarpPointsOutputSpec
+    _input_spec = WarpPointsToStdInputSpec
+    _output_spec = WarpPointsOutputSpec
     _cmd = 'img2stdcoord'
 
 
@@ -1759,6 +1759,6 @@ class MotionOutliers(FSLCommand):
     >>> res = mo.run() # doctest: +SKIP
     """
 
-    input_spec = MotionOutliersInputSpec
-    output_spec = MotionOutliersOutputSpec
+    _input_spec = MotionOutliersInputSpec
+    _output_spec = MotionOutliersOutputSpec
     _cmd = 'fsl_motion_outliers'

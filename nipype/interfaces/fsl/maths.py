@@ -40,8 +40,8 @@ class MathsOutput(TraitedSpec):
 
 class MathsCommand(FSLCommand):
     _cmd = "fslmaths"
-    input_spec = MathsInput
-    output_spec = MathsOutput
+    _input_spec = MathsInput
+    _output_spec = MathsOutput
 
 
 class ChangeDataTypeInput(MathsInput):
@@ -57,7 +57,7 @@ class ChangeDataTypeInput(MathsInput):
 
 class ChangeDataType(MathsCommand):
     """Use fslmaths to change the datatype of an image."""
-    input_spec = ChangeDataTypeInput
+    _input_spec = ChangeDataTypeInput
 
 
 class ThresholdInputSpec(MathsInput):
@@ -89,7 +89,7 @@ class ThresholdInputSpec(MathsInput):
 
 class Threshold(MathsCommand):
     """Use fslmaths to apply a threshold to an image in a variety of ways."""
-    input_spec = ThresholdInputSpec
+    _input_spec = ThresholdInputSpec
 
 
 class MeanImageInput(MathsInput):
@@ -102,7 +102,7 @@ class MeanImageInput(MathsInput):
 
 class MeanImage(MathsCommand):
     """Use fslmaths to generate a mean image across a given dimension."""
-    input_spec = MeanImageInput
+    _input_spec = MeanImageInput
 
 
 class MaxImageInput(MathsInput):
@@ -127,7 +127,7 @@ class MaxImage(MathsCommand):
     'fslmaths functional.nii -Tmax functional_max.nii'
 
     """
-    input_spec = MaxImageInput
+    _input_spec = MaxImageInput
 
 
 class IsotropicSmoothInput(MathsInput):
@@ -147,7 +147,7 @@ class IsotropicSmoothInput(MathsInput):
 
 class IsotropicSmooth(MathsCommand):
     """Use fslmaths to spatially smooth an image with a gaussian kernel."""
-    input_spec = IsotropicSmoothInput
+    _input_spec = IsotropicSmoothInput
 
 
 class ApplyMaskInput(MathsInput):
@@ -160,7 +160,7 @@ class ApplyMaskInput(MathsInput):
 
 class ApplyMask(MathsCommand):
     """Use fslmaths to apply a binary mask to another image."""
-    input_spec = ApplyMaskInput
+    _input_spec = ApplyMaskInput
 
 
 class KernelInput(MathsInput):
@@ -187,7 +187,7 @@ class DilateInput(KernelInput):
 
 class DilateImage(MathsCommand):
     """Use fslmaths to perform a spatial dilation of an image."""
-    input_spec = DilateInput
+    _input_spec = DilateInput
 
 
 class ErodeInput(KernelInput):
@@ -206,7 +206,7 @@ class ErodeInput(KernelInput):
 
 class ErodeImage(MathsCommand):
     """Use fslmaths to perform a spatial erosion of an image."""
-    input_spec = ErodeInput
+    _input_spec = ErodeInput
 
 
 class SpatialFilterInput(KernelInput):
@@ -219,7 +219,7 @@ class SpatialFilterInput(KernelInput):
 
 class SpatialFilter(MathsCommand):
     """Use fslmaths to spatially filter an image."""
-    input_spec = SpatialFilterInput
+    _input_spec = SpatialFilterInput
 
 
 class UnaryMathsInput(MathsInput):
@@ -235,7 +235,7 @@ class UnaryMathsInput(MathsInput):
 
 class UnaryMaths(MathsCommand):
     """Use fslmaths to perorm a variety of mathematical operations on an image."""
-    input_spec = UnaryMathsInput
+    _input_spec = UnaryMathsInput
 
 
 class BinaryMathsInput(MathsInput):
@@ -253,7 +253,7 @@ class BinaryMaths(MathsCommand):
     Use fslmaths to perform mathematical operations using a second
     image or a numeric value.
     """
-    input_spec = BinaryMathsInput
+    _input_spec = BinaryMathsInput
 
 
 class MultiImageMathsInput(MathsInput):
@@ -281,7 +281,7 @@ class MultiImageMaths(MathsCommand):
     'fslmaths functional.nii -add functional2.nii -mul -1 -div functional3.nii functional_maths.nii.gz'
 
     """
-    input_spec = MultiImageMathsInput
+    _input_spec = MultiImageMathsInput
 
 
 class TemporalFilterInput(MathsInput):
@@ -296,4 +296,4 @@ class TemporalFilterInput(MathsInput):
 
 class TemporalFilter(MathsCommand):
     """Use fslmaths to apply a low, high, or bandpass temporal filter to a timeseries. """
-    input_spec = TemporalFilterInput
+    _input_spec = TemporalFilterInput

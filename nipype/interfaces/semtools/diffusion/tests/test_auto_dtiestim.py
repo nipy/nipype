@@ -56,7 +56,7 @@ def test_dtiestim_inputs():
     weight_iterations=dict(argstr='--weight_iterations %d',
     ),
     )
-    inputs = dtiestim.input_spec()
+    inputs = dtiestim._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -69,7 +69,7 @@ def test_dtiestim_outputs():
     idwi=dict(),
     tensor_output=dict(),
     )
-    outputs = dtiestim.output_spec()
+    outputs = dtiestim._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

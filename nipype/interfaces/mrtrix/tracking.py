@@ -62,8 +62,8 @@ class FilterTracks(CommandLine):
     """
 
     _cmd = 'filter_tracks'
-    input_spec = FilterTracksInputSpec
-    output_spec = FilterTracksOutputSpec
+    _input_spec = FilterTracksInputSpec
+    _output_spec = FilterTracksOutputSpec
 
 
 class Tracks2ProbInputSpec(CommandLineInputSpec):
@@ -104,8 +104,8 @@ class Tracks2Prob(CommandLine):
     """
 
     _cmd = 'tracks2prob'
-    input_spec = Tracks2ProbInputSpec
-    output_spec = Tracks2ProbOutputSpec
+    _input_spec = Tracks2ProbInputSpec
+    _output_spec = Tracks2ProbOutputSpec
 
     def _post_run(self):
         
@@ -211,8 +211,8 @@ class StreamlineTrack(CommandLine):
     >>> strack.run()                                    # doctest: +SKIP
     """
     _cmd = 'streamtrack'
-    input_spec = StreamlineTrackInputSpec
-    output_spec = StreamlineTrackOutputSpec
+    _input_spec = StreamlineTrackInputSpec
+    _output_spec = StreamlineTrackOutputSpec
 
 
 class DiffusionTensorStreamlineTrackInputSpec(StreamlineTrackInputSpec):
@@ -236,7 +236,7 @@ class DiffusionTensorStreamlineTrack(StreamlineTrack):
     >>> dtstrack.run()                                  # doctest: +SKIP
     """
 
-    input_spec = DiffusionTensorStreamlineTrackInputSpec
+    _input_spec = DiffusionTensorStreamlineTrackInputSpec
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "DT_STREAM"
@@ -265,7 +265,7 @@ class ProbabilisticSphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     >>> sdprobtrack.inputs.seed_file = 'seed_mask.nii'
     >>> sdprobtrack.run()                                                       # doctest: +SKIP
     """
-    input_spec = ProbabilisticSphericallyDeconvolutedStreamlineTrackInputSpec
+    _input_spec = ProbabilisticSphericallyDeconvolutedStreamlineTrackInputSpec
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "SD_PROB"
@@ -289,7 +289,7 @@ class SphericallyDeconvolutedStreamlineTrack(StreamlineTrack):
     >>> sdtrack.inputs.seed_file = 'seed_mask.nii'
     >>> sdtrack.run()                                          # doctest: +SKIP
     """
-    input_spec = StreamlineTrackInputSpec
+    _input_spec = StreamlineTrackInputSpec
 
     def __init__(self, command=None, **inputs):
         inputs["inputmodel"] = "SD_STREAM"

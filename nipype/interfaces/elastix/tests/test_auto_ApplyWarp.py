@@ -28,7 +28,7 @@ def test_ApplyWarp_inputs():
     mandatory=True,
     ),
     )
-    inputs = ApplyWarp.input_spec()
+    inputs = ApplyWarp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +38,7 @@ def test_ApplyWarp_inputs():
 def test_ApplyWarp_outputs():
     output_map = dict(warped_file=dict(),
     )
-    outputs = ApplyWarp.output_spec()
+    outputs = ApplyWarp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

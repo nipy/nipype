@@ -13,7 +13,7 @@ def test_ICC_inputs():
     subjects_sessions=dict(mandatory=True,
     ),
     )
-    inputs = ICC.input_spec()
+    inputs = ICC._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +26,7 @@ def test_ICC_outputs():
     session_var_map=dict(),
     subject_var_map=dict(),
     )
-    outputs = ICC.output_spec()
+    outputs = ICC._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

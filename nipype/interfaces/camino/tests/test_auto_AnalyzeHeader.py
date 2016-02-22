@@ -80,7 +80,7 @@ def test_AnalyzeHeader_inputs():
     units='mm',
     ),
     )
-    inputs = AnalyzeHeader.input_spec()
+    inputs = AnalyzeHeader._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -90,7 +90,7 @@ def test_AnalyzeHeader_inputs():
 def test_AnalyzeHeader_outputs():
     output_map = dict(header=dict(),
     )
-    outputs = AnalyzeHeader.output_spec()
+    outputs = AnalyzeHeader._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -14,7 +14,7 @@ def test_ComputeMask_inputs():
     ),
     reference_volume=dict(),
     )
-    inputs = ComputeMask.input_spec()
+    inputs = ComputeMask._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -24,7 +24,7 @@ def test_ComputeMask_inputs():
 def test_ComputeMask_outputs():
     output_map = dict(brain_mask=dict(),
     )
-    outputs = ComputeMask.output_spec()
+    outputs = ComputeMask._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

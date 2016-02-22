@@ -44,7 +44,7 @@ def test_Means_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Means.input_spec()
+    inputs = Means._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -54,7 +54,7 @@ def test_Means_inputs():
 def test_Means_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Means.output_spec()
+    outputs = Means._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

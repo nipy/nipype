@@ -35,7 +35,7 @@ def test_JistLaminarROIAveraging_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistLaminarROIAveraging.input_spec()
+    inputs = JistLaminarROIAveraging._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +45,7 @@ def test_JistLaminarROIAveraging_inputs():
 def test_JistLaminarROIAveraging_outputs():
     output_map = dict(outROI3=dict(),
     )
-    outputs = JistLaminarROIAveraging.output_spec()
+    outputs = JistLaminarROIAveraging._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

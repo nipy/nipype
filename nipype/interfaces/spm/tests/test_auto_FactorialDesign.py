@@ -46,7 +46,7 @@ def test_FactorialDesign_inputs():
     usedefault=True,
     ),
     )
-    inputs = FactorialDesign.input_spec()
+    inputs = FactorialDesign._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -56,7 +56,7 @@ def test_FactorialDesign_inputs():
 def test_FactorialDesign_outputs():
     output_map = dict(spm_mat_file=dict(),
     )
-    outputs = FactorialDesign.output_spec()
+    outputs = FactorialDesign._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

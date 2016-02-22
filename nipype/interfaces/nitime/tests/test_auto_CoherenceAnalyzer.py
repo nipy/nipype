@@ -22,7 +22,7 @@ def test_CoherenceAnalyzer_inputs():
     output_csv_file=dict(),
     output_figure_file=dict(),
     )
-    inputs = CoherenceAnalyzer.input_spec()
+    inputs = CoherenceAnalyzer._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +37,7 @@ def test_CoherenceAnalyzer_outputs():
     timedelay_csv=dict(),
     timedelay_fig=dict(),
     )
-    outputs = CoherenceAnalyzer.output_spec()
+    outputs = CoherenceAnalyzer._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

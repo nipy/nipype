@@ -32,7 +32,7 @@ def test_ComputeMeanDiffusivity_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ComputeMeanDiffusivity.input_spec()
+    inputs = ComputeMeanDiffusivity._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +42,7 @@ def test_ComputeMeanDiffusivity_inputs():
 def test_ComputeMeanDiffusivity_outputs():
     output_map = dict(md=dict(),
     )
-    outputs = ComputeMeanDiffusivity.output_spec()
+    outputs = ComputeMeanDiffusivity._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

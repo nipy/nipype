@@ -31,7 +31,7 @@ def test_scalartransform_inputs():
     hash_files=False,
     ),
     )
-    inputs = scalartransform.input_spec()
+    inputs = scalartransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +42,7 @@ def test_scalartransform_outputs():
     output_map = dict(output_image=dict(),
     transformation=dict(),
     )
-    outputs = scalartransform.output_spec()
+    outputs = scalartransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

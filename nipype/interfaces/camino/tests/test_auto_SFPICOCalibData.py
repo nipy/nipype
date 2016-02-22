@@ -60,7 +60,7 @@ def test_SFPICOCalibData_inputs():
     units='NA',
     ),
     )
-    inputs = SFPICOCalibData.input_spec()
+    inputs = SFPICOCalibData._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -71,7 +71,7 @@ def test_SFPICOCalibData_outputs():
     output_map = dict(PICOCalib=dict(),
     calib_info=dict(),
     )
-    outputs = SFPICOCalibData.output_spec()
+    outputs = SFPICOCalibData._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -455,8 +455,8 @@ class CreateMatrix(BaseInterface):
     >>> conmap.run()                 # doctest: +SKIP
     """
 
-    input_spec = CreateMatrixInputSpec
-    output_spec = CreateMatrixOutputSpec
+    _input_spec = CreateMatrixInputSpec
+    _output_spec = CreateMatrixOutputSpec
 
     def _run_interface(self, runtime):
         if isdefined(self.inputs.out_matrix_file):
@@ -613,8 +613,8 @@ class ROIGen(BaseInterface):
     >>> labelDict                     # doctest: +SKIP
     """
 
-    input_spec = ROIGenInputSpec
-    output_spec = ROIGenOutputSpec
+    _input_spec = ROIGenInputSpec
+    _output_spec = ROIGenOutputSpec
 
     def _run_interface(self, runtime):
         aparc_aseg_file = self.inputs.aparc_aseg_file
@@ -777,8 +777,8 @@ class CreateNodes(BaseInterface):
     >>> mknode.run() # doctest: +SKIP
     """
 
-    input_spec = CreateNodesInputSpec
-    output_spec = CreateNodesOutputSpec
+    _input_spec = CreateNodesInputSpec
+    _output_spec = CreateNodesOutputSpec
 
     def _run_interface(self, runtime):
         iflogger.info('Creating nodes...')

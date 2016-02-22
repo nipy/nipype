@@ -119,7 +119,7 @@ def test_MedicAlgorithmSPECTRE2010_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = MedicAlgorithmSPECTRE2010.input_spec()
+    inputs = MedicAlgorithmSPECTRE2010._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -137,7 +137,7 @@ def test_MedicAlgorithmSPECTRE2010_outputs():
     outStripped=dict(),
     outd0=dict(),
     )
-    outputs = MedicAlgorithmSPECTRE2010.output_spec()
+    outputs = MedicAlgorithmSPECTRE2010._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

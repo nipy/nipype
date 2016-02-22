@@ -154,7 +154,7 @@ def test_Math_inputs():
     voxel_range=dict(argstr='-range %d %d',
     ),
     )
-    inputs = Math.input_spec()
+    inputs = Math._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -164,7 +164,7 @@ def test_Math_inputs():
 def test_Math_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Math.output_spec()
+    outputs = Math._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

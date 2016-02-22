@@ -26,7 +26,7 @@ def test_extractNrrdVectorIndex_inputs():
     vectorIndex=dict(argstr='--vectorIndex %d',
     ),
     )
-    inputs = extractNrrdVectorIndex.input_spec()
+    inputs = extractNrrdVectorIndex._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_extractNrrdVectorIndex_inputs():
 def test_extractNrrdVectorIndex_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = extractNrrdVectorIndex.output_spec()
+    outputs = extractNrrdVectorIndex._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

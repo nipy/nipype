@@ -27,7 +27,7 @@ def test_MultiplyScalarVolumes_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = MultiplyScalarVolumes.input_spec()
+    inputs = MultiplyScalarVolumes._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +38,7 @@ def test_MultiplyScalarVolumes_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = MultiplyScalarVolumes.output_spec()
+    outputs = MultiplyScalarVolumes._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -298,8 +298,8 @@ class DataSink(IOBase):
     """
 
     # Give obj .inputs and .outputs
-    input_spec = DataSinkInputSpec
-    output_spec = DataSinkOutputSpec
+    _input_spec = DataSinkInputSpec
+    _output_spec = DataSinkOutputSpec
 
     # Initialization method to set up datasink
     def __init__(self, infields=None, force_run=True, **kwargs):
@@ -804,8 +804,8 @@ class S3DataGrabber(IOBase):
         glob-style found in the original DataGrabber.
 
     """
-    input_spec = S3DataGrabberInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = S3DataGrabberInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = True
 
     def __init__(self, infields=None, outfields=None, **kwargs):
@@ -1052,8 +1052,8 @@ class DataGrabber(IOBase):
         >>> dg.inputs.template_args['struct'] = [['sid']]
 
     """
-    input_spec = DataGrabberInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = DataGrabberInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = True
 
     def __init__(self, infields=None, outfields=None, **kwargs):
@@ -1234,8 +1234,8 @@ class SelectFiles(IOBase):
     >>> dg.inputs.run = [2, 4]
 
     """
-    input_spec = SelectFilesInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = SelectFilesInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = True
 
     def __init__(self, templates, **kwargs):
@@ -1385,8 +1385,8 @@ class DataFinder(IOBase):
 
     """
 
-    input_spec = DataFinderInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = DataFinderInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = True
 
     def _match_path(self, target_path):
@@ -1576,8 +1576,8 @@ class FreeSurferSource(IOBase):
     >>> res = fs.run() # doctest: +SKIP
 
     """
-    input_spec = FSSourceInputSpec
-    output_spec = FSSourceOutputSpec
+    _input_spec = FSSourceInputSpec
+    _output_spec = FSSourceOutputSpec
     _always_run = True
     _additional_metadata = ['loc', 'altkey']
 
@@ -1676,8 +1676,8 @@ class XNATSource(IOBase):
 
 
     """
-    input_spec = XNATSourceInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = XNATSourceInputSpec
+    _output_spec = DynamicTraitedSpec
 
     def __init__(self, infields=None, outfields=None, **kwargs):
         """
@@ -1882,7 +1882,7 @@ class XNATSink(IOBase):
         list of nifti files and provides a set of structured output
         fields.
     """
-    input_spec = XNATSinkInputSpec
+    _input_spec = XNATSinkInputSpec
 
     def _post_run(self):
         """Execute this module.
@@ -2079,7 +2079,7 @@ class SQLiteSink(IOBase):
         >>> sql.run() # doctest: +SKIP
 
     """
-    input_spec = SQLiteSinkInputSpec
+    _input_spec = SQLiteSinkInputSpec
 
     def __init__(self, input_names, **inputs):
 
@@ -2132,7 +2132,7 @@ class MySQLSink(IOBase):
         >>> sql.run() # doctest: +SKIP
 
     """
-    input_spec = MySQLSinkInputSpec
+    _input_spec = MySQLSinkInputSpec
 
     def __init__(self, input_names, **inputs):
 
@@ -2238,8 +2238,8 @@ class SSHDataGrabber(DataGrabber):
         >>> dg.inputs.template_args['struct'] = [['sid']]
 
     """
-    input_spec = SSHDataGrabberInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = SSHDataGrabberInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = False
 
     def __init__(self, infields=None, outfields=None, **kwargs):
@@ -2451,8 +2451,8 @@ class JSONFileGrabber(IOBase):
 
 
     """
-    input_spec = JSONFileGrabberInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = JSONFileGrabberInputSpec
+    _output_spec = DynamicTraitedSpec
     _always_run = True
 
     def _post_run(self):
@@ -2526,8 +2526,8 @@ class JSONFileSink(IOBase):
         >>> dictsink.run() # doctest: +SKIP
 
     """
-    input_spec = JSONFileSinkInputSpec
-    output_spec = JSONFileSinkOutputSpec
+    _input_spec = JSONFileSinkInputSpec
+    _output_spec = JSONFileSinkOutputSpec
 
     def __init__(self, infields=[], force_run=True, **inputs):
         super(JSONFileSink, self).__init__(**inputs)

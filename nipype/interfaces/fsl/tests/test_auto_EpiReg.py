@@ -63,7 +63,7 @@ def test_EpiReg_inputs():
     wmedge=dict(),
     wmseg=dict(),
     )
-    inputs = EpiReg.input_spec()
+    inputs = EpiReg._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -85,7 +85,7 @@ def test_EpiReg_outputs():
     wmedge=dict(),
     wmseg=dict(),
     )
-    outputs = EpiReg.output_spec()
+    outputs = EpiReg._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

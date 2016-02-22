@@ -29,7 +29,7 @@ def test_Merge_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Merge.input_spec()
+    inputs = Merge._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +39,7 @@ def test_Merge_inputs():
 def test_Merge_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Merge.output_spec()
+    outputs = Merge._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

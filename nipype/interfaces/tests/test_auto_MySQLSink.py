@@ -22,7 +22,7 @@ def test_MySQLSink_inputs():
     ),
     username=dict(),
     )
-    inputs = MySQLSink.input_spec()
+    inputs = MySQLSink._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -31,7 +31,7 @@ def test_MySQLSink_inputs():
 
 def test_MySQLSink_outputs():
     output_map = dict()
-    outputs = MySQLSink.output_spec()
+    outputs = MySQLSink._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

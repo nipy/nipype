@@ -21,7 +21,7 @@ def test_DWISimpleCompare_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DWISimpleCompare.input_spec()
+    inputs = DWISimpleCompare._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -30,7 +30,7 @@ def test_DWISimpleCompare_inputs():
 
 def test_DWISimpleCompare_outputs():
     output_map = dict()
-    outputs = DWISimpleCompare.output_spec()
+    outputs = DWISimpleCompare._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

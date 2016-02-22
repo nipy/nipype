@@ -36,8 +36,8 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = ACPCTransformInputSpec
-    output_spec = ACPCTransformOutputSpec
+    _input_spec = ACPCTransformInputSpec
+    _output_spec = ACPCTransformOutputSpec
     _cmd = "ACPCTransform "
     _outputs_filenames = {'outputTransform': 'outputTransform.mat'}
 
@@ -72,8 +72,8 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = FiducialRegistrationInputSpec
-    output_spec = FiducialRegistrationOutputSpec
+    _input_spec = FiducialRegistrationInputSpec
+    _output_spec = FiducialRegistrationOutputSpec
     _cmd = "FiducialRegistration "
     _outputs_filenames = {'saveTransform': 'saveTransform.txt'}
 
@@ -150,8 +150,8 @@ acknowledgements: The development of this tool was supported by funding from gra
 
 """
 
-    input_spec = VBRAINSDemonWarpInputSpec
-    output_spec = VBRAINSDemonWarpOutputSpec
+    _input_spec = VBRAINSDemonWarpInputSpec
+    _output_spec = VBRAINSDemonWarpOutputSpec
     _cmd = "VBRAINSDemonWarp "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii', 'outputCheckerboardVolume': 'outputCheckerboardVolume.nii', 'outputDisplacementFieldVolume': 'outputDisplacementFieldVolume.nrrd'}
 
@@ -227,7 +227,7 @@ acknowledgements: The development of this tool was supported by funding from gra
 
 """
 
-    input_spec = BRAINSDemonWarpInputSpec
-    output_spec = BRAINSDemonWarpOutputSpec
+    _input_spec = BRAINSDemonWarpInputSpec
+    _output_spec = BRAINSDemonWarpOutputSpec
     _cmd = "BRAINSDemonWarp "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii', 'outputCheckerboardVolume': 'outputCheckerboardVolume.nii', 'outputDisplacementFieldVolume': 'outputDisplacementFieldVolume.nrrd'}

@@ -29,7 +29,7 @@ def test_DARTEL_inputs():
     usedefault=True,
     ),
     )
-    inputs = DARTEL.input_spec()
+    inputs = DARTEL._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +41,7 @@ def test_DARTEL_outputs():
     final_template_file=dict(),
     template_files=dict(),
     )
-    outputs = DARTEL.output_spec()
+    outputs = DARTEL._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

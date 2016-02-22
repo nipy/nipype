@@ -25,7 +25,7 @@ def test_Despike_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Despike.input_spec()
+    inputs = Despike._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +35,7 @@ def test_Despike_inputs():
 def test_Despike_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Despike.output_spec()
+    outputs = Despike._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -49,7 +49,7 @@ def test_antsIntroduction_inputs():
     usedefault=True,
     ),
     )
-    inputs = antsIntroduction.input_spec()
+    inputs = antsIntroduction._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -63,7 +63,7 @@ def test_antsIntroduction_outputs():
     output_file=dict(),
     warp_field=dict(),
     )
-    outputs = antsIntroduction.output_spec()
+    outputs = antsIntroduction._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

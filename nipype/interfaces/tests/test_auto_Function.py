@@ -10,7 +10,7 @@ def test_Function_inputs():
     usedefault=True,
     ),
     )
-    inputs = Function.input_spec()
+    inputs = Function._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -19,7 +19,7 @@ def test_Function_inputs():
 
 def test_Function_outputs():
     output_map = dict()
-    outputs = Function.output_spec()
+    outputs = Function._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

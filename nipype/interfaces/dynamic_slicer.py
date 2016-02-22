@@ -28,8 +28,8 @@ class SlicerCommandLine(CommandLine):
 
     """
     _cmd = "Slicer3"
-    input_spec = SlicerCommandLineInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = SlicerCommandLineInputSpec
+    _output_spec = DynamicTraitedSpec
 
     def _grab_xml(self, module):
         cmd = CommandLine(command="Slicer3", args="--launch %s --xml" % module)

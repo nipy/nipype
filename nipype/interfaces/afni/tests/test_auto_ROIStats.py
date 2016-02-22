@@ -30,7 +30,7 @@ def test_ROIStats_inputs():
     usedefault=True,
     ),
     )
-    inputs = ROIStats.input_spec()
+    inputs = ROIStats._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +40,7 @@ def test_ROIStats_inputs():
 def test_ROIStats_outputs():
     output_map = dict(stats=dict(),
     )
-    outputs = ROIStats.output_spec()
+    outputs = ROIStats._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

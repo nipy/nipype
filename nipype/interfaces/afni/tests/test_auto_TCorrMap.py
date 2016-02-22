@@ -98,7 +98,7 @@ def test_TCorrMap_inputs():
     suffix='_zmean',
     ),
     )
-    inputs = TCorrMap.input_spec()
+    inputs = TCorrMap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -120,7 +120,7 @@ def test_TCorrMap_outputs():
     var_absolute_threshold_normalize=dict(),
     zmean=dict(),
     )
-    outputs = TCorrMap.output_spec()
+    outputs = TCorrMap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

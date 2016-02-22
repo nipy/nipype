@@ -42,7 +42,7 @@ def test_DWI2Tensor_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DWI2Tensor.input_spec()
+    inputs = DWI2Tensor._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +52,7 @@ def test_DWI2Tensor_inputs():
 def test_DWI2Tensor_outputs():
     output_map = dict(tensor=dict(),
     )
-    outputs = DWI2Tensor.output_spec()
+    outputs = DWI2Tensor._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

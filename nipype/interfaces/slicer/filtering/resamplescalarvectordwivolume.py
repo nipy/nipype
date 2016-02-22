@@ -58,7 +58,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = ResampleScalarVectorDWIVolumeInputSpec
-    output_spec = ResampleScalarVectorDWIVolumeOutputSpec
+    _input_spec = ResampleScalarVectorDWIVolumeInputSpec
+    _output_spec = ResampleScalarVectorDWIVolumeOutputSpec
     _cmd = "ResampleScalarVectorDWIVolume "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}

@@ -46,7 +46,7 @@ def test_FilterRegressor_inputs():
     var_norm=dict(argstr='--vn',
     ),
     )
-    inputs = FilterRegressor.input_spec()
+    inputs = FilterRegressor._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -56,7 +56,7 @@ def test_FilterRegressor_inputs():
 def test_FilterRegressor_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = FilterRegressor.output_spec()
+    outputs = FilterRegressor._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

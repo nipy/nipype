@@ -44,7 +44,7 @@ def test_Camino2Trackvis_inputs():
     position=6,
     ),
     )
-    inputs = Camino2Trackvis.input_spec()
+    inputs = Camino2Trackvis._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -54,7 +54,7 @@ def test_Camino2Trackvis_inputs():
 def test_Camino2Trackvis_outputs():
     output_map = dict(trackvis=dict(),
     )
-    outputs = Camino2Trackvis.output_spec()
+    outputs = Camino2Trackvis._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

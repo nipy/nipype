@@ -51,7 +51,7 @@ def test_ApplyTransforms_inputs():
     mandatory=True,
     ),
     )
-    inputs = ApplyTransforms.input_spec()
+    inputs = ApplyTransforms._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -61,7 +61,7 @@ def test_ApplyTransforms_inputs():
 def test_ApplyTransforms_outputs():
     output_map = dict(output_image=dict(),
     )
-    outputs = ApplyTransforms.output_spec()
+    outputs = ApplyTransforms._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

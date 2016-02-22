@@ -31,7 +31,7 @@ def test_C3dAffineTool_inputs():
     position=3,
     ),
     )
-    inputs = C3dAffineTool.input_spec()
+    inputs = C3dAffineTool._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +41,7 @@ def test_C3dAffineTool_inputs():
 def test_C3dAffineTool_outputs():
     output_map = dict(itk_transform=dict(),
     )
-    outputs = C3dAffineTool.output_spec()
+    outputs = C3dAffineTool._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

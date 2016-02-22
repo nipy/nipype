@@ -39,7 +39,7 @@ def test_Directions2Amplitude_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Directions2Amplitude.input_spec()
+    inputs = Directions2Amplitude._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +49,7 @@ def test_Directions2Amplitude_inputs():
 def test_Directions2Amplitude_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Directions2Amplitude.output_spec()
+    outputs = Directions2Amplitude._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

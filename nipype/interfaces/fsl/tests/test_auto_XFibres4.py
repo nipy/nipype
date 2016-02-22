@@ -67,7 +67,7 @@ def test_XFibres4_inputs():
     update_proposal_every=dict(argstr='--updateproposalevery=%d',
     ),
     )
-    inputs = XFibres4.input_spec()
+    inputs = XFibres4._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -83,7 +83,7 @@ def test_XFibres4_outputs():
     phsamples=dict(),
     thsamples=dict(),
     )
-    outputs = XFibres4.output_spec()
+    outputs = XFibres4._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

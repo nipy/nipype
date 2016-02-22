@@ -93,8 +93,8 @@ class SVMTrain(AFNICommand):
     """
 
     _cmd = '3dsvm'
-    input_spec = SVMTrainInputSpec
-    output_spec = SVMTrainOutputSpec
+    _input_spec = SVMTrainInputSpec
+    _output_spec = SVMTrainOutputSpec
     _additional_metadata = ['suffix']
 
     def _format_arg(self, name, trait_spec, value):
@@ -146,5 +146,5 @@ class SVMTest(AFNICommand):
 
     """
     _cmd = '3dsvm'
-    input_spec = SVMTestInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = SVMTestInputSpec
+    _output_spec = AFNICommandOutputSpec

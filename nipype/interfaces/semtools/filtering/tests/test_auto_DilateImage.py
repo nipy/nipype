@@ -24,7 +24,7 @@ def test_DilateImage_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DilateImage.input_spec()
+    inputs = DilateImage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_DilateImage_inputs():
 def test_DilateImage_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = DilateImage.output_spec()
+    outputs = DilateImage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

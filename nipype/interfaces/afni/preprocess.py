@@ -76,8 +76,8 @@ class To3D(AFNICommand):
    """
 
     _cmd = 'to3d'
-    input_spec = To3DInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = To3DInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class TShiftInputSpec(AFNICommandInputSpec):
@@ -126,8 +126,8 @@ class TShift(AFNICommand):
     """
 
     _cmd = '3dTshift'
-    input_spec = TShiftInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = TShiftInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class RefitInputSpec(AFNICommandInputSpec):
@@ -171,8 +171,8 @@ class Refit(AFNICommandBase):
     """
 
     _cmd = '3drefit'
-    input_spec = RefitInputSpec
-    output_spec = RefitOutputSpec
+    _input_spec = RefitInputSpec
+    _output_spec = RefitOutputSpec
 
 
 class WarpInputSpec(AFNICommandInputSpec):
@@ -223,8 +223,8 @@ class Warp(AFNICommand):
     """
 
     _cmd = '3dWarp'
-    input_spec = WarpInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = WarpInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class ResampleInputSpec(AFNICommandInputSpec):
@@ -267,8 +267,8 @@ class Resample(AFNICommand):
     """
 
     _cmd = '3dresample'
-    input_spec = ResampleInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = ResampleInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class AutoTcorrelateInputSpec(AFNICommandInputSpec):
@@ -307,8 +307,8 @@ class AutoTcorrelate(AFNICommand):
     '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix functional_similarity_matrix.1D -polort -1 functional.nii'
     >>> res = corr.run() # doctest: +SKIP
     """
-    input_spec = AutoTcorrelateInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = AutoTcorrelateInputSpec
+    _output_spec = AFNICommandOutputSpec
     _cmd = '3dAutoTcorrelate'
 
 
@@ -345,8 +345,8 @@ class TStat(AFNICommand):
     """
 
     _cmd = '3dTstat'
-    input_spec = TStatInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = TStatInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class DetrendInputSpec(AFNICommandInputSpec):
@@ -381,8 +381,8 @@ class Detrend(AFNICommand):
     """
 
     _cmd = '3dDetrend'
-    input_spec = DetrendInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = DetrendInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class DespikeInputSpec(AFNICommandInputSpec):
@@ -414,8 +414,8 @@ class Despike(AFNICommand):
     """
 
     _cmd = '3dDespike'
-    input_spec = DespikeInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = DespikeInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class AutomaskInputSpec(AFNICommandInputSpec):
@@ -459,8 +459,8 @@ class Automask(AFNICommand):
     """
 
     _cmd = '3dAutomask'
-    input_spec = AutomaskInputSpec
-    output_spec = AutomaskOutputSpec
+    _input_spec = AutomaskInputSpec
+    _output_spec = AutomaskOutputSpec
 
 
 class VolregInputSpec(AFNICommandInputSpec):
@@ -517,8 +517,8 @@ class Volreg(AFNICommand):
     """
 
     _cmd = '3dvolreg'
-    input_spec = VolregInputSpec
-    output_spec = VolregOutputSpec
+    _input_spec = VolregInputSpec
+    _output_spec = VolregOutputSpec
 
 
 class MergeInputSpec(AFNICommandInputSpec):
@@ -558,8 +558,8 @@ class Merge(AFNICommand):
     """
 
     _cmd = '3dmerge'
-    input_spec = MergeInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = MergeInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class CopyInputSpec(AFNICommandInputSpec):
@@ -608,8 +608,8 @@ class Copy(AFNICommand):
     """
 
     _cmd = '3dcopy'
-    input_spec = CopyInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = CopyInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class FourierInputSpec(AFNICommandInputSpec):
@@ -653,8 +653,8 @@ class Fourier(AFNICommand):
     """
 
     _cmd = '3dFourier'
-    input_spec = FourierInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = FourierInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class BandpassInputSpec(AFNICommandInputSpec):
@@ -764,8 +764,8 @@ class Bandpass(AFNICommand):
     """
 
     _cmd = '3dBandpass'
-    input_spec = BandpassInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = BandpassInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class ZCutUpInputSpec(AFNICommandInputSpec):
@@ -801,8 +801,8 @@ class ZCutUp(AFNICommand):
     """
 
     _cmd = '3dZcutup'
-    input_spec = ZCutUpInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = ZCutUpInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class AllineateInputSpec(AFNICommandInputSpec):
@@ -1030,8 +1030,8 @@ class Allineate(AFNICommand):
     """
 
     _cmd = '3dAllineate'
-    input_spec = AllineateInputSpec
-    output_spec = AllineateOutputSpec
+    _input_spec = AllineateInputSpec
+    _output_spec = AllineateOutputSpec
 
 
 class MaskaveInputSpec(AFNICommandInputSpec):
@@ -1072,8 +1072,8 @@ class Maskave(AFNICommand):
     """
 
     _cmd = '3dmaskave'
-    input_spec = MaskaveInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = MaskaveInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class SkullStripInputSpec(AFNICommandInputSpec):
@@ -1107,8 +1107,8 @@ class SkullStrip(AFNICommand):
     """
     _cmd = '3dSkullStrip'
     _redirect_x = True
-    input_spec = SkullStripInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = SkullStripInputSpec
+    _output_spec = AFNICommandOutputSpec
 
     def __init__(self, **inputs):
         super(SkullStrip, self).__init__(**inputs)
@@ -1154,8 +1154,8 @@ class TCat(AFNICommand):
     """
 
     _cmd = '3dTcat'
-    input_spec = TCatInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = TCatInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class FimInputSpec(AFNICommandInputSpec):
@@ -1202,8 +1202,8 @@ class Fim(AFNICommand):
     """
 
     _cmd = '3dfim+'
-    input_spec = FimInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = FimInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class TCorrelateInputSpec(AFNICommandInputSpec):
@@ -1251,8 +1251,8 @@ class TCorrelate(AFNICommand):
     """
 
     _cmd = '3dTcorrelate'
-    input_spec = TCorrelateInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = TCorrelateInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class TCorr1DInputSpec(AFNICommandInputSpec):
@@ -1308,8 +1308,8 @@ class TCorr1D(AFNICommand):
     """
 
     _cmd = '3dTcorr1D'
-    input_spec = TCorr1DInputSpec
-    output_spec = TCorr1DOutputSpec
+    _input_spec = TCorr1DInputSpec
+    _output_spec = TCorr1DOutputSpec
 
 
 class BrickStatInputSpec(AFNICommandInputSpec):
@@ -1344,8 +1344,8 @@ class BrickStat(AFNICommand):
 
     """
     _cmd = '3dBrickStat'
-    input_spec = BrickStatInputSpec
-    output_spec = BrickStatOutputSpec
+    _input_spec = BrickStatInputSpec
+    _output_spec = BrickStatOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
 
@@ -1426,8 +1426,8 @@ class ROIStats(AFNICommandBase):
 
     """
     _cmd = '3dROIstats'
-    input_spec = ROIStatsInputSpec
-    output_spec = ROIStatsOutputSpec
+    _input_spec = ROIStatsInputSpec
+    _output_spec = ROIStatsOutputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
@@ -1492,8 +1492,8 @@ class Calc(AFNICommand):
     """
 
     _cmd = '3dcalc'
-    input_spec = CalcInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = CalcInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class BlurInMaskInputSpec(AFNICommandInputSpec):
@@ -1552,8 +1552,8 @@ class BlurInMask(AFNICommand):
     """
 
     _cmd = '3dBlurInMask'
-    input_spec = BlurInMaskInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = BlurInMaskInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class TCorrMapInputSpec(AFNICommandInputSpec):
@@ -1659,8 +1659,8 @@ class TCorrMap(AFNICommand):
     """
 
     _cmd = '3dTcorrMap'
-    input_spec = TCorrMapInputSpec
-    output_spec = TCorrMapOutputSpec
+    _input_spec = TCorrMapInputSpec
+    _output_spec = TCorrMapOutputSpec
     _additional_metadata = ['suffix']
 
 
@@ -1711,8 +1711,8 @@ class Autobox(AFNICommand):
     """
 
     _cmd = '3dAutobox'
-    input_spec = AutoboxInputSpec
-    output_spec = AutoboxOuputSpec
+    _input_spec = AutoboxInputSpec
+    _output_spec = AutoboxOuputSpec
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
         outputs = self._outputs()
@@ -1799,8 +1799,8 @@ class Retroicor(AFNICommand):
     """
 
     _cmd = '3dretroicor'
-    input_spec = RetroicorInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = RetroicorInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class AFNItoNIFTIInputSpec(AFNICommandInputSpec):
@@ -1835,8 +1835,8 @@ class AFNItoNIFTI(AFNICommand):
     """
 
     _cmd = '3dAFNItoNIFTI'
-    input_spec = AFNItoNIFTIInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = AFNItoNIFTIInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class EvalInputSpec(AFNICommandInputSpec):
@@ -1899,8 +1899,8 @@ class Eval(AFNICommand):
     """
 
     _cmd = '1deval'
-    input_spec = EvalInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = EvalInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class MeansInputSpec(AFNICommandInputSpec):
@@ -1947,8 +1947,8 @@ class Means(AFNICommand):
     """
 
     _cmd = '3dMean'
-    input_spec = MeansInputSpec
-    output_spec = AFNICommandOutputSpec
+    _input_spec = MeansInputSpec
+    _output_spec = AFNICommandOutputSpec
 
 
 class HistInputSpec(CommandLineInputSpec):
@@ -2004,8 +2004,8 @@ class Hist(AFNICommandBase):
     """
 
     _cmd = '3dHist'
-    input_spec = HistInputSpec
-    output_spec = HistOutputSpec
+    _input_spec = HistInputSpec
+    _output_spec = HistOutputSpec
     _redirect_x = True
 
     def __init__(self, **inputs):
@@ -2215,8 +2215,8 @@ class FWHMx(AFNICommandBase):
 
     """
     _cmd = '3dFWHMx'
-    input_spec = FWHMxInputSpec
-    output_spec = FWHMxOutputSpec
+    _input_spec = FWHMxInputSpec
+    _output_spec = FWHMxOutputSpec
 
     def _post_run(self):
         super(FWHMx, self)._post_run()

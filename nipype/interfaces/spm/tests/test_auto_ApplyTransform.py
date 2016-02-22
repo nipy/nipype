@@ -23,7 +23,7 @@ def test_ApplyTransform_inputs():
     usedefault=True,
     ),
     )
-    inputs = ApplyTransform.input_spec()
+    inputs = ApplyTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -33,7 +33,7 @@ def test_ApplyTransform_inputs():
 def test_ApplyTransform_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ApplyTransform.output_spec()
+    outputs = ApplyTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

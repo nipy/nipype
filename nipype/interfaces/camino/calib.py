@@ -117,8 +117,8 @@ class SFPICOCalibData(StdOutCommandLine):
     data is generated for calculating the LUT.      # doctest: +SKIP
     """
     _cmd = 'sfpicocalibdata'
-    input_spec = SFPICOCalibDataInputSpec
-    output_spec = SFPICOCalibDataOutputSpec
+    _input_spec = SFPICOCalibDataInputSpec
+    _output_spec = SFPICOCalibDataOutputSpec
 
     def _post_run(self):
         
@@ -223,8 +223,8 @@ class SFLUTGen(StdOutCommandLine):
     >>> lutgen.run()        # doctest: +SKIP
     """
     _cmd = 'sflutgen'
-    input_spec = SFLUTGenInputSpec
-    output_spec = SFLUTGenOutputSpec
+    _input_spec = SFLUTGenInputSpec
+    _output_spec = SFLUTGenOutputSpec
 
     def _post_run(self):
         

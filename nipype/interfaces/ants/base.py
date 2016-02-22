@@ -43,7 +43,7 @@ class ANTSCommand(CommandLine):
     """Base class for ANTS interfaces
     """
 
-    input_spec = ANTSCommandInputSpec
+    _input_spec = ANTSCommandInputSpec
     _num_threads = LOCAL_DEFAULT_NUMBER_OF_THREADS
 
     def __init__(self, **inputs):

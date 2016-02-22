@@ -108,7 +108,7 @@ def test_Tractography_inputs():
     use_rk4=dict(argstr='-rk4',
     ),
     )
-    inputs = Tractography.input_spec()
+    inputs = Tractography._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -119,7 +119,7 @@ def test_Tractography_outputs():
     output_map = dict(out_file=dict(),
     out_seeds=dict(),
     )
-    outputs = Tractography.output_spec()
+    outputs = Tractography._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -33,7 +33,7 @@ def test_JistBrainPartialVolumeFilter_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistBrainPartialVolumeFilter.input_spec()
+    inputs = JistBrainPartialVolumeFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +43,7 @@ def test_JistBrainPartialVolumeFilter_inputs():
 def test_JistBrainPartialVolumeFilter_outputs():
     output_map = dict(outPartial=dict(),
     )
-    outputs = JistBrainPartialVolumeFilter.output_spec()
+    outputs = JistBrainPartialVolumeFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -82,7 +82,7 @@ def test_Pik_inputs():
     width=dict(argstr='--width %s',
     ),
     )
-    inputs = Pik.input_spec()
+    inputs = Pik._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -92,7 +92,7 @@ def test_Pik_inputs():
 def test_Pik_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Pik.output_spec()
+    outputs = Pik._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -71,7 +71,7 @@ def test_DTIFit_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DTIFit.input_spec()
+    inputs = DTIFit._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -91,7 +91,7 @@ def test_DTIFit_outputs():
     out_v3=dict(),
     tensor=dict(),
     )
-    outputs = DTIFit.output_spec()
+    outputs = DTIFit._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

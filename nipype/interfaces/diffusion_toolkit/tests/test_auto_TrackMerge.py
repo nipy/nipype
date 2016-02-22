@@ -23,7 +23,7 @@ def test_TrackMerge_inputs():
     position=0,
     ),
     )
-    inputs = TrackMerge.input_spec()
+    inputs = TrackMerge._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -33,7 +33,7 @@ def test_TrackMerge_inputs():
 def test_TrackMerge_outputs():
     output_map = dict(track_file=dict(),
     )
-    outputs = TrackMerge.output_spec()
+    outputs = TrackMerge._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -100,7 +100,7 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
     unidirectional=dict(argstr='-unidirectional',
     ),
     )
-    inputs = ProbabilisticSphericallyDeconvolutedStreamlineTrack.input_spec()
+    inputs = ProbabilisticSphericallyDeconvolutedStreamlineTrack._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -110,7 +110,7 @@ def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_inputs():
 def test_ProbabilisticSphericallyDeconvolutedStreamlineTrack_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = ProbabilisticSphericallyDeconvolutedStreamlineTrack.output_spec()
+    outputs = ProbabilisticSphericallyDeconvolutedStreamlineTrack._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

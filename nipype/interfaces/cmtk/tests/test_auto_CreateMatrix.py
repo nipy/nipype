@@ -27,7 +27,7 @@ def test_CreateMatrix_inputs():
     tract_file=dict(mandatory=True,
     ),
     )
-    inputs = CreateMatrix.input_spec()
+    inputs = CreateMatrix._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -54,7 +54,7 @@ def test_CreateMatrix_outputs():
     median_fiber_length_matrix_mat_file=dict(),
     stats_file=dict(),
     )
-    outputs = CreateMatrix.output_spec()
+    outputs = CreateMatrix._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

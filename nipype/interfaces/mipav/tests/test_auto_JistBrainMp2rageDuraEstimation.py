@@ -35,7 +35,7 @@ def test_JistBrainMp2rageDuraEstimation_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistBrainMp2rageDuraEstimation.input_spec()
+    inputs = JistBrainMp2rageDuraEstimation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +45,7 @@ def test_JistBrainMp2rageDuraEstimation_inputs():
 def test_JistBrainMp2rageDuraEstimation_outputs():
     output_map = dict(outDura=dict(),
     )
-    outputs = JistBrainMp2rageDuraEstimation.output_spec()
+    outputs = JistBrainMp2rageDuraEstimation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

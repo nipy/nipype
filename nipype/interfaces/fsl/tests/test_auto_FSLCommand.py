@@ -17,7 +17,7 @@ def test_FSLCommand_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = FSLCommand.input_spec()
+    inputs = FSLCommand._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +26,7 @@ def test_FSLCommand_inputs():
 
 def test_FSLCommand_outputs():
     output_map = dict()
-    outputs = FSLCommand.output_spec()
+    outputs = FSLCommand._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

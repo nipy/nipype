@@ -65,7 +65,7 @@ def test_JointFusion_inputs():
     mandatory=True,
     ),
     )
-    inputs = JointFusion.input_spec()
+    inputs = JointFusion._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -75,7 +75,7 @@ def test_JointFusion_inputs():
 def test_JointFusion_outputs():
     output_map = dict(output_label_image=dict(),
     )
-    outputs = JointFusion.output_spec()
+    outputs = JointFusion._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

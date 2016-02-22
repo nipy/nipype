@@ -24,7 +24,7 @@ def test_DTIimport_inputs():
     testingmode=dict(argstr='--testingmode ',
     ),
     )
-    inputs = DTIimport.input_spec()
+    inputs = DTIimport._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +35,7 @@ def test_DTIimport_outputs():
     output_map = dict(outputTensor=dict(position=-1,
     ),
     )
-    outputs = DTIimport.output_spec()
+    outputs = DTIimport._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

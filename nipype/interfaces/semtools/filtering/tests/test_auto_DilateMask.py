@@ -26,7 +26,7 @@ def test_DilateMask_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DilateMask.input_spec()
+    inputs = DilateMask._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_DilateMask_inputs():
 def test_DilateMask_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = DilateMask.output_spec()
+    outputs = DilateMask._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

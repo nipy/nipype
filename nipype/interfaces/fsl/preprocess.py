@@ -143,8 +143,8 @@ class BET(FSLCommand):
     """
 
     _cmd = 'bet'
-    input_spec = BETInputSpec
-    output_spec = BETOutputSpec
+    _input_spec = BETInputSpec
+    _output_spec = BETOutputSpec
 
     def _run_interface(self, runtime):
         # The returncode is meaningless in BET.  So check the output
@@ -302,8 +302,8 @@ class FAST(FSLCommand):
 
     """
     _cmd = 'fast'
-    input_spec = FASTInputSpec
-    output_spec = FASTOutputSpec
+    _input_spec = FASTInputSpec
+    _output_spec = FASTOutputSpec
 
     def _post_run(self):
 
@@ -533,8 +533,8 @@ class FLIRT(FSLCommand):
 
     """
     _cmd = 'flirt'
-    input_spec = FLIRTInputSpec
-    output_spec = FLIRTOutputSpec
+    _input_spec = FLIRTInputSpec
+    _output_spec = FLIRTOutputSpec
 
     def _run_interface(self, runtime, **kwargs):
         runtime = super(FLIRT, self)._run_interface(runtime, **kwargs)
@@ -574,7 +574,7 @@ class ApplyXfm(FLIRT):
     >>> result = applyxfm.run() # doctest: +SKIP
 
     """
-    input_spec = ApplyXfmInputSpec
+    _input_spec = ApplyXfmInputSpec
 
 
 class MCFLIRTInputSpec(FSLCommandInputSpec):
@@ -652,8 +652,8 @@ class MCFLIRT(FSLCommand):
 
     """
     _cmd = 'mcflirt'
-    input_spec = MCFLIRTInputSpec
-    output_spec = MCFLIRTOutputSpec
+    _input_spec = MCFLIRTInputSpec
+    _output_spec = MCFLIRTOutputSpec
 
     def _post_run(self):
 
@@ -853,8 +853,8 @@ class FNIRT(FSLCommand):
     """
 
     _cmd = 'fnirt'
-    input_spec = FNIRTInputSpec
-    output_spec = FNIRTOutputSpec
+    _input_spec = FNIRTInputSpec
+    _output_spec = FNIRTOutputSpec
 
     filemap = {'warped_file': 'warped',
                'field_file': 'field',
@@ -971,8 +971,8 @@ class ApplyWarp(FSLCommand):
     """
 
     _cmd = 'applywarp'
-    input_spec = ApplyWarpInputSpec
-    output_spec = ApplyWarpOutputSpec
+    _input_spec = ApplyWarpInputSpec
+    _output_spec = ApplyWarpOutputSpec
 
     def _post_run(self):
 
@@ -1030,8 +1030,8 @@ class SliceTimer(FSLCommand):
     """
 
     _cmd = 'slicetimer'
-    input_spec = SliceTimerInputSpec
-    output_spec = SliceTimerOutputSpec
+    _input_spec = SliceTimerInputSpec
+    _output_spec = SliceTimerOutputSpec
 
     def _post_run(self):
         out_file = self.inputs.out_file
@@ -1108,8 +1108,8 @@ class SUSAN(FSLCommand):
     """
 
     _cmd = 'susan'
-    input_spec = SUSANInputSpec
-    output_spec = SUSANOutputSpec
+    _input_spec = SUSANInputSpec
+    _output_spec = SUSANOutputSpec
 
     def _post_run(self):
 
@@ -1299,8 +1299,8 @@ class FUGUE(FSLCommand):
 
     """
     _cmd = 'fugue'
-    input_spec = FUGUEInputSpec
-    output_spec = FUGUEOutputSpec
+    _input_spec = FUGUEInputSpec
+    _output_spec = FUGUEOutputSpec
 
 
 class PRELUDEInputSpec(FSLCommandInputSpec):
@@ -1361,8 +1361,8 @@ class PRELUDE(FSLCommand):
     Please insert examples for use of this command
 
     """
-    input_spec = PRELUDEInputSpec
-    output_spec = PRELUDEOutputSpec
+    _input_spec = PRELUDEInputSpec
+    _output_spec = PRELUDEOutputSpec
     _cmd = 'prelude'
 
     def __init__(self, **kwargs):
@@ -1456,8 +1456,8 @@ class FIRST(FSLCommand):
     """
 
     _cmd = 'run_first_all'
-    input_spec = FIRSTInputSpec
-    output_spec = FIRSTOutputSpec
+    _input_spec = FIRSTInputSpec
+    _output_spec = FIRSTOutputSpec
 
     def _post_run(self):
 

@@ -60,7 +60,7 @@ def test_EMSegmentCommandLine_inputs():
     verbose=dict(argstr='--verbose ',
     ),
     )
-    inputs = EMSegmentCommandLine.input_spec()
+    inputs = EMSegmentCommandLine._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -72,7 +72,7 @@ def test_EMSegmentCommandLine_outputs():
     resultMRMLSceneFileName=dict(),
     resultVolumeFileName=dict(),
     )
-    outputs = EMSegmentCommandLine.output_spec()
+    outputs = EMSegmentCommandLine._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

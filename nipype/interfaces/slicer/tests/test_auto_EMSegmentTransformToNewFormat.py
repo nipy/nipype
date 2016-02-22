@@ -22,7 +22,7 @@ def test_EMSegmentTransformToNewFormat_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = EMSegmentTransformToNewFormat.input_spec()
+    inputs = EMSegmentTransformToNewFormat._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -32,7 +32,7 @@ def test_EMSegmentTransformToNewFormat_inputs():
 def test_EMSegmentTransformToNewFormat_outputs():
     output_map = dict(outputMRMLFileName=dict(),
     )
-    outputs = EMSegmentTransformToNewFormat.output_spec()
+    outputs = EMSegmentTransformToNewFormat._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

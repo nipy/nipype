@@ -24,7 +24,7 @@ def test_BRAINSEyeDetector_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = BRAINSEyeDetector.input_spec()
+    inputs = BRAINSEyeDetector._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_BRAINSEyeDetector_inputs():
 def test_BRAINSEyeDetector_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = BRAINSEyeDetector.output_spec()
+    outputs = BRAINSEyeDetector._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

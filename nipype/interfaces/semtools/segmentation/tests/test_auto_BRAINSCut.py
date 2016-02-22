@@ -49,7 +49,7 @@ def test_BRAINSCut_inputs():
     verbose=dict(argstr='--verbose %d',
     ),
     )
-    inputs = BRAINSCut.input_spec()
+    inputs = BRAINSCut._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +58,7 @@ def test_BRAINSCut_inputs():
 
 def test_BRAINSCut_outputs():
     output_map = dict()
-    outputs = BRAINSCut.output_spec()
+    outputs = BRAINSCut._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

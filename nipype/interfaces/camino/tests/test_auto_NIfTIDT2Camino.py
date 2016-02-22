@@ -35,7 +35,7 @@ def test_NIfTIDT2Camino_inputs():
     uppertriangular=dict(argstr='-uppertriangular %s',
     ),
     )
-    inputs = NIfTIDT2Camino.input_spec()
+    inputs = NIfTIDT2Camino._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +45,7 @@ def test_NIfTIDT2Camino_inputs():
 def test_NIfTIDT2Camino_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = NIfTIDT2Camino.output_spec()
+    outputs = NIfTIDT2Camino._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

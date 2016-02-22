@@ -54,7 +54,7 @@ def test_VolSymm_inputs():
     z=dict(argstr='-z',
     ),
     )
-    inputs = VolSymm.input_spec()
+    inputs = VolSymm._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -66,7 +66,7 @@ def test_VolSymm_outputs():
     output_grid=dict(),
     trans_file=dict(),
     )
-    outputs = VolSymm.output_spec()
+    outputs = VolSymm._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

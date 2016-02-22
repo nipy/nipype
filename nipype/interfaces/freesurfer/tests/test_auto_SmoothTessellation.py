@@ -53,7 +53,7 @@ def test_SmoothTessellation_inputs():
     use_momentum=dict(argstr='-m',
     ),
     )
-    inputs = SmoothTessellation.input_spec()
+    inputs = SmoothTessellation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -63,7 +63,7 @@ def test_SmoothTessellation_inputs():
 def test_SmoothTessellation_outputs():
     output_map = dict(surface=dict(),
     )
-    outputs = SmoothTessellation.output_spec()
+    outputs = SmoothTessellation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

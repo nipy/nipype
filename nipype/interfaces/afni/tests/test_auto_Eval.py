@@ -44,7 +44,7 @@ def test_Eval_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Eval.input_spec()
+    inputs = Eval._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -54,7 +54,7 @@ def test_Eval_inputs():
 def test_Eval_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Eval.output_spec()
+    outputs = Eval._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

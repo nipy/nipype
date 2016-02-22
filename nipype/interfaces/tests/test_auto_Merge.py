@@ -12,7 +12,7 @@ def test_Merge_inputs():
     no_flatten=dict(usedefault=True,
     ),
     )
-    inputs = Merge.input_spec()
+    inputs = Merge._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -22,7 +22,7 @@ def test_Merge_inputs():
 def test_Merge_outputs():
     output_map = dict(out=dict(),
     )
-    outputs = Merge.output_spec()
+    outputs = Merge._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

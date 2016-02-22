@@ -27,7 +27,7 @@ def test_FEATModel_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = FEATModel.input_spec()
+    inputs = FEATModel._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +41,7 @@ def test_FEATModel_outputs():
     design_image=dict(),
     fcon_file=dict(),
     )
-    outputs = FEATModel.output_spec()
+    outputs = FEATModel._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

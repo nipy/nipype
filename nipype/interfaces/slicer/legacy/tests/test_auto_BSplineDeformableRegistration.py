@@ -46,7 +46,7 @@ def test_BSplineDeformableRegistration_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = BSplineDeformableRegistration.input_spec()
+    inputs = BSplineDeformableRegistration._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +58,7 @@ def test_BSplineDeformableRegistration_outputs():
     outputwarp=dict(),
     resampledmovingfilename=dict(),
     )
-    outputs = BSplineDeformableRegistration.output_spec()
+    outputs = BSplineDeformableRegistration._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

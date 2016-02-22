@@ -26,7 +26,7 @@ def test_CannyEdge_inputs():
     variance=dict(argstr='--variance %f',
     ),
     )
-    inputs = CannyEdge.input_spec()
+    inputs = CannyEdge._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_CannyEdge_inputs():
 def test_CannyEdge_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = CannyEdge.output_spec()
+    outputs = CannyEdge._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

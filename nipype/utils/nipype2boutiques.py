@@ -66,8 +66,8 @@ def generate_boutiques_descriptor(module, interface_name, ignored_template_input
     # Retrieves Nipype interface
     __import__(module)
     interface = getattr(sys.modules[module], interface_name)()
-    inputs = interface.input_spec()
-    outputs = interface.output_spec()
+    inputs = interface._input_spec()
+    outputs = interface._output_spec()
 
     # Tool description
     tool_desc = {}

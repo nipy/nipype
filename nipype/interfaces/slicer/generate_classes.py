@@ -281,37 +281,37 @@ def generate_class(module, launcher, strip_module_name_prefix=True, redirect_x=F
                              'xMaxProcess = traits.Int(1, desc="Set default maximum number of processes.", argstr="-xMaxProcess %d", usedefault=True)']
         inputTraits += compulsory_inputs
 
-    input_spec_code = "class " + module_name + "InputSpec(CommandLineInputSpec):\n"
+    _input_spec_code = "class " + module_name + "InputSpec(CommandLineInputSpec):\n"
     for trait in inputTraits:
-        input_spec_code += "    " + trait + "\n"
+        _input_spec_code += "    " + trait + "\n"
 
-    output_spec_code = "class " + module_name + "OutputSpec(TraitedSpec):\n"
+    _output_spec_code = "class " + module_name + "OutputSpec(TraitedSpec):\n"
     if not outputTraits:
-        output_spec_code += "    pass\n"
+        _output_spec_code += "    pass\n"
     else:
         for trait in outputTraits:
-            output_spec_code += "    " + trait + "\n"
+            _output_spec_code += "    " + trait + "\n"
 
     output_filenames_code = "_outputs_filenames = {"
     output_filenames_code += ",".join(["'%s':'%s'" % (
         key, value) for key, value in outputs_filenames.items()])
     output_filenames_code += "}"
 
-    input_spec_code += "\n\n"
-    output_spec_code += "\n\n"
+    _input_spec_code += "\n\n"
+    _output_spec_code += "\n\n"
 
     template = """class %module_name%(SEMLikeCommandLine):
     %class_str%
 
-    input_spec = %module_name%InputSpec
-    output_spec = %module_name%OutputSpec
+    _input_spec = %module_name%InputSpec
+    _output_spec = %module_name%OutputSpec
     _cmd = "%launcher% %name% "
     %output_filenames_code%\n"""
     template += "    _redirect_x = {0}\n".format(str(redirect_x))
 
     main_class = template.replace('%class_str%', class_string).replace("%module_name%", module_name).replace("%name%", module).replace("%output_filenames_code%", output_filenames_code).replace("%launcher%", " ".join(launcher))
 
-    return category, input_spec_code + output_spec_code + main_class, module_name
+    return category, _input_spec_code + _output_spec_code + main_class, module_name
 
 
 def grab_xml(module, launcher, mipav_hacks=False):

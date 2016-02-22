@@ -74,7 +74,7 @@ def test_ANTS_inputs():
     usedefault=True,
     ),
     )
-    inputs = ANTS.input_spec()
+    inputs = ANTS._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -97,7 +97,7 @@ def test_ANTS_outputs():
     name_template='%sWarp.nii.gz',
     ),
     )
-    outputs = ANTS.output_spec()
+    outputs = ANTS._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

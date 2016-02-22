@@ -17,7 +17,7 @@ def test_EPIDeWarp_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = EPIDeWarp.input_spec()
+    inputs = EPIDeWarp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +26,7 @@ def test_EPIDeWarp_inputs():
 
 def test_EPIDeWarp_outputs():
     output_map = dict()
-    outputs = EPIDeWarp.output_spec()
+    outputs = EPIDeWarp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

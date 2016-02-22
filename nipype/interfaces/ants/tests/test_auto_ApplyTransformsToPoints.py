@@ -32,7 +32,7 @@ def test_ApplyTransformsToPoints_inputs():
     mandatory=True,
     ),
     )
-    inputs = ApplyTransformsToPoints.input_spec()
+    inputs = ApplyTransformsToPoints._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +42,7 @@ def test_ApplyTransformsToPoints_inputs():
 def test_ApplyTransformsToPoints_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = ApplyTransformsToPoints.output_spec()
+    outputs = ApplyTransformsToPoints._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

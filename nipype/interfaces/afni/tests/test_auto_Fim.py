@@ -36,7 +36,7 @@ def test_Fim_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Fim.input_spec()
+    inputs = Fim._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -46,7 +46,7 @@ def test_Fim_inputs():
 def test_Fim_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Fim.output_spec()
+    outputs = Fim._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -63,8 +63,8 @@ class ParseDICOMDir(FSCommand):
    """
 
     _cmd = 'mri_parse_sdcmdir'
-    input_spec = ParseDICOMDirInputSpec
-    output_spec = ParseDICOMDirOutputSpec
+    _input_spec = ParseDICOMDirInputSpec
+    _output_spec = ParseDICOMDirOutputSpec
 
     def _post_run(self):
 
@@ -124,7 +124,7 @@ class UnpackSDICOMDir(FSCommand):
     'unpacksdcmdir -generic -targ . -run 5 mprage nii struct -src .'
     """
     _cmd = 'unpacksdcmdir'
-    input_spec = UnpackSDICOMDirInputSpec
+    _input_spec = UnpackSDICOMDirInputSpec
 
 
 class MRIConvertInputSpec(FSTraitedSpec):
@@ -345,8 +345,8 @@ class MRIConvert(FSCommand):
 
     """
     _cmd = 'mri_convert'
-    input_spec = MRIConvertInputSpec
-    output_spec = MRIConvertOutputSpec
+    _input_spec = MRIConvertInputSpec
+    _output_spec = MRIConvertOutputSpec
 
     filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
                    afni='brik', brik='brik', bshort='bshort',
@@ -453,7 +453,7 @@ class DICOMConvert(FSCommand):
 
     """
     _cmd = 'mri_convert'
-    input_spec = DICOMConvertInputSpec
+    _input_spec = DICOMConvertInputSpec
 
     def _get_dicomfiles(self):
         """validate fsl bet options
@@ -571,8 +571,8 @@ class Resample(FSCommand):
     """
 
     _cmd = 'mri_convert'
-    input_spec = ResampleInputSpec
-    output_spec = ResampleOutputSpec
+    _input_spec = ResampleInputSpec
+    _output_spec = ResampleOutputSpec
 
     def _get_outfilename(self):
         if isdefined(self.inputs.resampled_file):
@@ -616,7 +616,7 @@ class ReconAllInputSpec(CommandLineInputSpec):
     flags = traits.Str(argstr='%s', desc='additional parameters')
 
 
-class ReconAllIOutputSpec(FreeSurferSource.output_spec):
+class ReconAllIOutputSpec(FreeSurferSource._output_spec):
     subjects_dir = Directory(exists=True, desc='Freesurfer subjects directory.')
     subject_id = traits.Str(desc='Subject name for whom to retrieve data')
 
@@ -641,8 +641,8 @@ class ReconAll(CommandLine):
 
     _cmd = 'recon-all'
     _additional_metadata = ['loc', 'altkey']
-    input_spec = ReconAllInputSpec
-    output_spec = ReconAllIOutputSpec
+    _input_spec = ReconAllInputSpec
+    _output_spec = ReconAllIOutputSpec
     _can_resume = True
 
     _steps = [
@@ -860,8 +860,8 @@ class BBRegister(FSCommand):
     """
 
     _cmd = 'bbregister'
-    input_spec = BBRegisterInputSpec
-    output_spec = BBRegisterOutputSpec
+    _input_spec = BBRegisterInputSpec
+    _output_spec = BBRegisterOutputSpec
 
     def _post_run(self):
 
@@ -993,8 +993,8 @@ class ApplyVolTransform(FSCommand):
     """
 
     _cmd = 'mri_vol2vol'
-    input_spec = ApplyVolTransformInputSpec
-    output_spec = ApplyVolTransformOutputSpec
+    _input_spec = ApplyVolTransformInputSpec
+    _output_spec = ApplyVolTransformOutputSpec
 
     def _get_outfile(self):
         outfile = self.inputs.transformed_file
@@ -1072,8 +1072,8 @@ class Smooth(FSCommand):
     """
 
     _cmd = 'mris_volsmooth'
-    input_spec = SmoothInputSpec
-    output_spec = SmoothOutputSpec
+    _input_spec = SmoothInputSpec
+    _output_spec = SmoothOutputSpec
 
     def _post_run(self):
 
@@ -1181,8 +1181,8 @@ class RobustRegister(FSCommand):
     """
 
     _cmd = 'mri_robust_register'
-    input_spec = RobustRegisterInputSpec
-    output_spec = RobustRegisterOutputSpec
+    _input_spec = RobustRegisterInputSpec
+    _output_spec = RobustRegisterOutputSpec
 
     def _format_arg(self, name, spec, value):
         for option in ["registered_file", "weights_file", "half_source", "half_targ",
@@ -1260,8 +1260,8 @@ class FitMSParams(FSCommand):
 
     """
     _cmd = "mri_ms_fitparms"
-    input_spec = FitMSParamsInputSpec
-    output_spec = FitMSParamsOutputSpec
+    _input_spec = FitMSParamsInputSpec
+    _output_spec = FitMSParamsOutputSpec
 
     def _format_arg(self, name, spec, value):
         if name == "in_files":
@@ -1332,8 +1332,8 @@ class SynthesizeFLASH(FSCommand):
 
     """
     _cmd = "mri_synthesize"
-    input_spec = SynthesizeFLASHInputSpec
-    output_spec = SynthesizeFLASHOutputSpec
+    _input_spec = SynthesizeFLASHInputSpec
+    _output_spec = SynthesizeFLASHOutputSpec
 
     def _post_run(self):
 

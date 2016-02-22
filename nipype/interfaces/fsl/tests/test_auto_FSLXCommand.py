@@ -87,7 +87,7 @@ def test_FSLXCommand_inputs():
     update_proposal_every=dict(argstr='--updateproposalevery=%d',
     ),
     )
-    inputs = FSLXCommand.input_spec()
+    inputs = FSLXCommand._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -104,7 +104,7 @@ def test_FSLXCommand_outputs():
     phsamples=dict(),
     thsamples=dict(),
     )
-    outputs = FSLXCommand.output_spec()
+    outputs = FSLXCommand._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

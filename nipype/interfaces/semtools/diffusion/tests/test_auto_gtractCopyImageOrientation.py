@@ -24,7 +24,7 @@ def test_gtractCopyImageOrientation_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = gtractCopyImageOrientation.input_spec()
+    inputs = gtractCopyImageOrientation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_gtractCopyImageOrientation_inputs():
 def test_gtractCopyImageOrientation_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractCopyImageOrientation.output_spec()
+    outputs = gtractCopyImageOrientation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -20,7 +20,7 @@ def test_AvScale_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = AvScale.input_spec()
+    inputs = AvScale._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +37,7 @@ def test_AvScale_outputs():
     scales=dict(),
     skews=dict(),
     )
-    outputs = AvScale.output_spec()
+    outputs = AvScale._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

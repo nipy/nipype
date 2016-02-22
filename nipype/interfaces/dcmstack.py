@@ -125,8 +125,8 @@ class DcmStack(NiftiGeneratorBase):
     >>> result.outputs.out_file # doctest: +SKIP
     '/path/to/cwd/sequence.nii.gz'
     """
-    input_spec = DcmStackInputSpec
-    output_spec = DcmStackOutputSpec
+    _input_spec = DcmStackInputSpec
+    _output_spec = DcmStackOutputSpec
 
     def _get_filelist(self, trait_input):
         if isinstance(trait_input, string_types):
@@ -172,8 +172,8 @@ class GroupAndStackOutputSpec(TraitedSpec):
 class GroupAndStack(DcmStack):
     """Create (potentially) multiple Nifti files for a set of DICOM files.
     """
-    input_spec = DcmStackInputSpec
-    output_spec = GroupAndStackOutputSpec
+    _input_spec = DcmStackInputSpec
+    _output_spec = GroupAndStackOutputSpec
 
     def _run_interface(self, runtime):
         src_paths = self._get_filelist(self.inputs.dicom_files)
@@ -225,8 +225,8 @@ class LookupMeta(BaseInterface):
     >>> result.outputs.TE # doctest: +SKIP
     95.0
     """
-    input_spec = LookupMetaInputSpec
-    output_spec = DynamicTraitedSpec
+    _input_spec = LookupMetaInputSpec
+    _output_spec = DynamicTraitedSpec
 
     def _make_name_map(self):
         if isinstance(self.inputs.meta_keys, list):
@@ -279,8 +279,8 @@ class CopyMetaOutputSpec(TraitedSpec):
 class CopyMeta(BaseInterface):
     """Copy meta data from one Nifti file to another. Useful for preserving
     meta data after some processing steps."""
-    input_spec = CopyMetaInputSpec
-    output_spec = CopyMetaOutputSpec
+    _input_spec = CopyMetaInputSpec
+    _output_spec = CopyMetaOutputSpec
 
     def _run_interface(self, runtime):
         src_nii = nb.load(self.inputs.src_file)
@@ -344,8 +344,8 @@ def make_key_func(meta_keys, index=None):
 class MergeNifti(NiftiGeneratorBase):
     """Merge multiple Nifti files into one. Merges together meta data
     extensions as well."""
-    input_spec = MergeNiftiInputSpec
-    output_spec = MergeNiftiOutputSpec
+    _input_spec = MergeNiftiInputSpec
+    _output_spec = MergeNiftiOutputSpec
 
     def _run_interface(self, runtime):
         niis = [nb.load(fn)
@@ -389,8 +389,8 @@ class SplitNifti(NiftiGeneratorBase):
     Split one Nifti file into many along the specified dimension. Each
     result has an updated meta data extension as well.
     """
-    input_spec = SplitNiftiInputSpec
-    output_spec = SplitNiftiOutputSpec
+    _input_spec = SplitNiftiInputSpec
+    _output_spec = SplitNiftiOutputSpec
 
     def _run_interface(self, runtime):
         self.out_list = []

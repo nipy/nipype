@@ -22,7 +22,7 @@ def test_DTIexport_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DTIexport.input_spec()
+    inputs = DTIexport._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -33,7 +33,7 @@ def test_DTIexport_outputs():
     output_map = dict(outputFile=dict(position=-1,
     ),
     )
-    outputs = DTIexport.output_spec()
+    outputs = DTIexport._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -100,7 +100,7 @@ def test_ProcStreamlines_inputs():
     waypointfile=dict(argstr='-waypointfile %s',
     ),
     )
-    inputs = ProcStreamlines.input_spec()
+    inputs = ProcStreamlines._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -111,7 +111,7 @@ def test_ProcStreamlines_outputs():
     output_map = dict(outputroot_files=dict(),
     proc=dict(),
     )
-    outputs = ProcStreamlines.output_spec()
+    outputs = ProcStreamlines._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

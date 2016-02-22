@@ -114,7 +114,7 @@ def test_Registration_inputs():
     usedefault=True,
     ),
     )
-    inputs = Registration.input_spec()
+    inputs = Registration._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -132,7 +132,7 @@ def test_Registration_outputs():
     save_state=dict(),
     warped_image=dict(),
     )
-    outputs = Registration.output_spec()
+    outputs = Registration._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

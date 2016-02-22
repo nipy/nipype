@@ -34,7 +34,7 @@ def test_Blob_inputs():
     translation=dict(argstr='-translation',
     ),
     )
-    inputs = Blob.input_spec()
+    inputs = Blob._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -44,7 +44,7 @@ def test_Blob_inputs():
 def test_Blob_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Blob.output_spec()
+    outputs = Blob._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

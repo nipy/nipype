@@ -48,7 +48,7 @@ def test_BuildConnectome_inputs():
     zero_diagonal=dict(argstr='-zero_diagonal',
     ),
     )
-    inputs = BuildConnectome.input_spec()
+    inputs = BuildConnectome._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +58,7 @@ def test_BuildConnectome_inputs():
 def test_BuildConnectome_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = BuildConnectome.output_spec()
+    outputs = BuildConnectome._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

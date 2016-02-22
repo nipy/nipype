@@ -102,8 +102,8 @@ class ResponseSD(MRTrix3Base):
     """
 
     _cmd = 'dwi2response'
-    input_spec = ResponseSDInputSpec
-    output_spec = ResponseSDOutputSpec
+    _input_spec = ResponseSDInputSpec
+    _output_spec = ResponseSDOutputSpec
 
     def _post_run(self):
         
@@ -144,8 +144,8 @@ class ACTPrepareFSL(CommandLine):
     """
 
     _cmd = 'act_anat_prepare_fsl'
-    input_spec = ACTPrepareFSLInputSpec
-    output_spec = ACTPrepareFSLOutputSpec
+    _input_spec = ACTPrepareFSLInputSpec
+    _output_spec = ACTPrepareFSLOutputSpec
 
     def _post_run(self):
         
@@ -190,8 +190,8 @@ mrtrix3_labelconfig.txt aparc+first.mif'
     """
 
     _cmd = 'fs_parc_replace_sgm_first'
-    input_spec = ReplaceFSwithFIRSTInputSpec
-    output_spec = ReplaceFSwithFIRSTOutputSpec
+    _input_spec = ReplaceFSwithFIRSTInputSpec
+    _output_spec = ReplaceFSwithFIRSTOutputSpec
 
     def _post_run(self):
         

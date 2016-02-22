@@ -149,8 +149,8 @@ class SampleToSurface(FSCommand):
 
     """
     _cmd = "mri_vol2surf"
-    input_spec = SampleToSurfaceInputSpec
-    output_spec = SampleToSurfaceOutputSpec
+    _input_spec = SampleToSurfaceInputSpec
+    _output_spec = SampleToSurfaceOutputSpec
 
     filemap = dict(cor='cor', mgh='mgh', mgz='mgz', minc='mnc',
                    afni='brik', brik='brik', bshort='bshort',
@@ -268,8 +268,8 @@ class SurfaceSmooth(FSCommand):
 
     """
     _cmd = "mri_surf2surf"
-    input_spec = SurfaceSmoothInputSpec
-    output_spec = SurfaceSmoothOutputSpec
+    _input_spec = SurfaceSmoothInputSpec
+    _output_spec = SurfaceSmoothOutputSpec
 
     def _post_run(self):
         self.outputs.out_file = self.inputs.out_file
@@ -344,8 +344,8 @@ class SurfaceTransform(FSCommand):
 
     """
     _cmd = "mri_surf2surf"
-    input_spec = SurfaceTransformInputSpec
-    output_spec = SurfaceTransformOutputSpec
+    _input_spec = SurfaceTransformInputSpec
+    _output_spec = SurfaceTransformOutputSpec
 
     def _post_run(self):
         self.outputs.out_file = self.inputs.out_file
@@ -441,8 +441,8 @@ class Surface2VolTransform(FSCommand):
     """
 
     _cmd = 'mri_surf2vol'
-    input_spec = Surface2VolTransformInputSpec
-    output_spec = Surface2VolTransformOutputSpec
+    _input_spec = Surface2VolTransformInputSpec
+    _output_spec = Surface2VolTransformOutputSpec
 
 
 class ApplyMaskInputSpec(FSTraitedSpec):
@@ -476,8 +476,8 @@ class ApplyMask(FSCommand):
 
     """
     _cmd = "mri_mask"
-    input_spec = ApplyMaskInputSpec
-    output_spec = ApplyMaskOutputSpec
+    _input_spec = ApplyMaskInputSpec
+    _output_spec = ApplyMaskOutputSpec
 
     def _post_run(self):
         self.outputs.out_file = self.inputs.out_file
@@ -598,8 +598,8 @@ class SurfaceSnapshots(FSCommand):
 
     """
     _cmd = "tksurfer"
-    input_spec = SurfaceSnapshotsInputSpec
-    output_spec = SurfaceSnapshotsOutputSpec
+    _input_spec = SurfaceSnapshotsInputSpec
+    _output_spec = SurfaceSnapshotsOutputSpec
 
     def _format_arg(self, name, spec, value):
         if name == "tcl_script":
@@ -727,8 +727,8 @@ class ImageInfoOutputSpec(TraitedSpec):
 class ImageInfo(FSCommand):
 
     _cmd = "mri_info"
-    input_spec = ImageInfoInputSpec
-    output_spec = ImageInfoOutputSpec
+    _input_spec = ImageInfoInputSpec
+    _output_spec = ImageInfoOutputSpec
 
     def info_regexp(self, info, field, delim="\n"):
         m = re.search("%s\s*:\s+(.+?)%s" % (field, delim), info)
@@ -833,8 +833,8 @@ class MRIsConvert(FSCommand):
     >>> mris.run() # doctest: +SKIP
     """
     _cmd = 'mris_convert'
-    input_spec = MRIsConvertInputSpec
-    output_spec = MRIsConvertOutputSpec
+    _input_spec = MRIsConvertInputSpec
+    _output_spec = MRIsConvertOutputSpec
 
     def _format_arg(self, name, spec, value):
         if name == "out_file" and not os.path.isabs(value):
@@ -905,8 +905,8 @@ class MRITessellate(FSCommand):
     >>> tess.run() # doctest: +SKIP
     """
     _cmd = 'mri_tessellate'
-    input_spec = MRITessellateInputSpec
-    output_spec = MRITessellateOutputSpec
+    _input_spec = MRITessellateInputSpec
+    _output_spec = MRITessellateOutputSpec
 
     def _post_run(self):
 
@@ -974,8 +974,8 @@ class MRIPretess(FSCommand):
     >>> pretess.run() # doctest: +SKIP
     """
     _cmd = 'mri_pretess'
-    input_spec = MRIPretessInputSpec
-    output_spec = MRIPretessOutputSpec
+    _input_spec = MRIPretessInputSpec
+    _output_spec = MRIPretessOutputSpec
 
     def _post_run(self):
 
@@ -1030,8 +1030,8 @@ class MRIMarchingCubes(FSCommand):
     >>> mc.run() # doctest: +SKIP
     """
     _cmd = 'mri_mc'
-    input_spec = MRIMarchingCubesInputSpec
-    output_spec = MRIMarchingCubesOutputSpec
+    _input_spec = MRIMarchingCubesInputSpec
+    _output_spec = MRIMarchingCubesOutputSpec
 
     def _post_run(self):
 
@@ -1100,8 +1100,8 @@ class SmoothTessellation(FSCommand):
     >>> smooth.run() # doctest: +SKIP
     """
     _cmd = 'mris_smooth'
-    input_spec = SmoothTessellationInputSpec
-    output_spec = SmoothTessellationOutputSpec
+    _input_spec = SmoothTessellationInputSpec
+    _output_spec = SmoothTessellationOutputSpec
 
     def _post_run(self):
 
@@ -1156,8 +1156,8 @@ class MakeAverageSubject(FSCommand):
     """
 
     _cmd = 'make_average_subject'
-    input_spec = MakeAverageSubjectInputSpec
-    output_spec = MakeAverageSubjectOutputSpec
+    _input_spec = MakeAverageSubjectInputSpec
+    _output_spec = MakeAverageSubjectOutputSpec
 
     def _post_run(self):
 
@@ -1190,8 +1190,8 @@ class ExtractMainComponent(CommandLine):
     """
 
     _cmd = 'mris_extract_main_component'
-    input_spec = ExtractMainComponentInputSpec
-    output_spec = ExtractMainComponentOutputSpec
+    _input_spec = ExtractMainComponentInputSpec
+    _output_spec = ExtractMainComponentOutputSpec
 
 
 class Tkregister2InputSpec(FSTraitedSpec):
@@ -1265,8 +1265,8 @@ class Tkregister2(FSCommand):
     >>> tk2.run() # doctest: +SKIP
     """
     _cmd = "tkregister2"
-    input_spec = Tkregister2InputSpec
-    output_spec = Tkregister2OutputSpec
+    _input_spec = Tkregister2InputSpec
+    _output_spec = Tkregister2OutputSpec
 
     def _post_run(self):
         self.outputs.reg_file = os.path.abspath(self.inputs.reg_file)

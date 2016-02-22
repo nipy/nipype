@@ -40,7 +40,7 @@ acknowledgements: This work is funded by the Harvard Catalyst, and the National 
 
 """
 
-    input_spec = PETStandardUptakeValueComputationInputSpec
-    output_spec = PETStandardUptakeValueComputationOutputSpec
+    _input_spec = PETStandardUptakeValueComputationInputSpec
+    _output_spec = PETStandardUptakeValueComputationOutputSpec
     _cmd = "PETStandardUptakeValueComputation "
     _outputs_filenames = {'csvFile': 'csvFile.csv'}

@@ -85,8 +85,8 @@ ants_Affine.txt'
     """
 
     _cmd = 'WarpTimeSeriesImageMultiTransform'
-    input_spec = WarpTimeSeriesImageMultiTransformInputSpec
-    output_spec = WarpTimeSeriesImageMultiTransformOutputSpec
+    _input_spec = WarpTimeSeriesImageMultiTransformInputSpec
+    _output_spec = WarpTimeSeriesImageMultiTransformOutputSpec
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
         runtime = super(WarpTimeSeriesImageMultiTransform, self)._run_interface(runtime, correct_return_codes=[0, 1])
@@ -179,8 +179,8 @@ ants_Affine.txt'
     """
 
     _cmd = 'WarpImageMultiTransform'
-    input_spec = WarpImageMultiTransformInputSpec
-    output_spec = WarpImageMultiTransformOutputSpec
+    _input_spec = WarpImageMultiTransformInputSpec
+    _output_spec = WarpImageMultiTransformOutputSpec
 
 
 class ApplyTransformsInputSpec(ANTSCommandInputSpec):
@@ -309,8 +309,8 @@ class ApplyTransforms(ANTSCommand):
 
     """
     _cmd = 'antsApplyTransforms'
-    input_spec = ApplyTransformsInputSpec
-    output_spec = ApplyTransformsOutputSpec
+    _input_spec = ApplyTransformsInputSpec
+    _output_spec = ApplyTransformsOutputSpec
 
 
 class ApplyTransformsToPointsInputSpec(ANTSCommandInputSpec):
@@ -384,5 +384,5 @@ class ApplyTransformsToPoints(ANTSCommand):
 
     """
     _cmd = 'antsApplyTransformsToPoints'
-    input_spec = ApplyTransformsToPointsInputSpec
-    output_spec = ApplyTransformsToPointsOutputSpec
+    _input_spec = ApplyTransformsToPointsInputSpec
+    _output_spec = ApplyTransformsToPointsOutputSpec

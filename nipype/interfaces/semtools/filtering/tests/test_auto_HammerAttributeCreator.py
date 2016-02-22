@@ -27,7 +27,7 @@ def test_HammerAttributeCreator_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = HammerAttributeCreator.input_spec()
+    inputs = HammerAttributeCreator._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_HammerAttributeCreator_inputs():
 
 def test_HammerAttributeCreator_outputs():
     output_map = dict()
-    outputs = HammerAttributeCreator.output_spec()
+    outputs = HammerAttributeCreator._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

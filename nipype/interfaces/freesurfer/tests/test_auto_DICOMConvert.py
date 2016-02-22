@@ -31,7 +31,7 @@ def test_DICOMConvert_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DICOMConvert.input_spec()
+    inputs = DICOMConvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +40,7 @@ def test_DICOMConvert_inputs():
 
 def test_DICOMConvert_outputs():
     output_map = dict()
-    outputs = DICOMConvert.output_spec()
+    outputs = DICOMConvert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

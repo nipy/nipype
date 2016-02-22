@@ -23,7 +23,7 @@ def test_Reorient2Std_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Reorient2Std.input_spec()
+    inputs = Reorient2Std._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -33,7 +33,7 @@ def test_Reorient2Std_inputs():
 def test_Reorient2Std_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Reorient2Std.output_spec()
+    outputs = Reorient2Std._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

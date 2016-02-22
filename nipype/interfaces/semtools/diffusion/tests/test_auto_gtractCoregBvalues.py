@@ -49,7 +49,7 @@ def test_gtractCoregBvalues_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = gtractCoregBvalues.input_spec()
+    inputs = gtractCoregBvalues._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -60,7 +60,7 @@ def test_gtractCoregBvalues_outputs():
     output_map = dict(outputTransform=dict(),
     outputVolume=dict(),
     )
-    outputs = gtractCoregBvalues.output_spec()
+    outputs = gtractCoregBvalues._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

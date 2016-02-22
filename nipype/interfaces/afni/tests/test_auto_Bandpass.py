@@ -61,7 +61,7 @@ def test_Bandpass_inputs():
     tr=dict(argstr='-dt %f',
     ),
     )
-    inputs = Bandpass.input_spec()
+    inputs = Bandpass._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -71,7 +71,7 @@ def test_Bandpass_inputs():
 def test_Bandpass_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Bandpass.output_spec()
+    outputs = Bandpass._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

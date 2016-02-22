@@ -22,7 +22,7 @@ def test_GenerateLabelMapFromProbabilityMap_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = GenerateLabelMapFromProbabilityMap.input_spec()
+    inputs = GenerateLabelMapFromProbabilityMap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -32,7 +32,7 @@ def test_GenerateLabelMapFromProbabilityMap_inputs():
 def test_GenerateLabelMapFromProbabilityMap_outputs():
     output_map = dict(outputLabelVolume=dict(),
     )
-    outputs = GenerateLabelMapFromProbabilityMap.output_spec()
+    outputs = GenerateLabelMapFromProbabilityMap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

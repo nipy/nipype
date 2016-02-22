@@ -57,7 +57,7 @@ def test_MRConvert_inputs():
     sep=',',
     ),
     )
-    inputs = MRConvert.input_spec()
+    inputs = MRConvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -67,7 +67,7 @@ def test_MRConvert_inputs():
 def test_MRConvert_outputs():
     output_map = dict(converted=dict(),
     )
-    outputs = MRConvert.output_spec()
+    outputs = MRConvert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -37,7 +37,7 @@ def test_AutoTcorrelate_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = AutoTcorrelate.input_spec()
+    inputs = AutoTcorrelate._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +47,7 @@ def test_AutoTcorrelate_inputs():
 def test_AutoTcorrelate_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = AutoTcorrelate.output_spec()
+    outputs = AutoTcorrelate._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -47,7 +47,7 @@ def test_SurfaceTransform_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = SurfaceTransform.input_spec()
+    inputs = SurfaceTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -57,7 +57,7 @@ def test_SurfaceTransform_inputs():
 def test_SurfaceTransform_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = SurfaceTransform.output_spec()
+    outputs = SurfaceTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

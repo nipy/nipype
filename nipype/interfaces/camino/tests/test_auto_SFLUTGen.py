@@ -42,7 +42,7 @@ def test_SFLUTGen_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = SFLUTGen.input_spec()
+    inputs = SFLUTGen._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +53,7 @@ def test_SFLUTGen_outputs():
     output_map = dict(lut_one_fibre=dict(),
     lut_two_fibres=dict(),
     )
-    outputs = SFLUTGen.output_spec()
+    outputs = SFLUTGen._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

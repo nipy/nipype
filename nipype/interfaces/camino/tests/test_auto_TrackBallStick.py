@@ -68,7 +68,7 @@ def test_TrackBallStick_inputs():
     units='mm',
     ),
     )
-    inputs = TrackBallStick.input_spec()
+    inputs = TrackBallStick._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -78,7 +78,7 @@ def test_TrackBallStick_inputs():
 def test_TrackBallStick_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = TrackBallStick.output_spec()
+    outputs = TrackBallStick._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

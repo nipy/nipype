@@ -12,7 +12,7 @@ def test_AddCSVColumn_inputs():
     output_name='csv_file',
     ),
     )
-    inputs = AddCSVColumn.input_spec()
+    inputs = AddCSVColumn._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -22,7 +22,7 @@ def test_AddCSVColumn_inputs():
 def test_AddCSVColumn_outputs():
     output_map = dict(csv_file=dict(),
     )
-    outputs = AddCSVColumn.output_spec()
+    outputs = AddCSVColumn._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

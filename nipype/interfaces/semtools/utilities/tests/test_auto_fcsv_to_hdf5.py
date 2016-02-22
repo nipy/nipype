@@ -29,7 +29,7 @@ def test_fcsv_to_hdf5_inputs():
     versionID=dict(argstr='--versionID %s',
     ),
     )
-    inputs = fcsv_to_hdf5.input_spec()
+    inputs = fcsv_to_hdf5._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +40,7 @@ def test_fcsv_to_hdf5_outputs():
     output_map = dict(landmarksInformationFile=dict(),
     modelFile=dict(),
     )
-    outputs = fcsv_to_hdf5.output_spec()
+    outputs = fcsv_to_hdf5._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

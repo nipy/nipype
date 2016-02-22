@@ -53,7 +53,7 @@ def test_buildtemplateparallel_inputs():
     ),
     use_first_as_target=dict(),
     )
-    inputs = buildtemplateparallel.input_spec()
+    inputs = buildtemplateparallel._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -65,7 +65,7 @@ def test_buildtemplateparallel_outputs():
     subject_outfiles=dict(),
     template_files=dict(),
     )
-    outputs = buildtemplateparallel.output_spec()
+    outputs = buildtemplateparallel._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

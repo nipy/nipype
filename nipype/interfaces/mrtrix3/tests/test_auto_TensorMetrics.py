@@ -34,7 +34,7 @@ def test_TensorMetrics_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = TensorMetrics.input_spec()
+    inputs = TensorMetrics._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +47,7 @@ def test_TensorMetrics_outputs():
     out_evec=dict(),
     out_fa=dict(),
     )
-    outputs = TensorMetrics.output_spec()
+    outputs = TensorMetrics._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

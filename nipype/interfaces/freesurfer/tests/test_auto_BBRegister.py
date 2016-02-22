@@ -53,7 +53,7 @@ def test_BBRegister_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = BBRegister.input_spec()
+    inputs = BBRegister._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -66,7 +66,7 @@ def test_BBRegister_outputs():
     out_reg_file=dict(),
     registered_file=dict(),
     )
-    outputs = BBRegister.output_spec()
+    outputs = BBRegister._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

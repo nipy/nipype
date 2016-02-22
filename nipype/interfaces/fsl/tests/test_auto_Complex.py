@@ -80,7 +80,7 @@ def test_Complex_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Complex.input_spec()
+    inputs = Complex._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -94,7 +94,7 @@ def test_Complex_outputs():
     phase_out_file=dict(),
     real_out_file=dict(),
     )
-    outputs = Complex.output_spec()
+    outputs = Complex._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

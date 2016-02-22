@@ -49,8 +49,8 @@ acknowledgements: Supported by grant number FMECD-2010/71131616E from the Spanis
 
 """
 
-    input_spec = UnbiasedNonLocalMeansInputSpec
-    output_spec = UnbiasedNonLocalMeansOutputSpec
+    _input_spec = UnbiasedNonLocalMeansInputSpec
+    _output_spec = UnbiasedNonLocalMeansOutputSpec
     _cmd = " UnbiasedNonLocalMeans "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False

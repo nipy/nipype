@@ -10,7 +10,7 @@ def test_JSONFileGrabber_inputs():
     ),
     in_file=dict(),
     )
-    inputs = JSONFileGrabber.input_spec()
+    inputs = JSONFileGrabber._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -19,7 +19,7 @@ def test_JSONFileGrabber_inputs():
 
 def test_JSONFileGrabber_outputs():
     output_map = dict()
-    outputs = JSONFileGrabber.output_spec()
+    outputs = JSONFileGrabber._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

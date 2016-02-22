@@ -32,7 +32,7 @@ def test_MRITessellate_inputs():
     use_real_RAS_coordinates=dict(argstr='-n',
     ),
     )
-    inputs = MRITessellate.input_spec()
+    inputs = MRITessellate._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +42,7 @@ def test_MRITessellate_inputs():
 def test_MRITessellate_outputs():
     output_map = dict(surface=dict(),
     )
-    outputs = MRITessellate.output_spec()
+    outputs = MRITessellate._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

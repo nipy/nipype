@@ -34,7 +34,7 @@ def test_BRAINSSnapShotWriter_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = BRAINSSnapShotWriter.input_spec()
+    inputs = BRAINSSnapShotWriter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -44,7 +44,7 @@ def test_BRAINSSnapShotWriter_inputs():
 def test_BRAINSSnapShotWriter_outputs():
     output_map = dict(outputFilename=dict(),
     )
-    outputs = BRAINSSnapShotWriter.output_spec()
+    outputs = BRAINSSnapShotWriter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

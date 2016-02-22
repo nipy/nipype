@@ -37,7 +37,7 @@ def test_gtractCostFastMarching_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = gtractCostFastMarching.input_spec()
+    inputs = gtractCostFastMarching._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -48,7 +48,7 @@ def test_gtractCostFastMarching_outputs():
     output_map = dict(outputCostVolume=dict(),
     outputSpeedVolume=dict(),
     )
-    outputs = gtractCostFastMarching.output_spec()
+    outputs = gtractCostFastMarching._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

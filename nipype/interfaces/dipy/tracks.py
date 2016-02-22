@@ -53,8 +53,8 @@ class TrackDensityMap(DipyBaseInterface):
     >>> trk2tdi.run()                                   # doctest: +SKIP
 
     """
-    input_spec = TrackDensityMapInputSpec
-    output_spec = TrackDensityMapOutputSpec
+    _input_spec = TrackDensityMapInputSpec
+    _output_spec = TrackDensityMapOutputSpec
 
     def _run_interface(self, runtime):
         from numpy import min_scalar_type
@@ -155,8 +155,8 @@ class StreamlineTractography(DipyBaseInterface):
     >>> track.inputs.tracking_mask = 'dilated_wm_mask.nii'
     >>> res = track.run() # doctest: +SKIP
     """
-    input_spec = StreamlineTractographyInputSpec
-    output_spec = StreamlineTractographyOutputSpec
+    _input_spec = StreamlineTractographyInputSpec
+    _output_spec = StreamlineTractographyOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.reconst.peaks import peaks_from_model

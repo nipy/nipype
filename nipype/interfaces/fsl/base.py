@@ -120,7 +120,7 @@ class FSLCommandInputSpec(CommandLineInputSpec):
 class FSLCommand(CommandLine):  # pylint: disable=W0223
     """Base support for FSL commands."""
 
-    input_spec = FSLCommandInputSpec
+    _input_spec = FSLCommandInputSpec
 
     def __init__(self, **inputs):
         super(FSLCommand, self).__init__(**inputs)

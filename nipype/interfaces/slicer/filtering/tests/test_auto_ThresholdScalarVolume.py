@@ -32,7 +32,7 @@ def test_ThresholdScalarVolume_inputs():
     upper=dict(argstr='--upper %d',
     ),
     )
-    inputs = ThresholdScalarVolume.input_spec()
+    inputs = ThresholdScalarVolume._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +43,7 @@ def test_ThresholdScalarVolume_outputs():
     output_map = dict(OutputVolume=dict(position=-1,
     ),
     )
-    outputs = ThresholdScalarVolume.output_spec()
+    outputs = ThresholdScalarVolume._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

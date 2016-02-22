@@ -129,8 +129,8 @@ class Conmat(CommandLine):
     >>> conmat.run()        # doctest: +SKIP
     """
     _cmd = 'conmat'
-    input_spec = ConmatInputSpec
-    output_spec = ConmatOutputSpec
+    _input_spec = ConmatInputSpec
+    _output_spec = ConmatOutputSpec
 
     def _post_run(self):
         

@@ -24,7 +24,7 @@ def test_gtractImageConformity_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = gtractImageConformity.input_spec()
+    inputs = gtractImageConformity._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_gtractImageConformity_inputs():
 def test_gtractImageConformity_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractImageConformity.output_spec()
+    outputs = gtractImageConformity._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -37,7 +37,7 @@ def test_QBallMX_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = QBallMX.input_spec()
+    inputs = QBallMX._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +47,7 @@ def test_QBallMX_inputs():
 def test_QBallMX_outputs():
     output_map = dict(qmat=dict(),
     )
-    outputs = QBallMX.output_spec()
+    outputs = QBallMX._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -31,7 +31,7 @@ def test_Maskave_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Maskave.input_spec()
+    inputs = Maskave._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +41,7 @@ def test_Maskave_inputs():
 def test_Maskave_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Maskave.output_spec()
+    outputs = Maskave._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

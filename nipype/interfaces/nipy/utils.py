@@ -66,8 +66,8 @@ class Similarity(BaseInterface):
     >>> res = similarity.run() # doctest: +SKIP
     """
 
-    input_spec = SimilarityInputSpec
-    output_spec = SimilarityOutputSpec
+    _input_spec = SimilarityInputSpec
+    _output_spec = SimilarityOutputSpec
 
     def __init__(self, **inputs):
         warnings.warn(("This interface is deprecated since 0.10.0."

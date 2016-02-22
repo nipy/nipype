@@ -88,7 +88,7 @@ def test_TrackBayesDirac_inputs():
     units='mm',
     ),
     )
-    inputs = TrackBayesDirac.input_spec()
+    inputs = TrackBayesDirac._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -98,7 +98,7 @@ def test_TrackBayesDirac_inputs():
 def test_TrackBayesDirac_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = TrackBayesDirac.output_spec()
+    outputs = TrackBayesDirac._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

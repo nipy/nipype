@@ -35,7 +35,7 @@ def test_GenerateDirections_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = GenerateDirections.input_spec()
+    inputs = GenerateDirections._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +45,7 @@ def test_GenerateDirections_inputs():
 def test_GenerateDirections_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = GenerateDirections.output_spec()
+    outputs = GenerateDirections._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

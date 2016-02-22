@@ -112,8 +112,8 @@ class Level1Design(BaseInterface):
 
     """
 
-    input_spec = Level1DesignInputSpec
-    output_spec = Level1DesignOutputSpec
+    _input_spec = Level1DesignInputSpec
+    _output_spec = Level1DesignOutputSpec
 
     def _create_ev_file(self, evfname, evinfo):
         f = open(evfname, 'wt')
@@ -384,8 +384,8 @@ class FEAT(FSLCommand):
     """Uses FSL feat to calculate first level stats
     """
     _cmd = 'feat'
-    input_spec = FEATInputSpec
-    output_spec = FEATOutputSpec
+    _input_spec = FEATInputSpec
+    _output_spec = FEATOutputSpec
 
     def _post_run(self):
         is_ica = False
@@ -446,8 +446,8 @@ class FEATModel(FSLCommand):
     """Uses FSL feat_model to generate design.mat files
     """
     _cmd = 'feat_model'
-    input_spec = FEATModelInputSpec
-    output_spec = FEATModelOutputSpec
+    _input_spec = FEATModelInputSpec
+    _output_spec = FEATModelOutputSpec
 
     def _get_design_root(self, infile):
         _, fname = os.path.split(infile)
@@ -646,15 +646,15 @@ threshold=10, results_dir='stats')
     _cmd = 'film_gls'
 
     if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.6'):
-        input_spec = FILMGLSInputSpec507
+        _input_spec = FILMGLSInputSpec507
     elif Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.4'):
-        input_spec = FILMGLSInputSpec505
+        _input_spec = FILMGLSInputSpec505
     else:
-        input_spec = FILMGLSInputSpec
+        _input_spec = FILMGLSInputSpec
     if Info.version() and LooseVersion(Info.version()) > LooseVersion('5.0.6'):
-        output_spec = FILMGLSOutputSpec507
+        _output_spec = FILMGLSOutputSpec507
     else:
-        output_spec = FILMGLSOutputSpec
+        _output_spec = FILMGLSOutputSpec
 
     def _get_pe_files(self, cwd):
         files = None
@@ -766,8 +766,8 @@ class FEATRegisterOutputSpec(TraitedSpec):
 class FEATRegister(BaseInterface):
     """Register feat directories to a specific standard
     """
-    input_spec = FEATRegisterInputSpec
-    output_spec = FEATRegisterOutputSpec
+    _input_spec = FEATRegisterInputSpec
+    _output_spec = FEATRegisterOutputSpec
 
     def _run_interface(self, runtime):
         fsf_header = load_template('featreg_header.tcl')
@@ -887,8 +887,8 @@ class FLAMEO(FSLCommand):
     """
 
     _cmd = 'flameo'
-    input_spec = FLAMEOInputSpec
-    output_spec = FLAMEOOutputSpec
+    _input_spec = FLAMEOInputSpec
+    _output_spec = FLAMEOOutputSpec
 
     # ohinds: 2010-04-06
     def _run_interface(self, runtime):
@@ -1010,8 +1010,8 @@ class ContrastMgr(FSLCommand):
     """
 
     _cmd = 'contrast_mgr'
-    input_spec = ContrastMgrInputSpec
-    output_spec = ContrastMgrOutputSpec
+    _input_spec = ContrastMgrInputSpec
+    _output_spec = ContrastMgrOutputSpec
 
     def _run_interface(self, runtime):
         # The returncode is meaningless in ContrastMgr.  So check the output
@@ -1118,8 +1118,8 @@ class L2Model(BaseInterface):
 
     """
 
-    input_spec = L2ModelInputSpec
-    output_spec = L2ModelOutputSpec
+    _input_spec = L2ModelInputSpec
+    _output_spec = L2ModelOutputSpec
 
     def _run_interface(self, runtime):
         cwd = os.getcwd()
@@ -1223,8 +1223,8 @@ class MultipleRegressDesign(BaseInterface):
 
     """
 
-    input_spec = MultipleRegressDesignInputSpec
-    output_spec = MultipleRegressDesignOutputSpec
+    _input_spec = MultipleRegressDesignInputSpec
+    _output_spec = MultipleRegressDesignOutputSpec
 
     def _run_interface(self, runtime):
         cwd = os.getcwd()
@@ -1362,8 +1362,8 @@ class SMM(FSLCommand):
     Woolrich, M., Behrens, T., Beckmann, C., and Smith, S.; IEEE Trans. Medical Imaging, 24(1):1-11, 2005.
     """
     _cmd = 'mm'
-    input_spec = SMMInputSpec
-    output_spec = SMMOutputSpec
+    _input_spec = SMMInputSpec
+    _output_spec = SMMOutputSpec
 
 
 class MELODICInputSpec(FSLCommandInputSpec):
@@ -1479,8 +1479,8 @@ class MELODIC(FSLCommand):
 
 
     """
-    input_spec = MELODICInputSpec
-    output_spec = MELODICOutputSpec
+    _input_spec = MELODICInputSpec
+    _output_spec = MELODICOutputSpec
     _cmd = 'melodic'
 
     def _post_run(self):
@@ -1532,8 +1532,8 @@ class SmoothEstimate(FSLCommand):
 
     """
 
-    input_spec = SmoothEstimateInputSpec
-    output_spec = SmoothEstimateOutputSpec
+    _input_spec = SmoothEstimateInputSpec
+    _output_spec = SmoothEstimateOutputSpec
     _cmd = 'smoothest'
 
     def aggregate_outputs(self, runtime=None, needed_outputs=None):
@@ -1646,8 +1646,8 @@ class Cluster(FSLCommand):
     'cluster --in=zstat1.nii.gz --olmax=stats.txt --thresh=2.3000000000'
 
     """
-    input_spec = ClusterInputSpec
-    output_spec = ClusterOutputSpec
+    _input_spec = ClusterInputSpec
+    _output_spec = ClusterOutputSpec
     _cmd = 'cluster'
 
 
@@ -1750,8 +1750,8 @@ class Randomise(FSLCommand):
     """
 
     _cmd = 'randomise'
-    input_spec = RandomiseInputSpec
-    output_spec = RandomiseOutputSpec
+    _input_spec = RandomiseInputSpec
+    _output_spec = RandomiseOutputSpec
 
     def _post_run(self):
 
@@ -1885,8 +1885,8 @@ class GLM(FSLCommand):
 
     """
     _cmd = 'fsl_glm'
-    input_spec = GLMInputSpec
-    output_spec = GLMOutputSpec
+    _input_spec = GLMInputSpec
+    _output_spec = GLMOutputSpec
 
     def _post_run(self):
         outputs = super(GLM, self)._list_outputs()

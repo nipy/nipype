@@ -32,7 +32,7 @@ def test_DTMetric_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DTMetric.input_spec()
+    inputs = DTMetric._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +42,7 @@ def test_DTMetric_inputs():
 def test_DTMetric_outputs():
     output_map = dict(metric_stats=dict(),
     )
-    outputs = DTMetric.output_spec()
+    outputs = DTMetric._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

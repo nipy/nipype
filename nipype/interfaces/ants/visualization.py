@@ -58,8 +58,8 @@ class ConvertScalarImageToRGB(ANTSCommand):
     'ConvertScalarImageToRGB 3 T1.nii.gz rgb.nii.gz none jet none 0 6 0 255'
     """
     _cmd = 'ConvertScalarImageToRGB'
-    input_spec = ConvertScalarImageToRGBInputSpec
-    output_spec = ConvertScalarImageToRGBOutputSpec
+    _input_spec = ConvertScalarImageToRGBInputSpec
+    _output_spec = ConvertScalarImageToRGBOutputSpec
 
     def _format_arg(self, opt, spec, val):
         return super(ConvertScalarImageToRGB, self)._format_arg(opt, spec, val)
@@ -144,8 +144,8 @@ class CreateTiledMosaic(ANTSCommand):
     """
 
     _cmd = 'CreateTiledMosaic'
-    input_spec = CreateTiledMosaicInputSpec
-    output_spec = CreateTiledMosaicOutputSpec
+    _input_spec = CreateTiledMosaicInputSpec
+    _output_spec = CreateTiledMosaicOutputSpec
 
     def _post_run(self):
         self.outputs.output_image = os.path.join(os.getcwd(),

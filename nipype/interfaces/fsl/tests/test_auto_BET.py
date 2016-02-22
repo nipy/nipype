@@ -85,7 +85,7 @@ def test_BET_inputs():
     vertical_gradient=dict(argstr='-g %.2f',
     ),
     )
-    inputs = BET.input_spec()
+    inputs = BET._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -105,7 +105,7 @@ def test_BET_outputs():
     outskull_mesh_file=dict(),
     skull_mask_file=dict(),
     )
-    outputs = BET.output_spec()
+    outputs = BET._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

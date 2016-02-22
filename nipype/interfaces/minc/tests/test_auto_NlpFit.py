@@ -42,7 +42,7 @@ def test_NlpFit_inputs():
     verbose=dict(argstr='-verbose',
     ),
     )
-    inputs = NlpFit.input_spec()
+    inputs = NlpFit._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +53,7 @@ def test_NlpFit_outputs():
     output_map = dict(output_grid=dict(),
     output_xfm=dict(),
     )
-    outputs = NlpFit.output_spec()
+    outputs = NlpFit._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

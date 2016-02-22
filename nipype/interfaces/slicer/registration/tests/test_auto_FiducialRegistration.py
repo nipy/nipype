@@ -28,7 +28,7 @@ def test_FiducialRegistration_inputs():
     transformType=dict(argstr='--transformType %s',
     ),
     )
-    inputs = FiducialRegistration.input_spec()
+    inputs = FiducialRegistration._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +38,7 @@ def test_FiducialRegistration_inputs():
 def test_FiducialRegistration_outputs():
     output_map = dict(saveTransform=dict(),
     )
-    outputs = FiducialRegistration.output_spec()
+    outputs = FiducialRegistration._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

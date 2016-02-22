@@ -40,8 +40,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractTransformToDisplacementFieldInputSpec
-    output_spec = gtractTransformToDisplacementFieldOutputSpec
+    _input_spec = gtractTransformToDisplacementFieldInputSpec
+    _output_spec = gtractTransformToDisplacementFieldOutputSpec
     _cmd = " gtractTransformToDisplacementField "
     _outputs_filenames = {'outputDeformationFieldVolume': 'outputDeformationFieldVolume.nii'}
     _redirect_x = False
@@ -79,8 +79,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractInvertBSplineTransformInputSpec
-    output_spec = gtractInvertBSplineTransformOutputSpec
+    _input_spec = gtractInvertBSplineTransformInputSpec
+    _output_spec = gtractInvertBSplineTransformOutputSpec
     _cmd = " gtractInvertBSplineTransform "
     _outputs_filenames = {'outputTransform': 'outputTransform.h5'}
     _redirect_x = False
@@ -117,8 +117,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractConcatDwiInputSpec
-    output_spec = gtractConcatDwiOutputSpec
+    _input_spec = gtractConcatDwiInputSpec
+    _output_spec = gtractConcatDwiOutputSpec
     _cmd = " gtractConcatDwi "
     _outputs_filenames = {'outputVolume': 'outputVolume.nrrd'}
     _redirect_x = False
@@ -156,8 +156,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractAverageBvaluesInputSpec
-    output_spec = gtractAverageBvaluesOutputSpec
+    _input_spec = gtractAverageBvaluesInputSpec
+    _output_spec = gtractAverageBvaluesOutputSpec
     _cmd = " gtractAverageBvalues "
     _outputs_filenames = {'outputVolume': 'outputVolume.nrrd'}
     _redirect_x = False
@@ -209,8 +209,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractCoregBvaluesInputSpec
-    output_spec = gtractCoregBvaluesOutputSpec
+    _input_spec = gtractCoregBvaluesInputSpec
+    _output_spec = gtractCoregBvaluesOutputSpec
     _cmd = " gtractCoregBvalues "
     _outputs_filenames = {'outputVolume': 'outputVolume.nrrd', 'outputTransform': 'outputTransform.h5'}
     _redirect_x = False
@@ -249,8 +249,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractResampleAnisotropyInputSpec
-    output_spec = gtractResampleAnisotropyOutputSpec
+    _input_spec = gtractResampleAnisotropyInputSpec
+    _output_spec = gtractResampleAnisotropyOutputSpec
     _cmd = " gtractResampleAnisotropy "
     _outputs_filenames = {'outputVolume': 'outputVolume.nrrd'}
     _redirect_x = False
@@ -289,8 +289,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractResampleCodeImageInputSpec
-    output_spec = gtractResampleCodeImageOutputSpec
+    _input_spec = gtractResampleCodeImageInputSpec
+    _output_spec = gtractResampleCodeImageOutputSpec
     _cmd = " gtractResampleCodeImage "
     _outputs_filenames = {'outputVolume': 'outputVolume.nrrd'}
     _redirect_x = False
@@ -327,8 +327,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractCopyImageOrientationInputSpec
-    output_spec = gtractCopyImageOrientationOutputSpec
+    _input_spec = gtractCopyImageOrientationInputSpec
+    _output_spec = gtractCopyImageOrientationOutputSpec
     _cmd = " gtractCopyImageOrientation "
     _outputs_filenames = {'outputVolume': 'outputVolume.nrrd'}
     _redirect_x = False
@@ -366,8 +366,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractCreateGuideFiberInputSpec
-    output_spec = gtractCreateGuideFiberOutputSpec
+    _input_spec = gtractCreateGuideFiberInputSpec
+    _output_spec = gtractCreateGuideFiberOutputSpec
     _cmd = " gtractCreateGuideFiber "
     _outputs_filenames = {'outputFiber': 'outputFiber.vtk'}
     _redirect_x = False
@@ -404,8 +404,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractAnisotropyMapInputSpec
-    output_spec = gtractAnisotropyMapOutputSpec
+    _input_spec = gtractAnisotropyMapInputSpec
+    _output_spec = gtractAnisotropyMapOutputSpec
     _cmd = " gtractAnisotropyMap "
     _outputs_filenames = {'outputVolume': 'outputVolume.nrrd'}
     _redirect_x = False
@@ -443,8 +443,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractClipAnisotropyInputSpec
-    output_spec = gtractClipAnisotropyOutputSpec
+    _input_spec = gtractClipAnisotropyInputSpec
+    _output_spec = gtractClipAnisotropyOutputSpec
     _cmd = " gtractClipAnisotropy "
     _outputs_filenames = {'outputVolume': 'outputVolume.nrrd'}
     _redirect_x = False
@@ -484,8 +484,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractResampleB0InputSpec
-    output_spec = gtractResampleB0OutputSpec
+    _input_spec = gtractResampleB0InputSpec
+    _output_spec = gtractResampleB0OutputSpec
     _cmd = " gtractResampleB0 "
     _outputs_filenames = {'outputVolume': 'outputVolume.nrrd'}
     _redirect_x = False
@@ -521,8 +521,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractInvertRigidTransformInputSpec
-    output_spec = gtractInvertRigidTransformOutputSpec
+    _input_spec = gtractInvertRigidTransformInputSpec
+    _output_spec = gtractInvertRigidTransformOutputSpec
     _cmd = " gtractInvertRigidTransform "
     _outputs_filenames = {'outputTransform': 'outputTransform.h5'}
     _redirect_x = False
@@ -559,8 +559,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractImageConformityInputSpec
-    output_spec = gtractImageConformityOutputSpec
+    _input_spec = gtractImageConformityInputSpec
+    _output_spec = gtractImageConformityOutputSpec
     _cmd = " gtractImageConformity "
     _outputs_filenames = {'outputVolume': 'outputVolume.nrrd'}
     _redirect_x = False
@@ -601,8 +601,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = compareTractInclusionInputSpec
-    output_spec = compareTractInclusionOutputSpec
+    _input_spec = compareTractInclusionInputSpec
+    _output_spec = compareTractInclusionOutputSpec
     _cmd = " compareTractInclusion "
     _outputs_filenames = {}
     _redirect_x = False
@@ -649,8 +649,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractFastMarchingTrackingInputSpec
-    output_spec = gtractFastMarchingTrackingOutputSpec
+    _input_spec = gtractFastMarchingTrackingInputSpec
+    _output_spec = gtractFastMarchingTrackingOutputSpec
     _cmd = " gtractFastMarchingTracking "
     _outputs_filenames = {'outputTract': 'outputTract.vtk'}
     _redirect_x = False
@@ -688,8 +688,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractInvertDisplacementFieldInputSpec
-    output_spec = gtractInvertDisplacementFieldOutputSpec
+    _input_spec = gtractInvertDisplacementFieldInputSpec
+    _output_spec = gtractInvertDisplacementFieldOutputSpec
     _cmd = " gtractInvertDisplacementField "
     _outputs_filenames = {'outputVolume': 'outputVolume.nrrd'}
     _redirect_x = False
@@ -752,8 +752,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractCoRegAnatomyInputSpec
-    output_spec = gtractCoRegAnatomyOutputSpec
+    _input_spec = gtractCoRegAnatomyInputSpec
+    _output_spec = gtractCoRegAnatomyOutputSpec
     _cmd = " gtractCoRegAnatomy "
     _outputs_filenames = {'outputTransformName': 'outputTransformName.h5'}
     _redirect_x = False
@@ -796,8 +796,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractResampleDWIInPlaceInputSpec
-    output_spec = gtractResampleDWIInPlaceOutputSpec
+    _input_spec = gtractResampleDWIInPlaceInputSpec
+    _output_spec = gtractResampleDWIInPlaceOutputSpec
     _cmd = " gtractResampleDWIInPlace "
     _outputs_filenames = {'outputResampledB0': 'outputResampledB0.nii', 'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -841,8 +841,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractCostFastMarchingInputSpec
-    output_spec = gtractCostFastMarchingOutputSpec
+    _input_spec = gtractCostFastMarchingInputSpec
+    _output_spec = gtractCostFastMarchingOutputSpec
     _cmd = " gtractCostFastMarching "
     _outputs_filenames = {'outputCostVolume': 'outputCostVolume.nrrd', 'outputSpeedVolume': 'outputSpeedVolume.nrrd'}
     _redirect_x = False
@@ -903,8 +903,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractFiberTrackingInputSpec
-    output_spec = gtractFiberTrackingOutputSpec
+    _input_spec = gtractFiberTrackingInputSpec
+    _output_spec = gtractFiberTrackingOutputSpec
     _cmd = " gtractFiberTracking "
     _outputs_filenames = {'outputTract': 'outputTract.vtk'}
     _redirect_x = False
@@ -942,8 +942,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = extractNrrdVectorIndexInputSpec
-    output_spec = extractNrrdVectorIndexOutputSpec
+    _input_spec = extractNrrdVectorIndexInputSpec
+    _output_spec = extractNrrdVectorIndexOutputSpec
     _cmd = " extractNrrdVectorIndex "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -982,8 +982,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractResampleFibersInputSpec
-    output_spec = gtractResampleFibersOutputSpec
+    _input_spec = gtractResampleFibersInputSpec
+    _output_spec = gtractResampleFibersOutputSpec
     _cmd = " gtractResampleFibers "
     _outputs_filenames = {'outputTract': 'outputTract.vtk'}
     _redirect_x = False
@@ -1031,8 +1031,8 @@ acknowledgements: Funding for this version of the GTRACT program was provided by
 
 """
 
-    input_spec = gtractTensorInputSpec
-    output_spec = gtractTensorOutputSpec
+    _input_spec = gtractTensorInputSpec
+    _output_spec = gtractTensorOutputSpec
     _cmd = " gtractTensor "
     _outputs_filenames = {'outputVolume': 'outputVolume.nrrd'}
     _redirect_x = False

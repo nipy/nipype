@@ -18,7 +18,7 @@ def test_MpiCommandLine_inputs():
     use_mpi=dict(usedefault=True,
     ),
     )
-    inputs = MpiCommandLine.input_spec()
+    inputs = MpiCommandLine._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -27,7 +27,7 @@ def test_MpiCommandLine_inputs():
 
 def test_MpiCommandLine_outputs():
     output_map = dict()
-    outputs = MpiCommandLine.output_spec()
+    outputs = MpiCommandLine._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

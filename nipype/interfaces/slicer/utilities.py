@@ -31,7 +31,7 @@ description:
 
 """
 
-    input_spec = EMSegmentTransformToNewFormatInputSpec
-    output_spec = EMSegmentTransformToNewFormatOutputSpec
+    _input_spec = EMSegmentTransformToNewFormatInputSpec
+    _output_spec = EMSegmentTransformToNewFormatOutputSpec
     _cmd = "EMSegmentTransformToNewFormat "
     _outputs_filenames = {'outputMRMLFileName': 'outputMRMLFileName.mrml'}

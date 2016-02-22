@@ -89,7 +89,7 @@ def test_MeshFix_inputs():
     x_shift=dict(argstr='--smooth %d',
     ),
     )
-    inputs = MeshFix.input_spec()
+    inputs = MeshFix._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -99,7 +99,7 @@ def test_MeshFix_inputs():
 def test_MeshFix_outputs():
     output_map = dict(mesh_file=dict(),
     )
-    outputs = MeshFix.output_spec()
+    outputs = MeshFix._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

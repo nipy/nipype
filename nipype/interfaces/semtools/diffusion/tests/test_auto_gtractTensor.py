@@ -42,7 +42,7 @@ def test_gtractTensor_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = gtractTensor.input_spec()
+    inputs = gtractTensor._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +52,7 @@ def test_gtractTensor_inputs():
 def test_gtractTensor_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractTensor.output_spec()
+    outputs = gtractTensor._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

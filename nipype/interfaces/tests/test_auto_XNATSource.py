@@ -22,7 +22,7 @@ def test_XNATSource_inputs():
     ),
     user=dict(),
     )
-    inputs = XNATSource.input_spec()
+    inputs = XNATSource._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -31,7 +31,7 @@ def test_XNATSource_inputs():
 
 def test_XNATSource_outputs():
     output_map = dict()
-    outputs = XNATSource.output_spec()
+    outputs = XNATSource._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

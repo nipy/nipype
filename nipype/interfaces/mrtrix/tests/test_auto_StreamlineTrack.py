@@ -98,7 +98,7 @@ def test_StreamlineTrack_inputs():
     unidirectional=dict(argstr='-unidirectional',
     ),
     )
-    inputs = StreamlineTrack.input_spec()
+    inputs = StreamlineTrack._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -108,7 +108,7 @@ def test_StreamlineTrack_inputs():
 def test_StreamlineTrack_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = StreamlineTrack.output_spec()
+    outputs = StreamlineTrack._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

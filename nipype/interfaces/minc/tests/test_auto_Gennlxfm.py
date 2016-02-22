@@ -33,7 +33,7 @@ def test_Gennlxfm_inputs():
     verbose=dict(argstr='-verbose',
     ),
     )
-    inputs = Gennlxfm.input_spec()
+    inputs = Gennlxfm._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -44,7 +44,7 @@ def test_Gennlxfm_outputs():
     output_map = dict(output_file=dict(),
     output_grid=dict(),
     )
-    outputs = Gennlxfm.output_spec()
+    outputs = Gennlxfm._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

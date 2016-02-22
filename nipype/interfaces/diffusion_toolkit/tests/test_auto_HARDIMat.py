@@ -37,7 +37,7 @@ def test_HARDIMat_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = HARDIMat.input_spec()
+    inputs = HARDIMat._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +47,7 @@ def test_HARDIMat_inputs():
 def test_HARDIMat_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = HARDIMat.output_spec()
+    outputs = HARDIMat._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

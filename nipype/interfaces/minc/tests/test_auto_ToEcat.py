@@ -44,7 +44,7 @@ def test_ToEcat_inputs():
     voxels_as_integers=dict(argstr='-label',
     ),
     )
-    inputs = ToEcat.input_spec()
+    inputs = ToEcat._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -54,7 +54,7 @@ def test_ToEcat_inputs():
 def test_ToEcat_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = ToEcat.output_spec()
+    outputs = ToEcat._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

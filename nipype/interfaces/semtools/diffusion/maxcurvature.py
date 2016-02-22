@@ -44,8 +44,8 @@ acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); (1=University of Iowa D
 
 """
 
-    input_spec = maxcurvatureInputSpec
-    output_spec = maxcurvatureOutputSpec
+    _input_spec = maxcurvatureInputSpec
+    _output_spec = maxcurvatureOutputSpec
     _cmd = " maxcurvature "
     _outputs_filenames = {'output': 'output.nii'}
     _redirect_x = False

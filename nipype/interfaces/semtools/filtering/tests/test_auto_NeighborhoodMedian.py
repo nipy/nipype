@@ -24,7 +24,7 @@ def test_NeighborhoodMedian_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = NeighborhoodMedian.input_spec()
+    inputs = NeighborhoodMedian._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_NeighborhoodMedian_inputs():
 def test_NeighborhoodMedian_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = NeighborhoodMedian.output_spec()
+    outputs = NeighborhoodMedian._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

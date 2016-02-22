@@ -137,7 +137,7 @@ def test_OneSampleTTest_inputs():
     xor=('weight_file', 'weight_inv', 'weight_sqrt'),
     ),
     )
-    inputs = OneSampleTTest.input_spec()
+    inputs = OneSampleTTest._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -163,7 +163,7 @@ def test_OneSampleTTest_outputs():
     spatial_eigenvectors=dict(),
     svd_stats_file=dict(),
     )
-    outputs = OneSampleTTest.output_spec()
+    outputs = OneSampleTTest._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

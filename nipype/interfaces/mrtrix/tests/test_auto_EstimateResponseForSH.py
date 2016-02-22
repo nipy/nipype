@@ -39,7 +39,7 @@ def test_EstimateResponseForSH_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = EstimateResponseForSH.input_spec()
+    inputs = EstimateResponseForSH._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +49,7 @@ def test_EstimateResponseForSH_inputs():
 def test_EstimateResponseForSH_outputs():
     output_map = dict(response=dict(),
     )
-    outputs = EstimateResponseForSH.output_spec()
+    outputs = EstimateResponseForSH._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

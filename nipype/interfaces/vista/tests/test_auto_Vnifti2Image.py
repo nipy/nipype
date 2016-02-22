@@ -29,7 +29,7 @@ def test_Vnifti2Image_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Vnifti2Image.input_spec()
+    inputs = Vnifti2Image._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +39,7 @@ def test_Vnifti2Image_inputs():
 def test_Vnifti2Image_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Vnifti2Image.output_spec()
+    outputs = Vnifti2Image._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

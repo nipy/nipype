@@ -36,7 +36,7 @@ def test_SimpleRegionGrowingSegmentation_inputs():
     timestep=dict(argstr='--timestep %f',
     ),
     )
-    inputs = SimpleRegionGrowingSegmentation.input_spec()
+    inputs = SimpleRegionGrowingSegmentation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +47,7 @@ def test_SimpleRegionGrowingSegmentation_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = SimpleRegionGrowingSegmentation.output_spec()
+    outputs = SimpleRegionGrowingSegmentation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

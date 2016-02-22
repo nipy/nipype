@@ -52,8 +52,8 @@ class ImageStats(CommandLine):
     >>> imstats.run()                  # doctest: +SKIP
     """
     _cmd = 'imagestats'
-    input_spec = ImageStatsInputSpec
-    output_spec = ImageStatsOutputSpec
+    _input_spec = ImageStatsInputSpec
+    _output_spec = ImageStatsOutputSpec
 
     def _post_run(self):
         

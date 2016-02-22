@@ -28,7 +28,7 @@ def test_gtractResampleCodeImage_inputs():
     transformType=dict(argstr='--transformType %s',
     ),
     )
-    inputs = gtractResampleCodeImage.input_spec()
+    inputs = gtractResampleCodeImage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +38,7 @@ def test_gtractResampleCodeImage_inputs():
 def test_gtractResampleCodeImage_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractResampleCodeImage.output_spec()
+    outputs = gtractResampleCodeImage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

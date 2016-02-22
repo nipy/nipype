@@ -68,7 +68,7 @@ def test_Track_inputs():
     units='mm',
     ),
     )
-    inputs = Track.input_spec()
+    inputs = Track._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -78,7 +78,7 @@ def test_Track_inputs():
 def test_Track_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = Track.output_spec()
+    outputs = Track._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

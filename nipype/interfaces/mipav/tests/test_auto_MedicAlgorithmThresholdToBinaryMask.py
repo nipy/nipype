@@ -36,7 +36,7 @@ def test_MedicAlgorithmThresholdToBinaryMask_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = MedicAlgorithmThresholdToBinaryMask.input_spec()
+    inputs = MedicAlgorithmThresholdToBinaryMask._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +45,7 @@ def test_MedicAlgorithmThresholdToBinaryMask_inputs():
 
 def test_MedicAlgorithmThresholdToBinaryMask_outputs():
     output_map = dict()
-    outputs = MedicAlgorithmThresholdToBinaryMask.output_spec()
+    outputs = MedicAlgorithmThresholdToBinaryMask._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

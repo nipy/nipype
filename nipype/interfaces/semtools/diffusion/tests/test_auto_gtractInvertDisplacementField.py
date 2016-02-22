@@ -26,7 +26,7 @@ def test_gtractInvertDisplacementField_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = gtractInvertDisplacementField.input_spec()
+    inputs = gtractInvertDisplacementField._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_gtractInvertDisplacementField_inputs():
 def test_gtractInvertDisplacementField_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractInvertDisplacementField.output_spec()
+    outputs = gtractInvertDisplacementField._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -41,7 +41,7 @@ def test_Warp_inputs():
     zpad=dict(argstr='-zpad %d',
     ),
     )
-    inputs = Warp.input_spec()
+    inputs = Warp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -51,7 +51,7 @@ def test_Warp_inputs():
 def test_Warp_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Warp.output_spec()
+    outputs = Warp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

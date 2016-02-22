@@ -55,7 +55,7 @@ def test_JistLaminarVolumetricLayering_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistLaminarVolumetricLayering.input_spec()
+    inputs = JistLaminarVolumetricLayering._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -67,7 +67,7 @@ def test_JistLaminarVolumetricLayering_outputs():
     outDiscrete=dict(),
     outLayer=dict(),
     )
-    outputs = JistLaminarVolumetricLayering.output_spec()
+    outputs = JistLaminarVolumetricLayering._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

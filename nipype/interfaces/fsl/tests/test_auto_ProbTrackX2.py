@@ -127,7 +127,7 @@ def test_ProbTrackX2_inputs():
     xfm=dict(argstr='--xfm=%s',
     ),
     )
-    inputs = ProbTrackX2.input_spec()
+    inputs = ProbTrackX2._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -146,7 +146,7 @@ def test_ProbTrackX2_outputs():
     targets=dict(),
     way_total=dict(),
     )
-    outputs = ProbTrackX2.output_spec()
+    outputs = ProbTrackX2._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

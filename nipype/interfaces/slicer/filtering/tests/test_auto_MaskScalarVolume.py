@@ -29,7 +29,7 @@ def test_MaskScalarVolume_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = MaskScalarVolume.input_spec()
+    inputs = MaskScalarVolume._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +40,7 @@ def test_MaskScalarVolume_outputs():
     output_map = dict(OutputVolume=dict(position=-1,
     ),
     )
-    outputs = MaskScalarVolume.output_spec()
+    outputs = MaskScalarVolume._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

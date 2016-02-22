@@ -49,7 +49,7 @@ def test_GenWarpFields_inputs():
     usedefault=True,
     ),
     )
-    inputs = GenWarpFields.input_spec()
+    inputs = GenWarpFields._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -63,7 +63,7 @@ def test_GenWarpFields_outputs():
     output_file=dict(),
     warp_field=dict(),
     )
-    outputs = GenWarpFields.output_spec()
+    outputs = GenWarpFields._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

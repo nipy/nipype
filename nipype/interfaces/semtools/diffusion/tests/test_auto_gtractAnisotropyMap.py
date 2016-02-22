@@ -24,7 +24,7 @@ def test_gtractAnisotropyMap_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = gtractAnisotropyMap.input_spec()
+    inputs = gtractAnisotropyMap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_gtractAnisotropyMap_inputs():
 def test_gtractAnisotropyMap_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractAnisotropyMap.output_spec()
+    outputs = gtractAnisotropyMap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

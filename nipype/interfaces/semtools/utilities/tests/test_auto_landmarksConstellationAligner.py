@@ -20,7 +20,7 @@ def test_landmarksConstellationAligner_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = landmarksConstellationAligner.input_spec()
+    inputs = landmarksConstellationAligner._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -30,7 +30,7 @@ def test_landmarksConstellationAligner_inputs():
 def test_landmarksConstellationAligner_outputs():
     output_map = dict(outputLandmarksPaired=dict(),
     )
-    outputs = landmarksConstellationAligner.output_spec()
+    outputs = landmarksConstellationAligner._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

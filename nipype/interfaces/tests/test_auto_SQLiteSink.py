@@ -12,7 +12,7 @@ def test_SQLiteSink_inputs():
     table_name=dict(mandatory=True,
     ),
     )
-    inputs = SQLiteSink.input_spec()
+    inputs = SQLiteSink._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -21,7 +21,7 @@ def test_SQLiteSink_inputs():
 
 def test_SQLiteSink_outputs():
     output_map = dict()
-    outputs = SQLiteSink.output_spec()
+    outputs = SQLiteSink._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

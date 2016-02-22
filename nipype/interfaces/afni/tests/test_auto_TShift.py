@@ -43,7 +43,7 @@ def test_TShift_inputs():
     xor=['tslice'],
     ),
     )
-    inputs = TShift.input_spec()
+    inputs = TShift._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +53,7 @@ def test_TShift_inputs():
 def test_TShift_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = TShift.output_spec()
+    outputs = TShift._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

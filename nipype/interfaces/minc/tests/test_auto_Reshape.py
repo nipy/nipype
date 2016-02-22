@@ -33,7 +33,7 @@ def test_Reshape_inputs():
     write_short=dict(argstr='-short',
     ),
     )
-    inputs = Reshape.input_spec()
+    inputs = Reshape._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +43,7 @@ def test_Reshape_inputs():
 def test_Reshape_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Reshape.output_spec()
+    outputs = Reshape._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

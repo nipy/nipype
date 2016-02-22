@@ -74,7 +74,7 @@ def test_ResampleDTIVolume_inputs():
     window_function=dict(argstr='--window_function %s',
     ),
     )
-    inputs = ResampleDTIVolume.input_spec()
+    inputs = ResampleDTIVolume._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -85,7 +85,7 @@ def test_ResampleDTIVolume_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = ResampleDTIVolume.output_spec()
+    outputs = ResampleDTIVolume._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

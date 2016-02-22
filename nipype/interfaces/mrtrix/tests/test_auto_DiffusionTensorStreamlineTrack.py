@@ -102,7 +102,7 @@ def test_DiffusionTensorStreamlineTrack_inputs():
     unidirectional=dict(argstr='-unidirectional',
     ),
     )
-    inputs = DiffusionTensorStreamlineTrack.input_spec()
+    inputs = DiffusionTensorStreamlineTrack._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -112,7 +112,7 @@ def test_DiffusionTensorStreamlineTrack_inputs():
 def test_DiffusionTensorStreamlineTrack_outputs():
     output_map = dict(tracked=dict(),
     )
-    outputs = DiffusionTensorStreamlineTrack.output_spec()
+    outputs = DiffusionTensorStreamlineTrack._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

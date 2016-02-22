@@ -18,7 +18,7 @@ def test_TensorMode_inputs():
     mask_file=dict(),
     out_prefix=dict(),
     )
-    inputs = TensorMode.input_spec()
+    inputs = TensorMode._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -28,7 +28,7 @@ def test_TensorMode_inputs():
 def test_TensorMode_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = TensorMode.output_spec()
+    outputs = TensorMode._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

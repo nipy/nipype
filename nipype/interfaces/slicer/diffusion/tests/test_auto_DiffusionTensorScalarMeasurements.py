@@ -24,7 +24,7 @@ def test_DiffusionTensorScalarMeasurements_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DiffusionTensorScalarMeasurements.input_spec()
+    inputs = DiffusionTensorScalarMeasurements._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +35,7 @@ def test_DiffusionTensorScalarMeasurements_outputs():
     output_map = dict(outputScalar=dict(position=-1,
     ),
     )
-    outputs = DiffusionTensorScalarMeasurements.output_spec()
+    outputs = DiffusionTensorScalarMeasurements._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

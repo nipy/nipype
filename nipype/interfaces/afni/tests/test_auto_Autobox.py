@@ -28,7 +28,7 @@ def test_Autobox_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Autobox.input_spec()
+    inputs = Autobox._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -44,7 +44,7 @@ def test_Autobox_outputs():
     z_max=dict(),
     z_min=dict(),
     )
-    outputs = Autobox.output_spec()
+    outputs = Autobox._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

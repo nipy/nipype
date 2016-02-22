@@ -27,8 +27,8 @@ contributor: Ali Ghayoor
 
 """
 
-    input_spec = GenerateAverageLmkFileInputSpec
-    output_spec = GenerateAverageLmkFileOutputSpec
+    _input_spec = GenerateAverageLmkFileInputSpec
+    _output_spec = GenerateAverageLmkFileOutputSpec
     _cmd = " GenerateAverageLmkFile "
     _outputs_filenames = {'outputLandmarkFile': 'outputLandmarkFile'}
     _redirect_x = False

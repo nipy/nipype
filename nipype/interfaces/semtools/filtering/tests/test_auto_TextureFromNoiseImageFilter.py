@@ -22,7 +22,7 @@ def test_TextureFromNoiseImageFilter_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = TextureFromNoiseImageFilter.input_spec()
+    inputs = TextureFromNoiseImageFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -32,7 +32,7 @@ def test_TextureFromNoiseImageFilter_inputs():
 def test_TextureFromNoiseImageFilter_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = TextureFromNoiseImageFilter.output_spec()
+    outputs = TextureFromNoiseImageFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

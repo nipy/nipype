@@ -141,8 +141,8 @@ class Atropos(ANTSCommand):
 --likelihood-model Gaussian --mask-image mask.nii --mrf [0.2,1x1x1] --convergence [5,1e-06] \
 --output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1] --use-random-seed 1'
     """
-    input_spec = AtroposInputSpec
-    output_spec = AtroposOutputSpec
+    _input_spec = AtroposInputSpec
+    _output_spec = AtroposOutputSpec
     _cmd = 'Atropos'
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
@@ -200,8 +200,8 @@ class LaplacianThickness(ANTSCommand):
     """
 
     _cmd = 'LaplacianThickness'
-    input_spec = LaplacianThicknessInputSpec
-    output_spec = LaplacianThicknessOutputSpec
+    _input_spec = LaplacianThicknessInputSpec
+    _output_spec = LaplacianThicknessOutputSpec
 
     def _gen_filename(self, name):
         if name == 'output_image':
@@ -339,8 +339,8 @@ class N4BiasFieldCorrection(ANTSCommand):
     """
 
     _cmd = 'N4BiasFieldCorrection'
-    input_spec = N4BiasFieldCorrectionInputSpec
-    output_spec = N4BiasFieldCorrectionOutputSpec
+    _input_spec = N4BiasFieldCorrectionInputSpec
+    _output_spec = N4BiasFieldCorrectionOutputSpec
 
 
 class CorticalThicknessInputSpec(ANTSCommandInputSpec):
@@ -490,8 +490,8 @@ class CorticalThickness(ANTSCommand):
 -s nii.gz -o antsCT_ -p nipype_priors/BrainSegmentationPrior%02d.nii.gz -t brain_study_template.nii.gz'
     """
 
-    input_spec = CorticalThicknessInputSpec
-    output_spec = CorticalThicknessOutputSpec
+    _input_spec = CorticalThicknessInputSpec
+    _output_spec = CorticalThicknessOutputSpec
     _cmd = 'antsCorticalThickness.sh'
 
     def _run_interface(self, runtime, correct_return_codes=[0]):
@@ -627,8 +627,8 @@ class BrainExtraction(ANTSCommand):
     'antsBrainExtraction.sh -a T1.nii.gz -m ProbabilityMaskOfStudyTemplate.nii.gz -e study_template.nii.gz -d 3 \
 -s nii.gz -o highres001_'
     """
-    input_spec = BrainExtractionInputSpec
-    output_spec = BrainExtractionOutputSpec
+    _input_spec = BrainExtractionInputSpec
+    _output_spec = BrainExtractionOutputSpec
     _cmd = 'antsBrainExtraction.sh'
 
     def _post_run(self):
@@ -743,8 +743,8 @@ class JointFusion(ANTSCommand):
     'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -g im3.nii \
 -l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
     """
-    input_spec = JointFusionInputSpec
-    output_spec = JointFusionOutputSpec
+    _input_spec = JointFusionInputSpec
+    _output_spec = JointFusionOutputSpec
     _cmd = 'jointfusion'
 
     def _post_run(self):
@@ -828,8 +828,8 @@ class DenoiseImage(ANTSCommand):
     >>> denoise_3.cmdline
     'DenoiseImage -i im1.nii -n Gaussian -o [ im1_noise_corrected.nii, im1_noise.nii ] -s 1'
     """
-    input_spec = DenoiseImageInputSpec
-    output_spec = DenoiseImageOutputSpec
+    _input_spec = DenoiseImageInputSpec
+    _output_spec = DenoiseImageOutputSpec
     _cmd = 'DenoiseImage'
 
 
@@ -1008,8 +1008,8 @@ ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz
 -p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
 
     """
-    input_spec = AntsJointFusionInputSpec
-    output_spec = AntsJointFusionOutputSpec
+    _input_spec = AntsJointFusionInputSpec
+    _output_spec = AntsJointFusionOutputSpec
     _cmd = 'antsJointFusion'
 
 

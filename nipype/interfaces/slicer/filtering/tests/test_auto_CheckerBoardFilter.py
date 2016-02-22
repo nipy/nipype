@@ -28,7 +28,7 @@ def test_CheckerBoardFilter_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = CheckerBoardFilter.input_spec()
+    inputs = CheckerBoardFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +39,7 @@ def test_CheckerBoardFilter_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = CheckerBoardFilter.output_spec()
+    outputs = CheckerBoardFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

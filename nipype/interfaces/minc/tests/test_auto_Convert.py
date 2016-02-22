@@ -38,7 +38,7 @@ def test_Convert_inputs():
     two=dict(argstr='-2',
     ),
     )
-    inputs = Convert.input_spec()
+    inputs = Convert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -48,7 +48,7 @@ def test_Convert_inputs():
 def test_Convert_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Convert.output_spec()
+    outputs = Convert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

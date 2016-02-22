@@ -43,7 +43,7 @@ def test_BBox_inputs():
     xor=('one_line', 'two_lines'),
     ),
     )
-    inputs = BBox.input_spec()
+    inputs = BBox._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +53,7 @@ def test_BBox_inputs():
 def test_BBox_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = BBox.output_spec()
+    outputs = BBox._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

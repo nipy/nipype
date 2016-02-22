@@ -26,7 +26,7 @@ def test_FindTheBiggest_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = FindTheBiggest.input_spec()
+    inputs = FindTheBiggest._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +37,7 @@ def test_FindTheBiggest_outputs():
     output_map = dict(out_file=dict(argstr='%s',
     ),
     )
-    outputs = FindTheBiggest.output_spec()
+    outputs = FindTheBiggest._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

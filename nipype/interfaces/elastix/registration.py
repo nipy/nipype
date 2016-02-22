@@ -62,8 +62,8 @@ class Registration(CommandLine):
     """
 
     _cmd = 'elastix'
-    input_spec = RegistrationInputSpec
-    output_spec = RegistrationOutputSpec
+    _input_spec = RegistrationInputSpec
+    _output_spec = RegistrationOutputSpec
 
     def _post_run(self):
         
@@ -152,8 +152,8 @@ class ApplyWarp(CommandLine):
     """
 
     _cmd = 'transformix'
-    input_spec = ApplyWarpInputSpec
-    output_spec = ApplyWarpOutputSpec
+    _input_spec = ApplyWarpInputSpec
+    _output_spec = ApplyWarpOutputSpec
 
     def _post_run(self):
         out_dir = op.abspath(self.inputs.output_path)
@@ -190,8 +190,8 @@ class AnalyzeWarp(CommandLine):
     """
 
     _cmd = 'transformix -def all -jac all -jacmat all'
-    input_spec = AnalyzeWarpInputSpec
-    output_spec = AnalyzeWarpOutputSpec
+    _input_spec = AnalyzeWarpInputSpec
+    _output_spec = AnalyzeWarpOutputSpec
 
     def _post_run(self):
         out_dir = op.abspath(self.inputs.output_path)
@@ -229,8 +229,8 @@ class PointsWarp(CommandLine):
     """
 
     _cmd = 'transformix'
-    input_spec = PointsWarpInputSpec
-    output_spec = PointsWarpOutputSpec
+    _input_spec = PointsWarpInputSpec
+    _output_spec = PointsWarpOutputSpec
 
     def _post_run(self):
         out_dir = op.abspath(self.inputs.output_path)

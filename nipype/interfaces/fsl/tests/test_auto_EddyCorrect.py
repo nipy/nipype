@@ -17,7 +17,7 @@ def test_EddyCorrect_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = EddyCorrect.input_spec()
+    inputs = EddyCorrect._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +26,7 @@ def test_EddyCorrect_inputs():
 
 def test_EddyCorrect_outputs():
     output_map = dict()
-    outputs = EddyCorrect.output_spec()
+    outputs = EddyCorrect._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

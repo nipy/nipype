@@ -30,7 +30,7 @@ def test_DicomToNrrdConverter_inputs():
     writeProtocolGradientsFile=dict(argstr='--writeProtocolGradientsFile ',
     ),
     )
-    inputs = DicomToNrrdConverter.input_spec()
+    inputs = DicomToNrrdConverter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +40,7 @@ def test_DicomToNrrdConverter_inputs():
 def test_DicomToNrrdConverter_outputs():
     output_map = dict(outputDirectory=dict(),
     )
-    outputs = DicomToNrrdConverter.output_spec()
+    outputs = DicomToNrrdConverter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

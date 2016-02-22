@@ -39,8 +39,8 @@ acknowledgements: This command module was derived from Insight/Examples (copyrig
 
 """
 
-    input_spec = OtsuThresholdImageFilterInputSpec
-    output_spec = OtsuThresholdImageFilterOutputSpec
+    _input_spec = OtsuThresholdImageFilterInputSpec
+    _output_spec = OtsuThresholdImageFilterOutputSpec
     _cmd = "OtsuThresholdImageFilter "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
 
@@ -73,7 +73,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = ResampleScalarVolumeInputSpec
-    output_spec = ResampleScalarVolumeOutputSpec
+    _input_spec = ResampleScalarVolumeInputSpec
+    _output_spec = ResampleScalarVolumeOutputSpec
     _cmd = "ResampleScalarVolume "
     _outputs_filenames = {'OutputVolume': 'OutputVolume.nii'}

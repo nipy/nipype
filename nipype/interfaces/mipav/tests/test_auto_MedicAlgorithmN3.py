@@ -48,7 +48,7 @@ def test_MedicAlgorithmN3_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = MedicAlgorithmN3.input_spec()
+    inputs = MedicAlgorithmN3._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -59,7 +59,7 @@ def test_MedicAlgorithmN3_outputs():
     output_map = dict(outInhomogeneity=dict(),
     outInhomogeneity2=dict(),
     )
-    outputs = MedicAlgorithmN3.output_spec()
+    outputs = MedicAlgorithmN3._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

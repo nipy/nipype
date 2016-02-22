@@ -32,7 +32,7 @@ def test_XNATSink_inputs():
     ),
     user=dict(),
     )
-    inputs = XNATSink.input_spec()
+    inputs = XNATSink._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +41,7 @@ def test_XNATSink_inputs():
 
 def test_XNATSink_outputs():
     output_map = dict()
-    outputs = XNATSink.output_spec()
+    outputs = XNATSink._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

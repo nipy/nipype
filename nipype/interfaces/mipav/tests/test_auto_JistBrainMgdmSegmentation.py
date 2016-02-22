@@ -68,7 +68,7 @@ def test_JistBrainMgdmSegmentation_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistBrainMgdmSegmentation.input_spec()
+    inputs = JistBrainMgdmSegmentation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -81,7 +81,7 @@ def test_JistBrainMgdmSegmentation_outputs():
     outPosterior3=dict(),
     outSegmented=dict(),
     )
-    outputs = JistBrainMgdmSegmentation.output_spec()
+    outputs = JistBrainMgdmSegmentation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

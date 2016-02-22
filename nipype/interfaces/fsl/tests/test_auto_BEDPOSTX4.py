@@ -80,7 +80,7 @@ def test_BEDPOSTX4_inputs():
     weight=dict(argstr='-w %.2f',
     ),
     )
-    inputs = BEDPOSTX4.input_spec()
+    inputs = BEDPOSTX4._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -98,7 +98,7 @@ def test_BEDPOSTX4_outputs():
     merged_thsamples=dict(),
     xfms_directory=dict(),
     )
-    outputs = BEDPOSTX4.output_spec()
+    outputs = BEDPOSTX4._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

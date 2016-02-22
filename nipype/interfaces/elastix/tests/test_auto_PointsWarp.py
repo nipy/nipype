@@ -28,7 +28,7 @@ def test_PointsWarp_inputs():
     mandatory=True,
     ),
     )
-    inputs = PointsWarp.input_spec()
+    inputs = PointsWarp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +38,7 @@ def test_PointsWarp_inputs():
 def test_PointsWarp_outputs():
     output_map = dict(warped_file=dict(),
     )
-    outputs = PointsWarp.output_spec()
+    outputs = PointsWarp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -28,7 +28,7 @@ def test_XfmInvert_inputs():
     verbose=dict(argstr='-verbose',
     ),
     )
-    inputs = XfmInvert.input_spec()
+    inputs = XfmInvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +39,7 @@ def test_XfmInvert_outputs():
     output_map = dict(output_file=dict(),
     output_grid=dict(),
     )
-    outputs = XfmInvert.output_spec()
+    outputs = XfmInvert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -20,7 +20,7 @@ def test_GenerateCsfClippedFromClassifiedImage_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = GenerateCsfClippedFromClassifiedImage.input_spec()
+    inputs = GenerateCsfClippedFromClassifiedImage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -30,7 +30,7 @@ def test_GenerateCsfClippedFromClassifiedImage_inputs():
 def test_GenerateCsfClippedFromClassifiedImage_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = GenerateCsfClippedFromClassifiedImage.output_spec()
+    outputs = GenerateCsfClippedFromClassifiedImage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

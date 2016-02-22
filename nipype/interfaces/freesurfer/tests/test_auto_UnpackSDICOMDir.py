@@ -45,7 +45,7 @@ def test_UnpackSDICOMDir_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = UnpackSDICOMDir.input_spec()
+    inputs = UnpackSDICOMDir._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -54,7 +54,7 @@ def test_UnpackSDICOMDir_inputs():
 
 def test_UnpackSDICOMDir_outputs():
     output_map = dict()
-    outputs = UnpackSDICOMDir.output_spec()
+    outputs = UnpackSDICOMDir._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -86,8 +86,8 @@ class SimulateMultiTensor(DipyBaseInterface):
     >>> sim.inputs.in_bval = 'bvals'
     >>> sim.run()                                   # doctest: +SKIP
     """
-    input_spec = SimulateMultiTensorInputSpec
-    output_spec = SimulateMultiTensorOutputSpec
+    _input_spec = SimulateMultiTensorInputSpec
+    _output_spec = SimulateMultiTensorOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.core.gradients import gradient_table

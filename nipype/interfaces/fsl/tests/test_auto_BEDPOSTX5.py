@@ -91,7 +91,7 @@ def test_BEDPOSTX5_inputs():
     ),
     use_gpu=dict(),
     )
-    inputs = BEDPOSTX5.input_spec()
+    inputs = BEDPOSTX5._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -109,7 +109,7 @@ def test_BEDPOSTX5_outputs():
     phsamples=dict(),
     thsamples=dict(),
     )
-    outputs = BEDPOSTX5.output_spec()
+    outputs = BEDPOSTX5._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

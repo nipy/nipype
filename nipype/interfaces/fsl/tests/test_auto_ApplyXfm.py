@@ -146,7 +146,7 @@ def test_ApplyXfm_inputs():
     min_ver='5.0.0',
     ),
     )
-    inputs = ApplyXfm.input_spec()
+    inputs = ApplyXfm._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -158,7 +158,7 @@ def test_ApplyXfm_outputs():
     out_log=dict(),
     out_matrix_file=dict(),
     )
-    outputs = ApplyXfm.output_spec()
+    outputs = ApplyXfm._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

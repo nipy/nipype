@@ -18,7 +18,7 @@ def test_ANTSCommand_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ANTSCommand.input_spec()
+    inputs = ANTSCommand._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -27,7 +27,7 @@ def test_ANTSCommand_inputs():
 
 def test_ANTSCommand_outputs():
     output_map = dict()
-    outputs = ANTSCommand.output_spec()
+    outputs = ANTSCommand._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

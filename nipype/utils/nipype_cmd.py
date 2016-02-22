@@ -23,7 +23,7 @@ def add_options(parser=None, module=None, function=None):
         __import__(module)
         interface = getattr(sys.modules[module], function)()
 
-        inputs = interface.input_spec()
+        inputs = interface._input_spec()
         for name, spec in sorted(interface.inputs.traits(transient=None).items()):
             desc = "\n".join(interface._get_trait_desc(inputs, name, spec))[len(name) + 2:]
             args = {}

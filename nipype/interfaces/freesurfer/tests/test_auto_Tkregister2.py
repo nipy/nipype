@@ -47,7 +47,7 @@ def test_Tkregister2_inputs():
     xfm=dict(argstr='--xfm %s',
     ),
     )
-    inputs = Tkregister2.input_spec()
+    inputs = Tkregister2._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +58,7 @@ def test_Tkregister2_outputs():
     output_map = dict(fsl_file=dict(),
     reg_file=dict(),
     )
-    outputs = Tkregister2.output_spec()
+    outputs = Tkregister2._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

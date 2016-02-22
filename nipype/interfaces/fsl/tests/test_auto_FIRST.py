@@ -52,7 +52,7 @@ def test_FIRST_inputs():
     position=1,
     ),
     )
-    inputs = FIRST.input_spec()
+    inputs = FIRST._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -65,7 +65,7 @@ def test_FIRST_outputs():
     segmentation_file=dict(),
     vtk_surfaces=dict(),
     )
-    outputs = FIRST.output_spec()
+    outputs = FIRST._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

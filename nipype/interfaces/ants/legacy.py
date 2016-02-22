@@ -92,8 +92,8 @@ class antsIntroduction(ANTSCommand):
     """
 
     _cmd = 'antsIntroduction.sh'
-    input_spec = antsIntroductionInputSpec
-    output_spec = antsIntroductionOutputSpec
+    _input_spec = antsIntroductionInputSpec
+    _output_spec = antsIntroductionOutputSpec
 
     def _post_run(self):
         transmodel = self.inputs.transformation_model
@@ -208,8 +208,8 @@ class buildtemplateparallel(ANTSCommand):
     """
 
     _cmd = 'buildtemplateparallel.sh'
-    input_spec = buildtemplateparallelInputSpec
-    output_spec = buildtemplateparallelOutputSpec
+    _input_spec = buildtemplateparallelInputSpec
+    _output_spec = buildtemplateparallelOutputSpec
 
     def _format_arg(self, opt, spec, val):
         if opt == 'num_cores':

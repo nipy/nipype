@@ -42,7 +42,7 @@ def test_SynthesizeFLASH_inputs():
     position=2,
     ),
     )
-    inputs = SynthesizeFLASH.input_spec()
+    inputs = SynthesizeFLASH._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +52,7 @@ def test_SynthesizeFLASH_inputs():
 def test_SynthesizeFLASH_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = SynthesizeFLASH.output_spec()
+    outputs = SynthesizeFLASH._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

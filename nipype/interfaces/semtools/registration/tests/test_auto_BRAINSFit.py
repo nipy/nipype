@@ -158,7 +158,7 @@ def test_BRAINSFit_inputs():
     writeTransformOnFailure=dict(argstr='--writeTransformOnFailure ',
     ),
     )
-    inputs = BRAINSFit.input_spec()
+    inputs = BRAINSFit._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -175,7 +175,7 @@ def test_BRAINSFit_outputs():
     outputVolume=dict(),
     strippedOutputTransform=dict(),
     )
-    outputs = BRAINSFit.output_spec()
+    outputs = BRAINSFit._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

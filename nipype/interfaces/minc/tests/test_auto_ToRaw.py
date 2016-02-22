@@ -61,7 +61,7 @@ def test_ToRaw_inputs():
     xor=('write_signed', 'write_unsigned'),
     ),
     )
-    inputs = ToRaw.input_spec()
+    inputs = ToRaw._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -71,7 +71,7 @@ def test_ToRaw_inputs():
 def test_ToRaw_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = ToRaw.output_spec()
+    outputs = ToRaw._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

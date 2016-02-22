@@ -15,7 +15,7 @@ def test_CreateNifti_inputs():
     nifti_file=dict(ns='data_file',
     ),
     )
-    inputs = CreateNifti.input_spec()
+    inputs = CreateNifti._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -25,7 +25,7 @@ def test_CreateNifti_inputs():
 def test_CreateNifti_outputs():
     output_map = dict(nifti_file=dict(),
     )
-    outputs = CreateNifti.output_spec()
+    outputs = CreateNifti._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

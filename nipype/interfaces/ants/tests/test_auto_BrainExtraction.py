@@ -47,7 +47,7 @@ def test_BrainExtraction_inputs():
     use_random_seeding=dict(argstr='-u %d',
     ),
     )
-    inputs = BrainExtraction.input_spec()
+    inputs = BrainExtraction._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +58,7 @@ def test_BrainExtraction_outputs():
     output_map = dict(BrainExtractionBrain=dict(),
     BrainExtractionMask=dict(),
     )
-    outputs = BrainExtraction.output_spec()
+    outputs = BrainExtraction._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

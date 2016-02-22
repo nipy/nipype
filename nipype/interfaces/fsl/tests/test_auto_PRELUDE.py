@@ -62,7 +62,7 @@ def test_PRELUDE_inputs():
     hash_files=False,
     ),
     )
-    inputs = PRELUDE.input_spec()
+    inputs = PRELUDE._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -72,7 +72,7 @@ def test_PRELUDE_inputs():
 def test_PRELUDE_outputs():
     output_map = dict(unwrapped_phase_file=dict(),
     )
-    outputs = PRELUDE.output_spec()
+    outputs = PRELUDE._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

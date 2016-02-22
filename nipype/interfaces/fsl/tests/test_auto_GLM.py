@@ -67,7 +67,7 @@ def test_GLM_inputs():
     var_norm=dict(argstr='--vn',
     ),
     )
-    inputs = GLM.input_spec()
+    inputs = GLM._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -88,7 +88,7 @@ def test_GLM_outputs():
     out_vnscales=dict(),
     out_z=dict(),
     )
-    outputs = GLM.output_spec()
+    outputs = GLM._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

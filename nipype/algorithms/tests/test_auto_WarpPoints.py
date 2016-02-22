@@ -16,7 +16,7 @@ def test_WarpPoints_inputs():
     warp=dict(mandatory=True,
     ),
     )
-    inputs = WarpPoints.input_spec()
+    inputs = WarpPoints._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +26,7 @@ def test_WarpPoints_inputs():
 def test_WarpPoints_outputs():
     output_map = dict(out_points=dict(),
     )
-    outputs = WarpPoints.output_spec()
+    outputs = WarpPoints._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

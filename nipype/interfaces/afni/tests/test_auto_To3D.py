@@ -35,7 +35,7 @@ def test_To3D_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = To3D.input_spec()
+    inputs = To3D._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +45,7 @@ def test_To3D_inputs():
 def test_To3D_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = To3D.output_spec()
+    outputs = To3D._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

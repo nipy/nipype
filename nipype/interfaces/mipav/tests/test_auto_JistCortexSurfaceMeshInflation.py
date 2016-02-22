@@ -44,7 +44,7 @@ def test_JistCortexSurfaceMeshInflation_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistCortexSurfaceMeshInflation.input_spec()
+    inputs = JistCortexSurfaceMeshInflation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +55,7 @@ def test_JistCortexSurfaceMeshInflation_outputs():
     output_map = dict(outInflated=dict(),
     outOriginal=dict(),
     )
-    outputs = JistCortexSurfaceMeshInflation.output_spec()
+    outputs = JistCortexSurfaceMeshInflation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

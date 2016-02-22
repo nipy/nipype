@@ -57,7 +57,7 @@ def test_ConvertWarp_inputs():
     warp2=dict(argstr='--warp2=%s',
     ),
     )
-    inputs = ConvertWarp.input_spec()
+    inputs = ConvertWarp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -67,7 +67,7 @@ def test_ConvertWarp_inputs():
 def test_ConvertWarp_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ConvertWarp.output_spec()
+    outputs = ConvertWarp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

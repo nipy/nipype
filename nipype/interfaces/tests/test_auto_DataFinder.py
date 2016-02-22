@@ -17,7 +17,7 @@ def test_DataFinder_inputs():
     unpack_single=dict(usedefault=True,
     ),
     )
-    inputs = DataFinder.input_spec()
+    inputs = DataFinder._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +26,7 @@ def test_DataFinder_inputs():
 
 def test_DataFinder_outputs():
     output_map = dict()
-    outputs = DataFinder.output_spec()
+    outputs = DataFinder._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -60,8 +60,8 @@ class RESTORE(DipyDiffusionInterface):
 
 
     """
-    input_spec = RESTOREInputSpec
-    output_spec = RESTOREOutputSpec
+    _input_spec = RESTOREInputSpec
+    _output_spec = RESTOREOutputSpec
 
     def _run_interface(self, runtime):
         from scipy.special import gamma
@@ -195,8 +195,8 @@ class EstimateResponseSH(DipyDiffusionInterface):
 
 
     """
-    input_spec = EstimateResponseSHInputSpec
-    output_spec = EstimateResponseSHOutputSpec
+    _input_spec = EstimateResponseSHInputSpec
+    _output_spec = EstimateResponseSHOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.core.gradients import GradientTable
@@ -306,8 +306,8 @@ class CSD(DipyDiffusionInterface):
     >>> csd.inputs.in_bvec = 'bvecs'
     >>> res = csd.run() # doctest: +SKIP
     """
-    input_spec = CSDInputSpec
-    output_spec = CSDOutputSpec
+    _input_spec = CSDInputSpec
+    _output_spec = CSDOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.reconst.csdeconv import ConstrainedSphericalDeconvModel

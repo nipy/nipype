@@ -24,7 +24,7 @@ def test_GenerateBrainClippedImage_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = GenerateBrainClippedImage.input_spec()
+    inputs = GenerateBrainClippedImage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_GenerateBrainClippedImage_inputs():
 def test_GenerateBrainClippedImage_outputs():
     output_map = dict(outputFileName=dict(),
     )
-    outputs = GenerateBrainClippedImage.output_spec()
+    outputs = GenerateBrainClippedImage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

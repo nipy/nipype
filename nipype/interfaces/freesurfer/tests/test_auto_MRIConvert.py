@@ -183,7 +183,7 @@ def test_MRIConvert_inputs():
     zero_outlines=dict(argstr='--zero_outlines',
     ),
     )
-    inputs = MRIConvert.input_spec()
+    inputs = MRIConvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -193,7 +193,7 @@ def test_MRIConvert_inputs():
 def test_MRIConvert_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MRIConvert.output_spec()
+    outputs = MRIConvert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

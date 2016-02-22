@@ -51,7 +51,7 @@ def test_Dump_inputs():
     sep=',',
     ),
     )
-    inputs = Dump.input_spec()
+    inputs = Dump._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -61,7 +61,7 @@ def test_Dump_inputs():
 def test_Dump_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Dump.output_spec()
+    outputs = Dump._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

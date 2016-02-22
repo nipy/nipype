@@ -45,7 +45,7 @@ def test_ArtifactDetect_inputs():
     zintensity_threshold=dict(mandatory=True,
     ),
     )
-    inputs = ArtifactDetect.input_spec()
+    inputs = ArtifactDetect._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -61,7 +61,7 @@ def test_ArtifactDetect_outputs():
     plot_files=dict(),
     statistic_files=dict(),
     )
-    outputs = ArtifactDetect.output_spec()
+    outputs = ArtifactDetect._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

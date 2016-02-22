@@ -52,7 +52,7 @@ def test_DWIConvert_inputs():
     writeProtocolGradientsFile=dict(argstr='--writeProtocolGradientsFile ',
     ),
     )
-    inputs = DWIConvert.input_spec()
+    inputs = DWIConvert._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -66,7 +66,7 @@ def test_DWIConvert_outputs():
     outputDirectory=dict(),
     outputVolume=dict(),
     )
-    outputs = DWIConvert.output_spec()
+    outputs = DWIConvert._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

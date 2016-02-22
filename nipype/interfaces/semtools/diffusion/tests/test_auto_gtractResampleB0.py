@@ -30,7 +30,7 @@ def test_gtractResampleB0_inputs():
     vectorIndex=dict(argstr='--vectorIndex %d',
     ),
     )
-    inputs = gtractResampleB0.input_spec()
+    inputs = gtractResampleB0._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +40,7 @@ def test_gtractResampleB0_inputs():
 def test_gtractResampleB0_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractResampleB0.output_spec()
+    outputs = gtractResampleB0._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

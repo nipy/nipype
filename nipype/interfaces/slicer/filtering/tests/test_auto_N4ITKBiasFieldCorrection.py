@@ -44,7 +44,7 @@ def test_N4ITKBiasFieldCorrection_inputs():
     weightimage=dict(argstr='--weightimage %s',
     ),
     )
-    inputs = N4ITKBiasFieldCorrection.input_spec()
+    inputs = N4ITKBiasFieldCorrection._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +55,7 @@ def test_N4ITKBiasFieldCorrection_outputs():
     output_map = dict(outputbiasfield=dict(),
     outputimage=dict(),
     )
-    outputs = N4ITKBiasFieldCorrection.output_spec()
+    outputs = N4ITKBiasFieldCorrection._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

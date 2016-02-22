@@ -16,7 +16,7 @@ def test_MeshWarpMaths_inputs():
     ),
     out_warp=dict(),
     )
-    inputs = MeshWarpMaths.input_spec()
+    inputs = MeshWarpMaths._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -27,7 +27,7 @@ def test_MeshWarpMaths_outputs():
     output_map = dict(out_file=dict(),
     out_warp=dict(),
     )
-    outputs = MeshWarpMaths.output_spec()
+    outputs = MeshWarpMaths._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

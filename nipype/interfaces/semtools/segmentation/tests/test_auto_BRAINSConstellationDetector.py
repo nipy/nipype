@@ -110,7 +110,7 @@ def test_BRAINSConstellationDetector_inputs():
     writedebuggingImagesLevel=dict(argstr='--writedebuggingImagesLevel %d',
     ),
     )
-    inputs = BRAINSConstellationDetector.input_spec()
+    inputs = BRAINSConstellationDetector._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -129,7 +129,7 @@ def test_BRAINSConstellationDetector_outputs():
     resultsDir=dict(),
     writeBranded2DImage=dict(),
     )
-    outputs = BRAINSConstellationDetector.output_spec()
+    outputs = BRAINSConstellationDetector._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

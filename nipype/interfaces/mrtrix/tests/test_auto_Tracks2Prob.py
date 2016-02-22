@@ -43,7 +43,7 @@ def test_Tracks2Prob_inputs():
     sep=',',
     ),
     )
-    inputs = Tracks2Prob.input_spec()
+    inputs = Tracks2Prob._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +53,7 @@ def test_Tracks2Prob_inputs():
 def test_Tracks2Prob_outputs():
     output_map = dict(tract_image=dict(),
     )
-    outputs = Tracks2Prob.output_spec()
+    outputs = Tracks2Prob._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

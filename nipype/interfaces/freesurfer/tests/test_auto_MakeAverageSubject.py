@@ -23,7 +23,7 @@ def test_MakeAverageSubject_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = MakeAverageSubject.input_spec()
+    inputs = MakeAverageSubject._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -33,7 +33,7 @@ def test_MakeAverageSubject_inputs():
 def test_MakeAverageSubject_outputs():
     output_map = dict(average_subject_name=dict(),
     )
-    outputs = MakeAverageSubject.output_spec()
+    outputs = MakeAverageSubject._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

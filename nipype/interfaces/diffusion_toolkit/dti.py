@@ -62,8 +62,8 @@ class DTIRecon(CommandLine):
     """Use dti_recon to generate tensors and other maps
     """
 
-    input_spec = DTIReconInputSpec
-    output_spec = DTIReconOutputSpec
+    _input_spec = DTIReconInputSpec
+    _output_spec = DTIReconOutputSpec
 
     _cmd = 'dti_recon'
 
@@ -151,8 +151,8 @@ class DTITrackerOutputSpec(TraitedSpec):
 
 
 class DTITracker(CommandLine):
-    input_spec = DTITrackerInputSpec
-    output_spec = DTITrackerOutputSpec
+    _input_spec = DTITrackerInputSpec
+    _output_spec = DTITrackerOutputSpec
 
     _cmd = 'dti_tracker'
 

@@ -27,7 +27,7 @@ def test_JointHistogram_inputs():
     verbose=dict(argstr='--verbose ',
     ),
     )
-    inputs = JointHistogram.input_spec()
+    inputs = JointHistogram._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_JointHistogram_inputs():
 
 def test_JointHistogram_outputs():
     output_map = dict()
-    outputs = JointHistogram.output_spec()
+    outputs = JointHistogram._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

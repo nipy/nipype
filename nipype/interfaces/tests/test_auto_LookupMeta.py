@@ -9,7 +9,7 @@ def test_LookupMeta_inputs():
     meta_keys=dict(mandatory=True,
     ),
     )
-    inputs = LookupMeta.input_spec()
+    inputs = LookupMeta._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -18,7 +18,7 @@ def test_LookupMeta_inputs():
 
 def test_LookupMeta_outputs():
     output_map = dict()
-    outputs = LookupMeta.output_spec()
+    outputs = LookupMeta._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

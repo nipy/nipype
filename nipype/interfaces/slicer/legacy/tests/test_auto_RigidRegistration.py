@@ -47,7 +47,7 @@ def test_RigidRegistration_inputs():
     translationscale=dict(argstr='--translationscale %f',
     ),
     )
-    inputs = RigidRegistration.input_spec()
+    inputs = RigidRegistration._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -58,7 +58,7 @@ def test_RigidRegistration_outputs():
     output_map = dict(outputtransform=dict(),
     resampledmovingfilename=dict(),
     )
-    outputs = RigidRegistration.output_spec()
+    outputs = RigidRegistration._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

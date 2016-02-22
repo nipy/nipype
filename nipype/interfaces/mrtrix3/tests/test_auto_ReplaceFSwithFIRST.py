@@ -31,7 +31,7 @@ def test_ReplaceFSwithFIRST_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ReplaceFSwithFIRST.input_spec()
+    inputs = ReplaceFSwithFIRST._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +41,7 @@ def test_ReplaceFSwithFIRST_inputs():
 def test_ReplaceFSwithFIRST_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ReplaceFSwithFIRST.output_spec()
+    outputs = ReplaceFSwithFIRST._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

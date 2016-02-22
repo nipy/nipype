@@ -93,7 +93,7 @@ def test_MedicAlgorithmLesionToads_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = MedicAlgorithmLesionToads.input_spec()
+    inputs = MedicAlgorithmLesionToads._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -111,7 +111,7 @@ def test_MedicAlgorithmLesionToads_outputs():
     outSulcal=dict(),
     outWM=dict(),
     )
-    outputs = MedicAlgorithmLesionToads.output_spec()
+    outputs = MedicAlgorithmLesionToads._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

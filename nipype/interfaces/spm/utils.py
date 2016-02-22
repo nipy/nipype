@@ -22,8 +22,8 @@ class Analyze2niiOutputSpec(SPMCommandInputSpec):
 
 class Analyze2nii(SPMCommand):
 
-    input_spec = Analyze2niiInputSpec
-    output_spec = Analyze2niiOutputSpec
+    _input_spec = Analyze2niiInputSpec
+    _output_spec = Analyze2niiOutputSpec
 
     def _make_matlab_command(self, _):
         script = "V = spm_vol('%s');\n" % self.inputs.analyze_file
@@ -76,8 +76,8 @@ class CalcCoregAffine(SPMCommand):
        that can be used to move it
     """
 
-    input_spec = CalcCoregAffineInputSpec
-    output_spec = CalcCoregAffineOutputSpec
+    _input_spec = CalcCoregAffineInputSpec
+    _output_spec = CalcCoregAffineOutputSpec
 
     def _make_inv_file(self):
         """ makes filename to hold inverse transform if not specified"""
@@ -144,8 +144,8 @@ class ApplyTransform(SPMCommand):
     >>> applymat.run() # doctest: +SKIP
 
     """
-    input_spec = ApplyTransformInputSpec
-    output_spec = ApplyTransformOutputSpec
+    _input_spec = ApplyTransformInputSpec
+    _output_spec = ApplyTransformOutputSpec
 
     def _make_matlab_command(self, _):
         """checks for SPM, generates script"""
@@ -202,8 +202,8 @@ class ResliceOutputSpec(TraitedSpec):
 class Reslice(SPMCommand):
     """ uses  spm_reslice to resample in_file into space of space_defining"""
 
-    input_spec = ResliceInputSpec
-    output_spec = ResliceOutputSpec
+    _input_spec = ResliceInputSpec
+    _output_spec = ResliceOutputSpec
 
     def _make_matlab_command(self, _):
         """ generates script"""
@@ -294,8 +294,8 @@ class ApplyInverseDeformation(SPMCommand):
     >>> inv.run() # doctest: +SKIP
     """
 
-    input_spec = ApplyInverseDeformationInput
-    output_spec = ApplyInverseDeformationOutput
+    _input_spec = ApplyInverseDeformationInput
+    _output_spec = ApplyInverseDeformationOutput
 
     _jobtype = 'util'
     _jobname = 'defs'
@@ -349,8 +349,8 @@ class ResliceToReference(SPMCommand):
     >>> r2ref.run() # doctest: +SKIP
     """
 
-    input_spec = ResliceToReferenceInput
-    output_spec = ResliceToReferenceOutput
+    _input_spec = ResliceToReferenceInput
+    _output_spec = ResliceToReferenceOutput
 
     _jobtype = 'util'
     _jobname = 'defs'
@@ -436,8 +436,8 @@ class DicomImport(SPMCommand):
     >>> di.run() # doctest: +SKIP
     """
 
-    input_spec = DicomImportInputSpec
-    output_spec = DicomImportOutputSpec
+    _input_spec = DicomImportInputSpec
+    _output_spec = DicomImportOutputSpec
 
     _jobtype = 'util'
     _jobname = 'dicom'

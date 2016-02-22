@@ -177,8 +177,8 @@ class MRTrix2TrackVis(BaseInterface):
     >>> tck2trk.inputs.image_file = 'diffusion.nii'
     >>> tck2trk.run()                                   # doctest: +SKIP
     """
-    input_spec = MRTrix2TrackVisInputSpec
-    output_spec = MRTrix2TrackVisOutputSpec
+    _input_spec = MRTrix2TrackVisInputSpec
+    _output_spec = MRTrix2TrackVisOutputSpec
 
     def _run_interface(self, runtime):
         dx, dy, dz = get_data_dims(self.inputs.image_file)

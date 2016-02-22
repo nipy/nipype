@@ -36,7 +36,7 @@ def test_ChangeDataType_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ChangeDataType.input_spec()
+    inputs = ChangeDataType._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -46,7 +46,7 @@ def test_ChangeDataType_inputs():
 def test_ChangeDataType_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ChangeDataType.output_spec()
+    outputs = ChangeDataType._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

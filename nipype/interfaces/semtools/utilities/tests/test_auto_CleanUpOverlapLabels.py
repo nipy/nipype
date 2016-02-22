@@ -20,7 +20,7 @@ def test_CleanUpOverlapLabels_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = CleanUpOverlapLabels.input_spec()
+    inputs = CleanUpOverlapLabels._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -30,7 +30,7 @@ def test_CleanUpOverlapLabels_inputs():
 def test_CleanUpOverlapLabels_outputs():
     output_map = dict(outputBinaryVolumes=dict(),
     )
-    outputs = CleanUpOverlapLabels.output_spec()
+    outputs = CleanUpOverlapLabels._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

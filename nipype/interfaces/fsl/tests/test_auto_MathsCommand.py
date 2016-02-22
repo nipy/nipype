@@ -35,7 +35,7 @@ def test_MathsCommand_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = MathsCommand.input_spec()
+    inputs = MathsCommand._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +45,7 @@ def test_MathsCommand_inputs():
 def test_MathsCommand_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MathsCommand.output_spec()
+    outputs = MathsCommand._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

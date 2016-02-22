@@ -55,7 +55,7 @@ def test_FWHMx_inputs():
     unif=dict(argstr='-unif',
     ),
     )
-    inputs = FWHMx.input_spec()
+    inputs = FWHMx._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -70,7 +70,7 @@ def test_FWHMx_outputs():
     out_file=dict(),
     out_subbricks=dict(),
     )
-    outputs = FWHMx.output_spec()
+    outputs = FWHMx._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

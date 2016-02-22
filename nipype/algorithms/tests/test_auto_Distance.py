@@ -15,7 +15,7 @@ def test_Distance_inputs():
     volume2=dict(mandatory=True,
     ),
     )
-    inputs = Distance.input_spec()
+    inputs = Distance._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -28,7 +28,7 @@ def test_Distance_outputs():
     point1=dict(),
     point2=dict(),
     )
-    outputs = Distance.output_spec()
+    outputs = Distance._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

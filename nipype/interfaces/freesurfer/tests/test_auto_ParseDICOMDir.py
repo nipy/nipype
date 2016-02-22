@@ -26,7 +26,7 @@ def test_ParseDICOMDir_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ParseDICOMDir.input_spec()
+    inputs = ParseDICOMDir._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_ParseDICOMDir_inputs():
 def test_ParseDICOMDir_outputs():
     output_map = dict(dicom_info_file=dict(),
     )
-    outputs = ParseDICOMDir.output_spec()
+    outputs = ParseDICOMDir._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -39,7 +39,7 @@ def test_Threshold_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Threshold.input_spec()
+    inputs = Threshold._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +49,7 @@ def test_Threshold_inputs():
 def test_Threshold_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Threshold.output_spec()
+    outputs = Threshold._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

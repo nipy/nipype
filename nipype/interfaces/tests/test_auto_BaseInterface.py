@@ -8,7 +8,7 @@ def test_BaseInterface_inputs():
     usedefault=True,
     ),
     )
-    inputs = BaseInterface.input_spec()
+    inputs = BaseInterface._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -17,7 +17,7 @@ def test_BaseInterface_inputs():
 
 def test_BaseInterface_outputs():
     output_map = dict()
-    outputs = BaseInterface.output_spec()
+    outputs = BaseInterface._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -76,8 +76,8 @@ phase_fslprepared.nii.gz 2.460000'
 
     """
     _cmd = 'fsl_prepare_fieldmap'
-    input_spec = PrepareFieldmapInputSpec
-    output_spec = PrepareFieldmapOutputSpec
+    _input_spec = PrepareFieldmapInputSpec
+    _output_spec = PrepareFieldmapOutputSpec
 
     def _run_interface(self, runtime):
         runtime = super(PrepareFieldmap, self)._run_interface(runtime)
@@ -227,8 +227,8 @@ class TOPUP(FSLCommand):
 
     """
     _cmd = 'topup'
-    input_spec = TOPUPInputSpec
-    output_spec = TOPUPOutputSpec
+    _input_spec = TOPUPInputSpec
+    _output_spec = TOPUPOutputSpec
 
     def _run_interface(self, runtime):
         if not os.path.isfile(self.inputs.encoding_file):
@@ -307,8 +307,8 @@ class ApplyTOPUP(FSLCommand):
 
     """
     _cmd = 'applytopup'
-    input_spec = ApplyTOPUPInputSpec
-    output_spec = ApplyTOPUPOutputSpec
+    _input_spec = ApplyTOPUPInputSpec
+    _output_spec = ApplyTOPUPOutputSpec
 
 
 class EddyInputSpec(FSLCommandInputSpec):
@@ -394,8 +394,8 @@ class Eddy(FSLCommand):
 
     """
     _cmd = 'eddy'
-    input_spec = EddyInputSpec
-    output_spec = EddyOutputSpec
+    _input_spec = EddyInputSpec
+    _output_spec = EddyOutputSpec
 
     _num_threads = 1
 
@@ -471,8 +471,8 @@ class SigLoss(FSLCommand):
 
 
     """
-    input_spec = SigLossInputSpec
-    output_spec = SigLossOuputSpec
+    _input_spec = SigLossInputSpec
+    _output_spec = SigLossOuputSpec
     _cmd = 'sigloss'
 
     def _post_run(self):
@@ -613,8 +613,8 @@ class EpiReg(FSLCommand):
 
     """
     _cmd = 'epi_reg'
-    input_spec = EpiRegInputSpec
-    output_spec = EpiRegOutputSpec
+    _input_spec = EpiRegInputSpec
+    _output_spec = EpiRegOutputSpec
 
 
 # Helper functions ------------------------

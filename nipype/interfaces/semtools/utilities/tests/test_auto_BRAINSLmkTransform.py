@@ -31,7 +31,7 @@ def test_BRAINSLmkTransform_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = BRAINSLmkTransform.input_spec()
+    inputs = BRAINSLmkTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +42,7 @@ def test_BRAINSLmkTransform_outputs():
     output_map = dict(outputAffineTransform=dict(),
     outputResampledVolume=dict(),
     )
-    outputs = BRAINSLmkTransform.output_spec()
+    outputs = BRAINSLmkTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

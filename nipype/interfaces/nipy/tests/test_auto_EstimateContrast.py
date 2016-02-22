@@ -25,7 +25,7 @@ def test_EstimateContrast_inputs():
     s2=dict(mandatory=True,
     ),
     )
-    inputs = EstimateContrast.input_spec()
+    inputs = EstimateContrast._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +37,7 @@ def test_EstimateContrast_outputs():
     stat_maps=dict(),
     z_maps=dict(),
     )
-    outputs = EstimateContrast.output_spec()
+    outputs = EstimateContrast._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

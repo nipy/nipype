@@ -31,7 +31,7 @@ def test_CFFConverter_inputs():
     title=dict(),
     tract_files=dict(),
     )
-    inputs = CFFConverter.input_spec()
+    inputs = CFFConverter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +41,7 @@ def test_CFFConverter_inputs():
 def test_CFFConverter_outputs():
     output_map = dict(connectome_file=dict(),
     )
-    outputs = CFFConverter.output_spec()
+    outputs = CFFConverter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

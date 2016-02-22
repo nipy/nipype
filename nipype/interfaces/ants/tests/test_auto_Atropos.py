@@ -68,7 +68,7 @@ def test_Atropos_inputs():
     usedefault=True,
     ),
     )
-    inputs = Atropos.input_spec()
+    inputs = Atropos._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -79,7 +79,7 @@ def test_Atropos_outputs():
     output_map = dict(classified_image=dict(),
     posteriors=dict(),
     )
-    outputs = Atropos.output_spec()
+    outputs = Atropos._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

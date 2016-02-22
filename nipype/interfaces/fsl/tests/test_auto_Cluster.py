@@ -91,7 +91,7 @@ def test_Cluster_inputs():
     xfm_file=dict(argstr='--xfm=%s',
     ),
     )
-    inputs = Cluster.input_spec()
+    inputs = Cluster._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -108,7 +108,7 @@ def test_Cluster_outputs():
     out_size_file=dict(),
     out_threshold_file=dict(),
     )
-    outputs = Cluster.output_spec()
+    outputs = Cluster._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

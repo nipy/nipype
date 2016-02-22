@@ -65,7 +65,7 @@ def test_MRISPreproc_inputs():
     vol_measure_file=dict(argstr='--iv %s %s...',
     ),
     )
-    inputs = MRISPreproc.input_spec()
+    inputs = MRISPreproc._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -75,7 +75,7 @@ def test_MRISPreproc_inputs():
 def test_MRISPreproc_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MRISPreproc.output_spec()
+    outputs = MRISPreproc._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

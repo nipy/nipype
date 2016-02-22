@@ -10,7 +10,7 @@ def test_L2Model_inputs():
     num_copes=dict(mandatory=True,
     ),
     )
-    inputs = L2Model.input_spec()
+    inputs = L2Model._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -22,7 +22,7 @@ def test_L2Model_outputs():
     design_grp=dict(),
     design_mat=dict(),
     )
-    outputs = L2Model.output_spec()
+    outputs = L2Model._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

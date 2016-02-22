@@ -27,7 +27,7 @@ def test_SwapDimensions_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = SwapDimensions.input_spec()
+    inputs = SwapDimensions._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +37,7 @@ def test_SwapDimensions_inputs():
 def test_SwapDimensions_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = SwapDimensions.output_spec()
+    outputs = SwapDimensions._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

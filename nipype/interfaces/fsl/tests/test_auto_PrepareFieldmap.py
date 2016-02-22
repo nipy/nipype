@@ -41,7 +41,7 @@ def test_PrepareFieldmap_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = PrepareFieldmap.input_spec()
+    inputs = PrepareFieldmap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -51,7 +51,7 @@ def test_PrepareFieldmap_inputs():
 def test_PrepareFieldmap_outputs():
     output_map = dict(out_fieldmap=dict(),
     )
-    outputs = PrepareFieldmap.output_spec()
+    outputs = PrepareFieldmap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

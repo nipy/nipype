@@ -67,8 +67,8 @@ class DistanceOutputSpec(TraitedSpec):
 class Distance(BaseInterface):
     """Calculates distance between two volumes.
     """
-    input_spec = DistanceInputSpec
-    output_spec = DistanceOutputSpec
+    _input_spec = DistanceInputSpec
+    _output_spec = DistanceOutputSpec
 
     _hist_filename = "hist.pdf"
 
@@ -264,8 +264,8 @@ class Overlap(BaseInterface):
     >>> res = overlap.run() # doctest: +SKIP
 
     """
-    input_spec = OverlapInputSpec
-    output_spec = OverlapOutputSpec
+    _input_spec = OverlapInputSpec
+    _output_spec = OverlapOutputSpec
 
     def _bool_vec_dissimilarity(self, booldata1, booldata2, method):
         methods = {'dice': dice, 'jaccard': jaccard}
@@ -390,8 +390,8 @@ class FuzzyOverlap(BaseInterface):
     >>> res = overlap.run() # doctest: +SKIP
     """
 
-    input_spec = FuzzyOverlapInputSpec
-    output_spec = FuzzyOverlapOutputSpec
+    _input_spec = FuzzyOverlapInputSpec
+    _output_spec = FuzzyOverlapOutputSpec
 
     def _run_interface(self, runtime):
         ncomp = len(self.inputs.in_ref)
@@ -483,8 +483,8 @@ class ErrorMap(BaseInterface):
     >>> errormap.inputs.in_tst = 'cont2.nii'
     >>> res = errormap.run() # doctest: +SKIP
     """
-    input_spec = ErrorMapInputSpec
-    output_spec = ErrorMapOutputSpec
+    _input_spec = ErrorMapInputSpec
+    _output_spec = ErrorMapOutputSpec
     _out_file = ''
 
     def _run_interface(self, runtime):
@@ -588,8 +588,8 @@ class Similarity(BaseInterface):
     >>> res = similarity.run() # doctest: +SKIP
     """
 
-    input_spec = SimilarityInputSpec
-    output_spec = SimilarityOutputSpec
+    _input_spec = SimilarityInputSpec
+    _output_spec = SimilarityOutputSpec
     _have_nipy = True
 
     def __init__(self, **inputs):

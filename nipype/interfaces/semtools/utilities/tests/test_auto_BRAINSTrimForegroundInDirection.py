@@ -32,7 +32,7 @@ def test_BRAINSTrimForegroundInDirection_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = BRAINSTrimForegroundInDirection.input_spec()
+    inputs = BRAINSTrimForegroundInDirection._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +42,7 @@ def test_BRAINSTrimForegroundInDirection_inputs():
 def test_BRAINSTrimForegroundInDirection_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = BRAINSTrimForegroundInDirection.output_spec()
+    outputs = BRAINSTrimForegroundInDirection._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

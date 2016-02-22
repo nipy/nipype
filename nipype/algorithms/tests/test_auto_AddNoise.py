@@ -18,7 +18,7 @@ def test_AddNoise_inputs():
     snr=dict(usedefault=True,
     ),
     )
-    inputs = AddNoise.input_spec()
+    inputs = AddNoise._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -28,7 +28,7 @@ def test_AddNoise_inputs():
 def test_AddNoise_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = AddNoise.output_spec()
+    outputs = AddNoise._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

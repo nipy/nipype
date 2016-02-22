@@ -38,7 +38,7 @@ def test_TractSkeleton_inputs():
     xor=['search_mask_file'],
     ),
     )
-    inputs = TractSkeleton.input_spec()
+    inputs = TractSkeleton._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +49,7 @@ def test_TractSkeleton_outputs():
     output_map = dict(projected_data=dict(),
     skeleton_file=dict(),
     )
-    outputs = TractSkeleton.output_spec()
+    outputs = TractSkeleton._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

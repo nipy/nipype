@@ -72,8 +72,8 @@ class NetworkBasedStatistic(BaseInterface):
     >>> nbs.inputs.in_group2 = ['pat1.pck', 'pat2.pck'] # doctest: +SKIP
     >>> nbs.run()                 # doctest: +SKIP
     """
-    input_spec = NetworkBasedStatisticInputSpec
-    output_spec = NetworkBasedStatisticOutputSpec
+    _input_spec = NetworkBasedStatisticInputSpec
+    _output_spec = NetworkBasedStatisticOutputSpec
 
     def _run_interface(self, runtime):
         THRESH = self.inputs.threshold

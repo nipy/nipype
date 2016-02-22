@@ -25,7 +25,7 @@ def test_MedianImageFilter_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = MedianImageFilter.input_spec()
+    inputs = MedianImageFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_MedianImageFilter_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = MedianImageFilter.output_spec()
+    outputs = MedianImageFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

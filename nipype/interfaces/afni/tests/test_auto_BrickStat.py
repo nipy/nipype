@@ -27,7 +27,7 @@ def test_BrickStat_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = BrickStat.input_spec()
+    inputs = BrickStat._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +37,7 @@ def test_BrickStat_inputs():
 def test_BrickStat_outputs():
     output_map = dict(min_val=dict(),
     )
-    outputs = BrickStat.output_spec()
+    outputs = BrickStat._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

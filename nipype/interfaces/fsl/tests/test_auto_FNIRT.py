@@ -123,7 +123,7 @@ def test_FNIRT_inputs():
     hash_files=False,
     ),
     )
-    inputs = FNIRT.input_spec()
+    inputs = FNIRT._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -139,7 +139,7 @@ def test_FNIRT_outputs():
     out_intensitymap_file=dict(),
     warped_file=dict(),
     )
-    outputs = FNIRT.output_spec()
+    outputs = FNIRT._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

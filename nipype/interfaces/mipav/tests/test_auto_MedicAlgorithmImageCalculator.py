@@ -33,7 +33,7 @@ def test_MedicAlgorithmImageCalculator_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = MedicAlgorithmImageCalculator.input_spec()
+    inputs = MedicAlgorithmImageCalculator._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +43,7 @@ def test_MedicAlgorithmImageCalculator_inputs():
 def test_MedicAlgorithmImageCalculator_outputs():
     output_map = dict(outResult=dict(),
     )
-    outputs = MedicAlgorithmImageCalculator.output_spec()
+    outputs = MedicAlgorithmImageCalculator._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -16,7 +16,7 @@ def test_SpaceTimeRealigner_inputs():
     tr=dict(requires=['slice_times'],
     ),
     )
-    inputs = SpaceTimeRealigner.input_spec()
+    inputs = SpaceTimeRealigner._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -27,7 +27,7 @@ def test_SpaceTimeRealigner_outputs():
     output_map = dict(out_file=dict(),
     par_file=dict(),
     )
-    outputs = SpaceTimeRealigner.output_spec()
+    outputs = SpaceTimeRealigner._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

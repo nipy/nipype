@@ -37,7 +37,7 @@ def test_Volcentre_inputs():
     zero_dircos=dict(argstr='-zero_dircos',
     ),
     )
-    inputs = Volcentre.input_spec()
+    inputs = Volcentre._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +47,7 @@ def test_Volcentre_inputs():
 def test_Volcentre_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Volcentre.output_spec()
+    outputs = Volcentre._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

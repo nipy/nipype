@@ -60,7 +60,7 @@ def test_FLAMEO_inputs():
     var_cope_file=dict(argstr='--varcopefile=%s',
     ),
     )
-    inputs = FLAMEO.input_spec()
+    inputs = FLAMEO._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -81,7 +81,7 @@ def test_FLAMEO_outputs():
     zfstats=dict(),
     zstats=dict(),
     )
-    outputs = FLAMEO.output_spec()
+    outputs = FLAMEO._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -37,7 +37,7 @@ def test_TCorrelate_inputs():
     position=-1,
     ),
     )
-    inputs = TCorrelate.input_spec()
+    inputs = TCorrelate._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +47,7 @@ def test_TCorrelate_inputs():
 def test_TCorrelate_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = TCorrelate.output_spec()
+    outputs = TCorrelate._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

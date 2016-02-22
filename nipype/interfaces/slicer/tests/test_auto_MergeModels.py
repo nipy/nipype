@@ -25,7 +25,7 @@ def test_MergeModels_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = MergeModels.input_spec()
+    inputs = MergeModels._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_MergeModels_outputs():
     output_map = dict(ModelOutput=dict(position=-1,
     ),
     )
-    outputs = MergeModels.output_spec()
+    outputs = MergeModels._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -28,7 +28,7 @@ def test_FitMSParams_inputs():
     tr_list=dict(),
     xfm_list=dict(),
     )
-    inputs = FitMSParams.input_spec()
+    inputs = FitMSParams._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +40,7 @@ def test_FitMSParams_outputs():
     t1_image=dict(),
     t2star_image=dict(),
     )
-    outputs = FitMSParams.output_spec()
+    outputs = FitMSParams._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

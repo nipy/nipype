@@ -42,7 +42,7 @@ def test_InvWarp_inputs():
     mandatory=True,
     ),
     )
-    inputs = InvWarp.input_spec()
+    inputs = InvWarp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +52,7 @@ def test_InvWarp_inputs():
 def test_InvWarp_outputs():
     output_map = dict(inverse_warp=dict(),
     )
-    outputs = InvWarp.output_spec()
+    outputs = InvWarp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

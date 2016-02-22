@@ -42,7 +42,7 @@ def test_BRAINSAlignMSP_inputs():
     writedebuggingImagesLevel=dict(argstr='--writedebuggingImagesLevel %d',
     ),
     )
-    inputs = BRAINSAlignMSP.input_spec()
+    inputs = BRAINSAlignMSP._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +53,7 @@ def test_BRAINSAlignMSP_outputs():
     output_map = dict(OutputresampleMSP=dict(),
     resultsDir=dict(),
     )
-    outputs = BRAINSAlignMSP.output_spec()
+    outputs = BRAINSAlignMSP._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

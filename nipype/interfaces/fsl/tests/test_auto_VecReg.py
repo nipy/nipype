@@ -41,7 +41,7 @@ def test_VecReg_inputs():
     warp_field=dict(argstr='-w %s',
     ),
     )
-    inputs = VecReg.input_spec()
+    inputs = VecReg._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -51,7 +51,7 @@ def test_VecReg_inputs():
 def test_VecReg_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = VecReg.output_spec()
+    outputs = VecReg._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

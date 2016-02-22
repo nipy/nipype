@@ -33,7 +33,7 @@ def test_BRAINSCreateLabelMapFromProbabilityMaps_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = BRAINSCreateLabelMapFromProbabilityMaps.input_spec()
+    inputs = BRAINSCreateLabelMapFromProbabilityMaps._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -44,7 +44,7 @@ def test_BRAINSCreateLabelMapFromProbabilityMaps_outputs():
     output_map = dict(cleanLabelVolume=dict(),
     dirtyLabelVolume=dict(),
     )
-    outputs = BRAINSCreateLabelMapFromProbabilityMaps.output_spec()
+    outputs = BRAINSCreateLabelMapFromProbabilityMaps._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

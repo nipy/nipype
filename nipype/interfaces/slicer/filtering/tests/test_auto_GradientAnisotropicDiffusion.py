@@ -28,7 +28,7 @@ def test_GradientAnisotropicDiffusion_inputs():
     timeStep=dict(argstr='--timeStep %f',
     ),
     )
-    inputs = GradientAnisotropicDiffusion.input_spec()
+    inputs = GradientAnisotropicDiffusion._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +39,7 @@ def test_GradientAnisotropicDiffusion_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = GradientAnisotropicDiffusion.output_spec()
+    outputs = GradientAnisotropicDiffusion._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

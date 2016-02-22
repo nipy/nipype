@@ -30,7 +30,7 @@ def test_OtsuThresholdSegmentation_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = OtsuThresholdSegmentation.input_spec()
+    inputs = OtsuThresholdSegmentation._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +41,7 @@ def test_OtsuThresholdSegmentation_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = OtsuThresholdSegmentation.output_spec()
+    outputs = OtsuThresholdSegmentation._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

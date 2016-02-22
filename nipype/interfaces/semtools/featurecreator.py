@@ -36,8 +36,8 @@ contributor: This tool was written by Hans J. Johnson.
 
 """
 
-    input_spec = GenerateCsfClippedFromClassifiedImageInputSpec
-    output_spec = GenerateCsfClippedFromClassifiedImageOutputSpec
+    _input_spec = GenerateCsfClippedFromClassifiedImageInputSpec
+    _output_spec = GenerateCsfClippedFromClassifiedImageOutputSpec
     _cmd = " GenerateCsfClippedFromClassifiedImage "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False

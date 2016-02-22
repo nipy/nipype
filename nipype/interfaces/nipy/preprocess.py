@@ -47,8 +47,8 @@ class ComputeMaskOutputSpec(TraitedSpec):
 
 
 class ComputeMask(BaseInterface):
-    input_spec = ComputeMaskInputSpec
-    output_spec = ComputeMaskOutputSpec
+    _input_spec = ComputeMaskInputSpec
+    _output_spec = ComputeMaskOutputSpec
 
     def _run_interface(self, runtime):
         from nipy.labs.mask import compute_mask
@@ -140,8 +140,8 @@ class FmriRealign4d(BaseInterface):
 
     """
 
-    input_spec = FmriRealign4dInputSpec
-    output_spec = FmriRealign4dOutputSpec
+    _input_spec = FmriRealign4dInputSpec
+    _output_spec = FmriRealign4dOutputSpec
     keywords = ['slice timing', 'motion correction']
 
     def _run_interface(self, runtime):
@@ -267,8 +267,8 @@ class SpaceTimeRealigner(BaseInterface):
 
     """
 
-    input_spec = SpaceTimeRealignerInputSpec
-    output_spec = SpaceTimeRealignerOutputSpec
+    _input_spec = SpaceTimeRealignerInputSpec
+    _output_spec = SpaceTimeRealignerOutputSpec
     keywords = ['slice timing', 'motion correction']
 
     @property
@@ -355,8 +355,8 @@ class Trim(BaseInterface):
 
     """
 
-    input_spec = TrimInputSpec
-    output_spec = TrimOutputSpec
+    _input_spec = TrimInputSpec
+    _output_spec = TrimOutputSpec
 
     def _run_interface(self, runtime):
         out_file = self.outputs.out_file

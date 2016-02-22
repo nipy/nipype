@@ -28,7 +28,7 @@ def test_Split_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Split.input_spec()
+    inputs = Split._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +38,7 @@ def test_Split_inputs():
 def test_Split_outputs():
     output_map = dict(out_files=dict(),
     )
-    outputs = Split.output_spec()
+    outputs = Split._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

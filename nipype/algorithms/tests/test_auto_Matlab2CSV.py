@@ -9,7 +9,7 @@ def test_Matlab2CSV_inputs():
     reshape_matrix=dict(usedefault=True,
     ),
     )
-    inputs = Matlab2CSV.input_spec()
+    inputs = Matlab2CSV._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -19,7 +19,7 @@ def test_Matlab2CSV_inputs():
 def test_Matlab2CSV_outputs():
     output_map = dict(csv_files=dict(),
     )
-    outputs = Matlab2CSV.output_spec()
+    outputs = Matlab2CSV._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

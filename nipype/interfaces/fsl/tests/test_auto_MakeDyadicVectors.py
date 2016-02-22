@@ -36,7 +36,7 @@ def test_MakeDyadicVectors_inputs():
     position=0,
     ),
     )
-    inputs = MakeDyadicVectors.input_spec()
+    inputs = MakeDyadicVectors._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +47,7 @@ def test_MakeDyadicVectors_outputs():
     output_map = dict(dispersion=dict(),
     dyads=dict(),
     )
-    outputs = MakeDyadicVectors.output_spec()
+    outputs = MakeDyadicVectors._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

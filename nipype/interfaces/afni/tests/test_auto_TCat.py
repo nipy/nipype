@@ -29,7 +29,7 @@ def test_TCat_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = TCat.input_spec()
+    inputs = TCat._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +39,7 @@ def test_TCat_inputs():
 def test_TCat_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = TCat.output_spec()
+    outputs = TCat._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

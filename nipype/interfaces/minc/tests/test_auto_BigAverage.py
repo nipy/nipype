@@ -44,7 +44,7 @@ def test_BigAverage_inputs():
     verbose=dict(argstr='--verbose',
     ),
     )
-    inputs = BigAverage.input_spec()
+    inputs = BigAverage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -55,7 +55,7 @@ def test_BigAverage_outputs():
     output_map = dict(output_file=dict(),
     sd_file=dict(),
     )
-    outputs = BigAverage.output_spec()
+    outputs = BigAverage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

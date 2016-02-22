@@ -26,7 +26,7 @@ def test_VtoMat_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = VtoMat.input_spec()
+    inputs = VtoMat._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_VtoMat_inputs():
 def test_VtoMat_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = VtoMat.output_spec()
+    outputs = VtoMat._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -384,8 +384,8 @@ class NetworkXMetrics(BaseInterface):
     >>> nxmetrics.inputs.in_file = 'subj1.pck'
     >>> nxmetrics.run()                 # doctest: +SKIP
     """
-    input_spec = NetworkXMetricsInputSpec
-    output_spec = NetworkXMetricsOutputSpec
+    _input_spec = NetworkXMetricsInputSpec
+    _output_spec = NetworkXMetricsOutputSpec
 
     def _run_interface(self, runtime):
         global gpickled, nodentwks, edgentwks, kntwks, matlab
@@ -533,8 +533,8 @@ class AverageNetworks(BaseInterface):
     >>> avg.run()                 # doctest: +SKIP
 
     """
-    input_spec = AverageNetworksInputSpec
-    output_spec = AverageNetworksOutputSpec
+    _input_spec = AverageNetworksInputSpec
+    _output_spec = AverageNetworksOutputSpec
 
     def _run_interface(self, runtime):
         if isdefined(self.inputs.resolution_network_file):

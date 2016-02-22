@@ -37,8 +37,8 @@ class DTI(DipyDiffusionInterface):
     >>> dti.inputs.in_bval = 'bvals'
     >>> dti.run()                                   # doctest: +SKIP
     """
-    input_spec = DTIInputSpec
-    output_spec = DTIOutputSpec
+    _input_spec = DTIInputSpec
+    _output_spec = DTIOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.reconst import dti
@@ -98,8 +98,8 @@ class TensorMode(DipyDiffusionInterface):
     >>> mode.inputs.in_bval = 'bvals'
     >>> mode.run()                                   # doctest: +SKIP
     """
-    input_spec = TensorModeInputSpec
-    output_spec = TensorModeOutputSpec
+    _input_spec = TensorModeInputSpec
+    _output_spec = TensorModeOutputSpec
 
     def _run_interface(self, runtime):
         from dipy.reconst import dti

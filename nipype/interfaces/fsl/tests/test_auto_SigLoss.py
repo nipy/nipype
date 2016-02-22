@@ -29,7 +29,7 @@ def test_SigLoss_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = SigLoss.input_spec()
+    inputs = SigLoss._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +39,7 @@ def test_SigLoss_inputs():
 def test_SigLoss_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = SigLoss.output_spec()
+    outputs = SigLoss._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

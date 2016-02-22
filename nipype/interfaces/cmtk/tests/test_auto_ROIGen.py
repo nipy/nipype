@@ -20,7 +20,7 @@ def test_ROIGen_inputs():
     use_freesurfer_LUT=dict(xor=['LUT_file'],
     ),
     )
-    inputs = ROIGen.input_spec()
+    inputs = ROIGen._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -31,7 +31,7 @@ def test_ROIGen_outputs():
     output_map = dict(dict_file=dict(),
     roi_file=dict(),
     )
-    outputs = ROIGen.output_spec()
+    outputs = ROIGen._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

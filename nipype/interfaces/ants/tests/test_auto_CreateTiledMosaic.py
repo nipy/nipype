@@ -43,7 +43,7 @@ def test_CreateTiledMosaic_inputs():
     tile_geometry=dict(argstr='-t %s',
     ),
     )
-    inputs = CreateTiledMosaic.input_spec()
+    inputs = CreateTiledMosaic._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +53,7 @@ def test_CreateTiledMosaic_inputs():
 def test_CreateTiledMosaic_outputs():
     output_map = dict(output_image=dict(),
     )
-    outputs = CreateTiledMosaic.output_spec()
+    outputs = CreateTiledMosaic._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

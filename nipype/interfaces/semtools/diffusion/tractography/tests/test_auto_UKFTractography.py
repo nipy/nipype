@@ -84,7 +84,7 @@ def test_UKFTractography_inputs():
     writeUncompressedTracts=dict(argstr='--writeUncompressedTracts ',
     ),
     )
-    inputs = UKFTractography.input_spec()
+    inputs = UKFTractography._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -95,7 +95,7 @@ def test_UKFTractography_outputs():
     output_map = dict(tracts=dict(),
     tractsWithSecondTensor=dict(),
     )
-    outputs = UKFTractography.output_spec()
+    outputs = UKFTractography._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

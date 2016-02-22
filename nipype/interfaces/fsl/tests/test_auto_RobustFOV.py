@@ -24,7 +24,7 @@ def test_RobustFOV_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = RobustFOV.input_spec()
+    inputs = RobustFOV._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_RobustFOV_inputs():
 def test_RobustFOV_outputs():
     output_map = dict(out_roi=dict(),
     )
-    outputs = RobustFOV.output_spec()
+    outputs = RobustFOV._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

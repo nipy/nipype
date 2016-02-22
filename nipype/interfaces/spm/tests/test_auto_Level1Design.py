@@ -46,7 +46,7 @@ def test_Level1Design_inputs():
     volterra_expansion_order=dict(field='volt',
     ),
     )
-    inputs = Level1Design.input_spec()
+    inputs = Level1Design._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -56,7 +56,7 @@ def test_Level1Design_inputs():
 def test_Level1Design_outputs():
     output_map = dict(spm_mat_file=dict(),
     )
-    outputs = Level1Design.output_spec()
+    outputs = Level1Design._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

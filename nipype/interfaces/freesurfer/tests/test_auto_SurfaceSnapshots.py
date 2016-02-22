@@ -93,7 +93,7 @@ def test_SurfaceSnapshots_inputs():
     truncate_overlay=dict(argstr='-truncphaseflag 1',
     ),
     )
-    inputs = SurfaceSnapshots.input_spec()
+    inputs = SurfaceSnapshots._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -103,7 +103,7 @@ def test_SurfaceSnapshots_inputs():
 def test_SurfaceSnapshots_outputs():
     output_map = dict(snapshots=dict(),
     )
-    outputs = SurfaceSnapshots.output_spec()
+    outputs = SurfaceSnapshots._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

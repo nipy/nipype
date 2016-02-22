@@ -25,7 +25,7 @@ def test_PowerSpectrum_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = PowerSpectrum.input_spec()
+    inputs = PowerSpectrum._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +35,7 @@ def test_PowerSpectrum_inputs():
 def test_PowerSpectrum_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = PowerSpectrum.output_spec()
+    outputs = PowerSpectrum._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

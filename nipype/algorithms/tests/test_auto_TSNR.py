@@ -23,7 +23,7 @@ def test_TSNR_inputs():
     ns='in_file',
     ),
     )
-    inputs = TSNR.input_spec()
+    inputs = TSNR._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_TSNR_outputs():
     stddev_file=dict(),
     tsnr_file=dict(),
     )
-    outputs = TSNR.output_spec()
+    outputs = TSNR._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

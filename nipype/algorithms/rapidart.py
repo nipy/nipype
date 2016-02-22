@@ -151,8 +151,8 @@ class ArtifactDetect(BaseInterface):
     >>> ad.run()  # doctest: +SKIP
     """
 
-    input_spec = ArtifactDetectInputSpec
-    output_spec = ArtifactDetectOutputSpec
+    _input_spec = ArtifactDetectInputSpec
+    _output_spec = ArtifactDetectOutputSpec
 
     def __init__(self, **inputs):
         super(ArtifactDetect, self).__init__(**inputs)
@@ -466,8 +466,8 @@ class StimulusCorrelation(BaseInterface):
 
     """
 
-    input_spec = StimCorrInputSpec
-    output_spec = StimCorrOutputSpec
+    _input_spec = StimCorrInputSpec
+    _output_spec = StimCorrOutputSpec
 
     def _stimcorr_core(self, motionfile, intensityfile, corrfile, designmatrix):
         """

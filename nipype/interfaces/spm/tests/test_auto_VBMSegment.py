@@ -112,7 +112,7 @@ def test_VBMSegment_inputs():
     usedefault=True,
     ),
     )
-    inputs = VBMSegment.input_spec()
+    inputs = VBMSegment._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -134,7 +134,7 @@ def test_VBMSegment_outputs():
     pve_label_registered_images=dict(),
     transformation_mat=dict(),
     )
-    outputs = VBMSegment.output_spec()
+    outputs = VBMSegment._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

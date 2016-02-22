@@ -36,8 +36,8 @@ contributor: Eunyoung Regin Kim
 
 """
 
-    input_spec = SimilarityIndexInputSpec
-    output_spec = SimilarityIndexOutputSpec
+    _input_spec = SimilarityIndexInputSpec
+    _output_spec = SimilarityIndexOutputSpec
     _cmd = " SimilarityIndex "
     _outputs_filenames = {}
     _redirect_x = False
@@ -82,8 +82,8 @@ acknowledgements: Funding for this work was provided by NIH/NINDS award NS050568
 
 """
 
-    input_spec = BRAINSTalairachInputSpec
-    output_spec = BRAINSTalairachOutputSpec
+    _input_spec = BRAINSTalairachInputSpec
+    _output_spec = BRAINSTalairachOutputSpec
     _cmd = " BRAINSTalairach "
     _outputs_filenames = {'outputGrid': 'outputGrid', 'outputBox': 'outputBox'}
     _redirect_x = False
@@ -122,8 +122,8 @@ acknowledgements: Funding for this work was provided by NIH/NINDS award NS050568
 
 """
 
-    input_spec = BRAINSTalairachMaskInputSpec
-    output_spec = BRAINSTalairachMaskOutputSpec
+    _input_spec = BRAINSTalairachMaskInputSpec
+    _output_spec = BRAINSTalairachMaskOutputSpec
     _cmd = " BRAINSTalairachMask "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False

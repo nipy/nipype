@@ -34,7 +34,7 @@ def test_BinaryMaskEditorBasedOnLandmarks_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = BinaryMaskEditorBasedOnLandmarks.input_spec()
+    inputs = BinaryMaskEditorBasedOnLandmarks._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -44,7 +44,7 @@ def test_BinaryMaskEditorBasedOnLandmarks_inputs():
 def test_BinaryMaskEditorBasedOnLandmarks_outputs():
     output_map = dict(outputBinaryVolume=dict(),
     )
-    outputs = BinaryMaskEditorBasedOnLandmarks.output_spec()
+    outputs = BinaryMaskEditorBasedOnLandmarks._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -61,7 +61,7 @@ def test_Norm_inputs():
     upper=dict(argstr='-upper %s',
     ),
     )
-    inputs = Norm.input_spec()
+    inputs = Norm._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -72,7 +72,7 @@ def test_Norm_outputs():
     output_map = dict(output_file=dict(),
     output_threshold_mask=dict(),
     )
-    outputs = Norm.output_spec()
+    outputs = Norm._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

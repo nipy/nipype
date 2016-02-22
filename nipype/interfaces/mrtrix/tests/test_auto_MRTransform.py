@@ -47,7 +47,7 @@ def test_MRTransform_inputs():
     position=1,
     ),
     )
-    inputs = MRTransform.input_spec()
+    inputs = MRTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -57,7 +57,7 @@ def test_MRTransform_inputs():
 def test_MRTransform_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MRTransform.output_spec()
+    outputs = MRTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -53,8 +53,8 @@ class BrainMask(CommandLine):
     """
 
     _cmd = 'dwi2mask'
-    input_spec = BrainMaskInputSpec
-    output_spec = BrainMaskOutputSpec
+    _input_spec = BrainMaskInputSpec
+    _output_spec = BrainMaskOutputSpec
 
     def _post_run(self):
 
@@ -99,8 +99,8 @@ class Mesh2PVE(CommandLine):
     """
 
     _cmd = 'mesh2pve'
-    input_spec = Mesh2PVEInputSpec
-    output_spec = Mesh2PVEOutputSpec
+    _input_spec = Mesh2PVEInputSpec
+    _output_spec = Mesh2PVEOutputSpec
 
     def _post_run(self):
 
@@ -145,8 +145,8 @@ class Generate5tt(CommandLine):
     """
 
     _cmd = '5ttgen'
-    input_spec = Generate5ttInputSpec
-    output_spec = Generate5ttOutputSpec
+    _input_spec = Generate5ttInputSpec
+    _output_spec = Generate5ttOutputSpec
 
     def _post_run(self):
 
@@ -201,8 +201,8 @@ class TensorMetrics(CommandLine):
     """
 
     _cmd = 'tensor2metric'
-    input_spec = TensorMetricsInputSpec
-    output_spec = TensorMetricsOutputSpec
+    _input_spec = TensorMetricsInputSpec
+    _output_spec = TensorMetricsOutputSpec
 
     def _post_run(self):
         for k in list(outputs.keys()):
@@ -338,8 +338,8 @@ class ComputeTDI(MRTrix3Base):
     """
 
     _cmd = 'tckmap'
-    input_spec = ComputeTDIInputSpec
-    output_spec = ComputeTDIOutputSpec
+    _input_spec = ComputeTDIInputSpec
+    _output_spec = ComputeTDIOutputSpec
 
     def _post_run(self):
 
@@ -388,8 +388,8 @@ class TCK2VTK(MRTrix3Base):
     """
 
     _cmd = 'tck2vtk'
-    input_spec = TCK2VTKInputSpec
-    output_spec = TCK2VTKOutputSpec
+    _input_spec = TCK2VTKInputSpec
+    _output_spec = TCK2VTKOutputSpec
 
     def _post_run(self):
 

@@ -32,7 +32,7 @@ def test_ComputeFractionalAnisotropy_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ComputeFractionalAnisotropy.input_spec()
+    inputs = ComputeFractionalAnisotropy._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +42,7 @@ def test_ComputeFractionalAnisotropy_inputs():
 def test_ComputeFractionalAnisotropy_outputs():
     output_map = dict(fa=dict(),
     )
-    outputs = ComputeFractionalAnisotropy.output_spec()
+    outputs = ComputeFractionalAnisotropy._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

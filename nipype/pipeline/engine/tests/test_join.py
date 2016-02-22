@@ -24,8 +24,8 @@ class PickFirstOutSpec(nib.TraitedSpec):
 
 
 class PickFirst(nib.BaseInterface):
-    input_spec = PickFirstSpec
-    output_spec = PickFirstOutSpec
+    _input_spec = PickFirstSpec
+    _output_spec = PickFirstOutSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
@@ -45,8 +45,8 @@ class IncrementOutputSpec(nib.TraitedSpec):
 
 
 class IncrementInterface(nib.BaseInterface):
-    input_spec = IncrementInputSpec
-    output_spec = IncrementOutputSpec
+    _input_spec = IncrementInputSpec
+    _output_spec = IncrementOutputSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
@@ -70,8 +70,8 @@ class SumOutputSpec(nib.TraitedSpec):
 
 
 class SumInterface(nib.BaseInterface):
-    input_spec = SumInputSpec
-    output_spec = SumOutputSpec
+    _input_spec = SumInputSpec
+    _output_spec = SumOutputSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
@@ -99,8 +99,8 @@ class SetOutputSpec(nib.TraitedSpec):
 
 
 class SetInterface(nib.BaseInterface):
-    input_spec = SetInputSpec
-    output_spec = SetOutputSpec
+    _input_spec = SetInputSpec
+    _output_spec = SetOutputSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0
@@ -125,8 +125,8 @@ class ProductOutputSpec(nib.TraitedSpec):
 
 
 class ProductInterface(nib.BaseInterface):
-    input_spec = ProductInputSpec
-    output_spec = ProductOutputSpec
+    _input_spec = ProductInputSpec
+    _output_spec = ProductOutputSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0

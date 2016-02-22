@@ -76,8 +76,8 @@ class FitGLM(BaseInterface):
     """
     Fit GLM model based on the specified design. Supports only single or concatenated runs.
     """
-    input_spec = FitGLMInputSpec
-    output_spec = FitGLMOutputSpec
+    _input_spec = FitGLMInputSpec
+    _output_spec = FitGLMOutputSpec
 
     def _run_interface(self, runtime):
 
@@ -253,8 +253,8 @@ class EstimateContrast(BaseInterface):
     """
     Estimate contrast of a fitted model.
     """
-    input_spec = EstimateContrastInputSpec
-    output_spec = EstimateContrastOutputSpec
+    _input_spec = EstimateContrastInputSpec
+    _output_spec = EstimateContrastOutputSpec
 
     def _run_interface(self, runtime):
 

@@ -71,8 +71,8 @@ class WarpPoints(TVTKBaseInterface):
     >>> wp.inputs.warp = 'warpfield.nii'
     >>> res = wp.run() # doctest: +SKIP
     """
-    input_spec = WarpPointsInputSpec
-    output_spec = WarpPointsOutputSpec
+    _input_spec = WarpPointsInputSpec
+    _output_spec = WarpPointsOutputSpec
 
     def _run_interface(self, runtime):
         import nibabel as nb
@@ -175,8 +175,8 @@ class ComputeMeshWarp(TVTKBaseInterface):
 
     """
 
-    input_spec = ComputeMeshWarpInputSpec
-    output_spec = ComputeMeshWarpOutputSpec
+    _input_spec = ComputeMeshWarpInputSpec
+    _output_spec = ComputeMeshWarpOutputSpec
 
     def _triangle_area(self, A, B, C):
         A = np.array(A)
@@ -307,8 +307,8 @@ class MeshWarpMaths(TVTKBaseInterface):
 
     """
 
-    input_spec = MeshWarpMathsInputSpec
-    output_spec = MeshWarpMathsOutputSpec
+    _input_spec = MeshWarpMathsInputSpec
+    _output_spec = MeshWarpMathsOutputSpec
 
     def _run_interface(self, runtime):
         try:

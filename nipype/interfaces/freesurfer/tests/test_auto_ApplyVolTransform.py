@@ -72,7 +72,7 @@ def test_ApplyVolTransform_inputs():
     xor=('reg_file', 'fsl_reg_file', 'xfm_reg_file', 'reg_header', 'subject'),
     ),
     )
-    inputs = ApplyVolTransform.input_spec()
+    inputs = ApplyVolTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -82,7 +82,7 @@ def test_ApplyVolTransform_inputs():
 def test_ApplyVolTransform_outputs():
     output_map = dict(transformed_file=dict(),
     )
-    outputs = ApplyVolTransform.output_spec()
+    outputs = ApplyVolTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

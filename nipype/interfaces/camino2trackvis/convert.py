@@ -70,8 +70,8 @@ class Camino2Trackvis(CommandLine):
     """
 
     _cmd = 'camino_to_trackvis'
-    input_spec = Camino2TrackvisInputSpec
-    output_spec = Camino2TrackvisOutputSpec
+    _input_spec = Camino2TrackvisInputSpec
+    _output_spec = Camino2TrackvisOutputSpec
 
     def _post_run(self):
         
@@ -120,8 +120,8 @@ class Trackvis2CaminoOutputSpec(TraitedSpec):
 
 class Trackvis2Camino(CommandLine):
     _cmd = 'trackvis_to_camino'
-    input_spec = Trackvis2CaminoInputSpec
-    output_spec = Trackvis2CaminoOutputSpec
+    _input_spec = Trackvis2CaminoInputSpec
+    _output_spec = Trackvis2CaminoOutputSpec
 
     def _post_run(self):
         

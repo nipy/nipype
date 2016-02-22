@@ -43,8 +43,8 @@ contributor: Casey Goodlett
 
 """
 
-    input_spec = dtiaverageInputSpec
-    output_spec = dtiaverageOutputSpec
+    _input_spec = dtiaverageInputSpec
+    _output_spec = dtiaverageOutputSpec
     _cmd = " dtiaverage "
     _outputs_filenames = {'tensor_output': 'tensor_output.nii'}
     _redirect_x = False
@@ -125,8 +125,8 @@ acknowledgements: Hans Johnson(1,3,4); Kent Williams(1); (1=University of Iowa D
 
 """
 
-    input_spec = dtiestimInputSpec
-    output_spec = dtiestimOutputSpec
+    _input_spec = dtiestimInputSpec
+    _output_spec = dtiestimOutputSpec
     _cmd = " dtiestim "
     _outputs_filenames = {'B0': 'B0.nii', 'idwi': 'idwi.nii', 'tensor_output': 'tensor_output.nii', 'B0_mask_output': 'B0_mask_output.nii'}
     _redirect_x = False
@@ -216,8 +216,8 @@ contributor: Casey Goodlett
 
 """
 
-    input_spec = dtiprocessInputSpec
-    output_spec = dtiprocessOutputSpec
+    _input_spec = dtiprocessInputSpec
+    _output_spec = dtiprocessOutputSpec
     _cmd = " dtiprocess "
     _outputs_filenames = {'fa_gradmag_output': 'fa_gradmag_output.nii', 'fa_gradient_output': 'fa_gradient_output.nii', 'lambda1_output': 'lambda1_output.nii', 'lambda2_output': 'lambda2_output.nii', 'color_fa_output': 'color_fa_output.nii', 'fa_output': 'fa_output.nii', 'frobenius_norm_output': 'frobenius_norm_output.nii',
                           'principal_eigenvector_output': 'principal_eigenvector_output.nii', 'outmask': 'outmask.nii', 'lambda3_output': 'lambda3_output.nii', 'negative_eigenvector_output': 'negative_eigenvector_output.nii', 'md_output': 'md_output.nii', 'RD_output': 'RD_output.nii', 'deformation_output': 'deformation_output.nii', 'rot_output': 'rot_output.nii'}
@@ -274,8 +274,8 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = DWIConvertInputSpec
-    output_spec = DWIConvertOutputSpec
+    _input_spec = DWIConvertInputSpec
+    _output_spec = DWIConvertOutputSpec
     _cmd = " DWIConvert "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii', 'outputDirectory': 'outputDirectory', 'outputBValues': 'outputBValues.bval', 'gradientVectorFile': 'gradientVectorFile', 'outputBVectors': 'outputBVectors.bvec'}
     _redirect_x = False

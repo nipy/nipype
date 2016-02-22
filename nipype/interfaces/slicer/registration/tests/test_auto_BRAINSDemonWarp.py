@@ -105,7 +105,7 @@ def test_BRAINSDemonWarp_inputs():
     use_vanilla_dem=dict(argstr='--use_vanilla_dem ',
     ),
     )
-    inputs = BRAINSDemonWarp.input_spec()
+    inputs = BRAINSDemonWarp._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -117,7 +117,7 @@ def test_BRAINSDemonWarp_outputs():
     outputDisplacementFieldVolume=dict(),
     outputVolume=dict(),
     )
-    outputs = BRAINSDemonWarp.output_spec()
+    outputs = BRAINSDemonWarp._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

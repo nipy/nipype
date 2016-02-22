@@ -39,7 +39,7 @@ def test_UnaryMaths_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = UnaryMaths.input_spec()
+    inputs = UnaryMaths._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +49,7 @@ def test_UnaryMaths_inputs():
 def test_UnaryMaths_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = UnaryMaths.output_spec()
+    outputs = UnaryMaths._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

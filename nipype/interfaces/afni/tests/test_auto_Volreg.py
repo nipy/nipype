@@ -43,7 +43,7 @@ def test_Volreg_inputs():
     position=-5,
     ),
     )
-    inputs = Volreg.input_spec()
+    inputs = Volreg._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -56,7 +56,7 @@ def test_Volreg_outputs():
     oned_matrix_save=dict(),
     out_file=dict(),
     )
-    outputs = Volreg.output_spec()
+    outputs = Volreg._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

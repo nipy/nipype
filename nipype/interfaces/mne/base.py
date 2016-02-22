@@ -60,8 +60,8 @@ class WatershedBEM(FSCommand):
    """
 
     _cmd = 'mne_watershed_bem'
-    input_spec = WatershedBEMInputSpec
-    output_spec = WatershedBEMOutputSpec
+    _input_spec = WatershedBEMInputSpec
+    _output_spec = WatershedBEMOutputSpec
     _additional_metadata = ['loc', 'altkey']
 
     def _get_files(self, path, key, dirval, altkey=None):

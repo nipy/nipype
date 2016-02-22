@@ -23,7 +23,7 @@ def test_SimilarityIndex_inputs():
     thresholdInterval=dict(argstr='--thresholdInterval %f',
     ),
     )
-    inputs = SimilarityIndex.input_spec()
+    inputs = SimilarityIndex._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -32,7 +32,7 @@ def test_SimilarityIndex_inputs():
 
 def test_SimilarityIndex_outputs():
     output_map = dict()
-    outputs = SimilarityIndex.output_spec()
+    outputs = SimilarityIndex._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

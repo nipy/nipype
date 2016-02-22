@@ -39,8 +39,8 @@ class AverageAffineTransform(ANTSCommand):
     'AverageAffineTransform 3 MYtemplatewarp.mat trans.mat func_to_struct.mat'
     """
     _cmd = 'AverageAffineTransform'
-    input_spec = AverageAffineTransformInputSpec
-    output_spec = AverageAffineTransformOutputSpec
+    _input_spec = AverageAffineTransformInputSpec
+    _output_spec = AverageAffineTransformOutputSpec
 
     def _format_arg(self, opt, spec, val):
         return super(AverageAffineTransform, self)._format_arg(opt, spec, val)
@@ -79,8 +79,8 @@ class AverageImages(ANTSCommand):
     'AverageImages 3 average.nii.gz 1 rc1s1.nii rc1s1.nii'
     """
     _cmd = 'AverageImages'
-    input_spec = AverageImagesInputSpec
-    output_spec = AverageImagesOutputSpec
+    _input_spec = AverageImagesInputSpec
+    _output_spec = AverageImagesOutputSpec
 
     def _format_arg(self, opt, spec, val):
         return super(AverageImages, self)._format_arg(opt, spec, val)
@@ -118,8 +118,8 @@ class MultiplyImages(ANTSCommand):
     'MultiplyImages 3 moving2.nii 0.25 out.nii'
     """
     _cmd = 'MultiplyImages'
-    input_spec = MultiplyImagesInputSpec
-    output_spec = MultiplyImagesOutputSpec
+    _input_spec = MultiplyImagesInputSpec
+    _output_spec = MultiplyImagesOutputSpec
 
     def _format_arg(self, opt, spec, val):
         return super(MultiplyImages, self)._format_arg(opt, spec, val)
@@ -169,8 +169,8 @@ class JacobianDeterminant(ANTSCommand):
     """
 
     _cmd = 'ANTSJacobian'
-    input_spec = JacobianDeterminantInputSpec
-    output_spec = JacobianDeterminantOutputSpec
+    _input_spec = JacobianDeterminantInputSpec
+    _output_spec = JacobianDeterminantOutputSpec
 
     def _gen_filename(self, name):
         if name == 'output_prefix':

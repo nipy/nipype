@@ -50,7 +50,7 @@ def test_ErodeImage_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ErodeImage.input_spec()
+    inputs = ErodeImage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -60,7 +60,7 @@ def test_ErodeImage_inputs():
 def test_ErodeImage_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ErodeImage.output_spec()
+    outputs = ErodeImage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -113,8 +113,8 @@ class DTIFit(FSLCommand):
     """
 
     _cmd = 'dtifit'
-    input_spec = DTIFitInputSpec
-    output_spec = DTIFitOutputSpec
+    _input_spec = DTIFitInputSpec
+    _output_spec = DTIFitOutputSpec
 
     def _post_run(self):
         if not self.inputs.save_tensor:
@@ -223,8 +223,8 @@ class FSLXCommand(FSLCommand):
     """
     Base support for ``xfibres`` and ``bedpostx``
     """
-    input_spec = FSLXCommandInputSpec
-    output_spec = FSLXCommandOutputSpec
+    _input_spec = FSLXCommandInputSpec
+    _output_spec = FSLXCommandOutputSpec
 
     def _run_interface(self, runtime):
         runtime = super(FSLXCommand, self)._run_interface(runtime)
@@ -302,8 +302,8 @@ class BEDPOSTX5(FSLXCommand):
 
     _cmd = 'bedpostx'
     _default_cmd = _cmd
-    input_spec = BEDPOSTX5InputSpec
-    output_spec = BEDPOSTX5OutputSpec
+    _input_spec = BEDPOSTX5InputSpec
+    _output_spec = BEDPOSTX5OutputSpec
     _can_resume = True
 
     def __init__(self, **inputs):
@@ -350,8 +350,8 @@ class XFibres5(FSLXCommand):
     parameters
     """
     _cmd = 'xfibres'
-    input_spec = XFibres5InputSpec
-    output_spec = FSLXCommandOutputSpec
+    _input_spec = XFibres5InputSpec
+    _output_spec = FSLXCommandOutputSpec
 
 
 class XFibres4InputSpec(FSLCommandInputSpec):
@@ -414,8 +414,8 @@ class XFibres4(FSLCommand):
 
     """
     _cmd = 'xfibres'
-    input_spec = XFibres4InputSpec
-    output_spec = XFibres4OutputSpec
+    _input_spec = XFibres4InputSpec
+    _output_spec = XFibres4OutputSpec
 
     def __init__(self, **inputs):
         IFLOGGER.warn('Deprecated: Please use XFIBERS5 instead. This '
@@ -515,8 +515,8 @@ bvals='bvals', dwi='diffusion.nii', mask='mask.nii', fibres=1)
     """
 
     _cmd = 'bedpostx'
-    input_spec = BEDPOSTX4InputSpec
-    output_spec = BEDPOSTX4OutputSpec
+    _input_spec = BEDPOSTX4InputSpec
+    _output_spec = BEDPOSTX4OutputSpec
     _can_resume = True
 
     def __init__(self, **inputs):
@@ -727,8 +727,8 @@ class ProbTrackX(FSLCommand):
     """
 
     _cmd = 'probtrackx'
-    input_spec = ProbTrackXInputSpec
-    output_spec = ProbTrackXOutputSpec
+    _input_spec = ProbTrackXInputSpec
+    _output_spec = ProbTrackXOutputSpec
 
     def __init__(self, **inputs):
         IFLOGGER.warn('Deprecated: Please use create_bedpostx_pipeline instead')
@@ -878,8 +878,8 @@ class ProbTrackX2(ProbTrackX):
     'probtrackx2 --forcedir -m nodif_brain_mask.nii.gz --nsamples=3 --nsteps=10 --opd --dir=. --samples=merged --seed=seed_source.nii.gz'
     """
     _cmd = 'probtrackx2'
-    input_spec = ProbTrackX2InputSpec
-    output_spec = ProbTrackX2OutputSpec
+    _input_spec = ProbTrackX2InputSpec
+    _output_spec = ProbTrackX2OutputSpec
 
     def _post_run(self):
         outputs = super(ProbTrackX2, self)._post_run()
@@ -951,8 +951,8 @@ class VecReg(FSLCommand):
     """
 
     _cmd = 'vecreg'
-    input_spec = VecRegInputSpec
-    output_spec = VecRegOutputSpec
+    _input_spec = VecRegInputSpec
+    _output_spec = VecRegOutputSpec
 
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.out_file):
@@ -1006,8 +1006,8 @@ class ProjThresh(FSLCommand):
     """
 
     _cmd = 'proj_thresh'
-    input_spec = ProjThreshInputSpec
-    output_spec = ProjThreshOuputSpec
+    _input_spec = ProjThreshInputSpec
+    _output_spec = ProjThreshOuputSpec
 
     def _post_run(self):
         self.outputs.out_files = []
@@ -1048,8 +1048,8 @@ class FindTheBiggest(FSLCommand):
 
     """
     _cmd = 'find_the_biggest'
-    input_spec = FindTheBiggestInputSpec
-    output_spec = FindTheBiggestOutputSpec
+    _input_spec = FindTheBiggestInputSpec
+    _output_spec = FindTheBiggestOutputSpec
 
     def _run_interface(self, runtime):
         if not isdefined(self.inputs.out_file):
@@ -1119,8 +1119,8 @@ class TractSkeleton(FSLCommand):
     """
 
     _cmd = 'tbss_skeleton'
-    input_spec = TractSkeletonInputSpec
-    output_spec = TractSkeletonOutputSpec
+    _input_spec = TractSkeletonInputSpec
+    _output_spec = TractSkeletonOutputSpec
 
     def _format_arg(self, name, spec, value):
         if name == 'project_data':
@@ -1203,8 +1203,8 @@ class DistanceMap(FSLCommand):
     """
 
     _cmd = 'distancemap'
-    input_spec = DistanceMapInputSpec
-    output_spec = DistanceMapOutputSpec
+    _input_spec = DistanceMapInputSpec
+    _output_spec = DistanceMapOutputSpec
 
     def _post_run(self):
         _si = self.inputs
@@ -1251,8 +1251,8 @@ class MakeDyadicVectors(FSLCommand):
     and its uncertainty (dispersion)"""
 
     _cmd = 'make_dyadic_vectors'
-    input_spec = MakeDyadicVectorsInputSpec
-    output_spec = MakeDyadicVectorsOutputSpec
+    _input_spec = MakeDyadicVectorsInputSpec
+    _output_spec = MakeDyadicVectorsOutputSpec
 
     def _post_run(self):
         self.outputs.dyads = self._gen_fname(self.inputs.output)

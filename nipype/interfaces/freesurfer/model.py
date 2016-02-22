@@ -94,8 +94,8 @@ class MRISPreproc(FSCommand):
     """
 
     _cmd = 'mris_preproc'
-    input_spec = MRISPreprocInputSpec
-    output_spec = MRISPreprocOutputSpec
+    _input_spec = MRISPreprocInputSpec
+    _output_spec = MRISPreprocOutputSpec
 
     def _post_run(self):
 
@@ -267,8 +267,8 @@ class GLMFit(FSCommand):
     """
 
     _cmd = 'mri_glmfit'
-    input_spec = GLMFitInputSpec
-    output_spec = GLMFitOutputSpec
+    _input_spec = GLMFitInputSpec
+    _output_spec = GLMFitOutputSpec
 
     def _format_arg(self, name, spec, value):
         if name == "surf":
@@ -412,8 +412,8 @@ class Binarize(FSCommand):
    """
 
     _cmd = 'mri_binarize'
-    input_spec = BinarizeInputSpec
-    output_spec = BinarizeOutputSpec
+    _input_spec = BinarizeInputSpec
+    _output_spec = BinarizeOutputSpec
 
     def _post_run(self):
 
@@ -520,8 +520,8 @@ class Concatenate(FSCommand):
     """
 
     _cmd = 'mri_concat'
-    input_spec = ConcatenateInputSpec
-    output_spec = ConcatenateOutputSpec
+    _input_spec = ConcatenateInputSpec
+    _output_spec = ConcatenateOutputSpec
 
     def _post_run(self):
 
@@ -627,8 +627,8 @@ class SegStats(FSCommand):
     """
 
     _cmd = 'mri_segstats'
-    input_spec = SegStatsInputSpec
-    output_spec = SegStatsOutputSpec
+    _input_spec = SegStatsInputSpec
+    _output_spec = SegStatsOutputSpec
 
     def _post_run(self):
 
@@ -745,8 +745,8 @@ class Label2Vol(FSCommand):
    """
 
     _cmd = 'mri_label2vol'
-    input_spec = Label2VolInputSpec
-    output_spec = Label2VolOutputSpec
+    _input_spec = Label2VolInputSpec
+    _output_spec = Label2VolOutputSpec
 
     def _post_run(self):
 
@@ -822,8 +822,8 @@ class MS_LDA(FSCommand):
     """
 
     _cmd = 'mri_ms_LDA'
-    input_spec = MS_LDAInputSpec
-    output_spec = MS_LDAOutputSpec
+    _input_spec = MS_LDAInputSpec
+    _output_spec = MS_LDAOutputSpec
 
     def _post_run(self):
         if isdefined(self.inputs.output_synth):

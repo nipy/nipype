@@ -29,7 +29,7 @@ def test_MedianFilter3D_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = MedianFilter3D.input_spec()
+    inputs = MedianFilter3D._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +39,7 @@ def test_MedianFilter3D_inputs():
 def test_MedianFilter3D_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MedianFilter3D.output_spec()
+    outputs = MedianFilter3D._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

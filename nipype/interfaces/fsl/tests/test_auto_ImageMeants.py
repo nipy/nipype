@@ -41,7 +41,7 @@ def test_ImageMeants_inputs():
     use_mm=dict(argstr='--usemm',
     ),
     )
-    inputs = ImageMeants.input_spec()
+    inputs = ImageMeants._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -51,7 +51,7 @@ def test_ImageMeants_inputs():
 def test_ImageMeants_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ImageMeants.output_spec()
+    outputs = ImageMeants._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

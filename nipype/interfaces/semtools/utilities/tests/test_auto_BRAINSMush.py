@@ -53,7 +53,7 @@ def test_BRAINSMush_inputs():
     upperThresholdFactorPre=dict(argstr='--upperThresholdFactorPre %f',
     ),
     )
-    inputs = BRAINSMush.input_spec()
+    inputs = BRAINSMush._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -65,7 +65,7 @@ def test_BRAINSMush_outputs():
     outputVolume=dict(),
     outputWeightsFile=dict(),
     )
-    outputs = BRAINSMush.output_spec()
+    outputs = BRAINSMush._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

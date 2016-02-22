@@ -137,7 +137,7 @@ def test_GLMFit_inputs():
     xor=('weight_file', 'weight_inv', 'weight_sqrt'),
     ),
     )
-    inputs = GLMFit.input_spec()
+    inputs = GLMFit._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -163,7 +163,7 @@ def test_GLMFit_outputs():
     spatial_eigenvectors=dict(),
     svd_stats_file=dict(),
     )
-    outputs = GLMFit.output_spec()
+    outputs = GLMFit._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

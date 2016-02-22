@@ -39,7 +39,7 @@ def test_XfmAvg_inputs():
     verbose=dict(argstr='-verbose',
     ),
     )
-    inputs = XfmAvg.input_spec()
+    inputs = XfmAvg._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -50,7 +50,7 @@ def test_XfmAvg_outputs():
     output_map = dict(output_file=dict(),
     output_grid=dict(),
     )
-    outputs = XfmAvg.output_spec()
+    outputs = XfmAvg._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -81,7 +81,7 @@ def test_RobustRegister_inputs():
     write_vo2vox=dict(argstr='--vox2vox',
     ),
     )
-    inputs = RobustRegister.input_spec()
+    inputs = RobustRegister._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -98,7 +98,7 @@ def test_RobustRegister_outputs():
     registered_file=dict(),
     weights_file=dict(),
     )
-    outputs = RobustRegister.output_spec()
+    outputs = RobustRegister._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

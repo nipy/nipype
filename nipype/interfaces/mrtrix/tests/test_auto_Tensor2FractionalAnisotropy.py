@@ -29,7 +29,7 @@ def test_Tensor2FractionalAnisotropy_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Tensor2FractionalAnisotropy.input_spec()
+    inputs = Tensor2FractionalAnisotropy._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +39,7 @@ def test_Tensor2FractionalAnisotropy_inputs():
 def test_Tensor2FractionalAnisotropy_outputs():
     output_map = dict(FA=dict(),
     )
-    outputs = Tensor2FractionalAnisotropy.output_spec()
+    outputs = Tensor2FractionalAnisotropy._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -63,8 +63,8 @@ class Dcm2nii(CommandLine):
     'dcm2nii -a y -c y -b config.ini -v y -d y -e y -g y -i n -n y -o . -p y -x n -f n functional_1.dcm'
     """
 
-    input_spec = Dcm2niiInputSpec
-    output_spec = Dcm2niiOutputSpec
+    _input_spec = Dcm2niiInputSpec
+    _output_spec = Dcm2niiOutputSpec
     _cmd = 'dcm2nii'
 
     def _format_arg(self, opt, spec, val):

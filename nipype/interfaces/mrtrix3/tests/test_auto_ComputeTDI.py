@@ -59,7 +59,7 @@ def test_ComputeTDI_inputs():
     sep=',',
     ),
     )
-    inputs = ComputeTDI.input_spec()
+    inputs = ComputeTDI._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -69,7 +69,7 @@ def test_ComputeTDI_inputs():
 def test_ComputeTDI_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ComputeTDI.output_spec()
+    outputs = ComputeTDI._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

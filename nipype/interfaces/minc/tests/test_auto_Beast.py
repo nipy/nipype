@@ -65,7 +65,7 @@ def test_Beast_inputs():
     voxel_size=dict(argstr='-voxel_size %s',
     ),
     )
-    inputs = Beast.input_spec()
+    inputs = Beast._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -75,7 +75,7 @@ def test_Beast_inputs():
 def test_Beast_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Beast.output_spec()
+    outputs = Beast._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

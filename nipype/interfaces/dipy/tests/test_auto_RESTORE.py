@@ -19,7 +19,7 @@ def test_RESTORE_inputs():
     noise_mask=dict(),
     out_prefix=dict(),
     )
-    inputs = RESTORE.input_spec()
+    inputs = RESTORE._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +35,7 @@ def test_RESTORE_outputs():
     rd=dict(),
     trace=dict(),
     )
-    outputs = RESTORE.output_spec()
+    outputs = RESTORE._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

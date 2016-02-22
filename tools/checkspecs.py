@@ -214,7 +214,7 @@ class InterfaceChecker(object):
                            '']
                     cmd.append('\ndef test_%s_inputs():' % c)
                     input_fields = ''
-                    for traitname, trait in sorted(classinst.input_spec().traits(transient=None).items()):
+                    for traitname, trait in sorted(classinst._input_spec().traits(transient=None).items()):
                         input_fields += '%s=dict(' % traitname
                         for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
@@ -229,7 +229,7 @@ class InterfaceChecker(object):
                                 input_fields += "%s=%s,\n    " % (key, value)
                         input_fields += '),\n    '
                     cmd += ['    input_map = dict(%s)' % input_fields]
-                    cmd += ['    inputs = %s.input_spec()' % c]
+                    cmd += ['    inputs = %s._input_spec()' % c]
                     cmd += ["""
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -238,7 +238,7 @@ class InterfaceChecker(object):
             else:
                 print('%s has nonautotest' % c)
 
-            for traitname, trait in sorted(classinst.input_spec().traits(transient=None).items()):
+            for traitname, trait in sorted(classinst._input_spec().traits(transient=None).items()):
                 for key in sorted(trait.__dict__):
                     if key in in_built:
                         continue
@@ -251,14 +251,14 @@ class InterfaceChecker(object):
                     if key == 'mandatory' and trait.mandatory is not None and not trait.mandatory:
                         bad_specs.append([uri, c, 'Inputs', traitname, 'mandatory=False'])
 
-            if not classinst.output_spec:
+            if not classinst._output_spec:
                 continue
 
             if not os.path.exists(nonautotest):
                 with open(testfile, 'at') as fp:
                     cmd = ['\ndef test_%s_outputs():' % c]
                     input_fields = ''
-                    for traitname, trait in sorted(classinst.output_spec().traits(transient=None).items()):
+                    for traitname, trait in sorted(classinst._output_spec().traits(transient=None).items()):
                         input_fields += '%s=dict(' % traitname
                         for key, value in sorted(trait.__dict__.items()):
                             if key in in_built or key == 'desc':
@@ -273,14 +273,14 @@ class InterfaceChecker(object):
                                 input_fields += "%s=%s,\n    " % (key, value)
                         input_fields += '),\n    '
                     cmd += ['    output_map = dict(%s)' % input_fields]
-                    cmd += ['    outputs = %s.output_spec()' % c]
+                    cmd += ['    outputs = %s._output_spec()' % c]
                     cmd += ["""
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
             yield assert_equal, getattr(outputs.traits()[key], metakey), value"""]
                     fp.writelines('\n'.join(cmd) + '\n')
 
-            for traitname, trait in sorted(classinst.output_spec().traits(transient=None).items()):
+            for traitname, trait in sorted(classinst._output_spec().traits(transient=None).items()):
                 for key in sorted(trait.__dict__):
                     if key in in_built:
                         continue

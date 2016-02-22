@@ -26,7 +26,7 @@ def test_gtractAverageBvalues_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = gtractAverageBvalues.input_spec()
+    inputs = gtractAverageBvalues._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_gtractAverageBvalues_inputs():
 def test_gtractAverageBvalues_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractAverageBvalues.output_spec()
+    outputs = gtractAverageBvalues._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

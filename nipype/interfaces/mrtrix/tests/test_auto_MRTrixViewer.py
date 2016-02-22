@@ -25,7 +25,7 @@ def test_MRTrixViewer_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = MRTrixViewer.input_spec()
+    inputs = MRTrixViewer._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_MRTrixViewer_inputs():
 
 def test_MRTrixViewer_outputs():
     output_map = dict()
-    outputs = MRTrixViewer.output_spec()
+    outputs = MRTrixViewer._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -44,7 +44,7 @@ def test_SpecifySparseModel_inputs():
     volumes_in_cluster=dict(usedefault=True,
     ),
     )
-    inputs = SpecifySparseModel.input_spec()
+    inputs = SpecifySparseModel._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -56,7 +56,7 @@ def test_SpecifySparseModel_outputs():
     sparse_png_file=dict(),
     sparse_svg_file=dict(),
     )
-    outputs = SpecifySparseModel.output_spec()
+    outputs = SpecifySparseModel._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

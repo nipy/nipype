@@ -112,7 +112,7 @@ def test_Extract_inputs():
     xor=('write_signed', 'write_unsigned'),
     ),
     )
-    inputs = Extract.input_spec()
+    inputs = Extract._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -122,7 +122,7 @@ def test_Extract_inputs():
 def test_Extract_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Extract.output_spec()
+    outputs = Extract._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -158,8 +158,8 @@ class PETPVC(CommandLine):
     >>> pvc.inputs.fwhm_z = 2.0
     >>> outs = pvc.run() #doctest: +SKIP
     """
-    input_spec = PETPVCInputSpec
-    output_spec = PETPVCOutputSpec
+    _input_spec = PETPVCInputSpec
+    _output_spec = PETPVCOutputSpec
     _cmd = 'petpvc'
 
     def _post_run(self):

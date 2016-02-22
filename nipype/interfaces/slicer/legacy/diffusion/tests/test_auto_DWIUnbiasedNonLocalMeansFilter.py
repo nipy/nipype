@@ -35,7 +35,7 @@ def test_DWIUnbiasedNonLocalMeansFilter_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DWIUnbiasedNonLocalMeansFilter.input_spec()
+    inputs = DWIUnbiasedNonLocalMeansFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -46,7 +46,7 @@ def test_DWIUnbiasedNonLocalMeansFilter_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = DWIUnbiasedNonLocalMeansFilter.output_spec()
+    outputs = DWIUnbiasedNonLocalMeansFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

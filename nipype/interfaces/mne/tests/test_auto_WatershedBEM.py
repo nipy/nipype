@@ -29,7 +29,7 @@ def test_WatershedBEM_inputs():
     usedefault=True,
     ),
     )
-    inputs = WatershedBEM.input_spec()
+    inputs = WatershedBEM._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +53,7 @@ def test_WatershedBEM_outputs():
     outer_skull_surface=dict(loc='bem/watershed',
     ),
     )
-    outputs = WatershedBEM.output_spec()
+    outputs = WatershedBEM._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

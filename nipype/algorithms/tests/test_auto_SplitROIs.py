@@ -9,7 +9,7 @@ def test_SplitROIs_inputs():
     in_mask=dict(),
     roi_size=dict(),
     )
-    inputs = SplitROIs.input_spec()
+    inputs = SplitROIs._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -21,7 +21,7 @@ def test_SplitROIs_outputs():
     out_index=dict(),
     out_masks=dict(),
     )
-    outputs = SplitROIs.output_spec()
+    outputs = SplitROIs._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

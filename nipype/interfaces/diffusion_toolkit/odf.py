@@ -58,8 +58,8 @@ class HARDIMatOutputSpec(TraitedSpec):
 class HARDIMat(CommandLine):
     """Use hardi_mat to calculate a reconstruction matrix from a gradient table
     """
-    input_spec = HARDIMatInputSpec
-    output_spec = HARDIMatOutputSpec
+    _input_spec = HARDIMatInputSpec
+    _output_spec = HARDIMatOutputSpec
 
     _cmd = 'hardi_mat'
 
@@ -132,8 +132,8 @@ class ODFRecon(CommandLine):
     """Use odf_recon to generate tensors and other maps
     """
 
-    input_spec = ODFReconInputSpec
-    output_spec = ODFReconOutputSpec
+    _input_spec = ODFReconInputSpec
+    _output_spec = ODFReconOutputSpec
 
     _cmd = 'odf_recon'
 
@@ -213,8 +213,8 @@ class ODFTracker(CommandLine):
     """Use odf_tracker to generate track file
     """
 
-    input_spec = ODFTrackerInputSpec
-    output_spec = ODFTrackerOutputSpec
+    _input_spec = ODFTrackerInputSpec
+    _output_spec = ODFTrackerOutputSpec
 
     _cmd = 'odf_tracker'
 

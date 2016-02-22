@@ -8,7 +8,7 @@ def test_NiftiGeneratorBase_inputs():
     usedefault=True,
     ),
     )
-    inputs = NiftiGeneratorBase.input_spec()
+    inputs = NiftiGeneratorBase._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -17,7 +17,7 @@ def test_NiftiGeneratorBase_inputs():
 
 def test_NiftiGeneratorBase_outputs():
     output_map = dict()
-    outputs = NiftiGeneratorBase.output_spec()
+    outputs = NiftiGeneratorBase._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

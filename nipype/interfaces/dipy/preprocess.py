@@ -49,8 +49,8 @@ class Resample(DipyBaseInterface):
     >>> reslice.inputs.in_file = 'diffusion.nii'
     >>> reslice.run() # doctest: +SKIP
     """
-    input_spec = ResampleInputSpec
-    output_spec = ResampleOutputSpec
+    _input_spec = ResampleInputSpec
+    _output_spec = ResampleOutputSpec
 
     def _run_interface(self, runtime):
         order = self.inputs.interp
@@ -118,8 +118,8 @@ class Denoise(DipyBaseInterface):
     >>> denoise.inputs.in_file = 'diffusion.nii'
     >>> denoise.run() # doctest: +SKIP
     """
-    input_spec = DenoiseInputSpec
-    output_spec = DenoiseOutputSpec
+    _input_spec = DenoiseInputSpec
+    _output_spec = DenoiseOutputSpec
 
     def _run_interface(self, runtime):
         out_file = op.abspath(self._gen_outfilename())

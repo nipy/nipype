@@ -40,7 +40,7 @@ def test_LabelConfig_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = LabelConfig.input_spec()
+    inputs = LabelConfig._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -50,7 +50,7 @@ def test_LabelConfig_inputs():
 def test_LabelConfig_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = LabelConfig.output_spec()
+    outputs = LabelConfig._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

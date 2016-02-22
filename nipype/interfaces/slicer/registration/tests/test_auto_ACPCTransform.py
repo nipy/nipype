@@ -24,7 +24,7 @@ def test_ACPCTransform_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ACPCTransform.input_spec()
+    inputs = ACPCTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_ACPCTransform_inputs():
 def test_ACPCTransform_outputs():
     output_map = dict(outputTransform=dict(),
     )
-    outputs = ACPCTransform.output_spec()
+    outputs = ACPCTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -45,7 +45,7 @@ def test_LinearRegistration_inputs():
     translationscale=dict(argstr='--translationscale %f',
     ),
     )
-    inputs = LinearRegistration.input_spec()
+    inputs = LinearRegistration._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -56,7 +56,7 @@ def test_LinearRegistration_outputs():
     output_map = dict(outputtransform=dict(),
     resampledmovingfilename=dict(),
     )
-    outputs = LinearRegistration.output_spec()
+    outputs = LinearRegistration._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

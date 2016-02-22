@@ -91,7 +91,7 @@ def test_FUGUE_inputs():
     xor=['unwarped_file'],
     ),
     )
-    inputs = FUGUE.input_spec()
+    inputs = FUGUE._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -104,7 +104,7 @@ def test_FUGUE_outputs():
     unwarped_file=dict(),
     warped_file=dict(),
     )
-    outputs = FUGUE.output_spec()
+    outputs = FUGUE._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

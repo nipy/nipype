@@ -53,7 +53,7 @@ def test_TractographyLabelMapSeeding_inputs():
     writetofile=dict(argstr='--writetofile ',
     ),
     )
-    inputs = TractographyLabelMapSeeding.input_spec()
+    inputs = TractographyLabelMapSeeding._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -65,7 +65,7 @@ def test_TractographyLabelMapSeeding_outputs():
     ),
     outputdirectory=dict(),
     )
-    outputs = TractographyLabelMapSeeding.output_spec()
+    outputs = TractographyLabelMapSeeding._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

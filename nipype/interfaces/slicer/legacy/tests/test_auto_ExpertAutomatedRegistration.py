@@ -75,7 +75,7 @@ def test_ExpertAutomatedRegistration_inputs():
     verbosityLevel=dict(argstr='--verbosityLevel %s',
     ),
     )
-    inputs = ExpertAutomatedRegistration.input_spec()
+    inputs = ExpertAutomatedRegistration._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -86,7 +86,7 @@ def test_ExpertAutomatedRegistration_outputs():
     output_map = dict(resampledImage=dict(),
     saveTransform=dict(),
     )
-    outputs = ExpertAutomatedRegistration.output_spec()
+    outputs = ExpertAutomatedRegistration._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

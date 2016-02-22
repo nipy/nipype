@@ -53,7 +53,7 @@ def test_ExtractROI_inputs():
     position=7,
     ),
     )
-    inputs = ExtractROI.input_spec()
+    inputs = ExtractROI._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -63,7 +63,7 @@ def test_ExtractROI_inputs():
 def test_ExtractROI_outputs():
     output_map = dict(roi_file=dict(),
     )
-    outputs = ExtractROI.output_spec()
+    outputs = ExtractROI._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

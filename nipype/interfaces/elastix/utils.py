@@ -56,8 +56,8 @@ class EditTransform(BaseInterface):
 
     """
 
-    input_spec = EditTransformInputSpec
-    output_spec = EditTransformOutputSpec
+    _input_spec = EditTransformInputSpec
+    _output_spec = EditTransformOutputSpec
     _out_file = ''
     _pattern = '\((?P<entry>%s\s\"?)([-\.\s\w]+)(\"?\))'
 

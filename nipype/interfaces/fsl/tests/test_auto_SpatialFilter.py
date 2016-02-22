@@ -50,7 +50,7 @@ def test_SpatialFilter_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = SpatialFilter.input_spec()
+    inputs = SpatialFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -60,7 +60,7 @@ def test_SpatialFilter_inputs():
 def test_SpatialFilter_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = SpatialFilter.output_spec()
+    outputs = SpatialFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

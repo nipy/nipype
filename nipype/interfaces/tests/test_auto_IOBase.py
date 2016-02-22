@@ -8,7 +8,7 @@ def test_IOBase_inputs():
     usedefault=True,
     ),
     )
-    inputs = IOBase.input_spec()
+    inputs = IOBase._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -17,7 +17,7 @@ def test_IOBase_inputs():
 
 def test_IOBase_outputs():
     output_map = dict()
-    outputs = IOBase.output_spec()
+    outputs = IOBase._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

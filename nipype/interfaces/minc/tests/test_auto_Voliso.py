@@ -37,7 +37,7 @@ def test_Voliso_inputs():
     verbose=dict(argstr='--verbose',
     ),
     )
-    inputs = Voliso.input_spec()
+    inputs = Voliso._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +47,7 @@ def test_Voliso_inputs():
 def test_Voliso_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Voliso.output_spec()
+    outputs = Voliso._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -34,7 +34,7 @@ def test_StreamlineTractography_inputs():
     seed_mask=dict(),
     tracking_mask=dict(),
     )
-    inputs = StreamlineTractography.input_spec()
+    inputs = StreamlineTractography._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -47,7 +47,7 @@ def test_StreamlineTractography_outputs():
     out_seeds=dict(),
     tracks=dict(),
     )
-    outputs = StreamlineTractography.output_spec()
+    outputs = StreamlineTractography._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

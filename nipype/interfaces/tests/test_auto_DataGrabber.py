@@ -16,7 +16,7 @@ def test_DataGrabber_inputs():
     ),
     template_args=dict(),
     )
-    inputs = DataGrabber.input_spec()
+    inputs = DataGrabber._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -25,7 +25,7 @@ def test_DataGrabber_inputs():
 
 def test_DataGrabber_outputs():
     output_map = dict()
-    outputs = DataGrabber.output_spec()
+    outputs = DataGrabber._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

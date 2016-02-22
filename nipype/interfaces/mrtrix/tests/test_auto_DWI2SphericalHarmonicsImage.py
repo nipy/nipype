@@ -32,7 +32,7 @@ def test_DWI2SphericalHarmonicsImage_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DWI2SphericalHarmonicsImage.input_spec()
+    inputs = DWI2SphericalHarmonicsImage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +42,7 @@ def test_DWI2SphericalHarmonicsImage_inputs():
 def test_DWI2SphericalHarmonicsImage_outputs():
     output_map = dict(spherical_harmonics_image=dict(),
     )
-    outputs = DWI2SphericalHarmonicsImage.output_spec()
+    outputs = DWI2SphericalHarmonicsImage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

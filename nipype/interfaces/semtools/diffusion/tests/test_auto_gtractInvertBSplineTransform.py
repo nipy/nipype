@@ -27,7 +27,7 @@ def test_gtractInvertBSplineTransform_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = gtractInvertBSplineTransform.input_spec()
+    inputs = gtractInvertBSplineTransform._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +37,7 @@ def test_gtractInvertBSplineTransform_inputs():
 def test_gtractInvertBSplineTransform_outputs():
     output_map = dict(outputTransform=dict(),
     )
-    outputs = gtractInvertBSplineTransform.output_spec()
+    outputs = gtractInvertBSplineTransform._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

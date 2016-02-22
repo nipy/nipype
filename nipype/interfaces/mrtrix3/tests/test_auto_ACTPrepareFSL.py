@@ -24,7 +24,7 @@ def test_ACTPrepareFSL_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ACTPrepareFSL.input_spec()
+    inputs = ACTPrepareFSL._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_ACTPrepareFSL_inputs():
 def test_ACTPrepareFSL_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = ACTPrepareFSL.output_spec()
+    outputs = ACTPrepareFSL._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

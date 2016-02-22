@@ -28,7 +28,7 @@ def test_gtractResampleAnisotropy_inputs():
     transformType=dict(argstr='--transformType %s',
     ),
     )
-    inputs = gtractResampleAnisotropy.input_spec()
+    inputs = gtractResampleAnisotropy._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -38,7 +38,7 @@ def test_gtractResampleAnisotropy_inputs():
 def test_gtractResampleAnisotropy_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = gtractResampleAnisotropy.output_spec()
+    outputs = gtractResampleAnisotropy._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

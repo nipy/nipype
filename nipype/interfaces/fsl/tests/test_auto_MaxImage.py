@@ -39,7 +39,7 @@ def test_MaxImage_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = MaxImage.input_spec()
+    inputs = MaxImage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +49,7 @@ def test_MaxImage_inputs():
 def test_MaxImage_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MaxImage.output_spec()
+    outputs = MaxImage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

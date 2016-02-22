@@ -34,7 +34,7 @@ def test_GrayscaleModelMaker_inputs():
     threshold=dict(argstr='--threshold %f',
     ),
     )
-    inputs = GrayscaleModelMaker.input_spec()
+    inputs = GrayscaleModelMaker._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +45,7 @@ def test_GrayscaleModelMaker_outputs():
     output_map = dict(OutputGeometry=dict(position=-1,
     ),
     )
-    outputs = GrayscaleModelMaker.output_spec()
+    outputs = GrayscaleModelMaker._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

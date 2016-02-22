@@ -24,7 +24,7 @@ def test_gtractTransformToDisplacementField_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = gtractTransformToDisplacementField.input_spec()
+    inputs = gtractTransformToDisplacementField._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_gtractTransformToDisplacementField_inputs():
 def test_gtractTransformToDisplacementField_outputs():
     output_map = dict(outputDeformationFieldVolume=dict(),
     )
-    outputs = gtractTransformToDisplacementField.output_spec()
+    outputs = gtractTransformToDisplacementField._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

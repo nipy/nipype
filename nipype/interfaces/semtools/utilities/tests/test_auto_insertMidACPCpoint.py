@@ -20,7 +20,7 @@ def test_insertMidACPCpoint_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = insertMidACPCpoint.input_spec()
+    inputs = insertMidACPCpoint._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -30,7 +30,7 @@ def test_insertMidACPCpoint_inputs():
 def test_insertMidACPCpoint_outputs():
     output_map = dict(outputLandmarkFile=dict(),
     )
-    outputs = insertMidACPCpoint.output_spec()
+    outputs = insertMidACPCpoint._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

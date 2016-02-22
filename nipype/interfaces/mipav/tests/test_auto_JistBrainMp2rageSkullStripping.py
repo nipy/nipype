@@ -46,7 +46,7 @@ def test_JistBrainMp2rageSkullStripping_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistBrainMp2rageSkullStripping.input_spec()
+    inputs = JistBrainMp2rageSkullStripping._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -59,7 +59,7 @@ def test_JistBrainMp2rageSkullStripping_outputs():
     outMasked2=dict(),
     outMasked3=dict(),
     )
-    outputs = JistBrainMp2rageSkullStripping.output_spec()
+    outputs = JistBrainMp2rageSkullStripping._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -31,7 +31,7 @@ def test_SpecifySPMModel_inputs():
     time_repetition=dict(mandatory=True,
     ),
     )
-    inputs = SpecifySPMModel.input_spec()
+    inputs = SpecifySPMModel._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +41,7 @@ def test_SpecifySPMModel_inputs():
 def test_SpecifySPMModel_outputs():
     output_map = dict(session_info=dict(),
     )
-    outputs = SpecifySPMModel.output_spec()
+    outputs = SpecifySPMModel._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

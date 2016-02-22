@@ -48,7 +48,7 @@ def test_DenoiseImage_inputs():
     verbose=dict(argstr='-v',
     ),
     )
-    inputs = DenoiseImage.input_spec()
+    inputs = DenoiseImage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -59,7 +59,7 @@ def test_DenoiseImage_outputs():
     output_map = dict(noise_image=dict(),
     output_image=dict(),
     )
-    outputs = DenoiseImage.output_spec()
+    outputs = DenoiseImage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

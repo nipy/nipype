@@ -94,7 +94,7 @@ class FSCommand(CommandLine):
        Every FS command accepts 'subjects_dir' input.
     """
 
-    input_spec = FSTraitedSpec
+    _input_spec = FSTraitedSpec
 
     _subjects_dir = None
 

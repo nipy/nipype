@@ -67,7 +67,7 @@ def test_Normalize_inputs():
     write_wrap=dict(field='roptions.wrap',
     ),
     )
-    inputs = Normalize.input_spec()
+    inputs = Normalize._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -79,7 +79,7 @@ def test_Normalize_outputs():
     normalized_files=dict(),
     normalized_source=dict(),
     )
-    outputs = Normalize.output_spec()
+    outputs = Normalize._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

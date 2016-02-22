@@ -30,7 +30,7 @@ def test_BRAINSTransformFromFiducials_inputs():
     transformType=dict(argstr='--transformType %s',
     ),
     )
-    inputs = BRAINSTransformFromFiducials.input_spec()
+    inputs = BRAINSTransformFromFiducials._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +40,7 @@ def test_BRAINSTransformFromFiducials_inputs():
 def test_BRAINSTransformFromFiducials_outputs():
     output_map = dict(saveTransform=dict(),
     )
-    outputs = BRAINSTransformFromFiducials.output_spec()
+    outputs = BRAINSTransformFromFiducials._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

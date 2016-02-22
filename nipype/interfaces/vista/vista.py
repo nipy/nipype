@@ -42,8 +42,8 @@ class Vnifti2Image(CommandLine):
     """
 
     _cmd = 'vnifti2image'
-    input_spec = Vnifti2ImageInputSpec
-    output_spec = Vnifti2ImageOutputSpec
+    _input_spec = Vnifti2ImageInputSpec
+    _output_spec = Vnifti2ImageOutputSpec
 
 
 class VtoMatInputSpec(CommandLineInputSpec):
@@ -71,5 +71,5 @@ class VtoMat(CommandLine):
     """
 
     _cmd = 'vtomat'
-    input_spec = VtoMatInputSpec
-    output_spec = VtoMatOutputSpec
+    _input_spec = VtoMatInputSpec
+    _output_spec = VtoMatOutputSpec

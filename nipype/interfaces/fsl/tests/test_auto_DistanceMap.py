@@ -31,7 +31,7 @@ def test_DistanceMap_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DistanceMap.input_spec()
+    inputs = DistanceMap._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -42,7 +42,7 @@ def test_DistanceMap_outputs():
     output_map = dict(distance_map=dict(),
     local_max_file=dict(),
     )
-    outputs = DistanceMap.output_spec()
+    outputs = DistanceMap._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

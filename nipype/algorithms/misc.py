@@ -68,8 +68,8 @@ class PickAtlas(BaseInterface):
     and left right masking (assuming the atlas is properly aligned).
     """
 
-    input_spec = PickAtlasInputSpec
-    output_spec = PickAtlasOutputSpec
+    _input_spec = PickAtlasInputSpec
+    _output_spec = PickAtlasOutputSpec
 
     def _run_interface(self, runtime):
         nim = self._get_brodmann_area()
@@ -126,8 +126,8 @@ class SimpleThresholdOutputSpec(TraitedSpec):
 class SimpleThreshold(BaseInterface):
     """Applies a threshold to input volumes
     """
-    input_spec = SimpleThresholdInputSpec
-    output_spec = SimpleThresholdOutputSpec
+    _input_spec = SimpleThresholdInputSpec
+    _output_spec = SimpleThresholdOutputSpec
 
     def _run_interface(self, runtime):
         for fname, out_name in zip(self.inputs.volumes, self.inputs.thresholded_volumes):
@@ -164,8 +164,8 @@ class ModifyAffine(BaseInterface):
     """Left multiplies the affine matrix with a specified values. Saves the volume
     as a nifti file.
     """
-    input_spec = ModifyAffineInputSpec
-    output_spec = ModifyAffineOutputSpec
+    _input_spec = ModifyAffineInputSpec
+    _output_spec = ModifyAffineOutputSpec
 
     def _run_interface(self, runtime):
         for fname, out_name in zip(self.inputs.volumes, self.inputs.transformed_volumes):
@@ -192,8 +192,8 @@ class CreateNiftiOutputSpec(TraitedSpec):
 class CreateNifti(BaseInterface):
     """Creates a nifti volume
     """
-    input_spec = CreateNiftiInputSpec
-    output_spec = CreateNiftiOutputSpec
+    _input_spec = CreateNiftiInputSpec
+    _output_spec = CreateNiftiOutputSpec
 
     def _run_interface(self, runtime):
         hdr = nb.AnalyzeHeader.from_fileobj(
@@ -245,8 +245,8 @@ class TSNR(BaseInterface):
     >>> res = tsnr.run() # doctest: +SKIP
 
     """
-    input_spec = TSNRInputSpec
-    output_spec = TSNROutputSpec
+    _input_spec = TSNRInputSpec
+    _output_spec = TSNROutputSpec
 
     def _run_interface(self, runtime):
         img = nb.load(self.inputs.in_file[0])
@@ -304,8 +304,8 @@ class GunzipOutputSpec(TraitedSpec):
 class Gunzip(BaseInterface):
     """Gunzip wrapper
     """
-    input_spec = GunzipInputSpec
-    output_spec = GunzipOutputSpec
+    _input_spec = GunzipInputSpec
+    _output_spec = GunzipOutputSpec
 
     def _run_interface(self, runtime):
         import gzip
@@ -346,8 +346,8 @@ class Matlab2CSV(BaseInterface):
     >>> mat2csv.inputs.in_file = 'cmatrix.mat'
     >>> mat2csv.run() # doctest: +SKIP
     """
-    input_spec = Matlab2CSVInputSpec
-    output_spec = Matlab2CSVOutputSpec
+    _input_spec = Matlab2CSVInputSpec
+    _output_spec = Matlab2CSVOutputSpec
 
     def _run_interface(self, runtime):
         in_dict = sio.loadmat(op.abspath(self.inputs.in_file))
@@ -454,8 +454,8 @@ class MergeCSVFiles(BaseInterface):
     >>> mat2csv.inputs.column_headings = ['degree','clustering']
     >>> mat2csv.run() # doctest: +SKIP
     """
-    input_spec = MergeCSVFilesInputSpec
-    output_spec = MergeCSVFilesOutputSpec
+    _input_spec = MergeCSVFilesInputSpec
+    _output_spec = MergeCSVFilesOutputSpec
 
     def _run_interface(self, runtime):
         extraheadingBool = False
@@ -575,8 +575,8 @@ class AddCSVColumn(BaseInterface):
     >>> addcol.inputs.extra_field = 'male'
     >>> addcol.run() # doctest: +SKIP
     """
-    input_spec = AddCSVColumnInputSpec
-    output_spec = AddCSVColumnOutputSpec
+    _input_spec = AddCSVColumnInputSpec
+    _output_spec = AddCSVColumnOutputSpec
 
     def _run_interface(self, runtime):
         with open(self.inputs.in_file, 'r') as in_file:
@@ -636,8 +636,8 @@ class AddCSVRow(BaseInterface):
     >>> addrow.inputs.list_of_values = [ 0.4, 0.7, 0.3 ]
     >>> addrow.run() # doctest: +SKIP
     """
-    input_spec = AddCSVRowInputSpec
-    output_spec = AddCSVRowOutputSpec
+    _input_spec = AddCSVRowInputSpec
+    _output_spec = AddCSVRowOutputSpec
 
     def __init__(self, infields=None, force_run=True, **kwargs):
         super(AddCSVRow, self).__init__(**kwargs)
@@ -741,8 +741,8 @@ class CalculateNormalizedMoments(BaseInterface):
     >>> skew.inputs.timeseries_file = 'timeseries.txt'
     >>> skew.run() # doctest: +SKIP
     """
-    input_spec = CalculateNormalizedMomentsInputSpec
-    output_spec = CalculateNormalizedMomentsOutputSpec
+    _input_spec = CalculateNormalizedMomentsInputSpec
+    _output_spec = CalculateNormalizedMomentsOutputSpec
 
     def _run_interface(self, runtime):
         self.outputs.skewness = calc_moments(
@@ -784,8 +784,8 @@ class AddNoise(BaseInterface):
     >>> noise.run() # doctest: +SKIP
 
     """
-    input_spec = AddNoiseInputSpec
-    output_spec = AddNoiseOutputSpec
+    _input_spec = AddNoiseInputSpec
+    _output_spec = AddNoiseOutputSpec
 
     def _run_interface(self, runtime):
         in_image = nb.load(self.inputs.in_file)
@@ -876,8 +876,8 @@ class NormalizeProbabilityMapSet(BaseInterface):
     >>> normalize.inputs.in_mask = 'tpms_msk.nii.gz'
     >>> normalize.run() # doctest: +SKIP
     """
-    input_spec = NormalizeProbabilityMapSetInputSpec
-    output_spec = NormalizeProbabilityMapSetOutputSpec
+    _input_spec = NormalizeProbabilityMapSetInputSpec
+    _output_spec = NormalizeProbabilityMapSetOutputSpec
 
     def _run_interface(self, runtime):
         mask = None
@@ -916,8 +916,8 @@ class SplitROIs(BaseInterface):
     >>> rois.run() # doctest: +SKIP
 
     """
-    input_spec = SplitROIsInputSpec
-    output_spec = SplitROIsOutputSpec
+    _input_spec = SplitROIsInputSpec
+    _output_spec = SplitROIsOutputSpec
 
     def _run_interface(self, runtime):
         mask = None
@@ -964,8 +964,8 @@ class MergeROIs(BaseInterface):
     >>> rois.run() # doctest: +SKIP
 
     """
-    input_spec = MergeROIsInputSpec
-    output_spec = MergeROIsOutputSpec
+    _input_spec = MergeROIsInputSpec
+    _output_spec = MergeROIsOutputSpec
 
     def _run_interface(self, runtime):
         self.outputs.merged_file = merge_rois(

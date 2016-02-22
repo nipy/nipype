@@ -24,7 +24,7 @@ def test_maxcurvature_inputs():
     verbose=dict(argstr='--verbose ',
     ),
     )
-    inputs = maxcurvature.input_spec()
+    inputs = maxcurvature._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -34,7 +34,7 @@ def test_maxcurvature_inputs():
 def test_maxcurvature_outputs():
     output_map = dict(output=dict(),
     )
-    outputs = maxcurvature.output_spec()
+    outputs = maxcurvature._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

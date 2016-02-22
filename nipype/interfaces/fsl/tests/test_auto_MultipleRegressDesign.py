@@ -13,7 +13,7 @@ def test_MultipleRegressDesign_inputs():
     regressors=dict(mandatory=True,
     ),
     )
-    inputs = MultipleRegressDesign.input_spec()
+    inputs = MultipleRegressDesign._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +26,7 @@ def test_MultipleRegressDesign_outputs():
     design_grp=dict(),
     design_mat=dict(),
     )
-    outputs = MultipleRegressDesign.output_spec()
+    outputs = MultipleRegressDesign._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

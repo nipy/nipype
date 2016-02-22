@@ -13,7 +13,7 @@ def test_ModifyAffine_inputs():
     volumes=dict(mandatory=True,
     ),
     )
-    inputs = ModifyAffine.input_spec()
+    inputs = ModifyAffine._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -23,7 +23,7 @@ def test_ModifyAffine_inputs():
 def test_ModifyAffine_outputs():
     output_map = dict(transformed_volumes=dict(),
     )
-    outputs = ModifyAffine.output_spec()
+    outputs = ModifyAffine._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

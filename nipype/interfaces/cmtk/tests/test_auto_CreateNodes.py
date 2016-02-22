@@ -14,7 +14,7 @@ def test_CreateNodes_inputs():
     roi_file=dict(mandatory=True,
     ),
     )
-    inputs = CreateNodes.input_spec()
+    inputs = CreateNodes._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -24,7 +24,7 @@ def test_CreateNodes_inputs():
 def test_CreateNodes_outputs():
     output_map = dict(node_network=dict(),
     )
-    outputs = CreateNodes.output_spec()
+    outputs = CreateNodes._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

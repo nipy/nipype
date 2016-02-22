@@ -70,7 +70,7 @@ def test_Dcm2nii_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Dcm2nii.input_spec()
+    inputs = Dcm2nii._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -84,7 +84,7 @@ def test_Dcm2nii_outputs():
     reoriented_and_cropped_files=dict(),
     reoriented_files=dict(),
     )
-    outputs = Dcm2nii.output_spec()
+    outputs = Dcm2nii._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

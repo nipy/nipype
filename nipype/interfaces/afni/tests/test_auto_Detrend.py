@@ -25,7 +25,7 @@ def test_Detrend_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Detrend.input_spec()
+    inputs = Detrend._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +35,7 @@ def test_Detrend_inputs():
 def test_Detrend_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Detrend.output_spec()
+    outputs = Detrend._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

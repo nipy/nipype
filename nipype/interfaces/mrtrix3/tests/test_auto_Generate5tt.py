@@ -27,7 +27,7 @@ def test_Generate5tt_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Generate5tt.input_spec()
+    inputs = Generate5tt._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +37,7 @@ def test_Generate5tt_inputs():
 def test_Generate5tt_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Generate5tt.output_spec()
+    outputs = Generate5tt._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

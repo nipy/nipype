@@ -39,7 +39,7 @@ def test_BRAINSResample_inputs():
     warpTransform=dict(argstr='--warpTransform %s',
     ),
     )
-    inputs = BRAINSResample.input_spec()
+    inputs = BRAINSResample._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +49,7 @@ def test_BRAINSResample_inputs():
 def test_BRAINSResample_outputs():
     output_map = dict(outputVolume=dict(),
     )
-    outputs = BRAINSResample.output_spec()
+    outputs = BRAINSResample._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

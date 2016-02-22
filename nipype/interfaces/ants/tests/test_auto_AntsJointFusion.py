@@ -73,7 +73,7 @@ def test_AntsJointFusion_inputs():
     verbose=dict(argstr='-v',
     ),
     )
-    inputs = AntsJointFusion.input_spec()
+    inputs = AntsJointFusion._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -86,7 +86,7 @@ def test_AntsJointFusion_outputs():
     out_label_fusion=dict(),
     out_label_post_prob_name_format=dict(),
     )
-    outputs = AntsJointFusion.output_spec()
+    outputs = AntsJointFusion._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -56,7 +56,7 @@ def test_SFPeaks_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = SFPeaks.input_spec()
+    inputs = SFPeaks._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -66,7 +66,7 @@ def test_SFPeaks_inputs():
 def test_SFPeaks_outputs():
     output_map = dict(peaks=dict(),
     )
-    outputs = SFPeaks.output_spec()
+    outputs = SFPeaks._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

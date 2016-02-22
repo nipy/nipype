@@ -19,7 +19,7 @@ def test_StdOutCommandLine_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = StdOutCommandLine.input_spec()
+    inputs = StdOutCommandLine._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -29,7 +29,7 @@ def test_StdOutCommandLine_inputs():
 def test_StdOutCommandLine_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = StdOutCommandLine.output_spec()
+    outputs = StdOutCommandLine._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

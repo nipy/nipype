@@ -37,8 +37,8 @@ contributor: Greg Harris, Eun Young Kim
 
 """
 
-    input_spec = GenerateSummedGradientImageInputSpec
-    output_spec = GenerateSummedGradientImageOutputSpec
+    _input_spec = GenerateSummedGradientImageInputSpec
+    _output_spec = GenerateSummedGradientImageOutputSpec
     _cmd = " GenerateSummedGradientImage "
     _outputs_filenames = {'outputFileName': 'outputFileName'}
     _redirect_x = False
@@ -79,8 +79,8 @@ acknowledgements: This command module was derived from Insight/Examples/Segmenta
 
 """
 
-    input_spec = CannySegmentationLevelSetImageFilterInputSpec
-    output_spec = CannySegmentationLevelSetImageFilterOutputSpec
+    _input_spec = CannySegmentationLevelSetImageFilterInputSpec
+    _output_spec = CannySegmentationLevelSetImageFilterOutputSpec
     _cmd = " CannySegmentationLevelSetImageFilter "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii', 'outputSpeedVolume': 'outputSpeedVolume.nii'}
     _redirect_x = False
@@ -115,8 +115,8 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 """
 
-    input_spec = DilateImageInputSpec
-    output_spec = DilateImageOutputSpec
+    _input_spec = DilateImageInputSpec
+    _output_spec = DilateImageOutputSpec
     _cmd = " DilateImage "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -150,8 +150,8 @@ contributor: This tool was developed by Eunyoung Regina Kim
 
 """
 
-    input_spec = TextureFromNoiseImageFilterInputSpec
-    output_spec = TextureFromNoiseImageFilterOutputSpec
+    _input_spec = TextureFromNoiseImageFilterInputSpec
+    _output_spec = TextureFromNoiseImageFilterOutputSpec
     _cmd = " TextureFromNoiseImageFilter "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -185,8 +185,8 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 """
 
-    input_spec = FlippedDifferenceInputSpec
-    output_spec = FlippedDifferenceOutputSpec
+    _input_spec = FlippedDifferenceInputSpec
+    _output_spec = FlippedDifferenceOutputSpec
     _cmd = " FlippedDifference "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -221,8 +221,8 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 """
 
-    input_spec = ErodeImageInputSpec
-    output_spec = ErodeImageOutputSpec
+    _input_spec = ErodeImageInputSpec
+    _output_spec = ErodeImageOutputSpec
     _cmd = " ErodeImage "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -255,8 +255,8 @@ contributor: Eun Young Kim
 
 """
 
-    input_spec = GenerateBrainClippedImageInputSpec
-    output_spec = GenerateBrainClippedImageOutputSpec
+    _input_spec = GenerateBrainClippedImageInputSpec
+    _output_spec = GenerateBrainClippedImageOutputSpec
     _cmd = " GenerateBrainClippedImage "
     _outputs_filenames = {'outputFileName': 'outputFileName'}
     _redirect_x = False
@@ -291,8 +291,8 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 """
 
-    input_spec = NeighborhoodMedianInputSpec
-    output_spec = NeighborhoodMedianOutputSpec
+    _input_spec = NeighborhoodMedianInputSpec
+    _output_spec = NeighborhoodMedianOutputSpec
     _cmd = " NeighborhoodMedian "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -326,8 +326,8 @@ contributor: Eun Young Kim
 
 """
 
-    input_spec = GenerateTestImageInputSpec
-    output_spec = GenerateTestImageOutputSpec
+    _input_spec = GenerateTestImageInputSpec
+    _output_spec = GenerateTestImageOutputSpec
     _cmd = " GenerateTestImage "
     _outputs_filenames = {'outputVolume': 'outputVolume'}
     _redirect_x = False
@@ -362,8 +362,8 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 """
 
-    input_spec = NeighborhoodMeanInputSpec
-    output_spec = NeighborhoodMeanOutputSpec
+    _input_spec = NeighborhoodMeanInputSpec
+    _output_spec = NeighborhoodMeanOutputSpec
     _cmd = " NeighborhoodMean "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -400,8 +400,8 @@ contributor: This was extracted from the Hammer Registration source code, and wr
 
 """
 
-    input_spec = HammerAttributeCreatorInputSpec
-    output_spec = HammerAttributeCreatorOutputSpec
+    _input_spec = HammerAttributeCreatorInputSpec
+    _output_spec = HammerAttributeCreatorOutputSpec
     _cmd = " HammerAttributeCreator "
     _outputs_filenames = {}
     _redirect_x = False
@@ -437,8 +437,8 @@ acknowledgements: This command module was derived from Insight/Examples/Segmenta
 
 """
 
-    input_spec = TextureMeasureFilterInputSpec
-    output_spec = TextureMeasureFilterOutputSpec
+    _input_spec = TextureMeasureFilterInputSpec
+    _output_spec = TextureMeasureFilterOutputSpec
     _cmd = " TextureMeasureFilter "
     _outputs_filenames = {'outputFilename': 'outputFilename'}
     _redirect_x = False
@@ -474,8 +474,8 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 """
 
-    input_spec = DilateMaskInputSpec
-    output_spec = DilateMaskOutputSpec
+    _input_spec = DilateMaskInputSpec
+    _output_spec = DilateMaskOutputSpec
     _cmd = " DilateMask "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -508,8 +508,8 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 """
 
-    input_spec = DumpBinaryTrainingVectorsInputSpec
-    output_spec = DumpBinaryTrainingVectorsOutputSpec
+    _input_spec = DumpBinaryTrainingVectorsInputSpec
+    _output_spec = DumpBinaryTrainingVectorsOutputSpec
     _cmd = " DumpBinaryTrainingVectors "
     _outputs_filenames = {}
     _redirect_x = False
@@ -544,8 +544,8 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 """
 
-    input_spec = DistanceMapsInputSpec
-    output_spec = DistanceMapsOutputSpec
+    _input_spec = DistanceMapsInputSpec
+    _output_spec = DistanceMapsOutputSpec
     _cmd = " DistanceMaps "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -579,8 +579,8 @@ contributor: This tool was developed by Mark Scully and Jeremy Bockholt.
 
 """
 
-    input_spec = STAPLEAnalysisInputSpec
-    output_spec = STAPLEAnalysisOutputSpec
+    _input_spec = STAPLEAnalysisInputSpec
+    _output_spec = STAPLEAnalysisOutputSpec
     _cmd = " STAPLEAnalysis "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -610,8 +610,8 @@ contributor: This tool was developed by Eun Young Kim by modifying ITK Example
 
 """
 
-    input_spec = GradientAnisotropicDiffusionImageFilterInputSpec
-    output_spec = GradientAnisotropicDiffusionImageFilterOutputSpec
+    _input_spec = GradientAnisotropicDiffusionImageFilterInputSpec
+    _output_spec = GradientAnisotropicDiffusionImageFilterOutputSpec
     _cmd = " GradientAnisotropicDiffusionImageFilter "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False
@@ -649,8 +649,8 @@ contributor: This tool was written by Hans J. Johnson.
 
 """
 
-    input_spec = CannyEdgeInputSpec
-    output_spec = CannyEdgeOutputSpec
+    _input_spec = CannyEdgeInputSpec
+    _output_spec = CannyEdgeOutputSpec
     _cmd = " CannyEdge "
     _outputs_filenames = {'outputVolume': 'outputVolume.nii'}
     _redirect_x = False

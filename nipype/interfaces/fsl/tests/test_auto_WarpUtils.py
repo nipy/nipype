@@ -39,7 +39,7 @@ def test_WarpUtils_inputs():
     usedefault=True,
     ),
     )
-    inputs = WarpUtils.input_spec()
+    inputs = WarpUtils._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -50,7 +50,7 @@ def test_WarpUtils_outputs():
     output_map = dict(out_file=dict(),
     out_jacobian=dict(),
     )
-    outputs = WarpUtils.output_spec()
+    outputs = WarpUtils._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

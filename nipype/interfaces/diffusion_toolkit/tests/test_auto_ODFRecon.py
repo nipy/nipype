@@ -54,7 +54,7 @@ def test_ODFRecon_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ODFRecon.input_spec()
+    inputs = ODFRecon._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -68,7 +68,7 @@ def test_ODFRecon_outputs():
     entropy=dict(),
     max=dict(),
     )
-    outputs = ODFRecon.output_spec()
+    outputs = ODFRecon._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

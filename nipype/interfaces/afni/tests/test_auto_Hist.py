@@ -42,7 +42,7 @@ def test_Hist_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Hist.input_spec()
+    inputs = Hist._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +53,7 @@ def test_Hist_outputs():
     output_map = dict(out_file=dict(),
     out_show=dict(),
     )
-    outputs = Hist.output_spec()
+    outputs = Hist._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

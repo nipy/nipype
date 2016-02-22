@@ -30,7 +30,7 @@ def test_TCK2VTK_inputs():
     voxel=dict(argstr='-image %s',
     ),
     )
-    inputs = TCK2VTK.input_spec()
+    inputs = TCK2VTK._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +40,7 @@ def test_TCK2VTK_inputs():
 def test_TCK2VTK_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = TCK2VTK.output_spec()
+    outputs = TCK2VTK._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

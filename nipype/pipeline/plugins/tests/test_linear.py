@@ -17,8 +17,8 @@ class OutputSpec(nib.TraitedSpec):
 
 
 class TestInterface(nib.BaseInterface):
-    input_spec = InputSpec
-    output_spec = OutputSpec
+    _input_spec = InputSpec
+    _output_spec = OutputSpec
 
     def _run_interface(self, runtime):
         runtime.returncode = 0

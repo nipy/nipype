@@ -33,7 +33,7 @@ def test_PlotMotionParams_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = PlotMotionParams.input_spec()
+    inputs = PlotMotionParams._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -43,7 +43,7 @@ def test_PlotMotionParams_inputs():
 def test_PlotMotionParams_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = PlotMotionParams.output_spec()
+    outputs = PlotMotionParams._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

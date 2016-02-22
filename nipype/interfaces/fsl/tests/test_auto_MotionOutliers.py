@@ -39,7 +39,7 @@ def test_MotionOutliers_inputs():
     threshold=dict(argstr='--thresh=%g',
     ),
     )
-    inputs = MotionOutliers.input_spec()
+    inputs = MotionOutliers._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -51,7 +51,7 @@ def test_MotionOutliers_outputs():
     out_metric_plot=dict(),
     out_metric_values=dict(),
     )
-    outputs = MotionOutliers.output_spec()
+    outputs = MotionOutliers._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

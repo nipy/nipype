@@ -72,7 +72,7 @@ def test_Label2Vol_inputs():
     genfile=True,
     ),
     )
-    inputs = Label2Vol.input_spec()
+    inputs = Label2Vol._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -82,7 +82,7 @@ def test_Label2Vol_inputs():
 def test_Label2Vol_outputs():
     output_map = dict(vol_label_file=dict(),
     )
-    outputs = Label2Vol.output_spec()
+    outputs = Label2Vol._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

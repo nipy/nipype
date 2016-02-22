@@ -45,8 +45,8 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = BSplineDeformableRegistrationInputSpec
-    output_spec = BSplineDeformableRegistrationOutputSpec
+    _input_spec = BSplineDeformableRegistrationInputSpec
+    _output_spec = BSplineDeformableRegistrationOutputSpec
     _cmd = "BSplineDeformableRegistration "
     _outputs_filenames = {'resampledmovingfilename': 'resampledmovingfilename.nii', 'outputtransform': 'outputtransform.txt', 'outputwarp': 'outputwarp.nrrd'}
 
@@ -93,8 +93,8 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
 
 """
 
-    input_spec = AffineRegistrationInputSpec
-    output_spec = AffineRegistrationOutputSpec
+    _input_spec = AffineRegistrationInputSpec
+    _output_spec = AffineRegistrationOutputSpec
     _cmd = "AffineRegistration "
     _outputs_filenames = {'resampledmovingfilename': 'resampledmovingfilename.nii', 'outputtransform': 'outputtransform.txt'}
 
@@ -135,8 +135,8 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = MultiResolutionAffineRegistrationInputSpec
-    output_spec = MultiResolutionAffineRegistrationOutputSpec
+    _input_spec = MultiResolutionAffineRegistrationInputSpec
+    _output_spec = MultiResolutionAffineRegistrationOutputSpec
     _cmd = "MultiResolutionAffineRegistration "
     _outputs_filenames = {'resampledImage': 'resampledImage.nii', 'saveTransform': 'saveTransform.txt'}
 
@@ -189,8 +189,8 @@ This work is part of the National Alliance for Medical Image Computing (NAMIC), 
 
 """
 
-    input_spec = RigidRegistrationInputSpec
-    output_spec = RigidRegistrationOutputSpec
+    _input_spec = RigidRegistrationInputSpec
+    _output_spec = RigidRegistrationOutputSpec
     _cmd = "RigidRegistration "
     _outputs_filenames = {'resampledmovingfilename': 'resampledmovingfilename.nii', 'outputtransform': 'outputtransform.txt'}
 
@@ -232,8 +232,8 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = LinearRegistrationInputSpec
-    output_spec = LinearRegistrationOutputSpec
+    _input_spec = LinearRegistrationInputSpec
+    _output_spec = LinearRegistrationOutputSpec
     _cmd = "LinearRegistration "
     _outputs_filenames = {'resampledmovingfilename': 'resampledmovingfilename.nii', 'outputtransform': 'outputtransform.txt'}
 
@@ -291,7 +291,7 @@ acknowledgements: This work is part of the National Alliance for Medical Image C
 
 """
 
-    input_spec = ExpertAutomatedRegistrationInputSpec
-    output_spec = ExpertAutomatedRegistrationOutputSpec
+    _input_spec = ExpertAutomatedRegistrationInputSpec
+    _output_spec = ExpertAutomatedRegistrationOutputSpec
     _cmd = "ExpertAutomatedRegistration "
     _outputs_filenames = {'resampledImage': 'resampledImage.nii', 'saveTransform': 'saveTransform.txt'}

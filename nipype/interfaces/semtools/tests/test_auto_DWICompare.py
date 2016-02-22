@@ -19,7 +19,7 @@ def test_DWICompare_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = DWICompare.input_spec()
+    inputs = DWICompare._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -28,7 +28,7 @@ def test_DWICompare_inputs():
 
 def test_DWICompare_outputs():
     output_map = dict()
-    outputs = DWICompare.output_spec()
+    outputs = DWICompare._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

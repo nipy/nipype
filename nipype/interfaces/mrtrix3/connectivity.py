@@ -101,8 +101,8 @@ class BuildConnectome(MRTrix3Base):
     """
 
     _cmd = 'tck2connectome'
-    input_spec = BuildConnectomeInputSpec
-    output_spec = BuildConnectomeOutputSpec
+    _input_spec = BuildConnectomeInputSpec
+    _output_spec = BuildConnectomeOutputSpec
 
     def _post_run(self):
         
@@ -159,8 +159,8 @@ class LabelConfig(MRTrix3Base):
     """
 
     _cmd = 'labelconfig'
-    input_spec = LabelConfigInputSpec
-    output_spec = LabelConfigOutputSpec
+    _input_spec = LabelConfigInputSpec
+    _output_spec = LabelConfigOutputSpec
 
     def parse_args(self, skip=None):
         if skip is None:

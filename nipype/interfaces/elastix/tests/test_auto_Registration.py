@@ -37,7 +37,7 @@ def test_Registration_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Registration.input_spec()
+    inputs = Registration._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -50,7 +50,7 @@ def test_Registration_outputs():
     warped_files=dict(),
     warped_files_flags=dict(),
     )
-    outputs = Registration.output_spec()
+    outputs = Registration._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

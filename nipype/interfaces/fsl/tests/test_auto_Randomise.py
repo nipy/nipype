@@ -77,7 +77,7 @@ def test_Randomise_inputs():
     x_block_labels=dict(argstr='-e %s',
     ),
     )
-    inputs = Randomise.input_spec()
+    inputs = Randomise._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -92,7 +92,7 @@ def test_Randomise_outputs():
     t_p_files=dict(),
     tstat_files=dict(),
     )
-    outputs = Randomise.output_spec()
+    outputs = Randomise._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

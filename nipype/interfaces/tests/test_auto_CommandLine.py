@@ -15,7 +15,7 @@ def test_CommandLine_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = CommandLine.input_spec()
+    inputs = CommandLine._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -24,7 +24,7 @@ def test_CommandLine_inputs():
 
 def test_CommandLine_outputs():
     output_map = dict()
-    outputs = CommandLine.output_spec()
+    outputs = CommandLine._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

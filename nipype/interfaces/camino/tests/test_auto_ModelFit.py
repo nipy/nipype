@@ -52,7 +52,7 @@ def test_ModelFit_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ModelFit.input_spec()
+    inputs = ModelFit._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -62,7 +62,7 @@ def test_ModelFit_inputs():
 def test_ModelFit_outputs():
     output_map = dict(fitted_data=dict(),
     )
-    outputs = ModelFit.output_spec()
+    outputs = ModelFit._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -63,7 +63,7 @@ def test_DTITracker_inputs():
     tracking_method=dict(argstr='-%s',
     ),
     )
-    inputs = DTITracker.input_spec()
+    inputs = DTITracker._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -74,7 +74,7 @@ def test_DTITracker_outputs():
     output_map = dict(mask_file=dict(),
     track_file=dict(),
     )
-    outputs = DTITracker.output_spec()
+    outputs = DTITracker._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

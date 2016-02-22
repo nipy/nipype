@@ -38,7 +38,7 @@ def test_SVMTest_inputs():
     testlabels=dict(argstr='-testlabels %s',
     ),
     )
-    inputs = SVMTest.input_spec()
+    inputs = SVMTest._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -48,7 +48,7 @@ def test_SVMTest_inputs():
 def test_SVMTest_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = SVMTest.output_spec()
+    outputs = SVMTest._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

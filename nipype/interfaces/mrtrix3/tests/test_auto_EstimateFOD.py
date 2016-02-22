@@ -57,7 +57,7 @@ def test_EstimateFOD_inputs():
     thres=dict(argstr='-threshold %f',
     ),
     )
-    inputs = EstimateFOD.input_spec()
+    inputs = EstimateFOD._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -67,7 +67,7 @@ def test_EstimateFOD_inputs():
 def test_EstimateFOD_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = EstimateFOD.output_spec()
+    outputs = EstimateFOD._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

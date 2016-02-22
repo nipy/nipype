@@ -34,7 +34,7 @@ def test_UnbiasedNonLocalMeans_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = UnbiasedNonLocalMeans.input_spec()
+    inputs = UnbiasedNonLocalMeans._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -45,7 +45,7 @@ def test_UnbiasedNonLocalMeans_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = UnbiasedNonLocalMeans.output_spec()
+    outputs = UnbiasedNonLocalMeans._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

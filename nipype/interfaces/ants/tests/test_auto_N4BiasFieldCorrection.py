@@ -54,7 +54,7 @@ def test_N4BiasFieldCorrection_inputs():
     weight_image=dict(argstr='--weight-image %s',
     ),
     )
-    inputs = N4BiasFieldCorrection.input_spec()
+    inputs = N4BiasFieldCorrection._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -65,7 +65,7 @@ def test_N4BiasFieldCorrection_outputs():
     output_map = dict(bias_image=dict(),
     output_image=dict(),
     )
-    outputs = N4BiasFieldCorrection.output_spec()
+    outputs = N4BiasFieldCorrection._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

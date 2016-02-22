@@ -42,7 +42,7 @@ def test_Smooth_inputs():
     vol_fwhm=dict(argstr='--vol-fwhm %f',
     ),
     )
-    inputs = Smooth.input_spec()
+    inputs = Smooth._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +52,7 @@ def test_Smooth_inputs():
 def test_Smooth_outputs():
     output_map = dict(smoothed_file=dict(),
     )
-    outputs = Smooth.output_spec()
+    outputs = Smooth._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

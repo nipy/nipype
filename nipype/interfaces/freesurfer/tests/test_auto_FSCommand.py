@@ -16,7 +16,7 @@ def test_FSCommand_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = FSCommand.input_spec()
+    inputs = FSCommand._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -25,7 +25,7 @@ def test_FSCommand_inputs():
 
 def test_FSCommand_outputs():
     output_map = dict()
-    outputs = FSCommand.output_spec()
+    outputs = FSCommand._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

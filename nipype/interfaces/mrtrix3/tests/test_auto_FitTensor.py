@@ -42,7 +42,7 @@ def test_FitTensor_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = FitTensor.input_spec()
+    inputs = FitTensor._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +52,7 @@ def test_FitTensor_inputs():
 def test_FitTensor_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = FitTensor.output_spec()
+    outputs = FitTensor._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

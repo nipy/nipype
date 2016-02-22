@@ -47,7 +47,7 @@ def test_TCorr1D_inputs():
     position=-1,
     ),
     )
-    inputs = TCorr1D.input_spec()
+    inputs = TCorr1D._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -57,7 +57,7 @@ def test_TCorr1D_inputs():
 def test_TCorr1D_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = TCorr1D.output_spec()
+    outputs = TCorr1D._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

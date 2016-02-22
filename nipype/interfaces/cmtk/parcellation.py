@@ -564,8 +564,8 @@ class Parcellate(BaseInterface):
     >>> parcellate.run()                 # doctest: +SKIP
     """
 
-    input_spec = ParcellateInputSpec
-    output_spec = ParcellateOutputSpec
+    _input_spec = ParcellateInputSpec
+    _output_spec = ParcellateOutputSpec
 
     def _run_interface(self, runtime):
         if self.inputs.subjects_dir:

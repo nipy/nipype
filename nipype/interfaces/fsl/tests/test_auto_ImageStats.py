@@ -30,7 +30,7 @@ def test_ImageStats_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ImageStats.input_spec()
+    inputs = ImageStats._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -40,7 +40,7 @@ def test_ImageStats_inputs():
 def test_ImageStats_outputs():
     output_map = dict(out_stat=dict(),
     )
-    outputs = ImageStats.output_spec()
+    outputs = ImageStats._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

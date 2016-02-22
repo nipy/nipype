@@ -45,7 +45,7 @@ def test_fiberprocess_inputs():
     voxelize_count_fibers=dict(argstr='--voxelize_count_fibers ',
     ),
     )
-    inputs = fiberprocess.input_spec()
+    inputs = fiberprocess._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -56,7 +56,7 @@ def test_fiberprocess_outputs():
     output_map = dict(fiber_output=dict(),
     voxelize=dict(),
     )
-    outputs = fiberprocess.output_spec()
+    outputs = fiberprocess._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -28,7 +28,7 @@ def test_OtsuThresholdImageFilter_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = OtsuThresholdImageFilter.input_spec()
+    inputs = OtsuThresholdImageFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -39,7 +39,7 @@ def test_OtsuThresholdImageFilter_outputs():
     output_map = dict(outputVolume=dict(position=-1,
     ),
     )
-    outputs = OtsuThresholdImageFilter.output_spec()
+    outputs = OtsuThresholdImageFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

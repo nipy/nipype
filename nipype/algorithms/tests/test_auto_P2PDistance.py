@@ -17,7 +17,7 @@ def test_P2PDistance_inputs():
     weighting=dict(usedefault=True,
     ),
     )
-    inputs = P2PDistance.input_spec()
+    inputs = P2PDistance._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -29,7 +29,7 @@ def test_P2PDistance_outputs():
     out_file=dict(),
     out_warp=dict(),
     )
-    outputs = P2PDistance.output_spec()
+    outputs = P2PDistance._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -68,7 +68,7 @@ def test_CorticalThickness_inputs():
     use_random_seeding=dict(argstr='-u %d',
     ),
     )
-    inputs = CorticalThickness.input_spec()
+    inputs = CorticalThickness._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -89,7 +89,7 @@ def test_CorticalThickness_outputs():
     TemplateToSubject0Warp=dict(),
     TemplateToSubject1GenericAffine=dict(),
     )
-    outputs = CorticalThickness.output_spec()
+    outputs = CorticalThickness._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

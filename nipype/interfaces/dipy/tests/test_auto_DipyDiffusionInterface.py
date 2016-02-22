@@ -17,7 +17,7 @@ def test_DipyDiffusionInterface_inputs():
     ),
     out_prefix=dict(),
     )
-    inputs = DipyDiffusionInterface.input_spec()
+    inputs = DipyDiffusionInterface._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -26,7 +26,7 @@ def test_DipyDiffusionInterface_inputs():
 
 def test_DipyDiffusionInterface_outputs():
     output_map = dict()
-    outputs = DipyDiffusionInterface.output_spec()
+    outputs = DipyDiffusionInterface._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

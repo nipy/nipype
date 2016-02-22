@@ -111,7 +111,7 @@ def test_Average_inputs():
     requires=('avgdim',),
     ),
     )
-    inputs = Average.input_spec()
+    inputs = Average._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -121,7 +121,7 @@ def test_Average_inputs():
 def test_Average_outputs():
     output_map = dict(output_file=dict(),
     )
-    outputs = Average.output_spec()
+    outputs = Average._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

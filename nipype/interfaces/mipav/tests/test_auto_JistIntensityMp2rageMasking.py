@@ -48,7 +48,7 @@ def test_JistIntensityMp2rageMasking_inputs():
     xPrefExt=dict(argstr='--xPrefExt %s',
     ),
     )
-    inputs = JistIntensityMp2rageMasking.input_spec()
+    inputs = JistIntensityMp2rageMasking._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -61,7 +61,7 @@ def test_JistIntensityMp2rageMasking_outputs():
     outSignal=dict(),
     outSignal2=dict(),
     )
-    outputs = JistIntensityMp2rageMasking.output_spec()
+    outputs = JistIntensityMp2rageMasking._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

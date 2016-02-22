@@ -46,7 +46,7 @@ def test_FSL2Scheme_inputs():
     usegradmod=dict(argstr='-usegradmod',
     ),
     )
-    inputs = FSL2Scheme.input_spec()
+    inputs = FSL2Scheme._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -56,7 +56,7 @@ def test_FSL2Scheme_inputs():
 def test_FSL2Scheme_outputs():
     output_map = dict(scheme=dict(),
     )
-    outputs = FSL2Scheme.output_spec()
+    outputs = FSL2Scheme._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

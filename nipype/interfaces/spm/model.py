@@ -105,8 +105,8 @@ class Level1Design(SPMCommand):
 
     """
 
-    input_spec = Level1DesignInputSpec
-    output_spec = Level1DesignOutputSpec
+    _input_spec = Level1DesignInputSpec
+    _output_spec = Level1DesignOutputSpec
 
     _jobtype = 'stats'
     _jobname = 'fmri_spec'
@@ -187,8 +187,8 @@ class EstimateModel(SPMCommand):
     >>> est.inputs.spm_mat_file = 'SPM.mat'
     >>> est.run() # doctest: +SKIP
     """
-    input_spec = EstimateModelInputSpec
-    output_spec = EstimateModelOutputSpec
+    _input_spec = EstimateModelInputSpec
+    _output_spec = EstimateModelOutputSpec
     _jobtype = 'stats'
     _jobname = 'fmri_est'
 
@@ -309,8 +309,8 @@ class EstimateContrast(SPMCommand):
 
     """
 
-    input_spec = EstimateContrastInputSpec
-    output_spec = EstimateContrastOutputSpec
+    _input_spec = EstimateContrastInputSpec
+    _output_spec = EstimateContrastOutputSpec
     _jobtype = 'stats'
     _jobname = 'con'
 
@@ -444,8 +444,8 @@ class Threshold(SPMCommand):
     >>> thresh.inputs.extent_fdr_p_threshold = 0.05
     >>> thresh.run() # doctest: +SKIP
     """
-    input_spec = ThresholdInputSpec
-    output_spec = ThresholdOutputSpec
+    _input_spec = ThresholdInputSpec
+    _output_spec = ThresholdOutputSpec
 
     def _gen_thresholded_map_filename(self):
         _, fname, ext = split_filename(self.inputs.stat_image)
@@ -619,8 +619,8 @@ class ThresholdStatistics(SPMCommand):
     >>> thresh.inputs.height_threshold = 4.56
     >>> thresh.run() # doctest: +SKIP
     """
-    input_spec = ThresholdStatisticsInputSpec
-    output_spec = ThresholdStatisticsOutputSpec
+    _input_spec = ThresholdStatisticsInputSpec
+    _output_spec = ThresholdStatisticsOutputSpec
 
     def _make_matlab_command(self, _):
         script = "con_index = %d;\n" % self.inputs.contrast_index
@@ -737,8 +737,8 @@ class FactorialDesign(SPMCommand):
 
     """
 
-    input_spec = FactorialDesignInputSpec
-    output_spec = FactorialDesignOutputSpec
+    _input_spec = FactorialDesignInputSpec
+    _output_spec = FactorialDesignOutputSpec
     _jobtype = 'stats'
     _jobname = 'factorial_design'
 
@@ -790,7 +790,7 @@ class OneSampleTTestDesign(FactorialDesign):
     >>> ttest.run() # doctest: +SKIP
     """
 
-    input_spec = OneSampleTTestDesignInputSpec
+    _input_spec = OneSampleTTestDesignInputSpec
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
@@ -827,7 +827,7 @@ class TwoSampleTTestDesign(FactorialDesign):
     >>> ttest.run() # doctest: +SKIP
     """
 
-    input_spec = TwoSampleTTestDesignInputSpec
+    _input_spec = TwoSampleTTestDesignInputSpec
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
@@ -859,7 +859,7 @@ class PairedTTestDesign(FactorialDesign):
     >>> pttest.run() # doctest: +SKIP
     """
 
-    input_spec = PairedTTestDesignInputSpec
+    _input_spec = PairedTTestDesignInputSpec
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm
@@ -895,7 +895,7 @@ class MultipleRegressionDesign(FactorialDesign):
     >>> mreg.run() # doctest: +SKIP
     """
 
-    input_spec = MultipleRegressionDesignInputSpec
+    _input_spec = MultipleRegressionDesignInputSpec
 
     def _format_arg(self, opt, spec, val):
         """Convert input to appropriate format for spm

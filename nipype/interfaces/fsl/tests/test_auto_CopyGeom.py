@@ -31,7 +31,7 @@ def test_CopyGeom_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = CopyGeom.input_spec()
+    inputs = CopyGeom._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -41,7 +41,7 @@ def test_CopyGeom_inputs():
 def test_CopyGeom_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = CopyGeom.output_spec()
+    outputs = CopyGeom._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

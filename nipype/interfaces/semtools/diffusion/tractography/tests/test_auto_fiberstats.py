@@ -19,7 +19,7 @@ def test_fiberstats_inputs():
     verbose=dict(argstr='--verbose ',
     ),
     )
-    inputs = fiberstats.input_spec()
+    inputs = fiberstats._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -28,7 +28,7 @@ def test_fiberstats_inputs():
 
 def test_fiberstats_outputs():
     output_map = dict()
-    outputs = fiberstats.output_spec()
+    outputs = fiberstats._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

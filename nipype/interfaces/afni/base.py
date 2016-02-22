@@ -93,7 +93,7 @@ class AFNICommandOutputSpec(TraitedSpec):
 
 class AFNICommand(AFNICommandBase):
     """Shared options for several AFNI commands """
-    input_spec = AFNICommandInputSpec
+    _input_spec = AFNICommandInputSpec
 
 def no_afni():
     """ Checks if AFNI is available """

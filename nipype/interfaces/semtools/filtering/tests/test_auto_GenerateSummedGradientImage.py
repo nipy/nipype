@@ -26,7 +26,7 @@ def test_GenerateSummedGradientImage_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = GenerateSummedGradientImage.input_spec()
+    inputs = GenerateSummedGradientImage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -36,7 +36,7 @@ def test_GenerateSummedGradientImage_inputs():
 def test_GenerateSummedGradientImage_outputs():
     output_map = dict(outputFileName=dict(),
     )
-    outputs = GenerateSummedGradientImage.output_spec()
+    outputs = GenerateSummedGradientImage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -52,7 +52,7 @@ def test_DTLUTGen_inputs():
     watson=dict(argstr='-watson',
     ),
     )
-    inputs = DTLUTGen.input_spec()
+    inputs = DTLUTGen._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -62,7 +62,7 @@ def test_DTLUTGen_inputs():
 def test_DTLUTGen_outputs():
     output_map = dict(dtLUT=dict(),
     )
-    outputs = DTLUTGen.output_spec()
+    outputs = DTLUTGen._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

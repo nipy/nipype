@@ -27,7 +27,7 @@ def test_SplineFilter_inputs():
     position=0,
     ),
     )
-    inputs = SplineFilter.input_spec()
+    inputs = SplineFilter._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -37,7 +37,7 @@ def test_SplineFilter_inputs():
 def test_SplineFilter_outputs():
     output_map = dict(smoothed_track_file=dict(),
     )
-    outputs = SplineFilter.output_spec()
+    outputs = SplineFilter._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

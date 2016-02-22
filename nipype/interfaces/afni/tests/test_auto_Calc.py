@@ -42,7 +42,7 @@ def test_Calc_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Calc.input_spec()
+    inputs = Calc._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -52,7 +52,7 @@ def test_Calc_inputs():
 def test_Calc_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Calc.output_spec()
+    outputs = Calc._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

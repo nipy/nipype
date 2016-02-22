@@ -25,7 +25,7 @@ def test_Copy_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = Copy.input_spec()
+    inputs = Copy._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -35,7 +35,7 @@ def test_Copy_inputs():
 def test_Copy_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = Copy.output_spec()
+    outputs = Copy._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -43,7 +43,7 @@ def test_ApplyTOPUP_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = ApplyTOPUP.input_spec()
+    inputs = ApplyTOPUP._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -53,7 +53,7 @@ def test_ApplyTOPUP_inputs():
 def test_ApplyTOPUP_outputs():
     output_map = dict(out_corrected=dict(),
     )
-    outputs = ApplyTOPUP.output_spec()
+    outputs = ApplyTOPUP._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

@@ -39,7 +39,7 @@ def test_MeanImage_inputs():
     terminal_output=dict(nohash=True,
     ),
     )
-    inputs = MeanImage.input_spec()
+    inputs = MeanImage._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -49,7 +49,7 @@ def test_MeanImage_inputs():
 def test_MeanImage_outputs():
     output_map = dict(out_file=dict(),
     )
-    outputs = MeanImage.output_spec()
+    outputs = MeanImage._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

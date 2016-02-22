@@ -75,7 +75,7 @@ def test_FAST_inputs():
     verbose=dict(argstr='-v',
     ),
     )
-    inputs = FAST.input_spec()
+    inputs = FAST._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -92,7 +92,7 @@ def test_FAST_outputs():
     tissue_class_files=dict(),
     tissue_class_map=dict(),
     )
-    outputs = FAST.output_spec()
+    outputs = FAST._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):

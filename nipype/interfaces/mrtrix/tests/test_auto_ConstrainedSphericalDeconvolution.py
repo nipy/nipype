@@ -52,7 +52,7 @@ def test_ConstrainedSphericalDeconvolution_inputs():
     threshold_value=dict(argstr='-threshold %s',
     ),
     )
-    inputs = ConstrainedSphericalDeconvolution.input_spec()
+    inputs = ConstrainedSphericalDeconvolution._input_spec()
 
     for key, metadata in list(input_map.items()):
         for metakey, value in list(metadata.items()):
@@ -62,7 +62,7 @@ def test_ConstrainedSphericalDeconvolution_inputs():
 def test_ConstrainedSphericalDeconvolution_outputs():
     output_map = dict(spherical_harmonics_image=dict(),
     )
-    outputs = ConstrainedSphericalDeconvolution.output_spec()
+    outputs = ConstrainedSphericalDeconvolution._output_spec()
 
     for key, metadata in list(output_map.items()):
         for metakey, value in list(metadata.items()):
