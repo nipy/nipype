@@ -238,6 +238,11 @@ class BaseInterface(HasTraits):
                 if not value and out_name in outputs:
                     setattr(self.outputs, Undefined)
 
+            # Rule #3: inputs specifying an output_name metadata will be
+            # mapped to the corresponding output
+            if spec.output_name and self.outputs.traits()[spec.output_name]:
+                setattr(self.outputs, spec.output_name, value)
+
 
     def run(self, dry_run=False, **inputs):
         """Basic implementation of the interface runner"""
