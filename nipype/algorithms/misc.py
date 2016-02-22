@@ -293,8 +293,6 @@ class TSNR(BaseInterface):
 
 class GunzipInputSpec(BaseInputSpec):
     in_file = File(exists=True, mandatory=True)
-    out_file = GenFile(ns='in_file', template='%s', name_remove='.gz',
-                    keep_extension=False, desc='output file')
 
 
 class GunzipOutputSpec(TraitedSpec):
@@ -302,16 +300,24 @@ class GunzipOutputSpec(TraitedSpec):
 
 
 class Gunzip(BaseInterface):
-    """Gunzip wrapper
-    """
+    """Gunzip wrapper"""
     _input_spec = GunzipInputSpec
     _output_spec = GunzipOutputSpec
 
     def _run_interface(self, runtime):
         import gzip
+
+        _, fname, ext = split_filename(self.inputs.in_file)
+        out_file = fname + ext
+        if not ext.endswith('.gz'):
+            IFLOGGER.warn('File does not have .gz extension.')
+        else:
+            out_file = out_file[:-3]
+
         with gzip.open(self.inputs.in_file, 'rb') as in_file:
-            with open(self.inputs.out_file, 'wb') as out_file:
-                out_file.write(in_file.read())
+            with open(out_file, 'wb') as ofile:
+                ofile.write(in_file.read())
+        self.outputs.out_file = out_file
         return runtime
 
 
