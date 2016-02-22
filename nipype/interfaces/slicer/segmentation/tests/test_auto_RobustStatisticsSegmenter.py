@@ -8,13 +8,7 @@ def test_RobustStatisticsSegmenter_inputs():
     ),
     curvatureWeight=dict(argstr='--curvatureWeight %f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     expectedVolume=dict(argstr='--expectedVolume %f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     intensityHomogeneity=dict(argstr='--intensityHomogeneity %f',
     ),
@@ -31,8 +25,6 @@ def test_RobustStatisticsSegmenter_inputs():
     segmentedImageFileName=dict(argstr='%s',
     hash_files=False,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = RobustStatisticsSegmenter._input_spec()

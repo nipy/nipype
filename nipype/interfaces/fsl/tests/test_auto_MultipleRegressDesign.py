@@ -7,9 +7,6 @@ def test_MultipleRegressDesign_inputs():
     input_map = dict(contrasts=dict(mandatory=True,
     ),
     groups=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     regressors=dict(mandatory=True,
     ),
     )

@@ -6,16 +6,10 @@ from ..maths import IsotropicSmooth
 def test_IsotropicSmooth_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fwhm=dict(argstr='-s %.5f',
     mandatory=True,
     position=4,
     xor=['sigma'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -41,8 +35,6 @@ def test_IsotropicSmooth_inputs():
     mandatory=True,
     position=4,
     xor=['fwhm'],
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = IsotropicSmooth._input_spec()

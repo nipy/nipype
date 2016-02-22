@@ -12,12 +12,6 @@ def test_Erode_inputs():
     dilate=dict(argstr='-dilate',
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -30,8 +24,6 @@ def test_Erode_inputs():
     ),
     quiet=dict(argstr='-quiet',
     position=1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Erode._input_spec()

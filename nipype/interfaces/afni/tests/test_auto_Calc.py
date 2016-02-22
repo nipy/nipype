@@ -6,15 +6,9 @@ from ..preprocess import Calc
 def test_Calc_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     expr=dict(argstr='-expr "%s"',
     mandatory=True,
     position=3,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file_a=dict(argstr='-a %s',
     mandatory=True,
@@ -38,8 +32,6 @@ def test_Calc_inputs():
     start_idx=dict(requires=['stop_idx'],
     ),
     stop_idx=dict(requires=['start_idx'],
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Calc._input_spec()

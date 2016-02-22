@@ -6,12 +6,6 @@ from ..utils import Reorient2Std
 def test_Reorient2Std_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     ),
@@ -19,8 +13,6 @@ def test_Reorient2Std_inputs():
     hash_files=False,
     ),
     output_type=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Reorient2Std._input_spec()

@@ -8,13 +8,7 @@ def test_ESLR_inputs():
     ),
     closingSize=dict(argstr='--closingSize %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     high=dict(argstr='--high %d',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
@@ -30,8 +24,6 @@ def test_ESLR_inputs():
     preserveOutside=dict(argstr='--preserveOutside ',
     ),
     safetySize=dict(argstr='--safetySize %d',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ESLR._input_spec()

@@ -8,12 +8,6 @@ def test_DWIToDTIEstimation_inputs():
     ),
     enumeration=dict(argstr='--enumeration %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='%s',
     position=-3,
     ),
@@ -28,8 +22,6 @@ def test_DWIToDTIEstimation_inputs():
     position=-2,
     ),
     shiftNeg=dict(argstr='--shiftNeg ',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DWIToDTIEstimation._input_spec()

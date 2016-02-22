@@ -6,18 +6,10 @@ from ..featurecreator import GenerateCsfClippedFromClassifiedImage
 def test_GenerateCsfClippedFromClassifiedImage_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputCassifiedVolume=dict(argstr='--inputCassifiedVolume %s',
     ),
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = GenerateCsfClippedFromClassifiedImage._input_spec()

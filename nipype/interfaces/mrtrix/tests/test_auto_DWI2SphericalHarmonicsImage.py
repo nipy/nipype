@@ -10,12 +10,6 @@ def test_DWI2SphericalHarmonicsImage_inputs():
     mandatory=True,
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -28,8 +22,6 @@ def test_DWI2SphericalHarmonicsImage_inputs():
     out_filename=dict(argstr='%s',
     genfile=True,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DWI2SphericalHarmonicsImage._input_spec()

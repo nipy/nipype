@@ -6,12 +6,6 @@ from ..maths import ChangeDataType
 def test_ChangeDataType_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=2,
@@ -32,8 +26,6 @@ def test_ChangeDataType_inputs():
     position=-1,
     ),
     output_type=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ChangeDataType._input_spec()

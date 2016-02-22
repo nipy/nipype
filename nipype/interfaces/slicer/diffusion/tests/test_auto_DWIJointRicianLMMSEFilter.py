@@ -8,12 +8,6 @@ def test_DWIJointRicianLMMSEFilter_inputs():
     ),
     compressOutput=dict(argstr='--compressOutput ',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='%s',
     position=-2,
     ),
@@ -28,8 +22,6 @@ def test_DWIJointRicianLMMSEFilter_inputs():
     ),
     rf=dict(argstr='--rf %s',
     sep=',',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DWIJointRicianLMMSEFilter._input_spec()

@@ -16,17 +16,9 @@ def test_MaskScalarVolume_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     label=dict(argstr='--label %d',
     ),
     replace=dict(argstr='--replace %d',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = MaskScalarVolume._input_spec()

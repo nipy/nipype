@@ -6,12 +6,6 @@ from ..connectivity import LabelConfig
 def test_LabelConfig_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_config=dict(argstr='%s',
     position=-2,
     ),
@@ -36,8 +30,6 @@ def test_LabelConfig_inputs():
     usedefault=True,
     ),
     spine=dict(argstr='-spine %s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = LabelConfig._input_spec()

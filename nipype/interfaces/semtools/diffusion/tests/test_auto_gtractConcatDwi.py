@@ -6,13 +6,7 @@ from ..gtract import gtractConcatDwi
 def test_gtractConcatDwi_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     ignoreOrigins=dict(argstr='--ignoreOrigins ',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='--inputVolume %s...',
     ),
@@ -20,8 +14,6 @@ def test_gtractConcatDwi_inputs():
     ),
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = gtractConcatDwi._input_spec()

@@ -6,12 +6,6 @@ from ..featuredetection import DilateImage
 def test_DilateImage_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputMaskVolume=dict(argstr='--inputMaskVolume %s',
     ),
     inputRadius=dict(argstr='--inputRadius %d',
@@ -20,8 +14,6 @@ def test_DilateImage_inputs():
     ),
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DilateImage._input_spec()

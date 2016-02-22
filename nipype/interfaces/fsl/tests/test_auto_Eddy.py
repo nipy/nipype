@@ -6,15 +6,9 @@ from ..epi import Eddy
 def test_Eddy_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     flm=dict(argstr='--flm=%s',
     ),
     fwhm=dict(argstr='--fwhm=%s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_acqp=dict(argstr='--acqp=%s',
     mandatory=True,
@@ -54,8 +48,6 @@ def test_Eddy_inputs():
     repol=dict(argstr='--repol',
     ),
     session=dict(argstr='--session=%s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Eddy._input_spec()

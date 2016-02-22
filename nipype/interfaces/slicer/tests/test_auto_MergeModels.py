@@ -16,14 +16,6 @@ def test_MergeModels_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
-    ),
     )
     inputs = MergeModels._input_spec()
 

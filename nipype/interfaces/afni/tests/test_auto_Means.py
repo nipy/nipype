@@ -8,12 +8,6 @@ def test_Means_inputs():
     ),
     count=dict(argstr='-count',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file_a=dict(argstr='%s',
     mandatory=True,
     position=0,
@@ -40,8 +34,6 @@ def test_Means_inputs():
     std_dev=dict(argstr='-stdev',
     ),
     summ=dict(argstr='-sum',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Means._input_spec()

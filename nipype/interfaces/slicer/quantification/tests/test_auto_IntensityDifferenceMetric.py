@@ -14,14 +14,8 @@ def test_IntensityDifferenceMetric_inputs():
     ),
     changingBandSize=dict(argstr='--changingBandSize %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     followupVolume=dict(argstr='%s',
     position=-2,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     outputVolume=dict(argstr='%s',
     hash_files=False,
@@ -31,8 +25,6 @@ def test_IntensityDifferenceMetric_inputs():
     hash_files=False,
     ),
     sensitivityThreshold=dict(argstr='--sensitivityThreshold %f',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = IntensityDifferenceMetric._input_spec()

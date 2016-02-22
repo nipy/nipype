@@ -6,12 +6,6 @@ from ..utils import PlotMotionParams
 def test_PlotMotionParams_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-i %s',
     mandatory=True,
     position=1,
@@ -29,8 +23,6 @@ def test_PlotMotionParams_inputs():
     ),
     plot_type=dict(argstr='%s',
     mandatory=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = PlotMotionParams._input_spec()

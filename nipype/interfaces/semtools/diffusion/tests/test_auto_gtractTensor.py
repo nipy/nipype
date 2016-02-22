@@ -12,14 +12,8 @@ def test_gtractTensor_inputs():
     ),
     backgroundSuppressingThreshold=dict(argstr='--backgroundSuppressingThreshold %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     ignoreIndex=dict(argstr='--ignoreIndex %s',
     sep=',',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
@@ -38,8 +32,6 @@ def test_gtractTensor_inputs():
     resampleIsotropic=dict(argstr='--resampleIsotropic ',
     ),
     size=dict(argstr='--size %f',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = gtractTensor._input_spec()

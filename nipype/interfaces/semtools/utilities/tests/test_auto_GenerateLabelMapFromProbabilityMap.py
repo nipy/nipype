@@ -6,20 +6,12 @@ from ..brains import GenerateLabelMapFromProbabilityMap
 def test_GenerateLabelMapFromProbabilityMap_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolumes=dict(argstr='--inputVolumes %s...',
     ),
     numberOfThreads=dict(argstr='--numberOfThreads %d',
     ),
     outputLabelVolume=dict(argstr='--outputLabelVolume %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = GenerateLabelMapFromProbabilityMap._input_spec()

@@ -6,14 +6,6 @@ from ..base import MRTrix3Base
 def test_MRTrix3Base_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
-    ),
     )
     inputs = MRTrix3Base._input_spec()
 

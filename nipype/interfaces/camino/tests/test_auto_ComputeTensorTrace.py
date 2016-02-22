@@ -6,12 +6,6 @@ from ..dti import ComputeTensorTrace
 def test_ComputeTensorTrace_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='< %s',
     mandatory=True,
     position=1,
@@ -28,8 +22,6 @@ def test_ComputeTensorTrace_inputs():
     ),
     scheme_file=dict(argstr='%s',
     position=2,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ComputeTensorTrace._input_spec()

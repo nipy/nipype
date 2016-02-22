@@ -10,18 +10,10 @@ def test_ACPCTransform_inputs():
     ),
     debugSwitch=dict(argstr='--debugSwitch ',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     midline=dict(argstr='--midline %s...',
     ),
     outputTransform=dict(argstr='--outputTransform %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ACPCTransform._input_spec()

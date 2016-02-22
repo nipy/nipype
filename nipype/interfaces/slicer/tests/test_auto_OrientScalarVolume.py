@@ -6,12 +6,6 @@ from ..converters import OrientScalarVolume
 def test_OrientScalarVolume_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume1=dict(argstr='%s',
     position=-2,
     ),
@@ -20,8 +14,6 @@ def test_OrientScalarVolume_inputs():
     outputVolume=dict(argstr='%s',
     hash_files=False,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = OrientScalarVolume._input_spec()

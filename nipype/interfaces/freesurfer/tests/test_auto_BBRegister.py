@@ -9,13 +9,7 @@ def test_BBRegister_inputs():
     contrast_type=dict(argstr='--%s',
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     epi_mask=dict(argstr='--epi-mask',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     init=dict(argstr='--init-%s',
     mandatory=True,
@@ -50,8 +44,6 @@ def test_BBRegister_inputs():
     mandatory=True,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     )
     inputs = BBRegister._input_spec()
 

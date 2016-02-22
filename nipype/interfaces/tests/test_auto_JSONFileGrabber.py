@@ -5,9 +5,6 @@ from ..io import JSONFileGrabber
 
 def test_JSONFileGrabber_inputs():
     input_map = dict(defaults=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(),
     )
     inputs = JSONFileGrabber._input_spec()

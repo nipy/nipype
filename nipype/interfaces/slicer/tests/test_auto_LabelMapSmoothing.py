@@ -6,13 +6,7 @@ from ..surface import LabelMapSmoothing
 def test_LabelMapSmoothing_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     gaussianSigma=dict(argstr='--gaussianSigma %f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='%s',
     position=-2,
@@ -26,8 +20,6 @@ def test_LabelMapSmoothing_inputs():
     outputVolume=dict(argstr='%s',
     hash_files=False,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = LabelMapSmoothing._input_spec()

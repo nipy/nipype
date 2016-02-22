@@ -6,9 +6,6 @@ from ..base import DipyDiffusionInterface
 def test_DipyDiffusionInterface_inputs():
     input_map = dict(b0_thres=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_bval=dict(mandatory=True,
     ),
     in_bvec=dict(mandatory=True,

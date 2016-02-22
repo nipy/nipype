@@ -6,20 +6,12 @@ from ..morphology import GrayscaleGrindPeakImageFilter
 def test_GrayscaleGrindPeakImageFilter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='%s',
     position=-2,
     ),
     outputVolume=dict(argstr='%s',
     hash_files=False,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = GrayscaleGrindPeakImageFilter._input_spec()

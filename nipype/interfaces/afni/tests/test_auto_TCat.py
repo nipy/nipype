@@ -6,12 +6,6 @@ from ..preprocess import TCat
 def test_TCat_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(argstr=' %s',
     copyfile=False,
     mandatory=True,
@@ -25,8 +19,6 @@ def test_TCat_inputs():
     ),
     rlt=dict(argstr='-rlt%s',
     position=1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = TCat._input_spec()

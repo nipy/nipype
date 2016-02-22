@@ -6,12 +6,6 @@ from ..classify import BRAINSPosteriorToContinuousClass
 def test_BRAINSPosteriorToContinuousClass_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputBasalGmVolume=dict(argstr='--inputBasalGmVolume %s',
     ),
     inputCrblGmVolume=dict(argstr='--inputCrblGmVolume %s',
@@ -28,8 +22,6 @@ def test_BRAINSPosteriorToContinuousClass_inputs():
     ),
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BRAINSPosteriorToContinuousClass._input_spec()

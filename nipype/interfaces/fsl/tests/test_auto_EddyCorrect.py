@@ -6,15 +6,7 @@ from ..epi import EddyCorrect
 def test_EddyCorrect_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     output_type=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = EddyCorrect._input_spec()

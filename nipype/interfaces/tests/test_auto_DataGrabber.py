@@ -5,9 +5,6 @@ from ..io import DataGrabber
 
 def test_DataGrabber_inputs():
     input_map = dict(base_directory=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     raise_on_empty=dict(usedefault=True,
     ),
     sort_filelist=dict(mandatory=True,

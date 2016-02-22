@@ -6,20 +6,12 @@ from ..diffusion import DTIexport
 def test_DTIexport_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputTensor=dict(argstr='%s',
     position=-2,
     ),
     outputFile=dict(argstr='%s',
     hash_files=False,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DTIexport._input_spec()

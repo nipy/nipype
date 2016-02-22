@@ -6,12 +6,6 @@ from ..gtract import gtractInvertBSplineTransform
 def test_gtractInvertBSplineTransform_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputReferenceVolume=dict(argstr='--inputReferenceVolume %s',
     ),
     inputTransform=dict(argstr='--inputTransform %s',
@@ -23,8 +17,6 @@ def test_gtractInvertBSplineTransform_inputs():
     ),
     outputTransform=dict(argstr='--outputTransform %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = gtractInvertBSplineTransform._input_spec()

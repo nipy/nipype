@@ -10,12 +10,6 @@ def test_Shredder_inputs():
     position=2,
     units='NA',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='< %s',
     mandatory=True,
     position=-2,
@@ -31,8 +25,6 @@ def test_Shredder_inputs():
     space=dict(argstr='%d',
     position=3,
     units='NA',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Shredder._input_spec()

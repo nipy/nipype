@@ -6,18 +6,10 @@ from ..utils import AvScale
 def test_AvScale_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     mat_file=dict(argstr='%s',
     position=0,
     ),
     output_type=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = AvScale._input_spec()

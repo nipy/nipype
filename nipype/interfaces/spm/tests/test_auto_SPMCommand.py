@@ -4,10 +4,7 @@ from ..base import SPMCommand
 
 
 def test_SPMCommand_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    matlab_cmd=dict(),
+    input_map = dict(matlab_cmd=dict(),
     mfile=dict(usedefault=True,
     ),
     paths=dict(),

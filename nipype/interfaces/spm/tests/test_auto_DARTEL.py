@@ -4,10 +4,7 @@ from ..preprocess import DARTEL
 
 
 def test_DARTEL_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    image_files=dict(copyfile=False,
+    input_map = dict(image_files=dict(copyfile=False,
     field='warp.images',
     mandatory=True,
     ),

@@ -6,20 +6,12 @@ from ..featuredetection import TextureFromNoiseImageFilter
 def test_TextureFromNoiseImageFilter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputRadius=dict(argstr='--inputRadius %d',
     ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = TextureFromNoiseImageFilter._input_spec()

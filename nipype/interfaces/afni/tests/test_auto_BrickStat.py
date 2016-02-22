@@ -6,12 +6,6 @@ from ..preprocess import BrickStat
 def test_BrickStat_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-1,
@@ -23,8 +17,6 @@ def test_BrickStat_inputs():
     position=1,
     ),
     outputtype=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BrickStat._input_spec()

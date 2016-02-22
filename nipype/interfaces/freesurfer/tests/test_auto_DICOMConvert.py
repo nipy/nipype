@@ -11,13 +11,7 @@ def test_DICOMConvert_inputs():
     dicom_dir=dict(mandatory=True,
     ),
     dicom_info=dict(),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     file_mapping=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     ignore_single_slice=dict(requires=['dicom_info'],
     ),
     out_type=dict(usedefault=True,
@@ -28,8 +22,6 @@ def test_DICOMConvert_inputs():
     ),
     subject_id=dict(),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     )
     inputs = DICOMConvert._input_spec()
 

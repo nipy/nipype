@@ -8,12 +8,6 @@ def test_PicoPDFs_inputs():
     ),
     directmap=dict(argstr='-directmap',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='< %s',
     mandatory=True,
     position=1,
@@ -38,8 +32,6 @@ def test_PicoPDFs_inputs():
     pdf=dict(argstr='-pdf %s',
     position=4,
     usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = PicoPDFs._input_spec()

@@ -9,12 +9,6 @@ def test_Trackvis2Camino_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-i %s',
     mandatory=True,
     position=1,
@@ -22,8 +16,6 @@ def test_Trackvis2Camino_inputs():
     out_file=dict(argstr='-o %s',
     genfile=True,
     position=2,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Trackvis2Camino._input_spec()

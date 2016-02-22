@@ -17,12 +17,6 @@ def test_DTIRecon_inputs():
     bvecs=dict(argstr='-gm %s',
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     image_orientation_vectors=dict(argstr='-iop %f',
     ),
     n_averages=dict(argstr='-nex %s',
@@ -35,8 +29,6 @@ def test_DTIRecon_inputs():
     ),
     output_type=dict(argstr='-ot %s',
     usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DTIRecon._input_spec()

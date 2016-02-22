@@ -6,18 +6,10 @@ from ..brains import CleanUpOverlapLabels
 def test_CleanUpOverlapLabels_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputBinaryVolumes=dict(argstr='--inputBinaryVolumes %s...',
     ),
     outputBinaryVolumes=dict(argstr='--outputBinaryVolumes %s...',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = CleanUpOverlapLabels._input_spec()

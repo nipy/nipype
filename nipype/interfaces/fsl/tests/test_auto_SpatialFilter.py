@@ -6,12 +6,6 @@ from ..maths import SpatialFilter
 def test_SpatialFilter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=2,
@@ -46,8 +40,6 @@ def test_SpatialFilter_inputs():
     position=-1,
     ),
     output_type=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = SpatialFilter._input_spec()

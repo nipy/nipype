@@ -6,12 +6,6 @@ from ..utils import PowerSpectrum
 def test_PowerSpectrum_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=0,
@@ -21,8 +15,6 @@ def test_PowerSpectrum_inputs():
     position=1,
     ),
     output_type=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = PowerSpectrum._input_spec()

@@ -6,18 +6,12 @@ from ..registration import MultiResolutionAffineRegistration
 def test_MultiResolutionAffineRegistration_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fixedImage=dict(argstr='%s',
     position=-2,
     ),
     fixedImageMask=dict(argstr='--fixedImageMask %s',
     ),
     fixedImageROI=dict(argstr='--fixedImageROI %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     metricTolerance=dict(argstr='--metricTolerance %f',
     ),
@@ -37,8 +31,6 @@ def test_MultiResolutionAffineRegistration_inputs():
     stepSize=dict(argstr='--stepSize %f',
     ),
     stepTolerance=dict(argstr='--stepTolerance %f',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = MultiResolutionAffineRegistration._input_spec()

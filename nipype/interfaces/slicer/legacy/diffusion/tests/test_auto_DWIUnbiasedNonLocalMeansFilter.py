@@ -6,13 +6,7 @@ from ..denoising import DWIUnbiasedNonLocalMeansFilter
 def test_DWIUnbiasedNonLocalMeansFilter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     hp=dict(argstr='--hp %f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='%s',
     position=-2,
@@ -31,8 +25,6 @@ def test_DWIUnbiasedNonLocalMeansFilter_inputs():
     ),
     rs=dict(argstr='--rs %s',
     sep=',',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DWIUnbiasedNonLocalMeansFilter._input_spec()

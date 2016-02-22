@@ -8,12 +8,6 @@ def test_LinRecon_inputs():
     ),
     bgmask=dict(argstr='-bgmask %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=1,
@@ -33,8 +27,6 @@ def test_LinRecon_inputs():
     scheme_file=dict(argstr='%s',
     mandatory=True,
     position=2,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = LinRecon._input_spec()

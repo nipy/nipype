@@ -6,12 +6,6 @@ from ..utils import MakeAverageSubject
 def test_MakeAverageSubject_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     out_name=dict(argstr='--out %s',
     usedefault=True,
     ),
@@ -19,8 +13,6 @@ def test_MakeAverageSubject_inputs():
     subjects_ids=dict(argstr='--subjects %s',
     mandatory=True,
     sep=' ',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = MakeAverageSubject._input_spec()

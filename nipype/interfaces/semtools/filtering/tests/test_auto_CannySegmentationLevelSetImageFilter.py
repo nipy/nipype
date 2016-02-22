@@ -12,12 +12,6 @@ def test_CannySegmentationLevelSetImageFilter_inputs():
     ),
     cannyVariance=dict(argstr='--cannyVariance %f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     initialModel=dict(argstr='--initialModel %s',
     ),
     initialModelIsovalue=dict(argstr='--initialModelIsovalue %f',
@@ -31,8 +25,6 @@ def test_CannySegmentationLevelSetImageFilter_inputs():
     ),
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = CannySegmentationLevelSetImageFilter._input_spec()

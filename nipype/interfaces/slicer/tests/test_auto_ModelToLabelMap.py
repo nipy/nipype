@@ -15,16 +15,8 @@ def test_ModelToLabelMap_inputs():
     ),
     distance=dict(argstr='--distance %f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     surface=dict(argstr='%s',
     position=-2,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ModelToLabelMap._input_spec()

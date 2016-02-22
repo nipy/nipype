@@ -8,13 +8,7 @@ def test_OtsuThresholdSegmentation_inputs():
     ),
     brightObjects=dict(argstr='--brightObjects ',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     faceConnected=dict(argstr='--faceConnected ',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='%s',
     position=-2,
@@ -26,8 +20,6 @@ def test_OtsuThresholdSegmentation_inputs():
     outputVolume=dict(argstr='%s',
     hash_files=False,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = OtsuThresholdSegmentation._input_spec()

@@ -6,13 +6,7 @@ from ..preprocess import FitMSParams
 def test_FitMSParams_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     flip_list=dict(),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -23,8 +17,6 @@ def test_FitMSParams_inputs():
     ),
     subjects_dir=dict(),
     te_list=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     tr_list=dict(),
     xfm_list=dict(),
     )

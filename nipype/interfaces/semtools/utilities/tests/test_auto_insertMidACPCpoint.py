@@ -6,18 +6,10 @@ from ..brains import insertMidACPCpoint
 def test_insertMidACPCpoint_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputLandmarkFile=dict(argstr='--inputLandmarkFile %s',
     ),
     outputLandmarkFile=dict(argstr='--outputLandmarkFile %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = insertMidACPCpoint._input_spec()

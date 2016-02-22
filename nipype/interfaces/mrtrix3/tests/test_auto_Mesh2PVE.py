@@ -6,12 +6,6 @@ from ..utils import Mesh2PVE
 def test_Mesh2PVE_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-3,
@@ -26,8 +20,6 @@ def test_Mesh2PVE_inputs():
     reference=dict(argstr='%s',
     mandatory=True,
     position=-2,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Mesh2PVE._input_spec()

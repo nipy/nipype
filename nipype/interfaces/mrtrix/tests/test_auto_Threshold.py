@@ -11,12 +11,6 @@ def test_Threshold_inputs():
     debug=dict(argstr='-debug',
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -35,8 +29,6 @@ def test_Threshold_inputs():
     ),
     replace_zeros_with_NaN=dict(argstr='-nan',
     position=1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Threshold._input_spec()

@@ -6,12 +6,6 @@ from ..brains import BRAINSLandmarkInitializer
 def test_BRAINSLandmarkInitializer_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputFixedLandmarkFilename=dict(argstr='--inputFixedLandmarkFilename %s',
     ),
     inputMovingLandmarkFilename=dict(argstr='--inputMovingLandmarkFilename %s',
@@ -20,8 +14,6 @@ def test_BRAINSLandmarkInitializer_inputs():
     ),
     outputTransformFilename=dict(argstr='--outputTransformFilename %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BRAINSLandmarkInitializer._input_spec()

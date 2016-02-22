@@ -6,20 +6,12 @@ from ..brains import ShuffleVectorsModule
 def test_ShuffleVectorsModule_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVectorFileBaseName=dict(argstr='--inputVectorFileBaseName %s',
     ),
     outputVectorFileBaseName=dict(argstr='--outputVectorFileBaseName %s',
     hash_files=False,
     ),
     resampleProportion=dict(argstr='--resampleProportion %f',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ShuffleVectorsModule._input_spec()

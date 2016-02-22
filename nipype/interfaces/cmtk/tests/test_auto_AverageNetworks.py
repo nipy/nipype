@@ -6,9 +6,6 @@ from ..nx import AverageNetworks
 def test_AverageNetworks_inputs():
     input_map = dict(group_id=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(mandatory=True,
     ),
     out_gexf_groupavg=dict(),

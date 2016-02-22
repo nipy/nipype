@@ -9,10 +9,8 @@ def test_CreateNifti_inputs():
     ),
     header_file=dict(mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    nifti_file=dict(ns='data_file',
+    nifti_file=dict(keep_extension=False,
+    ns='data_file',
     ),
     )
     inputs = CreateNifti._input_spec()

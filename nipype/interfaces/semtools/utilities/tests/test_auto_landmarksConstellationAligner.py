@@ -6,18 +6,10 @@ from ..brains import landmarksConstellationAligner
 def test_landmarksConstellationAligner_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputLandmarksPaired=dict(argstr='--inputLandmarksPaired %s',
     ),
     outputLandmarksPaired=dict(argstr='--outputLandmarksPaired %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = landmarksConstellationAligner._input_spec()

@@ -4,10 +4,7 @@ from ..convert import MergeCNetworks
 
 
 def test_MergeCNetworks_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_files=dict(mandatory=True,
+    input_map = dict(in_files=dict(mandatory=True,
     ),
     out_file=dict(usedefault=True,
     ),

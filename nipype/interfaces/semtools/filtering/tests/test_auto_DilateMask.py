@@ -6,12 +6,6 @@ from ..featuredetection import DilateMask
 def test_DilateMask_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputBinaryVolume=dict(argstr='--inputBinaryVolume %s',
     ),
     inputVolume=dict(argstr='--inputVolume %s',
@@ -22,8 +16,6 @@ def test_DilateMask_inputs():
     hash_files=False,
     ),
     sizeStructuralElement=dict(argstr='--sizeStructuralElement %d',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DilateMask._input_spec()

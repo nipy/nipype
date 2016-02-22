@@ -4,10 +4,7 @@ from ..utility import Select
 
 
 def test_Select_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    index=dict(mandatory=True,
+    input_map = dict(index=dict(mandatory=True,
     ),
     inlist=dict(mandatory=True,
     ),

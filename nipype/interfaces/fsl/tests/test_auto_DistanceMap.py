@@ -7,14 +7,7 @@ def test_DistanceMap_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
     distance_map=dict(argstr='--out=%s',
-    genfile=True,
     hash_files=False,
-    ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='--in=%s',
     mandatory=True,
@@ -27,8 +20,6 @@ def test_DistanceMap_inputs():
     mask_file=dict(argstr='--mask=%s',
     ),
     output_type=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DistanceMap._input_spec()

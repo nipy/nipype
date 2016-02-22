@@ -14,12 +14,6 @@ def test_GenerateWhiteMatterMask_inputs():
     mandatory=True,
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-3,
@@ -29,8 +23,6 @@ def test_GenerateWhiteMatterMask_inputs():
     out_WMProb_filename=dict(argstr='%s',
     genfile=True,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = GenerateWhiteMatterMask._input_spec()

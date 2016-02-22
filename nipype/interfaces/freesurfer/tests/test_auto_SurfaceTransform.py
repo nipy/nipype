@@ -6,14 +6,8 @@ from ..utils import SurfaceTransform
 def test_SurfaceTransform_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     hemi=dict(argstr='--hemi %s',
     mandatory=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     out_file=dict(argstr='--tval %s',
     genfile=True,
@@ -43,8 +37,6 @@ def test_SurfaceTransform_inputs():
     mandatory=True,
     ),
     target_type=dict(argstr='--tfmt %s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = SurfaceTransform._input_spec()

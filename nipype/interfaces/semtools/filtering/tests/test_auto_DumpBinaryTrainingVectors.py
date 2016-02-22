@@ -6,17 +6,9 @@ from ..featuredetection import DumpBinaryTrainingVectors
 def test_DumpBinaryTrainingVectors_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputHeaderFilename=dict(argstr='--inputHeaderFilename %s',
     ),
     inputVectorFilename=dict(argstr='--inputVectorFilename %s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DumpBinaryTrainingVectors._input_spec()

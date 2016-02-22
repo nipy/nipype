@@ -6,12 +6,6 @@ from ..filtering import OtsuThresholdImageFilter
 def test_OtsuThresholdImageFilter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='%s',
     position=-2,
     ),
@@ -24,8 +18,6 @@ def test_OtsuThresholdImageFilter_inputs():
     position=-1,
     ),
     outsideValue=dict(argstr='--outsideValue %d',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = OtsuThresholdImageFilter._input_spec()

@@ -6,16 +6,10 @@ from ..registration import Registration
 def test_Registration_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fixed_image=dict(argstr='-f %s',
     mandatory=True,
     ),
     fixed_mask=dict(argstr='-fMask %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     initial_transform=dict(argstr='-t0 %s',
     ),
@@ -33,8 +27,6 @@ def test_Registration_inputs():
     ),
     parameters=dict(argstr='-p %s...',
     mandatory=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Registration._input_spec()

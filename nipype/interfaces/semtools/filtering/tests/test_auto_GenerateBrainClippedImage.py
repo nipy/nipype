@@ -6,12 +6,6 @@ from ..featuredetection import GenerateBrainClippedImage
 def test_GenerateBrainClippedImage_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputImg=dict(argstr='--inputImg %s',
     ),
     inputMsk=dict(argstr='--inputMsk %s',
@@ -20,8 +14,6 @@ def test_GenerateBrainClippedImage_inputs():
     ),
     outputFileName=dict(argstr='--outputFileName %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = GenerateBrainClippedImage._input_spec()

@@ -6,20 +6,12 @@ from ..gtract import gtractInvertRigidTransform
 def test_gtractInvertRigidTransform_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputTransform=dict(argstr='--inputTransform %s',
     ),
     numberOfThreads=dict(argstr='--numberOfThreads %d',
     ),
     outputTransform=dict(argstr='--outputTransform %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = gtractInvertRigidTransform._input_spec()

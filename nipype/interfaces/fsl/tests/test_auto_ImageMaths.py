@@ -6,12 +6,6 @@ from ..utils import ImageMaths
 def test_ImageMaths_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=1,
@@ -32,8 +26,6 @@ def test_ImageMaths_inputs():
     output_type=dict(usedefault=True,
     ),
     suffix=dict(deprecated=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ImageMaths._input_spec()

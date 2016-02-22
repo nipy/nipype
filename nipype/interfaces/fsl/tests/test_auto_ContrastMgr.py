@@ -15,13 +15,7 @@ def test_ContrastMgr_inputs():
     copyfile=False,
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fcon_file=dict(argstr='-f %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     output_type=dict(usedefault=True,
     ),
@@ -39,8 +33,6 @@ def test_ContrastMgr_inputs():
     tcon_file=dict(argstr='%s',
     mandatory=True,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ContrastMgr._input_spec()

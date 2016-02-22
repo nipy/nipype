@@ -6,12 +6,6 @@ from ..dti import ComputeEigensystem
 def test_ComputeEigensystem_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='< %s',
     mandatory=True,
     position=1,
@@ -29,8 +23,6 @@ def test_ComputeEigensystem_inputs():
     ),
     outputdatatype=dict(argstr='-outputdatatype %s',
     usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ComputeEigensystem._input_spec()

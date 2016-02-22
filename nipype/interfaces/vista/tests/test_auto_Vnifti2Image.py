@@ -9,12 +9,6 @@ def test_Vnifti2Image_inputs():
     attributes=dict(argstr='-attr %s',
     position=2,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-in %s',
     mandatory=True,
     position=1,
@@ -25,8 +19,6 @@ def test_Vnifti2Image_inputs():
     name_source=['in_file'],
     name_template='%s.v',
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Vnifti2Image._input_spec()

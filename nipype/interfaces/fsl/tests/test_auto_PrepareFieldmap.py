@@ -11,12 +11,6 @@ def test_PrepareFieldmap_inputs():
     position=-2,
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_magnitude=dict(argstr='%s',
     mandatory=True,
     position=3,
@@ -37,8 +31,6 @@ def test_PrepareFieldmap_inputs():
     scanner=dict(argstr='%s',
     position=1,
     usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = PrepareFieldmap._input_spec()

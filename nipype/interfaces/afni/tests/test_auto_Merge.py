@@ -11,12 +11,6 @@ def test_Merge_inputs():
     ),
     doall=dict(argstr='-doall',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(argstr='%s',
     copyfile=False,
     mandatory=True,
@@ -25,8 +19,6 @@ def test_Merge_inputs():
     out_file=dict(argstr='-prefix %s',
     ),
     outputtype=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Merge._input_spec()

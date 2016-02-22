@@ -6,12 +6,6 @@ from ..gtract import gtractTransformToDisplacementField
 def test_gtractTransformToDisplacementField_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputReferenceVolume=dict(argstr='--inputReferenceVolume %s',
     ),
     inputTransform=dict(argstr='--inputTransform %s',
@@ -20,8 +14,6 @@ def test_gtractTransformToDisplacementField_inputs():
     ),
     outputDeformationFieldVolume=dict(argstr='--outputDeformationFieldVolume %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = gtractTransformToDisplacementField._input_spec()

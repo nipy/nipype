@@ -4,10 +4,7 @@ from ..io import DataFinder
 
 
 def test_DataFinder_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_regexes=dict(),
+    input_map = dict(ignore_regexes=dict(),
     match_regex=dict(usedefault=True,
     ),
     max_depth=dict(),

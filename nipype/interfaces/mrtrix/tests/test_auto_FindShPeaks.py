@@ -14,12 +14,6 @@ def test_FindShPeaks_inputs():
     ),
     display_info=dict(argstr='-info',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-3,
@@ -41,8 +35,6 @@ def test_FindShPeaks_inputs():
     peaks_image=dict(argstr='-peaks %s',
     ),
     quiet_display=dict(argstr='-quiet',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = FindShPeaks._input_spec()

@@ -6,12 +6,6 @@ from ..preprocess import AFNItoNIFTI
 def test_AFNItoNIFTI_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     copyfile=False,
     mandatory=True,
@@ -23,8 +17,6 @@ def test_AFNItoNIFTI_inputs():
     name_template='%s.nii',
     ),
     outputtype=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = AFNItoNIFTI._input_spec()

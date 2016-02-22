@@ -9,12 +9,6 @@ def test_SFPeaks_inputs():
     density=dict(argstr='-density %d',
     units='NA',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-inputfile %s',
     mandatory=True,
     ),
@@ -52,8 +46,6 @@ def test_SFPeaks_inputs():
     ),
     stdsfrommean=dict(argstr='-stdsfrommean %f',
     units='NA',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = SFPeaks._input_spec()

@@ -12,13 +12,7 @@ def test_Automask_inputs():
     ),
     dilate=dict(argstr='-dilate %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     erode=dict(argstr='-erode %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     copyfile=False,
@@ -28,8 +22,6 @@ def test_Automask_inputs():
     out_file=dict(argstr='-prefix %s',
     ),
     outputtype=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Automask._input_spec()

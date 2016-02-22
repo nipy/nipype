@@ -6,12 +6,6 @@ from ..denoising import MedianImageFilter
 def test_MedianImageFilter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='%s',
     position=-2,
     ),
@@ -21,8 +15,6 @@ def test_MedianImageFilter_inputs():
     outputVolume=dict(argstr='%s',
     hash_files=False,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = MedianImageFilter._input_spec()

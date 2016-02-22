@@ -4,10 +4,7 @@ from ..misc import SimpleThreshold
 
 
 def test_SimpleThreshold_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    threshold=dict(mandatory=True,
+    input_map = dict(threshold=dict(mandatory=True,
     ),
     thresholded_volumes=dict(),
     volumes=dict(mandatory=True,

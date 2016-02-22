@@ -6,12 +6,6 @@ from ..utils import ImageStats
 def test_ImageStats_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(argstr='-images %s',
     mandatory=True,
     position=-1,
@@ -25,8 +19,6 @@ def test_ImageStats_inputs():
     stat=dict(argstr='-stat %s',
     mandatory=True,
     units='NA',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ImageStats._input_spec()

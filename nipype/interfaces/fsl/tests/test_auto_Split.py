@@ -10,12 +10,6 @@ def test_Split_inputs():
     mandatory=True,
     position=2,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=0,
@@ -24,8 +18,6 @@ def test_Split_inputs():
     position=1,
     ),
     output_type=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Split._input_spec()

@@ -6,12 +6,6 @@ from ..specialized import BRAINSMultiSTAPLE
 def test_BRAINSMultiSTAPLE_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputCompositeT1Volume=dict(argstr='--inputCompositeT1Volume %s',
     ),
     inputLabelVolume=dict(argstr='--inputLabelVolume %s...',
@@ -29,8 +23,6 @@ def test_BRAINSMultiSTAPLE_inputs():
     resampledVolumePrefix=dict(argstr='--resampledVolumePrefix %s',
     ),
     skipResampling=dict(argstr='--skipResampling ',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BRAINSMultiSTAPLE._input_spec()

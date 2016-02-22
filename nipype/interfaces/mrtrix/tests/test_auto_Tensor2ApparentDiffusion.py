@@ -9,12 +9,6 @@ def test_Tensor2ApparentDiffusion_inputs():
     debug=dict(argstr='-debug',
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -25,8 +19,6 @@ def test_Tensor2ApparentDiffusion_inputs():
     ),
     quiet=dict(argstr='-quiet',
     position=1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Tensor2ApparentDiffusion._input_spec()

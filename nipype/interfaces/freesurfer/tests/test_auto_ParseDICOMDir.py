@@ -12,18 +12,10 @@ def test_ParseDICOMDir_inputs():
     dicom_info_file=dict(argstr='--o %s',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     sortbyrun=dict(argstr='--sortbyrun',
     ),
     subjects_dir=dict(),
     summarize=dict(argstr='--summarize',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ParseDICOMDir._input_spec()

@@ -21,9 +21,6 @@ def test_Dcm2nii_inputs():
     date_in_filename=dict(argstr='-d',
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     events_in_filename=dict(argstr='-e',
     usedefault=True,
     ),
@@ -31,9 +28,6 @@ def test_Dcm2nii_inputs():
     usedefault=True,
     ),
     id_in_filename=dict(argstr='-i',
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
     nii_output=dict(argstr='-n',
@@ -66,8 +60,6 @@ def test_Dcm2nii_inputs():
     ),
     spm_analyze=dict(argstr='-s',
     xor=['nii_output'],
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Dcm2nii._input_spec()

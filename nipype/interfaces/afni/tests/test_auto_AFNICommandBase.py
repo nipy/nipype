@@ -6,14 +6,6 @@ from ..base import AFNICommandBase
 def test_AFNICommandBase_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
-    ),
     )
     inputs = AFNICommandBase._input_spec()
 

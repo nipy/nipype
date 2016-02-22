@@ -6,9 +6,6 @@ from ..nbs import NetworkBasedStatistic
 def test_NetworkBasedStatistic_inputs():
     input_map = dict(edge_key=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_group1=dict(mandatory=True,
     ),
     in_group2=dict(mandatory=True,

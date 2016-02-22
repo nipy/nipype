@@ -6,12 +6,6 @@ from ..brainsresize import BRAINSResize
 def test_BRAINSResize_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
     outputVolume=dict(argstr='--outputVolume %s',
@@ -20,8 +14,6 @@ def test_BRAINSResize_inputs():
     pixelType=dict(argstr='--pixelType %s',
     ),
     scaleFactor=dict(argstr='--scaleFactor %f',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BRAINSResize._input_spec()

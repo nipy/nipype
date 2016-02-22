@@ -4,10 +4,7 @@ from ..utils import ApplyTransform
 
 
 def test_ApplyTransform_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(copyfile=True,
+    input_map = dict(in_file=dict(copyfile=True,
     mandatory=True,
     ),
     mat=dict(mandatory=True,

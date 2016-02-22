@@ -6,12 +6,6 @@ from ..preprocess import ReplaceFSwithFIRST
 def test_ReplaceFSwithFIRST_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_config=dict(argstr='%s',
     position=-2,
     ),
@@ -27,8 +21,6 @@ def test_ReplaceFSwithFIRST_inputs():
     mandatory=True,
     position=-1,
     usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ReplaceFSwithFIRST._input_spec()

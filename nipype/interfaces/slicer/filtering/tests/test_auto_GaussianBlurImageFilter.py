@@ -6,12 +6,6 @@ from ..denoising import GaussianBlurImageFilter
 def test_GaussianBlurImageFilter_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume=dict(argstr='%s',
     position=-2,
     ),
@@ -20,8 +14,6 @@ def test_GaussianBlurImageFilter_inputs():
     position=-1,
     ),
     sigma=dict(argstr='--sigma %f',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = GaussianBlurImageFilter._input_spec()

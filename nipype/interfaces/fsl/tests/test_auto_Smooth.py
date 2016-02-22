@@ -6,16 +6,10 @@ from ..utils import Smooth
 def test_Smooth_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fwhm=dict(argstr='-kernel gauss %.03f -fmean',
     mandatory=True,
     position=1,
     xor=['sigma'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -31,8 +25,6 @@ def test_Smooth_inputs():
     smoothed_file=dict(argstr='%s',
     hash_files=False,
     position=2,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Smooth._input_spec()

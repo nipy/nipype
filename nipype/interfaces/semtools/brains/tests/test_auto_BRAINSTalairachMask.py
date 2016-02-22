@@ -6,15 +6,9 @@ from ..segmentation import BRAINSTalairachMask
 def test_BRAINSTalairachMask_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     expand=dict(argstr='--expand ',
     ),
     hemisphereMode=dict(argstr='--hemisphereMode %s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
@@ -24,8 +18,6 @@ def test_BRAINSTalairachMask_inputs():
     talairachBox=dict(argstr='--talairachBox %s',
     ),
     talairachParameters=dict(argstr='--talairachParameters %s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BRAINSTalairachMask._input_spec()

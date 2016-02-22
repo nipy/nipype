@@ -12,12 +12,6 @@ def test_EstimateResponseForSH_inputs():
     mandatory=True,
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-3,
@@ -35,8 +29,6 @@ def test_EstimateResponseForSH_inputs():
     position=-1,
     ),
     quiet=dict(argstr='-quiet',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = EstimateResponseForSH._input_spec()

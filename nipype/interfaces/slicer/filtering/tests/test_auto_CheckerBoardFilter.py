@@ -9,12 +9,6 @@ def test_CheckerBoardFilter_inputs():
     checkerPattern=dict(argstr='--checkerPattern %s',
     sep=',',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume1=dict(argstr='%s',
     position=-3,
     ),
@@ -24,8 +18,6 @@ def test_CheckerBoardFilter_inputs():
     outputVolume=dict(argstr='%s',
     hash_files=False,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = CheckerBoardFilter._input_spec()

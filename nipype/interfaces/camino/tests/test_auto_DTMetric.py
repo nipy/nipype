@@ -11,12 +11,6 @@ def test_DTMetric_inputs():
     eigen_data=dict(argstr='-inputfile %s',
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputdatatype=dict(argstr='-inputdatatype %s',
     usedefault=True,
     ),
@@ -28,8 +22,6 @@ def test_DTMetric_inputs():
     ),
     outputfile=dict(argstr='-outputfile %s',
     genfile=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DTMetric._input_spec()

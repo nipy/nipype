@@ -6,12 +6,6 @@ from ..utils import MRIPretess
 def test_MRIPretess_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_filled=dict(argstr='%s',
     mandatory=True,
     position=-4,
@@ -34,8 +28,6 @@ def test_MRIPretess_inputs():
     position=-1,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     test=dict(argstr='-test',
     ),
     )

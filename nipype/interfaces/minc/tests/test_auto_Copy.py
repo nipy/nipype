@@ -6,12 +6,6 @@ from ..minc import Copy
 def test_Copy_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_file=dict(argstr='%s',
     mandatory=True,
     position=-2,
@@ -28,8 +22,6 @@ def test_Copy_inputs():
     ),
     real_values=dict(argstr='-real_values',
     xor=('pixel_values', 'real_values'),
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Copy._input_spec()

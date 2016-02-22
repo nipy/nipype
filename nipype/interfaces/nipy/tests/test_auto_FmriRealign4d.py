@@ -6,9 +6,6 @@ from ..preprocess import FmriRealign4d
 def test_FmriRealign4d_inputs():
     input_map = dict(between_loops=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(mandatory=True,
     ),
     loops=dict(usedefault=True,

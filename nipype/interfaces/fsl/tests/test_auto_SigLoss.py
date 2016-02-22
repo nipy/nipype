@@ -8,12 +8,6 @@ def test_SigLoss_inputs():
     ),
     echo_time=dict(argstr='--te=%f',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-i %s',
     mandatory=True,
     ),
@@ -25,8 +19,6 @@ def test_SigLoss_inputs():
     output_type=dict(usedefault=True,
     ),
     slice_direction=dict(argstr='-d %s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = SigLoss._input_spec()

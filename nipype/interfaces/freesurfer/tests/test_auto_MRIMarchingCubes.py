@@ -10,12 +10,6 @@ def test_MRIMarchingCubes_inputs():
     position=-1,
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=1,
@@ -29,8 +23,6 @@ def test_MRIMarchingCubes_inputs():
     position=-2,
     ),
     subjects_dir=dict(),
-    terminal_output=dict(nohash=True,
-    ),
     )
     inputs = MRIMarchingCubes._input_spec()
 

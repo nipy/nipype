@@ -4,10 +4,7 @@ from ..utils import EditTransform
 
 
 def test_EditTransform_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    interpolation=dict(argstr='FinalBSplineInterpolationOrder',
+    input_map = dict(interpolation=dict(argstr='FinalBSplineInterpolationOrder',
     usedefault=True,
     ),
     output_file=dict(),

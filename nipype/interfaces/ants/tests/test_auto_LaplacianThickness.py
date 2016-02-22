@@ -9,12 +9,6 @@ def test_LaplacianThickness_inputs():
     dT=dict(argstr='dT=%d',
     position=6,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_gm=dict(argstr='%s',
     copyfile=True,
     mandatory=True,
@@ -44,8 +38,6 @@ def test_LaplacianThickness_inputs():
     ),
     sulcus_prior=dict(argstr='use-sulcus-prior',
     position=7,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = LaplacianThickness._input_spec()

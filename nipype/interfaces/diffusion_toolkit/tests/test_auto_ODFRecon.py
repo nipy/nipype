@@ -12,13 +12,7 @@ def test_ODFRecon_inputs():
     ),
     dsi=dict(argstr='-dsi',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     filter=dict(argstr='-f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     image_orientation_vectors=dict(argstr='-iop %f',
     ),
@@ -50,8 +44,6 @@ def test_ODFRecon_inputs():
     sharpness=dict(argstr='-s %f',
     ),
     subtract_background=dict(argstr='-bg',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ODFRecon._input_spec()

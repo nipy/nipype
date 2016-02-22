@@ -20,12 +20,6 @@ def test_ConvertScalarImageToRGB_inputs():
     position=0,
     usedefault=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     input_image=dict(argstr='%s',
     mandatory=True,
     position=1,
@@ -56,8 +50,6 @@ def test_ConvertScalarImageToRGB_inputs():
     output_image=dict(argstr='%s',
     position=2,
     usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ConvertScalarImageToRGB._input_spec()

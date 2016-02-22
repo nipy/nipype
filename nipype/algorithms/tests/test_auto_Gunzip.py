@@ -4,12 +4,10 @@ from ..misc import Gunzip
 
 
 def test_Gunzip_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
+    input_map = dict(in_file=dict(mandatory=True,
     ),
-    in_file=dict(mandatory=True,
-    ),
-    out_file=dict(name_remove='.gz',
+    out_file=dict(keep_extension=False,
+    name_remove='.gz',
     ns='in_file',
     ),
     )

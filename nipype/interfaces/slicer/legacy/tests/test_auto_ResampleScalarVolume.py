@@ -13,18 +13,10 @@ def test_ResampleScalarVolume_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     interpolation=dict(argstr='--interpolation %s',
     ),
     spacing=dict(argstr='--spacing %s',
     sep=',',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ResampleScalarVolume._input_spec()

@@ -4,10 +4,7 @@ from ..metrics import Similarity
 
 
 def test_Similarity_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    mask1=dict(),
+    input_map = dict(mask1=dict(),
     mask2=dict(),
     metric=dict(usedefault=True,
     ),

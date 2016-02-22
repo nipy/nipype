@@ -6,12 +6,6 @@ from ..specialized import BinaryMaskEditorBasedOnLandmarks
 def test_BinaryMaskEditorBasedOnLandmarks_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputBinaryVolume=dict(argstr='--inputBinaryVolume %s',
     ),
     inputLandmarkNames=dict(argstr='--inputLandmarkNames %s',
@@ -30,8 +24,6 @@ def test_BinaryMaskEditorBasedOnLandmarks_inputs():
     ),
     setCutDirectionForObliquePlane=dict(argstr='--setCutDirectionForObliquePlane %s',
     sep=',',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BinaryMaskEditorBasedOnLandmarks._input_spec()

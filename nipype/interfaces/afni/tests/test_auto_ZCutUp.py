@@ -6,12 +6,6 @@ from ..preprocess import ZCutUp
 def test_ZCutUp_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     copyfile=False,
     mandatory=True,
@@ -24,8 +18,6 @@ def test_ZCutUp_inputs():
     name_template='%s_zcupup',
     ),
     outputtype=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ZCutUp._input_spec()

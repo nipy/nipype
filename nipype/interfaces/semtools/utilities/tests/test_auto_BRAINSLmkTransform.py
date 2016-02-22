@@ -6,12 +6,6 @@ from ..brains import BRAINSLmkTransform
 def test_BRAINSLmkTransform_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputFixedLandmarks=dict(argstr='--inputFixedLandmarks %s',
     ),
     inputMovingLandmarks=dict(argstr='--inputMovingLandmarks %s',
@@ -27,8 +21,6 @@ def test_BRAINSLmkTransform_inputs():
     ),
     outputResampledVolume=dict(argstr='--outputResampledVolume %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BRAINSLmkTransform._input_spec()

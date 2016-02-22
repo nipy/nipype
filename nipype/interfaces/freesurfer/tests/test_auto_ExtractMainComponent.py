@@ -6,12 +6,6 @@ from ..utils import ExtractMainComponent
 def test_ExtractMainComponent_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=1,
@@ -20,8 +14,6 @@ def test_ExtractMainComponent_inputs():
     name_source='in_file',
     name_template='%s.maincmp',
     position=2,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ExtractMainComponent._input_spec()

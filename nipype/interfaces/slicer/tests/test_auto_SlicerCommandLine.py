@@ -6,14 +6,6 @@ from ..base import SlicerCommandLine
 def test_SlicerCommandLine_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
-    ),
     )
     inputs = SlicerCommandLine._input_spec()
 

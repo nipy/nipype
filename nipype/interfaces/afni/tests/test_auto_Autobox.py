@@ -6,12 +6,6 @@ from ..preprocess import Autobox
 def test_Autobox_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-input %s',
     copyfile=False,
     mandatory=True,
@@ -24,8 +18,6 @@ def test_Autobox_inputs():
     outputtype=dict(usedefault=True,
     ),
     padding=dict(argstr='-npad %d',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Autobox._input_spec()

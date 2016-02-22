@@ -10,12 +10,6 @@ def test_GenerateDirections_inputs():
     ),
     display_info=dict(argstr='-info',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     niter=dict(argstr='-niter %s',
     ),
     num_dirs=dict(argstr='%s',
@@ -31,8 +25,6 @@ def test_GenerateDirections_inputs():
     power=dict(argstr='-power %s',
     ),
     quiet_display=dict(argstr='-quiet',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = GenerateDirections._input_spec()

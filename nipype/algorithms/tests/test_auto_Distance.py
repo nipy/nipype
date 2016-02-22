@@ -4,10 +4,7 @@ from ..misc import Distance
 
 
 def test_Distance_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    mask_volume=dict(),
+    input_map = dict(mask_volume=dict(),
     method=dict(usedefault=True,
     ),
     volume1=dict(mandatory=True,

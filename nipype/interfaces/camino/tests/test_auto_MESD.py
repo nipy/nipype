@@ -8,14 +8,8 @@ def test_MESD_inputs():
     ),
     bgmask=dict(argstr='-bgmask %s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fastmesd=dict(argstr='-fastmesd',
     requires=['mepointset'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='-inputfile %s',
     mandatory=True,
@@ -41,8 +35,6 @@ def test_MESD_inputs():
     ),
     scheme_file=dict(argstr='-schemefile %s',
     mandatory=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = MESD._input_spec()

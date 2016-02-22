@@ -6,9 +6,6 @@ from ..nx import NetworkXMetrics
 def test_NetworkXMetrics_inputs():
     input_map = dict(compute_clique_related_measures=dict(usedefault=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(mandatory=True,
     ),
     out_edge_metrics_matlab=dict(genfile=True,

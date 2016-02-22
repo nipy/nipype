@@ -6,12 +6,6 @@ from ..arithmetic import AddScalarVolumes
 def test_AddScalarVolumes_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume1=dict(argstr='%s',
     position=-3,
     ),
@@ -23,8 +17,6 @@ def test_AddScalarVolumes_inputs():
     outputVolume=dict(argstr='%s',
     hash_files=False,
     position=-1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = AddScalarVolumes._input_spec()

@@ -4,10 +4,7 @@ from ..model import L2Model
 
 
 def test_L2Model_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    num_copes=dict(mandatory=True,
+    input_map = dict(num_copes=dict(mandatory=True,
     ),
     )
     inputs = L2Model._input_spec()

@@ -9,12 +9,6 @@ def test_TensorMetrics_inputs():
     component=dict(argstr='-num %s',
     sep=',',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     mandatory=True,
     position=-1,
@@ -30,8 +24,6 @@ def test_TensorMetrics_inputs():
     out_evec=dict(argstr='-vector %s',
     ),
     out_fa=dict(argstr='-fa %s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = TensorMetrics._input_spec()

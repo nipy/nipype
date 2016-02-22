@@ -8,12 +8,6 @@ def test_GenerateSummedGradientImage_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume1=dict(argstr='--inputVolume1 %s',
     ),
     inputVolume2=dict(argstr='--inputVolume2 %s',
@@ -22,8 +16,6 @@ def test_GenerateSummedGradientImage_inputs():
     ),
     outputFileName=dict(argstr='--outputFileName %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = GenerateSummedGradientImage._input_spec()

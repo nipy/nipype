@@ -6,12 +6,6 @@ from ..preprocess import Maskave
 def test_Maskave_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     copyfile=False,
     mandatory=True,
@@ -21,14 +15,13 @@ def test_Maskave_inputs():
     position=1,
     ),
     out_file=dict(argstr='> %s',
+    keep_extension=False,
     position=-1,
     ),
     outputtype=dict(usedefault=True,
     ),
     quiet=dict(argstr='-quiet',
     position=2,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Maskave._input_spec()

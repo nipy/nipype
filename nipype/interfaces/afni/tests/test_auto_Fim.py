@@ -6,18 +6,12 @@ from ..preprocess import Fim
 def test_Fim_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     fim_thr=dict(argstr='-fim_thr %f',
     position=3,
     ),
     ideal_file=dict(argstr='-ideal_file %s',
     mandatory=True,
     position=2,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr=' -input %s',
     copyfile=False,
@@ -32,8 +26,6 @@ def test_Fim_inputs():
     name_template='%s_fim',
     ),
     outputtype=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Fim._input_spec()

@@ -12,12 +12,6 @@ def test_HARDIMat_inputs():
     mandatory=True,
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     image_info=dict(argstr='-info %s',
     ),
     image_orientation_vectors=dict(argstr='-iop %f',
@@ -33,8 +27,6 @@ def test_HARDIMat_inputs():
     usedefault=True,
     ),
     reference_file=dict(argstr='-ref %s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = HARDIMat._input_spec()

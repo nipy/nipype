@@ -4,10 +4,7 @@ from ..utils import CalcCoregAffine
 
 
 def test_CalcCoregAffine_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    invmat=dict(),
+    input_map = dict(invmat=dict(),
     mat=dict(),
     matlab_cmd=dict(),
     mfile=dict(usedefault=True,

@@ -12,14 +12,8 @@ def test_CopyGeom_inputs():
     output_name='out_file',
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     ignore_dims=dict(argstr='-d',
     position=-1,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
     usedefault=True,
     ),
     in_file=dict(argstr='%s',
@@ -27,8 +21,6 @@ def test_CopyGeom_inputs():
     position=0,
     ),
     output_type=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = CopyGeom._input_spec()

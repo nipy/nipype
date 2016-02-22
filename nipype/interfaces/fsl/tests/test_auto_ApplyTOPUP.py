@@ -11,12 +11,6 @@ def test_ApplyTOPUP_inputs():
     encoding_file=dict(argstr='--datain=%s',
     mandatory=True,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(argstr='--imain=%s',
     mandatory=True,
     sep=',',
@@ -39,8 +33,6 @@ def test_ApplyTOPUP_inputs():
     out_corrected=dict(argstr='--out=%s',
     ),
     output_type=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ApplyTOPUP._input_spec()

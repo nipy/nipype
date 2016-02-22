@@ -6,9 +6,6 @@ from ..model import FEATModel
 def test_FEATModel_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     ev_files=dict(argstr='%s',
     copyfile=False,
     mandatory=True,
@@ -19,12 +16,7 @@ def test_FEATModel_inputs():
     mandatory=True,
     position=0,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     output_type=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = FEATModel._input_spec()

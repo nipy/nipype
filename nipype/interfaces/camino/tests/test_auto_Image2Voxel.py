@@ -6,12 +6,6 @@ from ..convert import Image2Voxel
 def test_Image2Voxel_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-4dimage %s',
     mandatory=True,
     position=1,
@@ -23,8 +17,6 @@ def test_Image2Voxel_inputs():
     out_type=dict(argstr='-outputdatatype %s',
     position=2,
     usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Image2Voxel._input_spec()

@@ -6,13 +6,7 @@ from ..preprocess import AutoTcorrelate
 def test_AutoTcorrelate_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     eta2=dict(argstr='-eta2',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     copyfile=False,
@@ -29,12 +23,11 @@ def test_AutoTcorrelate_inputs():
     xor=['mask_only_targets'],
     ),
     out_file=dict(argstr='-prefix %s',
+    keep_extension=False,
     ),
     outputtype=dict(usedefault=True,
     ),
     polort=dict(argstr='-polort %d',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = AutoTcorrelate._input_spec()

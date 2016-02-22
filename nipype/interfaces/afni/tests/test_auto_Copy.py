@@ -6,12 +6,6 @@ from ..preprocess import Copy
 def test_Copy_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     copyfile=False,
     mandatory=True,
@@ -21,8 +15,6 @@ def test_Copy_inputs():
     position=-1,
     ),
     outputtype=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Copy._input_spec()

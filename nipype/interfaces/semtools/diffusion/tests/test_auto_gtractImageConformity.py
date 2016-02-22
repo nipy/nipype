@@ -6,12 +6,6 @@ from ..gtract import gtractImageConformity
 def test_gtractImageConformity_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputReferenceVolume=dict(argstr='--inputReferenceVolume %s',
     ),
     inputVolume=dict(argstr='--inputVolume %s',
@@ -20,8 +14,6 @@ def test_gtractImageConformity_inputs():
     ),
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = gtractImageConformity._input_spec()

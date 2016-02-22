@@ -11,13 +11,7 @@ def test_ApplyWarp_inputs():
     ),
     datatype=dict(argstr='--datatype=%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     field_file=dict(argstr='--warp=%s',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='--in=%s',
     mandatory=True,
@@ -50,8 +44,6 @@ def test_ApplyWarp_inputs():
     superlevel=dict(argstr='--superlevel=%s',
     ),
     supersample=dict(argstr='--super',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ApplyWarp._input_spec()

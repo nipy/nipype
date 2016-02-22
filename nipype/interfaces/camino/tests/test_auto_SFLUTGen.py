@@ -11,12 +11,6 @@ def test_SFLUTGen_inputs():
     ),
     directmap=dict(argstr='-directmap',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='-inputfile %s',
     mandatory=True,
     ),
@@ -38,8 +32,6 @@ def test_SFLUTGen_inputs():
     ),
     pdf=dict(argstr='-pdf %s',
     usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = SFLUTGen._input_spec()

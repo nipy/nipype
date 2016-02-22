@@ -6,13 +6,7 @@ from ..denoising import UnbiasedNonLocalMeans
 def test_UnbiasedNonLocalMeans_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     hp=dict(argstr='--hp %f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='%s',
     position=-2,
@@ -30,8 +24,6 @@ def test_UnbiasedNonLocalMeans_inputs():
     sep=',',
     ),
     sigma=dict(argstr='--sigma %f',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = UnbiasedNonLocalMeans._input_spec()

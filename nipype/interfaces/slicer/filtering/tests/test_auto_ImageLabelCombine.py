@@ -16,15 +16,7 @@ def test_ImageLabelCombine_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     first_overwrites=dict(argstr='--first_overwrites ',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ImageLabelCombine._input_spec()

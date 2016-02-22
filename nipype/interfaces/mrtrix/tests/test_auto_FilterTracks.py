@@ -9,9 +9,6 @@ def test_FilterTracks_inputs():
     debug=dict(argstr='-debug',
     position=1,
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     exclude_file=dict(argstr='-exclude %s',
     xor=['exclude_file', 'exclude_spec'],
     ),
@@ -20,9 +17,6 @@ def test_FilterTracks_inputs():
     sep=',',
     units='mm',
     xor=['exclude_file', 'exclude_spec'],
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     mandatory=True,
@@ -52,8 +46,6 @@ def test_FilterTracks_inputs():
     ),
     quiet=dict(argstr='-quiet',
     position=1,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = FilterTracks._input_spec()

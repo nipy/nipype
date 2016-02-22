@@ -6,15 +6,9 @@ from ..preprocess import Fourier
 def test_Fourier_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     highpass=dict(argstr='-highpass %f',
     mandatory=True,
     position=1,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     in_file=dict(argstr='%s',
     copyfile=False,
@@ -30,8 +24,6 @@ def test_Fourier_inputs():
     name_template='%s_fourier',
     ),
     outputtype=dict(usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = Fourier._input_spec()

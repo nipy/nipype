@@ -6,9 +6,6 @@ from ..utility import Function
 def test_Function_inputs():
     input_map = dict(function_str=dict(mandatory=True,
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     )
     inputs = Function._input_spec()
 

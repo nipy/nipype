@@ -6,20 +6,12 @@ from ..utilities import EMSegmentTransformToNewFormat
 def test_EMSegmentTransformToNewFormat_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputMRMLFileName=dict(argstr='--inputMRMLFileName %s',
     ),
     outputMRMLFileName=dict(argstr='--outputMRMLFileName %s',
     hash_files=False,
     ),
     templateFlag=dict(argstr='--templateFlag ',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = EMSegmentTransformToNewFormat._input_spec()

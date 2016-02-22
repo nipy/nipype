@@ -8,12 +8,6 @@ def test_gtractCostFastMarching_inputs():
     ),
     args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputAnisotropyVolume=dict(argstr='--inputAnisotropyVolume %s',
     ),
     inputStartingSeedsLabelMapVolume=dict(argstr='--inputStartingSeedsLabelMapVolume %s',
@@ -33,8 +27,6 @@ def test_gtractCostFastMarching_inputs():
     startingSeedsLabel=dict(argstr='--startingSeedsLabel %d',
     ),
     stoppingValue=dict(argstr='--stoppingValue %f',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = gtractCostFastMarching._input_spec()

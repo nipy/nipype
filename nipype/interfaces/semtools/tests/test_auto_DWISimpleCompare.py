@@ -8,17 +8,9 @@ def test_DWISimpleCompare_inputs():
     ),
     checkDWIData=dict(argstr='--checkDWIData ',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputVolume1=dict(argstr='--inputVolume1 %s',
     ),
     inputVolume2=dict(argstr='--inputVolume2 %s',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = DWISimpleCompare._input_spec()

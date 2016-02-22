@@ -4,10 +4,7 @@ from ..utils import Reslice
 
 
 def test_Reslice_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    in_file=dict(mandatory=True,
+    input_map = dict(in_file=dict(mandatory=True,
     ),
     interp=dict(usedefault=True,
     ),

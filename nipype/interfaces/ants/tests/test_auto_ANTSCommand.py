@@ -6,16 +6,8 @@ from ..base import ANTSCommand
 def test_ANTSCommand_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     num_threads=dict(nohash=True,
     usedefault=True,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = ANTSCommand._input_spec()

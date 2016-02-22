@@ -4,10 +4,7 @@ from ..io import IOBase
 
 
 def test_IOBase_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
-    )
+    input_map = dict()
     inputs = IOBase._input_spec()
 
     for key, metadata in list(input_map.items()):

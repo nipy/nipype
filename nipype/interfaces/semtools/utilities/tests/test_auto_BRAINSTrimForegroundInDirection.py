@@ -12,13 +12,7 @@ def test_BRAINSTrimForegroundInDirection_inputs():
     ),
     directionCode=dict(argstr='--directionCode %d',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
     headSizeLimit=dict(argstr='--headSizeLimit %f',
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
     ),
     inputVolume=dict(argstr='--inputVolume %s',
     ),
@@ -28,8 +22,6 @@ def test_BRAINSTrimForegroundInDirection_inputs():
     ),
     outputVolume=dict(argstr='--outputVolume %s',
     hash_files=False,
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BRAINSTrimForegroundInDirection._input_spec()

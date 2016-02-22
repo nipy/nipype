@@ -6,12 +6,6 @@ from ..preprocess import TStat
 def test_TStat_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_file=dict(argstr='%s',
     copyfile=False,
     mandatory=True,
@@ -21,12 +15,12 @@ def test_TStat_inputs():
     ),
     options=dict(argstr='%s',
     ),
-    out_file=dict(),
+    out_file=dict(keep_extension=False,
+    ),
     outputtype=dict(usedefault=True,
     ),
     prefix=dict(argstr='-prefix %s',
-    ),
-    terminal_output=dict(nohash=True,
+    keep_extension=False,
     ),
     )
     inputs = TStat._input_spec()

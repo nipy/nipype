@@ -4,13 +4,11 @@ from ..mesh import WarpPoints
 
 
 def test_WarpPoints_inputs():
-    input_map = dict(ignore_exception=dict(nohash=True,
+    input_map = dict(interp=dict(mandatory=True,
     usedefault=True,
     ),
-    interp=dict(mandatory=True,
-    usedefault=True,
+    out_points=dict(keep_extension=True,
     ),
-    out_points=dict(),
     points=dict(mandatory=True,
     ),
     warp=dict(mandatory=True,

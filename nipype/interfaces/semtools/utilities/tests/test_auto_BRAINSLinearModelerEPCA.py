@@ -6,17 +6,9 @@ from ..brains import BRAINSLinearModelerEPCA
 def test_BRAINSLinearModelerEPCA_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    environ=dict(nohash=True,
-    usedefault=True,
-    ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     inputTrainingList=dict(argstr='--inputTrainingList %s',
     ),
     numberOfThreads=dict(argstr='--numberOfThreads %d',
-    ),
-    terminal_output=dict(nohash=True,
     ),
     )
     inputs = BRAINSLinearModelerEPCA._input_spec()

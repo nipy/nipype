@@ -6,9 +6,6 @@ from ..utils import ResliceToReference
 def test_ResliceToReference_inputs():
     input_map = dict(bounding_box=dict(field='comp{2}.idbbvox.bb',
     ),
-    ignore_exception=dict(nohash=True,
-    usedefault=True,
-    ),
     in_files=dict(field='fnames',
     mandatory=True,
     ),
