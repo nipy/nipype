@@ -115,15 +115,15 @@ class BaseInterface(HasTraits):
     ...     foo = File(exists=True)
     ...     bar = traits.Int(10, usedefault=True)
     ...     out_foo = File('out_file.txt', usedefault=True)
-    
+
     >>> class IfaceAOutputSpec(BaseOutputSpec):
     ...     out_foo = File(exists=True)
-    
+
     >>> class IfaceA(BaseInterface):
     ...     _input_spec = IfaceAInputSpec
     ...     _output_spec = IfaceAOutputSpec
     ...     version = 1.0
-    
+
     >>> new_a = IfaceA()
     >>> new_a.inputs.foo = 'functional.nii'
     >>> new_a.inputs.get_traitsfree()
@@ -131,7 +131,7 @@ class BaseInterface(HasTraits):
 
     >>> new_a.run(dry_run=True) # doctest: +SKIP
 
-    
+
     """
     _additional_metadata = []
     _input_spec = BaseInputSpec
@@ -187,7 +187,7 @@ class BaseInterface(HasTraits):
     def _run_interface(self, runtime, dry_run=False, **kwargs):
         """ Core function that executes interface"""
         raise NotImplementedError('BaseInterface running is disabled.')
-        
+
     def pre_run(self, **inputs):
         """ Implementation of the pre-execution hook"""
         inputs.pop('dry_run', None)  # Remove the dry_run key
@@ -205,7 +205,7 @@ class BaseInterface(HasTraits):
 
         exists_list = self.outputs.trait_names(**dict(exists=lambda t: t is not None or t))
         print(exists_list)
-        
+
         if isinstance(value, string_types):
             files = [value]
         else:

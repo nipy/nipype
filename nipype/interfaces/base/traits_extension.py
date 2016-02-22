@@ -24,7 +24,6 @@ import traits
 if traits.__version__ < '3.7.0':
     raise ImportError('Traits version 3.7.0 or higher must be installed')
 import traits.api as traits
-from traits.trait_types import BaseFile, File, BaseStr, ListStr, Directory
 from traits.trait_handlers import TraitDictObject, TraitListObject
 from traits.trait_errors import TraitError
 from traits.trait_base import _Undefined
@@ -90,7 +89,7 @@ class BaseFile(traits.BaseStr):
         self.error(obj, name, value)
 
 
-class File(BaseFile):
+class File(traits.BaseFile):
     """ Defines a trait whose value must be the name of a file using a C-level
         fast validator.
     """
@@ -227,8 +226,7 @@ class GenFile(File):
 
                 outvals = []
 
-                isfile = obj.trait(nsrc).is_trait_type((
-                    File, MultiPath, GenMultiFile))
+                isfile = obj.trait(nsrc).is_trait_type((File, MultiPath, GenMultiFile))
                 for val in vallist:
                     if isfile:
                         _, val, ext = split_filename(val)
@@ -266,7 +264,7 @@ class GenFile(File):
         self.set_value(obj, name, value)
 
 
-class MultiPath(ListStr):
+class MultiPath(traits.List):
     """ Abstract class - shared functionality of input and output MultiPath
     """
 
@@ -279,7 +277,7 @@ class MultiPath(ListStr):
         if not isinstance(value, list) \
             or (self.inner_traits() and
                 isinstance(self.inner_traits()[0].trait_type,
-                           ListStr) and not
+                           traits.List) and not
                 isinstance(self.inner_traits()[0].trait_type,
                            InputMultiPath) and
                 isinstance(value, list) and
@@ -294,7 +292,7 @@ class MultiPath(ListStr):
         self.error(obj, name, value)
 
 
-class GenMultiFile(ListStr):
+class GenMultiFile(traits.List):
     """ Traits to generate lists of files.
 
     >>> # The traits start undefined
@@ -394,7 +392,7 @@ class GenMultiFile(ListStr):
         if not isinstance(value, list) \
             or (self.inner_traits() and
                 isinstance(self.inner_traits()[0].trait_type,
-                           ListStr) and not
+                           traits.List) and not
                 isinstance(self.inner_traits()[0].trait_type,
                            InputMultiPath) and
                 isinstance(value, list) and
@@ -582,95 +580,100 @@ class InputMultiPath(MultiPath):
 # -------------------------------------------------------------------------------
 
 
-# class BaseDirectory (traits.BaseStr):
-#     """ Defines a trait whose value must be the name of a directory.
-#     """
+class BaseDirectory (traits.BaseStr):
+    """ Defines a trait whose value must be the name of a directory.
+    """
 
-#     # A description of the type of value this trait accepts:
-#     info_text = 'a directory name'
+    # A description of the type of value this trait accepts:
+    info_text = 'a directory name'
 
-#     def __init__(self, value='', auto_set=False, entries=0,
-#                  exists=False, **metadata):
-#         """ Creates a BaseDirectory trait.
+    def __init__(self, value='', auto_set=False, entries=0,
+                 exists=False, **metadata):
+        """ Creates a BaseDirectory trait.
 
-#         Parameters
-#         ----------
-#         value : string
-#             The default value for the trait
-#         auto_set : boolean
-#             Indicates whether the directory editor updates the trait value
-#             after every key stroke.
-#         exists : boolean
-#             Indicates whether the trait value must be an existing directory or
-#             not.
+        Parameters
+        ----------
+        value : string
+            The default value for the trait
+        auto_set : boolean
+            Indicates whether the directory editor updates the trait value
+            after every key stroke.
+        exists : boolean
+            Indicates whether the trait value must be an existing directory or
+            not.
 
-#         Default Value
-#         -------------
-#         *value* or ''
-        
-#         """
-#         self.entries = entries
-#         self.auto_set = auto_set
-#         self.exists = exists
+        Default Value
+        -------------
+        *value* or ''
 
-#         if exists:
-#             self.info_text = 'an existing directory name'
+        """
+        self.entries = entries
+        self.auto_set = auto_set
+        self.exists = exists
 
-#         super(BaseDirectory, self).__init__(value, **metadata)
+        if exists:
+            self.info_text = 'an existing directory name'
 
-#     def validate(self, obj, name, value):
-#         """ Validates that a specified value is valid for this trait.
+        super(BaseDirectory, self).__init__(value, **metadata)
 
-#             Note: The 'fast validator' version performs this check in C.
-#         """
-#         validated_value = super(BaseDirectory, self).validate(obj, name, value)
-#         if not self.exists:
-#             return validated_value
+    def validate(self, obj, name, value):
+        """ Validates that a specified value is valid for this trait.
 
-#         if op.isdir(value):
-#             return validated_value
+            Note: The 'fast validator' version performs this check in C.
+        """
+        validated_value = super(BaseDirectory, self).validate(obj, name, value)
+        if not self.exists:
+            return validated_value
 
-#         self.error(obj, name, value)
+        if op.isdir(value):
+            return validated_value
+
+        self.error(obj, name, value)
 
 
-# class Directory (BaseDirectory):
-#     """ Defines a trait whose value must be the name of a directory using a
-#         C-level fast validator.
-#     """
+class Directory (BaseDirectory):
+    """ Defines a trait whose value must be the name of a directory using a
+        C-level fast validator.
+    """
 
-#     def __init__(self, value='', auto_set=False, entries=0,
-#                  exists=False, **metadata):
-#         """ Creates a Directory trait.
+    def __init__(self, value='', auto_set=False, entries=0,
+                 exists=False, **metadata):
+        """ Creates a Directory trait.
 
-#         Parameters
-#         ----------
-#         value : string
-#             The default value for the trait
-#         auto_set : boolean
-#             Indicates whether the directory editor updates the trait value
-#             after every key stroke.
-#         exists : boolean
-#             Indicates whether the trait value must be an existing directory or
-#             not.
+        Parameters
+        ----------
+        value : string
+            The default value for the trait
+        auto_set : boolean
+            Indicates whether the directory editor updates the trait value
+            after every key stroke.
+        exists : boolean
+            Indicates whether the trait value must be an existing directory or
+            not.
 
-#         Default Value
-#         -------------
-#         *value* or ''
-#         """
-#         # Define the C-level fast validator to use if the directory existence
-#         # test is not required:
-#         if not exists:
-#             self.fast_validate = (11, str)
+        Default Value
+        -------------
+        *value* or ''
+        """
+        # Define the C-level fast validator to use if the directory existence
+        # test is not required:
+        if not exists:
+            self.fast_validate = (11, str)
 
-#         super(Directory, self).__init__(value, auto_set, entries, exists,
-#                                         **metadata)
+        super(Directory, self).__init__(value, auto_set, entries, exists,
+                                        **metadata)
 
-class Command(BaseStr):
+class Command(traits.BaseStr):
     """ Defines a trait whose value must be an executable command
     """
 
     # A description of the type of value this trait accepts:
     info_text = 'an executable file'
+
+    def __init__(self, value='', path='', **metadata):
+        metadata['path'] = path
+        super(Command, self).__init__(value, **metadata)
+
 
     def validate(self, obj, name, value):
         """ Validates that a specified value is valid for this trait.
@@ -678,9 +681,10 @@ class Command(BaseStr):
             Note: The 'fast validator' version performs this check in C.
         """
         validated_value = super(Command, self).validate(obj, name, value)
-        env = obj.environ
+        env = getattr(obj, 'environ', None)
         # IFLOGGER.debug('Environ now: %s', env)
-        valid, _ = _exists_in_path(validated_value.split()[0], env)
+        valid, path = _exists_in_path(validated_value.split()[0], env)
+        obj.trait(name).path = path
 
         if valid:
             return validated_value
