@@ -50,8 +50,8 @@ import networkx as nx
 from ...utils.misc import package_check, str2bool
 from ... import config, logging
 
-from ...interfaces.specs import TraitedSpec
-from ...interfaces.traits_extension import traits, TraitListObject, TraitDictObject
+from ...interfaces.base.traits_extension import TraitListObject, TraitDictObject
+from ...interfaces.base import traits, TraitedSpec
 from ...utils.misc import (getsource, create_function_from_source,
                            flatten, unflatten)
 from ...utils.filemanip import save_json

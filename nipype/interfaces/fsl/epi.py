@@ -411,10 +411,10 @@ class Eddy(FSLCommand):
     def _num_threads_update(self):
         self._num_threads = self.inputs.num_threads
         if not isdefined(self.inputs.num_threads):
-            if 'OMP_NUM_THREADS' in self.inputs.environ:
-                del self.inputs.environ['OMP_NUM_THREADS']
+            if 'OMP_NUM_THREADS' in self.environ:
+                del self.environ['OMP_NUM_THREADS']
         else:
-            self.inputs.environ['OMP_NUM_THREADS'] = str(self.inputs.num_threads)
+            self.environ['OMP_NUM_THREADS'] = str(self.inputs.num_threads)
 
     def _format_arg(self, name, spec, value):
         if name == 'in_topup_fieldcoef':
