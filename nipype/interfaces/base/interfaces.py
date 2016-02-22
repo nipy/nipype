@@ -199,22 +199,6 @@ class BaseInterface(HasTraits):
         """ Implementation of the post-execution hook"""
         pass
 
-    def _genfile_dryrun(self, name, value, out_name=None):
-        if out_name is None:
-            out_name = name
-
-        exists_list = self.outputs.trait_names(**dict(exists=lambda t: t is not None or t))
-        print(exists_list)
-
-        if isinstance(value, string_types):
-            files = [value]
-        else:
-            files = value
-
-        if self.outputs.traits()[out_name].exists:
-            for fname in files:
-                _touch_file(fname)
-
     def _aggregate_outputs(self, dry_run=False):
         """
         Anticipates the outputs. If, for some reason, the outputs cannot be
@@ -227,9 +211,11 @@ class BaseInterface(HasTraits):
             # Rule #1: outputs with a corresponding input (same name) are
             # automatically copied.
             if name in outputs:
-                if dry_run:
-                    self._genfile_dryrun(name, value)
-                setattr(self.outputs, name, value)
+                try:
+                    setattr(self.outputs, name, value)
+                except traits.TraitError:  # file does not exist
+                    _genfile_dryrun(name, value)
+                    setattr(self.outputs, name, value)
 
             # Rule #2: boolean inputs that start with save_ automatically
             # enable the corresponding out_ and vice-versa
@@ -241,9 +227,12 @@ class BaseInterface(HasTraits):
             # Rule #3: inputs specifying an output_name metadata will be
             # mapped to the corresponding output
             if spec.output_name and self.outputs.traits()[spec.output_name]:
-                if dry_run:
-                    self._genfile_dryrun(name, value)
-                setattr(self.outputs, spec.output_name, value)
+                try:
+                    setattr(self.outputs, spec.output_name, value)
+                except traits.TraitError:  # file does not exist
+                    _genfile_dryrun(name, value)
+                    setattr(self.outputs, spec.output_name, value)
+
 
 
     def run(self, dry_run=False, **inputs):
@@ -540,10 +529,23 @@ class SEMLikeCommandLine(CommandLine):
                     else:
                         setattr(self.outputs, name, op.abspath(corresponding_input))
 
-def _touch_file(filename):
-    if not op.isfile(filename):
-        with open(filename, 'a'):
-            os.utime(filename, None)
+
+def _genfile_dryrun(name, value, out_name=None):
+        if out_name is None:
+            out_name = name
+
+        if isinstance(value, string_types):
+            files = [value]
+        else:
+            files = value
+
+        for fname in files:
+            if not op.isfile(op.abspath(fname)):
+                with open(fname, 'a'):
+                    os.utime(fname, None)
+                    IFLOGGER.debug('Successfully created dry-run output: %s', fname)
+            else:
+                IFLOGGER.debug('File exists, skipping touch %s', fname)
 
 def _unlock_display(ndisplay):
     lockf = op.join('/tmp', '.X%d-lock' % ndisplay)

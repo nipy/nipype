@@ -14,8 +14,10 @@ import os.path as op
 import re
 import numpy as np
 
-from ..base import (Directory, traits, isdefined, File, GenFile, Undefined,
-                    CommandLineInputSpec, TraitedSpec, InputMultiPath)
+from ..base import (traits, isdefined, Undefined,
+                    CommandLineInputSpec, TraitedSpec)
+from ..base.traits_extension import Directory, File, GenFile, InputMultiPath
+
 from .base import (AFNICommandBase, AFNICommand, AFNICommandInputSpec,
                    AFNICommandOutputSpec, Info, no_afni)
 from ...external.six import string_types
@@ -166,7 +168,7 @@ class Refit(AFNICommandBase):
     >>> refit.inputs.deoblique = True
     >>> refit.cmdline
     '3drefit -deoblique structural.nii'
-    >>> res = refit.run() # doctest: +SKIP
+    >>> res = refit.run(dry_run=True)
 
     """
 
@@ -262,7 +264,7 @@ class Resample(AFNICommand):
     >>> resample.inputs.outputtype = "NIFTI"
     >>> resample.cmdline
     '3dresample -orient RPI -prefix functional_resample -inset functional.nii'
-    >>> res = resample.run() # doctest: +SKIP
+    >>> res = resample.run(dry_run=True)
 
     """
 
@@ -305,7 +307,7 @@ class AutoTcorrelate(AFNICommand):
     >>> corr.inputs.mask_only_targets = True
     >>> corr.cmdline # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
     '3dAutoTcorrelate -eta2 -mask mask.nii -mask_only_targets -prefix functional_similarity_matrix.1D -polort -1 functional.nii'
-    >>> res = corr.run() # doctest: +SKIP
+    >>> res = corr.run(dry_run=True)
     """
     _input_spec = AutoTcorrelateInputSpec
     _output_spec = AFNICommandOutputSpec
@@ -340,7 +342,7 @@ class TStat(AFNICommand):
     >>> tstat.inputs.out_file = "stats"
     >>> tstat.cmdline
     '3dTstat -mean -prefix functional_tstat functional.nii'
-    >>> res = tstat.run() # doctest: +SKIP
+    >>> res = tstat.run(dry_run=True)
 
     """
 
@@ -376,7 +378,7 @@ class Detrend(AFNICommand):
     >>> detrend.inputs.outputtype = "AFNI"
     >>> detrend.cmdline
     '3dDetrend -polort 2 -prefix functional_detrend functional.nii'
-    >>> res = detrend.run() # doctest: +SKIP
+    >>> res = detrend.run(dry_run=True)
 
     """
 
@@ -409,7 +411,7 @@ class Despike(AFNICommand):
     >>> despike.inputs.in_file = 'functional.nii'
     >>> despike.cmdline
     '3dDespike -prefix functional_despike functional.nii'
-    >>> res = despike.run() # doctest: +SKIP
+    >>> res = despike.run(dry_run=True)
 
     """
 
@@ -421,20 +423,24 @@ class Despike(AFNICommand):
 class AutomaskInputSpec(AFNICommandInputSpec):
     in_file = File(argstr='%s', position=-1, mandatory=True, exists=True, copyfile=False,
                    desc='input file to 3dAutomask',)
-    out_file = GenFile(template="{in_file}_mask", argstr='-prefix %s',
-                       desc='output image file name')
-    brain_file = GenFile(template="{in_file}_masked", argstr='-apply_prefix %s',
-                         desc="output file from 3dAutomask")
-    clfrac = traits.Range(low=0.1, high=0.9, argstr='-clfrac %.2f', 
+    prefix = GenFile(template="{in_file}_mask", argstr='-prefix %s',
+                     desc='prefix for output images')
+    apply_prefix = GenFile(template="{in_file}_masked", argstr='-apply_prefix %s',
+                           desc="output file from 3dAutomask")
+    clfrac = traits.Range(low=0.1, high=0.9, argstr='-clfrac %.2f',
                           desc='sets the clip level fraction. A small value will tend '
                                'to make the mask larger [default = 0.5].')
     dilate = traits.Int(argstr="-dilate %s", desc='dilate the mask outwards')
     erode = traits.Int(argstr="-erode %s", desc='erode the mask inwards')
 
+    # Automatically generated output names
+    out_file = GenFile(template="{prefix}{outputtype_}", desc='output image file name')
+    brain_file = GenFile(template="{apply_prefix}{outputtype_}",
+                         desc="output file from 3dAutomask")
 
 class AutomaskOutputSpec(TraitedSpec):
     out_file = File(exists=True, desc='mask file')
-    brain_file = File(desc='brain file (skull stripped)', exists=True)
+    brain_file = File(exists=True, desc='brain file (skull stripped)')
 
 
 class Automask(AFNICommand):
@@ -453,8 +459,10 @@ class Automask(AFNICommand):
     >>> automask.inputs.dilate = 1
     >>> automask.inputs.outputtype = "NIFTI"
     >>> automask.cmdline #doctest: +ELLIPSIS
-    '3dAutomask -apply_prefix functional_masked.nii -dilate 1 -prefix functional_mask.nii functional.nii'
-    >>> res = automask.run() # doctest: +SKIP
+    '3dAutomask -apply_prefix functional_masked -dilate 1 -prefix functional_mask functional.nii'
+    >>> res = automask.run(dry_run=True)
+    >>> res.outputs.get_traitsfree()
+    {'out_file': 'functional_mask.nii', 'brain_file': 'functional_masked.nii'}
 
     """
 
@@ -466,30 +474,34 @@ class Automask(AFNICommand):
 class VolregInputSpec(AFNICommandInputSpec):
     in_file = File(argstr='%s', position=-1, mandatory=True, exists=True, copyfile=False,
                    desc='input file to 3dvolreg')
-    out_file = GenFile(template="{in_file}_volreg", argstr='-prefix %s',
+    prefix = GenFile(template="{in_file}_volreg", argstr='-prefix %s',
                        desc='output image file name')
     basefile = File(argstr='-base %s', position=-6, exists=True,
                     desc='base file for registration')
     zpad = traits.Int(argstr='-zpad %d', position=-5,
                       desc='Zeropad around the edges by \'n\' voxels during rotations')
-    md1d_file = GenFile(template='{in_file}_md.1D', argstr='-maxdisp1D %s', keep_extension=False,
-                        position=-4, desc='max displacement output file')
-    oned_file = GenFile(template='{in_file}.1D', argstr='-1Dfile %s', keep_extension=False,
-                        desc='1D movement parameters output file')
     verbose = traits.Bool(desc='more detailed description of the process',
                           argstr='-verbose')
     timeshift = traits.Bool(desc='time shift to mean slice time offset',
                             argstr='-tshift 0')
     copyorigin = traits.Bool(desc='copy base file origin coords to output',
                              argstr='-twodup')
+
+    # Outputs
+    out_file = GenFile(template="{in_file}_volreg{outputtype_}",
+                       desc='output image file name')
+    md1d_file = GenFile(template='{in_file}_md.1D', argstr='-maxdisp1D %s', keep_extension=False,
+                        position=-4, desc='max displacement output file')
+    oned_file = GenFile(template='{in_file}.1D', argstr='-1Dfile %s', keep_extension=False,
+                        desc='1D movement parameters output file')
     oned_matrix_save = GenFile(template='{in_file}.aff12.1D', argstr='-1Dmatrix_save %s',
                                keep_extension=False, desc='Save the matrix transformation')
 
 
 class VolregOutputSpec(TraitedSpec):
-    out_file = File(desc='registered file', exists=True)
-    md1d_file = File(desc='max displacement info file', exists=True)
-    oned_file = File(desc='movement parameters info file', exists=True)
+    out_file = File(exists=True, desc='registered file')
+    md1d_file = File(exists=True, desc='max displacement info file')
+    oned_file = File(exists=True, desc='movement parameters info file')
     oned_matrix_save = File(
         desc='matrix transformation from base to input', exists=True)
 
@@ -511,8 +523,8 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.zpad = 4
     >>> volreg.inputs.outputtype = "NIFTI"
     >>> volreg.cmdline #doctest: +ELLIPSIS
-    '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg.nii -zpad 4 -maxdisp1D functional_md.1D functional.nii'
-    >>> res = volreg.run() # doctest: +SKIP
+    '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg -zpad 4 -maxdisp1D functional_md.1D functional.nii'
+    >>> res = volreg.run(dry_run=True)
 
     """
 
@@ -553,7 +565,7 @@ class Merge(AFNICommand):
     >>> merge.inputs.blurfwhm = 4
     >>> merge.inputs.doall = True
     >>> merge.inputs.out_file = 'e7.nii'
-    >>> res = merge.run() # doctest: +SKIP
+    >>> res = merge.run(dry_run=True)
 
     """
 
@@ -648,7 +660,7 @@ class Fourier(AFNICommand):
     >>> fourier.inputs.args = '-retrend'
     >>> fourier.inputs.highpass = 0.005
     >>> fourier.inputs.lowpass = 0.1
-    >>> res = fourier.run() # doctest: +SKIP
+    >>> res = fourier.run(dry_run=True)
 
     """
 
@@ -759,7 +771,7 @@ class Bandpass(AFNICommand):
     >>> bandpass.inputs.in_file = example_data('functional.nii')
     >>> bandpass.inputs.highpass = 0.005
     >>> bandpass.inputs.lowpass = 0.1
-    >>> res = bandpass.run() # doctest: +SKIP
+    >>> res = bandpass.run(dry_run=True)
 
     """
 
@@ -796,7 +808,7 @@ class ZCutUp(AFNICommand):
     >>> zcutup.inputs.in_file = 'functional.nii'
     >>> zcutup.inputs.out_file = 'functional_zcutup.nii'
     >>> zcutup.inputs.keep= '0 10'
-    >>> res = zcutup.run() # doctest: +SKIP
+    >>> res = zcutup.run(dry_run=True)
 
     """
 
@@ -1025,7 +1037,7 @@ class Allineate(AFNICommand):
     >>> allineate.inputs.in_file = 'functional.nii'
     >>> allineate.inputs.out_file= 'functional_allineate.nii'
     >>> allineate.inputs.in_matrix= 'cmatrix.mat'
-    >>> res = allineate.run() # doctest: +SKIP
+    >>> res = allineate.run(dry_run=True)
 
     """
 
@@ -1067,7 +1079,7 @@ class Maskave(AFNICommand):
     >>> maskave.inputs.quiet= True
     >>> maskave.cmdline #doctest: +ELLIPSIS
     '3dmaskave -mask seed_mask.nii -quiet functional.nii > functional_maskave.1D'
-    >>> res = maskave.run() # doctest: +SKIP
+    >>> res = maskave.run(dry_run=True)
 
     """
 
@@ -1102,22 +1114,19 @@ class SkullStrip(AFNICommand):
     >>> skullstrip = afni.SkullStrip()
     >>> skullstrip.inputs.in_file = 'functional.nii'
     >>> skullstrip.inputs.args = '-o_ply'
-    >>> res = skullstrip.run() # doctest: +SKIP
+    >>> res = skullstrip.run(dry_run=True)
 
     """
     _cmd = '3dSkullStrip'
-    _redirect_x = True
     _input_spec = SkullStripInputSpec
     _output_spec = AFNICommandOutputSpec
+    redirect_x = True
 
     def __init__(self, **inputs):
         super(SkullStrip, self).__init__(**inputs)
-        if not no_afni():
-            v = Info.version()
-
-            # As of AFNI 16.0.00, redirect_x is not needed
-            if isinstance(v[0], int) and v[0] > 15:
-                self._redirect_x = False
+        # As of AFNI 16.0.00, redirect_x is not needed
+        if self.version_major > 15:
+            self.redirect_x = False
 
 
 class TCatInputSpec(AFNICommandInputSpec):
@@ -1149,7 +1158,7 @@ class TCat(AFNICommand):
     >>> tcat.inputs.in_files = ['functional.nii', 'functional2.nii']
     >>> tcat.inputs.out_file= 'functional_tcat.nii'
     >>> tcat.inputs.rlt = '+'
-    >>> res = tcat.run() # doctest: +SKIP
+    >>> res = tcat.run(dry_run=True)
 
     """
 
@@ -1197,7 +1206,7 @@ class Fim(AFNICommand):
     >>> fim.inputs.out_file = 'functional_corr.nii'
     >>> fim.inputs.out = 'Correlation'
     >>> fim.inputs.fim_thr = 0.0009
-    >>> res = fim.run() # doctest: +SKIP
+    >>> res = fim.run(dry_run=True)
 
     """
 
@@ -1246,7 +1255,7 @@ class TCorrelate(AFNICommand):
     >>> tcorrelate.inputs.yset = 'u_rc1s2_Template.nii'
     >>> tcorrelate.inputs.polort = -1
     >>> tcorrelate.inputs.pearson = True
-    >>> res = tcarrelate.run() # doctest: +SKIP
+    >>> res = tcorrelate.run(dry_run=True)
 
     """
 
@@ -1304,7 +1313,7 @@ class TCorr1D(AFNICommand):
     >>> tcorr1D.inputs.y_1d = 'seed.1D'
     >>> tcorr1D.cmdline
     '3dTcorr1D -prefix u_rc1s1_Template_correlation u_rc1s1_Template.nii seed.1D'
-    >>> res = tcorr1D.run() # doctest: +SKIP
+    >>> res = tcorr1D.run(dry_run=True)
     """
 
     _cmd = '3dTcorr1D'
@@ -1340,7 +1349,7 @@ class BrickStat(AFNICommand):
     >>> brickstat.inputs.in_file = 'functional.nii'
     >>> brickstat.inputs.mask = 'skeleton_mask.nii.gz'
     >>> brickstat.inputs.min = True
-    >>> res = brickstat.run() # doctest: +SKIP
+    >>> res = brickstat.run(dry_run=True)
 
     """
     _cmd = '3dBrickStat'
@@ -1422,7 +1431,7 @@ class ROIStats(AFNICommandBase):
     >>> roistats.inputs.in_file = 'functional.nii'
     >>> roistats.inputs.mask = 'skeleton_mask.nii.gz'
     >>> roistats.inputs.quiet=True
-    >>> res = roistats.run() # doctest: +SKIP
+    >>> res = roistats.run(dry_run=True)
 
     """
     _cmd = '3dROIstats'
@@ -1956,7 +1965,7 @@ class HistInputSpec(CommandLineInputSpec):
         desc='input file to 3dHist', argstr='-input %s', position=1, mandatory=True,
         exists=True, copyfile=False)
     prefix = GenFile(
-        template='{in_file}_hist', keep_extension=False, argstr='-prefix %s', 
+        template='{in_file}_hist', keep_extension=False, argstr='-prefix %s',
         desc='Write histogram to niml file with this prefix')
     out_file = GenFile(
         template='{prefix}.niml.hist', keep_extension=False,
@@ -1999,23 +2008,20 @@ class Hist(AFNICommandBase):
     >>> hist.inputs.in_file = 'functional.nii'
     >>> hist.cmdline
     '3dHist -input functional.nii -prefix functional_hist'
-    >>> res = hist.run() # doctest: +SKIP
+    >>> res = hist.run(dry_run=True)
 
     """
 
     _cmd = '3dHist'
     _input_spec = HistInputSpec
     _output_spec = HistOutputSpec
-    _redirect_x = True
+    redirect_x = True
 
     def __init__(self, **inputs):
         super(Hist, self).__init__(**inputs)
-        if not no_afni():
-            version = Info.version()
-
-            # As of AFNI 16.0.00, redirect_x is not needed
-            if isinstance(version[0], int) and version[0] > 15:
-                self._redirect_x = False
+        # As of AFNI 16.0.00, redirect_x is not needed
+        if self.version_major > 15:
+            self.redirect_x = False
 
 
     def _post_run(self):

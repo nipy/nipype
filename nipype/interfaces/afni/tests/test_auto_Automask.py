@@ -4,10 +4,11 @@ from ..preprocess import Automask
 
 
 def test_Automask_inputs():
-    input_map = dict(args=dict(argstr='%s',
+    input_map = dict(apply_prefix=dict(argstr='-apply_prefix %s',
     ),
-    brain_file=dict(argstr='-apply_prefix %s',
+    args=dict(argstr='%s',
     ),
+    brain_file=dict(),
     clfrac=dict(argstr='-clfrac %.2f',
     ),
     dilate=dict(argstr='-dilate %s',
@@ -19,9 +20,10 @@ def test_Automask_inputs():
     mandatory=True,
     position=-1,
     ),
-    out_file=dict(argstr='-prefix %s',
-    ),
+    out_file=dict(),
     outputtype=dict(usedefault=True,
+    ),
+    prefix=dict(argstr='-prefix %s',
     ),
     )
     inputs = Automask._input_spec()

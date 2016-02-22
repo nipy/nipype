@@ -6,6 +6,7 @@ import os
 from builtins import object
 
 from ... import logging
+from ...external.six import string_types
 from ..base import traits, File, CommandLine, CommandLineInputSpec, TraitedSpec
 
 # Use nipype's logging system
@@ -77,6 +78,24 @@ class AFNICommandBase(CommandLine):
     A base class to fix a linking problem in OSX and afni.
     See http://afni.nimh.nih.gov/afni/community/board/read.php?1,145346,145347#msg-145347
     """
+    version_major = traits.Int(0, desc='AFNI version major')
+
+    def _default_version(self):
+        version = ''
+        if not no_afni():
+            version += Info.version()
+
+            if isinstance(version, string_types):
+                return '.'.join(version)
+        return version
+
+    def _default_version_major(self):
+        try:
+            return int(self.version.split('.')[0])
+        except ValueError:
+            return 0
+
+
     def _run_interface(self, runtime):
         if runtime.platform == 'darwin':
             runtime.environ['DYLD_FALLBACK_LIBRARY_PATH'] = '/usr/local/afni/'
