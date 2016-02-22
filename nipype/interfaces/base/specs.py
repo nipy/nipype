@@ -52,6 +52,9 @@ class IInputSpec(Interface):
     def get_traitsfree(self, **kwargs):
         """ Returns traited class as a dict without traits"""
 
+    def get_defined(self):
+        """ Returns the traits that have been set"""
+
     @classmethod
     def help(cls):
         """Print help of these traits"""
@@ -91,10 +94,16 @@ class BaseSpec(traits.HasTraits):
         return '\n' + '\n'.join(outstr) + '\n'
 
     def items(self):
-        """ Name, trait generator for user modifiable traits
-        """
+        """ Name, trait generator for user modifiable traits"""
         for name in sorted(self.copyable_trait_names()):
             yield name, self.traits()[name]
+
+    def get_defined(self):
+        """ Trait generator for modified traits by user"""
+        for name in sorted(self.copyable_trait_names()):
+            value = getattr(self, name)
+            if isdefined(value):
+                yield name, value, self.traits()[name]
 
     @classmethod
     def help(cls):

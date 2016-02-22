@@ -5,6 +5,16 @@ Base interfaces that will be implemented with installed packages
 with implementation in nipype (:module:`nipype.interfaces`) or
 pure python implementations (:module:`nipype.algorithms`).
 
+  .. testsetup::
+
+    >>> import os
+    >>> filepath = op.dirname(op.realpath( __file__ ))
+    >>> datadir = op.realpath(op.join(filepath, '../../testing/data'))
+    >>> os.chdir(datadir)
+    >>> from nipype.interfaces.base.specs import BaseInputSpec, BaseOutputSpec
+    >>> from nipype.interfaces.base import traits_extension as traits
+    >>> import pprint
+
 """
 
 from __future__ import print_function
@@ -26,7 +36,7 @@ from builtins import object
 
 from configparser import NoOptionError
 from traits.api import Interface, Instance, provides, HasTraits
-from .traits_extension import traits
+from .traits_extension import traits, Undefined, File, MultiPath
 from ...utils.misc import trim, str2bool
 from ...utils.provenance import write_provenance
 from ... import config, logging, LooseVersion
@@ -36,7 +46,7 @@ from ...external.six import string_types
 # Make all the traits and spec interfaces available through base
 # for backwards compatibility, even though import * is discouraged
 # in production environments.
-from .traits_extension import isdefined, Command
+from .traits_extension import isdefined, Command, File, BaseFile
 from .specs import (IInputSpec, IOutputSpec, IInputCommandLineSpec,
                     BaseInputSpec, BaseOutputSpec, CommandLineInputSpec,
                     StdOutCommandLineInputSpec, StdOutCommandLineOutputSpec,
@@ -89,8 +99,39 @@ class ICommandBase(Interface):
 
 @provides(IBase)
 class BaseInterface(HasTraits):
-    """Implements common interface functionality.
+    """
+    Implements common interface functionality.
 
+    To implement an interface, one should define the input and
+    output specification types (`_input_spec` and `_output_spec`).
+
+    The input interface will be available in thorugh the `inputs` trait.
+    The behavior is the same for outputs.
+
+    Examples
+    --------
+
+    >>> class IfaceAInputSpec(BaseInputSpec):
+    ...     foo = File(exists=True)
+    ...     bar = traits.Int(10, usedefault=True)
+    ...     out_foo = File('out_file.txt', usedefault=True)
+    
+    >>> class IfaceAOutputSpec(BaseOutputSpec):
+    ...     out_foo = File(exists=True)
+    
+    >>> class IfaceA(BaseInterface):
+    ...     _input_spec = IfaceAInputSpec
+    ...     _output_spec = IfaceAOutputSpec
+    ...     version = 1.0
+    
+    >>> new_a = IfaceA()
+    >>> new_a.inputs.foo = 'functional.nii'
+    >>> new_a.inputs.get_traitsfree()
+    {'foo': 'functional.nii', 'bar': 10, 'out_foo': 'out_file.txt'}
+
+    >>> new_a.run(dry_run=True) # doctest: +SKIP
+
+    
     """
     _additional_metadata = []
     _input_spec = BaseInputSpec
@@ -98,7 +139,7 @@ class BaseInterface(HasTraits):
 
     inputs = Instance(IInputSpec)
     outputs = Instance(IOutputSpec)
-    status = traits.Enum('waiting', 'starting', 'running', 'ending',
+    status = traits.Enum('ready', 'starting', 'running', 'ending',
                          'errored', 'finished')
     version = traits.Str
     redirect_x = traits.Bool
@@ -111,7 +152,10 @@ class BaseInterface(HasTraits):
         self.inputs.set(**inputs)
         self.outputs = self._output_spec()
 
-    def _run_wrapper(self, runtime):
+    def _run_wrapper(self, runtime, dry_run=False):
+        if dry_run:
+            return runtime
+
         sysdisplay = os.getenv('DISPLAY')
         if self.redirect_x:
             try:
@@ -138,32 +182,12 @@ class BaseInterface(HasTraits):
             IFLOGGER.info('Freeing X :%d', vdisp_num)
             vdisp.stop()
             _unlock_display(vdisp_num)
-
-        self._aggregate_outputs()
         return runtime
 
-
-    def _dry_run(self, runtime, *kwargs):
-        """
-        A fake runner which creates empty files when they do not exist,
-        but required by the output
-
-        """
-        self._aggregate_outputs()
-
-        for name, spec in list(self.outputs.items()):
-            if spec.exists:
-                value = getattr(self.outputs, name)
-                if not op.isfile(value):
-                    with open(value, 'a'):
-                        os.utime(value)
-        return runtime
-
-    def _run_interface(self, runtime, *kwargs):
-        """ Core function that executes interface
-        """
+    def _run_interface(self, runtime, dry_run=False, **kwargs):
+        """ Core function that executes interface"""
         raise NotImplementedError('BaseInterface running is disabled.')
-
+        
     def pre_run(self, **inputs):
         """ Implementation of the pre-execution hook"""
         inputs.pop('dry_run', None)  # Remove the dry_run key
@@ -175,30 +199,45 @@ class BaseInterface(HasTraits):
         """ Implementation of the post-execution hook"""
         pass
 
-    def _aggregate_outputs(self):
-        # ns_outputs = {}
-        # for ns_input, ns_spec in list(self.inputs.namesource_items()):
-        #     ns_pointer = getattr(ns_spec, 'out_name', None)
-        #     if ns_pointer is not None:
-        #         ns_outputs[ns_pointer] = ns_input
+    def _genfile_dryrun(self, name, value, out_name=None):
+        if out_name is None:
+            out_name = name
 
-        # # Search for inputs with the same name
-        # for out_name, spec in list(self.outputs.items()):
-        #     if out_name in ns_outputs.keys():
-        #         value = getattr(self.inputs, ns_outputs[out_name], Undefined)
-        #     else:
-        #         value = getattr(self.inputs, out_name, Undefined)
+        exists_list = self.outputs.trait_names(**dict(exists=lambda t: t is not None or t))
+        print(exists_list)
+        
+        if isinstance(value, string_types):
+            files = [value]
+        else:
+            files = value
 
-        #     if isdefined(value):
-        #         setattr(self.outputs, out_name, op.abspath(value))
+        if self.outputs.traits()[out_name].exists:
+            for fname in files:
+                _touch_file(fname)
 
-        # # Search for outputs with name source
-        # for out_name, spec in self.outputs.namesource_items():
-        #     if isdefined(getattr(self.outputs, out_name)):
-        #         continue
-        #     value = self.outputs.format_ns(spec.name_source, out_name, self.inputs)
-        #     setattr(self.outputs, out_name, value)
-        pass
+    def _aggregate_outputs(self, dry_run=False):
+        """
+        Anticipates the outputs. If, for some reason, the outputs cannot be
+        guessed from the inputs and the rules inside this method,
+        use :member:`nipype.interfaces.base.IBase.post_run()` to specify
+        these outputs
+        """
+        outputs = [k[0] for k in list(self.outputs.items())]
+        for name, value, spec in self.inputs.get_defined():
+            # Rule #1: outputs with a corresponding input (same name) are
+            # automatically copied.
+            if name in outputs:
+                if dry_run:
+                    self._genfile_dryrun(name, value)
+                setattr(self.outputs, name, value)
+
+            # Rule #2: boolean inputs that start with save_ automatically
+            # enable the corresponding out_ and vice-versa
+            if name.startswith('save_') and isinstance(value, bool):
+                out_name = 'out_' + name[5:]
+                if not value and out_name in outputs:
+                    setattr(self.outputs, Undefined)
+
 
     def run(self, dry_run=False, **inputs):
         """Basic implementation of the interface runner"""
@@ -213,10 +252,7 @@ class BaseInterface(HasTraits):
         self.status = 'running'
         exception = None
         try:
-            if not dry_run:
-                runtime = self._run_wrapper(runtime)
-            else:
-                runtime = self._dry_run(runtime)
+            runtime = self._run_wrapper(runtime, dry_run)
         except Exception as error:  # pylint: disable=W0703
             runtime, exception = self.handle_error(runtime, error)
             if not self.ignore_exception:
@@ -231,6 +267,7 @@ class BaseInterface(HasTraits):
 
             if exception is None:
                 self.status = 'ending'
+                self._aggregate_outputs(dry_run=dry_run)
                 self.post_run()
                 results.outputs = self.outputs
 
@@ -378,10 +415,6 @@ class CommandLine(BaseInterface):
         self.inputs.check_inputs()
         return ' '.join([self.command] + self.inputs.parse_args())
 
-    def _run_wrapper(self, runtime):
-        runtime = self._run_interface(runtime)
-        return runtime
-
     def _run_interface(self, runtime, **kwargs):
         """Execute command via subprocess
 
@@ -495,6 +528,11 @@ class SEMLikeCommandLine(CommandLine):
                                 [op.abspath(inp) for inp in corresponding_input])
                     else:
                         setattr(self.outputs, name, op.abspath(corresponding_input))
+
+def _touch_file(filename):
+    if not op.isfile(filename):
+        with open(filename, 'a'):
+            os.utime(filename, None)
 
 def _unlock_display(ndisplay):
     lockf = op.join('/tmp', '.X%d-lock' % ndisplay)
