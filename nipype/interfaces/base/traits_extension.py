@@ -127,10 +127,10 @@ class GenFile(File):
     traits.
 
     >>> # The traits start undefined
-    >>> from nipype.interfaces.base import GenFile, Undefined
-    >>> class A(TraitedSpec):
+    >>> from nipype.interfaces.base import GenFile, Undefined, BaseInputSpec
+    >>> class A(BaseInputSpec):
     ...     src = File(exists=False)
-    ...     foo = GenFile(template='{src}_foo')
+    ...     foo = GenFile(template='{src}_foo', keep_extension=True)
     >>> a = A()
     >>> a.src
     <undefined>
@@ -296,10 +296,10 @@ class GenMultiFile(traits.List):
     """ Traits to generate lists of files.
 
     >>> # The traits start undefined
-    >>> from nipype.interfaces.base import GenFile, Undefined, traits
-    >>> class A(TraitedSpec):
+    >>> from nipype.interfaces.base import GenFile, Undefined, traits, BaseInputSpec
+    >>> class A(BaseInputSpec):
     ...     src = InputMultiPath(File(exists=False))
-    ...     foo = GenMultiFile(template='{src}_foo')
+    ...     foo = GenMultiFile(template='{src}_foo', keep_extension=True)
     >>> a = A()
     >>> a.src
     <undefined>
@@ -327,24 +327,28 @@ class GenMultiFile(traits.List):
     ['foo1_foo.txt', 'foo2_foo.txt']
 
     >>> # It works with several replacements and defining ranges
-    >>> class B(TraitedSpec):
+    >>> class B(BaseInputSpec):
     ...     src = File(exists=False)
     ...     num = traits.Int()
-    ...     foo = GenMultiFile(template='{src}_foo_{num:03d}', range_source='num')
+    ...     foo = GenMultiFile(template='{src}_foo_{num:03d}', range_source='num',
+    ...                        keep_extension=True)
+    >>> a = B()
     >>> a.src = '/software/temp/source.txt'
     >>> a.num = 3
     >>> a.foo
     ['source_foo_000.txt', 'source_foo_001.txt', 'source_foo_002.txt']
 
     >>> # And altogether with InputMultiPaths
-    >>> class B(TraitedSpec):
+    >>> class B(BaseInputSpec):
     ...     src = InputMultiPath(File(exists=False))
     ...     num = traits.Int()
-    ...     foo = GenMultiFile(template='{src}_foo_{num:03d}', range_source='num')
+    ...     foo = GenMultiFile(template='{src}_foo_{num:03d}', range_source='num',
+    ...                        keep_extension=True)
+    >>> a = B()
     >>> a.src = ['/software/temp/source.txt', '/software/temp/alt.txt']
     >>> a.num = 2
     >>> a.foo
-    ['source_foo_000.txt', 'alt_foo_000.txt', 'source_foo_001.txt', 'alt_foo_001.txt']
+    ['source_foo_000.txt', 'source_foo_001.txt', 'alt_foo_000.txt', 'alt_foo_001.txt']
 
 
     """
@@ -433,11 +437,14 @@ class GenMultiFile(traits.List):
                     IFLOGGER.debug('Generating range of outputs: %s', vallist)
 
 
+
                 if isinstance(srcvalue, tuple):
-                    vallist = list(tuple)
+                    vallist = list(srcvalue)
 
                 if not isinstance(srcvalue, list):
                     vallist = [srcvalue]
+                else:
+                    vallist = srcvalue
 
                 outvals = []
 
@@ -500,8 +507,8 @@ class OutputMultiPath(MultiPath):
 
     XXX This needs to be vetted by somebody who understands traits
 
-    >>> from nipype.interfaces.base import OutputMultiPath
-    >>> class A(TraitedSpec):
+    >>> from nipype.interfaces.base import OutputMultiPath, BaseInputSpec
+    >>> class A(BaseInputSpec):
     ...     foo = OutputMultiPath(File(exists=False))
     >>> a = A()
     >>> a.foo
@@ -545,8 +552,8 @@ class InputMultiPath(MultiPath):
 
     XXX This needs to be vetted by somebody who understands traits
 
-    >>> from nipype.interfaces.base import InputMultiPath
-    >>> class A(TraitedSpec):
+    >>> from nipype.interfaces.base import InputMultiPath, BaseInputSpec
+    >>> class A(BaseInputSpec):
     ...     foo = InputMultiPath(File(exists=False))
     >>> a = A()
     >>> a.foo
