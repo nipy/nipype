@@ -241,6 +241,8 @@ class BaseInterface(HasTraits):
             # Rule #3: inputs specifying an output_name metadata will be
             # mapped to the corresponding output
             if spec.output_name and self.outputs.traits()[spec.output_name]:
+                if dry_run:
+                    self._genfile_dryrun(name, value)
                 setattr(self.outputs, spec.output_name, value)
 
 
@@ -462,8 +464,12 @@ class CommandLine(BaseInterface):
 
     @classmethod
     def help(cls, returnhelp=False):
-        allhelp = super(CommandLine, cls).help(returnhelp=True)
-        allhelp = "Wraps command ``%s``\n\n" % cls._cmd + allhelp
+        if cls._cmd is not None:
+            allhelp = 'Wraps the ``%s`` command\n\n' % cls._cmd
+        else:
+            allhelp = 'Wraps a system command specified by the ``command`` attribute\n\n'
+
+        allhelp += super(CommandLine, cls).help(returnhelp=True)
 
         if returnhelp:
             return allhelp
