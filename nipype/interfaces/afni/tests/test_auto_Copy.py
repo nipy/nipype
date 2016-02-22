@@ -14,7 +14,7 @@ def test_Copy_inputs():
     out_file=dict(argstr='%s',
     position=-1,
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     )
     inputs = Copy._input_spec()

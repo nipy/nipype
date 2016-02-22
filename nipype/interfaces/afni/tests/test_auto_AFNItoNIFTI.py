@@ -16,7 +16,7 @@ def test_AFNItoNIFTI_inputs():
     name_source='in_file',
     name_template='%s.nii',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     )
     inputs = AFNItoNIFTI._input_spec()

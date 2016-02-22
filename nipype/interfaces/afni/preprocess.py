@@ -27,7 +27,7 @@ from ...utils.filemanip import (load_json, save_json, split_filename)
 class To3DInputSpec(AFNICommandInputSpec):
     prefix = traits.Str('afni_to3d', usedefault='true', argstr='-prefix %s',
                         desc='output files prefix')
-    out_file = GenFile(template='{prefix}{outputtype_}', keep_extension=False,
+    out_file = GenFile(template='{prefix}{output_type_}', keep_extension=False,
                        desc='output image file name')
     in_folder = Directory(desc='folder with DICOM images to convert',
                           argstr='%s/*.dcm',
@@ -87,7 +87,7 @@ class TShiftInputSpec(AFNICommandInputSpec):
                    exists=True, copyfile=False)
     prefix = GenFile(template='{in_file}_tshift', keep_extension=False, argstr='-prefix %s',
                      desc='output files prefix')
-    out_file = GenFile(template='{prefix}{outputtype_}', desc='output image file name')
+    out_file = GenFile(template='{prefix}{output_type_}', desc='output image file name')
     tr = traits.Str(argstr='-TR %s', desc='manually set the TR You can attach suffix "s" for '
                                           'seconds or "ms" for milliseconds.')
     tzero = traits.Float(argstr='-tzero %s', xor=['tslice'],
@@ -135,7 +135,7 @@ class TShift(AFNICommand):
 class RefitInputSpec(AFNICommandInputSpec):
     in_file = File(argstr='%s', position=-1, mandatory=True, exists=True,
                    copyfile=True, desc='input file to 3drefit')
-    out_file = GenFile(template='{in_file}{outputtype_}', desc='output file')
+    out_file = GenFile(template='{in_file}{output_type_}', desc='output file')
     deoblique = traits.Bool(
         False, usedefault=True, argstr='-deoblique',
         desc='replace current transformation matrix with cardinal matrix')
@@ -182,7 +182,7 @@ class WarpInputSpec(AFNICommandInputSpec):
                    desc='input file to 3dWarp')
     prefix = GenFile(template='{in_file}_warp', keep_extension=False, argstr='-prefix %s',
                      desc='output files prefix')
-    out_file = GenFile(template="{prefix}{outputtype_}", desc='output image file name')
+    out_file = GenFile(template="{prefix}{output_type_}", desc='output image file name')
     tta2mni = traits.Bool(desc='transform dataset from Talairach to MNI152',
                           argstr='-tta2mni')
     mni2tta = traits.Bool(desc='transform dataset from MNI152 to Talaraich',
@@ -234,7 +234,7 @@ class ResampleInputSpec(AFNICommandInputSpec):
                    desc='input file to 3dresample')
     prefix = GenFile(template='{in_file}_resample', keep_extension=False, argstr='-prefix %s',
                      desc='output files prefix')
-    out_file = GenFile(template="{prefix}{outputtype_}", keep_extension=False,
+    out_file = GenFile(template="{prefix}{output_type_}", keep_extension=False,
                        desc='output image file name')
     orientation = traits.Str(desc='new orientation code', argstr='-orient %s')
     resample_mode = traits.Enum(
@@ -261,7 +261,7 @@ class Resample(AFNICommand):
     >>> resample = afni.Resample()
     >>> resample.inputs.in_file = 'functional.nii'
     >>> resample.inputs.orientation= 'RPI'
-    >>> resample.inputs.outputtype = "NIFTI"
+    >>> resample.inputs.output_type = "NIFTI"
     >>> resample.cmdline
     '3dresample -orient RPI -prefix functional_resample -inset functional.nii'
     >>> res = resample.run(dry_run=True)
@@ -319,7 +319,7 @@ class TStatInputSpec(AFNICommandInputSpec):
                    desc='input file to 3dTstat')
     prefix = GenFile(template='{in_file}_tstat', keep_extension=False, argstr='-prefix %s',
                      desc='output files prefix')
-    out_file = GenFile(template="{in_file}{outputtype_}", keep_extension=False,
+    out_file = GenFile(template="{in_file}{output_type_}", keep_extension=False,
                        desc='output image file name')
     mask = File(desc='mask file', argstr='-mask %s', exists=True)
     options = traits.Str(desc='selected statistical output', argstr='%s')
@@ -356,7 +356,7 @@ class DetrendInputSpec(AFNICommandInputSpec):
                    desc='input file to 3dDetrend')
     prefix = GenFile(template='{in_file}_detrend', keep_extension=False, argstr='-prefix %s',
                      desc='output files prefix')
-    out_file = GenFile(template="{prefix}{outputtype_}", keep_extension=False,
+    out_file = GenFile(template="{prefix}{output_type_}", keep_extension=False,
                        desc='output image file name')
 
 
@@ -375,7 +375,7 @@ class Detrend(AFNICommand):
     >>> detrend = afni.Detrend()
     >>> detrend.inputs.in_file = 'functional.nii'
     >>> detrend.inputs.args = '-polort 2'
-    >>> detrend.inputs.outputtype = "AFNI"
+    >>> detrend.inputs.output_type = "AFNI"
     >>> detrend.cmdline
     '3dDetrend -polort 2 -prefix functional_detrend functional.nii'
     >>> res = detrend.run(dry_run=True)
@@ -392,7 +392,7 @@ class DespikeInputSpec(AFNICommandInputSpec):
                    desc='input file to 3dDespike')
     prefix = GenFile(template='{in_file}_despike', keep_extension=False, argstr='-prefix %s',
                      desc='output files prefix')
-    out_file = GenFile(template="{prefix}{outputtype_}", keep_extension=False,
+    out_file = GenFile(template="{prefix}{output_type_}", keep_extension=False,
                        desc='output image file name')
 
 
@@ -434,8 +434,8 @@ class AutomaskInputSpec(AFNICommandInputSpec):
     erode = traits.Int(argstr="-erode %s", desc='erode the mask inwards')
 
     # Automatically generated output names
-    out_file = GenFile(template="{prefix}{outputtype_}", desc='output image file name')
-    brain_file = GenFile(template="{apply_prefix}{outputtype_}",
+    out_file = GenFile(template="{prefix}{output_type_}", desc='output image file name')
+    brain_file = GenFile(template="{apply_prefix}{output_type_}",
                          desc="output file from 3dAutomask")
 
 class AutomaskOutputSpec(TraitedSpec):
@@ -457,7 +457,7 @@ class Automask(AFNICommand):
     >>> automask = afni.Automask()
     >>> automask.inputs.in_file = 'functional.nii'
     >>> automask.inputs.dilate = 1
-    >>> automask.inputs.outputtype = "NIFTI"
+    >>> automask.inputs.output_type = "NIFTI"
     >>> automask.cmdline #doctest: +ELLIPSIS
     '3dAutomask -apply_prefix functional_masked -dilate 1 -prefix functional_mask functional.nii'
     >>> res = automask.run(dry_run=True)
@@ -488,7 +488,7 @@ class VolregInputSpec(AFNICommandInputSpec):
                              argstr='-twodup')
 
     # Outputs
-    out_file = GenFile(template="{in_file}_volreg{outputtype_}",
+    out_file = GenFile(template="{in_file}_volreg{output_type_}",
                        desc='output image file name')
     md1d_file = GenFile(template='{in_file}_md.1D', argstr='-maxdisp1D %s', keep_extension=False,
                         position=-4, desc='max displacement output file')
@@ -521,7 +521,7 @@ class Volreg(AFNICommand):
     >>> volreg.inputs.in_file = 'functional.nii'
     >>> volreg.inputs.args = '-Fourier -twopass'
     >>> volreg.inputs.zpad = 4
-    >>> volreg.inputs.outputtype = "NIFTI"
+    >>> volreg.inputs.output_type = "NIFTI"
     >>> volreg.cmdline #doctest: +ELLIPSIS
     '3dvolreg -Fourier -twopass -1Dfile functional.1D -1Dmatrix_save functional.aff12.1D -prefix functional_volreg -zpad 4 -maxdisp1D functional_md.1D functional.nii'
     >>> res = volreg.run(dry_run=True)
@@ -578,7 +578,7 @@ class CopyInputSpec(AFNICommandInputSpec):
     in_file = File(desc='input file to 3dcopy', argstr='%s', position=-2, mandatory=True,
                    exists=True, copyfile=False)
     out_file = GenFile(
-        template='{in_file}_copy{outputtype_}', position=-1,
+        template='{in_file}_copy{output_type_}', position=-1,
         argstr='%s', desc='output image file name')
 
 
@@ -602,13 +602,13 @@ class Copy(AFNICommand):
     >>> from copy import deepcopy
     >>> copy3d_2 = afni.Copy()
     >>> copy3d_2.inputs.in_file = 'functional.nii'
-    >>> copy3d_2.inputs.outputtype = 'NIFTI'
+    >>> copy3d_2.inputs.output_type = 'NIFTI'
     >>> copy3d_2.cmdline
     '3dcopy functional.nii functional_copy.nii'
 
     >>> copy3d_3 = afni.Copy()
     >>> copy3d_3.inputs.in_file = 'functional.nii'
-    >>> copy3d_3.inputs.outputtype = 'NIFTI_GZ'
+    >>> copy3d_3.inputs.output_type = 'NIFTI_GZ'
     >>> copy3d_3.cmdline
     '3dcopy functional.nii functional_copy.nii.gz'
 
@@ -1271,7 +1271,7 @@ class TCorr1DInputSpec(AFNICommandInputSpec):
                      argstr='-prefix %s', desc='output files prefix')
     y_1d = File(argstr='%s', position=-1, mandatory=True, exists=True,
                 desc='1D time series file input')
-    out_file = File(name_template='{prefix}{outputtype_}', keep_extension=False,
+    out_file = File(name_template='{prefix}{output_type_}', keep_extension=False,
                     desc='output filename prefix')
     pearson = traits.Bool(desc='Correlation is the normal' +
                           ' Pearson correlation coefficient',
@@ -1494,7 +1494,7 @@ class Calc(AFNICommand):
     >>> calc.inputs.in_file_b = 'functional2.nii'
     >>> calc.inputs.expr='a*b'
     >>> calc.inputs.out_file =  'functional_calc.nii.gz'
-    >>> calc.inputs.outputtype = "NIFTI"
+    >>> calc.inputs.output_type = "NIFTI"
     >>> calc.cmdline #doctest: +ELLIPSIS
     '3dcalc -a functional.nii  -b functional2.nii -expr "a*b" -prefix functional_calc.nii.gz'
 
@@ -1515,7 +1515,7 @@ class BlurInMaskInputSpec(AFNICommandInputSpec):
         copyfile=False)
     prefix = GenFile(template='{in_file}_blur', keep_extension=False, argstr='-prefix %s',
                      desc='output files prefix')
-    out_file = GenFile(template='{prefix}{outputtype_}', keep_extension=False,
+    out_file = GenFile(template='{prefix}{output_type_}', keep_extension=False,
                        desc='output to the file')
     mask = File(
         desc='Mask dataset, if desired.  Blurring will occur only within the mask.  Voxels NOT in the mask will be set to zero in the output.',

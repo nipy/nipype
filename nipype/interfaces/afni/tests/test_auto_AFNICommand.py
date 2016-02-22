@@ -6,7 +6,7 @@ from ..base import AFNICommand
 def test_AFNICommand_inputs():
     input_map = dict(args=dict(argstr='%s',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     )
     inputs = AFNICommand._input_spec()

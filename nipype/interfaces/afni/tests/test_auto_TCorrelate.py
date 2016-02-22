@@ -10,7 +10,7 @@ def test_TCorrelate_inputs():
     name_source='xset',
     name_template='%s_tcorr',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     pearson=dict(argstr='-pearson',
     position=1,

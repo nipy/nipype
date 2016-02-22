@@ -16,7 +16,7 @@ def test_BrickStat_inputs():
     min=dict(argstr='-min',
     position=1,
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     )
     inputs = BrickStat._input_spec()

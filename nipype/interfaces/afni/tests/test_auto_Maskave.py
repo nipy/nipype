@@ -18,7 +18,7 @@ def test_Maskave_inputs():
     keep_extension=False,
     position=-1,
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     quiet=dict(argstr='-quiet',
     position=2,

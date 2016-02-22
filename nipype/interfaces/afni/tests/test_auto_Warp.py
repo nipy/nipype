@@ -24,7 +24,7 @@ def test_Warp_inputs():
     newgrid=dict(argstr='-newgrid %f',
     ),
     out_file=dict(),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     prefix=dict(argstr='-prefix %s',
     keep_extension=False,

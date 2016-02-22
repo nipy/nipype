@@ -21,7 +21,7 @@ def test_Automask_inputs():
     position=-1,
     ),
     out_file=dict(),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     prefix=dict(argstr='-prefix %s',
     ),

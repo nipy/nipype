@@ -25,7 +25,7 @@ def test_AutoTcorrelate_inputs():
     out_file=dict(argstr='-prefix %s',
     keep_extension=False,
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     polort=dict(argstr='-polort %d',
     ),

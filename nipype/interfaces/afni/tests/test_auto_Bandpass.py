@@ -48,7 +48,7 @@ def test_Bandpass_inputs():
     name_template='%s_bp',
     position=1,
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     tr=dict(argstr='-dt %f',
     ),

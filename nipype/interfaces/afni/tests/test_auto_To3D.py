@@ -20,7 +20,7 @@ def test_To3D_inputs():
     ),
     out_file=dict(keep_extension=False,
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     prefix=dict(argstr='-prefix %s',
     usedefault='true',

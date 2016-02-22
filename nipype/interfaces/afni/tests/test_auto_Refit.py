@@ -15,7 +15,7 @@ def test_Refit_inputs():
     position=-1,
     ),
     out_file=dict(),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     space=dict(argstr='-space %s',
     ),

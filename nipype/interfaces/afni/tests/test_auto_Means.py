@@ -25,7 +25,7 @@ def test_Means_inputs():
     name_source='in_file_a',
     name_template='%s_mean',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     scale=dict(argstr='-%sscale',
     ),

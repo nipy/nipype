@@ -15,7 +15,7 @@ def test_Autobox_inputs():
     out_file=dict(argstr='-prefix %s',
     name_source='in_file',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     padding=dict(argstr='-npad %d',
     ),

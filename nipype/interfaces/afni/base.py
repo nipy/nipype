@@ -103,7 +103,7 @@ class AFNICommandBase(CommandLine):
 
 
 class AFNICommandInputSpec(CommandLineInputSpec):
-    outputtype = traits.Trait('AFNI', AFNI_FTYPES, usedefault=True,
+    output_type = traits.Trait('AFNI', AFNI_FTYPES, usedefault=True,
                               desc='AFNI output filetype')
 
 class AFNICommandOutputSpec(TraitedSpec):

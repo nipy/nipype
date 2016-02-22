@@ -39,7 +39,7 @@ def test_SVMTrain_inputs():
     name_template='%s_vectors',
     suffix='_bucket',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     trainlabels=dict(argstr='-trainlabels %s',
     ),

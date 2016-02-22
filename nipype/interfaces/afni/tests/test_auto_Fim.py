@@ -25,7 +25,7 @@ def test_Fim_inputs():
     name_source='in_file',
     name_template='%s_fim',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     )
     inputs = Fim._input_spec()

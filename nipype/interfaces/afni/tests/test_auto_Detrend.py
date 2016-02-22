@@ -13,7 +13,7 @@ def test_Detrend_inputs():
     ),
     out_file=dict(keep_extension=False,
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     prefix=dict(argstr='-prefix %s',
     keep_extension=False,

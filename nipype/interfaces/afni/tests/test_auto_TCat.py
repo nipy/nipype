@@ -15,7 +15,7 @@ def test_TCat_inputs():
     name_source='in_files',
     name_template='%s_tcat',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     rlt=dict(argstr='-rlt%s',
     position=1,

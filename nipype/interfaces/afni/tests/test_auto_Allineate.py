@@ -68,7 +68,7 @@ def test_Allineate_inputs():
     ),
     out_weight_file=dict(argstr='-wtprefix %s',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     reference=dict(argstr='-base %s',
     ),

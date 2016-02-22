@@ -25,7 +25,7 @@ def test_SVMTest_inputs():
     out_file=dict(argstr='-predictions %s',
     name_template='%s_predictions',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     testlabels=dict(argstr='-testlabels %s',
     ),

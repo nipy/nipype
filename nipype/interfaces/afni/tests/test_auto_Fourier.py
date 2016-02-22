@@ -23,7 +23,7 @@ def test_Fourier_inputs():
     name_source='in_file',
     name_template='%s_fourier',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     )
     inputs = Fourier._input_spec()

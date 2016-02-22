@@ -18,7 +18,7 @@ def test_Merge_inputs():
     ),
     out_file=dict(argstr='-prefix %s',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     )
     inputs = Merge._input_spec()

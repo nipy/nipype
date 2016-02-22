@@ -49,7 +49,7 @@ def test_TCorrMap_inputs():
     name_source='in_file',
     suffix='_mean',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     pmean=dict(argstr='-Pmean %s',
     name_source='in_file',

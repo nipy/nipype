@@ -25,7 +25,7 @@ def test_Retroicor_inputs():
     mandatory=True,
     position=1,
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     resp=dict(argstr='-resp %s',
     position=-3,

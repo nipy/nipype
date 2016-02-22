@@ -15,7 +15,7 @@ def test_SkullStrip_inputs():
     name_source='in_file',
     name_template='%s_skullstrip',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     )
     inputs = SkullStrip._input_spec()

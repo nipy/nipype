@@ -16,7 +16,7 @@ def test_TShift_inputs():
     interp=dict(argstr='-%s',
     ),
     out_file=dict(),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     prefix=dict(argstr='-prefix %s',
     keep_extension=False,

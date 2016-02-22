@@ -27,7 +27,7 @@ def test_Volreg_inputs():
     keep_extension=False,
     ),
     out_file=dict(),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     prefix=dict(argstr='-prefix %s',
     ),

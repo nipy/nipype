@@ -28,7 +28,7 @@ def test_Eval_inputs():
     name_source='in_file_a',
     name_template='%s_calc',
     ),
-    outputtype=dict(usedefault=True,
+    output_type=dict(usedefault=True,
     ),
     single_idx=dict(),
     start_idx=dict(requires=['stop_idx'],
