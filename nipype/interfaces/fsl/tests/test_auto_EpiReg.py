@@ -25,6 +25,7 @@ def test_EpiReg_inputs():
     usedefault=True,
     ),
     no_clean=dict(argstr='--noclean',
+    usedefault=True,
     ),
     no_fmapreg=dict(argstr='--nofmapreg',
     ),
