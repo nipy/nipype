@@ -1513,6 +1513,80 @@ class BrickStat(AFNICommand):
         return outputs
 
 
+class ClipLevelInputSpec(CommandLineInputSpec):
+    in_file = File(desc='input file to 3dClipLevel',
+                   argstr='%s',
+                   position=-1,
+                   mandatory=True,
+                   exists=True)
+
+    mfrac = traits.Float(desc='Use the number ff instead of 0.50 in the algorithm',
+                  argstr='-mfrac %s',
+                  position=2)
+
+    doall = traits.Bool(desc='Apply the algorithm to each sub-brick separately',
+                        argstr='-doall',
+                        position=3,
+                        xor=('grad'))
+
+    grad = traits.File(desc='also compute a \'gradual\' clip level as a function of voxel position, and output that to a dataset',
+                       argstr='-grad %s',
+                       position=3,
+                       xor=('doall'))
+
+
+class ClipLevelOutputSpec(TraitedSpec):
+    clip_val = traits.Float(desc='output')
+
+
+class ClipLevel(AFNICommandBase):
+    """Compute maximum and/or minimum voxel values of an input dataset
+
+    For complete details, see the `3dClipLevel Documentation.
+    <https://afni.nimh.nih.gov/pub/dist/doc/program_help/3dClipLevel.html>`_
+
+    Examples
+    ========
+
+    >>> from nipype.interfaces.afni import preprocess
+    >>> cliplevel = preprocess.ClipLevel()
+    >>> cliplevel.inputs.in_file = 'anatomical.nii'
+    >>> res = cliplevel.run() # doctest: +SKIP
+
+    """
+    _cmd = '3dClipLevel'
+    input_spec = ClipLevelInputSpec
+    output_spec = ClipLevelOutputSpec
+
+    def aggregate_outputs(self, runtime=None, needed_outputs=None):
+
+        outputs = self._outputs()
+
+        outfile = os.path.join(os.getcwd(), 'stat_result.json')
+
+        if runtime is None:
+            try:
+                clip_val = load_json(outfile)['stat']
+            except IOError:
+                return self.run().outputs
+        else:
+            clip_val = []
+            for line in runtime.stdout.split('\n'):
+                if line:
+                    values = line.split()
+                    if len(values) > 1:
+                        clip_val.append([float(val) for val in values])
+                    else:
+                        clip_val.extend([float(val) for val in values])
+
+            if len(clip_val) == 1:
+                clip_val = clip_val[0]
+            save_json(outfile, dict(stat=clip_val))
+        outputs.clip_val = clip_val
+
+        return outputs
+
+
 class ROIStatsInputSpec(CommandLineInputSpec):
     in_file = File(desc='input file to 3dROIstats',
                    argstr='%s',
