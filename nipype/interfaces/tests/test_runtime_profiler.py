@@ -137,7 +137,6 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         # Run workflow
         plugin_args = {'n_procs' : num_procs,
                        'memory' : num_gb,
-                       'runtime_profile' : True,
                        'status_callback' : log_nodes_cb}
         wf.run(plugin='ResourceMultiProc', plugin_args=plugin_args)
 

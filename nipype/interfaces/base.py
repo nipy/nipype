@@ -1032,6 +1032,7 @@ class BaseInterface(Interface):
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
         interface = self.__class__
+
         # initialize provenance tracking
         env = deepcopy(dict(os.environ))
         runtime = Bunch(cwd=os.getcwd(),
@@ -1211,7 +1212,6 @@ def _get_num_threads(proc):
 
     # Import packages
     import psutil
-    import logging as lg
 
     # Init variables
     num_threads = proc.num_threads()
@@ -1255,13 +1255,19 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     The returned runtime contains a merged stdout+stderr log with timestamps
     """
 
-    # Import packages
+    # Init logger
+    logger = logging.getLogger('workflow')
+
+    # Default to profiling the runtime
     try:
         import memory_profiler
         import psutil
-        mem_prof = True
-    except:
-        mem_prof = False
+        runtime_profile = True
+    except ImportError as exc:
+        logger.info('Unable to import packages needed for runtime '\
+                    'profiling. Turning off runtime profiler.\n'\
+                    'Error: %s' % exc)
+        runtime_profile = False
 
     # Init variables
     PIPE = subprocess.PIPE
@@ -1317,7 +1323,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
                 for stream in res[0]:
                     stream.read(drain)
         while proc.returncode is None:
-            if mem_prof:
+            if runtime_profile:
                 mem_mb, num_threads = \
                     _get_max_resources_used(proc, mem_mb, num_threads)
             proc.poll()
@@ -1335,7 +1341,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['merged'] = [r[1] for r in temp]
 
     if output == 'allatonce':
-        if mem_prof:
+        if runtime_profile:
             while proc.returncode is None:
                 mem_mb, num_threads = \
                     _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
@@ -1355,7 +1361,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stderr'] = str(stderr).split('\n')
         result['merged'] = ''
     if output == 'file':
-        if mem_prof:
+        if runtime_profile:
             while proc.returncode is None:
                 mem_mb, num_threads = \
                     _get_max_resources_used(proc, mem_mb, num_threads, poll=True)
@@ -1366,7 +1372,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stderr'] = [line.strip() for line in open(errfile).readlines()]
         result['merged'] = ''
     if output == 'none':
-        if mem_prof:
+        if runtime_profile:
             while proc.returncode is None:
                 mem_mb, num_threads = \
                     _get_max_resources_used(proc, mem_mb, num_threads, poll=True)

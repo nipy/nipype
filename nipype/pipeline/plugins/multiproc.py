@@ -23,7 +23,7 @@ from .base import (DistributedPluginBase, report_crash)
 logger = logging.getLogger('workflow')
 
 # Run node
-def run_node(node, updatehash, runtime_profile=False):
+def run_node(node, updatehash):
     """docstring
     """
  
@@ -33,29 +33,22 @@ def run_node(node, updatehash, runtime_profile=False):
     # Init variables
     result = dict(result=None, traceback=None)
 
-    # If we're profiling the run
-    if runtime_profile:
-        try:
-            start = datetime.datetime.now()
-            retval = node.run(updatehash=updatehash)
-            run_secs = (datetime.datetime.now() - start).total_seconds()
-            result['result'] = retval
-            result['runtime_seconds'] = run_secs
-            if hasattr(retval.runtime, 'get'):
-                result['runtime_memory'] = retval.runtime.get('runtime_memory')
-                result['runtime_threads'] = retval.runtime.get('runtime_threads')
-        except:
-            etype, eval, etr = sys.exc_info()
-            result['traceback'] = format_exception(etype,eval,etr)
-            result['result'] = node.result
-    # Otherwise, execute node.run as normal
-    else:
-        try:
-            result['result'] = node.run(updatehash=updatehash)
-        except:
-            etype, eval, etr = sys.exc_info()
-            result['traceback'] = format_exception(etype,eval,etr)
-            result['result'] = node.result
+    # 
+    try:
+        start = datetime.datetime.now()
+        retval = node.run(updatehash=updatehash)
+        run_secs = (datetime.datetime.now() - start).total_seconds()
+        result['result'] = retval
+        result['runtime_seconds'] = run_secs
+        if hasattr(retval.runtime, 'get'):
+            result['runtime_memory'] = retval.runtime.get('runtime_memory')
+            result['runtime_threads'] = retval.runtime.get('runtime_threads')
+    except:
+        etype, eval, etr = sys.exc_info()
+        result['traceback'] = format_exception(etype,eval,etr)
+        result['result'] = node.result
+
+    # Return the result dictionary
     return result
 
 
@@ -160,13 +153,10 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
                 node.inputs.terminal_output = 'allatonce'
         except:
             pass
-        try:
-            runtime_profile = self.plugin_args['runtime_profile']
-        except:
-            runtime_profile = False
+
         self._taskresult[self._taskid] = \
             self.pool.apply_async(run_node,
-                                  (node, updatehash, runtime_profile),
+                                  (node, updatehash),
                                   callback=release_lock)
         return self._taskid
 
