@@ -1,9 +1,16 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""Module to draw an html gantt chart from logfile produced by
+callback_log.log_nodes_cb()
+"""
+
+# Import packages
 import json
 from dateutil import parser
 import datetime
 import random
 
- 
+
 def log_to_json(logfile):
     result = []
     with open(logfile, 'r') as content:
@@ -31,9 +38,11 @@ def log_to_json(logfile):
             #fint the end node for that start
             for j in range(i+1, len(lines)):
                 if lines[j].has_key('finish'):
-                    if lines[j]['id'] == line['id'] and lines[j]['name'] == line['name']:
+                    if lines[j]['id'] == line['id'] and \
+                       lines[j]['name'] == line['name']:
                         line['finish'] = lines[j]['finish']
-                        line['duration'] = (parser.parse(line['finish']) - parser.parse(line['start'])).total_seconds()
+                        line['duration'] = (parser.parse(line['finish']) - \
+                                            parser.parse(line['start'])).total_seconds()
                         result.append(line)
                         break
 
@@ -58,6 +67,7 @@ def draw_lines(start, total_duration, minute_scale, scale):
         next_time += datetime.timedelta(minutes=minute_scale)
     return result
 
+
 def draw_nodes(start, nodes, cores, scale, colors):
     result = ''
     end_times = [datetime.datetime(start.year, start.month, start.day, start.hour, start.minute, start.second) for x in range(cores)]
@@ -75,12 +85,22 @@ def draw_nodes(start, nodes, cores, scale, colors):
         for j in range(len(end_times)):
             if end_times[j] < node_start:
                 left += j * 30
-                end_times[j] = datetime.datetime(node_finish.year, node_finish.month, node_finish.day, node_finish.hour, node_finish.minute, node_finish.second)
+                end_times[j] = datetime.datetime(node_finish.year,
+                                                 node_finish.month,
+                                                 node_finish.day,
+                                                 node_finish.hour,
+                                                 node_finish.minute,
+                                                 node_finish.second)
                 #end_times[j]+=  datetime.timedelta(microseconds=node_finish.microsecond)
                 break
 
         color = random.choice(colors)
-        new_node = "<div class='node' style=' left:" + str(left) + "px;top: " + str(offset) + "px;height:" + str(scale_duration) + "px; background-color: " + color  + " 'title='" + node['name'] +'\nduration: ' + str(node['duration']/60) + '\nstart: ' + node['start'] + '\nend: ' + node['finish'] + "'></div>";
+        new_node = "<div class='node' style=' left:" + str(left) + \
+                   "px;top: " + str(offset) + "px;height:" + \
+                   str(scale_duration) + "px; background-color: " + color + \
+                   " 'title='" + node['name'] +'\nduration: ' + \
+                   str(node['duration']/60) + '\nstart: ' + node['start'] + \
+                   '\nend: ' + node['finish'] + "'></div>";
         result += new_node
     return result
 
@@ -115,14 +135,15 @@ def draw_thread_bar(start, total_duration, nodes, space_between_minutes, minute_
     for i in range(len(thread)):
         width = thread[i] * 10
         t = (i*scale*minute_scale) + 220
-        bar = "<div class='bar' style='height:"+ str(space_between_minutes) + "px;width:"+ str(width) +"px;left:900px;top:"+str(t)+"px'></div>"
+        bar = "<div class='bar' style='height:" + str(space_between_minutes) + \
+              "px;width:" + str(width) + "px;left:900px;top:"+str(t)+"px'></div>"
         result += bar
 
     return result
 
 
-
-def draw_memory_bar(start, total_duration, nodes, space_between_minutes, minute_scale):
+def draw_memory_bar(start, total_duration, nodes,
+                    space_between_minutes, minute_scale):
     result = "<p class='time' style='top:198px;left:1200px;'>Memory</p>"
 
     total = total_duration/60
@@ -152,36 +173,39 @@ def draw_memory_bar(start, total_duration, nodes, space_between_minutes, minute_
     for i in range(len(memory)):
         width = memory[i] * 10
         t = (i*scale*minute_scale) + 220
-        bar = "<div class='bar' style='height:"+ str(space_between_minutes) + "px;width:"+ str(width) +"px;left:1200px;top:"+str(t)+"px'></div>"
+        bar = "<div class='bar' style='height:" + str(space_between_minutes) + \
+              "px;width:" + str(width) + "px;left:1200px;top:"+str(t)+"px'></div>"
         result += bar
 
     return result
 
 
-'''
-Generates a gantt chart in html showing the workflow execution based on a callback log file.
-This script was intended to be used with the ResourceMultiprocPlugin.
-The following code shows how to set up the workflow in order to generate the log file:
-
-# import logging
-# import logging.handlers
-# from nipype.pipeline.plugins.callback_log import log_nodes_cb
-
-# log_filename = 'callback.log'
-# logger = logging.getLogger('callback')
-# logger.setLevel(logging.DEBUG)
-# handler = logging.FileHandler(log_filename)
-# logger.addHandler(handler)
-
-# #create workflow
-# workflow = ...
-
-# workflow.run(plugin='ResourceMultiProc',  
-#     plugin_args={'num_threads':8, 'memory':12, 'status_callback': log_nodes_cb})
-
-# generate_gantt_chart('callback.log', 8)
-'''
-def generate_gantt_chart(logfile, cores, minute_scale=10, space_between_minutes=50, colors=["#7070FF", "#4E4EB2", "#2D2D66", "#9B9BFF"]):
+def generate_gantt_chart(logfile, cores, minute_scale=10,
+                         space_between_minutes=50,
+                         colors=["#7070FF", "#4E4EB2", "#2D2D66", "#9B9BFF"]):
+    '''
+    Generates a gantt chart in html showing the workflow execution based on a callback log file.
+    This script was intended to be used with the ResourceMultiprocPlugin.
+    The following code shows how to set up the workflow in order to generate the log file:
+    
+    # import logging
+    # import logging.handlers
+    # from nipype.pipeline.plugins.callback_log import log_nodes_cb
+    
+    # log_filename = 'callback.log'
+    # logger = logging.getLogger('callback')
+    # logger.setLevel(logging.DEBUG)
+    # handler = logging.FileHandler(log_filename)
+    # logger.addHandler(handler)
+    
+    # #create workflow
+    # workflow = ...
+    
+    # workflow.run(plugin='ResourceMultiProc',  
+    #     plugin_args={'num_threads':8, 'memory':12, 'status_callback': log_nodes_cb})
+    
+    # generate_gantt_chart('callback.log', 8)
+    '''
 
     result, last_node = log_to_json(logfile)
     scale = space_between_minutes 

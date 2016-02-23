@@ -14,6 +14,7 @@ from nipype.interfaces.base import traits, CommandLine, CommandLineInputSpec
 # UseResources inputspec
 class UseResourcesInputSpec(CommandLineInputSpec):
     '''
+    use_resources cmd interface inputspec
     '''
 
     # Init attributes
@@ -26,6 +27,7 @@ class UseResourcesInputSpec(CommandLineInputSpec):
 # UseResources interface
 class UseResources(CommandLine):
     '''
+    use_resources cmd interface
     '''
 
     # Import packages

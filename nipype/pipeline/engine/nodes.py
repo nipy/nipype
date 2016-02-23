@@ -52,7 +52,6 @@ package_check('networkx', '1.3')
 
 from ... import config, logging
 logger = logging.getLogger('workflow')
-
 from ...interfaces.base import (traits, InputMultiPath, CommandLine,
                                 Undefined, TraitedSpec, DynamicTraitedSpec,
                                 Bunch, InterfaceResult, md5, Interface,

@@ -19,6 +19,7 @@ def use_gb_ram(num_gb):
     # Eat 1 GB of memory for 1 second
     gb_str = ' ' * int(num_gb*1024.0**3)
 
+    # Spin CPU
     ctr = 0
     while ctr < 100e6:
         ctr+= 1

@@ -1,9 +1,17 @@
+# emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
+# vi: set ft=python sts=4 ts=4 sw=4 et:
+"""Callback logger for recording workflow and node run stats
+"""
+
+# Import packages
 import datetime
 import logging
 
+# Log node stats function
 def log_nodes_cb(node, status, result=None):
-    '''
-    '''
+    """Function to record node run statistics to a log file as json
+    dictionaries
+    """
 
     # Init variables
     logger = logging.getLogger('callback')

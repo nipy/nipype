@@ -1032,7 +1032,6 @@ class BaseInterface(Interface):
         self._check_mandatory_inputs()
         self._check_version_requirements(self.inputs)
         interface = self.__class__
-
         # initialize provenance tracking
         env = deepcopy(dict(os.environ))
         runtime = Bunch(cwd=os.getcwd(),
@@ -1207,8 +1206,18 @@ class Stream(object):
 
 # Get number of threads for process
 def _get_num_threads(proc):
-    '''
-    '''
+    """Function to get the number of threads a process is using
+
+    Parameters
+    ----------
+    proc : psutil.Process instance
+        the process to evaluate thead usage of
+
+    Returns
+    -------
+    num_threads : int
+        the number of threads that the process is using
+    """
 
     # Import packages
     import psutil
@@ -1223,14 +1232,32 @@ def _get_num_threads(proc):
     except psutil.NoSuchProcess:
         pass
 
+    # Return the number of threads found
     return num_threads
 
 
 # Get max resources used for process
 def _get_max_resources_used(proc, mem_mb, num_threads, poll=False):
-    '''
-    docstring
-    '''
+    """Function to get the RAM and threads usage of a process
+
+    Paramters
+    ---------
+    proc : subprocess.Popen instance
+        the process to profile
+    mem_mb : float
+        the high memory watermark so far during process execution (in MB)
+    num_threads: int
+        the high thread watermark so far during process execution
+    poll : boolean
+        whether to poll the process or not
+
+    Returns
+    -------
+    mem_mb : float
+        the new high memory watermark of process (MB)
+    num_threads : float
+        the new high thread watermark of process
+    """
 
     # Import packages
     from memory_profiler import _get_memory
@@ -1264,9 +1291,8 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         import psutil
         runtime_profile = True
     except ImportError as exc:
-        logger.info('Unable to import packages needed for runtime '\
-                    'profiling. Turning off runtime profiler.\n'\
-                    'Error: %s' % exc)
+        logger.info('Unable to import packages needed for runtime profiling. '\
+                    'Turning off runtime profiler.\nError: %s' % exc)
         runtime_profile = False
 
     # Init variables
@@ -1305,7 +1331,6 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
     # Init variables for memory profiling
     mem_mb = -1
     num_threads = -1
-    interval = 1
 
     if output == 'stream':
         streams = [Stream('stdout', proc.stdout), Stream('stderr', proc.stderr)]

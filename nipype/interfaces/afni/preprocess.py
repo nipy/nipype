@@ -180,7 +180,6 @@ class RefitInputSpec(CommandLineInputSpec):
                         ' template type, e.g. TLRC, MNI, ORIG')
 
 
-
 class Refit(CommandLine):
     """Changes some of the information inside a 3D dataset's header
 

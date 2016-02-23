@@ -10,6 +10,7 @@ http://stackoverflow.com/a/8963618/1183453
 from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
 import sys
+
 import numpy as np
 from copy import deepcopy
 from ..engine import MapNode
@@ -24,7 +25,20 @@ logger = logging.getLogger('workflow')
 
 # Run node
 def run_node(node, updatehash):
-    """docstring
+    """Function to execute node.run(), catch and log any errors and
+    return the result dictionary
+
+    Parameters
+    ----------
+    node : nipype Node instance
+        the node to run
+    updatehash : boolean
+        flag for updating hash
+
+    Returns
+    -------
+    result : dictionary
+        dictionary containing the node runtime results and stats
     """
  
     # Import packages
@@ -45,7 +59,7 @@ def run_node(node, updatehash):
             result['runtime_threads'] = retval.runtime.get('runtime_threads')
     except:
         etype, eval, etr = sys.exc_info()
-        result['traceback'] = format_exception(etype,eval,etr)
+        result['traceback'] = format_exception(etype, eval, etr)
         result['result'] = node.result
 
     # Return the result dictionary
@@ -125,14 +139,12 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
             semaphore_singleton.semaphore.acquire()
         semaphore_singleton.semaphore.release()
 
-
     def _get_result(self, taskid):
         if taskid not in self._taskresult:
             raise RuntimeError('Multiproc task %d not found' % taskid)
         if not self._taskresult[taskid].ready():
             return None
         return self._taskresult[taskid].get()
-
 
     def _report_crash(self, node, result=None):
         if result and result['traceback']:
@@ -167,7 +179,8 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
         executing_now = []
 
         # Check to see if a job is available
-        jobids = np.flatnonzero((self.proc_pending == True) & (self.depidx.sum(axis=0) == 0).__array__())
+        jobids = np.flatnonzero((self.proc_pending == True) & \
+                                (self.depidx.sum(axis=0) == 0).__array__())
 
         #check available system resources by summing all threads and memory used
         busy_memory = 0
@@ -181,22 +194,29 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
 
 
         #check all jobs without dependency not run
-        jobids = np.flatnonzero((self.proc_done == False) & (self.depidx.sum(axis=0) == 0).__array__())
+        jobids = np.flatnonzero((self.proc_done == False) & \
+                                (self.depidx.sum(axis=0) == 0).__array__())
 
 
         #sort jobs ready to run first by memory and then by number of threads
         #The most resource consuming jobs run first
-        jobids = sorted(jobids, key=lambda item: (self.procs[item]._interface.estimated_memory, self.procs[item]._interface.num_threads))
+        jobids = sorted(jobids,
+                        key=lambda item: (self.procs[item]._interface.estimated_memory,
+                                          self.procs[item]._interface.num_threads))
 
-        logger.debug('Free memory: %d, Free processors: %d', free_memory, free_processors)
+        logger.debug('Free memory: %d, Free processors: %d',
+                     free_memory, free_processors)
 
 
         #while have enough memory and processors for first job
         #submit first job on the list
         for jobid in jobids:
-            logger.debug('Next Job: %d, memory: %d, threads: %d' %(jobid, self.procs[jobid]._interface.estimated_memory, self.procs[jobid]._interface.num_threads))
+            logger.debug('Next Job: %d, memory: %d, threads: %d' \
+                         % (jobid, self.procs[jobid]._interface.estimated_memory,
+                            self.procs[jobid]._interface.num_threads))
 
-            if self.procs[jobid]._interface.estimated_memory <= free_memory and self.procs[jobid]._interface.num_threads <= free_processors:
+            if self.procs[jobid]._interface.estimated_memory <= free_memory and \
+               self.procs[jobid]._interface.num_threads <= free_processors:
                 logger.info('Executing: %s ID: %d' %(self.procs[jobid]._id, jobid))
                 executing_now.append(self.procs[jobid])
 
@@ -228,7 +248,9 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
                         hash_exists, _, _, _ = self.procs[
                             jobid].hash_exists()
                         logger.debug('Hash exists %s' % str(hash_exists))
-                        if (hash_exists and (self.procs[jobid].overwrite == False or (self.procs[jobid].overwrite == None and not self.procs[jobid]._interface.always_run))):
+                        if (hash_exists and (self.procs[jobid].overwrite == False or \
+                                             (self.procs[jobid].overwrite == None and \
+                                              not self.procs[jobid]._interface.always_run))):
                             self._task_finished_cb(jobid)
                             self._remove_node_dirs()
                             continue
@@ -239,7 +261,8 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
                 logger.debug('Finished checking hash')
 
                 if self.procs[jobid].run_without_submitting:
-                    logger.debug('Running node %s on master thread' %self.procs[jobid])
+                    logger.debug('Running node %s on master thread' \
+                                 % self.procs[jobid])
                     try:
                         self.procs[jobid].run()
                     except Exception:
@@ -249,7 +272,8 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
 
                 else:
                     logger.debug('submitting %s' % str(jobid))
-                    tid = self._submit_job(deepcopy(self.procs[jobid]), updatehash=updatehash)
+                    tid = self._submit_job(deepcopy(self.procs[jobid]),
+                                           updatehash=updatehash)
                     if tid is None:
                         self.proc_done[jobid] = False
                         self.proc_pending[jobid] = False
