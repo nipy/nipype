@@ -49,6 +49,11 @@ class IPythonPlugin(DistributedPluginBase):
         if IPython_not_loaded:
             raise ImportError('ipyparallel could not be imported')
         super(IPythonPlugin, self).__init__(plugin_args=plugin_args)
+        valid_args = ('url_file', 'profile', 'cluster_id', 'context', 'debug',
+                      'timeout', 'config', 'username', 'sshserver', 'sshkey',
+                      'password', 'paramiko')
+        self.client_args = {arg: plugin_args[arg]
+                            for arg in valid_args if arg in plugin_args}
         self.iparallel = None
         self.taskclient = None
         self.taskmap = {}
@@ -67,7 +72,7 @@ class IPythonPlugin(DistributedPluginBase):
             raise ImportError("Ipython kernel not found. Parallel execution "
                               "will be unavailable")
         try:
-            self.taskclient = self.iparallel.Client()
+            self.taskclient = self.iparallel.Client(**self.client_args)
         except Exception as e:
             if isinstance(e, TimeoutError):
                 raise Exception("No IPython clients found.")
