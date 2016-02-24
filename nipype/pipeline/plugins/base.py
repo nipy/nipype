@@ -246,7 +246,7 @@ class DistributedPluginBase(PluginBase):
                             notrun.append(self._clean_queue(jobid, graph,
                                                             result=result))
                         else:
-                            self._task_finished_cb(jobid, result)
+                            self._task_finished_cb(jobid)
                             self._remove_node_dirs()
                         self._clear_task(taskid)
                     else:
@@ -415,7 +415,7 @@ class DistributedPluginBase(PluginBase):
             else:
                 break
 
-    def _task_finished_cb(self, jobid, result=None):
+    def _task_finished_cb(self, jobid):
         """ Extract outputs and assign to inputs of dependent tasks
 
         This is called when a job is completed.
@@ -423,10 +423,7 @@ class DistributedPluginBase(PluginBase):
         logger.info('[Job finished] jobname: %s jobid: %d' %
                     (self.procs[jobid]._id, jobid))
         if self._status_callback:
-            if result == None:
-                if self._taskresult.has_key(jobid):
-                    result = self._taskresult[jobid].get()
-            self._status_callback(self.procs[jobid], 'end', result)
+            self._status_callback(self.procs[jobid], 'end')
         # Update job and worker queues
         self.proc_pending[jobid] = False
         # update the job dependency structure

@@ -47,8 +47,7 @@ class UseResources(CommandLine):
 # Test case for the run function
 class RuntimeProfilerTestCase(unittest.TestCase):
     '''
-    This class is a test case for the ResourceMultiProc plugin runtime
-    profiler
+    This class is a test case for the runtime profiler
 
     Inherits
     --------
@@ -129,7 +128,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
 
         # Resources used node
         resource_node = pe.Node(UseResources(), name='resource_node')
-        resource_node.interface.estimated_memory = num_gb
+        resource_node.interface.estimated_memory_gb = num_gb
         resource_node.interface.num_threads = num_procs
 
         # Connect workflow
@@ -140,7 +139,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         plugin_args = {'n_procs' : num_procs,
                        'memory' : num_gb,
                        'status_callback' : log_nodes_cb}
-        wf.run(plugin='ResourceMultiProc', plugin_args=plugin_args)
+        wf.run(plugin='MultiProc', plugin_args=plugin_args)
 
         # Get runtime stats from log file
         finish_str = open(log_file, 'r').readlines()[1].rstrip('\n')
@@ -169,7 +168,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         node_stats = json.loads(finish_str)
 
         # Read out runtime stats
-        runtime_gb = float(node_stats['runtime_memory'])
+        runtime_gb = float(node_stats['runtime_memory_gb'])
         runtime_procs = int(node_stats['runtime_threads'])
 
         # Error message formatting

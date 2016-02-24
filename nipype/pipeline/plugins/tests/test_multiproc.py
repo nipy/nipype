@@ -48,7 +48,7 @@ def test_run_multiproc():
     pipe.base_dir = os.getcwd()
     mod1.inputs.input1 = 1
     pipe.config['execution']['poll_sleep_duration'] = 2
-    execgraph = pipe.run(plugin="ResourceMultiProc")
+    execgraph = pipe.run(plugin="MultiProc")
     names = ['.'.join((node._hierarchy, node.name)) for node in execgraph.nodes()]
     node = execgraph.nodes()[names.index('pipe.mod1')]
     result = node.get_output('output1')
@@ -110,7 +110,7 @@ def find_metrics(nodes, last_node):
             node_finish = parse(nodes[j]['finish'])
 
             if node_start < x and node_finish > x:
-                total_memory[i] += nodes[j]['estimated_memory']
+                total_memory[i] += nodes[j]['estimated_memory_gb']
                 total_threads[i] += nodes[j]['num_threads']
                 start_index = j
 
@@ -138,10 +138,10 @@ def test_do_not_use_more_memory_then_specified():
     n3 = pe.Node(interface=TestInterfaceSingleNode(), name='n3')
     n4 = pe.Node(interface=TestInterfaceSingleNode(), name='n4')
 
-    n1.interface.estimated_memory = 1
-    n2.interface.estimated_memory = 1
-    n3.interface.estimated_memory = 10
-    n4.interface.estimated_memory = 1
+    n1.interface.estimated_memory_gb = 1
+    n2.interface.estimated_memory_gb = 1
+    n3.interface.estimated_memory_gb = 10
+    n4.interface.estimated_memory_gb = 1
 
     pipe.connect(n1, 'output1', n2, 'input1')
     pipe.connect(n1, 'output1', n3, 'input1')
@@ -149,7 +149,7 @@ def test_do_not_use_more_memory_then_specified():
     pipe.connect(n3, 'output1', n4, 'input2')
     n1.inputs.input1 = 10
 
-    pipe.run(plugin='ResourceMultiProc',
+    pipe.run(plugin='MultiProc',
              plugin_args={'memory': max_memory,
                           'status_callback': log_nodes_cb})
 
@@ -207,8 +207,8 @@ def test_do_not_use_more_threads_then_specified():
     pipe.connect(n3, 'output1', n4, 'input2')
     n1.inputs.input1 = 10
     pipe.config['execution']['poll_sleep_duration'] = 1
-    pipe.run(plugin='ResourceMultiProc', plugin_args={'n_procs': max_threads,
-                                                      'status_callback': log_nodes_cb})
+    pipe.run(plugin='MultiProc', plugin_args={'n_procs': max_threads,
+                                              'status_callback': log_nodes_cb})
 
     nodes, last_node = draw_gantt_chart.log_to_json(LOG_FILENAME)
     #usage in every second

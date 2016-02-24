@@ -41,22 +41,12 @@ def run_node(node, updatehash):
         dictionary containing the node runtime results and stats
     """
  
-    # Import packages
-    import datetime
- 
     # Init variables
     result = dict(result=None, traceback=None)
 
-    # 
+    # Try and execute the node via node.run()
     try:
-        start = datetime.datetime.now()
-        retval = node.run(updatehash=updatehash)
-        run_secs = (datetime.datetime.now() - start).total_seconds()
-        result['result'] = retval
-        result['runtime_seconds'] = run_secs
-        if hasattr(retval.runtime, 'get'):
-            result['runtime_memory'] = retval.runtime.get('runtime_memory')
-            result['runtime_threads'] = retval.runtime.get('runtime_threads')
+        result['result'] = node.run(updatehash=updatehash)
     except:
         etype, eval, etr = sys.exc_info()
         result['traceback'] = format_exception(etype, eval, etr)
@@ -88,7 +78,7 @@ def release_lock(args):
     semaphore_singleton.semaphore.release()
 
 
-class ResourceMultiProcPlugin(DistributedPluginBase):
+class MultiProcPlugin(DistributedPluginBase):
     """Execute workflow with multiprocessing, not sending more jobs at once
     than the system can support.
 
@@ -98,7 +88,7 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
     the number of threads and memory of the system is used.
 
     System consuming nodes should be tagged:
-    memory_consuming_node.interface.estimated_memory = 8 #Gb
+    memory_consuming_node.interface.estimated_memory_gb = 8
     thread_consuming_node.interface.num_threads = 16
 
     The default number of threads and memory for a node is 1. 
@@ -107,12 +97,12 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
 
     - non_daemon : boolean flag to execute as non-daemon processes
     - num_threads: maximum number of threads to be executed in parallel
-    - estimated_memory: maximum memory that can be used at once.
+    - estimated_memory_gb: maximum memory (in GB) that can be used at once.
 
     """
 
     def __init__(self, plugin_args=None):
-        super(ResourceMultiProcPlugin, self).__init__(plugin_args=plugin_args)
+        super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._taskid = 0
         non_daemon = True
@@ -186,8 +176,8 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
         busy_memory = 0
         busy_processors = 0
         for jobid in jobids:
-            busy_memory+= self.procs[jobid]._interface.estimated_memory
-            busy_processors+= self.procs[jobid]._interface.num_threads
+            busy_memory += self.procs[jobid]._interface.estimated_memory_gb
+            busy_processors += self.procs[jobid]._interface.num_threads
 
         free_memory = self.memory - busy_memory
         free_processors = self.processors - busy_processors
@@ -201,21 +191,21 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
         #sort jobs ready to run first by memory and then by number of threads
         #The most resource consuming jobs run first
         jobids = sorted(jobids,
-                        key=lambda item: (self.procs[item]._interface.estimated_memory,
+                        key=lambda item: (self.procs[item]._interface.estimated_memory_gb,
                                           self.procs[item]._interface.num_threads))
 
-        logger.debug('Free memory: %d, Free processors: %d',
+        logger.debug('Free memory (GB): %d, Free processors: %d',
                      free_memory, free_processors)
 
 
         #while have enough memory and processors for first job
         #submit first job on the list
         for jobid in jobids:
-            logger.debug('Next Job: %d, memory: %d, threads: %d' \
-                         % (jobid, self.procs[jobid]._interface.estimated_memory,
+            logger.debug('Next Job: %d, memory (GB): %d, threads: %d' \
+                         % (jobid, self.procs[jobid]._interface.estimated_memory_gb,
                             self.procs[jobid]._interface.num_threads))
 
-            if self.procs[jobid]._interface.estimated_memory <= free_memory and \
+            if self.procs[jobid]._interface.estimated_memory_gb <= free_memory and \
                self.procs[jobid]._interface.num_threads <= free_processors:
                 logger.info('Executing: %s ID: %d' %(self.procs[jobid]._id, jobid))
                 executing_now.append(self.procs[jobid])
@@ -236,7 +226,7 @@ class ResourceMultiProcPlugin(DistributedPluginBase):
                 self.proc_done[jobid] = True
                 self.proc_pending[jobid] = True
 
-                free_memory -= self.procs[jobid]._interface.estimated_memory
+                free_memory -= self.procs[jobid]._interface.estimated_memory_gb
                 free_processors -= self.procs[jobid]._interface.num_threads
 
                 # Send job to task manager and add to pending tasks

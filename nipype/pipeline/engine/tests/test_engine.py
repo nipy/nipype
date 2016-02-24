@@ -723,7 +723,7 @@ def test_serial_input():
     # test running the workflow on default conditions
     error_raised = False
     try:
-        w1.run(plugin='ResourceMultiProc')
+        w1.run(plugin='MultiProc')
     except Exception as e:
         from nipype.pipeline.engine.base import logger
         logger.info('Exception: %s' % str(e))
@@ -737,7 +737,7 @@ def test_serial_input():
     # test running the workflow on serial conditions
     error_raised = False
     try:
-        w1.run(plugin='ResourceMultiProc')
+        w1.run(plugin='MultiProc')
     except Exception as e:
         from nipype.pipeline.engine.base import logger
         logger.info('Exception: %s' % str(e))

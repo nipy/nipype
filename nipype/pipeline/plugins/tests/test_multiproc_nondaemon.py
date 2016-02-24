@@ -115,9 +115,9 @@ def run_multiproc_nondaemon_with_flag(nondaemon_flag):
 
     pipe.config['execution']['stop_on_first_crash'] = True
 
-    # execute the pipe using the ResourceMultiProc plugin with 2 processes and the non_daemon flag
+    # execute the pipe using the MultiProc plugin with 2 processes and the non_daemon flag
     # to enable child processes which start other multiprocessing jobs
-    execgraph = pipe.run(plugin="ResourceMultiProc",
+    execgraph = pipe.run(plugin="MultiProc",
                          plugin_args={'n_procs': 2,
                                       'non_daemon': nondaemon_flag})
 

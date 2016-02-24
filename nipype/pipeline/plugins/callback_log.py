@@ -8,7 +8,7 @@ import datetime
 import logging
 
 # Log node stats function
-def log_nodes_cb(node, status, result=None):
+def log_nodes_cb(node, status):
     """Function to record node run statistics to a log file as json
     dictionaries
     """
@@ -17,47 +17,40 @@ def log_nodes_cb(node, status, result=None):
     logger = logging.getLogger('callback')
 
     # Check runtime profile stats
-    if result is None:
-        runtime_memory = runtime_seconds = runtime_threads = 'N/A'
-    else:
+    if node.result is not None:
         try:
-            runtime_memory = result['runtime_memory']
-        except KeyError:
-            runtime_memory = 'Unknown'
-        try:
-            runtime_seconds = result['runtime_seconds']
-        except KeyError:
-            runtime_seconds = 'Unknown'
-        try:
-            runtime_threads = result['runtime_threads']
+            runtime = node.result.runtime
+            runtime_memory_gb = runtime.runtime_memory_gb
+            runtime_threads = runtime.runtime_threads
         except:
-            runtime_threads = 'Unknown'
+            runtime_memory_gb = runtime_threads = 'Unkown'
+    else:
+        runtime_memory_gb = runtime_threads = 'N/A'
 
     # Check status and write to log
     # Start
     if status == 'start':
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' +\
         node._id + '"' + ',"start":' + '"' +str(datetime.datetime.now()) +\
-        '"' + ',"estimated_memory":' + str(node._interface.estimated_memory) + ',"num_threads":' \
-        + str(node._interface.num_threads) + '}'
+        '"' + ',"estimated_memory_gb":' + str(node._interface.estimated_memory_gb) + \
+        ',"num_threads":' + str(node._interface.num_threads) + '}'
 
         logger.debug(message)
     # End
     elif status == 'end':
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' + \
         node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) +  \
-        '"' + ',"estimated_memory":' + '"'+ str(node._interface.estimated_memory) + '"'+ \
-        ',"num_threads":' + '"'+ str(node._interface.num_threads) + '"'+ \
+        '"' + ',"estimated_memory_gb":' + '"'+ str(node._interface.estimated_memory_gb) + \
+        '"'+ ',"num_threads":' + '"'+ str(node._interface.num_threads) + '"'+ \
         ',"runtime_threads":' + '"'+ str(runtime_threads) + '"'+ \
-        ',"runtime_memory":' + '"'+ str(runtime_memory) + '"' + \
-        ',"runtime_seconds":' + '"'+ str(runtime_seconds) + '"'+ '}'
+        ',"runtime_memory_gb":' + '"'+ str(runtime_memory_gb) + '"' + '}'
 
         logger.debug(message)
     # Other
     else:
         message  = '{"name":' + '"' + node.name + '"' + ',"id":' + '"' + \
         node._id + '"' + ',"finish":' + '"' + str(datetime.datetime.now()) +\
-        '"' + ',"estimated_memory":' + str(node._interface.estimated_memory) + ',"num_threads":' \
-        + str(node._interface.num_threads) + ',"error":"True"}'
+        '"' + ',"estimated_memory_gb":' + str(node._interface.estimated_memory_gb) + \
+        ',"num_threads":' + str(node._interface.num_threads) + ',"error":"True"}'
 
         logger.debug(message)

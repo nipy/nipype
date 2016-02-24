@@ -764,7 +764,7 @@ class BaseInterface(Interface):
             raise Exception('No input_spec in class: %s' %
                             self.__class__.__name__)
         self.inputs = self.input_spec(**inputs)
-        self.estimated_memory = 1
+        self.estimated_memory_gb = 1
         self.num_threads = 1
 
     @classmethod
@@ -1406,7 +1406,7 @@ def run_command(runtime, output=None, timeout=0.01, redirect_x=False):
         result['stderr'] = []
         result['merged'] = ''
 
-    setattr(runtime, 'runtime_memory', mem_mb/1024.0)
+    setattr(runtime, 'runtime_memory_gb', mem_mb/1024.0)
     setattr(runtime, 'runtime_threads', num_threads)
     runtime.stderr = '\n'.join(result['stderr'])
     runtime.stdout = '\n'.join(result['stdout'])

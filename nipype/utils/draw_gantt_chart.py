@@ -161,7 +161,7 @@ def draw_memory_bar(start, total_duration, nodes,
             node_finish = parser.parse(nodes[j]['finish'])
 
             if node_start <= now and node_finish >= now:
-                memory[i] += nodes[j]['estimated_memory']
+                memory[i] += nodes[j]['estimated_memory_gb']
             if node_start > now:
                 break
         now += datetime.timedelta(minutes=1)
@@ -185,7 +185,7 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
                          colors=["#7070FF", "#4E4EB2", "#2D2D66", "#9B9BFF"]):
     '''
     Generates a gantt chart in html showing the workflow execution based on a callback log file.
-    This script was intended to be used with the ResourceMultiprocPlugin.
+    This script was intended to be used with the MultiprocPlugin.
     The following code shows how to set up the workflow in order to generate the log file:
     
     # import logging
@@ -201,8 +201,8 @@ def generate_gantt_chart(logfile, cores, minute_scale=10,
     # #create workflow
     # workflow = ...
     
-    # workflow.run(plugin='ResourceMultiProc',  
-    #     plugin_args={'num_threads':8, 'memory':12, 'status_callback': log_nodes_cb})
+    # workflow.run(plugin='MultiProc',  
+    #     plugin_args={'n_procs':8, 'memory':12, 'status_callback': log_nodes_cb})
     
     # generate_gantt_chart('callback.log', 8)
     '''
