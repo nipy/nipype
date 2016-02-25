@@ -23,7 +23,7 @@ def log_to_json(logfile):
             try:
                 y = json.loads(i)
                 l.append(y)
-            except Exception, e:
+            except Exception:
                 pass
 
         lines = l

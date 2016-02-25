@@ -17,7 +17,7 @@ from copy import deepcopy
 from ..engine import MapNode
 from ...utils.misc import str2bool
 from ... import logging
-import semaphore_singleton
+from nipype.pipeline.plugins import semaphore_singleton
 from .base import (DistributedPluginBase, report_crash)
 
 # Init logger

@@ -19,3 +19,4 @@ from .slurm import SLURMPlugin
 from .slurmgraph import SLURMGraphPlugin
 
 from .callback_log import log_nodes_cb
+from . import  semaphore_singleton
