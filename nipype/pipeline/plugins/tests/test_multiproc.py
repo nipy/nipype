@@ -3,13 +3,13 @@ import os
 from tempfile import mkdtemp
 from shutil import rmtree
 from multiprocessing import cpu_count
-import psutil
 
 import nipype.interfaces.base as nib
 from nipype.utils import draw_gantt_chart
 from nipype.testing import assert_equal
 import nipype.pipeline.engine as pe
 from nipype.pipeline.plugins.callback_log import log_nodes_cb
+from nipype.pipeline.plugins.multiproc import get_system_total_memory_gb
 
 class InputSpec(nib.TraitedSpec):
     input1 = nib.traits.Int(desc='a random int')
@@ -222,7 +222,7 @@ def test_do_not_use_more_threads_then_specified():
 
     yield assert_equal, result, True, "using more threads than specified"
 
-    max_memory = psutil.virtual_memory().total / (1024*1024)
+    max_memory = get_system_total_memory_gb()
     result = True
     for m in memory:
         if m > max_memory:

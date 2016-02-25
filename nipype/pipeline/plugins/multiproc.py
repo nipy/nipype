@@ -9,13 +9,13 @@ http://stackoverflow.com/a/8963618/1183453
 # Import packages
 from multiprocessing import Process, Pool, cpu_count, pool
 from traceback import format_exception
+import os
 import sys
 
 import numpy as np
 from copy import deepcopy
 from ..engine import MapNode
 from ...utils.misc import str2bool
-import psutil
 from ... import logging
 import semaphore_singleton
 from .base import (DistributedPluginBase, report_crash)
@@ -78,6 +78,34 @@ def release_lock(args):
     semaphore_singleton.semaphore.release()
 
 
+# Get total system RAM
+def get_system_total_memory_gb():
+    """Function to get the total RAM of the running system in GB
+    """
+
+    # Import packages
+    import os
+    import sys
+
+    # Get memory
+    if 'linux' in sys.platform:
+        with open('/proc/meminfo', 'r') as f_in:
+            meminfo_lines = f_in.readlines()
+            mem_total_line = [line for line in meminfo_lines \
+                              if 'MemTotal' in line][0]
+            mem_total = float(mem_total_line.split()[1])
+            memory_gb = mem_total/(1024.0**2)
+    elif 'darwin' in sys.platform:
+        mem_str = os.popen('sysctl hw.memsize').read().strip().split(' ')[-1]
+        memory_gb = float(mem_str)/(1024.0**3)
+    else:
+        err_msg = 'System platform: %s is not supported'
+        raise Exception(err_msg)
+
+    # Return memory
+    return memory_gb
+
+
 class MultiProcPlugin(DistributedPluginBase):
     """Execute workflow with multiprocessing, not sending more jobs at once
     than the system can support.
@@ -102,14 +130,16 @@ class MultiProcPlugin(DistributedPluginBase):
     """
 
     def __init__(self, plugin_args=None):
+        # Init variables and instance attributes
         super(MultiProcPlugin, self).__init__(plugin_args=plugin_args)
         self._taskresult = {}
         self._taskid = 0
         non_daemon = True
         self.plugin_args = plugin_args
         self.processors = cpu_count()
-        memory = psutil.virtual_memory()
-        self.memory = float(memory.total) / (1024.0**3)
+        self.memory_gb = get_system_total_memory_gb()
+
+        # Check plugin args
         if self.plugin_args:
             if 'non_daemon' in self.plugin_args:
                 non_daemon = plugin_args['non_daemon']
@@ -117,7 +147,7 @@ class MultiProcPlugin(DistributedPluginBase):
                 self.processors = self.plugin_args['n_procs']
             if 'memory' in self.plugin_args:
                 self.memory = self.plugin_args['memory']
-
+        # Instantiate different thread pools for non-daemon processes
         if non_daemon:
             # run the execution using the non-daemon pool subclass
             self.pool = NonDaemonPool(processes=self.processors)
@@ -172,40 +202,39 @@ class MultiProcPlugin(DistributedPluginBase):
         jobids = np.flatnonzero((self.proc_pending == True) & \
                                 (self.depidx.sum(axis=0) == 0).__array__())
 
-        #check available system resources by summing all threads and memory used
-        busy_memory = 0
+        # Check available system resources by summing all threads and memory used
+        busy_memory_gb = 0
         busy_processors = 0
         for jobid in jobids:
-            busy_memory += self.procs[jobid]._interface.estimated_memory_gb
+            busy_memory_gb += self.procs[jobid]._interface.estimated_memory_gb
             busy_processors += self.procs[jobid]._interface.num_threads
 
-        free_memory = self.memory - busy_memory
+        free_memory_gb = self.memory_gb - busy_memory_gb
         free_processors = self.processors - busy_processors
 
 
-        #check all jobs without dependency not run
+        # Check all jobs without dependency not run
         jobids = np.flatnonzero((self.proc_done == False) & \
                                 (self.depidx.sum(axis=0) == 0).__array__())
 
 
-        #sort jobs ready to run first by memory and then by number of threads
-        #The most resource consuming jobs run first
+        # Sort jobs ready to run first by memory and then by number of threads
+        # The most resource consuming jobs run first
         jobids = sorted(jobids,
                         key=lambda item: (self.procs[item]._interface.estimated_memory_gb,
                                           self.procs[item]._interface.num_threads))
 
         logger.debug('Free memory (GB): %d, Free processors: %d',
-                     free_memory, free_processors)
+                     free_memory_gb, free_processors)
 
-
-        #while have enough memory and processors for first job
-        #submit first job on the list
+        # While have enough memory and processors for first job
+        # Submit first job on the list
         for jobid in jobids:
             logger.debug('Next Job: %d, memory (GB): %d, threads: %d' \
                          % (jobid, self.procs[jobid]._interface.estimated_memory_gb,
                             self.procs[jobid]._interface.num_threads))
 
-            if self.procs[jobid]._interface.estimated_memory_gb <= free_memory and \
+            if self.procs[jobid]._interface.estimated_memory_gb <= free_memory_gb and \
                self.procs[jobid]._interface.num_threads <= free_processors:
                 logger.info('Executing: %s ID: %d' %(self.procs[jobid]._id, jobid))
                 executing_now.append(self.procs[jobid])
@@ -226,7 +255,7 @@ class MultiProcPlugin(DistributedPluginBase):
                 self.proc_done[jobid] = True
                 self.proc_pending[jobid] = True
 
-                free_memory -= self.procs[jobid]._interface.estimated_memory_gb
+                free_memory_gb -= self.procs[jobid]._interface.estimated_memory_gb
                 free_processors -= self.procs[jobid]._interface.num_threads
 
                 # Send job to task manager and add to pending tasks

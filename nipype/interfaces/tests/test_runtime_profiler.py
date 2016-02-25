@@ -10,6 +10,15 @@ Module to unit test the runtime_profiler in nipype
 import unittest
 from nipype.interfaces.base import traits, CommandLine, CommandLineInputSpec
 
+try:
+    import psutil
+    import memory_profiler
+    run_profiler = True
+    skip_profile_msg = 'Run profiler tests'
+except ImportError as exc:
+    skip_profile_msg = 'Missing python packages for runtime profiling, skipping...\n'\
+                       'Error: %s' % exc
+    run_profiler = False
 
 # UseResources inputspec
 class UseResourcesInputSpec(CommandLineInputSpec):
@@ -151,6 +160,7 @@ class RuntimeProfilerTestCase(unittest.TestCase):
         return finish_str
 
     # Test resources were used as expected
+    @unittest.skipIf(run_profiler == False, skip_profile_msg)
     def test_wf_logfile(self):
         '''
         Test runtime profiler correctly records workflow RAM/CPUs consumption
